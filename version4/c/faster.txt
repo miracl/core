@@ -1,0 +1,29 @@
+We assume than optimizing compilers will unwind loops at every opportunity. 
+
+But sometimes they don't. So time-critical code will run faster if we step
+in and unwind complex loops for the compiler.
+
+Once the architecture and ECC/RSA support is decided upon choose 
+which BIG numbers need to be optimized. So for example for a 32-bit build and
+if using 256 bit BIGs and a base of 2^29, replace XXX with 256_29 inside 
+faster.c
+
+Then compile and execute the program faster.c like this (using MinGW 
+port of GCC as an example), in the same directory as arch.h and big_256_29.h
+
+gcc -O2 -std=c99 faster.c -o faster.exe
+faster > t.txt
+
+Now extract the code fragments from t.txt and insert them where indicated
+into big_256_29.c (look for UNWOUND)
+
+Finally make sure that
+
+#define UNWOUND
+
+appears somewhere in big_256_29.h
+
+Finally compile and replace the big_256_29 module in the library, and maybe 
+get a 30% speed-up! If there is no significant improvement, don't use this 
+method!
+

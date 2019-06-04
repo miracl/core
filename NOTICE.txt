@@ -1,0 +1,4 @@
+MIRACL Core library
+Copyright 2019 MIRACL.com
+
+http://www.miracl.com/).

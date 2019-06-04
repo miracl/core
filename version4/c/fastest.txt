@@ -1,0 +1,28 @@
+When using Montgomery reduction, some advantage comes from "fusing" the 
+multiplication with the modular reduction and unrolling the loops.
+
+For a 32-bit build and if for example using 256 bit BIGs and a base of 2^28
+with the NIST256 curve, replace XXX with 256_28 and YYY with NIST256 in 
+fastest.c
+
+
+Then compile and execute the program fastest.c like this (using MinGW
+port of GCC as an example), in the same directory as arch.h and fp_NIST256.h
+
+gcc -O2 -std=c99 fastest.c -o fastest.exe
+fastest > t.txt
+
+Now extract the code fragment from t.txt and insert it where indicated
+into fp_NIST256.c (look for FUSED_MODMUL)
+
+Finally make sure that
+
+#define FUSED_MODMUL
+
+appears somewhere in fp_NIST256.h
+
+Finally compile and replace the fp_YYY module in the library, and maybe 
+get a 30% speed-up! If there is no significant improvement, don't use this 
+method!
+
+NOTE: This method is experimental. It might impact on numerical stability.

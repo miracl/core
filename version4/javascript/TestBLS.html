@@ -1,0 +1,257 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>JavaScript Test BLS</title>
+</head>
+<body>
+<h1>JavaScript Test BLS Example</h1>
+<script type="text/javascript"src=./rand.js></script>
+<script type="text/javascript"src=./rom_curve.js></script>
+<script type="text/javascript"src=./rom_field.js></script>
+<script type="text/javascript"src=./uint64.js></script>
+<script type="text/javascript"src=./aes.js></script>
+<script type="text/javascript"src=./big.js></script>
+<script type="text/javascript"src=./gcm.js></script>
+<script type="text/javascript"src=./hash256.js></script>
+<script type="text/javascript"src=./hash384.js></script>
+<script type="text/javascript"src=./hash512.js></script>
+<script type="text/javascript"src=./sha3.js></script>
+<script type="text/javascript"src=./nhs.js></script>
+<script type="text/javascript"src=./fp.js></script>
+<script type="text/javascript"src=./fp2.js></script>
+<script type="text/javascript"src=./fp4.js></script>
+<script type="text/javascript"src=./fp12.js></script>
+<script type="text/javascript"src=./ff.js></script>
+<script type="text/javascript"src=./rsa.js></script>
+<script type="text/javascript"src=./ecp.js></script>
+<script type="text/javascript"src=./ecp2.js></script>
+<script type="text/javascript"src=./ecdh.js></script>
+<script type="text/javascript"src=./pair.js></script>
+<script type="text/javascript"src=./bls.js></script>
+<script type="text/javascript"src=./mpin.js></script>
+<script type="text/javascript"src=./ctx.js></script>
+
+<script type="text/javascript"src=./fp8.js></script>
+<script type="text/javascript"src=./fp16.js></script>
+<script type="text/javascript"src=./fp24.js></script>
+<script type="text/javascript"src=./fp48.js></script>
+<script type="text/javascript"src=./ecp4.js></script>
+<script type="text/javascript"src=./ecp8.js></script>
+<script type="text/javascript"src=./pair192.js></script>
+<script type="text/javascript"src=./pair256.js></script>
+<script type="text/javascript"src=./mpin192.js></script>
+<script type="text/javascript"src=./mpin256.js></script>
+<script type="text/javascript"src=./bls192.js></script>
+<script type="text/javascript"src=./bls256.js></script>
+
+
+<p><a id="myLink4" href="#" onclick="location.reload(false);bn254();">BN254 254-bit k=12 Pairing-Friendly BN Curve Boneh-Lynn-Shacham</a></p>
+<p><a id="myLink5" href="#" onclick="location.reload(false);bls383();">BLS383 383-bit k=12 Pairing-Friendly BLS Curve Boneh-Lynn-Shacham</a></p>
+<p><a id="myLink6" href="#" onclick="location.reload(false);bls24();">BLS24 479-bit k=24 Pairing-Friendly BLS Curve Boneh-Lynn-Shacham</a></p>
+<p><a id="myLink7" href="#" onclick="location.reload(false);bls48();">BLS48 556-bit k=48 Pairing-Friendly BLS Curve Boneh-Lynn-Shacham</a></p>
+
+
+<script>
+
+
+/* Test BLS signature */
+
+// BN254 context
+function bn254() {
+	var ctx = new CTX('BN254');
+	mywindow=window.open();
+
+	mywindow.document.write("<br> BN254 Pairing-Friendly Curve "+  "<br>");
+
+	var i,res;
+	var result;
+
+	var BGS=ctx.BLS.BGS;
+	var BFS=ctx.BLS.BFS;
+
+	var G1S=BFS+1; // Group 1 Size 
+	var G2S=4*BFS; // Group 2 Size 
+
+	var S=[];
+	var W=[];
+	var SIG=[];
+
+	var RAW=[];
+	var rng=new ctx.RAND();
+
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+
+	rng.seed(100,RAW);
+
+	ctx.BLS.init();
+
+	mywindow.document.write ("Testing BLS code <br>");
+	var mess="This is a test message";
+
+	ctx.BLS.KeyPairGenerate(rng,S,W);
+	mywindow.document.write("Private key : 0x"+ctx.BLS.bytestostring(S) + "<br>");
+	mywindow.document.write("Public  key : 0x"+ctx.BLS.bytestostring(W) + "<br>");
+
+	ctx.BLS.sign(SIG,mess,S);
+	mywindow.document.write("Signature : 0x"+ctx.BLS.bytestostring(SIG) + "<br>");
+
+	var res=ctx.BLS.verify(SIG,mess,W);
+
+	if (res==0)
+		mywindow.document.write("Signature is OK" + "<br>");
+	else
+		mywindow.document.write("Signature is *NOT* OK"  + "<br>");
+
+}
+
+// BLS383 context
+function bls383() {
+	var ctx = new CTX('BLS383');
+	mywindow=window.open();
+
+	mywindow.document.write("<br> BLS383 Pairing-Friendly Curve "+  "<br>");
+
+	var i,res;
+	var result;
+
+	var BGS=ctx.BLS.BGS;
+	var BFS=ctx.BLS.BFS;
+
+	var G1S=BFS+1; /* Group 1 Size */
+	var G2S=4*BFS; /* Group 2 Size */
+
+	var S=[];
+	var W=[];
+	var SIG=[];
+
+	var RAW=[];
+	var rng=new ctx.RAND();
+
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+
+	rng.seed(100,RAW);
+
+	ctx.BLS.init();
+
+	mywindow.document.write ("Testing BLS code <br>");
+	var mess="This is a test message";
+
+	ctx.BLS.KeyPairGenerate(rng,S,W);
+	mywindow.document.write("Private key : 0x"+ctx.BLS.bytestostring(S) + "<br>");
+	mywindow.document.write("Public  key : 0x"+ctx.BLS.bytestostring(W) + "<br>");
+
+	ctx.BLS.sign(SIG,mess,S);
+	mywindow.document.write("Signature : 0x"+ctx.BLS.bytestostring(SIG) + "<br>");
+
+	var res=ctx.BLS.verify(SIG,mess,W);
+
+	if (res==0)
+		mywindow.document.write("Signature is OK" + "<br>");
+	else
+		mywindow.document.write("Signature is *NOT* OK"  + "<br>");
+ 
+}
+
+// BLS24 context
+function bls24() {
+	var ctx = new CTX('BLS24');
+	mywindow=window.open();
+
+	mywindow.document.write("<br> BLS24 Pairing-Friendly Curve "+  "<br>");
+
+	var i,res;
+	var result;
+
+	var BGS=ctx.BLS192.BGS;
+	var BFS=ctx.BLS192.BFS;
+
+	var G1S=BFS+1; /* Group 1 Size */
+	var G2S=4*BFS; /* Group 2 Size */
+
+	var S=[];
+	var W=[];
+	var SIG=[];
+
+	var RAW=[];
+	var rng=new ctx.RAND();
+
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+
+	rng.seed(100,RAW);
+
+	ctx.BLS192.init();
+
+	mywindow.document.write ("Testing BLS code <br>");
+	var mess="This is a test message";
+
+	ctx.BLS192.KeyPairGenerate(rng,S,W);
+	mywindow.document.write("Private key : 0x"+ctx.BLS192.bytestostring(S) + "<br>");
+	mywindow.document.write("Public  key : 0x"+ctx.BLS192.bytestostring(W) + "<br>");
+
+	ctx.BLS192.sign(SIG,mess,S);
+	mywindow.document.write("Signature : 0x"+ctx.BLS192.bytestostring(SIG) + "<br>");
+
+	var res=ctx.BLS192.verify(SIG,mess,W);
+
+	if (res==0)
+		mywindow.document.write("Signature is OK" + "<br>");
+	else
+		mywindow.document.write("Signature is *NOT* OK"  + "<br>");
+ 
+}
+
+// BLS48 context
+function bls48() {
+	var ctx = new CTX('BLS48');
+	mywindow=window.open();
+
+	mywindow.document.write("<br> BLS48 Pairing-Friendly Curve "+  "<br>");
+
+	var i,res;
+	var result;
+
+	var BGS=ctx.BLS256.BGS;
+	var BFS=ctx.BLS256.BFS;
+
+	var G1S=BFS+1; /* Group 1 Size */
+	var G2S=4*BFS; /* Group 2 Size */
+
+	var S=[];
+	var W=[];
+	var SIG=[];
+
+	var RAW=[];
+	var rng=new ctx.RAND();
+
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+
+	rng.seed(100,RAW);
+
+	ctx.BLS256.init();
+
+	mywindow.document.write ("Testing BLS code <br>");
+	var mess="This is a test message";
+
+	ctx.BLS256.KeyPairGenerate(rng,S,W);
+	mywindow.document.write("Private key : 0x"+ctx.BLS256.bytestostring(S) + "<br>");
+	mywindow.document.write("Public  key : 0x"+ctx.BLS256.bytestostring(W) + "<br>");
+
+	ctx.BLS256.sign(SIG,mess,S);
+	mywindow.document.write("Signature : 0x"+ctx.BLS256.bytestostring(SIG) + "<br>");
+
+	var res=ctx.BLS256.verify(SIG,mess,W);
+
+	if (res==0)
+		mywindow.document.write("Signature is OK" + "<br>");
+	else
+		mywindow.document.write("Signature is *NOT* OK"  + "<br>");
+ 
+}
+
+</script>
+</body>
+</html>

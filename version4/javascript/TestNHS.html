@@ -1,0 +1,56 @@
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>JavaScript Test NHS</title>
+</head>
+<body>
+<h1>JavaScript Test NHS</h1>
+<script type="text/javascript"src=./rand.js></script>
+<script type="text/javascript"src=./uint64.js></script>
+<script type="text/javascript"src=./aes.js></script>
+<script type="text/javascript"src=./big.js></script>
+<script type="text/javascript"src=./gcm.js></script>
+<script type="text/javascript"src=./hash256.js></script>
+<script type="text/javascript"src=./hash384.js></script>
+<script type="text/javascript"src=./hash512.js></script>
+<script type="text/javascript"src=./sha3.js></script>
+<script type="text/javascript"src=./nhs.js></script>
+<script type="text/javascript"src=./ctx.js></script>
+
+<script>
+
+// Test NewHope Simple 
+// See https://eprint.iacr.org/2016/1157 (Alkim, Ducas, Popplemann and Schwabe)
+
+	var ctx = new CTX();
+
+	var RAW=[];
+	var srng=new ctx.RAND(); srng.clean();
+								var crng=new ctx.RAND(); crng.clean(); 
+
+	for (i=0;i<100;i++) RAW[i]=i+1;
+	srng.seed(100,RAW);
+
+								for (i=0;i<100;i++) RAW[i]=i+2;
+								crng.seed(100,RAW);
+	var S=[];
+								var SB=[];
+								var UC=[];
+	var KEYA=[];
+								var KEYB=[];
+
+	ctx.NHS.SERVER_1(srng,SB,S);
+
+								ctx.NHS.CLIENT(crng,SB,UC,KEYB);
+
+	ctx.NHS.SERVER_2(S,UC,KEYA);
+
+	window.document.write("Alice Key= 0x"+ctx.NHS.bytestostring(KEYA)+ "<br>");
+	window.document.write("Bob's Key= 0x"+ctx.NHS.bytestostring(KEYB)+ "<br>");
+
+
+</script>
+</body>
+</html>
