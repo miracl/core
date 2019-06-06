@@ -126,14 +126,11 @@ func NewECPbig(ix *BIG) *ECP {
 /* test for O point-at-infinity */
 func (E *ECP) Is_infinity() bool {
 	//	if E.INF {return true}
-	E.x.reduce()
-	E.z.reduce()
+
 	if CURVETYPE == EDWARDS {
-		E.y.reduce()
 		return (E.x.iszilch() && E.y.Equals(E.z))
 	}
 	if CURVETYPE == WEIERSTRASS {
-		E.y.reduce()
 		return (E.x.iszilch() && E.z.iszilch())
 	}
 	if CURVETYPE == MONTGOMERY {

@@ -32,10 +32,6 @@ var ECP2 = function(ctx) {
     ECP2.prototype = {
         /* Test this=O? */
         is_infinity: function() {
-
-            this.x.reduce();
-            this.y.reduce();
-            this.z.reduce();
             return (this.x.iszilch() && this.z.iszilch());
         },
 

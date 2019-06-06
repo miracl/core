@@ -39,9 +39,6 @@ func NewECP2() *ECP2 {
 
 /* Test this=O? */
 func (E *ECP2) Is_infinity() bool {
-	E.x.reduce()
-	E.y.reduce()
-	E.z.reduce()
 	return E.x.iszilch() && E.z.iszilch()
 }
 

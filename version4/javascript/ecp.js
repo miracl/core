@@ -56,17 +56,9 @@ var ECP = function(ctx) {
     ECP.prototype = {
         /* test this=O point-at-infinity */
         is_infinity: function() {
-  
-            this.x.reduce();
-            this.z.reduce();
-
             if (ECP.CURVETYPE == ECP.EDWARDS) {
-
-                this.y.reduce();
-
                 return (this.x.iszilch() && this.y.equals(this.z));
             } else if (ECP.CURVETYPE == ECP.WEIERSTRASS) {
-                this.y.reduce();
                 return (this.x.iszilch() && this.z.iszilch());
             } else if (ECP.CURVETYPE == ECP.MONTGOMERY) {
                 return (this.z.iszilch());

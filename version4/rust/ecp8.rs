@@ -77,9 +77,7 @@ impl ECP8 {
 
     /* Test this=O? */
     pub fn is_infinity(&self) -> bool {
-        let xx = FP8::new_copy(&self.x);
-        let zz = FP8::new_copy(&self.z);
-        return xx.iszilch() && zz.iszilch();
+        return self.x.iszilch() && self.z.iszilch();
     }
 
     /* copy self=P */

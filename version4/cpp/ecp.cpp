@@ -257,7 +257,7 @@ int ZZZ::ECP_get(BIG x,ECP *P)
 {
 	ECP W;
 	ECP_copy(&W,P);
-	ECP_affine(W);
+	ECP_affine(&W);
     if (ECP_isinf(&W)) return -1;
     FP_redc(x,&(W.x));
     return 0;
