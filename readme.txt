@@ -1,5 +1,5 @@
 What was the Apache Milagro Cryptographic Library (AMCL) is now renamed
-as MIRACL Core It also has new licensing conditions, which should be read 
+as MIRACL Core. It also has new licensing conditions, which should be read 
 carefully.
 
 Version 2 is now deprecated.
