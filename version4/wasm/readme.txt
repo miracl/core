@@ -1,15 +1,15 @@
 
-AMCL in Webassembly 
+MIRACL Core in Webassembly 
 
 See https://webassembly.org/getting-started/developers-guide/
 
 
-The AMCL library already has a Javascript version, but can also run up 
-to 20 times faster in a browser that supports Webassembly. And thats
+The MIRACL Core library already has a Javascript version, but can also run 
+up to 20 times faster in a browser that supports Webassembly. And thats
 most of the popular browsers in use today (Firefox, Safari, Edge, Chrome)
 
-The C, C++ or Rust version of the AMCL library can be compiled to a 
-bitcode that runs directly in the browser, by-passing Javascript 
+The C, C++ or Rust version of the MIRACL Core library can be compiled to 
+a bitcode that runs directly in the browser, by-passing Javascript 
 entirely. Which is good for our type of application, as the way
 in which Javascript handles integer arithmetic is very slow.
 
@@ -26,8 +26,8 @@ C installation
 
 
 
-Copy the AMCL C code into a new directory, along with the config32.py file 
-from this directory. For a 32-bit build in the new directory execute
+Copy the MIRACL Core C code into a new directory, along with the config32.py 
+file from this directory. For a 32-bit build in the new directory execute
 
 python3 config32.py
 
@@ -59,7 +59,7 @@ rustup target add wasm32-unknown-emscripten
 
 The Emscripten toolchain is also required, as above
 
-Copy the AMCL Rust code into a new directory. 
+Copy the MIRACL Core Rust code into a new directory. 
 
 Edit config32.py and replace the line
 
@@ -76,7 +76,7 @@ python3 config32.py
 Then select options 1, 3, 7, 19, 21, 27, 28 and 30, which are fixed for 
 the example programs.
 
-Copy the AMCL library to the current directory
+Copy the MIRACL Core library to the current directory
 
 cp amcl/target/wasm32-unknown-emscripten/release/libamcl.rlib .
 
