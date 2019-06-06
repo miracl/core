@@ -19,12 +19,12 @@ under the License.
 
 /* test driver and function exerciser for ECDH/ECIES/ECDSA API Functions */
 
-package org.apache.milagro.amcl.XXX;  //
+package org.miracl.core.XXX;  //
 
 import java.util.Scanner;
 import junit.framework.TestCase;       //
-import org.apache.milagro.amcl.RAND;
-import org.apache.milagro.amcl.AES;
+import org.miracl.core.RAND;
+import org.miracl.core.AES;
 
 public class TestECDH extends TestCase   //
 {

@@ -19,13 +19,13 @@ under the License.
 
 /* Elliptic Curve API high-level functions  */
 
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
-import org.apache.milagro.amcl.RAND;
-import org.apache.milagro.amcl.HASH256;
-import org.apache.milagro.amcl.HASH384;
-import org.apache.milagro.amcl.HASH512;
-import org.apache.milagro.amcl.AES;
+import org.miracl.core.RAND;
+import org.miracl.core.HASH256;
+import org.miracl.core.HASH384;
+import org.miracl.core.HASH512;
+import org.miracl.core.AES;
 
 public final class ECDH {
 	public static final int INVALID_PUBLIC_KEY=-2;

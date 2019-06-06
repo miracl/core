@@ -20,7 +20,7 @@ under the License.
 /* Finite Field arithmetic */
 /* AMCL mod p functions */
 
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 public final class FP {
 

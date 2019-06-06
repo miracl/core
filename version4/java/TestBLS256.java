@@ -19,10 +19,10 @@ under the License.
 
 /* test driver and function exerciser for BLS API Functions */
 
-package org.apache.milagro.amcl.XXX;  //
+package org.miracl.core.XXX;  //
 
 import junit.framework.TestCase;      //
-import org.apache.milagro.amcl.RAND;
+import org.miracl.core.RAND;
 
 public class TestBLS256 extends TestCase //
 {

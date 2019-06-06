@@ -20,7 +20,7 @@
 /* Fixed Data in ROM - Field and Curve parameters */
 
 
-package org.apache.milagro.amcl.NUMS256W;
+package org.miracl.core.NUMS256W;
 
 public class ROM
 {

@@ -21,7 +21,7 @@ under the License.
 
 package XXX
 
-import "github.com/miracl/amcl/version3/go/amcl"
+import "github.com/miracl/core/version4/go/core"
 
 //import "fmt"
 

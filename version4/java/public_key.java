@@ -1,5 +1,5 @@
 
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 public final class public_key
 {

@@ -22,7 +22,7 @@ under the License.
 //import amcl.SHA3;
 //import amcl.RAND;
 
-package org.apache.milagro.amcl;
+package org.miracl.core;
 
 public final class NHS {
 

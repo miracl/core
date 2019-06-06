@@ -19,7 +19,7 @@ Choose options 1, 3, 7, 19, 21, 27, 28 and 30, for example.
 
 Once the library is configured, you can compile and install with maven:
 
-cd amcl
+cd core
 mvn clean install
 
 Testing will be carried out during the installation process.

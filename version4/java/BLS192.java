@@ -19,10 +19,10 @@ under the License.
 
 /* Boneh-Lynn-Shacham signature API Functions */
 
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
-import org.apache.milagro.amcl.RAND;
-import org.apache.milagro.amcl.SHA3;
+import org.miracl.core.RAND;
+import org.miracl.core.SHA3;
 
 public class BLS192
 {

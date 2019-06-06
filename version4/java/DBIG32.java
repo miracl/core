@@ -19,7 +19,7 @@ under the License.
 
 /* AMCL double length DBIG number class */ 
 
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 public class DBIG {
 	protected int[] w=new int[BIG.DNLEN];

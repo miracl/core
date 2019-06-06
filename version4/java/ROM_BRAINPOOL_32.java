@@ -22,7 +22,7 @@ under the License.
 /* Note that the original curve has been transformed to an isomorphic curve with A=-3 */
 
 
-package org.apache.milagro.amcl.BRAINPOOL;
+package org.miracl.core.BRAINPOOL;
 
 public class ROM
 {

@@ -1,4 +1,4 @@
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 public class CONFIG_CURVE {
 	public static final int WEIERSTRASS=0;

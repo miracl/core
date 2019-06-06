@@ -19,7 +19,7 @@ under the License.
 
 
 /* AES Encryption */ 
-package org.apache.milagro.amcl;
+package org.miracl.core;
 
 public class AES {
 	int Nk,Nr;

@@ -19,7 +19,7 @@ under the License.
 
 /* AMCL Weierstrass elliptic curve functions over FP2 */
 
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 public final class ECP2 {
 	private FP2 x;

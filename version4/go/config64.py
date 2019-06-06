@@ -39,8 +39,8 @@ def rsaset(tb,nb,base,ml) :
 	chosen.append(tb)
 	cptr=cptr+1
 
-	fpath="amcl"+slashtext+tb+slashtext
-	os.system("mkdir amcl"+slashtext+tb)
+	fpath="core"+slashtext+tb+slashtext
+	os.system("mkdir core"+slashtext+tb)
 
 	os.system(copytext+"ARCH64.go "+fpath+"ARCH.go")
 	os.system(copytext+"BIG64.go "+fpath+"BIG.go")
@@ -75,8 +75,8 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	chosen.append(tc)
 	cptr=cptr+1
 
-	fpath="amcl"+slashtext+tc+slashtext
-	os.system("mkdir amcl"+slashtext+tc)
+	fpath="core"+slashtext+tc+slashtext
+	os.system("mkdir core"+slashtext+tc)
 
 	os.system(copytext+"ARCH64.go "+fpath+"ARCH.go")
 	os.system(copytext+"BIG64.go "+fpath+"BIG.go")
@@ -197,13 +197,13 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fpath+"BLS256.go","XXX",tc)
 
 
-os.system("mkdir amcl")
-os.system(copytext+ "HASH*.go amcl"+slashtext+".")
-os.system(copytext+ "SHA3.go amcl"+slashtext+".")
-os.system(copytext+ "RAND.go amcl"+slashtext+".")
-os.system(copytext+ "AES.go amcl"+slashtext+".")
-os.system(copytext+ "GCM.go amcl"+slashtext+".")
-os.system(copytext+ "NHS.go amcl"+slashtext+".")
+os.system("mkdir core")
+os.system(copytext+ "HASH*.go core"+slashtext+".")
+os.system(copytext+ "SHA3.go core"+slashtext+".")
+os.system(copytext+ "RAND.go core"+slashtext+".")
+os.system(copytext+ "AES.go core"+slashtext+".")
+os.system(copytext+ "GCM.go core"+slashtext+".")
+os.system(copytext+ "NHS.go core"+slashtext+".")
 
 print("Elliptic Curves")
 print("1. ED25519")

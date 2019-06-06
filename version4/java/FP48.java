@@ -20,7 +20,7 @@ under the License.
 /* AMCL Fp^48 functions */
 /* FP48 elements are of the form a+i.b+i^2.c */
 
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 public final class FP48 {
 	public static final int ZERO=0;

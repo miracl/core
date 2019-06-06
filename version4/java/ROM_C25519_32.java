@@ -20,7 +20,7 @@ under the License.
 /* Fixed Data in ROM - Field and Curve parameters */
 
 
-package org.apache.milagro.amcl.C25519;
+package org.miracl.core.C25519;
 
 public class ROM
 {

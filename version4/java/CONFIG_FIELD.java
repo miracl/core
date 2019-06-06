@@ -1,4 +1,4 @@
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 public class CONFIG_FIELD {
 	public static final int NOT_SPECIAL=0;

@@ -6,8 +6,7 @@ slashtext=""
 copytext=""
 makedir=""
 org1text="org"
-org2text="apache"
-org3text="milagro"
+org2text="miracl"
 
 if sys.platform.startswith("linux")  :
 	copytext="cp "
@@ -20,8 +19,8 @@ if sys.platform.startswith("win") :
 	slashtext="\\"
 	makedir="md "
 
-amclpath = "amcl" + slashtext + "src" + slashtext + "main" + slashtext + "java" + slashtext + org1text + slashtext + org2text + slashtext + org3text +slashtext + "amcl"
-amclTestPath = "amcl" + slashtext + "src" + slashtext + "test" + slashtext + "java" + slashtext + org1text + slashtext + org2text + slashtext + org3text +slashtext + "amcl"
+corepath = "core" + slashtext + "src" + slashtext + "main" + slashtext + "java" + slashtext + org1text + slashtext + org2text +slashtext + "core"
+coreTestPath = "core" + slashtext + "src" + slashtext + "test" + slashtext + "java" + slashtext + org1text + slashtext + org2text + slashtext + "core"
 chosen=[]
 cptr=0
 
@@ -44,10 +43,10 @@ def rsaset(tb,nb,base,ml) :
 	chosen.append(tb)
 	cptr=cptr+1
 
-	fpath=amclpath+slashtext+tb+slashtext
-	fpathTest=amclTestPath+slashtext+tb+slashtext  #ms
-	os.system(makedir+amclpath+slashtext+tb)
-	os.system(makedir+amclTestPath+slashtext+tb)  #ms
+	fpath=corepath+slashtext+tb+slashtext
+	fpathTest=coreTestPath+slashtext+tb+slashtext  #ms
+	os.system(makedir+corepath+slashtext+tb)
+	os.system(makedir+coreTestPath+slashtext+tb)  #ms
 
 	os.system(copytext+"CONFIG_BIG.java "+fpath+"CONFIG_BIG.java")
 	os.system(copytext+"CONFIG_FF.java "+fpath+"CONFIG_FF.java")
@@ -90,10 +89,10 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	chosen.append(tc)
 	cptr=cptr+1
 
-	fpath=amclpath+slashtext+tc+slashtext
-	fpathTest=amclTestPath+slashtext+tc+slashtext  #ms
-	os.system(makedir+amclpath+slashtext+tc)
-	os.system(makedir+amclTestPath+slashtext+tc)  #ms
+	fpath=corepath+slashtext+tc+slashtext
+	fpathTest=coreTestPath+slashtext+tc+slashtext  #ms
+	os.system(makedir+corepath+slashtext+tc)
+	os.system(makedir+coreTestPath+slashtext+tc)  #ms
 
 	os.system(copytext+"CONFIG_BIG.java "+fpath+"CONFIG_BIG.java")
 	os.system(copytext+"CONFIG_FIELD.java "+fpath+"CONFIG_FIELD.java")
@@ -232,11 +231,11 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fpathTest+"TesttimeMPIN256.java","XXX",tc)  #ms
 
 
-os.system(makedir + amclpath)
+os.system(makedir + corepath)
 
-os.system(copytext + "pom.xml " + "amcl" + slashtext + ".")
+os.system(copytext + "pom.xml " + "core" + slashtext + ".")
 for file in ['HASH*.java', 'SHA3.java', 'RAND.java', 'AES.java', 'GCM.java', 'NHS.java']:
-	os.system(copytext + file + " " + amclpath+slashtext+".")
+	os.system(copytext + file + " " + corepath+slashtext+".")
 
 print("Elliptic Curves")
 print("1. ED25519")

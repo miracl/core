@@ -29,7 +29,7 @@ under the License.
 /* Marsaglia & Zaman Random number generator constants */
 
 
-package org.apache.milagro.amcl;
+package org.miracl.core;
 
 public class RAND {
 /* Cryptographically strong pseudo-random number generator */

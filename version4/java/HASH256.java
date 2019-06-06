@@ -26,7 +26,7 @@ under the License.
  * For use with byte-oriented messages only. 
  */
 
-package org.apache.milagro.amcl;
+package org.miracl.core;
 
 public class HASH256 {
 	private int[] length=new int[2];

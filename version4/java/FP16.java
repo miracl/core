@@ -21,7 +21,7 @@ under the License.
 
 /* FP16 elements are of the form a+ib, where i is sqrt(sqrt(sqrt(-1+sqrt(-1))))  */
 
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 public final class FP16 {
 	private final FP8 a;

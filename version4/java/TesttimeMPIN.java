@@ -18,11 +18,11 @@ under the License.
 */
 
 /* test driver and function exerciser for MPIN API Functions */
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 import java.util.Scanner;
 import junit.framework.TestCase;
-import org.apache.milagro.amcl.RAND;
+import org.miracl.core.RAND;
 
 public class TesttimeMPIN extends TestCase
 {

@@ -20,7 +20,7 @@ under the License.
 /* Fixed Data in ROM - Field and Curve parameters */
 
 
-package org.apache.milagro.amcl.GOLDILOCKS;
+package org.miracl.core.GOLDILOCKS;
 
 public class ROM
 {

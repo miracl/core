@@ -20,7 +20,7 @@ under the License.
 /* Fixed Data in ROM - Field and Curve parameters */
 
 
-package org.apache.milagro.amcl.HIFIVE;
+package org.miracl.core.HIFIVE;
 
 public class ROM
 {

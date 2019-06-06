@@ -27,7 +27,7 @@ under the License.
  */
 
 
-package org.apache.milagro.amcl;
+package org.miracl.core;
 
 public class SHA3 {
 	private long length;

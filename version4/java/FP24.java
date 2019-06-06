@@ -20,7 +20,7 @@ under the License.
 /* AMCL Fp^24 functions */
 /* FP24 elements are of the form a+i.b+i^2.c */
 
-package org.apache.milagro.amcl.XXX;
+package org.miracl.core.XXX;
 
 public final class FP24 {
 	public static final int ZERO=0;
