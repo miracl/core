@@ -1,0 +1,471 @@
+/*
+   Copyright (C) 2019 MIRACL UK Ltd.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+     https://www.gnu.org/licenses/agpl-3.0.en.html
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+   You can be released from the requirements of the license by purchasing
+   a commercial license. Buying such a license is mandatory as soon as you
+   develop commercial activities involving the MIRACL Core Crypto SDK
+   without disclosing the source code of your own applications, or shipping
+   the MIRACL Core Crypto SDK with a closed source product.
+*/
+
+/* CORE Fp^2 functions */
+/* SU=m, m is Stack Usage (no lazy )*/
+
+/* FP2 elements are of the form a+ib, where i is sqrt(-1) */
+
+#include "fp2_YYY.h"
+
+/* test x==0 ? */
+/* SU= 8 */
+int FP2_YYY_iszilch(FP2_YYY *x)
+{
+    if (FP_YYY_iszilch(&(x->a)) && FP_YYY_iszilch(&(x->b))) return 1;
+    return 0;
+}
+
+/* Move b to a if d=1 */
+void FP2_YYY_cmove(FP2_YYY *f, FP2_YYY *g, int d)
+{
+    FP_YYY_cmove(&(f->a), &(g->a), d);
+    FP_YYY_cmove(&(f->b), &(g->b), d);
+}
+
+/* test x==1 ? */
+/* SU= 48 */
+int FP2_YYY_isunity(FP2_YYY *x)
+{
+    FP_YYY one;
+    FP_YYY_one(&one);
+    if (FP_YYY_equals(&(x->a), &one) && FP_YYY_iszilch(&(x->b))) return 1;
+    return 0;
+}
+
+/* SU= 8 */
+/* Fully reduce a and b mod Modulus */
+void FP2_YYY_reduce(FP2_YYY *w)
+{
+    FP_YYY_reduce(&(w->a));
+    FP_YYY_reduce(&(w->b));
+}
+
+/* return 1 if x==y, else 0 */
+/* SU= 16 */
+int FP2_YYY_equals(FP2_YYY *x, FP2_YYY *y)
+{
+    if (FP_YYY_equals(&(x->a), &(y->a)) && FP_YYY_equals(&(x->b), &(y->b)))
+        return 1;
+    return 0;
+}
+
+/* Create FP2 from two FPs */
+/* SU= 16 */
+void FP2_YYY_from_FPs(FP2_YYY *w, FP_YYY *x, FP_YYY *y)
+{
+    FP_YYY_copy(&(w->a), x);
+    FP_YYY_copy(&(w->b), y);
+}
+
+/* Create FP2 from two BIGS */
+/* SU= 16 */
+void FP2_YYY_from_BIGs(FP2_YYY *w, BIG_XXX x, BIG_XXX y)
+{
+    FP_YYY_nres(&(w->a), x);
+    FP_YYY_nres(&(w->b), y);
+}
+
+/* Create FP2 from two ints */
+void FP2_YYY_from_ints(FP2_YYY *w, int xa, int xb)
+{
+    BIG_XXX a, b;
+    BIG_XXX_zero(a); BIG_XXX_inc(a, xa); BIG_XXX_norm(a);
+    BIG_XXX_zero(b); BIG_XXX_inc(b, xb); BIG_XXX_norm(b);
+    FP2_YYY_from_BIGs(w, a, b);
+}
+
+/* Create FP2 from FP */
+/* SU= 8 */
+void FP2_YYY_from_FP(FP2_YYY *w, FP_YYY *x)
+{
+    FP_YYY_copy(&(w->a), x);
+    FP_YYY_zero(&(w->b));
+}
+
+/* Create FP2 from BIG */
+/* SU= 8 */
+void FP2_YYY_from_BIG(FP2_YYY *w, BIG_XXX x)
+{
+    FP_YYY_nres(&(w->a), x);
+    FP_YYY_zero(&(w->b));
+}
+
+/* FP2 copy w=x */
+/* SU= 16 */
+void FP2_YYY_copy(FP2_YYY *w, FP2_YYY *x)
+{
+    if (w == x) return;
+    FP_YYY_copy(&(w->a), &(x->a));
+    FP_YYY_copy(&(w->b), &(x->b));
+}
+
+/* FP2 set w=0 */
+/* SU= 8 */
+void FP2_YYY_zero(FP2_YYY *w)
+{
+    FP_YYY_zero(&(w->a));
+    FP_YYY_zero(&(w->b));
+}
+
+/* FP2 set w=1 */
+/* SU= 48 */
+void FP2_YYY_one(FP2_YYY *w)
+{
+    FP_YYY one;
+    FP_YYY_one(&one);
+    FP2_YYY_from_FP(w, &one);
+}
+
+int FP2_YYY_sign(FP2_YYY *w)
+{
+    BIG_XXX m;
+    FP_YYY_redc(m,&(w->a));
+    return BIG_XXX_parity(m);
+}
+
+/* Set w=-x */
+/* SU= 88 */
+void FP2_YYY_neg(FP2_YYY *w, FP2_YYY *x)
+{
+    /* Just one neg! */
+    FP_YYY m, t;
+    FP_YYY_add(&m, &(x->a), &(x->b));
+    FP_YYY_neg(&m, &m);
+    FP_YYY_add(&t, &m, &(x->b));
+    FP_YYY_add(&(w->b), &m, &(x->a));
+    FP_YYY_copy(&(w->a), &t);
+
+}
+
+/* Set w=conj(x) */
+/* SU= 16 */
+void FP2_YYY_conj(FP2_YYY *w, FP2_YYY *x)
+{
+    FP_YYY_copy(&(w->a), &(x->a));
+    FP_YYY_neg(&(w->b), &(x->b));
+    FP_YYY_norm(&(w->b));
+}
+
+/* Set w=x+y */
+/* SU= 16 */
+void FP2_YYY_add(FP2_YYY *w, FP2_YYY *x, FP2_YYY *y)
+{
+    FP_YYY_add(&(w->a), &(x->a), &(y->a));
+    FP_YYY_add(&(w->b), &(x->b), &(y->b));
+}
+
+/* Set w=x-y */
+/* Input y MUST be normed */
+void FP2_YYY_sub(FP2_YYY *w, FP2_YYY *x, FP2_YYY *y)
+{
+    FP2_YYY m;
+    FP2_YYY_neg(&m, y);
+    FP2_YYY_add(w, x, &m);
+}
+
+/* Set w=s*x, where s is FP */
+/* SU= 16 */
+void FP2_YYY_pmul(FP2_YYY *w, FP2_YYY *x, FP_YYY *s)
+{
+    FP_YYY_mul(&(w->a), &(x->a), s);
+    FP_YYY_mul(&(w->b), &(x->b), s);
+}
+
+/* SU= 16 */
+/* Set w=s*x, where s is int */
+void FP2_YYY_imul(FP2_YYY *w, FP2_YYY *x, int s)
+{
+    FP_YYY_imul(&(w->a), &(x->a), s);
+    FP_YYY_imul(&(w->b), &(x->b), s);
+}
+
+/* Set w=x^2 */
+/* SU= 128 */
+void FP2_YYY_sqr(FP2_YYY *w, FP2_YYY *x)
+{
+    FP_YYY w1, w3, mb;
+
+    FP_YYY_add(&w1, &(x->a), &(x->b));
+    FP_YYY_neg(&mb, &(x->b));
+
+    FP_YYY_add(&w3, &(x->a), &(x->a));
+    FP_YYY_norm(&w3);
+    FP_YYY_mul(&(w->b), &w3, &(x->b));
+
+    FP_YYY_add(&(w->a), &(x->a), &mb);
+
+    FP_YYY_norm(&w1);
+    FP_YYY_norm(&(w->a));
+
+    FP_YYY_mul(&(w->a), &w1, &(w->a));   /* w->a#2 w->a=1 w1&w2=6 w1*w2=2 */
+}
+
+/* Set w=x*y */
+/* Inputs MUST be normed  */
+/* Now uses Lazy reduction */
+void FP2_YYY_mul(FP2_YYY *w, FP2_YYY *x, FP2_YYY *y)
+{
+    DBIG_XXX A, B, E, F, pR;
+    BIG_XXX C, D, p;
+
+    BIG_XXX_rcopy(p, Modulus_YYY);
+    BIG_XXX_dsucopy(pR, p);
+
+// reduce excesses of a and b as required (so product < pR)
+
+    if ((sign64)(x->a.XES + x->b.XES) * (y->a.XES + y->b.XES) > (sign64)FEXCESS_YYY)
+    {
+#ifdef DEBUG_REDUCE
+        printf("FP2 Product too large - reducing it\n");
+#endif
+        if (x->a.XES > 1) FP_YYY_reduce(&(x->a));
+        if (x->b.XES > 1) FP_YYY_reduce(&(x->b));
+    }
+
+    BIG_XXX_mul(A, x->a.g, y->a.g);
+    BIG_XXX_mul(B, x->b.g, y->b.g);
+
+    BIG_XXX_add(C, x->a.g, x->b.g);
+    BIG_XXX_norm(C);
+    BIG_XXX_add(D, y->a.g, y->b.g);
+    BIG_XXX_norm(D);
+
+    BIG_XXX_mul(E, C, D);
+    BIG_XXX_dadd(F, A, B);
+    BIG_XXX_dsub(B, pR, B); //
+
+    BIG_XXX_dadd(A, A, B);  // A<pR? Not necessarily, but <2pR
+    BIG_XXX_dsub(E, E, F);  // E<pR ? Yes
+
+    BIG_XXX_dnorm(A);
+    FP_YYY_mod(w->a.g, A);
+    w->a.XES = 3; // may drift above 2p...
+    BIG_XXX_dnorm(E);
+    FP_YYY_mod(w->b.g, E);
+    w->b.XES = 2;
+
+}
+
+/* output FP2 in hex format [a,b] */
+/* SU= 16 */
+void FP2_YYY_output(FP2_YYY *w)
+{
+    BIG_XXX bx, by;
+    FP2_YYY_reduce(w);
+    FP_YYY_redc(bx, &(w->a));
+    FP_YYY_redc(by, &(w->b));
+    printf("[");
+    BIG_XXX_output(bx);
+    printf(",");
+    BIG_XXX_output(by);
+    printf("]");
+    FP_YYY_nres(&(w->a), bx);
+    FP_YYY_nres(&(w->b), by);
+}
+
+/* SU= 8 */
+void FP2_YYY_rawoutput(FP2_YYY *w)
+{
+    printf("[");
+    BIG_XXX_rawoutput(w->a.g);
+    printf(",");
+    BIG_XXX_rawoutput(w->b.g);
+    printf("]");
+}
+
+
+/* Set w=1/x */
+/* SU= 128 */
+void FP2_YYY_inv(FP2_YYY *w, FP2_YYY *x)
+{
+    BIG_XXX m, b;
+    FP_YYY w1, w2;
+
+    FP2_YYY_norm(x);
+    FP_YYY_sqr(&w1, &(x->a));
+    FP_YYY_sqr(&w2, &(x->b));
+    FP_YYY_add(&w1, &w1, &w2);
+
+    FP_YYY_inv(&w1, &w1);
+
+    FP_YYY_mul(&(w->a), &(x->a), &w1);
+    FP_YYY_neg(&w1, &w1);
+    FP_YYY_norm(&w1);
+    FP_YYY_mul(&(w->b), &(x->b), &w1);
+}
+
+
+/* Set w=x/2 */
+/* SU= 16 */
+void FP2_YYY_div2(FP2_YYY *w, FP2_YYY *x)
+{
+    FP_YYY_div2(&(w->a), &(x->a));
+    FP_YYY_div2(&(w->b), &(x->b));
+}
+
+/* Set w*=(1+sqrt(-1)) */
+/* where X^2-(1+sqrt(-1)) is irreducible for FP4, assumes p=3 mod 8 */
+
+/* Input MUST be normed */
+void FP2_YYY_mul_ip(FP2_YYY *w)
+{
+    FP2_YYY t;
+
+    int i = QNRI_YYY;
+
+    FP2_YYY_copy(&t, w);
+    FP2_YYY_times_i(w);
+
+// add 2^i.t
+    while (i > 0)
+    {
+        FP2_YYY_add(&t, &t, &t);
+        FP2_YYY_norm(&t);
+        i--;
+    }
+    FP2_YYY_add(w, &t, w);
+
+#if TOWER_YYY == POSITOWER
+    FP2_YYY_norm(w);
+    FP2_YYY_neg(w, w);  // ***
+#endif
+//    Output NOT normed, so use with care
+}
+
+/* Set w/=(1+sqrt(-1)) */
+/* SU= 88 */
+void FP2_YYY_div_ip(FP2_YYY *w)
+{
+    FP2_YYY z;
+    FP2_YYY_norm(w);
+    FP2_YYY_from_ints(&z, (1 << QNRI_YYY), 1);
+    FP2_YYY_inv(&z, &z);
+    FP2_YYY_mul(w, &z, w);
+#if TOWER_YYY == POSITOWER
+    FP2_YYY_neg(w, w);  // ***
+#endif
+}
+
+/* SU= 8 */
+/* normalise a and b components of w */
+void FP2_YYY_norm(FP2_YYY *w)
+{
+    FP_YYY_norm(&(w->a));
+    FP_YYY_norm(&(w->b));
+}
+
+/* Set w=a^b mod m */
+/* SU= 208 */
+/*
+void FP2_YYY_pow(FP2_YYY *r, FP2_YYY* a, BIG_XXX b)
+{
+    FP2_YYY w;
+    FP_YYY one;
+    BIG_XXX z, zilch;
+    int bt;
+
+    BIG_XXX_norm(b);
+    BIG_XXX_copy(z, b);
+    FP2_YYY_copy(&w, a);
+    FP_YYY_one(&one);
+    BIG_XXX_zero(zilch);
+    FP2_YYY_from_FP(r, &one);
+    while (1)
+    {
+        bt = BIG_XXX_parity(z);
+        BIG_XXX_shr(z, 1);
+        if (bt) FP2_YYY_mul(r, r, &w);
+        if (BIG_XXX_comp(z, zilch) == 0) break;
+        FP2_YYY_sqr(&w, &w);
+    }
+    FP2_YYY_reduce(r);
+}
+*/
+/* test for x a QR */
+
+int FP2_YYY_qr(FP2_YYY *x)
+{ /* test x^(p^2-1)/2 = 1 */
+    FP2_YYY c;
+    FP2_YYY_conj(&c,x);
+    FP2_YYY_mul(&c,&c,x);
+
+    return FP_YYY_qr(&(c.a));
+}
+
+/* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
+/* returns true if u is QR */
+
+void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
+{
+    FP_YYY w1, w2, w3;
+    FP2_YYY_copy(w, u);
+    if (FP2_YYY_iszilch(w)) return;
+
+    FP_YYY_sqr(&w1, &(w->b));
+    FP_YYY_sqr(&w2, &(w->a));
+    FP_YYY_add(&w1, &w1, &w2);
+
+    FP_YYY_sqrt(&w1, &w1);
+
+    FP_YYY_add(&w2, &(w->a), &w1);
+    FP_YYY_norm(&w2);
+    FP_YYY_div2(&w2, &w2);
+
+    FP_YYY_sub(&w3, &(w->a), &w1);
+    FP_YYY_norm(&w3);
+    FP_YYY_div2(&w3, &w3);
+
+    FP_YYY_cmove(&w2,&w3,FP_YYY_qr(&w3)); // one or the other will be a QR
+
+    FP_YYY_sqrt(&w2, &w2);
+    FP_YYY_copy(&(w->a), &w2);
+    FP_YYY_add(&w2, &w2, &w2);
+
+    FP_YYY_inv(&w2, &w2);
+
+    FP_YYY_mul(&(w->b), &(w->b), &w2);
+}
+
+/* New stuff for ECp4 support */
+
+/* Input MUST be normed */
+void FP2_YYY_times_i(FP2_YYY *w)
+{
+    FP_YYY z;
+    FP_YYY_copy(&z, &(w->a));
+    FP_YYY_neg(&(w->a), &(w->b));
+    FP_YYY_copy(&(w->b), &z);
+
+//    Output NOT normed, so use with care
+}
+
