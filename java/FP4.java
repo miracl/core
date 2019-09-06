@@ -635,7 +635,7 @@ public final class FP4 {
 		ws.norm();
 		wa.sub(ws);
 
-		ws.copy(wa);
+		ws.copy(wa); ws.norm();
         ws.sqrt();
 
 		wa.copy(wt); wa.add(ws); 
@@ -648,7 +648,7 @@ public final class FP4 {
         wa.sqrt();
 
 		wt.copy(b);
-		ws.copy(wa); ws.add(wa);
+		ws.copy(wa); ws.add(wa); ws.norm();
 		ws.inverse();
 
 		wt.mul(ws);

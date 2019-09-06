@@ -702,7 +702,7 @@ impl FP8 {
         s.norm();
         a.sub(&s);
 
-        s.copy(&a);
+        s.copy(&a); s.norm();
 
         s.sqrt();
 
@@ -722,7 +722,7 @@ impl FP8 {
         a.sqrt();
         t.copy(&self.b);
         s.copy(&a);
-        s.add(&a);
+        s.add(&a); s.norm();
         s.inverse();
 
         t.mul(&s);

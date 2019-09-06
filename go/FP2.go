@@ -316,7 +316,7 @@ func (F *FP2) sqrt() {
 	w3 := NewFP();
 	w1.sqr()
 	w2.sqr()
-	w1.add(w2)
+	w1.add(w2); w1.norm()
 
 	w1 = w1.sqrt()
 	w2.copy(F.a)
@@ -334,7 +334,7 @@ func (F *FP2) sqrt() {
 
 	w2 = w2.sqrt()
 	F.a.copy(w2)
-	w2.add(w2)
+	w2.add(w2); w2.norm()
 	w2.inverse()
 	F.b.mul(w2)
 }

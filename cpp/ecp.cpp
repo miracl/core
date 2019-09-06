@@ -1202,7 +1202,7 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
 // Elligator 2
     BIG a;
     FP X1,X2,t,one,A,w;
-    BIG_zero(a); BIG_inc(a,CURVE_A); FP_nres(&A,a);
+    BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
     FP_nres(&t,h);
     FP_sqr(&t,&t);   // t^2
     if (MOD8_YYY == 5)
@@ -1226,7 +1226,7 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
     return;
 #endif
 #if CURVETYPE_ZZZ==EDWARDS
-// Elligator 2
+// Elligator 2 - map to Montgomery, place point, map back
     int qres;
     BIG x,y;
     FP X1,X2,t,one,A,w1,w2,B,Y;
@@ -1308,13 +1308,65 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
 
 
 #if CURVETYPE_ZZZ==WEIERSTRASS
-
-//todo
-    for (;;)
+// SWU method. Assumes p=3 mod 4.
+    BIG a,x,y;
+    FP X1,X2,X3,t,w,one,A,B,Y,j;
+    FP_rcopy(&B,CURVE_B);
+    BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
+    FP_one(&one);
+    FP_nres(&t,h);
+    if (CURVE_A!=0)
     {
-        ECP_setx(P, h, 0);
-        BIG_inc(h, 1); BIG_norm(h);
-        if (!ECP_isinf(P)) break;
+        FP_sqr(&t,&t);
+        FP_neg(&t,&t);   // t2=-t^2
+        FP_norm(&t);
+        FP_add(&w,&t,&one);  
+        FP_norm(&w);
+        FP_mul(&w,&w,&t);    // w=t2(t2+1)
+        FP_mul(&A,&A,&w);     // A=Aw
+        FP_inv(&A,&A);
+        FP_add(&w,&w,&one); FP_norm(&w);
+        FP_mul(&w,&w,&B);     
+        FP_neg(&w,&w);      // -B(w+1)
+        FP_norm(&w);
+        FP_mul(&X2,&w,&A);   // -B(w+1)/Aw
+        FP_mul(&X3,&t,&X2);
+        ECP_rhs(&w,&X3);
+        FP_cmove(&X2,&X3,FP_qr(&w));
+        ECP_rhs(&w,&X2);
+        FP_sqrt(&Y,&w);
+        FP_redc(x,&X2);
+        FP_redc(y,&Y);
+        ECP_set(P,x,y);
+    } else {
+        BIG_zero(a); BIG_inc(a,-3); BIG_norm(a); FP_nres(&A,a);
+        FP_sqrt(&w,&A);      // w=sqrt(-3)
+        FP_sub(&j,&w,&one);  FP_norm(&j);
+        FP_div2(&j,&j);        // j=(w-1)/2
+        FP_mul(&w,&w,&t);     // w=s.t
+        FP_add(&B,&B,&one);   
+        FP_sqr(&Y,&t);
+        FP_add(&B,&B,&Y);    // t^2+b+1
+        FP_norm(&B);
+        FP_inv(&B,&B);
+        FP_mul(&w,&w,&B);
+        FP_mul(&t,&t,&w);
+        FP_sub(&X1,&j,&t); FP_norm(&X1);
+        FP_neg(&X2,&X1);
+        FP_sub(&X2,&X2,&one);
+        FP_norm(&X2);
+        FP_sqr(&w,&w); FP_inv(&w,&w); 
+        FP_add(&X3,&w,&one); FP_norm(&X3);
+    
+        ECP_rhs(&w,&X2);
+        FP_cmove(&X1,&X2,FP_qr(&w));
+        ECP_rhs(&w,&X3);
+        FP_cmove(&X1,&X3,FP_qr(&w));
+        ECP_rhs(&w,&X1);
+        FP_sqrt(&Y,&w);
+        FP_redc(x,&X1);
+        FP_redc(y,&Y);
+        ECP_set(P,x,y); 
     }
 #endif
 }

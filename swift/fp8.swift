@@ -685,7 +685,7 @@ public struct FP8 {
 
         ws.copy(wa)
         
-        ws.sqrt()
+        ws.sqrt(); ws.norm()
 
         wa.copy(wt); wa.add(ws); 
         wa.norm(); wa.div2()
@@ -697,7 +697,7 @@ public struct FP8 {
         wa.sqrt()
 
         wt.copy(b)
-        ws.copy(wa); ws.add(wa)
+        ws.copy(wa); ws.add(wa); ws.norm()
         ws.inverse()
 
         wt.mul(ws)

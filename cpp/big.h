@@ -63,7 +63,7 @@ using namespace core;
 #define HBITS_XXX (BASEBITS_XXX/2)      /**< Number of bits in number base divided by 2 */
 #define HMASK_XXX (((chunk)1<<HBITS_XXX)-1)    /**< Mask = 2^HBITS-1 */
 
-#define DEBUG_NORM
+//#define DEBUG_NORM
 
 #ifdef DEBUG_NORM  /* Add an extra location to track chunk extension */
 #define MPV_XXX NLEN_XXX

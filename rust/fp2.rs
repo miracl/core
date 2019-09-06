@@ -339,7 +339,7 @@ impl FP2 {
 
         w1.sqr();
         w2.sqr();
-        w1.add(&w2);
+        w1.add(&w2); w1.norm();
 
         w2.copy(&w1.sqrt());
         w1.copy(&w2);
@@ -359,7 +359,7 @@ impl FP2 {
 
         w1.copy(&w2.sqrt());
         self.a.copy(&w1);
-        w1.dbl();
+        w1.dbl(); w1.norm();
         w1.inverse();
         self.b.mul(&w1);
     }

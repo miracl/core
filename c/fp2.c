@@ -434,7 +434,7 @@ void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
     FP_YYY_sqr(&w1, &(w->b));
     FP_YYY_sqr(&w2, &(w->a));
     FP_YYY_add(&w1, &w1, &w2);
-
+    FP_YYY_norm(&w1);
     FP_YYY_sqrt(&w1, &w1);
 
     FP_YYY_add(&w2, &(w->a), &w1);
@@ -450,7 +450,7 @@ void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
     FP_YYY_sqrt(&w2, &w2);
     FP_YYY_copy(&(w->a), &w2);
     FP_YYY_add(&w2, &w2, &w2);
-
+    FP_YYY_norm(&w2);
     FP_YYY_inv(&w2, &w2);
 
     FP_YYY_mul(&(w->b), &(w->b), &w2);

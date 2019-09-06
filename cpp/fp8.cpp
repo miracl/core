@@ -636,7 +636,6 @@ int YYY::FP8_qr(FP8 *x)
 void YYY::FP8_sqrt(FP8 *r, FP8* x)
 {
     FP4 a, b, s, t;
-
     FP8_copy(r, x);
     if (FP8_iszilch(x)) return;
 
@@ -648,23 +647,22 @@ void YYY::FP8_sqrt(FP8 *r, FP8* x)
     FP4_times_i(&s);
     FP4_norm(&s);
     FP4_sub(&a, &a, &s); // a-=txx(s)
-
+    FP4_norm(&a);  // **
     FP4_sqrt(&s, &a);
 
     FP4_copy(&t, &(x->a));
     FP4_add(&a, &t, &s);
     FP4_norm(&a);
     FP4_div2(&a, &a);
-
     FP4_sub(&b, &t, &s);
     FP4_norm(&b);
     FP4_div2(&b, &b);
 
     FP4_cmove(&a,&b,FP4_qr(&b)); // one or the other will be a QR
-
     FP4_sqrt(&a, &a);
     FP4_copy(&t, &(x->b));
     FP4_add(&s, &a, &a);
+    FP4_norm(&s); // **
     FP4_inv(&s, &s);
 
     FP4_mul(&t, &t, &s);

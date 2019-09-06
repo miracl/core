@@ -648,7 +648,7 @@ void FP8_YYY_sqrt(FP8_YYY *r, FP8_YYY* x)
     FP4_YYY_times_i(&s);
     FP4_YYY_norm(&s);
     FP4_YYY_sub(&a, &a, &s); // a-=txx(s)
-
+    FP4_YYY_norm(&a);
     FP4_YYY_sqrt(&s, &a);
    
     FP4_YYY_copy(&t, &(x->a));
@@ -665,6 +665,7 @@ void FP8_YYY_sqrt(FP8_YYY *r, FP8_YYY* x)
     FP4_YYY_sqrt(&a, &a);
     FP4_YYY_copy(&t, &(x->b));
     FP4_YYY_add(&s, &a, &a);
+    FP4_YYY_norm(&s);
     FP4_YYY_inv(&s, &s);
 
     FP4_YYY_mul(&t, &t, &s);

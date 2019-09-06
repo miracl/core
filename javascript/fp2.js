@@ -313,7 +313,7 @@ var FP2 = function(ctx) {
 
             w1.sqr();
             w2.sqr();
-            w1.add(w2);
+            w1.add(w2); w1.norm();
 
             w1 = w1.sqrt();
 
@@ -331,7 +331,7 @@ var FP2 = function(ctx) {
 
             w2 = w2.sqrt();
             this.a.copy(w2);
-            w2.add(w2);
+            w2.add(w2); w2.norm();
             w2.inverse();
             this.b.mul(w2);
         },

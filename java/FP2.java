@@ -319,7 +319,7 @@ public final class FP2 {
 		FP w1=new FP(b);
 		FP w2=new FP(a);
 		FP w3=new FP(a);
-		w1.sqr(); w2.sqr(); w1.add(w2);
+		w1.sqr(); w2.sqr(); w1.add(w2); w1.norm();
 		
 		w1=w1.sqrt();
 		
@@ -333,7 +333,7 @@ public final class FP2 {
 
 		w2=w2.sqrt();
 		a.copy(w2);
-		w2.add(w2);
+		w2.add(w2); w2.norm();
 		w2.inverse();
 		b.mul(w2);
 	

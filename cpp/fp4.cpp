@@ -650,6 +650,7 @@ void YYY::FP4_sqrt(FP4 *r, FP4* x)
     FP2_mul_ip(&s);
     FP2_norm(&s);
     FP2_sub(&a, &a, &s); // a-=txx(s)
+    FP2_norm(&a); // **
 
     FP2_sqrt(&s, &a);
 
@@ -667,7 +668,7 @@ void YYY::FP4_sqrt(FP4 *r, FP4* x)
 
     FP2_sqrt(&a, &a);
     FP2_copy(&t, &(x->b));
-    FP2_add(&s, &a, &a);
+    FP2_add(&s, &a, &a); FP2_norm(&s);
     FP2_inv(&s, &s);
 
     FP2_mul(&t, &t, &s);

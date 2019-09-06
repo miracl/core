@@ -650,7 +650,7 @@ func (F *FP4) sqrt()  {
 	s.norm()
 	a.sub(s)
 
-	s.copy(a)
+	s.copy(a); s.norm()
 	s.sqrt();
 
 	a.copy(t)
@@ -669,7 +669,7 @@ func (F *FP4) sqrt()  {
 	a.sqrt()
 	t.copy(F.b)
 	s.copy(a)
-	s.add(a)
+	s.add(a); s.norm()
 	s.inverse()
 
 	t.mul(s)

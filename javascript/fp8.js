@@ -656,7 +656,7 @@ var FP8 = function(ctx) {
             ws.norm();
             wa.sub(ws);
 
-            ws.copy(wa);
+            ws.copy(wa); ws.norm();
             ws.sqrt();
 
             wa.copy(wt); wa.add(ws);
@@ -667,7 +667,7 @@ var FP8 = function(ctx) {
 
             wa.sqrt();
             wt.copy(this.b);
-            ws.copy(wa); ws.add(wa);
+            ws.copy(wa); ws.add(wa); ws.norm();
             ws.inverse();
 
             wt.mul(ws);

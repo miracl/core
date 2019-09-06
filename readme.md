@@ -27,6 +27,7 @@ MIRACL Core features:-
 - New HMAC message authentication module
 - Improved side-channel resistance
 - Deterministic hashing to curve points
+- Point compression in G2
 - Demonstrated support for low-powered IoT processor nodes
 - An updated manual
 

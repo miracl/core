@@ -661,7 +661,7 @@ public final class FP8 {
 		ws.norm();
 		wa.sub(ws);
 
-		ws.copy(wa);
+		ws.copy(wa); ws.norm();
 
         ws.sqrt();
 
@@ -675,7 +675,7 @@ public final class FP8 {
         wa.sqrt();
 
 		wt.copy(b);
-		ws.copy(wa); ws.add(wa);
+		ws.copy(wa); ws.add(wa); ws.norm();
 		ws.inverse();
 
 		wt.mul(ws);
