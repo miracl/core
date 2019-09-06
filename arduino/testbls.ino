@@ -55,7 +55,7 @@ int bls_XXX()
     using namespace XXX;
 
     int res;
-    char s[BGS_XXX], w[4 * BFS_XXX], sig[BFS_XXX + 1];
+    char s[BGS_XXX], w[4 * BFS_XXX + 1], sig[BFS_XXX + 1];
     octet S = {0, sizeof(s), s};
     octet W = {0, sizeof(w), w};
     octet SIG = {0, sizeof(sig), sig};

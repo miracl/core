@@ -682,6 +682,8 @@ os.system(deltext+" pair256.*")
 os.system(deltext+" mpin256.*")
 os.system(deltext+" bls256.*")
 
+os.system(deltext+" blsrev*.cpp")
+
 # create library
 
 if not nhs_selected :
@@ -693,10 +695,7 @@ else :
 	os.system(copytext+" testnhs.ino "+"examples"+slashtext+"testnhs"+slashtext+"testnhs.ino")
 os.system(deltext+" testnhs.ino")
 
-if not curve_selected :
-	os.system(deltext+" ecdh_support.cpp")
-	os.system(deltext+" ecdh_support.h")
-else :
+if curve_selected :
 	os.system("mkdir examples")
 	os.system("mkdir examples"+slashtext+"testecc")
 	os.system(copytext+" testecc.ino "+"examples"+slashtext+"testecc"+slashtext+"testecc.ino")
@@ -706,8 +705,6 @@ os.system(deltext+" testecc.ino")
 os.system(deltext+" timeecc.ino")
 
 if not rsa_selected :
-	os.system(deltext+" rsa_support.cpp")
-	os.system(deltext+" rsa_support.h")
 	os.system(deltext+" X509.cpp")
 	os.system(deltext+" X509.h")
 else :
@@ -717,10 +714,7 @@ else :
 os.system(deltext+" testrsa.ino")
 
 
-if not pfcurve_selected :
-	os.system(deltext+" pbc_support.cpp")
-	os.system(deltext+" pbc_support.h")
-else :
+if pfcurve_selected :
 	os.system("mkdir examples")
 	os.system("mkdir examples"+slashtext+"testbls")
 	os.system(copytext+" testbls.ino "+"examples"+slashtext+"testbls"+slashtext+"testbls.ino")
@@ -729,6 +723,7 @@ else :
 	os.system(deltext+ " ecdh*.* ")
 os.system(deltext+" testbls.ino")
 os.system(deltext+" timepbc.ino")
+
 
 #print("Your selection was ")
 #for i in range(1,max) :
