@@ -134,7 +134,7 @@ public struct FP {
         }
         if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.NOT_SPECIAL
         {
-            let md=BIG(ROM.Modulus);
+            let md=BIG(ROM.Modulus)
 
             return BIG.monty(md,ROM.MConst,&d)
         }
@@ -149,7 +149,13 @@ public struct FP {
     }
     init(_ a: Int)
     {
-        x=BIG(a)
+        if a<0 {
+            var m=BIG(ROM.Modulus)
+            m.inc(a); m.norm();
+            x=BIG(m)
+        } else {
+            x=BIG(a)
+        }
         xes=1
         nres()
     }
@@ -238,6 +244,11 @@ public struct FP {
         x.one(); nres()
     }
     
+    func sign() -> Int
+    {
+        return redc().parity()
+    }
+
 /* normalise this */
     mutating func norm()
     {

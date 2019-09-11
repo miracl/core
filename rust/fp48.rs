@@ -38,7 +38,6 @@ use crate::xxx::fp16::FP16;
 use crate::xxx::fp2::FP2;
 use crate::xxx::fp4::FP4;
 use crate::xxx::fp8::FP8;
-use crate::xxx::rom;
 
 pub const ZERO: usize = 0;
 pub const ONE: usize = 1;

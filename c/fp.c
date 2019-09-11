@@ -215,6 +215,15 @@ void FP_YYY_mod(BIG_XXX a, DBIG_XXX d)
 
 #endif
 
+void FP_YYY_from_int(FP_YYY *x,int a)
+{
+    BIG_XXX w;
+    if (a<0) BIG_XXX_rcopy(w, Modulus_YYY);
+    else BIG_XXX_zero(w); 
+    BIG_XXX_inc(w,a); BIG_XXX_norm(w); 
+    FP_YYY_nres(x,w);
+}
+
 /* test x==0 ? */
 /* SU= 48 */
 int FP_YYY_iszilch(FP_YYY *x)
@@ -687,9 +696,10 @@ void FP_YYY_pow(FP_YYY *r, FP_YYY *a, BIG_XXX b)
     BIG_XXX t;
     int i, nb;
 
-    FP_YYY_norm(a);
-    BIG_XXX_norm(b);
+    FP_YYY_copy(r,a);
+    FP_YYY_norm(r);
     BIG_XXX_copy(t, b);
+    BIG_XXX_norm(t);
     nb = 1 + (BIG_XXX_nbits(t) + 3) / 4;
     /* convert exponent to 4-bit window */
     for (i = 0; i < nb; i++)
@@ -701,9 +711,9 @@ void FP_YYY_pow(FP_YYY *r, FP_YYY *a, BIG_XXX b)
     }
 
     FP_YYY_one(&tb[0]);
-    FP_YYY_copy(&tb[1], a);
+    FP_YYY_copy(&tb[1], r);
     for (i = 2; i < 16; i++)
-        FP_YYY_mul(&tb[i], &tb[i - 1], a);
+        FP_YYY_mul(&tb[i], &tb[i - 1], r);
 
     FP_YYY_copy(r, &tb[w[nb - 1]]);
     for (i = nb - 2; i >= 0; i--)
@@ -737,6 +747,14 @@ void FP_YYY_one(FP_YYY *n)
     BIG_XXX_one(b);
     FP_YYY_nres(n, b);
 }
+
+int FP_YYY_sign(FP_YYY *w)
+{
+    BIG_XXX m;
+    FP_YYY_redc(m,w);
+    return BIG_XXX_parity(m);
+}
+
 
 /* is r a QR? 
 int FP_YYY_qr(FP_YYY *r)

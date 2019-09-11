@@ -1201,8 +1201,9 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
 #if CURVETYPE_ZZZ==MONTGOMERY
 // Elligator 2
     BIG a;
-    FP X1,X2,t,one,A,w;
-    BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
+    FP X1,X2,t,one,A;
+    //BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
+    FP_from_int(&A,CURVE_A);
     FP_nres(&t,h);
     FP_sqr(&t,&t);   // t^2
     if (MOD8_YYY == 5)
@@ -1227,9 +1228,9 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
 #endif
 #if CURVETYPE_ZZZ==EDWARDS
 // Elligator 2 - map to Montgomery, place point, map back
-    int qres;
+    int qres,sgn,ne;
     BIG x,y;
-    FP X1,X2,t,one,A,w1,w2,B,Y;
+    FP X1,X2,t,one,A,w1,w2,B,Y,NY,KB;
     FP_rcopy(&B,CURVE_B);
     FP_one(&one);
     if (CURVE_A==1)
@@ -1242,12 +1243,14 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
         FP_add(&B,&B,&one);  // B=B+1
     }
     FP_norm(&A); FP_norm(&B);
+    FP_copy(&KB,&B);
+
     FP_div2(&A,&A);    // (A+B)/2
     FP_div2(&B,&B);    // (B-A)/2
     FP_div2(&B,&B);    // (B-A)/4
     FP_sqr(&B,&B);     // (B-A)^2/16
 
-    FP_nres(&t,h);
+    FP_nres(&t,h); sgn=FP_sign(&t);
     FP_sqr(&t,&t);   // t^2
     if (MOD8_YYY == 5)
          FP_add(&t,&t,&t);  // 2t^2
@@ -1282,16 +1285,9 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
 
     FP_sqrt(&Y,&w1);
     FP_copy(&t,&X1); FP_add(&t,&t,&t); FP_add(&t,&t,&t); FP_norm(&t); // t=4*x
-    FP_rcopy(&B,CURVE_B);
-    if (CURVE_A==1)
-        FP_sub(&B,&B,&one);   // B-1
-    else
-        FP_add(&B,&B,&one);   // B+1
-    FP_norm(&B);
-
-    FP_neg(&B,&B);   // 1-B or -1-B
-    FP_add(&w1,&t,&B); FP_norm(&w1);  // w1 = 4x+(a-b)
-    FP_sub(&w2,&t,&B); FP_norm(&w2);  // w2 = 4x-(a-b)
+    
+    FP_sub(&w1,&t,&KB); FP_norm(&w1);  // w1 = 4x+(a-b)
+    FP_add(&w2,&t,&KB); FP_norm(&w2);  // w2 = 4x-(a-b)
     FP_mul(&t,&w1,&Y);
     FP_inv(&t,&t);         // t=1/(4x+(a-b))y    
   
@@ -1300,23 +1296,29 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
     FP_mul(&Y,&Y,&t);      
     FP_mul(&Y,&Y,&w2);     // y=w2.y/t
     FP_redc(x,&X1);
-    FP_redc(y,&Y);
 
+    ne=FP_sign(&Y)^sgn;
+    FP_neg(&NY,&Y); FP_norm(&NY);
+    FP_cmove(&Y,&NY,ne);
+    
+    FP_redc(y,&Y);
     ECP_set(P,x,y);
     return;
 #endif
 
-
 #if CURVETYPE_ZZZ==WEIERSTRASS
 // SWU method. Assumes p=3 mod 4.
+    int sgn,ne;
     BIG a,x,y;
-    FP X1,X2,X3,t,w,one,A,B,Y,j;
+    FP X1,X2,X3,t,w,one,A,B,Y,NY,j;
     FP_rcopy(&B,CURVE_B);
-    BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
     FP_one(&one);
     FP_nres(&t,h);
+    sgn=FP_sign(&t);
     if (CURVE_A!=0)
     {
+        //BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
+        FP_from_int(&A,CURVE_A);
         FP_sqr(&t,&t);
         FP_neg(&t,&t);   // t2=-t^2
         FP_norm(&t);
@@ -1336,10 +1338,10 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
         ECP_rhs(&w,&X2);
         FP_sqrt(&Y,&w);
         FP_redc(x,&X2);
-        FP_redc(y,&Y);
-        ECP_set(P,x,y);
+
     } else {
-        BIG_zero(a); BIG_inc(a,-3); BIG_norm(a); FP_nres(&A,a);
+        //BIG_zero(a); BIG_inc(a,-3); BIG_norm(a); FP_nres(&A,a);
+        FP_from_int(&A,-3);
         FP_sqrt(&w,&A);      // w=sqrt(-3)
         FP_sub(&j,&w,&one);  FP_norm(&j);
         FP_div2(&j,&j);        // j=(w-1)/2
@@ -1365,9 +1367,13 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
         ECP_rhs(&w,&X1);
         FP_sqrt(&Y,&w);
         FP_redc(x,&X1);
-        FP_redc(y,&Y);
-        ECP_set(P,x,y); 
     }
+    ne=FP_sign(&Y)^sgn;
+    FP_neg(&NY,&Y); FP_norm(&NY);
+    FP_cmove(&Y,&NY,ne);
+ 
+    FP_redc(y,&Y);
+    ECP_set(P,x,y);
 #endif
 }
 

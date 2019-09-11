@@ -67,7 +67,13 @@ func NewFP() *FP {
 
 func NewFPint(a int) *FP {
 	F := new(FP)
-	F.x = NewBIGint(a)
+	if a < 0 {
+		m := NewBIGints(Modulus)
+		m.inc(a); m.norm();
+		F.x = NewBIGcopy(m)
+	} else {
+		F.x = NewBIGint(a)
+	}
 	F.nres()
 	return F
 }
@@ -249,6 +255,11 @@ func (F *FP) zero() {
 func (F *FP) one() {
 	F.x.one()
 	F.nres()
+}
+
+/* return sign */
+func (F *FP) sign() int {
+	return F.redc().parity()
 }
 
 /* normalise this */

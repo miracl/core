@@ -73,7 +73,13 @@ impl FP {
 
     pub fn new_int(a: isize) -> FP {
         let mut f = FP::new();
-        f.x.inc(a);
+        if a<0 {
+            let mut m = BIG::new_ints(&rom::MODULUS);
+            m.inc(a); m.norm();
+            f.x.copy(&m);
+        } else {
+            f.x.inc(a);
+        }
         f.nres();
         return f;
     }
@@ -254,6 +260,11 @@ impl FP {
     pub fn norm(&mut self) {
         self.x.norm();
     }
+
+    pub fn sign(&mut self) -> isize {
+        return self.redc().parity();
+    }
+
     /* swap FPs depending on d */
     pub fn cswap(&mut self, b: &mut FP, d: isize) {
         self.x.cswap(&mut (b.x), d);
@@ -420,7 +431,7 @@ impl FP {
 
     // See eprint paper https://eprint.iacr.org/2018/1038
     // return this^(p-3)/4 or this^(p-5)/8
-    pub fn fpow(&mut self) -> FP {
+    pub fn fpow(&self) -> FP {
         let ac: [isize; 11] = [1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255];
         let mut xp: [FP; 11] = [
             FP::new(),
@@ -603,7 +614,7 @@ impl FP {
     }
 
     /* return self^e mod Modulus */
-    pub fn pow(&mut self, e: &mut BIG) -> FP {
+    pub fn pow(&self, e: &BIG) -> FP {
         let mut tb: [FP; 16] = [
             FP::new(),
             FP::new(),
@@ -625,7 +636,8 @@ impl FP {
         const CT: usize = 1 + (big::NLEN * (big::BASEBITS as usize) + 3) / 4;
         let mut w: [i8; CT] = [0; CT];
 
-        self.norm();
+        let mut s = FP::new_copy(&self);
+        s.norm();
         let mut t = BIG::new_copy(e);
         t.norm();
         let nb = 1 + (t.nbits() + 3) / 4;
@@ -638,13 +650,13 @@ impl FP {
             t.fshr(4);
         }
         tb[0].one();
-        tb[1].copy(&self);
+        tb[1].copy(&s);
 
         let mut c = FP::new();
         for i in 2..16 {
             c.copy(&tb[i - 1]);
             tb[i].copy(&c);
-            tb[i].mul(&self);
+            tb[i].mul(&s);
         }
         let mut r = FP::new_copy(&tb[w[nb - 1] as usize]);
         for i in (0..nb - 1).rev() {
@@ -673,7 +685,7 @@ impl FP {
                 p.dec(5);
                 p.norm();
                 p.shr(3);
-                v = i.pow(&mut p);
+                v = i.pow(&p);
             }
             i.mul(&v);
             i.mul(&v);
@@ -693,13 +705,13 @@ impl FP {
                 p.inc(1);
                 p.norm();
                 p.shr(2);
-                r = self.pow(&mut p);
+                r = self.pow(&p);
             }
             return r;
         }
     }
 
-    pub fn qr(&mut self) -> isize {
+    pub fn qr(&self) -> isize {
         let mut r: FP;
         if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
             r=self.fpow();
@@ -718,7 +730,7 @@ impl FP {
             m.dec(1);
             m.norm();
             m.shr(1);
-            r=self.pow(&mut m);                
+            r=self.pow(&m);                
         }
         let w=r.redc();
         return w.isunity() as isize;

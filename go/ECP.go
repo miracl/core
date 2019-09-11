@@ -1146,7 +1146,7 @@ func (E *ECP) Mul2(e *BIG, Q *ECP, f *BIG) *ECP {
 	return S
 }
 
-func (E *ECP) cfp() {
+func (E *ECP) Cfp() {
 	cf := CURVE_Cof_I
 	if cf == 1 {
 		return
@@ -1166,19 +1166,167 @@ func (E *ECP) cfp() {
 	E.Copy(E.mul(c))
 }
 
-func ECP_hashit(x *BIG) *ECP {
+func ECP_hashit(h *BIG) *ECP {
 	P := NewECP()
-	for true {
-		if CURVETYPE != MONTGOMERY {
-			P = NewECPbigint(x, 0)
-		} else {
-			P = NewECPbig(x)
-		}
-		x.inc(1)
-		x.norm()
-		if !P.Is_infinity() {
-			break
-		}
+
+	if CURVETYPE == MONTGOMERY {
+// Elligator 2
+			one:=NewFPint(1)
+			A:=NewFPint(CURVE_A)
+			t:=NewFPbig(h)
+
+            t.sqr();
+            if (MOD8 == 5) {
+                t.add(t)
+            } else {
+                t.neg()
+            }
+            t.add(one)
+            t.norm()
+            t.inverse()
+			X1:=NewFPcopy(t); X1.mul(A)
+            X1.neg();
+			X2:=NewFPcopy(X1)
+            X2.add(A); X2.norm()
+            X2.neg()
+            rhs:=RHS(X2)
+            X1.cmove(X2,rhs.qr())
+
+            a:=X1.redc()
+            P.Copy(NewECPbig(a))
+	} 
+	if CURVETYPE == EDWARDS {
+// Elligator 2 - map to Montgomery, place point, map back
+            t:=NewFPbig(h)
+            one:=NewFPint(1)
+            B:=NewFPbig(NewBIGints(CURVE_B))
+            A:=NewFPcopy(B)
+            sgn:=t.sign()
+            if (CURVE_A==1) {
+                A.add(one)
+                B.sub(one)
+            } else {
+                A.sub(one)
+                B.add(one)
+            }
+            A.norm(); B.norm()
+            KB:=NewFPcopy(B);
+
+            A.div2()
+            B.div2()
+            B.div2()
+            B.sqr()
+            
+            t.sqr()
+            if (MOD8 == 5) {
+                t.add(t)
+            } else {
+                t.neg()
+            }
+            t.add(one); t.norm()
+            t.inverse()
+			X1:=NewFPcopy(t); X1.mul(A)
+            X1.neg()
+
+			X2:=NewFPcopy(X1);
+            X2.add(A); X2.norm()
+            X2.neg()
+
+            X1.norm()
+            t.copy(X1); t.sqr(); w1:=NewFPcopy(t); w1.mul(X1)
+            t.mul(A); w1.add(t)
+            t.copy(X1); t.mul(B)
+            w1.add(t)
+            w1.norm()
+
+            X2.norm()
+            t.copy(X2); t.sqr(); w2:=NewFPcopy(t); w2.mul(X2)
+            t.mul(A); w2.add(t)
+            t.copy(X2); t.mul(B)
+            w2.add(t)
+            w2.norm()
+
+            qres:=w2.qr()
+            X1.cmove(X2,qres)
+            w1.cmove(w2,qres)
+
+            Y:=w1.sqrt()
+            t.copy(X1); t.add(t); t.add(t); t.norm()
+
+            w1.copy(t); w1.sub(KB); w1.norm()
+            w2.copy(t); w2.add(KB); w2.norm()
+            t.copy(w1); t.mul(Y)
+            t.inverse()
+
+            X1.mul(t)
+            X1.mul(w1)
+            Y.mul(t)
+            Y.mul(w2)
+
+            x:=X1.redc()
+
+            ne:=Y.sign()^sgn
+            NY:=NewFPcopy(Y); NY.neg(); NY.norm()
+            Y.cmove(NY,ne)
+
+            y:=Y.redc()
+            P.Copy(NewECPbigs(x,y))
+	}
+	if CURVETYPE == WEIERSTRASS {
+	// swu method
+            one:=NewFPint(1);
+            B:=NewFPbig(NewBIGints(CURVE_B))
+            t:=NewFPbig(h)
+            x:=NewBIG();
+			Y:=NewFP();
+            sgn:=t.sign();
+            if CURVE_A!=0 {
+                A:=NewFPint(CURVE_A)
+                t.sqr()
+                t.neg()
+                t.norm()
+                w:=NewFPcopy(t); w.add(one); w.norm()
+                w.mul(t)
+                A.mul(w)
+                A.inverse()
+                w.add(one); w.norm()
+                w.mul(B)
+                w.neg(); w.norm()
+                X2:=NewFPcopy(w); X2.mul(A)
+                X3:=NewFPcopy(t); X3.mul(X2)
+                rhs:=RHS(X3)
+                X2.cmove(X3,rhs.qr())
+                rhs.copy(RHS(X2))
+                Y.copy(rhs.sqrt())
+                x.copy(X2.redc())
+            } else {
+                A:=NewFPint(-3)
+                w:=A.sqrt()
+                j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
+                w.mul(t)
+                B.add(one)
+                Y.copy(t); Y.sqr()
+                B.add(Y); B.norm(); B.inverse()
+                w.mul(B)
+                t.mul(w)
+                X1:=NewFPcopy(j); X1.sub(t); X1.norm()
+                X2:=NewFPcopy(X1); X2.neg(); X2.sub(one); X2.norm()
+                w.sqr(); w.inverse()
+                X3:=NewFPcopy(w); X3.add(one); X3.norm()
+                rhs:=RHS(X2)
+                X1.cmove(X2,rhs.qr())
+                rhs.copy(RHS(X3))
+                X1.cmove(X3,rhs.qr())
+                rhs.copy(RHS(X1))
+                Y.copy(rhs.sqrt())
+                x.copy(X1.redc())
+            }
+            ne:=Y.sign()^sgn
+            NY:=NewFPcopy(Y); NY.neg(); NY.norm()
+            Y.cmove(NY,ne)
+
+            y:=Y.redc()
+            P.Copy(NewECPbigs(x,y))            
 	}
 	return P
 }
@@ -1188,7 +1336,7 @@ func ECP_mapit(h []byte) *ECP {
 	dx:= DBIG_fromBytes(h[:])
 	x:= dx.mod(q)
 	P:= ECP_hashit(x)
-	P.cfp()
+	P.Cfp()
 	return P
 }
 

@@ -32,9 +32,9 @@
 
 use crate::xxx::big;
 use crate::xxx::big::BIG;
-use crate::xxx::dbig;
 use crate::xxx::dbig::DBIG;
 use crate::xxx::fp::FP;
+use crate::xxx::fp;
 use crate::xxx::rom;
 
 pub struct ECP {
@@ -1214,20 +1214,181 @@ impl ECP {
         self.copy(&P);
     }
 
-    pub fn hashit(x: &mut BIG) -> ECP {
+    pub fn hashit(h: &BIG) -> ECP {
         let mut P = ECP::new();
-        loop {
-            if CURVETYPE != MONTGOMERY {
-                P.copy(&ECP::new_bigint(&x, 0));
+
+        if CURVETYPE == MONTGOMERY {
+        // Elligator 2
+            let mut X1=FP::new();
+            let mut X2=FP::new();
+            let mut t =FP::new_big(h);
+            let one=FP::new_int(1);
+            let A=FP::new_int(rom::CURVE_A);
+
+            t.sqr();
+            if fp::MOD8 == 5 {
+                t.dbl();
             } else {
-                P.copy(&ECP::new_big(&x));
+                t.neg();
             }
-            x.inc(1);
-            x.norm();
-            if !P.is_infinity() {
-                break;
+            t.add(&one);
+            t.norm();
+            t.inverse();
+            X1.copy(&t); X1.mul(&A);
+            X1.neg();
+            X2.copy(&X1);
+            X2.add(&A); X2.norm();
+            X2.neg();
+            let rhs=ECP::rhs(&X2);
+            X1.cmove(&X2,rhs.qr());
+
+            let a=X1.redc();
+            P.copy(&ECP::new_big(&a));
+
+        } 
+        if CURVETYPE == EDWARDS {
+// Elligator 2 - map to Montgomery, place point, map back
+            let mut X1=FP::new();
+            let mut X2=FP::new();
+            let mut t=FP::new_big(h);
+            let mut w1=FP::new();
+            let mut w2=FP::new();
+            let one=FP::new_int(1);
+            let mut B = FP::new_big(&BIG::new_ints(&rom::CURVE_B));
+            let mut A=FP::new_copy(&B);
+            let sgn=t.sign();
+            if rom::CURVE_A==1 {
+                A.add(&one);
+                B.sub(&one);
+            } else {
+                A.sub(&one);
+                B.add(&one);
             }
-        }   
+            A.norm(); B.norm();
+            let KB=FP::new_copy(&B);
+
+            A.div2();
+            B.div2();
+            B.div2();
+            B.sqr();
+            
+            t.sqr();
+            if fp::MOD8 == 5 {
+                t.dbl();
+            } else {
+                t.neg();
+            }
+            t.add(&one); t.norm();
+            t.inverse();
+            X1.copy(&t); X1.mul(&A);
+            X1.neg();
+
+            X2.copy(&X1);
+            X2.add(&A); X2.norm();
+            X2.neg();
+
+            X1.norm();
+            t.copy(&X1); t.sqr(); w1.copy(&t); w1.mul(&X1);
+            t.mul(&A); w1.add(&t);
+            t.copy(&X1); t.mul(&B);
+            w1.add(&t);
+            w1.norm();
+
+            X2.norm();
+            t.copy(&X2); t.sqr(); w2.copy(&t); w2.mul(&X2);
+            t.mul(&A); w2.add(&t);
+            t.copy(&X2); t.mul(&B);
+            w2.add(&t);
+            w2.norm();
+
+            let qres=w2.qr();
+            X1.cmove(&X2,qres);
+            w1.cmove(&w2,qres);
+
+            let mut Y=w1.sqrt();
+            t.copy(&X1); t.dbl(); t.dbl(); t.norm();
+
+            w1.copy(&t); w1.sub(&KB); w1.norm();
+            w2.copy(&t); w2.add(&KB); w2.norm();
+            t.copy(&w1); t.mul(&Y);
+            t.inverse();
+
+            X1.mul(&t);
+            X1.mul(&w1);
+            Y.mul(&t);
+            Y.mul(&w2);
+
+            let x=X1.redc();
+
+            let ne=Y.sign()^sgn;
+            let mut NY=FP::new_copy(&Y); NY.neg(); NY.norm();
+            Y.cmove(&NY,ne);
+
+            let y=Y.redc();
+            P.copy(&ECP::new_bigs(&x,&y));
+
+
+        }
+        if CURVETYPE==WEIERSTRASS {
+        // swu method
+            let mut X1=FP::new();
+            let mut X2=FP::new();
+            let mut X3=FP::new();
+            let one=FP::new_int(1);
+            let mut B = FP::new_big(&BIG::new_ints(&rom::CURVE_B));
+            let mut Y=FP::new();
+            let mut t=FP::new_big(h);
+            let mut x=BIG::new_int(0);
+            let sgn=t.sign();
+            if rom::CURVE_A != 0
+            {
+                let mut A=FP::new_int(rom::CURVE_A);
+                t.sqr();
+                t.neg();
+                t.norm();
+                let mut w=FP::new_copy(&t); w.add(&one); w.norm();
+                w.mul(&t);
+                A.mul(&w);
+                A.inverse();
+                w.add(&one); w.norm();
+                w.mul(&B);
+                w.neg(); w.norm();
+                X2.copy(&w); X2.mul(&A);
+                X3.copy(&t); X3.mul(&X2);
+                let mut rhs=ECP::rhs(&X3);
+                X2.cmove(&X3,rhs.qr());
+                rhs.copy(&ECP::rhs(&X2));
+                Y.copy(&rhs.sqrt());
+                x.copy(&X2.redc());
+            } else {
+                let mut A=FP::new_int(-3);
+                let mut w=A.sqrt();
+                let mut j=FP::new_copy(&w); j.sub(&one); j.norm(); j.div2();
+                w.mul(&t);
+                B.add(&one);
+                Y.copy(&t); Y.sqr();
+                B.add(&Y); B.norm(); B.inverse();
+                w.mul(&B);
+                t.mul(&w);
+                X1.copy(&j); X1.sub(&t); X1.norm();
+                X2.copy(&X1); X2.neg(); X2.sub(&one); X2.norm();
+                w.sqr(); w.inverse();
+                X3.copy(&w); X3.add(&one); X3.norm();
+                let mut rhs=ECP::rhs(&X2);
+                X1.cmove(&X2,rhs.qr());
+                rhs.copy(&ECP::rhs(&X3));
+                X1.cmove(&X3,rhs.qr());
+                rhs.copy(&ECP::rhs(&X1));
+                Y.copy(&rhs.sqrt());
+                x.copy(&X1.redc());
+            }
+            let ne=Y.sign()^sgn;
+            let mut NY=FP::new_copy(&Y); NY.neg(); NY.norm();
+            Y.cmove(&NY,ne);
+
+            let y=Y.redc();
+            P.copy(&ECP::new_bigs(&x,&y));         
+        } 
         return P;
     }
 

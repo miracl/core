@@ -160,7 +160,14 @@ public final class FP {
 
     /* Constructors */
     public FP(int a) {
-        x = new BIG(a);
+        if (a<0)
+        {
+            BIG m = new BIG(ROM.Modulus);
+            m.inc(a); m.norm();
+            x=new BIG(m);
+        } else {
+            x = new BIG(a);
+        }
         nres();
     }
 
@@ -233,6 +240,12 @@ public final class FP {
     /* set this=1 */
     public void one() {
         x.one(); nres();
+    }
+
+/* get sign */ 
+    public int sign()
+    {
+        return redc().parity();
     }
 
     /* normalise this */

@@ -1310,18 +1310,179 @@ var ECP = function(ctx) {
         return r;
     };
 
-    ECP.hashit = function(x) {
+    ECP.hashit = function(h) {
         var P = new ECP();
-        for (;;) {
-            if (ECP.CURVETYPE != ECP.MONTGOMERY) {
-                P.setxi(x,0);
+        if (ECP.CURVETYPE == ECP.MONTGOMERY)
+        {
+            var X1=new ctx.FP(0);
+            var X2=new ctx.FP(0);
+            var t=new ctx.FP(h);
+            var one=new ctx.FP(1);
+            var A=new ctx.FP(ctx.ROM_CURVE.CURVE_A);
+            t.sqr();
+            if (ctx.FP.MOD8 == 5) {
+                t.add(t);
             } else {
-                P.setx(x);
+                t.neg();
             }
-            x.inc(1); x.norm();
-            if (!P.is_infinity()){
-                    break;
+            t.add(one);
+            t.norm();
+            t.inverse();
+            X1.copy(t); X1.mul(A);
+            X1.neg();
+            X2.copy(X1);
+            X2.add(A); X2.norm();
+            X2.neg();
+            var rhs=ECP.RHS(X2);
+            X1.cmove(X2,rhs.qr());
+
+            var a=X1.redc();
+            P.setx(a);
+        } 
+        if (ECP.CURVETYPE == ECP.EDWARDS)
+        { // Elligator 2 - map to Montgomery, place point, map back
+            var X1=new ctx.FP(0);
+            var X2=new ctx.FP(0);
+            var t=new ctx.FP(h);
+            var w1=new ctx.FP(0);
+            var w2=new ctx.FP(0);
+            var one=new ctx.FP(1);
+            var B = new ctx.FP(0);
+            B.rcopy(ctx.ROM_CURVE.CURVE_B);
+            var A=new ctx.FP(B);
+            var sgn=t.sign();
+            if (ctx.ROM_CURVE.CURVE_A==1) {
+                A.add(one);
+                B.sub(one);
+            } else {
+                A.sub(one);
+                B.add(one);
             }
+            A.norm(); B.norm();
+            var KB=new ctx.FP(B);
+
+            A.div2();
+            B.div2();
+            B.div2();
+            B.sqr();
+            
+            t.sqr();
+            if (ctx.FP.MOD8 == 5) {
+                t.add(t);
+            } else {
+                t.neg();
+            }
+            t.add(one); t.norm();
+            t.inverse();
+            X1.copy(t); X1.mul(A);
+            X1.neg();
+
+            X2.copy(X1);
+            X2.add(A); X2.norm();
+            X2.neg();
+
+            X1.norm();
+            t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1);
+            t.mul(A); w1.add(t);
+            t.copy(X1); t.mul(B);
+            w1.add(t);
+            w1.norm();
+
+            X2.norm();
+            t.copy(X2); t.sqr(); w2.copy(t); w2.mul(X2);
+            t.mul(A); w2.add(t);
+            t.copy(X2); t.mul(B);
+            w2.add(t);
+            w2.norm();
+
+            var qres=w2.qr();
+            X1.cmove(X2,qres);
+            w1.cmove(w2,qres);
+
+            var Y=w1.sqrt();
+            t.copy(X1); t.add(t); t.add(t); t.norm();
+
+            w1.copy(t); w1.sub(KB); w1.norm();
+            w2.copy(t); w2.add(KB); w2.norm();
+            t.copy(w1); t.mul(Y);
+            t.inverse();
+
+            X1.mul(t);
+            X1.mul(w1);
+            Y.mul(t);
+            Y.mul(w2);
+
+            var x=X1.redc();
+
+            var ne=Y.sign()^sgn;
+            var NY=new ctx.FP(Y); NY.neg(); NY.norm();
+            Y.cmove(NY,ne);
+
+            var y=Y.redc();
+            P.setxy(x,y);
+            
+        }
+        if (ECP.CURVETYPE == ECP.WEIERSTRASS)
+        { // swu method
+            var X1=new ctx.FP(0);
+            var X2=new ctx.FP(0);
+            var X3=new ctx.FP(0);
+            var one=new ctx.FP(1);
+            var B = new ctx.FP(0);
+            B.rcopy(ctx.ROM_CURVE.CURVE_B);
+            var Y=new ctx.FP(0);
+            var t=new ctx.FP(h);
+            var x=new ctx.BIG(0);
+            var sgn=t.sign();
+            if (ctx.ROM_CURVE.CURVE_A!=0)
+            {
+                var A=new ctx.FP(ctx.ROM_CURVE.CURVE_A);
+                t.sqr();
+                t.neg();
+                t.norm();
+                var w=new ctx.FP(t); w.add(one); w.norm();
+                w.mul(t);
+                A.mul(w);
+                A.inverse();
+                w.add(one); w.norm();
+                w.mul(B);
+                w.neg(); w.norm();
+                X2.copy(w); X2.mul(A);
+                X3.copy(t); X3.mul(X2);
+                var rhs=ECP.RHS(X2);
+                rhs=ECP.RHS(X3);
+                X2.cmove(X3,rhs.qr());
+                rhs.copy(ECP.RHS(X2));
+                Y.copy(rhs.sqrt());
+                x.copy(X2.redc());
+            } else {
+                var A=new ctx.FP(-3);
+                var w=A.sqrt();
+                var j=new ctx.FP(w); j.sub(one); j.norm(); j.div2();
+                w.mul(t);
+                B.add(one);
+                Y.copy(t); Y.sqr();
+                B.add(Y); B.norm(); B.inverse();
+                w.mul(B);
+                t.mul(w);
+                X1.copy(j); X1.sub(t); X1.norm();
+                X2.copy(X1); X2.neg(); X2.sub(one); X2.norm();
+                w.sqr(); w.inverse();
+                X3.copy(w); X3.add(one); X3.norm();
+                var rhs=ECP.RHS(X2);
+                X1.cmove(X2,rhs.qr());
+                rhs.copy(ECP.RHS(X3));
+                X1.cmove(X3,rhs.qr());
+                rhs.copy(ECP.RHS(X1));
+                Y.copy(rhs.sqrt());
+                x.copy(X1.redc());
+            }
+            var ne=Y.sign()^sgn;
+            var NY=new ctx.FP(Y); NY.neg(); NY.norm();
+            Y.cmove(NY,ne);
+
+            var y=Y.redc();
+            P.setxy(x,y);          
         }
         return P;
     };

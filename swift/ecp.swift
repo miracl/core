@@ -969,35 +969,210 @@ public struct ECP {
         return S;
     }
     
-   mutating func cfp()
-   {
+    mutating func cfp()
+    {
 
-	let cf=ROM.CURVE_Cof_I;
-	if cf==1 {return}
-	if cf==4 {
-		dbl(); dbl()
-		return
-	} 
-	if cf==8 {
-		dbl(); dbl(); dbl()
-		return;
-	}
-	let c=BIG(ROM.CURVE_Cof);
-	copy(mul(c));
+	    let cf=ROM.CURVE_Cof_I;
+	    if cf==1 {return}
+	    if cf==4 {
+		    dbl(); dbl()
+		    return
+	    } 
+	    if cf==8 {
+		    dbl(); dbl(); dbl()
+		    return;
+	    }
+	    let c=BIG(ROM.CURVE_Cof);
+	    copy(mul(c));
 
-   }
+    }
 
-    static func hashit(_ x: inout BIG) -> ECP {
-        var P=ECP()       
-		while (true) {
-			if CONFIG_CURVE.CURVETYPE != CONFIG_CURVE.MONTGOMERY {
-				P.copy(ECP(x,0))
-			} else {
-				P.copy(ECP(x))
-			}
-			x.inc(1); x.norm();
-			if !P.is_infinity() {break}
-		}  
+    static public func hashit(_ h: BIG) -> ECP {
+        var P=ECP()    
+        
+        if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.MONTGOMERY { 
+// Elligator 2
+            var X1=FP()
+            var X2=FP()
+            var t=FP(h)
+            let one=FP(1)
+            let A=FP(ROM.CURVE_A)
+            t.sqr()
+            if CONFIG_FIELD.MOD8 == 5 {
+                t.add(t)
+            } else {
+                t.neg()
+            }
+            t.add(one)
+            t.norm()
+            t.inverse()
+            X1.copy(t); X1.mul(A)
+            X1.neg()
+            X2.copy(X1)
+            X2.add(A); X2.norm()
+            X2.neg()
+            let rhs=ECP.RHS(X2)
+            X1.cmove(X2,rhs.qr())
+
+            let a=X1.redc()
+            P.copy(ECP(a))
+
+        } 
+        
+        if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.EDWARDS { 
+// Elligator 2 - map to Montgomery, place point, map back
+            var X1=FP()
+            var X2=FP()
+            var t=FP(h)
+            var w1=FP()
+            var w2=FP()
+            let one=FP(1)
+            var B=FP(BIG(ROM.CURVE_B))
+            var A=FP(B)
+            let sgn=t.sign()
+            if ROM.CURVE_A==1 {
+                A.add(one)
+                B.sub(one)
+            } else {
+                A.sub(one)
+                B.add(one)
+            }
+            A.norm(); B.norm()
+            let KB=FP(B)
+
+            A.div2()
+            B.div2()
+            B.div2()
+            B.sqr()
+            
+            t.sqr()
+            if CONFIG_FIELD.MOD8 == 5 {
+                t.add(t)
+            } else {
+                t.neg()
+            }
+            t.add(one); t.norm()
+            t.inverse()
+            X1.copy(t); X1.mul(A)
+            X1.neg()
+
+            X2.copy(X1)
+            X2.add(A); X2.norm()
+            X2.neg()
+
+            X1.norm()
+            t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1)
+            t.mul(A); w1.add(t)
+            t.copy(X1); t.mul(B)
+            w1.add(t)
+            w1.norm()
+
+            X2.norm()
+            t.copy(X2); t.sqr(); w2.copy(t); w2.mul(X2)
+            t.mul(A); w2.add(t)
+            t.copy(X2); t.mul(B)
+            w2.add(t)
+            w2.norm()
+
+            let qres=w2.qr()
+            X1.cmove(X2,qres)
+            w1.cmove(w2,qres)
+
+            var Y=w1.sqrt()
+            t.copy(X1); t.add(t); t.add(t); t.norm()
+
+            w1.copy(t); w1.sub(KB); w1.norm()
+            w2.copy(t); w2.add(KB); w2.norm()
+            t.copy(w1); t.mul(Y)
+            t.inverse()
+
+            X1.mul(t)
+            X1.mul(w1)
+            Y.mul(t)
+            Y.mul(w2)
+
+            let x=X1.redc()
+
+            let ne=Y.sign()^sgn
+            var NY=FP(Y); NY.neg(); NY.norm()
+            Y.cmove(NY,ne)
+
+            let y=Y.redc();
+            P.copy(ECP(x,y))           
+        }
+
+        if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.WEIERSTRASS { 
+// swu method
+            var X1=FP()
+            var X2=FP()
+            var X3=FP()
+            let one=FP(1)
+            var B=FP(BIG(ROM.CURVE_B))
+            var Y=FP()
+            var t=FP(h)
+            var x=BIG(0)
+            let sgn=t.sign();
+            if ROM.CURVE_A != 0
+            {
+                var A=FP(ROM.CURVE_A)
+                t.sqr()
+                t.neg()
+                t.norm()
+                var w=FP(t); w.add(one); w.norm()
+                w.mul(t)
+                A.mul(w)
+                A.inverse()
+                w.add(one); w.norm()
+                w.mul(B)
+                w.neg(); w.norm()
+                X2.copy(w); X2.mul(A)
+                X3.copy(t); X3.mul(X2)
+                var rhs=ECP.RHS(X3)
+                X2.cmove(X3,rhs.qr())
+                rhs.copy(ECP.RHS(X2))
+                Y.copy(rhs.sqrt())
+                x.copy(X2.redc())
+            } else {
+                var A=FP(-3)
+                var w=A.sqrt()
+                var j=FP(w); j.sub(one); j.norm(); j.div2()
+                w.mul(t)
+                B.add(one)
+                Y.copy(t); Y.sqr()
+                B.add(Y); B.norm(); B.inverse()
+                w.mul(B)
+                t.mul(w)
+                X1.copy(j); X1.sub(t); X1.norm()
+                X2.copy(X1); X2.neg(); X2.sub(one); X2.norm()
+                w.sqr(); w.inverse()
+                X3.copy(w); X3.add(one); X3.norm()
+                var rhs=ECP.RHS(X2)
+                X1.cmove(X2,rhs.qr())
+                rhs.copy(ECP.RHS(X3))
+                X1.cmove(X3,rhs.qr())
+                rhs.copy(ECP.RHS(X1));
+                Y.copy(rhs.sqrt())
+                x.copy(X1.redc())
+            }
+            let ne=Y.sign()^sgn
+            var NY=FP(Y); NY.neg(); NY.norm()
+            Y.cmove(NY,ne)
+
+            let y=Y.redc();
+            P.copy(ECP(x,y))           
+
+/*
+
+		    while (true) {
+			    if CONFIG_CURVE.CURVETYPE != CONFIG_CURVE.MONTGOMERY {
+				    P.copy(ECP(h,0))
+			    } else {
+				    P.copy(ECP(h))
+			    }
+			    h.inc(1); h.norm();
+			    if !P.is_infinity() {break}
+		    } */
+        }
         return P
     }
 
@@ -1005,8 +1180,8 @@ public struct ECP {
     {
         let q=BIG(ROM.Modulus)
         var dx = DBIG.fromBytes(h)
-        var x=dx.mod(q)
-        var P=ECP.hashit(&x)
+        let x=dx.mod(q)
+        var P=ECP.hashit(x)
 		P.cfp()
         return P
     }    

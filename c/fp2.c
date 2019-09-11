@@ -98,10 +98,14 @@ void FP2_YYY_from_BIGs(FP2_YYY *w, BIG_XXX x, BIG_XXX y)
 /* Create FP2 from two ints */
 void FP2_YYY_from_ints(FP2_YYY *w, int xa, int xb)
 {
-    BIG_XXX a, b;
-    BIG_XXX_zero(a); BIG_XXX_inc(a, xa); BIG_XXX_norm(a);
-    BIG_XXX_zero(b); BIG_XXX_inc(b, xb); BIG_XXX_norm(b);
-    FP2_YYY_from_BIGs(w, a, b);
+    FP_YYY a,b;
+    FP_YYY_from_int(&a,xa);
+    FP_YYY_from_int(&b,xb);
+    FP2_YYY_from_FPs(w,&a,&b);
+//    BIG_XXX a, b;
+//    BIG_XXX_zero(a); BIG_XXX_inc(a, xa); BIG_XXX_norm(a);
+//    BIG_XXX_zero(b); BIG_XXX_inc(b, xb); BIG_XXX_norm(b);
+//    FP2_YYY_from_BIGs(w, a, b);
 }
 
 /* Create FP2 from FP */

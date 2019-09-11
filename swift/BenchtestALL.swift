@@ -158,7 +158,13 @@ public func TimeECDH_ed25519(_ rng: inout RAND)
     let r=ed25519.BIG(ed25519.ROM.CURVE_Order)
     s=ed25519.BIG.randtrunc(r,16*ed25519.CONFIG_CURVE.AESKEY,&rng)
 
-    var W=G.mul(r)
+    var W=ed25519.ECP.hashit(s);
+    if W.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true;
+    }
+
+    W=G.mul(r)
     if !W.is_infinity() {
         print("FAILURE - rG!=O")
         fail=true;
@@ -220,7 +226,13 @@ public func TimeECDH_nist256(_ rng: inout RAND)
     let r=nist256.BIG(nist256.ROM.CURVE_Order)
     s=nist256.BIG.randtrunc(r,16*nist256.CONFIG_CURVE.AESKEY,&rng)
 
-    var W=G.mul(r)
+    var W=nist256.ECP.hashit(s);
+    if W.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true;
+    }
+
+    W=G.mul(r)
     if !W.is_infinity() {
         print("FAILURE - rG!=O")
         fail=true;
@@ -282,7 +294,13 @@ public func TimeECDH_goldilocks(_ rng: inout RAND)
     let r=goldilocks.BIG(goldilocks.ROM.CURVE_Order)
     s=goldilocks.BIG.randtrunc(r,16*goldilocks.CONFIG_CURVE.AESKEY,&rng)
 
-    var W=G.mul(r)
+    var W=goldilocks.ECP.hashit(s);
+    if W.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true;
+    }
+
+    W=G.mul(r)
     if !W.is_infinity() {
         print("FAILURE - rG!=O")
         fail=true;
@@ -326,7 +344,13 @@ public func TimeMPIN_bn254(_ rng: inout RAND)
     let r=bn254.BIG(bn254.ROM.CURVE_Order)
     let s=bn254.BIG.randtrunc(r,16*bn254.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bn254.PAIR.G1mul(G,r);
+    var P=bn254.ECP.hashit(s);
+    if P.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true;
+    }
+
+    P=bn254.PAIR.G1mul(G,r);
 
     if !P.is_infinity() {
         print("FAILURE - rP!=O")
@@ -482,7 +506,13 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     let r=bls383.BIG(bls383.ROM.CURVE_Order)
     let s=bls383.BIG.randtrunc(r,16*bls383.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bls383.PAIR.G1mul(G,r);
+    var P=bls383.ECP.hashit(s);
+    if P.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true;
+    }
+
+    P=bls383.PAIR.G1mul(G,r);
 
     if !P.is_infinity() {
         print("FAILURE - rP!=O")
@@ -641,7 +671,13 @@ public func TimeMPIN_bls24(_ rng: inout RAND)
     let r=bls24.BIG(bls24.ROM.CURVE_Order)
     let s=bls24.BIG.randtrunc(r,16*bls24.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bls24.PAIR192.G1mul(G,r);
+    var P=bls24.ECP.hashit(s);
+    if P.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true;
+    }
+
+    P=bls24.PAIR192.G1mul(G,r);
 
     if !P.is_infinity() {
         print("FAILURE - rP!=O")
@@ -702,21 +738,7 @@ public func TimeMPIN_bls24(_ rng: inout RAND)
     elapsed=1000.0*elapsed/Double(iterations)
     print(String(format: "GT  pow              - %d iterations",iterations),terminator: "");
     print(String(format: " %.2f ms per iteration",elapsed))
-/*
-    g.copy(w)
 
-    start=Date()
-    iterations=0
-    elapsed=0.0
-    while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        _=g.compow(s,r)
-        iterations+=1
-        elapsed = -start.timeIntervalSinceNow
-    }
-    elapsed=1000.0*elapsed/Double(iterations)
-    print(String(format: "GT  pow (compressed) - %d iterations",iterations),terminator: "");
-    print(String(format: " %.2f ms per iteration",elapsed))
-*/
     start=Date()
     iterations=0
     elapsed=0.0
@@ -785,12 +807,12 @@ public func TimeMPIN_bls48(_ rng: inout RAND)
     let MIN_ITERS=10
     var fail=false;
 
-    print("\nTiming/Testing bls48 Pairings")
+    print("\nTiming/Testing BLS48 Pairings")
     if bls48.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls48.CONFIG_CURVE.BN {
         print("BN Pairing-Friendly Curve")
     }
     if bls48.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls48.CONFIG_CURVE.BLS {
-        print("bls48 Pairing-Friendly Curve")
+        print("BLS48 Pairing-Friendly Curve")
     }
     print("Modulus size \(bls48.CONFIG_FIELD.MODBITS) bits")
     print("\(bls48.CONFIG_BIG.CHUNK) bit build")
@@ -800,7 +822,13 @@ public func TimeMPIN_bls48(_ rng: inout RAND)
     let r=bls48.BIG(bls48.ROM.CURVE_Order)
     let s=bls48.BIG.randtrunc(r,16*bls48.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=PAIR256.G1mul(G,r);
+    var P=bls48.ECP.hashit(s);
+    if P.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true;
+    }
+
+    P=PAIR256.G1mul(G,r);
 
     if !P.is_infinity() {
         print("FAILURE - rP!=O")
@@ -861,21 +889,7 @@ public func TimeMPIN_bls48(_ rng: inout RAND)
     elapsed=1000.0*elapsed/Double(iterations)
     print(String(format: "GT  pow              - %d iterations",iterations),terminator: "");
     print(String(format: " %.2f ms per iteration",elapsed))
-/*
-    g.copy(w)
 
-    start=Date()
-    iterations=0
-    elapsed=0.0
-    while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        _=g.compow(s,r)
-        iterations+=1
-        elapsed = -start.timeIntervalSinceNow
-    }
-    elapsed=1000.0*elapsed/Double(iterations)
-    print(String(format: "GT  pow (compressed) - %d iterations",iterations),terminator: "");
-    print(String(format: " %.2f ms per iteration",elapsed))
-*/
     start=Date()
     iterations=0
     elapsed=0.0

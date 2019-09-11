@@ -34,7 +34,6 @@ use crate::xxx::big::BIG;
 use crate::xxx::fp;
 use crate::xxx::fp::FP;
 use crate::xxx::fp2::FP2;
-use crate::xxx::rom;
 
 #[derive(Copy, Clone)]
 pub struct FP4 {

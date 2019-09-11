@@ -86,6 +86,12 @@ public class TesttimeECDH extends TestCase {
         r = new BIG(ROM.CURVE_Order);
         s = BIG.randtrunc(r, 16 * CONFIG_CURVE.AESKEY, rng);
 
+        WP = ECP.hashit(s);
+        WP.cfp();
+        if (WP.is_infinity()) {
+            fail("HASHING FAILURE - P=O");
+        }
+
         WP = G.mul(r);
         if (!WP.is_infinity()) {
             fail("FAILURE - rG!=O");

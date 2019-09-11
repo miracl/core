@@ -978,18 +978,179 @@ public final class ECP {
 	}
 
 /* Hash random Fp element to point on curve */
-    public static ECP hashit(BIG x)
+    public static ECP hashit(BIG h)
     {
         ECP P;
-		while (true)
-		{
-			if (CONFIG_CURVE.CURVETYPE!=CONFIG_CURVE.MONTGOMERY)
-				P=new ECP(x,0);
-			else
-				P=new ECP(x);	
-			x.inc(1); x.norm();
-			if (!P.is_infinity()) break;
-		}
+
+        if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.MONTGOMERY)
+        { // Elligator 2
+            FP X1=new FP();
+            FP X2=new FP();
+            FP t=new FP(h);
+            FP one=new FP(1);
+            FP A=new FP(ROM.CURVE_A);
+            t.sqr();
+            if (CONFIG_FIELD.MOD8 == 5) {
+                t.add(t);
+            } else {
+                t.neg();
+            }
+            t.add(one);
+            t.norm();
+            t.inverse();
+            X1.copy(t); X1.mul(A);
+            X1.neg();
+            X2.copy(X1);
+            X2.add(A); X2.norm();
+            X2.neg();
+            FP rhs=RHS(X2);
+            X1.cmove(X2,rhs.qr());
+
+            BIG a=X1.redc();
+            P=new ECP(a);
+        } 
+        if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.EDWARDS)
+        { // Elligator 2 - map to Montgomery, place point, map back
+            FP X1=new FP();
+            FP X2=new FP();
+            FP t=new FP(h);
+            FP w1=new FP();
+            FP w2=new FP();
+            FP one=new FP(1);
+            FP B=new FP(new BIG(ROM.CURVE_B));
+            FP A=new FP(B);
+            int sgn=t.sign();
+            if (ROM.CURVE_A==1) {
+                A.add(one);
+                B.sub(one);
+            } else {
+                A.sub(one);
+                B.add(one);
+            }
+            A.norm(); B.norm();
+            FP KB=new FP(B);
+
+            A.div2();
+            B.div2();
+            B.div2();
+            B.sqr();
+            
+            t.sqr();
+            if (CONFIG_FIELD.MOD8 == 5) {
+                t.add(t);
+            } else {
+                t.neg();
+            }
+            t.add(one); t.norm();
+            t.inverse();
+            X1.copy(t); X1.mul(A);
+            X1.neg();
+
+            X2.copy(X1);
+            X2.add(A); X2.norm();
+            X2.neg();
+
+            X1.norm();
+            t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1);
+            t.mul(A); w1.add(t);
+            t.copy(X1); t.mul(B);
+            w1.add(t);
+            w1.norm();
+
+            X2.norm();
+            t.copy(X2); t.sqr(); w2.copy(t); w2.mul(X2);
+            t.mul(A); w2.add(t);
+            t.copy(X2); t.mul(B);
+            w2.add(t);
+            w2.norm();
+
+            int qres=w2.qr();
+            X1.cmove(X2,qres);
+            w1.cmove(w2,qres);
+
+            FP Y=w1.sqrt();
+            t.copy(X1); t.add(t); t.add(t); t.norm();
+
+            w1.copy(t); w1.sub(KB); w1.norm();
+            w2.copy(t); w2.add(KB); w2.norm();
+            t.copy(w1); t.mul(Y);
+            t.inverse();
+
+            X1.mul(t);
+            X1.mul(w1);
+            Y.mul(t);
+            Y.mul(w2);
+
+            BIG x=X1.redc();
+
+            int ne=Y.sign()^sgn;
+            FP NY=new FP(Y); NY.neg(); NY.norm();
+            Y.cmove(NY,ne);
+
+            BIG y=Y.redc();
+            P=new ECP(x,y);
+        }
+
+        if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.WEIERSTRASS)
+        { // swu method
+            FP X1=new FP();
+            FP X2=new FP();
+            FP X3=new FP();
+            FP one=new FP(1);
+            FP B=new FP(new BIG(ROM.CURVE_B));
+            FP Y=new FP();
+            FP t=new FP(h);
+            BIG x=new BIG(0);
+            int sgn=t.sign();
+            if (ROM.CURVE_A!=0)
+            {
+                FP A=new FP(ROM.CURVE_A);
+                t.sqr();
+                t.neg();
+                t.norm();
+                FP w=new FP(t); w.add(one); w.norm();
+                w.mul(t);
+                A.mul(w);
+                A.inverse();
+                w.add(one); w.norm();
+                w.mul(B);
+                w.neg(); w.norm();
+                X2.copy(w); X2.mul(A);
+                X3.copy(t); X3.mul(X2);
+                FP rhs=RHS(X3);
+                X2.cmove(X3,rhs.qr());
+                rhs.copy(RHS(X2));
+                Y.copy(rhs.sqrt());
+                x.copy(X2.redc());
+            } else {
+                FP A=new FP(-3);
+                FP w=A.sqrt();
+                FP j=new FP(w); j.sub(one); j.norm(); j.div2();
+                w.mul(t);
+                B.add(one);
+                Y.copy(t); Y.sqr();
+                B.add(Y); B.norm(); B.inverse();
+                w.mul(B);
+                t.mul(w);
+                X1.copy(j); X1.sub(t); X1.norm();
+                X2.copy(X1); X2.neg(); X2.sub(one); X2.norm();
+                w.sqr(); w.inverse();
+                X3.copy(w); X3.add(one); X3.norm();
+                FP rhs=RHS(X2);
+                X1.cmove(X2,rhs.qr());
+                rhs.copy(RHS(X3));
+                X1.cmove(X3,rhs.qr());
+                rhs.copy(RHS(X1));
+                Y.copy(rhs.sqrt());
+                x.copy(X1.redc());
+            }
+            int ne=Y.sign()^sgn;
+            FP NY=new FP(Y); NY.neg(); NY.norm();
+            Y.cmove(NY,ne);
+
+            BIG y=Y.redc();
+            P=new ECP(x,y);            
+        }
         return P;
     }
 

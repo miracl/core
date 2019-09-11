@@ -83,7 +83,13 @@ fn ed25519(mut rng: &mut RAND) {
     let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let mut s = big::BIG::randomnum(&r, &mut rng);
 
-    let P = G.mul(&mut r);
+    let mut P = ecp::ECP::hashit(&s);
+    if P.is_infinity() {
+        println!("HASH FAILURE - P=O");
+        fail = true;
+    }
+
+    P = G.mul(&mut r);
     if !P.is_infinity() {
         println!("FAILURE - rG!=O");
         fail = true;
@@ -145,8 +151,14 @@ fn nist256(mut rng: &mut RAND) {
 
     let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let mut s = big::BIG::randomnum(&r, &mut rng);
-
-    let P = G.mul(&mut r);
+    
+    let mut P = ecp::ECP::hashit(&s);
+    if P.is_infinity() {
+        println!("HASH FAILURE - P=O");
+        fail = true;
+    }
+    
+    P = G.mul(&mut r);
     if !P.is_infinity() {
         println!("FAILURE - rG!=O");
         fail = true;
@@ -209,7 +221,13 @@ fn goldilocks(mut rng: &mut RAND) {
     let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let mut s = big::BIG::randomnum(&r, &mut rng);
 
-    let P = G.mul(&mut r);
+    let mut P = ecp::ECP::hashit(&s);
+    if P.is_infinity() {
+        println!("HASH FAILURE - P=O");
+        fail = true;
+    }
+    
+    P = G.mul(&mut r);
     if !P.is_infinity() {
         println!("FAILURE - rG!=O");
         fail = true;
@@ -258,7 +276,13 @@ fn bn254(mut rng: &mut RAND) {
     let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let mut s = big::BIG::randomnum(&r, &mut rng);
 
-    let mut P = pair::g1mul(&mut G, &mut r);
+    let mut P = ecp::ECP::hashit(&s);
+    if P.is_infinity() {
+        println!("HASH FAILURE - P=O");
+        fail = true;
+    } 
+    
+    P = pair::g1mul(&mut G, &mut r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -433,7 +457,13 @@ fn bls383(mut rng: &mut RAND) {
     let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let mut s = big::BIG::randomnum(&r, &mut rng);
 
-    let mut P = pair::g1mul(&mut G, &mut r);
+    let mut P = ecp::ECP::hashit(&s);
+    if P.is_infinity() {
+        println!("HASH FAILURE - P=O");
+        fail = true;
+    }
+    
+    P = pair::g1mul(&mut G, &mut r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -608,7 +638,13 @@ fn bls24(mut rng: &mut RAND) {
     let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let mut s = big::BIG::randomnum(&r, &mut rng);
 
-    let mut P = pair192::g1mul(&mut G, &mut r);
+    let mut P = ecp::ECP::hashit(&s);
+    if P.is_infinity() {
+        println!("HASH FAILURE - P=O");
+        fail = true;
+    }
+    
+    P = pair192::g1mul(&mut G, &mut r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -671,20 +707,7 @@ fn bls24(mut rng: &mut RAND) {
     let duration = (dur as f64) / (iterations as f64);
     print!("GT  pow              - {:} iterations  ", iterations);
     println!(" {:0.2} ms per iteration", duration);
-/*
-    let start = Instant::now();
-    let mut iterations = 0;
-    let mut dur = 0 as u64;
-    while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = w.compow(&s, &mut r);
-        iterations += 1;
-        let elapsed = start.elapsed();
-        dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
-    }
-    let duration = (dur as f64) / (iterations as f64);
-    print!("GT  pow (compressed) - {:} iterations  ", iterations);
-    println!(" {:0.2} ms per iteration", duration);
-*/
+
     let start = Instant::now();
     let mut iterations = 0;
     let mut dur = 0 as u64;
@@ -783,7 +806,13 @@ fn bls48(mut rng: &mut RAND) {
     let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let mut s = big::BIG::randomnum(&r, &mut rng);
 
-    let mut P = pair256::g1mul(&mut G, &mut r);
+    let mut P = ecp::ECP::hashit(&s);
+    if P.is_infinity() {
+        println!("HASH FAILURE - P=O");
+        fail = true;
+    }
+    
+    P = pair256::g1mul(&mut G, &mut r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -848,20 +877,7 @@ fn bls48(mut rng: &mut RAND) {
     let duration = (dur as f64) / (iterations as f64);
     print!("GT  pow              - {:} iterations  ", iterations);
     println!(" {:0.2} ms per iteration", duration);
-/*
-    let start = Instant::now();
-    let mut iterations = 0;
-    let mut dur = 0 as u64;
-    while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = w.compow(&s, &mut r);
-        iterations += 1;
-        let elapsed = start.elapsed();
-        dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
-    }
-    let duration = (dur as f64) / (iterations as f64);
-    print!("GT  pow (compressed) - {:} iterations  ", iterations);
-    println!(" {:0.2} ms per iteration", duration);
-*/
+
     let start = Instant::now();
     let mut iterations = 0;
     let mut dur = 0 as u64;

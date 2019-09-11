@@ -42,7 +42,19 @@ var FP = function(ctx) {
             this.f = new ctx.BIG(x.f);
             this.XES = x.XES;
         } else {
-            this.f = new ctx.BIG(x);
+            if (x instanceof BIG) {
+                this.f = new ctx.BIG(x);
+            } else {
+                if (x<0)
+                {
+                    var m = new ctx.BIG(0);
+                    m.rcopy(ctx.ROM_FIELD.Modulus);
+                    m.inc(x); m.norm();
+                    this.f = new ctx.BIG(m);
+                } else {
+                    this.f = new ctx.BIG(x);
+                }
+            }
 			this.XES = 1;
 			//if (x!=0) 
 			if (!this.f.iszilch())
@@ -206,6 +218,10 @@ var FP = function(ctx) {
         one: function() {
             this.f.one();
             this.nres();
+        },
+
+        sign: function () {
+            return this.redc().parity();
         },
 
         /* normalise this */

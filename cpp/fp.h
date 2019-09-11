@@ -69,6 +69,14 @@ extern const XXX::BIG Frb; /**< imaginary part of BN curve Frobenius Constant */
 
 /* FP prototypes */
 
+/**	@brief Create FP from integer
+ *
+	@param x FP to be initialised
+	@param a integer
+ */
+extern void FP_from_int(FP *x,int a);
+
+
 /**	@brief Tests for FP equal to zero mod Modulus
  *
 	@param x BIG number to be tested
@@ -140,6 +148,15 @@ extern void FP_redc(XXX::BIG x, FP *y);
 	@param x FP number to be set equal to unity.
  */
 extern void FP_one(FP *x);
+
+/**	@brief returns "sign" of an FP
+ *
+	@param x FP number
+    @return 0 for positive, 1 for negative
+ */
+extern int FP_sign(FP *x);
+
+
 /**	@brief Reduces DBIG to BIG exploiting special form of the modulus
  *
 	This function comes in different flavours depending on the form of Modulus that is currently in use.

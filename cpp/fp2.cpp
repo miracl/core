@@ -105,10 +105,14 @@ void YYY::FP2_from_BIGs(FP2 *w, BIG x, BIG y)
 /* Create FP2 from two ints */
 void YYY::FP2_from_ints(FP2 *w, int xa, int xb)
 {
-    BIG a, b;
-    BIG_zero(a); BIG_inc(a, xa); BIG_norm(a);
-    BIG_zero(b); BIG_inc(b, xb); BIG_norm(b);
-    FP2_from_BIGs(w, a, b);
+    FP a,b;
+    FP_from_int(&a,xa);
+    FP_from_int(&b,xb);
+    FP2_from_FPs(w,&a,&b);
+    //BIG a, b;
+    //BIG_zero(a); BIG_inc(a, xa); BIG_norm(a);
+    //BIG_zero(b); BIG_inc(b, xb); BIG_norm(b);
+    //FP2_from_BIGs(w, a, b);
 }
 
 /* Create FP2 from FP */

@@ -226,6 +226,15 @@ void YYY::FP_mod(BIG a, DBIG d)
 
 #endif
 
+void YYY::FP_from_int(FP *x,int a)
+{
+    BIG w;
+    if (a<0) BIG_rcopy(w, Modulus);
+    else BIG_zero(w); 
+    BIG_inc(w,a); BIG_norm(w); 
+    FP_nres(x,w);
+}
+
 /* test x==0 ? */
 /* SU= 48 */
 int YYY::FP_iszilch(FP *x)
@@ -695,9 +704,10 @@ void YYY::FP_pow(FP *r, FP *a, BIG b)
     BIG t;
     int i, nb;
 
-    FP_norm(a);
-    BIG_norm(b);
+    FP_copy(r,a);
+    FP_norm(r);
     BIG_copy(t, b);
+    BIG_norm(t);
     nb = 1 + (BIG_nbits(t) + 3) / 4;
     // convert exponent to 4-bit window
     for (i = 0; i < nb; i++)
@@ -709,9 +719,9 @@ void YYY::FP_pow(FP *r, FP *a, BIG b)
     }
 
     FP_one(&tb[0]);
-    FP_copy(&tb[1], a);
+    FP_copy(&tb[1], r);
     for (i = 2; i < 16; i++)
-        FP_mul(&tb[i], &tb[i - 1], a);
+        FP_mul(&tb[i], &tb[i - 1], r);
 
     FP_copy(r, &tb[w[nb - 1]]);
     for (i = nb - 2; i >= 0; i--)
@@ -735,6 +745,13 @@ void YYY::FP_one(FP *n)
     BIG b;
     BIG_one(b);
     FP_nres(n, b);
+}
+
+int YYY::FP_sign(FP *w)
+{
+    BIG m;
+    FP_redc(m,w);
+    return BIG_parity(m);
 }
 
 /* is r a QR? */

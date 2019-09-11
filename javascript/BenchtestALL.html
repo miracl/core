@@ -123,6 +123,13 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
+		WP=ctx.ECP.hashit(s);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
 		WP=G.mul(r);
 		if (!WP.is_infinity())
 		{
@@ -180,6 +187,14 @@
 
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
+
+		var WP=ctx.ECP.hashit(s);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
 
 		var P=ctx.PAIR.G1mul(G,r);
 
@@ -388,6 +403,13 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
+		WP=ctx.ECP.hashit(s);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
 		WP=G.mul(r);
 		if (!WP.is_infinity())
 		{
@@ -471,6 +493,13 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
+		WP=ctx.ECP.hashit(s);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
 		WP=G.mul(r);
 		if (!WP.is_infinity())
 		{
@@ -529,6 +558,13 @@
 
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
+
+		var WP=ctx.ECP.hashit(s);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
 
 		var P=ctx.PAIR.G1mul(G,r);
 
@@ -713,6 +749,13 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
+		var WP=ctx.ECP.hashit(s);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
 		var P=ctx.PAIR192.G1mul(G,r);
 
 		if (!P.is_infinity())
@@ -775,19 +818,6 @@
 		mywindow.document.write("GT pow -                " + iterations + " iteration  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
-/*
-		var cr;
-		start = performance.now();
-		iterations=0;
-		do {
-			cr=w.compow(s,r);
-			iterations++;
-			elapsed=(performance.now()-start);
-		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
-		mywindow.document.write("GT pow (compressed) -   " + iterations + " iteration  ");
-		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
-*/
 		start = performance.now();
 		iterations=0;
 		do {
@@ -897,6 +927,13 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
+		var WP=ctx.ECP.hashit(s);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
 		var P=ctx.PAIR256.G1mul(G,r);
 
 		if (!P.is_infinity())
@@ -959,19 +996,6 @@
 		mywindow.document.write("GT pow -                " + iterations + " iteration  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
-/*
-		var cr;
-		start = performance.now();
-		iterations=0;
-		do {
-			cr=w.compow(s,r);
-			iterations++;
-			elapsed=(performance.now()-start);
-		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
-		mywindow.document.write("GT pow (compressed) -   " + iterations + " iteration  ");
-		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
-*/
 		start = performance.now();
 		iterations=0;
 		do {
