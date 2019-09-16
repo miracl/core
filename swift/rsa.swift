@@ -164,7 +164,7 @@ public struct RSA {
     static let SHA512ID:[UInt8]=[0x30,0x51,0x30,0x0d,0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x03,0x05,0x00,0x04,0x40]
 
     /* PKCS 1.5 padding of a message to be signed */
-    static public func PKCS15(_ sha:Int,_ m:[UInt8],_ w:inout [UInt8])->Bool
+    @discardableResult static public func PKCS15(_ sha:Int,_ m:[UInt8],_ w:inout [UInt8])->Bool
     {
         let hlen=sha
         let olen=Int(CONFIG_FF.FF_BITS/8)

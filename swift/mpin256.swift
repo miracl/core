@@ -144,7 +144,7 @@ public struct MPIN256
     // these next two functions implement elligator squared - http://eprint.iacr.org/2014/043
     // Elliptic curve point E in format (0x04,x,y} is converted to form {0x0-,u,v}
     // Note that u and v are indistinguisible from random strings
-    static public func ENCODING(_ rng: inout RAND,_ E:inout [UInt8]) -> Int
+    @discardableResult static public func ENCODING(_ rng: inout RAND,_ E:inout [UInt8]) -> Int
     {
         var T=[UInt8](repeating: 0,count: EFS)
 
@@ -178,7 +178,7 @@ public struct MPIN256
         return 0;
     }
 
-    static public func DECODING(_ D:inout [UInt8]) -> Int
+    @discardableResult static public func DECODING(_ D:inout [UInt8]) -> Int
     {
         var T=[UInt8](repeating: 0,count: EFS)
 
@@ -231,7 +231,7 @@ public struct MPIN256
         return 0
     }
     // create random secret S
-    static public func RANDOM_GENERATE(_ rng: inout RAND,_ S:inout [UInt8]) -> Int
+    @discardableResult static public func RANDOM_GENERATE(_ rng: inout RAND,_ S:inout [UInt8]) -> Int
     {
         let r=BIG(ROM.CURVE_Order)
         let s=BIG.randtrunc(r,16*CONFIG_CURVE.AESKEY,&rng)
@@ -353,7 +353,7 @@ public struct MPIN256
         return 0;
     }
     // Extract Server Secret SST=S*Q where Q is fixed generator in G2 and S is master secret
-    static public func GET_SERVER_SECRET(_ S:[UInt8],_ SST:inout [UInt8]) -> Int
+    @discardableResult static public func GET_SERVER_SECRET(_ S:[UInt8],_ SST:inout [UInt8]) -> Int
     {
         var Q=ECP8.generator();
 
@@ -369,7 +369,7 @@ public struct MPIN256
     //if RNG != NULL the X is passed out
     //if type=0 W=x*G where G is point on the curve, else W=x*M(G), where M(G) is mapping of octet G to point on the curve
 
-    static public func GET_G1_MULTIPLE(_ rng: inout RAND?,_ type:Int,_ X:inout [UInt8],_ G:[UInt8],_ W:inout [UInt8]) -> Int
+    @discardableResult static public func GET_G1_MULTIPLE(_ rng: inout RAND?,_ type:Int,_ X:inout [UInt8],_ G:[UInt8],_ W:inout [UInt8]) -> Int
     {
         var x:BIG
         let r=BIG(ROM.CURVE_Order)
@@ -396,13 +396,13 @@ public struct MPIN256
     }
     // Client secret CST=S*H(CID) where CID is client ID and S is master secret
     // CID is hashed externally
-    static public func GET_CLIENT_SECRET(_ S:inout [UInt8],_ CID:[UInt8],_ CST:inout [UInt8]) -> Int
+    @discardableResult static public func GET_CLIENT_SECRET(_ S:inout [UInt8],_ CID:[UInt8],_ CST:inout [UInt8]) -> Int
     {
         var RNG : RAND? = nil
         return GET_G1_MULTIPLE(&RNG,1,&S,CID,&CST)
     }
     // Time Permit CTT=S*(date|H(CID)) where S is master secret
-    static public func GET_CLIENT_PERMIT(_ sha:Int,_ date:Int32,_ S:[UInt8],_ CID:[UInt8],_ CTT:inout [UInt8]) -> Int
+    @discardableResult static public func GET_CLIENT_PERMIT(_ sha:Int,_ date:Int32,_ S:[UInt8],_ CID:[UInt8],_ CTT:inout [UInt8]) -> Int
     {
         let h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,date,CID)
         let P=ECP.mapit(h)
@@ -541,7 +541,7 @@ public struct MPIN256
     }
     // Functions to support M-Pin Full
 
-    static public func PRECOMPUTE(_ TOKEN:[UInt8],_ CID:[UInt8],_ G1:inout [UInt8],_ G2:inout [UInt8]) -> Int
+    @discardableResult static public func PRECOMPUTE(_ TOKEN:[UInt8],_ CID:[UInt8],_ G1:inout [UInt8],_ G2:inout [UInt8]) -> Int
     {
         let T=ECP.fromBytes(TOKEN);
         if T.is_infinity() {return INVALID_POINT}
@@ -589,7 +589,7 @@ public struct MPIN256
 
     // calculate common key on client side
     // wCID = w.(A+AT)
-    static public func CLIENT_KEY(_ sha:Int,_ G1:[UInt8],_ G2:[UInt8],_ pin:Int32,_ R:[UInt8],_ X:[UInt8],_ H:[UInt8],_ wCID:[UInt8],_ CK:inout [UInt8]) -> Int
+    @discardableResult static public func CLIENT_KEY(_ sha:Int,_ G1:[UInt8],_ G2:[UInt8],_ pin:Int32,_ R:[UInt8],_ X:[UInt8],_ H:[UInt8],_ wCID:[UInt8],_ CK:inout [UInt8]) -> Int
     {
         var g1=FP48.fromBytes(G1)
         var g2=FP48.fromBytes(G2)
@@ -623,7 +623,7 @@ public struct MPIN256
     // calculate common key on server side
     // Z=r.A - no time permits involved
 
-    static public func SERVER_KEY(_ sha:Int,_ Z:[UInt8],_ SST:[UInt8],_ W:[UInt8],_ H:[UInt8],_ HID:[UInt8],_ xID:[UInt8],_ xCID:[UInt8]?,_ SK:inout [UInt8]) -> Int
+    @discardableResult static public func SERVER_KEY(_ sha:Int,_ Z:[UInt8],_ SST:[UInt8],_ W:[UInt8],_ H:[UInt8],_ HID:[UInt8],_ xID:[UInt8],_ xCID:[UInt8]?,_ SK:inout [UInt8]) -> Int
     {
         let sQ=ECP8.fromBytes(SST)
         if sQ.is_infinity() {return INVALID_POINT}
