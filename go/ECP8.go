@@ -752,6 +752,67 @@ func (E *ECP8) Mul(e *BIG) *ECP8 {
 	return E.mul(e)
 }
 
+/* needed for SOK */
+func (E *ECP8) Cfp() {
+
+	F := ECP8_frob_constants()
+	x := NewBIGints(CURVE_Bnx)
+
+	xQ := E.mul(x)
+	x2Q := xQ.mul(x)
+	x3Q := x2Q.mul(x)
+	x4Q := x3Q.mul(x)
+	x5Q := x4Q.mul(x)
+	x6Q := x5Q.mul(x)
+	x7Q := x6Q.mul(x)
+	x8Q := x7Q.mul(x)
+
+	if SIGN_OF_X == NEGATIVEX {
+		xQ.neg()
+		x3Q.neg()
+		x5Q.neg()
+		x7Q.neg()
+	}
+	x8Q.Sub(x7Q)
+	x8Q.Sub(E)
+
+	x7Q.Sub(x6Q)
+	x7Q.frob(F, 1)
+
+	x6Q.Sub(x5Q)
+	x6Q.frob(F, 2)
+
+	x5Q.Sub(x4Q)
+	x5Q.frob(F, 3)
+
+	x4Q.Sub(x3Q)
+	x4Q.frob(F, 4)
+
+	x3Q.Sub(x2Q)
+	x3Q.frob(F, 5)
+
+	x2Q.Sub(xQ)
+	x2Q.frob(F, 6)
+
+	xQ.Sub(E)
+	xQ.frob(F, 7)
+
+	E.dbl()
+	E.frob(F, 8)
+
+	E.Add(x8Q)
+	E.Add(x7Q)
+	E.Add(x6Q)
+	E.Add(x5Q)
+
+	E.Add(x4Q)
+	E.Add(x3Q)
+	E.Add(x2Q)
+	E.Add(xQ)
+
+	E.Affine()
+}
+
 func ECP8_generator() *ECP8 {
 	var G *ECP8
 	G = NewECP8fp8s(
@@ -772,84 +833,69 @@ func ECP8_generator() *ECP8 {
 	return G
 }
 
-/* needed for SOK */
+/* Deterministic mapping of Fp to point on curve */
+ func ECP8_hashit(h *BIG) *ECP8 {
+    // SWU method
+    W:=NewFP8int(1)
+
+	b2 := NewFP2big(NewBIGints(CURVE_B))
+	b4 := NewFP4fp2(b2)
+	B := NewFP8fp4(b4)
+
+    t:=NewFPbig(h)
+    s:=NewFPint(-3)
+    one:=NewFPint(1)
+	if SEXTIC_TWIST == D_TYPE {
+		B.div_i()
+	}
+	if SEXTIC_TWIST == M_TYPE {
+		B.times_i()
+	}
+    B.norm()
+    sgn:=t.sign()
+    w:=s.sqrt()
+    j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
+
+    w.mul(t)
+    b:=NewFPcopy(t)
+    b.sqr()
+    b.add(one)
+    Y:=NewFP8fp(b)
+    B.add(Y); B.norm(); B.inverse()
+    B.tmul(w)
+
+    X1:=NewFP8copy(B); X1.tmul(t)
+    Y.copy(NewFP8fp(j))
+    X2:=NewFP8copy(X1); X2.sub(Y); X2.norm()
+    X1.copy(X2); X1.neg(); X1.norm()
+    X2.sub(W); X2.norm()
+
+    B.sqr(); B.inverse()
+    X3:=NewFP8copy(B); X3.add(W); X3.norm()
+
+    Y.copy(RHS8(X2))
+    X1.cmove(X2,Y.qr())
+    Y.copy(RHS8(X3))
+    X1.cmove(X3,Y.qr())
+    Y.copy(RHS8(X1))
+    Y.sqrt()
+
+    ne:=Y.sign()^sgn
+    W.copy(Y); W.neg(); W.norm()
+    Y.cmove(W,ne)
+
+    return NewECP8fp8s(X1,Y);
+}
+
+/* Map octet string to curve point */
 func ECP8_mapit(h []byte) *ECP8 {
 	q := NewBIGints(Modulus)
-	hv := FromBytes(h[:])
-	one := NewBIGint(1)
-	var X2 *FP2
-	var X4 *FP4
-	var X *FP8
-	var Q *ECP8
-	hv.Mod(q)
-	for true {
-		X2 = NewFP2bigs(one, hv)
-		X4 = NewFP4fp2(X2)
-		X = NewFP8fp4(X4)
-		Q = NewECP8fp8(X,0)
-		if !Q.Is_infinity() {
-			break
-		}
-		hv.inc(1)
-		hv.norm()
-	}
-	F := ECP8_frob_constants()
-	x := NewBIGints(CURVE_Bnx)
-
-	xQ := Q.mul(x)
-	x2Q := xQ.mul(x)
-	x3Q := x2Q.mul(x)
-	x4Q := x3Q.mul(x)
-	x5Q := x4Q.mul(x)
-	x6Q := x5Q.mul(x)
-	x7Q := x6Q.mul(x)
-	x8Q := x7Q.mul(x)
-
-	if SIGN_OF_X == NEGATIVEX {
-		xQ.neg()
-		x3Q.neg()
-		x5Q.neg()
-		x7Q.neg()
-	}
-	x8Q.Sub(x7Q)
-	x8Q.Sub(Q)
-
-	x7Q.Sub(x6Q)
-	x7Q.frob(F, 1)
-
-	x6Q.Sub(x5Q)
-	x6Q.frob(F, 2)
-
-	x5Q.Sub(x4Q)
-	x5Q.frob(F, 3)
-
-	x4Q.Sub(x3Q)
-	x4Q.frob(F, 4)
-
-	x3Q.Sub(x2Q)
-	x3Q.frob(F, 5)
-
-	x2Q.Sub(xQ)
-	x2Q.frob(F, 6)
-
-	xQ.Sub(Q)
-	xQ.frob(F, 7)
-
-	Q.dbl()
-	Q.frob(F, 8)
-
-	Q.Add(x8Q)
-	Q.Add(x7Q)
-	Q.Add(x6Q)
-	Q.Add(x5Q)
-
-	Q.Add(x4Q)
-	Q.Add(x3Q)
-	Q.Add(x2Q)
-	Q.Add(xQ)
-
-	Q.Affine()
-	return Q
+	dx:=DBIG_fromBytes(h);
+    x:=dx.mod(q);
+		
+	Q:=ECP8_hashit(x)
+	Q.Cfp()
+    return Q
 }
 
 /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3.. */

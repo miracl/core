@@ -42,7 +42,6 @@ extern crate core;
 //use std::io;
 
 use core::rand::RAND;
-use core::hmac;
 use core::nhs;
 
 fn main() {

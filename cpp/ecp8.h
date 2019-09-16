@@ -267,8 +267,20 @@ extern void ECP8_frob(ECP8 *P, YYY::FP2 F[3], int n);
  */
 extern void ECP8_mul16(ECP8 *P, ECP8 *Q, XXX::BIG *b);
 
+/**	@brief Multiplies random point by co-factor
+ *
+	@param Q ECP8 multiplied by co-factor
+ */
+extern void ECP8_cfp(ECP8 *Q);
 
-/**	@brief Maps random BIG to curve point of correct order
+/**	@brief Hashes random BIG to curve point
+ *
+	@param Q ECP8 instance 
+	@param x Fp derived from hash
+ */
+extern void ECP8_hashit(ECP8 *Q, XXX::BIG  x);
+
+/**	@brief Maps random octet to curve point of correct order
  *
 	@param P ECP8 instance of correct order
 	@param W OCTET byte array to be mapped

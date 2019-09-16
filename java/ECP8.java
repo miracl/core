@@ -835,33 +835,74 @@ public final class ECP8 {
 		return P;
 	}        
 
-/* needed for SOK */
+/* Deterministic mapping of Fp to point on curve */
+    public static ECP8 hashit(BIG h)
+    { // SWU method
+        int sgn,ne;
+        FP8 W=new FP8(1);
+        FP8 B=new FP8(new FP4(new FP2(new BIG(ROM.CURVE_B))));
+        FP t=new FP(h);
+        FP s=new FP(-3);
+        FP one=new FP(1);
+		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_i();
+		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
+        B.norm();
+        sgn=t.sign();
+        FP w=s.sqrt();
+        FP j=new FP(w); j.sub(one); j.norm(); j.div2();
+
+        w.mul(t);
+        FP b=new FP(t);
+        b.sqr();
+        b.add(one);
+        FP8 Y=new FP8(b);
+        B.add(Y); B.norm(); B.inverse();
+        B.tmul(w);
+
+        FP8 X1=new FP8(B); X1.tmul(t);
+        Y.copy(new FP8(j));
+        FP8 X2=new FP8(X1); X2.sub(Y); X2.norm();
+        X1.copy(X2); X1.neg(); X1.norm();
+        X2.sub(W); X2.norm();
+
+        B.sqr(); B.inverse();
+        FP8 X3=new FP8(B); X3.add(W); X3.norm();
+
+        Y.copy(RHS(X2));
+        X1.cmove(X2,Y.qr());
+        Y.copy(RHS(X3));
+        X1.cmove(X3,Y.qr());
+        Y.copy(RHS(X1));
+        Y.sqrt();
+
+        ne=Y.sign()^sgn;
+        W.copy(Y); W.neg(); W.norm();
+        Y.cmove(W,ne);
+
+        return new ECP8(X1,Y);
+    }
+
+/* Map octet string to curve point */
 	public static ECP8 mapit(byte[] h)
 	{
 		BIG q=new BIG(ROM.Modulus);
-		BIG x=BIG.fromBytes(h);
-		BIG one=new BIG(1);
-		FP8 X;
-		FP2 X2;
-		FP4 X4;
-		ECP8 Q;
-		x.mod(q);
-		while (true)
-		{
-			X2=new FP2(one,x);
-			X4=new FP4(X2);
-			X=new FP8(X4);
-			Q=new ECP8(X,0);
-			if (!Q.is_infinity()) break;
-			x.inc(1); x.norm();
-		}
+		DBIG dx=DBIG.fromBytes(h);
+        BIG x=dx.mod(q);
+		
+		ECP8 Q=hashit(x);
+		Q.cfp();
+        return Q;
+    }
 
+/* clear cofactor */
+	public void cfp()
+	{
 		FP2[] F=ECP8.frob_constants();
-		x=new BIG(ROM.CURVE_Bnx);
+		BIG x=new BIG(ROM.CURVE_Bnx);
 
 /* Efficient hash maps to G2 on BLS curves - Budroni, Pintore */
 
-		ECP8 xQ=Q.mul(x);
+		ECP8 xQ=this.mul(x);
 		ECP8 x2Q=xQ.mul(x);
 		ECP8 x3Q=x2Q.mul(x);
 		ECP8 x4Q=x3Q.mul(x);
@@ -879,7 +920,7 @@ public final class ECP8 {
 		}	
 
 		x8Q.sub(x7Q);
-		x8Q.sub(Q);
+		x8Q.sub(this);
 
 		x7Q.sub(x6Q);
 		x7Q.frob(F,1);
@@ -899,24 +940,23 @@ public final class ECP8 {
 		x2Q.sub(xQ);
 		x2Q.frob(F,6);
 
-		xQ.sub(Q);
+		xQ.sub(this);
 		xQ.frob(F,7);
 
-		Q.dbl();
-		Q.frob(F,8);
+		dbl();
+		frob(F,8);
 
-		Q.add(x8Q);
-		Q.add(x7Q);
-		Q.add(x6Q);
-		Q.add(x5Q);
+		add(x8Q);
+		add(x7Q);
+		add(x6Q);
+		add(x5Q);
 
-		Q.add(x4Q);
-		Q.add(x3Q);
-		Q.add(x2Q);
-		Q.add(xQ);
+		add(x4Q);
+		add(x3Q);
+		add(x2Q);
+		add(xQ);
 
-		Q.affine();
-		return Q;
+		affine();
 	}
 
 	public static ECP8 generator()

@@ -589,27 +589,80 @@ public final class ECP2 {
 		return P;
 	}        
 
+/* Deterministic mapping of Fp to point on curve */
+    public static ECP2 hashit(BIG h)
+    { // SWU method
+        int sgn,ne;
+        FP2 W=new FP2(1);
+        FP2 B=new FP2(new BIG(ROM.CURVE_B));
+        FP t=new FP(h);
+        FP s=new FP(-3);
+        FP one=new FP(1);
+		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_ip();
+		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.mul_ip();
+        B.norm();
+        sgn=t.sign();
+        FP w=s.sqrt();
+        FP j=new FP(w); j.sub(one); j.norm(); j.div2();
+//System.out.print("s= "+w.toString()+"\n");
+        w.mul(t);
+        FP b=new FP(t);
+        b.sqr();
+        b.add(one);
+        FP2 Y=new FP2(b);
+        B.add(Y); B.norm(); B.inverse();
+        B.pmul(w);
 
-/* needed for SOK */
+//System.out.print("w= "+B.toString()+"\n");
+//System.out.print("j= "+j.toString()+"\n");
+
+        FP2 X1=new FP2(B); X1.pmul(t);
+        Y.copy(new FP2(j));
+        FP2 X2=new FP2(X1); X2.sub(Y); X2.norm();
+        X1.copy(X2); X1.neg(); X1.norm();
+        X2.sub(W); X2.norm();
+
+        B.sqr(); B.inverse();
+        FP2 X3=new FP2(B); X3.add(W); X3.norm();
+
+    //System.out.print("X1= "+X1.toString()+"\n");
+   //System.out.print("X2= "+X2.toString()+"\n");
+      //System.out.print("X3= "+X3.toString()+"\n");
+
+        Y.copy(RHS(X2));
+        X1.cmove(X2,Y.qr());
+        Y.copy(RHS(X3));
+        X1.cmove(X3,Y.qr());
+        Y.copy(RHS(X1));
+        Y.sqrt();
+
+        ne=Y.sign()^sgn;
+        W.copy(Y); W.neg(); W.norm();
+        Y.cmove(W,ne);
+
+
+        return new ECP2(X1,Y);
+    }
+
+
+/* Map octet string to curve point */
 	public static ECP2 mapit(byte[] h)
 	{
 		BIG q=new BIG(ROM.Modulus);
-		BIG x=BIG.fromBytes(h);
-		BIG one=new BIG(1);
-		FP2 X;
-		ECP2 Q;
-		x.mod(q);
-		while (true)
-		{
-			X=new FP2(one,x);
-			Q=new ECP2(X,0);
-			if (!Q.is_infinity()) break;
-			x.inc(1); x.norm();
-		}
+		DBIG dx=DBIG.fromBytes(h);
+        BIG x=dx.mod(q);
+		
+		ECP2 Q=hashit(x);
+		Q.cfp();
+        return Q;
+    }
 
+/* clear the cofactor */
+    public void cfp()
+    {
 		BIG Fra=new BIG(ROM.Fra);
 		BIG Frb=new BIG(ROM.Frb);
-		X=new FP2(Fra,Frb);
+		FP2 X=new FP2(Fra,Frb);
 
 		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE)
 		{
@@ -617,7 +670,7 @@ public final class ECP2 {
 			X.norm();
 		}
 
-		x=new BIG(ROM.CURVE_Bnx);
+		BIG x=new BIG(ROM.CURVE_Bnx);
 
 /* Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez */
 
@@ -625,7 +678,7 @@ public final class ECP2 {
 		{
 			ECP2 T,K;
 
-			T=new ECP2(); T.copy(Q);
+			T=new ECP2(); T.copy(this);
 			T=T.mul(x); 
 			
 			if (CONFIG_CURVE.SIGN_OF_X==CONFIG_CURVE.NEGATIVEX)
@@ -636,10 +689,10 @@ public final class ECP2 {
 			K.dbl(); K.add(T); //K.affine();
 
 			K.frob(X);
-			Q.frob(X); Q.frob(X); Q.frob(X);
-			Q.add(T); Q.add(K);
+			frob(X); frob(X); frob(X);
+			add(T); add(K);
 			T.frob(X); T.frob(X);
-			Q.add(T);
+			add(T);
 
 		}
 
@@ -648,7 +701,7 @@ public final class ECP2 {
 
 		if (CONFIG_CURVE.CURVE_PAIRING_TYPE==CONFIG_CURVE.BLS)
 		{
-			ECP2 xQ=Q.mul(x);
+			ECP2 xQ=this.mul(x);
 			ECP2 x2Q=xQ.mul(x);
 
 			if (CONFIG_CURVE.SIGN_OF_X==CONFIG_CURVE.NEGATIVEX)
@@ -657,20 +710,19 @@ public final class ECP2 {
 			}	
 
 			x2Q.sub(xQ);
-			x2Q.sub(Q);
+			x2Q.sub(this);
 
-			xQ.sub(Q);
+			xQ.sub(this);
 			xQ.frob(X);
 
-			Q.dbl();
-			Q.frob(X);
-			Q.frob(X);
+			dbl();
+			frob(X);
+			frob(X);
 
-			Q.add(x2Q);
-			Q.add(xQ);
+			add(x2Q);
+			add(xQ);
 		}
-		Q.affine();
-		return Q;
+		affine();
 	}
 
 	public static ECP2 generator()

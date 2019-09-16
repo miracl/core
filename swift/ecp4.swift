@@ -557,6 +557,47 @@ public struct ECP4 {
         return P;
     }
     
+    // clear cofactor
+    mutating public func cfp()
+    {
+    // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
+        let F=ECP4.frob_constants()        
+        let x=BIG(ROM.CURVE_Bnx);
+    
+        var xQ=self.mul(x);
+        var x2Q=xQ.mul(x)
+        var x3Q=x2Q.mul(x)
+        var x4Q=x3Q.mul(x)
+
+        if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
+            xQ.neg()
+            x3Q.neg()
+        }
+
+        x4Q.sub(x3Q)
+        x4Q.sub(self)
+
+        x3Q.sub(x2Q)
+        x3Q.frob(F,1)
+
+        x2Q.sub(xQ)
+        x2Q.frob(F,2)
+
+        xQ.sub(self)
+        xQ.frob(F,3)
+
+        self.dbl()
+        self.frob(F,4)
+
+        self.add(x4Q)
+        self.add(x3Q)
+        self.add(x2Q)
+        self.add(xQ)
+      
+        self.affine()
+    }  
+
+
     /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3.. */
     // Bos & Costello https://eprint.iacr.org/2013/458.pdf
     // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
@@ -686,58 +727,67 @@ public struct ECP4 {
         return P
     }
 
-     // needed for SOK
-    static func mapit(_ h:[UInt8]) -> ECP4
-    {
-        let q=BIG(ROM.Modulus)
-        var x=BIG.fromBytes(h)
-        let one=BIG(1)
-        var Q=ECP4()
-        x.mod(q);
-        while (true)
-        {
-            let X=FP4(FP2(one,x))
-            Q=ECP4(X,0);
-            if !Q.is_infinity() {break}
-            x.inc(1); x.norm();
+/* Deterministic mapping of Fp to point on curve */
+    static public func hashit(_ h:BIG) -> ECP4
+    { // SWU method
+        var W=FP4(1)
+        var B=FP4(FP2(BIG(ROM.CURVE_B)))
+        let t=FP(h)
+        var s=FP(-3)
+        let one=FP(1)
+		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
+            B.div_i();
         }
-    // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
-        let F=ECP4.frob_constants()        
-        x=BIG(ROM.CURVE_Bnx);
-    
-        var xQ=Q.mul(x);
-        var x2Q=xQ.mul(x)
-        var x3Q=x2Q.mul(x)
-        var x4Q=x3Q.mul(x)
-
-        if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
-            xQ.neg()
-            x3Q.neg()
+		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
+            B.times_i();
         }
+        B.norm()
+        let sgn=t.sign()
+        var w=s.sqrt()
+        var j=FP(w); j.sub(one); j.norm(); j.div2()
 
-        x4Q.sub(x3Q)
-        x4Q.sub(Q)
+        w.mul(t)
+        var b=FP(t)
+        b.sqr()
+        b.add(one)
+        var Y=FP4(b)
+        B.add(Y); B.norm(); B.inverse()
+        B.qmul(w)
 
-        x3Q.sub(x2Q)
-        x3Q.frob(F,1)
+        var X1=FP4(B); X1.qmul(t)
+        Y.copy(FP4(j))
+        var X2=FP4(X1); X2.sub(Y); X2.norm()
+        X1.copy(X2); X1.neg(); X1.norm()
+        X2.sub(W); X2.norm()
 
-        x2Q.sub(xQ)
-        x2Q.frob(F,2)
+        B.sqr(); B.inverse()
+        var X3=FP4(B); X3.add(W); X3.norm()
 
-        xQ.sub(Q)
-        xQ.frob(F,3)
+        Y.copy(ECP4.RHS(X2))
+        X1.cmove(X2,Y.qr())
+        Y.copy(ECP4.RHS(X3))
+        X1.cmove(X3,Y.qr())
+        Y.copy(ECP4.RHS(X1))
+        Y.sqrt()
 
-        Q.dbl()
-        Q.frob(F,4)
+        let ne=Y.sign()^sgn
+        W.copy(Y); W.neg(); W.norm()
+        Y.cmove(W,ne)
 
-        Q.add(x4Q)
-        Q.add(x3Q)
-        Q.add(x2Q)
-        Q.add(xQ)
-      
-        Q.affine()
+        return ECP4(X1,Y)
+    }
+
+/* Map octet string to curve point */
+	static public func mapit(_ h:[UInt8]) -> ECP4
+	{
+		let q=BIG(ROM.Modulus)
+		var dx=DBIG.fromBytes(h)
+        let x=dx.mod(q)
+		
+		var Q=ECP4.hashit(x);  
+		Q.cfp()
         return Q
-    }  
+    }
 
     static public func generator() -> ECP4
     {

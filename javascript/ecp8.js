@@ -575,6 +575,72 @@ var ECP8 = function(ctx) {
             P.affine();
 
             return P;
+        },
+    /* clear cofactor */
+        cfp: function(h) {
+            var F=ECP8.frob_constants(),
+            x, X, X2, X4,
+            xQ, x2Q, x3Q, x4Q, x5Q, x6Q, x7Q, x8Q;
+
+        /* Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez */
+            x = new ctx.BIG(0);
+            x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
+
+
+            xQ = this.mul(x);
+            x2Q = xQ.mul(x);
+            x3Q = x2Q.mul(x);
+            x4Q = x3Q.mul(x);
+            x5Q = x4Q.mul(x);
+            x6Q = x5Q.mul(x);
+            x7Q = x6Q.mul(x);
+            x8Q = x7Q.mul(x);
+
+            if (ctx.ECP.SIGN_OF_X == ctx.ECP.NEGATIVEX) {
+                xQ.neg();
+                x3Q.neg();
+                x5Q.neg();
+                x7Q.neg();
+            }
+
+            x8Q.sub(x7Q);
+            x8Q.sub(this);
+
+            x7Q.sub(x6Q);
+            x7Q.frob(F,1);
+
+            x6Q.sub(x5Q);
+            x6Q.frob(F,2);
+
+            x5Q.sub(x4Q);
+            x5Q.frob(F,3);
+
+            x4Q.sub(x3Q);
+            x4Q.frob(F,4);
+
+            x3Q.sub(x2Q);
+            x3Q.frob(F,5);
+
+            x2Q.sub(xQ);
+            x2Q.frob(F,6);
+
+            xQ.sub(this);
+            xQ.frob(F,7);
+
+            this.dbl();
+            this.frob(F,8);
+
+            this.add(x8Q);
+            this.add(x7Q);
+            this.add(x6Q);
+            this.add(x5Q);
+
+            this.add(x4Q);
+            this.add(x3Q);
+            this.add(x2Q);
+            this.add(xQ);
+
+            this.affine()
         }
     };
 
@@ -969,90 +1035,70 @@ var ECP8 = function(ctx) {
         return ((x >> 31) & 1);
     };
 
-    /* needed for SOK */
-    ECP8.mapit = function(h) {
-        var F=ECP8.frob_constants(),
-            q, x, one, Q, X, X2, X4,
-            xQ, x2Q, x3Q, x4Q, x5Q, x6Q, x7Q, x8Q;
+/* Deterministic mapping of Fp to point on curve */
+    ECP8.hashit = function(h)
+    { // SWU method
+        var sgn,ne;
+        var W=new ctx.FP8(1);
 
-        q = new ctx.BIG(0);
+        var c = new ctx.BIG(0);
+        c.rcopy(ctx.ROM_CURVE.CURVE_B);
+        var B = new ctx.FP8(c);
+
+        var t=new ctx.FP(h);
+        var s=new ctx.FP(-3);
+        var one=new ctx.FP(1);
+
+		if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.D_TYPE) B.div_i();
+		if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) B.times_i();
+        B.norm();
+        sgn=t.sign();
+        var w=s.sqrt();
+        var j=new ctx.FP(w); j.sub(one); j.norm(); j.div2();
+
+        w.mul(t);
+        var b=new ctx.FP(t);
+        b.sqr();
+        b.add(one);
+        var Y=new ctx.FP8(b);
+        B.add(Y); B.norm(); B.inverse();
+        B.tmul(w);
+
+        var X1=new ctx.FP8(B); X1.tmul(t);
+        Y.copy(new ctx.FP8(j));
+        var X2=new ctx.FP8(X1); X2.sub(Y); X2.norm();
+        X1.copy(X2); X1.neg(); X1.norm();
+        X2.sub(W); X2.norm();
+
+        B.sqr(); B.inverse();
+        var X3=new ctx.FP8(B); X3.add(W); X3.norm();
+
+        Y.copy(ECP8.RHS(X2));
+        X1.cmove(X2,Y.qr());
+        Y.copy(ECP8.RHS(X3));
+        X1.cmove(X3,Y.qr());
+        Y.copy(ECP8.RHS(X1));
+        Y.sqrt();
+
+        ne=Y.sign()^sgn;
+        W.copy(Y); W.neg(); W.norm();
+        Y.cmove(W,ne);
+
+        var P=new ECP8();
+        P.setxy(X1,Y);
+        return P;
+    };
+
+/* Map octet string to curve point */
+	ECP8.mapit = function(h)
+	{
+		var q=new ctx.BIG(0);
         q.rcopy(ctx.ROM_FIELD.Modulus);
-        x = ctx.BIG.fromBytes(h);
-        one = new ctx.BIG(1);
-        x.mod(q);
-
-        for (;;) {
-            X2 = new ctx.FP2(one, x);
-            X4 = new ctx.FP4(X2);
-            X = new ctx.FP8(X4);
-            Q = new ECP8();
-            Q.setx(X,0);
-            if (!Q.is_infinity()) {
-                break;
-            }
-            x.inc(1);
-            x.norm();
-        }
-
-        /* Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez */
-        x = new ctx.BIG(0);
-        x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
-
-
-        xQ = Q.mul(x);
-        x2Q = xQ.mul(x);
-        x3Q = x2Q.mul(x);
-        x4Q = x3Q.mul(x);
-        x5Q = x4Q.mul(x);
-        x6Q = x5Q.mul(x);
-        x7Q = x6Q.mul(x);
-        x8Q = x7Q.mul(x);
-
-        if (ctx.ECP.SIGN_OF_X == ctx.ECP.NEGATIVEX) {
-            xQ.neg();
-            x3Q.neg();
-            x5Q.neg();
-            x7Q.neg();
-        }
-
-        x8Q.sub(x7Q);
-        x8Q.sub(Q);
-
-        x7Q.sub(x6Q);
-        x7Q.frob(F,1);
-
-        x6Q.sub(x5Q);
-        x6Q.frob(F,2);
-
-        x5Q.sub(x4Q);
-        x5Q.frob(F,3);
-
-        x4Q.sub(x3Q);
-        x4Q.frob(F,4);
-
-        x3Q.sub(x2Q);
-        x3Q.frob(F,5);
-
-        x2Q.sub(xQ);
-        x2Q.frob(F,6);
-
-        xQ.sub(Q);
-        xQ.frob(F,7);
-
-        Q.dbl();
-        Q.frob(F,8);
-
-        Q.add(x8Q);
-        Q.add(x7Q);
-        Q.add(x6Q);
-        Q.add(x5Q);
-
-        Q.add(x4Q);
-        Q.add(x3Q);
-        Q.add(x2Q);
-        Q.add(xQ);
-
-        Q.affine();
+		var dx=ctx.DBIG.fromBytes(h);
+        var x=dx.mod(q);
+		
+		var Q=ECP8.hashit(x);
+		Q.cfp();
         return Q;
     };
 

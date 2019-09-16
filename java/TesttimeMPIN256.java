@@ -94,9 +94,18 @@ public class TesttimeMPIN256 extends TestCase {
 
         ECP8 Q = ECP8.generator();
 
-        //System.out.println("Q= "+Q.toString());
-        //System.out.println("r= "+r.toString());
-        ECP8 W = PAIR256.G2mul(Q, r);
+
+        ECP8 W = ECP8.hashit(s);
+        W.cfp();
+        if (W.is_infinity()) {
+            fail("HASHING FAILURE - P=O");
+        }
+        W = PAIR256.G2mul(W, r);
+        if (!W.is_infinity()) {
+            fail("FAILURE - rQ!=O");
+        }
+
+        W = PAIR256.G2mul(Q, r);
 
         if (!W.is_infinity()) {
             fail("FAILURE - rQ!=O");
@@ -132,21 +141,7 @@ public class TesttimeMPIN256 extends TestCase {
         dur = (double)elapsed / iterations;
         System.out.format("GT pow              - %8d iterations  ", iterations);
         System.out.format(" %8.2f ms per iteration\n", dur);
-/*
-        g.copy(w);
-        FP16 cr;
-        iterations = 0;
-        start = System.currentTimeMillis();
-        do {
-            cr = g.compow(s, r);
 
-            iterations++;
-            elapsed = (System.currentTimeMillis() - start);
-        } while (elapsed < MIN_TIME * 1000 || iterations < MIN_ITERS);
-        dur = (double)elapsed / iterations;
-        System.out.format("GT pow (compressed) - %8d iterations  ", iterations);
-        System.out.format(" %8.2f ms per iteration\n", dur);
-*/
         iterations = 0;
         start = System.currentTimeMillis();
         do {

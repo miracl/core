@@ -945,31 +945,86 @@ void ZZZ::ECP8_mul16(ECP8 *P, ECP8 Q[16], BIG u[16])
     ECP8_affine(P);
 }
 
-/* Map to hash value to point on G2 from random BIG */
+/* Deterministic Map of BIG to G2 curve point */
+void ZZZ::ECP8_hashit(ECP8 *Q,BIG h)
+{
+    int sgn,ne;
+    FP8 X1,X2,X3,W,B,Y;
+    FP t,b,j,s,one;
 
+    FP_rcopy(&b,CURVE_B);
+    FP8_from_FP(&B, &b);
+#if SEXTIC_TWIST_ZZZ == D_TYPE
+    FP8_div_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+
+#if SEXTIC_TWIST_ZZZ == M_TYPE
+    FP8_times_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+
+    FP8_one(&W);
+    FP_one(&one);
+    FP_nres(&t,h);
+    sgn=FP_sign(&t);
+        
+    FP_from_int(&s,-3);
+    FP_sqrt(&s,&s);         // s=sqrt(-3)
+    FP_sub(&j,&s,&one);     FP_norm(&j);
+    FP_div2(&j,&j);         // j=(s-1)/2
+
+    FP_mul(&s,&s,&t);       // s=s.t
+    FP_sqr(&b,&t);          // t^2
+    FP_add(&b,&b,&one);     // t^2+1
+    FP8_from_FP(&Y,&b);
+    FP8_add(&B,&B,&Y);      // t^2+B+1
+    FP8_norm(&B);
+    FP8_inv(&B,&B);
+    FP8_tmul(&B,&B,&s);      // w=s.t/(1+B+t*2)
+
+    FP8_tmul(&X1,&B,&t);       
+    FP8_from_FP(&Y,&j);     
+    FP8_sub(&X2,&X1,&Y);    FP8_norm(&X2);// X2=t.w-j 
+    FP8_neg(&X1,&X2);       FP8_norm(&X1);// X1=j-t.w
+    FP8_sub(&X2,&X2,&W);    FP8_norm(&X2);
+
+    FP8_sqr(&B,&B);
+    FP8_inv(&B,&B);
+    FP8_add(&X3,&B,&W);     FP8_norm(&X3);
+    
+    ECP8_rhs(&W,&X2);
+    FP8_cmove(&X1,&X2,FP8_qr(&W));
+    ECP8_rhs(&W,&X3);
+    FP8_cmove(&X1,&X3,FP8_qr(&W));
+    ECP8_rhs(&W,&X1);
+    FP8_sqrt(&Y,&W);
+    
+    ne=FP8_sign(&Y)^sgn;
+    FP8_neg(&W,&Y); FP8_norm(&W);
+    FP8_cmove(&Y,&W,ne);
+ 
+    ECP8_set(Q,&X1,&Y);
+}
+
+/* Map to hash value to point on G2 from random BIG */
 void ZZZ::ECP8_mapit(ECP8 *Q, octet *W)
 {
-    BIG q, one, x, hv;
-    FP Fx, Fy;
-    FP2 T, X[3];
-    FP4 X4;
-    FP8 X8;
-
-    ECP8 xQ, x2Q, x3Q, x4Q , x5Q, x6Q, x7Q, x8Q;
-
-    BIG_fromBytes(hv, W->val);
+    BIG q, x;
+    DBIG dx;
     BIG_rcopy(q, Modulus);
-    BIG_one(one);
-    BIG_mod(hv, q);
 
-    for (;;)
-    {
-        FP2_from_BIGs(&T, one, hv); /*******/
-        FP4_from_FP2(&X4, &T);
-        FP8_from_FP4(&X8, &X4);
-        if (ECP8_setx(Q, &X8, 0)) break;
-        BIG_inc(hv, 1);
-    }
+    BIG_dfromBytesLen(dx,W->val,W->len);
+    BIG_dmod(x,dx,q);
+
+    ECP8_hashit(Q,x);   
+    ECP8_cfp(Q);
+}
+
+/* cofactor product */
+void ZZZ::ECP8_cfp(ECP8 *Q)
+{
+    FP2 X[3];
+    ECP8 xQ, x2Q, x3Q, x4Q , x5Q, x6Q, x7Q, x8Q;
+    BIG x;
 
     ECP8_frob_constants(X);
 

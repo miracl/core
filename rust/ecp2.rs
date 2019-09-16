@@ -35,6 +35,8 @@ use crate::xxx::big::BIG;
 use crate::xxx::ecp;
 use crate::xxx::fp2::FP2;
 use crate::xxx::rom;
+use crate::xxx::fp::FP;
+use crate::xxx::dbig::DBIG;
 
 //#[derive(Copy, Clone)]
 pub struct ECP2 {
@@ -582,6 +584,60 @@ impl ECP2 {
         return P;
     }
 
+    #[allow(non_snake_case)]
+    pub fn cfp(&mut self)  {
+        let mut X = FP2::new_bigs(&BIG::new_ints(&rom::FRA), &BIG::new_ints(&rom::FRB));
+        if ecp::SEXTIC_TWIST == ecp::M_TYPE {
+            X.inverse();
+            X.norm();
+        }
+        let mut x = BIG::new_ints(&rom::CURVE_BNX);
+
+        if ecp::CURVE_PAIRING_TYPE == ecp::BN {
+            let mut T = self.mul(&mut x);
+            if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+                T.neg();
+            }
+            let mut K = ECP2::new();
+            K.copy(&T);
+            K.dbl();
+            K.add(&T);
+
+            K.frob(&X);
+            self.frob(&X);
+            self.frob(&X);
+            self.frob(&X);
+            self.add(&T);
+            self.add(&K);
+            T.frob(&X);
+            T.frob(&X);
+            self.add(&T);
+        }
+        if ecp::CURVE_PAIRING_TYPE == ecp::BLS {
+            let mut xQ = self.mul(&mut x);
+            let mut x2Q = xQ.mul(&mut x);
+
+            if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+                xQ.neg();
+            }
+            x2Q.sub(&xQ);
+            x2Q.sub(&self);
+
+            xQ.sub(&self);
+            xQ.frob(&X);
+
+            self.dbl();
+            self.frob(&X);
+            self.frob(&X);
+
+            self.add(&x2Q);
+            self.add(&xQ);
+        }
+
+        self.affine();
+    }
+
+
     /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3 */
     // Bos & Costello https://eprint.iacr.org/2013/458.pdf
     // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
@@ -693,73 +749,66 @@ impl ECP2 {
         return P;
     }
 
+
+/* Deterministic mapping of Fp to point on curve */
+    #[allow(non_snake_case)]
+    pub fn hashit(h: &BIG) -> ECP2 {
+    // SWU method
+        let mut W=FP2::new_int(1);
+        let mut B = FP2::new_big(&BIG::new_ints(&rom::CURVE_B));
+        let mut t=FP::new_big(h);
+        let mut s=FP::new_int(-3);
+        let one=FP::new_int(1);
+		if ecp::SEXTIC_TWIST == ecp::D_TYPE {
+            B.div_ip();
+        }
+		if ecp::SEXTIC_TWIST == ecp::M_TYPE {
+            B.mul_ip();
+        }
+        B.norm();
+        let sgn=t.sign();
+        let mut w=s.sqrt();
+        let mut j=FP::new_copy(&w); j.sub(&one); j.norm(); j.div2();
+
+        w.mul(&t);
+        let mut b=FP::new_copy(&t);
+        b.sqr();
+        b.add(&one);
+        let mut Y=FP2::new_fp(&b);
+        B.add(&Y); B.norm(); B.inverse();
+        B.pmul(&w);
+
+        let mut X1=FP2::new_copy(&B); X1.pmul(&t);
+        Y.copy(&FP2::new_fp(&j));
+        let mut X2=FP2::new_copy(&X1); X2.sub(&Y); X2.norm();
+        X1.copy(&X2); X1.neg(); X1.norm();
+        X2.sub(&W); X2.norm();
+
+        B.sqr(); B.inverse();
+        let mut X3=FP2::new_copy(&B); X3.add(&W); X3.norm();
+
+        Y.copy(&ECP2::rhs(&X2));
+        X1.cmove(&X2,Y.qr());
+        Y.copy(&ECP2::rhs(&X3));
+        X1.cmove(&X3,Y.qr());
+        Y.copy(&ECP2::rhs(&X1));
+        Y.sqrt();
+
+        let ne=Y.sign()^sgn;
+        W.copy(&Y); W.neg(); W.norm();
+        Y.cmove(&W,ne);
+
+        return ECP2::new_fp2s(&X1,&Y);
+    }
+
     #[allow(non_snake_case)]
     pub fn mapit(h: &[u8]) -> ECP2 {
-        let mut q = BIG::new_ints(&rom::MODULUS);
-        let mut x = BIG::frombytes(h);
-        x.rmod(&mut q);
-        let mut Q: ECP2;
-        let one = BIG::new_int(1);
-
-        loop {
-            let X = FP2::new_bigs(&one, &x);
-            Q = ECP2::new_fp2(&X,0);
-            if !Q.is_infinity() {
-                break;
-            }
-            x.inc(1);
-            x.norm();
-        }
-        let mut X = FP2::new_bigs(&BIG::new_ints(&rom::FRA), &BIG::new_ints(&rom::FRB));
-        if ecp::SEXTIC_TWIST == ecp::M_TYPE {
-            X.inverse();
-            X.norm();
-        }
-        x = BIG::new_ints(&rom::CURVE_BNX);
-
-        if ecp::CURVE_PAIRING_TYPE == ecp::BN {
-            let mut T = Q.mul(&mut x);
-            if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-                T.neg();
-            }
-            let mut K = ECP2::new();
-            K.copy(&T);
-            K.dbl();
-            K.add(&T);
-
-            K.frob(&X);
-            Q.frob(&X);
-            Q.frob(&X);
-            Q.frob(&X);
-            Q.add(&T);
-            Q.add(&K);
-            T.frob(&X);
-            T.frob(&X);
-            Q.add(&T);
-        }
-        if ecp::CURVE_PAIRING_TYPE == ecp::BLS {
-            let mut xQ = Q.mul(&mut x);
-            let mut x2Q = xQ.mul(&mut x);
-
-            if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-                xQ.neg();
-            }
-            x2Q.sub(&xQ);
-            x2Q.sub(&Q);
-
-            xQ.sub(&Q);
-            xQ.frob(&X);
-
-            Q.dbl();
-            Q.frob(&X);
-            Q.frob(&X);
-
-            Q.add(&x2Q);
-            Q.add(&xQ);
-        }
-
-        Q.affine();
-        return Q;
+        let q = BIG::new_ints(&rom::MODULUS);
+        let mut dx = DBIG::frombytes(h);
+        let mut x=dx.dmod(&q);
+        let mut P=ECP2::hashit(&mut x);
+        P.cfp();
+        return P;
     }
 
     pub fn generator() -> ECP2 {

@@ -642,6 +642,69 @@ public struct ECP8 {
         return P;
     }
     
+    // clear cofactor
+    mutating public func cfp()
+    {
+    // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
+        let F=ECP8.frob_constants()        
+        let x=BIG(ROM.CURVE_Bnx);
+    
+        var xQ=self.mul(x);
+        var x2Q=xQ.mul(x)
+        var x3Q=x2Q.mul(x)
+        var x4Q=x3Q.mul(x)
+        var x5Q=x4Q.mul(x);
+        var x6Q=x5Q.mul(x)
+        var x7Q=x6Q.mul(x)
+        var x8Q=x7Q.mul(x)        
+
+        if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
+            xQ.neg()
+            x3Q.neg()
+            x5Q.neg()
+            x7Q.neg()            
+        }
+
+        x8Q.sub(x7Q)
+        x8Q.sub(self)
+
+        x7Q.sub(x6Q)
+        x7Q.frob(F,1)
+
+        x6Q.sub(x5Q)
+        x6Q.frob(F,2)
+
+        x5Q.sub(x4Q)
+        x5Q.frob(F,3)
+
+        x4Q.sub(x3Q)
+        x4Q.frob(F,4)
+
+        x3Q.sub(x2Q)
+        x3Q.frob(F,5)
+
+        x2Q.sub(xQ)
+        x2Q.frob(F,6)
+
+        xQ.sub(self)
+        xQ.frob(F,7)
+
+        self.dbl()
+        self.frob(F,8)
+
+        self.add(x8Q)
+        self.add(x7Q)
+        self.add(x6Q)
+        self.add(x5Q)
+
+        self.add(x4Q)
+        self.add(x3Q)
+        self.add(x2Q)
+        self.add(xQ)
+      
+        self.affine()
+    }  
+
     /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3.. */
     // Bos & Costello https://eprint.iacr.org/2013/458.pdf
     // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
@@ -851,83 +914,68 @@ public struct ECP8 {
         return P
     }
 
-
-     // needed for SOK
-    static func mapit(_ h:[UInt8]) -> ECP8
-    {
-        let q=BIG(ROM.Modulus)
-        var x=BIG.fromBytes(h)
-        let one=BIG(1)
-        var Q=ECP8()
-        x.mod(q);
-        while (true)
-        {
-            let X=FP8(FP4(FP2(one,x)))
-            Q=ECP8(X,0);
-            if !Q.is_infinity() {break}
-            x.inc(1); x.norm();
+/* Deterministic mapping of Fp to point on curve */
+    static public func hashit(_ h:BIG) -> ECP8
+    { // SWU method
+        var W=FP8(1)
+        var B=FP8(FP4(FP2(BIG(ROM.CURVE_B))))
+        let t=FP(h)
+        var s=FP(-3)
+        let one=FP(1)
+		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
+            B.div_i();
         }
-    // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
-        let F=ECP8.frob_constants()        
-        x=BIG(ROM.CURVE_Bnx);
-    
-        var xQ=Q.mul(x);
-        var x2Q=xQ.mul(x)
-        var x3Q=x2Q.mul(x)
-        var x4Q=x3Q.mul(x)
-        var x5Q=x4Q.mul(x);
-        var x6Q=x5Q.mul(x)
-        var x7Q=x6Q.mul(x)
-        var x8Q=x7Q.mul(x)        
-
-        if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
-            xQ.neg()
-            x3Q.neg()
-            x5Q.neg()
-            x7Q.neg()            
+		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
+            B.times_i();
         }
+        B.norm()
+        let sgn=t.sign()
+        var w=s.sqrt()
+        var j=FP(w); j.sub(one); j.norm(); j.div2()
 
-        x8Q.sub(x7Q)
-        x8Q.sub(Q)
+        w.mul(t)
+        var b=FP(t)
+        b.sqr()
+        b.add(one)
+        var Y=FP8(b)
+        B.add(Y); B.norm(); B.inverse()
+        B.tmul(w)
 
-        x7Q.sub(x6Q)
-        x7Q.frob(F,1)
+        var X1=FP8(B); X1.tmul(t)
+        Y.copy(FP8(j))
+        var X2=FP8(X1); X2.sub(Y); X2.norm()
+        X1.copy(X2); X1.neg(); X1.norm()
+        X2.sub(W); X2.norm()
 
-        x6Q.sub(x5Q)
-        x6Q.frob(F,2)
+        B.sqr(); B.inverse()
+        var X3=FP8(B); X3.add(W); X3.norm()
 
-        x5Q.sub(x4Q)
-        x5Q.frob(F,3)
+        Y.copy(ECP8.RHS(X2))
+        X1.cmove(X2,Y.qr())
+        Y.copy(ECP8.RHS(X3))
+        X1.cmove(X3,Y.qr())
+        Y.copy(ECP8.RHS(X1))
+        Y.sqrt()
 
-        x4Q.sub(x3Q)
-        x4Q.frob(F,4)
+        let ne=Y.sign()^sgn
+        W.copy(Y); W.neg(); W.norm()
+        Y.cmove(W,ne)
 
-        x3Q.sub(x2Q)
-        x3Q.frob(F,5)
+        return ECP8(X1,Y)
+    }
 
-        x2Q.sub(xQ)
-        x2Q.frob(F,6)
-
-        xQ.sub(Q)
-        xQ.frob(F,7)
-
-        Q.dbl()
-        Q.frob(F,8)
-
-        Q.add(x8Q)
-        Q.add(x7Q)
-        Q.add(x6Q)
-        Q.add(x5Q)
-
-        Q.add(x4Q)
-        Q.add(x3Q)
-        Q.add(x2Q)
-        Q.add(xQ)
-      
-        Q.affine()
+/* Map octet string to curve point */
+	static public func mapit(_ h:[UInt8]) -> ECP8
+	{
+		let q=BIG(ROM.Modulus)
+		var dx=DBIG.fromBytes(h)
+        let x=dx.mod(q)
+		
+		var Q=ECP8.hashit(x);  
+		Q.cfp()
         return Q
-    }  
-
+    }
+ 
     static public func generator() -> ECP8
     {
         return ECP8(FP8(FP4(FP2(BIG(ROM.CURVE_Pxaaa),BIG(ROM.CURVE_Pxaab)),FP2(BIG(ROM.CURVE_Pxaba),BIG(ROM.CURVE_Pxabb))),FP4(FP2(BIG(ROM.CURVE_Pxbaa),BIG(ROM.CURVE_Pxbab)),FP2(BIG(ROM.CURVE_Pxbba),BIG(ROM.CURVE_Pxbbb)))),FP8(FP4(FP2(BIG(ROM.CURVE_Pyaaa),BIG(ROM.CURVE_Pyaab)),FP2(BIG(ROM.CURVE_Pyaba),BIG(ROM.CURVE_Pyabb))),FP4(FP2(BIG(ROM.CURVE_Pybaa),BIG(ROM.CURVE_Pybab)),FP2(BIG(ROM.CURVE_Pybba),BIG(ROM.CURVE_Pybbb)))))

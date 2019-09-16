@@ -303,7 +303,21 @@ fn bn254(mut rng: &mut RAND) {
     println!(" {:0.2} ms per iteration", duration);
 
     let mut Q = ecp2::ECP2::generator();
-    let mut W = pair::g2mul(&mut Q, &mut r);
+
+    let mut W = ecp2::ECP2::hashit(&s);
+    W.cfp();
+    if W.is_infinity() {
+        println!("HASHING FAILURE - P=O");
+		fail=true;
+    }
+    W = pair::g2mul(&mut W, &mut r);
+    if !W.is_infinity() {
+        println!("FAILURE - rQ!=O");
+		fail=true;
+    }
+
+
+    W = pair::g2mul(&mut Q, &mut r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
@@ -484,7 +498,20 @@ fn bls383(mut rng: &mut RAND) {
     println!(" {:0.2} ms per iteration", duration);
 
     let mut Q = ecp2::ECP2::generator();
-    let mut W = pair::g2mul(&mut Q, &mut r);
+
+    let mut W = ecp2::ECP2::hashit(&s);
+    W.cfp();
+    if W.is_infinity() {
+        println!("HASHING FAILURE - P=O");
+		fail=true;
+    }
+    W = pair::g2mul(&mut W, &mut r);
+    if !W.is_infinity() {
+        println!("FAILURE - rQ!=O");
+		fail=true;
+    }
+
+    W = pair::g2mul(&mut Q, &mut r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
@@ -665,7 +692,20 @@ fn bls24(mut rng: &mut RAND) {
     println!(" {:0.2} ms per iteration", duration);
 
     let mut Q = ecp4::ECP4::generator();
-    let mut W = pair192::g2mul(&mut Q, &mut r);
+
+    let mut W = ecp4::ECP4::hashit(&s);
+    W.cfp();
+    if W.is_infinity() {
+        println!("HASHING FAILURE - P=O");
+		fail=true;
+    }
+    W = pair192::g2mul(&mut W, &mut r);
+    if !W.is_infinity() {
+        println!("FAILURE - rQ!=O");
+		fail=true;
+    }
+
+    W = pair192::g2mul(&mut Q, &mut r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
@@ -833,9 +873,20 @@ fn bls48(mut rng: &mut RAND) {
     println!(" {:0.2} ms per iteration", duration);
 
     let mut Q = ecp8::ECP8::generator();
-    //println!("Q= {}",Q.tostring());
-    //println!("r= {}",r.tostring());
-    let mut W = pair256::g2mul(&mut Q, &mut r);
+
+    let mut W = ecp8::ECP8::hashit(&s);
+    W.cfp();
+    if W.is_infinity() {
+        println!("HASHING FAILURE - P=O");
+		fail=true;
+    }
+    W = pair256::g2mul(&mut W, &mut r);
+    if !W.is_infinity() {
+        println!("FAILURE - rQ!=O");
+		fail=true;
+    }
+
+    W = pair256::g2mul(&mut Q, &mut r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");

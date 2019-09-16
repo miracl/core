@@ -1385,6 +1385,7 @@ void ZZZ::ECP_mapit(ECP *P, octet *W)
     BIG q, x;
     DBIG dx;
     BIG_rcopy(q, Modulus);
+
     BIG_dfromBytesLen(dx,W->val,W->len);
     BIG_dmod(x,dx,q);
 

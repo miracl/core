@@ -257,8 +257,21 @@ extern void ECP4_frob(ECP4 *P, YYY::FP2 F[3], int n);
  */
 extern void ECP4_mul8(ECP4 *P, ECP4 *Q, XXX::BIG *b);
 
+/**	@brief Multiplies random point by co-factor
+ *
+	@param Q ECP4 multiplied by co-factor
+ */
+extern void ECP4_cfp(ECP4 *Q);
 
-/**	@brief Maps random BIG to curve point of correct order
+/**	@brief Hashes random BIG to curve point
+ *
+	@param Q ECP4 instance 
+	@param x Fp derived from hash
+ */
+extern void ECP4_hashit(ECP4 *Q, XXX::BIG  x);
+
+
+/**	@brief Maps random octet to curve point of correct order
  *
 	@param P ECP4 instance of correct order
 	@param W OCTET byte array to be mapped

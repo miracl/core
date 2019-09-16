@@ -121,6 +121,7 @@ int ED_25519(csprng *RNG)
         return 0;
     }
 
+
     ECP_copy(&EP, &EG);
     ECP_mul(&EP, r);
 
@@ -380,6 +381,22 @@ int BN_254(csprng *RNG)
 
     ECP2_generator(&W);
 
+    ECP2_hashit(&Q,s);
+    ECP2_cfp(&Q);
+
+    if (ECP2_isinf(&Q))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
+    //printf("Q= "); ECP2_output(&Q); printf("\n");
+    ECP2_mul(&Q,r);
+    if (!ECP2_isinf(&Q))
+    {
+        printf("FAILURE - rQ!=O\n");
+        return 0;
+    }
+
     ECP2_copy(&Q, &W);
     ECP2_mul(&Q, r);
 
@@ -611,6 +628,22 @@ int BLS_383(csprng *RNG)
 
     ECP2_generator(&W);
 
+    ECP2_hashit(&Q,s);
+    ECP2_cfp(&Q);
+
+    if (ECP2_isinf(&Q))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
+    ECP2_mul(&Q,r);
+    if (!ECP2_isinf(&Q))
+    {
+        printf("FAILURE - rQ!=O\n");
+        return 0;
+    }
+
+
     ECP2_copy(&Q, &W);
     ECP2_mul(&Q, r);
 
@@ -836,6 +869,20 @@ int BLS_24(csprng *RNG)
 
     ECP4_generator(&W);
 
+    ECP4_hashit(&Q,s);
+    ECP4_cfp(&Q);
+
+    if (ECP4_isinf(&Q))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
+    ECP4_mul(&Q,r);
+    if (!ECP4_isinf(&Q))
+    {
+        printf("FAILURE - rQ!=O\n");
+        return 0;
+    }
     ECP4_copy(&Q, &W);
     ECP4_mul(&Q, r);
 
@@ -1064,6 +1111,21 @@ int BLS_48(csprng *RNG)
 
 
     ECP8_generator(&W);
+
+    ECP8_hashit(&Q,s);
+    ECP8_cfp(&Q);
+
+    if (ECP8_isinf(&Q))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
+    ECP8_mul(&Q,r);
+    if (!ECP8_isinf(&Q))
+    {
+        printf("FAILURE - rQ!=O\n");
+        return 0;
+    }
     ECP8_copy(&Q, &W);
 
     //ECP8_mul(&Q,r);

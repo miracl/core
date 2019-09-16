@@ -271,7 +271,6 @@ void ZZZ::ECP2_rhs(FP2 *rhs, FP2 *x)
 
 #endif
 
-
     FP2_add(rhs, &t, rhs);
     FP2_reduce(rhs);
 }
@@ -658,31 +657,92 @@ void ZZZ::ECP2_mul4(ECP2 *P, ECP2 Q[4], BIG u[4])
     ECP2_affine(P);
 }
 
+/* Deterministic Map of BIG to G2 curve point */
+void ZZZ::ECP2_hashit(ECP2 *Q,BIG h)
+{ // SWU method. Assumes p=3 mod 4.
+    int sgn,ne;
+    FP2 X1,X2,X3,W,B,Y;
+    FP t,b,j,s,one;
+
+    FP_rcopy(&b,CURVE_B);
+    FP2_from_FP(&B, &b);
+#if SEXTIC_TWIST_ZZZ == D_TYPE
+    FP2_div_ip(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+#if SEXTIC_TWIST_ZZZ == M_TYPE
+    FP2_mul_ip(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+    FP2_norm(&B);
+
+    FP2_one(&W);
+    FP_one(&one);
+    FP_nres(&t,h);
+    sgn=FP_sign(&t);
+        
+    FP_from_int(&s,-3);
+    FP_sqrt(&s,&s);         // s=sqrt(-3)
+    FP_sub(&j,&s,&one);     FP_norm(&j);
+    FP_div2(&j,&j);         // j=(s-1)/2
+
+    FP_mul(&s,&s,&t);       // s=s.t
+    FP_sqr(&b,&t);          // t^2
+    FP_add(&b,&b,&one);     // t^2+1
+    FP2_from_FP(&Y,&b);
+    FP2_add(&B,&B,&Y);      // t^2+B+1
+    FP2_norm(&B);
+    FP2_inv(&B,&B);
+    FP2_pmul(&B,&B,&s);      // w=s.t/(1+B+t*2)
+
+    FP2_pmul(&X1,&B,&t);       
+    FP2_from_FP(&Y,&j);     
+    FP2_sub(&X2,&X1,&Y);    FP2_norm(&X2);// X2=t.w-j 
+    FP2_neg(&X1,&X2);       FP2_norm(&X1);// X1=j-t.w
+    FP2_sub(&X2,&X2,&W);    FP2_norm(&X2);
+
+    FP2_sqr(&B,&B);
+    FP2_inv(&B,&B);
+    FP2_add(&X3,&B,&W);     FP2_norm(&X3);
+    
+    ECP2_rhs(&W,&X2);
+    FP2_cmove(&X1,&X2,FP2_qr(&W));
+    ECP2_rhs(&W,&X3);
+    FP2_cmove(&X1,&X3,FP2_qr(&W));
+    ECP2_rhs(&W,&X1);
+    FP2_sqrt(&Y,&W);
+    
+    ne=FP2_sign(&Y)^sgn;
+    FP2_neg(&W,&Y); FP2_norm(&W);
+    FP2_cmove(&Y,&W,ne);
+ 
+    ECP2_set(Q,&X1,&Y);
+}
 
 /* Map to hash value to point on G2 from random BIG */
-
 void ZZZ::ECP2_mapit(ECP2 *Q, octet *W)
 {
-    BIG q, one, x, hv;
+    BIG q, x;
+    DBIG dx;
+    BIG_rcopy(q, Modulus);
+
+    BIG_dfromBytesLen(dx,W->val,W->len);
+    BIG_dmod(x,dx,q);
+
+
+    ECP2_hashit(Q,x);
+    ECP2_cfp(Q);
+}
+
+/* cofactor product */
+void ZZZ::ECP2_cfp(ECP2 *Q)
+{
     FP Fx, Fy;
     FP2 X;
+    BIG x;
 #if (PAIRING_FRIENDLY_ZZZ == BN)
     ECP2 T, K;
 #elif (PAIRING_FRIENDLY_ZZZ == BLS)
     ECP2 xQ, x2Q;
 #endif
-    BIG_fromBytes(hv, W->val);
-    BIG_rcopy(q, Modulus);
-    BIG_one(one);
-    BIG_mod(hv, q);
-
-    for (;;)
-    {
-        FP2_from_BIGs(&X, one, hv);
-        if (ECP2_setx(Q, &X, 0)) break;
-        BIG_inc(hv, 1);
-    }
-
     FP_rcopy(&Fx, Fra);
     FP_rcopy(&Fy, Frb);
     FP2_from_FPs(&X, &Fx, &Fy);

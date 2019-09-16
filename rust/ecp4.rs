@@ -36,6 +36,8 @@ use crate::xxx::ecp;
 use crate::xxx::fp2::FP2;
 use crate::xxx::fp4::FP4;
 use crate::xxx::rom;
+use crate::xxx::fp::FP;
+use crate::xxx::dbig::DBIG;
 
 pub struct ECP4 {
     x: FP4,
@@ -647,6 +649,44 @@ impl ECP4 {
         return P;
     }
 
+    #[allow(non_snake_case)]
+    pub fn cfp(&mut self) {
+        let f = ECP4::frob_constants();
+        let mut x = BIG::new_ints(&rom::CURVE_BNX);
+
+        let mut xQ = self.mul(&mut x);
+        let mut x2Q = xQ.mul(&mut x);
+        let mut x3Q = x2Q.mul(&mut x);
+        let mut x4Q = x3Q.mul(&mut x);
+
+        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+            xQ.neg();
+            x3Q.neg();
+        }
+
+        x4Q.sub(&x3Q);
+        x4Q.sub(&self);
+
+        x3Q.sub(&x2Q);
+        x3Q.frob(&f, 1);
+
+        x2Q.sub(&xQ);
+        x2Q.frob(&f, 2);
+
+        xQ.sub(&self);
+        xQ.frob(&f, 3);
+
+        self.dbl();
+        self.frob(&f, 4);
+
+        self.add(&x4Q);
+        self.add(&x3Q);
+        self.add(&x2Q);
+        self.add(&xQ);
+
+        self.affine();
+    }
+
     /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3.. */
     // Bos & Costello https://eprint.iacr.org/2013/458.pdf
     // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
@@ -834,58 +874,66 @@ impl ECP4 {
         );
     }
 
+/* Deterministic mapping of Fp to point on curve */
+    #[allow(non_snake_case)]
+    pub fn hashit(h: &BIG) -> ECP4 {
+    // SWU method
+        let mut W=FP4::new_int(1);
+        let mut B = FP4::new_fp2(&FP2::new_big(&BIG::new_ints(&rom::CURVE_B)));
+        let mut t=FP::new_big(h);
+        let mut s=FP::new_int(-3);
+        let one=FP::new_int(1);
+		if ecp::SEXTIC_TWIST == ecp::D_TYPE {
+            B.div_i();
+        }
+		if ecp::SEXTIC_TWIST == ecp::M_TYPE {
+            B.times_i();
+        }
+        B.norm();
+        let sgn=t.sign();
+        let mut w=s.sqrt();
+        let mut j=FP::new_copy(&w); j.sub(&one); j.norm(); j.div2();
+
+        w.mul(&t);
+        let mut b=FP::new_copy(&t);
+        b.sqr();
+        b.add(&one);
+        let mut Y=FP4::new_fp(&b);
+        B.add(&Y); B.norm(); B.inverse();
+        B.qmul(&w);
+
+        let mut X1=FP4::new_copy(&B); X1.qmul(&t);
+        Y.copy(&FP4::new_fp(&j));
+        let mut X2=FP4::new_copy(&X1); X2.sub(&Y); X2.norm();
+        X1.copy(&X2); X1.neg(); X1.norm();
+        X2.sub(&W); X2.norm();
+
+        B.sqr(); B.inverse();
+        let mut X3=FP4::new_copy(&B); X3.add(&W); X3.norm();
+
+        Y.copy(&ECP4::rhs(&X2));
+        X1.cmove(&X2,Y.qr());
+        Y.copy(&ECP4::rhs(&X3));
+        X1.cmove(&X3,Y.qr());
+        Y.copy(&ECP4::rhs(&X1));
+        Y.sqrt();
+
+        let ne=Y.sign()^sgn;
+        W.copy(&Y); W.neg(); W.norm();
+        Y.cmove(&W,ne);
+
+        return ECP4::new_fp4s(&X1,&Y);
+    }
+
     #[allow(non_snake_case)]
     pub fn mapit(h: &[u8]) -> ECP4 {
-        let mut q = BIG::new_ints(&rom::MODULUS);
-        let mut x = BIG::frombytes(h);
-        x.rmod(&mut q);
-        let mut Q: ECP4;
-        let one = BIG::new_int(1);
-
-        loop {
-            let X = FP4::new_fp2(&FP2::new_bigs(&one, &x));
-            Q = ECP4::new_fp4(&X,0);
-            if !Q.is_infinity() {
-                break;
-            }
-            x.inc(1);
-            x.norm();
-        }
-
-        let f = ECP4::frob_constants();
-        x = BIG::new_ints(&rom::CURVE_BNX);
-
-        let mut xQ = Q.mul(&mut x);
-        let mut x2Q = xQ.mul(&mut x);
-        let mut x3Q = x2Q.mul(&mut x);
-        let mut x4Q = x3Q.mul(&mut x);
-
-        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-            xQ.neg();
-            x3Q.neg();
-        }
-
-        x4Q.sub(&x3Q);
-        x4Q.sub(&Q);
-
-        x3Q.sub(&x2Q);
-        x3Q.frob(&f, 1);
-
-        x2Q.sub(&xQ);
-        x2Q.frob(&f, 2);
-
-        xQ.sub(&Q);
-        xQ.frob(&f, 3);
-
-        Q.dbl();
-        Q.frob(&f, 4);
-
-        Q.add(&x4Q);
-        Q.add(&x3Q);
-        Q.add(&x2Q);
-        Q.add(&xQ);
-
-        Q.affine();
-        return Q;
+        let q = BIG::new_ints(&rom::MODULUS);
+        let mut dx = DBIG::frombytes(h);
+        let mut x=dx.dmod(&q);
+        let mut P=ECP4::hashit(&mut x);
+        P.cfp();
+        return P;
     }
+
+
 }

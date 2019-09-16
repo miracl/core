@@ -287,7 +287,21 @@ func BN_254(rng *core.RAND) {
 	fmt.Printf(" %8.2f ms per iteration\n", dur)
 
 	Q := BN254.ECP2_generator()
-	W := BN254.G2mul(Q, r)
+
+    W := BN254.ECP2_hashit(s)
+    W.Cfp()
+    if W.Is_infinity() {
+        fmt.Printf("HASHING FAILURE - P=O\n")
+		return
+    }
+    W = BN254.G2mul(W, r);
+    if !W.Is_infinity() {
+        fmt.Printf("FAILURE - rQ!=O\n")
+		return
+    }
+
+
+	W = BN254.G2mul(Q, r)
 
 	if !W.Is_infinity() {
 		fmt.Printf("FAILURE - rQ!=O\n")
@@ -456,7 +470,20 @@ func BLS_383(rng *core.RAND) {
 	fmt.Printf(" %8.2f ms per iteration\n", dur)
 
 	Q := BLS383.ECP2_generator()
-	W := BLS383.G2mul(Q, r)
+
+    W := BLS383.ECP2_hashit(s)
+    W.Cfp()
+    if W.Is_infinity() {
+        fmt.Printf("HASHING FAILURE - P=O\n")
+		return
+    }
+    W = BLS383.G2mul(W, r);
+    if !W.Is_infinity() {
+        fmt.Printf("FAILURE - rQ!=O\n")
+		return
+    }
+
+	W = BLS383.G2mul(Q, r)
 
 	if !W.Is_infinity() {
 		fmt.Printf("FAILURE - rQ!=O\n")
@@ -627,7 +654,21 @@ func BLS_24(rng *core.RAND) {
 
 	Q := BLS24.ECP4_generator()
 
-	W := BLS24.G2mul(Q, r)
+
+    W := BLS24.ECP4_hashit(s)
+    W.Cfp()
+    if W.Is_infinity() {
+        fmt.Printf("HASHING FAILURE - P=O\n")
+		return
+    }
+    W = BLS24.G2mul(W, r);
+    if !W.Is_infinity() {
+        fmt.Printf("FAILURE - rQ!=O\n")
+		return
+    }
+
+
+	W = BLS24.G2mul(Q, r)
 
 	if !W.Is_infinity() {
 		fmt.Printf("FAILURE - rQ!=O\n")
@@ -797,7 +838,19 @@ func BLS_48(rng *core.RAND) {
 
 	Q := BLS48.ECP8_generator()
 
-	W := BLS48.G2mul(Q, r)
+    W := BLS48.ECP8_hashit(s)
+    W.Cfp()
+    if W.Is_infinity() {
+        fmt.Printf("HASHING FAILURE - P=O\n")
+		return
+    }
+    W = BLS48.G2mul(W, r);
+    if !W.Is_infinity() {
+        fmt.Printf("FAILURE - rQ!=O\n")
+		return
+    }
+
+	W = BLS48.G2mul(Q, r)
 
 	if !W.Is_infinity() {
 		fmt.Printf("FAILURE - rQ!=O\n")

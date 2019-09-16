@@ -545,7 +545,75 @@ var ECP2 = function(ctx) {
             P.affine();
 
             return P;
+        },
+
+// clear cofactor
+        cfp: function() {
+            var fa = new ctx.BIG(0),
+                fb = new ctx.BIG(0),
+                q, x, T, K, X, xQ, x2Q;
+
+        // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez 
+            fa.rcopy(ctx.ROM_FIELD.Fra);
+            fb.rcopy(ctx.ROM_FIELD.Frb);
+            X = new ctx.FP2(fa, fb);
+            if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) {
+                X.inverse();
+                X.norm();
+            }
+
+            x = new ctx.BIG(0);
+            x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
+
+            if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BN) {
+                T = new ECP2();
+                T.copy(this);
+                T = T.mul(x);
+                if (ctx.ECP.SIGN_OF_X == ctx.ECP.NEGATIVEX) {
+                    T.neg();
+                }
+                K = new ECP2();
+                K.copy(T);
+                K.dbl();
+                K.add(T); //K.affine();
+
+                K.frob(X);
+                this.frob(X);
+                this.frob(X);
+                this.frob(X);
+                this.add(T);
+                this.add(K);
+                T.frob(X);
+                T.frob(X);
+                this.add(T);
+            }
+
+            if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BLS) {
+
+                xQ = this.mul(x);
+                x2Q = xQ.mul(x);
+
+                if (ctx.ECP.SIGN_OF_X == ctx.ECP.NEGATIVEX) {
+                    xQ.neg();
+                }
+
+                x2Q.sub(xQ);
+                x2Q.sub(this);
+
+                xQ.sub(this);
+                xQ.frob(X);
+
+                this.dbl();
+                this.frob(X);
+                this.frob(X);
+
+                this.add(x2Q);
+                this.add(xQ);
+            }
+
+            this.affine();
         }
+
     };
 
     // set to group generator
@@ -719,88 +787,70 @@ var ECP2 = function(ctx) {
         return ((x >> 31) & 1);
     };
 
-    /* needed for SOK */
-    ECP2.mapit = function(h) {
-        var fa = new ctx.BIG(0),
-            fb = new ctx.BIG(0),
-            q, x, one, Q, T, K, X, xQ, x2Q;
+/* Deterministic mapping of Fp to point on curve */
+    ECP2.hashit = function(h)
+    { // SWU method
+        var sgn,ne;
+        var W=new ctx.FP2(1);
 
-        q = new ctx.BIG(0);
+        var c = new ctx.BIG(0);
+        c.rcopy(ctx.ROM_CURVE.CURVE_B);
+        var B = new ctx.FP2(c);
+
+        var t=new ctx.FP(h);
+        var s=new ctx.FP(-3);
+        var one=new ctx.FP(1);
+
+		if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.D_TYPE) B.div_ip();
+		if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) B.mul_ip();
+        B.norm();
+        sgn=t.sign();
+        var w=s.sqrt();
+        var j=new ctx.FP(w); j.sub(one); j.norm(); j.div2();
+
+        w.mul(t);
+        var b=new ctx.FP(t);
+        b.sqr();
+        b.add(one);
+        var Y=new ctx.FP2(b);
+        B.add(Y); B.norm(); B.inverse();
+        B.pmul(w);
+
+        var X1=new ctx.FP2(B); X1.pmul(t);
+        Y.copy(new ctx.FP2(j));
+        var X2=new ctx.FP2(X1); X2.sub(Y); X2.norm();
+        X1.copy(X2); X1.neg(); X1.norm();
+        X2.sub(W); X2.norm();
+
+        B.sqr(); B.inverse();
+        var X3=new ctx.FP2(B); X3.add(W); X3.norm();
+
+        Y.copy(ECP2.RHS(X2));
+        X1.cmove(X2,Y.qr());
+        Y.copy(ECP2.RHS(X3));
+        X1.cmove(X3,Y.qr());
+        Y.copy(ECP2.RHS(X1));
+        Y.sqrt();
+
+        ne=Y.sign()^sgn;
+        W.copy(Y); W.neg(); W.norm();
+        Y.cmove(W,ne);
+
+        var P=new ECP2();
+        P.setxy(X1,Y);
+        return P;
+    };
+
+/* Map octet string to curve point */
+	ECP2.mapit = function(h)
+	{
+		var q=new ctx.BIG(0);
         q.rcopy(ctx.ROM_FIELD.Modulus);
-        x = ctx.BIG.fromBytes(h);
-        one = new ctx.BIG(1);
-        x.mod(q);
-
-        for (;;) {
-            X = new ctx.FP2(one, x);
-            Q = new ECP2();
-            Q.setx(X,0);
-            if (!Q.is_infinity()) {
-                break;
-            }
-            x.inc(1);
-            x.norm();
-        }
-        /* Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez */
-        fa.rcopy(ctx.ROM_FIELD.Fra);
-        fb.rcopy(ctx.ROM_FIELD.Frb);
-        X = new ctx.FP2(fa, fb);
-        if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) {
-            X.inverse();
-            X.norm();
-        }
-
-        x = new ctx.BIG(0);
-        x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
-
-        if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BN) {
-            T = new ECP2();
-            T.copy(Q);
-            T = T.mul(x);
-            if (ctx.ECP.SIGN_OF_X == ctx.ECP.NEGATIVEX) {
-                T.neg();
-            }
-            K = new ECP2();
-            K.copy(T);
-            K.dbl();
-            K.add(T); //K.affine();
-
-            K.frob(X);
-            Q.frob(X);
-            Q.frob(X);
-            Q.frob(X);
-            Q.add(T);
-            Q.add(K);
-            T.frob(X);
-            T.frob(X);
-            Q.add(T);
-        }
-
-        if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BLS) {
-
-            xQ = Q.mul(x);
-            x2Q = xQ.mul(x);
-
-            if (ctx.ECP.SIGN_OF_X == ctx.ECP.NEGATIVEX) {
-                xQ.neg();
-            }
-
-            x2Q.sub(xQ);
-            x2Q.sub(Q);
-
-            xQ.sub(Q);
-            xQ.frob(X);
-
-            Q.dbl();
-            Q.frob(X);
-            Q.frob(X);
-
-            Q.add(x2Q);
-            Q.add(xQ);
-        }
-
-        Q.affine();
-
+		var dx=ctx.DBIG.fromBytes(h);
+        var x=dx.mod(q);
+		
+		var Q=ECP2.hashit(x);
+		Q.cfp();
         return Q;
     };
 

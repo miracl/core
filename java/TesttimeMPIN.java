@@ -93,7 +93,23 @@ public class TesttimeMPIN extends TestCase {
         System.out.format(" %8.2f ms per iteration\n", dur);
 
         ECP2 Q = ECP2.generator();
-        ECP2 W = PAIR.G2mul(Q, r);
+
+
+        ECP2 W = ECP2.hashit(s);
+        //System.out.print("W= "+W.toString()+"\n");
+        W.cfp();
+        if (W.is_infinity()) {
+            fail("HASHING FAILURE - P=O");
+        }
+        
+        W = PAIR.G2mul(W, r);
+        if (!W.is_infinity()) {
+            fail("FAILURE - rQ!=O");
+        }
+        
+
+
+        W = PAIR.G2mul(Q, r);
 
         if (!W.is_infinity()) {
             fail("FAILURE - rQ!=O");

@@ -269,6 +269,18 @@ extern void ECP8_ZZZ_frob(ECP8_ZZZ *P, FP2_YYY F[3], int n);
  */
 extern void ECP8_ZZZ_mul16(ECP8_ZZZ *P, ECP8_ZZZ *Q, BIG_XXX *b);
 
+/**	@brief Multiplies random point by co-factor
+ *
+	@param Q ECP8 multiplied by co-factor
+ */
+extern void ECP8_ZZZ_cfp(ECP8_ZZZ *Q);
+
+/**	@brief Hashes random BIG to curve point
+ *
+	@param Q ECP8 instance 
+	@param x Fp derived from hash
+ */
+extern void ECP8_ZZZ_hashit(ECP8_ZZZ *Q, BIG_XXX  x);
 
 /**	@brief Maps random BIG to curve point of correct order
  *

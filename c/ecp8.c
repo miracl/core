@@ -938,31 +938,86 @@ void ECP8_ZZZ_mul16(ECP8_ZZZ *P, ECP8_ZZZ Q[16], BIG_XXX u[16])
     ECP8_ZZZ_affine(P);
 }
 
-/* Map to hash value to point on G2 from random BIG_XXX */
+/* Deterministic Map of BIG to G2 curve point */
+void ECP8_ZZZ_hashit(ECP8_ZZZ *Q,BIG_XXX h)
+{
+    int sgn,ne;
+    FP8_YYY X1,X2,X3,W,B,Y;
+    FP_YYY t,b,j,s,one;
 
+    FP_YYY_rcopy(&b,CURVE_B_ZZZ);
+    FP8_YYY_from_FP(&B, &b);
+#if SEXTIC_TWIST_ZZZ == D_TYPE
+    FP8_YYY_div_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+
+#if SEXTIC_TWIST_ZZZ == M_TYPE
+    FP8_YYY_times_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+
+    FP8_YYY_one(&W);
+    FP_YYY_one(&one);
+    FP_YYY_nres(&t,h);
+    sgn=FP_YYY_sign(&t);
+        
+    FP_YYY_from_int(&s,-3);
+    FP_YYY_sqrt(&s,&s);         // s=sqrt(-3)
+    FP_YYY_sub(&j,&s,&one);     FP_YYY_norm(&j);
+    FP_YYY_div2(&j,&j);         // j=(s-1)/2
+
+    FP_YYY_mul(&s,&s,&t);       // s=s.t
+    FP_YYY_sqr(&b,&t);          // t^2
+    FP_YYY_add(&b,&b,&one);     // t^2+1
+    FP8_YYY_from_FP(&Y,&b);
+    FP8_YYY_add(&B,&B,&Y);      // t^2+B+1
+    FP8_YYY_norm(&B);
+    FP8_YYY_inv(&B,&B);
+    FP8_YYY_tmul(&B,&B,&s);      // w=s.t/(1+B+t*2)
+
+    FP8_YYY_tmul(&X1,&B,&t);       
+    FP8_YYY_from_FP(&Y,&j);     
+    FP8_YYY_sub(&X2,&X1,&Y);    FP8_YYY_norm(&X2);// X2=t.w-j 
+    FP8_YYY_neg(&X1,&X2);       FP8_YYY_norm(&X1);// X1=j-t.w
+    FP8_YYY_sub(&X2,&X2,&W);    FP8_YYY_norm(&X2);
+
+    FP8_YYY_sqr(&B,&B);
+    FP8_YYY_inv(&B,&B);
+    FP8_YYY_add(&X3,&B,&W);     FP8_YYY_norm(&X3);
+    
+    ECP8_ZZZ_rhs(&W,&X2);
+    FP8_YYY_cmove(&X1,&X2,FP8_YYY_qr(&W));
+    ECP8_ZZZ_rhs(&W,&X3);
+    FP8_YYY_cmove(&X1,&X3,FP8_YYY_qr(&W));
+    ECP8_ZZZ_rhs(&W,&X1);
+    FP8_YYY_sqrt(&Y,&W);
+    
+    ne=FP8_YYY_sign(&Y)^sgn;
+    FP8_YYY_neg(&W,&Y); FP8_YYY_norm(&W);
+    FP8_YYY_cmove(&Y,&W,ne);
+ 
+    ECP8_ZZZ_set(Q,&X1,&Y);
+}
+
+/* Map to hash value to point on G2 from random BIG */
 void ECP8_ZZZ_mapit(ECP8_ZZZ *Q, octet *W)
 {
-    BIG_XXX q, one, x, hv;
-    FP_YYY Fx, Fy;
-    FP2_YYY T, X[3];
-    FP4_YYY X4;
-    FP8_YYY X8;
-
-    ECP8_ZZZ xQ, x2Q, x3Q, x4Q , x5Q, x6Q, x7Q, x8Q;
-
-    BIG_XXX_fromBytes(hv, W->val);
+    BIG_XXX q, x;
+    DBIG_XXX dx;
     BIG_XXX_rcopy(q, Modulus_YYY);
-    BIG_XXX_one(one);
-    BIG_XXX_mod(hv, q);
 
-    for (;;)
-    {
-        FP2_YYY_from_BIGs(&T, one, hv); /*******/
-        FP4_YYY_from_FP2(&X4, &T);
-        FP8_YYY_from_FP4(&X8, &X4);
-        if (ECP8_ZZZ_setx(Q, &X8, 0)) break;
-        BIG_XXX_inc(hv, 1);
-    }
+    BIG_XXX_dfromBytesLen(dx,W->val,W->len);
+    BIG_XXX_dmod(x,dx,q);
+
+    ECP8_ZZZ_hashit(Q,x);   
+    ECP8_ZZZ_cfp(Q);
+}
+
+/* cofactor product */
+void ECP8_ZZZ_cfp(ECP8_ZZZ *Q)
+{
+    FP2_YYY X[3];
+    ECP8_ZZZ xQ, x2Q, x3Q, x4Q , x5Q, x6Q, x7Q, x8Q;
+    BIG_XXX x;
 
     ECP8_ZZZ_frob_constants(X);
 

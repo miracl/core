@@ -650,6 +650,46 @@ func (E *ECP4) Mul(e *BIG) *ECP4 {
 	return E.mul(e)
 }
 
+
+/* clear cofactor */
+func (E *ECP4) Cfp()  {
+
+	F := ECP4_frob_constants()
+	x := NewBIGints(CURVE_Bnx)
+	xQ := E.mul(x)
+	x2Q := xQ.mul(x)
+	x3Q := x2Q.mul(x)
+	x4Q := x3Q.mul(x)
+
+	if SIGN_OF_X == NEGATIVEX {
+		xQ.neg()
+		x3Q.neg()
+	}
+
+	x4Q.Sub(x3Q)
+	x4Q.Sub(E)
+
+	x3Q.Sub(x2Q)
+	x3Q.frob(F, 1)
+
+	x2Q.Sub(xQ)
+	x2Q.frob(F, 2)
+
+	xQ.Sub(E)
+	xQ.frob(F, 3)
+
+	E.dbl()
+	E.frob(F, 4)
+
+	E.Add(x4Q)
+	E.Add(x3Q)
+	E.Add(x2Q)
+	E.Add(xQ)
+
+	E.Affine()
+}
+
+
 func ECP4_generator() *ECP4 {
 	var G *ECP4
 	G = NewECP4fp4s(
@@ -663,60 +703,68 @@ func ECP4_generator() *ECP4 {
 	return G
 }
 
-/* needed for SOK */
+/* Deterministic mapping of Fp to point on curve */
+ func ECP4_hashit(h *BIG) *ECP4 {
+    // SWU method
+    W:=NewFP4int(1)
+
+	b2 := NewFP2big(NewBIGints(CURVE_B))
+	B := NewFP4fp2(b2)
+
+    t:=NewFPbig(h)
+    s:=NewFPint(-3)
+    one:=NewFPint(1)
+	if SEXTIC_TWIST == D_TYPE {
+		B.div_i()
+	}
+	if SEXTIC_TWIST == M_TYPE {
+		B.times_i()
+	}
+    B.norm()
+    sgn:=t.sign()
+    w:=s.sqrt()
+    j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
+
+    w.mul(t)
+    b:=NewFPcopy(t)
+    b.sqr()
+    b.add(one)
+    Y:=NewFP4fp(b)
+    B.add(Y); B.norm(); B.inverse()
+    B.qmul(w)
+
+    X1:=NewFP4copy(B); X1.qmul(t)
+    Y.copy(NewFP4fp(j))
+    X2:=NewFP4copy(X1); X2.sub(Y); X2.norm()
+    X1.copy(X2); X1.neg(); X1.norm()
+    X2.sub(W); X2.norm()
+
+    B.sqr(); B.inverse()
+    X3:=NewFP4copy(B); X3.add(W); X3.norm()
+
+    Y.copy(RHS4(X2))
+    X1.cmove(X2,Y.qr())
+    Y.copy(RHS4(X3))
+    X1.cmove(X3,Y.qr())
+    Y.copy(RHS4(X1))
+    Y.sqrt()
+
+    ne:=Y.sign()^sgn
+    W.copy(Y); W.neg(); W.norm()
+    Y.cmove(W,ne)
+
+    return NewECP4fp4s(X1,Y);
+}
+
+/* Map octet string to curve point */
 func ECP4_mapit(h []byte) *ECP4 {
 	q := NewBIGints(Modulus)
-	hv := FromBytes(h[:])
-	one := NewBIGint(1)
-	var X2 *FP2
-	var X *FP4
-	var Q *ECP4
-	hv.Mod(q)
-	for true {
-		X2 = NewFP2bigs(one, hv)
-		X = NewFP4fp2(X2)
-		Q = NewECP4fp4(X,0)
-		if !Q.Is_infinity() {
-			break
-		}
-		hv.inc(1)
-		hv.norm()
-	}
-
-	F := ECP4_frob_constants()
-	x := NewBIGints(CURVE_Bnx)
-	xQ := Q.mul(x)
-	x2Q := xQ.mul(x)
-	x3Q := x2Q.mul(x)
-	x4Q := x3Q.mul(x)
-
-	if SIGN_OF_X == NEGATIVEX {
-		xQ.neg()
-		x3Q.neg()
-	}
-
-	x4Q.Sub(x3Q)
-	x4Q.Sub(Q)
-
-	x3Q.Sub(x2Q)
-	x3Q.frob(F, 1)
-
-	x2Q.Sub(xQ)
-	x2Q.frob(F, 2)
-
-	xQ.Sub(Q)
-	xQ.frob(F, 3)
-
-	Q.dbl()
-	Q.frob(F, 4)
-
-	Q.Add(x4Q)
-	Q.Add(x3Q)
-	Q.Add(x2Q)
-	Q.Add(xQ)
-
-	Q.Affine()
-	return Q
+	dx:=DBIG_fromBytes(h);
+    x:=dx.mod(q);
+		
+	Q:=ECP4_hashit(x)
+	Q.Cfp()
+    return Q
 }
 
 /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3.. */

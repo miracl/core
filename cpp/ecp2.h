@@ -221,7 +221,21 @@ extern void ECP2_frob(ECP2 *P, YYY::FP2 *f);
  */
 extern void ECP2_mul4(ECP2 *P, ECP2 *Q, XXX::BIG *b);
 
-/**	@brief Maps random BIG to curve point of correct order
+/**	@brief Multiplies random point by co-factor
+ *
+	@param Q ECP2 multiplied by co-factor
+ */
+extern void ECP2_cfp(ECP2 *Q);
+
+/**	@brief Hashes random BIG to curve point
+ *
+	@param Q ECP2 instance 
+	@param x Fp derived from hash
+ */
+extern void ECP2_hashit(ECP2 *Q, XXX::BIG  x);
+
+
+/**	@brief Maps random octet to curve point of correct order
  *
 	@param P ECP2 instance of correct order
 	@param W OCTET byte array to be mapped

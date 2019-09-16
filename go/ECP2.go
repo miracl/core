@@ -574,6 +574,69 @@ func (E *ECP2) Mul(e *BIG) *ECP2 {
 	return E.mul(e)
 }
 
+
+/* clear cofactor */
+func (E *ECP2) Cfp() {
+	var T, K, xQ, x2Q *ECP2
+	/* Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez */
+	Fra := NewBIGints(Fra)
+	Frb := NewBIGints(Frb)
+	X := NewFP2bigs(Fra, Frb)
+	if SEXTIC_TWIST == M_TYPE {
+		X.inverse()
+		X.norm()
+	}
+
+	x := NewBIGints(CURVE_Bnx)
+
+	if CURVE_PAIRING_TYPE == BN {
+		T = NewECP2()
+		T.Copy(E)
+		T = T.mul(x)
+		if SIGN_OF_X == NEGATIVEX {
+			T.neg()
+		}
+
+		K = NewECP2()
+		K.Copy(T)
+		K.dbl()
+		K.Add(T)
+
+		K.frob(X)
+		E.frob(X)
+		E.frob(X)
+		E.frob(X)
+		E.Add(T)
+		E.Add(K)
+		T.frob(X)
+		T.frob(X)
+		E.Add(T)
+	}
+	if CURVE_PAIRING_TYPE == BLS {
+		xQ = E.mul(x)
+		x2Q = xQ.mul(x)
+
+		if SIGN_OF_X == NEGATIVEX {
+			xQ.neg()
+		}
+
+		x2Q.Sub(xQ)
+		x2Q.Sub(E)
+
+		xQ.Sub(E)
+		xQ.frob(X)
+
+		E.dbl()
+		E.frob(X)
+		E.frob(X)
+
+		E.Add(x2Q)
+		E.Add(xQ)
+	}
+	E.Affine()
+}
+
+
 /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3 */
 // Bos & Costello https://eprint.iacr.org/2013/458.pdf
 // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
@@ -667,80 +730,65 @@ func mul4(Q []*ECP2, u []*BIG) *ECP2 {
 	return P
 }
 
-/* needed for SOK */
+/* Deterministic mapping of Fp to point on curve */
+ func ECP2_hashit(h *BIG) *ECP2 {
+    // SWU method
+    W:=NewFP2int(1)
+	B := NewFP2big(NewBIGints(CURVE_B))
+    t:=NewFPbig(h)
+    s:=NewFPint(-3)
+    one:=NewFPint(1)
+	if SEXTIC_TWIST == D_TYPE {
+		B.div_ip()
+	}
+	if SEXTIC_TWIST == M_TYPE {
+		B.mul_ip()
+	}
+    B.norm()
+    sgn:=t.sign()
+    w:=s.sqrt()
+    j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
+
+    w.mul(t)
+    b:=NewFPcopy(t)
+    b.sqr()
+    b.add(one)
+    Y:=NewFP2fp(b)
+    B.add(Y); B.norm(); B.inverse()
+    B.pmul(w)
+
+    X1:=NewFP2copy(B); X1.pmul(t)
+    Y.copy(NewFP2fp(j))
+    X2:=NewFP2copy(X1); X2.sub(Y); X2.norm()
+    X1.copy(X2); X1.neg(); X1.norm()
+    X2.sub(W); X2.norm()
+
+    B.sqr(); B.inverse()
+    X3:=NewFP2copy(B); X3.add(W); X3.norm()
+
+    Y.copy(RHS2(X2))
+    X1.cmove(X2,Y.qr())
+    Y.copy(RHS2(X3))
+    X1.cmove(X3,Y.qr())
+    Y.copy(RHS2(X1))
+    Y.sqrt()
+
+    ne:=Y.sign()^sgn
+    W.copy(Y); W.neg(); W.norm()
+    Y.cmove(W,ne)
+
+    return NewECP2fp2s(X1,Y);
+}
+
+/* Map octet string to curve point */
 func ECP2_mapit(h []byte) *ECP2 {
 	q := NewBIGints(Modulus)
-	x := FromBytes(h[:])
-	one := NewBIGint(1)
-	var X *FP2
-	var Q, T, K, xQ, x2Q *ECP2
-	x.Mod(q)
-	for true {
-		X = NewFP2bigs(one, x)
-		Q = NewECP2fp2(X,0)
-		if !Q.Is_infinity() {
-			break
-		}
-		x.inc(1)
-		x.norm()
-	}
-	/* Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez */
-	Fra := NewBIGints(Fra)
-	Frb := NewBIGints(Frb)
-	X = NewFP2bigs(Fra, Frb)
-	if SEXTIC_TWIST == M_TYPE {
-		X.inverse()
-		X.norm()
-	}
-
-	x = NewBIGints(CURVE_Bnx)
-
-	if CURVE_PAIRING_TYPE == BN {
-		T = NewECP2()
-		T.Copy(Q)
-		T = T.mul(x)
-		if SIGN_OF_X == NEGATIVEX {
-			T.neg()
-		}
-
-		K = NewECP2()
-		K.Copy(T)
-		K.dbl()
-		K.Add(T)
-
-		K.frob(X)
-		Q.frob(X)
-		Q.frob(X)
-		Q.frob(X)
-		Q.Add(T)
-		Q.Add(K)
-		T.frob(X)
-		T.frob(X)
-		Q.Add(T)
-	}
-	if CURVE_PAIRING_TYPE == BLS {
-		xQ = Q.mul(x)
-		x2Q = xQ.mul(x)
-
-		if SIGN_OF_X == NEGATIVEX {
-			xQ.neg()
-		}
-
-		x2Q.Sub(xQ)
-		x2Q.Sub(Q)
-
-		xQ.Sub(Q)
-		xQ.frob(X)
-
-		Q.dbl()
-		Q.frob(X)
-		Q.frob(X)
-
-		Q.Add(x2Q)
-		Q.Add(xQ)
-	}
-	Q.Affine()
-	return Q
+	dx:=DBIG_fromBytes(h);
+    x:=dx.mod(q);
+		
+	Q:=ECP2_hashit(x)
+	Q.Cfp()
+    return Q
 }
 
 func ECP2_generator() *ECP2 {

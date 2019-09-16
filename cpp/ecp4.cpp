@@ -774,28 +774,86 @@ void ZZZ::ECP4_mul8(ECP4 *P, ECP4 Q[8], BIG u[8])
     ECP4_affine(P);
 }
 
-/* Map to hash value to point on G2 from random BIG */
+/* Deterministic Map of BIG to G2 curve point */
+void ZZZ::ECP4_hashit(ECP4 *Q,BIG h)
+{
+    int sgn,ne;
+    FP4 X1,X2,X3,W,B,Y;
+    FP t,b,j,s,one;
 
+    FP_rcopy(&b,CURVE_B);
+    FP4_from_FP(&B, &b);
+#if SEXTIC_TWIST_ZZZ == D_TYPE
+    FP4_div_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+
+#if SEXTIC_TWIST_ZZZ == M_TYPE
+    FP4_times_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+
+    FP4_one(&W);
+    FP_one(&one);
+    FP_nres(&t,h);
+    sgn=FP_sign(&t);
+        
+    FP_from_int(&s,-3);
+    FP_sqrt(&s,&s);         // s=sqrt(-3)
+    FP_sub(&j,&s,&one);     FP_norm(&j);
+    FP_div2(&j,&j);         // j=(s-1)/2
+
+    FP_mul(&s,&s,&t);       // s=s.t
+    FP_sqr(&b,&t);          // t^2
+    FP_add(&b,&b,&one);     // t^2+1
+    FP4_from_FP(&Y,&b);
+    FP4_add(&B,&B,&Y);      // t^2+B+1
+    FP4_norm(&B);
+    FP4_inv(&B,&B);
+    FP4_qmul(&B,&B,&s);      // w=s.t/(1+B+t*2)
+
+    FP4_qmul(&X1,&B,&t);       
+    FP4_from_FP(&Y,&j);     
+    FP4_sub(&X2,&X1,&Y);    FP4_norm(&X2);// X2=t.w-j 
+    FP4_neg(&X1,&X2);       FP4_norm(&X1);// X1=j-t.w
+    FP4_sub(&X2,&X2,&W);    FP4_norm(&X2);
+
+    FP4_sqr(&B,&B);
+    FP4_inv(&B,&B);
+    FP4_add(&X3,&B,&W);     FP4_norm(&X3);
+    
+    ECP4_rhs(&W,&X2);
+    FP4_cmove(&X1,&X2,FP4_qr(&W));
+    ECP4_rhs(&W,&X3);
+    FP4_cmove(&X1,&X3,FP4_qr(&W));
+    ECP4_rhs(&W,&X1);
+    FP4_sqrt(&Y,&W);
+    
+    ne=FP4_sign(&Y)^sgn;
+    FP4_neg(&W,&Y); FP4_norm(&W);
+    FP4_cmove(&Y,&W,ne);
+ 
+    ECP4_set(Q,&X1,&Y);
+}
+
+/* Map to hash value to point on G2 from random BIG */
 void ZZZ::ECP4_mapit(ECP4 *Q, octet *W)
 {
-    BIG q, one, x, hv;
-    FP2 X[3], T;
-    FP4 X4, Y4;
-
-    ECP4 xQ, x2Q, x3Q, x4Q;
-
-    BIG_fromBytes(hv, W->val);
+    BIG q, x;
+    DBIG dx;
     BIG_rcopy(q, Modulus);
-    BIG_one(one);
-    BIG_mod(hv, q);
 
-    for (;;)
-    {
-        FP2_from_BIGs(&T, one, hv); /*******/
-        FP4_from_FP2(&X4, &T);
-        if (ECP4_setx(Q, &X4, 0)) break;
-        BIG_inc(hv, 1);
-    }
+    BIG_dfromBytesLen(dx,W->val,W->len);
+    BIG_dmod(x,dx,q);
+
+    ECP4_hashit(Q,x);   
+    ECP4_cfp(Q);
+}
+
+/* cofactor product */
+void ZZZ::ECP4_cfp(ECP4 *Q)
+{
+    FP2 X[3];
+    ECP4 xQ, x2Q, x3Q, x4Q;
+    BIG x;
 
     ECP4_frob_constants(X);
 

@@ -369,9 +369,23 @@ public func TimeMPIN_bn254(_ rng: inout RAND)
     print(String(format: "G1  mul              - %d iterations",iterations),terminator: "");
     print(String(format: " %.2f ms per iteration",elapsed))
 
-    var Q=bn254.ECP2.generator();
+    var Q=bn254.ECP2.generator()
 
-    var W=bn254.PAIR.G2mul(Q,r)
+
+    var W = bn254.ECP2.hashit(s)
+    W.cfp();
+    if W.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true
+    }
+    W = bn254.PAIR.G2mul(W, r);
+    if !W.is_infinity() {
+        print("FAILURE - rQ!=O")
+        fail=true
+    }
+
+
+    W=bn254.PAIR.G2mul(Q,r)
 
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
@@ -533,7 +547,20 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
 
     var Q=bls383.ECP2.generator();
 
-    var W=bls383.PAIR.G2mul(Q,r)
+    var W = bls383.ECP2.hashit(s)
+    W.cfp();
+    if W.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true
+    }
+    W = bls383.PAIR.G2mul(W, r);
+    if !W.is_infinity() {
+        print("FAILURE - rQ!=O")
+        fail=true
+    }
+
+
+    W=bls383.PAIR.G2mul(Q,r)
 
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
@@ -698,7 +725,19 @@ public func TimeMPIN_bls24(_ rng: inout RAND)
 
     var Q=bls24.ECP4.generator();
 
-    var W=PAIR192.G2mul(Q,r)
+    var W = bls24.ECP4.hashit(s)
+    W.cfp();
+    if W.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true
+    }
+    W = bls24.PAIR192.G2mul(W, r);
+    if !W.is_infinity() {
+        print("FAILURE - rQ!=O")
+        fail=true
+    }
+
+    W=PAIR192.G2mul(Q,r)
 
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
@@ -849,7 +888,19 @@ public func TimeMPIN_bls48(_ rng: inout RAND)
 
     var Q=ECP8.generator();
 
-    var W=PAIR256.G2mul(Q,r)
+    var W = bls48.ECP8.hashit(s)
+    W.cfp();
+    if W.is_infinity() {
+        print("HASHING FAILURE - P=O")
+        fail=true
+    }
+    W = bls48.PAIR256.G2mul(W, r);
+    if !W.is_infinity() {
+        print("FAILURE - rQ!=O")
+        fail=true
+    }
+
+    W=PAIR256.G2mul(Q,r)
 
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")

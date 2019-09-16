@@ -217,6 +217,19 @@
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
 		Q=ctx.ECP2.generator();
+
+        W = ctx.ECP2.hashit(s);
+        W.cfp();
+        if (W.is_infinity()) {
+            alert("HASHING FAILURE - P=O");
+			fail=true;
+        }
+        W = ctx.PAIR.G2mul(W, r);
+        if (!W.is_infinity()) {
+            alert("FAILURE - rQ!=O");
+			fail=true;
+        }
+
 		W=ctx.PAIR.G2mul(Q,r);
 
 		if (!W.is_infinity())
@@ -587,6 +600,19 @@
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
 		Q=ctx.ECP2.generator();
+
+        W = ctx.ECP2.hashit(s);
+        W.cfp();
+        if (W.is_infinity()) {
+            alert("HASHING FAILURE - P=O");
+			fail=true;
+        }
+        W = ctx.PAIR.G2mul(W, r);
+        if (!W.is_infinity()) {
+            alert("FAILURE - rQ!=O");
+			fail=true;
+        }
+
 		W=ctx.PAIR.G2mul(Q,r);
 
 		if (!W.is_infinity())
@@ -777,6 +803,19 @@
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
 		Q=ctx.ECP4.generator();
+
+        W = ctx.ECP4.hashit(s);
+        W.cfp();
+        if (W.is_infinity()) {
+            alert("HASHING FAILURE - P=O");
+			fail=true;
+        }
+        W = ctx.PAIR192.G2mul(W, r);
+        if (!W.is_infinity()) {
+            alert("FAILURE - rQ!=O");
+			fail=true;
+        }
+
 		W=ctx.PAIR192.G2mul(Q,r);
 
 		if (!W.is_infinity())
@@ -955,6 +994,20 @@
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
 		Q=ctx.ECP8.generator();
+
+        W = ctx.ECP8.hashit(s);
+        W.cfp();
+        if (W.is_infinity()) {
+            alert("HASHING FAILURE - P=O");
+			fail=true;
+        }
+        W = ctx.PAIR256.G2mul(W, r);
+        if (!W.is_infinity()) {
+            alert("FAILURE - rQ!=O");
+			fail=true;
+        }
+
+
 		W=ctx.PAIR256.G2mul(Q,r);
 
 		if (!W.is_infinity())

@@ -255,6 +255,18 @@ extern void ECP4_ZZZ_frob(ECP4_ZZZ *P, FP2_YYY F[3], int n);
  */
 extern void ECP4_ZZZ_mul8(ECP4_ZZZ *P, ECP4_ZZZ *Q, BIG_XXX *b);
 
+/**	@brief Multiplies random point by co-factor
+ *
+	@param Q ECP4 multiplied by co-factor
+ */
+extern void ECP4_ZZZ_cfp(ECP4_ZZZ *Q);
+
+/**	@brief Hashes random BIG to curve point
+ *
+	@param Q ECP4 instance 
+	@param x Fp derived from hash
+ */
+extern void ECP4_ZZZ_hashit(ECP4_ZZZ *Q, BIG_XXX  x);
 
 /**	@brief Maps random BIG to curve point of correct order
  *

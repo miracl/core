@@ -687,31 +687,75 @@ public final class ECP4 {
 		return P;
 	}        
 
-/* needed for SOK */
+/* Deterministic mapping of Fp to point on curve */
+    public static ECP4 hashit(BIG h)
+    { // SWU method
+        int sgn,ne;
+        FP4 W=new FP4(1);
+        FP4 B=new FP4(new FP2(new BIG(ROM.CURVE_B)));
+        FP t=new FP(h);
+        FP s=new FP(-3);
+        FP one=new FP(1);
+		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_i();
+		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
+        B.norm();
+        sgn=t.sign();
+        FP w=s.sqrt();
+        FP j=new FP(w); j.sub(one); j.norm(); j.div2();
+
+        w.mul(t);
+        FP b=new FP(t);
+        b.sqr();
+        b.add(one);
+        FP4 Y=new FP4(b);
+        B.add(Y); B.norm(); B.inverse();
+        B.qmul(w);
+
+        FP4 X1=new FP4(B); X1.qmul(t);
+        Y.copy(new FP4(j));
+        FP4 X2=new FP4(X1); X2.sub(Y); X2.norm();
+        X1.copy(X2); X1.neg(); X1.norm();
+        X2.sub(W); X2.norm();
+
+        B.sqr(); B.inverse();
+        FP4 X3=new FP4(B); X3.add(W); X3.norm();
+
+        Y.copy(RHS(X2));
+        X1.cmove(X2,Y.qr());
+        Y.copy(RHS(X3));
+        X1.cmove(X3,Y.qr());
+        Y.copy(RHS(X1));
+        Y.sqrt();
+
+        ne=Y.sign()^sgn;
+        W.copy(Y); W.neg(); W.norm();
+        Y.cmove(W,ne);
+
+        return new ECP4(X1,Y);
+    }
+
+/* Map octet string to curve point */
 	public static ECP4 mapit(byte[] h)
 	{
 		BIG q=new BIG(ROM.Modulus);
-		BIG x=BIG.fromBytes(h);
-		BIG one=new BIG(1);
-		FP4 X;
-		FP2 X2;
-		ECP4 Q;
-		x.mod(q);
-		while (true)
-		{
-			X2=new FP2(one,x);
-			X=new FP4(X2);
-			Q=new ECP4(X,0);
-			if (!Q.is_infinity()) break;
-			x.inc(1); x.norm();
-		}
+		DBIG dx=DBIG.fromBytes(h);
+        BIG x=dx.mod(q);
+		
+		ECP4 Q=hashit(x);
+		Q.cfp();
+        return Q;
+    }
 
+
+/* clear cofactor */
+	public void cfp()
+	{
 		FP2[] F=ECP4.frob_constants();
-		x=new BIG(ROM.CURVE_Bnx);
+		BIG x=new BIG(ROM.CURVE_Bnx);
 
 /* Efficient hash maps to G2 on BLS curves - Budroni, Pintore */
 
-		ECP4 xQ=Q.mul(x);
+		ECP4 xQ=this.mul(x);
 		ECP4 x2Q=xQ.mul(x);
 		ECP4 x3Q=x2Q.mul(x);
 		ECP4 x4Q=x3Q.mul(x);
@@ -723,7 +767,7 @@ public final class ECP4 {
 		}	
 
 		x4Q.sub(x3Q);
-		x4Q.sub(Q);
+		x4Q.sub(this);
 
 		x3Q.sub(x2Q);
 		x3Q.frob(F,1);
@@ -731,19 +775,18 @@ public final class ECP4 {
 		x2Q.sub(xQ);
 		x2Q.frob(F,2);
 
-		xQ.sub(Q);
+		xQ.sub(this);
 		xQ.frob(F,3);
 
-		Q.dbl();
-		Q.frob(F,4);
+		dbl();
+		frob(F,4);
 
-		Q.add(x4Q);
-		Q.add(x3Q);
-		Q.add(x2Q);
-		Q.add(xQ);
+		add(x4Q);
+		add(x3Q);
+		add(x2Q);
+		add(xQ);
 
-		Q.affine();
-		return Q;
+		affine();
 	}
 
 	public static ECP4 generator()

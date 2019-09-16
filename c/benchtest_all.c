@@ -414,6 +414,21 @@ int BN_254(csprng *RNG)
 
     ECP2_BN254_generator(&W);
 
+    ECP2_BN254_hashit(&Q,s);
+    ECP2_BN254_cfp(&Q);
+
+    if (ECP2_BN254_isinf(&Q))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
+    ECP2_BN254_mul(&Q,r);
+    if (!ECP2_BN254_isinf(&Q))
+    {
+        printf("FAILURE - rQ!=O\n");
+        return 0;
+    }
+
     ECP2_BN254_copy(&Q, &W);
     ECP2_BN254_mul(&Q, r);
 
@@ -595,6 +610,21 @@ int BLS_383(csprng *RNG)
 
     ECP2_BLS383_generator(&W);
 
+    ECP2_BLS383_hashit(&Q,s);
+    ECP2_BLS383_cfp(&Q);
+
+    if (ECP2_BLS383_isinf(&Q))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
+    ECP2_BLS383_mul(&Q,r);
+    if (!ECP2_BLS383_isinf(&Q))
+    {
+        printf("FAILURE - rQ!=O\n");
+        return 0;
+    }
+
     ECP2_BLS383_copy(&Q, &W);
     ECP2_BLS383_mul(&Q, r);
 
@@ -774,6 +804,21 @@ int BLS_24(csprng *RNG)
 
     ECP4_BLS24_generator(&W);
 
+    ECP4_BLS24_hashit(&Q,s);
+    ECP4_BLS24_cfp(&Q);
+
+    if (ECP4_BLS24_isinf(&Q))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
+    ECP4_BLS24_mul(&Q,r);
+    if (!ECP4_BLS24_isinf(&Q))
+    {
+        printf("FAILURE - rQ!=O\n");
+        return 0;
+    }
+
     ECP4_BLS24_copy(&Q, &W);
     ECP4_BLS24_mul(&Q, r);
 
@@ -952,6 +997,21 @@ int BLS_48(csprng *RNG)
     printf(" %8.2lf ms per iteration\n", elapsed);
 
     ECP8_BLS48_generator(&W);
+
+    ECP8_BLS48_hashit(&Q,s);
+    ECP8_BLS48_cfp(&Q);
+
+    if (ECP8_BLS48_isinf(&Q))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
+    ECP8_BLS48_mul(&Q,r);
+    if (!ECP8_BLS48_isinf(&Q))
+    {
+        printf("FAILURE - rQ!=O\n");
+        return 0;
+    }
 
     ECP8_BLS48_copy(&Q, &W);
     ECP8_BLS48_mul(&Q, r);

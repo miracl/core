@@ -37,6 +37,8 @@ use crate::xxx::fp2::FP2;
 use crate::xxx::fp4::FP4;
 use crate::xxx::fp8::FP8;
 use crate::xxx::rom;
+use crate::xxx::fp::FP;
+use crate::xxx::dbig::DBIG;
 
 pub struct ECP8 {
     x: FP8,
@@ -762,6 +764,67 @@ impl ECP8 {
         return P;
     }
 
+    #[allow(non_snake_case)]
+    pub fn cfp(&mut self) {
+        let f = ECP8::frob_constants();
+        let mut x = BIG::new_ints(&rom::CURVE_BNX);
+
+        let mut xQ = self.mul(&mut x);
+        let mut x2Q = xQ.mul(&mut x);
+        let mut x3Q = x2Q.mul(&mut x);
+        let mut x4Q = x3Q.mul(&mut x);
+        let mut x5Q = x4Q.mul(&mut x);
+        let mut x6Q = x5Q.mul(&mut x);
+        let mut x7Q = x6Q.mul(&mut x);
+        let mut x8Q = x7Q.mul(&mut x);
+
+        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+            xQ.neg();
+            x3Q.neg();
+            x5Q.neg();
+            x7Q.neg();
+        }
+
+        x8Q.sub(&x7Q);
+        x8Q.sub(&self);
+
+        x7Q.sub(&x6Q);
+        x7Q.frob(&f, 1);
+
+        x6Q.sub(&x5Q);
+        x6Q.frob(&f, 2);
+
+        x5Q.sub(&x4Q);
+        x5Q.frob(&f, 3);
+
+        x4Q.sub(&x3Q);
+        x4Q.frob(&f, 4);
+
+        x3Q.sub(&x2Q);
+        x3Q.frob(&f, 5);
+
+        x2Q.sub(&xQ);
+        x2Q.frob(&f, 6);
+
+        xQ.sub(&self);
+        xQ.frob(&f, 7);
+
+        self.dbl();
+        self.frob(&f, 8);
+
+        self.add(&x8Q);
+        self.add(&x7Q);
+        self.add(&x6Q);
+        self.add(&x5Q);
+
+        self.add(&x4Q);
+        self.add(&x3Q);
+        self.add(&x2Q);
+        self.add(&xQ);
+
+        self.affine();
+    }
+
     /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3.. */
     // Bos & Costello https://eprint.iacr.org/2013/458.pdf
     // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
@@ -1113,81 +1176,66 @@ impl ECP8 {
         );
     }
 
+/* Deterministic mapping of Fp to point on curve */
+    #[allow(non_snake_case)]
+    pub fn hashit(h: &BIG) -> ECP8 {
+    // SWU method
+        let mut W=FP8::new_int(1);
+        let mut B = FP8::new_fp4(&FP4::new_fp2(&FP2::new_big(&BIG::new_ints(&rom::CURVE_B))));
+        let mut t=FP::new_big(h);
+        let mut s=FP::new_int(-3);
+        let one=FP::new_int(1);
+		if ecp::SEXTIC_TWIST == ecp::D_TYPE {
+            B.div_i();
+        }
+		if ecp::SEXTIC_TWIST == ecp::M_TYPE {
+            B.times_i();
+        }
+        B.norm();
+        let sgn=t.sign();
+        let mut w=s.sqrt();
+        let mut j=FP::new_copy(&w); j.sub(&one); j.norm(); j.div2();
+
+        w.mul(&t);
+        let mut b=FP::new_copy(&t);
+        b.sqr();
+        b.add(&one);
+        let mut Y=FP8::new_fp(&b);
+        B.add(&Y); B.norm(); B.inverse();
+        B.tmul(&w);
+
+        let mut X1=FP8::new_copy(&B); X1.tmul(&t);
+        Y.copy(&FP8::new_fp(&j));
+        let mut X2=FP8::new_copy(&X1); X2.sub(&Y); X2.norm();
+        X1.copy(&X2); X1.neg(); X1.norm();
+        X2.sub(&W); X2.norm();
+
+        B.sqr(); B.inverse();
+        let mut X3=FP8::new_copy(&B); X3.add(&W); X3.norm();
+
+        Y.copy(&ECP8::rhs(&X2));
+        X1.cmove(&X2,Y.qr());
+        Y.copy(&ECP8::rhs(&X3));
+        X1.cmove(&X3,Y.qr());
+        Y.copy(&ECP8::rhs(&X1));
+        Y.sqrt();
+
+        let ne=Y.sign()^sgn;
+        W.copy(&Y); W.neg(); W.norm();
+        Y.cmove(&W,ne);
+
+        return ECP8::new_fp8s(&X1,&Y);
+    }
+
     #[allow(non_snake_case)]
     pub fn mapit(h: &[u8]) -> ECP8 {
-        let mut q = BIG::new_ints(&rom::MODULUS);
-        let mut x = BIG::frombytes(h);
-        x.rmod(&mut q);
-        let mut Q: ECP8;
-        let one = BIG::new_int(1);
-
-        loop {
-            let X = FP8::new_fp4(&FP4::new_fp2(&FP2::new_bigs(&one, &x)));
-            Q = ECP8::new_fp8(&X,0);
-            if !Q.is_infinity() {
-                break;
-            }
-            x.inc(1);
-            x.norm();
-        }
-
-        let f = ECP8::frob_constants();
-        x = BIG::new_ints(&rom::CURVE_BNX);
-
-        let mut xQ = Q.mul(&mut x);
-        let mut x2Q = xQ.mul(&mut x);
-        let mut x3Q = x2Q.mul(&mut x);
-        let mut x4Q = x3Q.mul(&mut x);
-        let mut x5Q = x4Q.mul(&mut x);
-        let mut x6Q = x5Q.mul(&mut x);
-        let mut x7Q = x6Q.mul(&mut x);
-        let mut x8Q = x7Q.mul(&mut x);
-
-        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-            xQ.neg();
-            x3Q.neg();
-            x5Q.neg();
-            x7Q.neg();
-        }
-
-        x8Q.sub(&x7Q);
-        x8Q.sub(&Q);
-
-        x7Q.sub(&x6Q);
-        x7Q.frob(&f, 1);
-
-        x6Q.sub(&x5Q);
-        x6Q.frob(&f, 2);
-
-        x5Q.sub(&x4Q);
-        x5Q.frob(&f, 3);
-
-        x4Q.sub(&x3Q);
-        x4Q.frob(&f, 4);
-
-        x3Q.sub(&x2Q);
-        x3Q.frob(&f, 5);
-
-        x2Q.sub(&xQ);
-        x2Q.frob(&f, 6);
-
-        xQ.sub(&Q);
-        xQ.frob(&f, 7);
-
-        Q.dbl();
-        Q.frob(&f, 8);
-
-        Q.add(&x8Q);
-        Q.add(&x7Q);
-        Q.add(&x6Q);
-        Q.add(&x5Q);
-
-        Q.add(&x4Q);
-        Q.add(&x3Q);
-        Q.add(&x2Q);
-        Q.add(&xQ);
-
-        Q.affine();
-        return Q;
+        let q = BIG::new_ints(&rom::MODULUS);
+        let mut dx = DBIG::frombytes(h);
+        let mut x=dx.dmod(&q);
+        let mut P=ECP8::hashit(&mut x);
+        P.cfp();
+        return P;
     }
+
+
 }

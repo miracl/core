@@ -655,31 +655,96 @@ void ECP2_ZZZ_mul4(ECP2_ZZZ *P, ECP2_ZZZ Q[4], BIG_XXX u[4])
     ECP2_ZZZ_affine(P);
 }
 
+
+/* Deterministic Map of BIG to G2 curve point */
+void ECP2_ZZZ_hashit(ECP2_ZZZ *Q,BIG_XXX h)
+{ // SWU method. Assumes p=3 mod 4.
+    int sgn,ne;
+    FP2_YYY X1,X2,X3,W,B,Y;
+    FP_YYY t,b,j,s,one;
+
+    FP_YYY_rcopy(&b,CURVE_B_ZZZ);
+    FP2_YYY_from_FP(&B, &b);
+#if SEXTIC_TWIST_ZZZ == D_TYPE
+    FP2_YYY_div_ip(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+#if SEXTIC_TWIST_ZZZ == M_TYPE
+    FP2_YYY_mul_ip(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
+#endif
+    FP2_YYY_norm(&B);
+
+    FP2_YYY_one(&W);
+    FP_YYY_one(&one);
+    FP_YYY_nres(&t,h);
+    sgn=FP_YYY_sign(&t);
+        
+    FP_YYY_from_int(&s,-3);
+    FP_YYY_sqrt(&s,&s);         // s=sqrt(-3)
+    FP_YYY_sub(&j,&s,&one);     FP_YYY_norm(&j);
+    FP_YYY_div2(&j,&j);         // j=(s-1)/2
+
+    FP_YYY_mul(&s,&s,&t);       // s=s.t
+    FP_YYY_sqr(&b,&t);          // t^2
+    FP_YYY_add(&b,&b,&one);     // t^2+1
+    FP2_YYY_from_FP(&Y,&b);
+    FP2_YYY_add(&B,&B,&Y);      // t^2+B+1
+    FP2_YYY_norm(&B);
+    FP2_YYY_inv(&B,&B);
+    FP2_YYY_pmul(&B,&B,&s);      // w=s.t/(1+B+t*2)
+
+    FP2_YYY_pmul(&X1,&B,&t);       
+    FP2_YYY_from_FP(&Y,&j);     
+    FP2_YYY_sub(&X2,&X1,&Y);    FP2_YYY_norm(&X2);// X2=t.w-j 
+    FP2_YYY_neg(&X1,&X2);       FP2_YYY_norm(&X1);// X1=j-t.w
+    FP2_YYY_sub(&X2,&X2,&W);    FP2_YYY_norm(&X2);
+
+    FP2_YYY_sqr(&B,&B);
+    FP2_YYY_inv(&B,&B);
+    FP2_YYY_add(&X3,&B,&W);     FP2_YYY_norm(&X3);
+    
+    ECP2_ZZZ_rhs(&W,&X2);
+    FP2_YYY_cmove(&X1,&X2,FP2_YYY_qr(&W));
+    ECP2_ZZZ_rhs(&W,&X3);
+    FP2_YYY_cmove(&X1,&X3,FP2_YYY_qr(&W));
+    ECP2_ZZZ_rhs(&W,&X1);
+    FP2_YYY_sqrt(&Y,&W);
+    
+    ne=FP2_YYY_sign(&Y)^sgn;
+    FP2_YYY_neg(&W,&Y); FP2_YYY_norm(&W);
+    FP2_YYY_cmove(&Y,&W,ne);
+ 
+    ECP2_ZZZ_set(Q,&X1,&Y);
+}
+
 /* Map to hash value to point on G2 from random BIG */
 void ECP2_ZZZ_mapit(ECP2_ZZZ *Q, octet *W)
 {
-    BIG_XXX q, one, Fx, Fy, x, hv;
+    BIG_XXX q, x;
+    DBIG_XXX dx;
+    BIG_XXX_rcopy(q, Modulus_YYY);
+
+    BIG_XXX_dfromBytesLen(dx,W->val,W->len);
+    BIG_XXX_dmod(x,dx,q);
+
+
+    ECP2_ZZZ_hashit(Q,x);
+    ECP2_ZZZ_cfp(Q);
+}
+
+/* cofactor product */
+void ECP2_ZZZ_cfp(ECP2_ZZZ *Q)
+{
+    FP_YYY Fx, Fy;
     FP2_YYY X;
+    BIG_XXX x;
 #if (PAIRING_FRIENDLY_ZZZ == BN)
     ECP2_ZZZ T, K;
 #elif (PAIRING_FRIENDLY_ZZZ == BLS)
     ECP2_ZZZ xQ, x2Q;
 #endif
-    BIG_XXX_fromBytes(hv, W->val);
-    BIG_XXX_rcopy(q, Modulus_ZZZ);
-    BIG_XXX_one(one);
-    BIG_XXX_mod(hv, q);
-
-    for (;;)
-    {
-        FP2_YYY_from_BIGs(&X, one, hv);
-        if (ECP2_ZZZ_setx(Q, &X, 0)) break;
-        BIG_XXX_inc(hv, 1);
-    }
-
-    BIG_XXX_rcopy(Fx, Fra_YYY);
-    BIG_XXX_rcopy(Fy, Frb_YYY);
-    FP2_YYY_from_BIGs(&X, Fx, Fy);
+    FP_YYY_rcopy(&Fx, Fra_YYY);
+    FP_YYY_rcopy(&Fy, Frb_YYY);
+    FP2_YYY_from_FPs(&X, &Fx, &Fy);
 
 #if SEXTIC_TWIST_ZZZ==M_TYPE
     FP2_YYY_inv(&X, &X);
@@ -690,8 +755,8 @@ void ECP2_ZZZ_mapit(ECP2_ZZZ *Q, octet *W)
 
 #if (PAIRING_FRIENDLY_ZZZ == BN)
 
-    /* Faster Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez */
-    /* Q -> xQ + F(3xQ) + F(F(xQ)) + F(F(F(Q))). */
+    // Faster Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
+    // Q -> xQ + F(3xQ) + F(F(xQ)) + F(F(F(Q))).
     ECP2_ZZZ_copy(&T, Q);
     ECP2_ZZZ_mul(&T, x);
 #if SIGN_OF_X_ZZZ==NEGATIVEX
@@ -714,12 +779,11 @@ void ECP2_ZZZ_mapit(ECP2_ZZZ *Q, octet *W)
 
 #elif (PAIRING_FRIENDLY_ZZZ == BLS)
 
-    /* Efficient hash maps to G2 on BLS curves - Budroni, Pintore */
-    /* Q -> x2Q -xQ -Q +F(xQ -Q) +F(F(2Q)) */
+    // Efficient hash maps to G2 on BLS curves - Budroni, Pintore
+    // Q -> x2Q -xQ -Q +F(xQ -Q) +F(F(2Q))
 
     ECP2_ZZZ_copy(&xQ, Q);
     ECP2_ZZZ_mul(&xQ, x);
-
     ECP2_ZZZ_copy(&x2Q, &xQ);
     ECP2_ZZZ_mul(&x2Q, x);
 

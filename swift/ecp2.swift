@@ -489,6 +489,59 @@ public struct ECP2 {
         return P;
     }
     
+
+    // clear cofactor
+    mutating public func cfp()
+    {
+    // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
+        let Fra=BIG(ROM.Fra)
+        let Frb=BIG(ROM.Frb)
+        var X=FP2(Fra,Frb)
+        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE { 
+            X.inverse()
+            X.norm()
+        }         
+        let x=BIG(ROM.CURVE_Bnx)
+    
+        if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
+            var T=self.mul(x)
+            if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
+                T.neg()
+            }
+            var K=ECP2(); K.copy(T)
+            K.dbl(); K.add(T)
+    
+            K.frob(X)
+            self.frob(X); self.frob(X); self.frob(X)
+            self.add(T); self.add(K)
+            T.frob(X); T.frob(X)
+            self.add(T)
+        }
+        if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BLS {
+            var xQ=self.mul(x);
+            var x2Q=xQ.mul(x);
+
+            if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
+                xQ.neg()
+            }
+
+            x2Q.sub(xQ)
+            x2Q.sub(self)
+
+            xQ.sub(self)
+            xQ.frob(X)
+
+            self.dbl()
+            self.frob(X)
+            self.frob(X)
+
+            self.add(x2Q)
+            self.add(xQ)
+        }        
+        self.affine()
+    }   
+
+
     /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3 */
     // Bos & Costello https://eprint.iacr.org/2013/458.pdf
     // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
@@ -575,69 +628,67 @@ public struct ECP2 {
         return P
     }
 
-     // needed for SOK
-    static func mapit(_ h:[UInt8]) -> ECP2
-    {
-        let q=BIG(ROM.Modulus)
-        var x=BIG.fromBytes(h)
-        let one=BIG(1)
-        var Q=ECP2()
-        x.mod(q);
-        while (true)
-        {
-            let X=FP2(one,x)
-            Q=ECP2(X,0)
-            if !Q.is_infinity() {break}
-            x.inc(1); x.norm()
+/* Deterministic mapping of Fp to point on curve */
+    static public func hashit(_ h:BIG) -> ECP2
+    { // SWU method
+        var W=FP2(1)
+        var B=FP2(BIG(ROM.CURVE_B))
+        let t=FP(h)
+        var s=FP(-3)
+        let one=FP(1)
+		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
+            B.div_ip();
         }
-    // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
-        let Fra=BIG(ROM.Fra)
-        let Frb=BIG(ROM.Frb)
-        var X=FP2(Fra,Frb)
-        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE { 
-            X.inverse()
-            X.norm()
-        }         
-        x=BIG(ROM.CURVE_Bnx)
-    
-        if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
-            var T=Q.mul(x)
-            if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
-                T.neg()
-            }
-            var K=ECP2(); K.copy(T)
-            K.dbl(); K.add(T)
-    
-            K.frob(X)
-            Q.frob(X); Q.frob(X); Q.frob(X)
-            Q.add(T); Q.add(K)
-            T.frob(X); T.frob(X)
-            Q.add(T)
+		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
+            B.mul_ip();
         }
-        if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BLS {
-            var xQ=Q.mul(x);
-            var x2Q=xQ.mul(x);
+        B.norm()
+        let sgn=t.sign()
+        var w=s.sqrt()
+        var j=FP(w); j.sub(one); j.norm(); j.div2()
 
-            if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
-                xQ.neg()
-            }
+        w.mul(t)
+        var b=FP(t)
+        b.sqr()
+        b.add(one)
+        var Y=FP2(b)
+        B.add(Y); B.norm(); B.inverse()
+        B.pmul(w)
 
-            x2Q.sub(xQ)
-            x2Q.sub(Q)
+        var X1=FP2(B); X1.pmul(t)
+        Y.copy(FP2(j))
+        var X2=FP2(X1); X2.sub(Y); X2.norm()
+        X1.copy(X2); X1.neg(); X1.norm()
+        X2.sub(W); X2.norm()
 
-            xQ.sub(Q)
-            xQ.frob(X)
+        B.sqr(); B.inverse()
+        var X3=FP2(B); X3.add(W); X3.norm()
 
-            Q.dbl()
-            Q.frob(X)
-            Q.frob(X)
+        Y.copy(ECP2.RHS(X2))
+        X1.cmove(X2,Y.qr())
+        Y.copy(ECP2.RHS(X3))
+        X1.cmove(X3,Y.qr())
+        Y.copy(ECP2.RHS(X1))
+        Y.sqrt()
 
-            Q.add(x2Q)
-            Q.add(xQ)
-        }        
-        Q.affine()
+        let ne=Y.sign()^sgn
+        W.copy(Y); W.neg(); W.norm()
+        Y.cmove(W,ne)
+
+        return ECP2(X1,Y)
+    }
+
+/* Map octet string to curve point */
+	static public func mapit(_ h:[UInt8]) -> ECP2
+	{
+		let q=BIG(ROM.Modulus)
+		var dx=DBIG.fromBytes(h)
+        let x=dx.mod(q)
+		
+		var Q=ECP2.hashit(x);  
+		Q.cfp()
         return Q
-    }   
+    }
     
     static public func generator() -> ECP2
     {
