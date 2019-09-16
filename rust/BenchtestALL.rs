@@ -80,8 +80,8 @@ fn ed25519(mut rng: &mut RAND) {
 
     let G = ecp::ECP::generator();
 
-    let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let mut s = big::BIG::randomnum(&r, &mut rng);
+    let r = big::BIG::new_ints(&rom::CURVE_ORDER);
+    let s = big::BIG::randomnum(&r, &mut rng);
 
     let mut P = ecp::ECP::hashit(&s);
     if P.is_infinity() {
@@ -89,7 +89,7 @@ fn ed25519(mut rng: &mut RAND) {
         fail = true;
     }
 
-    P = G.mul(&mut r);
+    P = G.mul(&r);
     if !P.is_infinity() {
         println!("FAILURE - rG!=O");
         fail = true;
@@ -99,7 +99,7 @@ fn ed25519(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = G.mul(&mut s);
+        let _ = G.mul(&s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -149,8 +149,8 @@ fn nist256(mut rng: &mut RAND) {
 
     let G = ecp::ECP::generator();
 
-    let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let mut s = big::BIG::randomnum(&r, &mut rng);
+    let r = big::BIG::new_ints(&rom::CURVE_ORDER);
+    let s = big::BIG::randomnum(&r, &mut rng);
     
     let mut P = ecp::ECP::hashit(&s);
     if P.is_infinity() {
@@ -158,7 +158,7 @@ fn nist256(mut rng: &mut RAND) {
         fail = true;
     }
     
-    P = G.mul(&mut r);
+    P = G.mul(&r);
     if !P.is_infinity() {
         println!("FAILURE - rG!=O");
         fail = true;
@@ -168,7 +168,7 @@ fn nist256(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = G.mul(&mut s);
+        let _ = G.mul(&s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -218,8 +218,8 @@ fn goldilocks(mut rng: &mut RAND) {
 
     let G = ecp::ECP::generator();
 
-    let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let mut s = big::BIG::randomnum(&r, &mut rng);
+    let r = big::BIG::new_ints(&rom::CURVE_ORDER);
+    let s = big::BIG::randomnum(&r, &mut rng);
 
     let mut P = ecp::ECP::hashit(&s);
     if P.is_infinity() {
@@ -227,7 +227,7 @@ fn goldilocks(mut rng: &mut RAND) {
         fail = true;
     }
     
-    P = G.mul(&mut r);
+    P = G.mul(&r);
     if !P.is_infinity() {
         println!("FAILURE - rG!=O");
         fail = true;
@@ -237,7 +237,7 @@ fn goldilocks(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = G.mul(&mut s);
+        let _ = G.mul(&s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -271,10 +271,10 @@ fn bn254(mut rng: &mut RAND) {
     println!("Modulus size {:} bits", fp::MODBITS);
     println!("{:} bit build", arch::CHUNK);
 
-    let mut G = ecp::ECP::generator();
+    let G = ecp::ECP::generator();
 
-    let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let mut s = big::BIG::randomnum(&r, &mut rng);
+    let r = big::BIG::new_ints(&rom::CURVE_ORDER);
+    let s = big::BIG::randomnum(&r, &mut rng);
 
     let mut P = ecp::ECP::hashit(&s);
     if P.is_infinity() {
@@ -282,7 +282,7 @@ fn bn254(mut rng: &mut RAND) {
         fail = true;
     } 
     
-    P = pair::g1mul(&mut G, &mut r);
+    P = pair::g1mul(&G, &r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -293,7 +293,7 @@ fn bn254(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        P = pair::g1mul(&mut G, &mut s);
+        P = pair::g1mul(&G, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -310,14 +310,14 @@ fn bn254(mut rng: &mut RAND) {
         println!("HASHING FAILURE - P=O");
 		fail=true;
     }
-    W = pair::g2mul(&mut W, &mut r);
+    W = pair::g2mul(&W, &r);
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
 		fail=true;
     }
 
 
-    W = pair::g2mul(&mut Q, &mut r);
+    W = pair::g2mul(&Q, &r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
@@ -328,7 +328,7 @@ fn bn254(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        W = pair::g2mul(&mut Q, &mut s);
+        W = pair::g2mul(&Q, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -337,10 +337,10 @@ fn bn254(mut rng: &mut RAND) {
     print!("G2  mul              - {:} iterations  ", iterations);
     println!(" {:0.2} ms per iteration", duration);
 
-    let mut w = pair::ate(&mut Q, &mut P);
+    let mut w = pair::ate(&Q, &P);
     w = pair::fexp(&w);
 
-    let mut g = pair::gtpow(&mut w, &mut r);
+    let mut g = pair::gtpow(&w, &r);
 
     if !g.isunity() {
         println!("FAILURE - g^r!=1");
@@ -351,7 +351,7 @@ fn bn254(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = pair::gtpow(&mut w, &mut s);
+        let _ = pair::gtpow(&w, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -364,7 +364,7 @@ fn bn254(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = w.compow(&s, &mut r);
+        let _ = w.compow(&s, &r);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -377,7 +377,7 @@ fn bn254(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        w = pair::ate(&mut Q, &mut P);
+        w = pair::ate(&Q, &P);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -402,13 +402,13 @@ fn bn254(mut rng: &mut RAND) {
     P.copy(&G);
     Q.copy(&W);
 
-    P = pair::g1mul(&mut P, &mut s);
-    g = pair::ate(&mut Q, &mut P);
+    P = pair::g1mul(&P, &s);
+    g = pair::ate(&Q, &P);
     g = pair::fexp(&g);
 
     P.copy(&G);
-    Q = pair::g2mul(&mut Q, &mut s);
-    w = pair::ate(&mut Q, &mut P);
+    Q = pair::g2mul(&Q, &s);
+    w = pair::ate(&Q, &P);
     w = pair::fexp(&w);
 
     if !pair::g1member(&P) {
@@ -426,17 +426,17 @@ fn bn254(mut rng: &mut RAND) {
         fail=true;
     }
 
-    if !g.equals(&mut w) {
+    if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,sP) ");
         fail = true;
     }
 
     Q.copy(&W);
-    g = pair::ate(&mut Q, &mut P);
+    g = pair::ate(&Q, &P);
     g = pair::fexp(&g);
-    g = pair::gtpow(&mut g, &mut s);
+    g = pair::gtpow(&g, &s);
 
-    if !g.equals(&mut w) {
+    if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,P)^s ");
         fail = true;
     }
@@ -466,10 +466,10 @@ fn bls383(mut rng: &mut RAND) {
     println!("Modulus size {:} bits", fp::MODBITS);
     println!("{:} bit build", arch::CHUNK);
 
-    let mut G = ecp::ECP::generator();
+    let G = ecp::ECP::generator();
 
-    let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let mut s = big::BIG::randomnum(&r, &mut rng);
+    let r = big::BIG::new_ints(&rom::CURVE_ORDER);
+    let s = big::BIG::randomnum(&r, &mut rng);
 
     let mut P = ecp::ECP::hashit(&s);
     if P.is_infinity() {
@@ -477,7 +477,7 @@ fn bls383(mut rng: &mut RAND) {
         fail = true;
     }
     
-    P = pair::g1mul(&mut G, &mut r);
+    P = pair::g1mul(&G, &r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -488,7 +488,7 @@ fn bls383(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        P = pair::g1mul(&mut G, &mut s);
+        P = pair::g1mul(&G, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -505,13 +505,13 @@ fn bls383(mut rng: &mut RAND) {
         println!("HASHING FAILURE - P=O");
 		fail=true;
     }
-    W = pair::g2mul(&mut W, &mut r);
+    W = pair::g2mul(&W, &r);
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
 		fail=true;
     }
 
-    W = pair::g2mul(&mut Q, &mut r);
+    W = pair::g2mul(&Q, &r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
@@ -522,7 +522,7 @@ fn bls383(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        W = pair::g2mul(&mut Q, &mut s);
+        W = pair::g2mul(&Q, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -531,10 +531,10 @@ fn bls383(mut rng: &mut RAND) {
     print!("G2  mul              - {:} iterations  ", iterations);
     println!(" {:0.2} ms per iteration", duration);
 
-    let mut w = pair::ate(&mut Q, &mut P);
+    let mut w = pair::ate(&Q, &P);
     w = pair::fexp(&w);
 
-    let mut g = pair::gtpow(&mut w, &mut r);
+    let mut g = pair::gtpow(&w, &r);
 
     if !g.isunity() {
         println!("FAILURE - g^r!=1");
@@ -545,7 +545,7 @@ fn bls383(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = pair::gtpow(&mut w, &mut s);
+        let _ = pair::gtpow(&w, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -558,7 +558,7 @@ fn bls383(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = w.compow(&s, &mut r);
+        let _ = w.compow(&s, &r);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -571,7 +571,7 @@ fn bls383(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        w = pair::ate(&mut Q, &mut P);
+        w = pair::ate(&Q, &P);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -596,13 +596,13 @@ fn bls383(mut rng: &mut RAND) {
     P.copy(&G);
     Q.copy(&W);
 
-    P = pair::g1mul(&mut P, &mut s);
-    g = pair::ate(&mut Q, &mut P);
+    P = pair::g1mul(&P, &s);
+    g = pair::ate(&Q, &P);
     g = pair::fexp(&g);
 
     P.copy(&G);
-    Q = pair::g2mul(&mut Q, &mut s);
-    w = pair::ate(&mut Q, &mut P);
+    Q = pair::g2mul(&Q, &s);
+    w = pair::ate(&Q, &P);
     w = pair::fexp(&w);
 
     if !pair::g1member(&P) {
@@ -620,17 +620,17 @@ fn bls383(mut rng: &mut RAND) {
         fail=true;
     }
 
-    if !g.equals(&mut w) {
+    if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,sP) ");
         fail = true;
     }
 
     Q.copy(&W);
-    g = pair::ate(&mut Q, &mut P);
+    g = pair::ate(&Q, &P);
     g = pair::fexp(&g);
-    g = pair::gtpow(&mut g, &mut s);
+    g = pair::gtpow(&g, &s);
 
-    if !g.equals(&mut w) {
+    if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,P)^s ");
         fail = true;
     }
@@ -660,10 +660,10 @@ fn bls24(mut rng: &mut RAND) {
     println!("Modulus size {:} bits", fp::MODBITS);
     println!("{:} bit build", arch::CHUNK);
 
-    let mut G = ecp::ECP::generator();
+    let G = ecp::ECP::generator();
 
-    let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let mut s = big::BIG::randomnum(&r, &mut rng);
+    let r = big::BIG::new_ints(&rom::CURVE_ORDER);
+    let s = big::BIG::randomnum(&r, &mut rng);
 
     let mut P = ecp::ECP::hashit(&s);
     if P.is_infinity() {
@@ -671,7 +671,7 @@ fn bls24(mut rng: &mut RAND) {
         fail = true;
     }
     
-    P = pair192::g1mul(&mut G, &mut r);
+    P = pair192::g1mul(&G, &r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -682,7 +682,7 @@ fn bls24(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        P = pair192::g1mul(&mut G, &mut s);
+        P = pair192::g1mul(&G, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -699,13 +699,13 @@ fn bls24(mut rng: &mut RAND) {
         println!("HASHING FAILURE - P=O");
 		fail=true;
     }
-    W = pair192::g2mul(&mut W, &mut r);
+    W = pair192::g2mul(&W, &r);
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
 		fail=true;
     }
 
-    W = pair192::g2mul(&mut Q, &mut r);
+    W = pair192::g2mul(&Q, &r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
@@ -716,7 +716,7 @@ fn bls24(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        W = pair192::g2mul(&mut Q, &mut s);
+        W = pair192::g2mul(&Q, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -725,10 +725,10 @@ fn bls24(mut rng: &mut RAND) {
     print!("G2  mul              - {:} iterations  ", iterations);
     println!(" {:0.2} ms per iteration", duration);
 
-    let mut w = pair192::ate(&mut Q, &mut P);
+    let mut w = pair192::ate(&Q, &P);
     w = pair192::fexp(&w);
 
-    let mut g = pair192::gtpow(&mut w, &mut r);
+    let mut g = pair192::gtpow(&w, &r);
 
     if !g.isunity() {
         println!("FAILURE - g^r!=1");
@@ -739,7 +739,7 @@ fn bls24(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = pair192::gtpow(&mut w, &mut s);
+        let _ = pair192::gtpow(&w, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -752,7 +752,7 @@ fn bls24(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        w = pair192::ate(&mut Q, &mut P);
+        w = pair192::ate(&Q, &P);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -777,13 +777,13 @@ fn bls24(mut rng: &mut RAND) {
     P.copy(&G);
     Q.copy(&W);
 
-    P = pair192::g1mul(&mut P, &mut s);
-    g = pair192::ate(&mut Q, &mut P);
+    P = pair192::g1mul(&P, &s);
+    g = pair192::ate(&Q, &P);
     g = pair192::fexp(&g);
 
     P.copy(&G);
-    Q = pair192::g2mul(&mut Q, &mut s);
-    w = pair192::ate(&mut Q, &mut P);
+    Q = pair192::g2mul(&Q, &s);
+    w = pair192::ate(&Q, &P);
     w = pair192::fexp(&w);
 
     if !pair192::g1member(&P) {
@@ -801,17 +801,17 @@ fn bls24(mut rng: &mut RAND) {
         fail=true;
     }
 
-    if !g.equals(&mut w) {
+    if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,sP) ");
         fail = true;
     }
 
     Q.copy(&W);
-    g = pair192::ate(&mut Q, &mut P);
+    g = pair192::ate(&Q, &P);
     g = pair192::fexp(&g);
-    g = pair192::gtpow(&mut g, &mut s);
+    g = pair192::gtpow(&g, &s);
 
-    if !g.equals(&mut w) {
+    if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,P)^s ");
         fail = true;
     }
@@ -841,10 +841,10 @@ fn bls48(mut rng: &mut RAND) {
     println!("Modulus size {:} bits", fp::MODBITS);
     println!("{:} bit build", arch::CHUNK);
 
-    let mut G = ecp::ECP::generator();
+    let G = ecp::ECP::generator();
 
-    let mut r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let mut s = big::BIG::randomnum(&r, &mut rng);
+    let r = big::BIG::new_ints(&rom::CURVE_ORDER);
+    let s = big::BIG::randomnum(&r, &mut rng);
 
     let mut P = ecp::ECP::hashit(&s);
     if P.is_infinity() {
@@ -852,7 +852,7 @@ fn bls48(mut rng: &mut RAND) {
         fail = true;
     }
     
-    P = pair256::g1mul(&mut G, &mut r);
+    P = pair256::g1mul(&G, &r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -863,7 +863,7 @@ fn bls48(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        P = pair256::g1mul(&mut G, &mut s);
+        P = pair256::g1mul(&G, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -880,13 +880,13 @@ fn bls48(mut rng: &mut RAND) {
         println!("HASHING FAILURE - P=O");
 		fail=true;
     }
-    W = pair256::g2mul(&mut W, &mut r);
+    W = pair256::g2mul(&W, &r);
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
 		fail=true;
     }
 
-    W = pair256::g2mul(&mut Q, &mut r);
+    W = pair256::g2mul(&Q, &r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
@@ -897,7 +897,7 @@ fn bls48(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        W = pair256::g2mul(&mut Q, &mut s);
+        W = pair256::g2mul(&Q, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -906,10 +906,10 @@ fn bls48(mut rng: &mut RAND) {
     print!("G2  mul              - {:} iterations  ", iterations);
     println!(" {:0.2} ms per iteration", duration);
 
-    let mut w = pair256::ate(&mut Q, &mut P);
+    let mut w = pair256::ate(&Q, &P);
     w = pair256::fexp(&w);
 
-    let mut g = pair256::gtpow(&mut w, &mut r);
+    let mut g = pair256::gtpow(&w, &r);
 
     if !g.isunity() {
         println!("FAILURE - g^r!=1");
@@ -920,7 +920,7 @@ fn bls48(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = pair256::gtpow(&mut w, &mut s);
+        let _ = pair256::gtpow(&w, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -933,7 +933,7 @@ fn bls48(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        w = pair256::ate(&mut Q, &mut P);
+        w = pair256::ate(&Q, &P);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -958,13 +958,13 @@ fn bls48(mut rng: &mut RAND) {
     P.copy(&G);
     Q.copy(&W);
 
-    P = pair256::g1mul(&mut P, &mut s);
-    g = pair256::ate(&mut Q, &mut P);
+    P = pair256::g1mul(&P, &s);
+    g = pair256::ate(&Q, &P);
     g = pair256::fexp(&g);
 
     P.copy(&G);
-    Q = pair256::g2mul(&mut Q, &mut s);
-    w = pair256::ate(&mut Q, &mut P);
+    Q = pair256::g2mul(&Q, &s);
+    w = pair256::ate(&Q, &P);
     w = pair256::fexp(&w);
 
     if !pair256::g1member(&P) {
@@ -982,17 +982,17 @@ fn bls48(mut rng: &mut RAND) {
         fail=true;
     }
 
-    if !g.equals(&mut w) {
+    if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,sP) ");
         fail = true;
     }
 
     Q.copy(&W);
-    g = pair256::ate(&mut Q, &mut P);
+    g = pair256::ate(&Q, &P);
     g = pair256::fexp(&g);
-    g = pair256::gtpow(&mut g, &mut s);
+    g = pair256::gtpow(&g, &s);
 
-    if !g.equals(&mut w) {
+    if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,P)^s ");
         fail = true;
     }
