@@ -727,14 +727,10 @@ os.system(deltext+" bls256.*")
 
 # create library
 os.system("emcc -O2  randapi.c -o randapi.bc")
-if curve_selected :
-	os.system("emcc -O2  ecdh_support.c -o ecdh_support.bc")
-if rsa_selected :
-	os.system("emcc -O2  rsa_support.c -o rsa_support.bc")
-if pfcurve_selected :
-	os.system("emcc -O2  pbc_support.c -o pbc_support.bc")
+
 
 os.system("emcc -O2 hash.c -o hash.bc")
+os.system("emcc -O2 hmac.c -o hmac.bc")
 os.system("emcc -O2 rand.c -o rand.bc")
 os.system("emcc -O2 oct.c -o oct.bc")
 os.system("emcc -O2 aes.c -o aes.bc")
