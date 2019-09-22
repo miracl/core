@@ -749,6 +749,7 @@ pub fn gtpow(d: &FP24, e: &BIG) -> FP24 {
 }
 
 /* test G1 group membership */
+#[allow(non_snake_case)]
 pub fn g1member(P: &ECP) -> bool {
     let q = BIG::new_ints(&rom::CURVE_ORDER);
     if P.is_infinity() {
@@ -762,6 +763,7 @@ pub fn g1member(P: &ECP) -> bool {
 }
 
 /* test G2 group membership */
+#[allow(non_snake_case)]
 pub fn g2member(P: &ECP4) -> bool {
     let q = BIG::new_ints(&rom::CURVE_ORDER);
     if P.is_infinity() {

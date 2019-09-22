@@ -55,6 +55,8 @@ Switch G1/G2 parameter order in pairing function calls
 
 #define REVERSE here
 
+See BLSREV*.cpp
+
 */
 
 //#define REVERSE
@@ -67,8 +69,9 @@ int bls_BN254(csprng *RNG)
 {
     using namespace BN254;
 
-    int res;
+    int i,res;
     char s[BGS_BN254];
+    char ikm[64];
 #ifdef REVERSE
     char w[BFS_BN254+1], sig[4 * BFS_BN254 + 1];        // w is 2* if not compressed else 1*. sig is 4* if not compressed, else 2*
 #else
@@ -77,6 +80,10 @@ int bls_BN254(csprng *RNG)
     octet S = {0, sizeof(s), s};
     octet W = {0, sizeof(w), w};
     octet SIG = {0, sizeof(sig), sig};
+    octet IKM = {0, sizeof(ikm), ikm};
+    octet M = {0,sizeof(message), message};
+
+    OCT_jstring(&M,message);
 
     res = BLS_INIT();
     if (res == BLS_FAIL)
@@ -85,7 +92,12 @@ int bls_BN254(csprng *RNG)
         return res;
     }
 
-    res = BLS_KEY_PAIR_GENERATE(RNG, &S, &W);
+    OCT_rand(&IKM,RNG,32);
+    //IKM.len=32;
+    //for (i=0;i<IKM.len;i++)
+    //        IKM.val[i]=i+1;
+
+    res = BLS_KEY_PAIR_GENERATE(&IKM, &S, &W);
     if (res == BLS_FAIL)
     {
         printf("Failed to generate keys\n");
@@ -97,13 +109,13 @@ int bls_BN254(csprng *RNG)
     printf("Public key= 0x");
     OCT_output(&W);
 
-    BLS_SIGN(&SIG, message, &S);
+    BLS_CORE_SIGN(&SIG, &M, &S);
     printf("Signature= 0x");
     OCT_output(&SIG);
 
     //message[7]='f'; // change the message
 
-    res = BLS_VERIFY(&SIG, message, &W);
+    res = BLS_CORE_VERIFY(&SIG, &M, &W);
     if (res == BLS_OK) printf("Signature is OK\n");
     else printf("Signature is *NOT* OK\n");
     return res;
@@ -115,8 +127,9 @@ int bls_BLS383(csprng *RNG)
 {
     using namespace BLS383;
 
-    int res;
+    int i,res;
     char s[BGS_BLS383];
+    char ikm[64];
 #ifdef REVERSE
     char w[BFS_BLS383+1], sig[4 * BFS_BLS383 + 1];
 #else
@@ -125,6 +138,10 @@ int bls_BLS383(csprng *RNG)
     octet S = {0, sizeof(s), s};
     octet W = {0, sizeof(w), w};
     octet SIG = {0, sizeof(sig), sig};
+    octet IKM = {0, sizeof(ikm), ikm};
+    octet M = {0,sizeof(message), message};
+
+    OCT_jstring(&M,message);
 
     res = BLS_INIT();
     if (res == BLS_FAIL)
@@ -133,7 +150,12 @@ int bls_BLS383(csprng *RNG)
         return res;
     }
 
-    res = BLS_KEY_PAIR_GENERATE(RNG, &S, &W);
+    OCT_rand(&IKM,RNG,32);
+    //IKM.len=32;
+    //for (i=0;i<IKM.len;i++)
+    //        IKM.val[i]=i+1;
+
+    res = BLS_KEY_PAIR_GENERATE(&IKM, &S, &W);
     if (res == BLS_FAIL)
     {
         printf("Failed to generate keys\n");
@@ -145,13 +167,13 @@ int bls_BLS383(csprng *RNG)
     printf("Public key= 0x");
     OCT_output(&W);
 
-    BLS_SIGN(&SIG, message, &S);
+    BLS_CORE_SIGN(&SIG, &M, &S);
     printf("Signature= 0x");
     OCT_output(&SIG);
 
     //message[7]='f'; // change the message
 
-    res = BLS_VERIFY(&SIG, message, &W);
+    res = BLS_CORE_VERIFY(&SIG, &M, &W);
     if (res == BLS_OK) printf("Signature is OK\n");
     else printf("Signature is *NOT* OK\n");
     return res;
@@ -161,8 +183,9 @@ int bls_BLS24(csprng *RNG)
 {
     using namespace BLS24;
 
-    int res;
+    int i,res;
     char s[BGS_BLS24];
+    char ikm[64];
 #ifdef REVERSE
     char w[BFS_BLS24+1], sig[8 * BFS_BLS24 + 1];
 #else
@@ -171,6 +194,10 @@ int bls_BLS24(csprng *RNG)
     octet S = {0, sizeof(s), s};
     octet W = {0, sizeof(w), w};
     octet SIG = {0, sizeof(sig), sig};
+    octet IKM = {0, sizeof(ikm), ikm};
+    octet M = {0,sizeof(message), message};
+
+    OCT_jstring(&M,message);
 
     res = BLS_INIT();
     if (res == BLS_FAIL)
@@ -179,7 +206,12 @@ int bls_BLS24(csprng *RNG)
         return res;
     }
 
-    res = BLS_KEY_PAIR_GENERATE(RNG, &S, &W);
+    OCT_rand(&IKM,RNG,48);
+    //IKM.len=48;
+    //for (i=0;i<IKM.len;i++)
+    //        IKM.val[i]=i+1;
+
+    res = BLS_KEY_PAIR_GENERATE(&IKM, &S, &W);
     if (res == BLS_FAIL)
     {
         printf("Failed to generate keys\n");
@@ -191,13 +223,13 @@ int bls_BLS24(csprng *RNG)
     printf("Public key= 0x");
     OCT_output(&W);
 
-    BLS_SIGN(&SIG, message, &S);
+    BLS_CORE_SIGN(&SIG, &M, &S);
     printf("Signature= 0x");
     OCT_output(&SIG);
 
     //message[7]='f'; // change the message
 
-    res = BLS_VERIFY(&SIG, message, &W);
+    res = BLS_CORE_VERIFY(&SIG, &M, &W);
     if (res == BLS_OK) printf("Signature is OK\n");
     else printf("Signature is *NOT* OK\n");
     return res;
@@ -207,8 +239,9 @@ int bls_BLS48(csprng *RNG)
 {
     using namespace BLS48;
 
-    int res;
+    int i,res;
     char s[BGS_BLS48];
+    char ikm[64];
 #ifdef REVERSE
     char w[BFS_BLS48+1], sig[16 * BFS_BLS48 + 1];
 #else
@@ -217,6 +250,10 @@ int bls_BLS48(csprng *RNG)
     octet S = {0, sizeof(s), s};
     octet W = {0, sizeof(w), w};
     octet SIG = {0, sizeof(sig), sig};
+    octet IKM = {0, sizeof(ikm), ikm};
+    octet M = {0,sizeof(message), message};
+
+    OCT_jstring(&M,message);
 
     res = BLS_INIT();
     if (res == BLS_FAIL)
@@ -225,7 +262,12 @@ int bls_BLS48(csprng *RNG)
         return res;
     }
 
-    res = BLS_KEY_PAIR_GENERATE(RNG, &S, &W);
+    OCT_rand(&IKM,RNG,64);
+    //IKM.len=64;
+    //for (i=0;i<IKM.len;i++)
+    //        IKM.val[i]=i+1;
+
+    res = BLS_KEY_PAIR_GENERATE(&IKM, &S, &W);
     if (res == BLS_FAIL)
     {
         printf("Failed to generate keys\n");
@@ -237,13 +279,13 @@ int bls_BLS48(csprng *RNG)
     printf("Public key= 0x");
     OCT_output(&W);
 
-    BLS_SIGN(&SIG, message, &S);
+    BLS_CORE_SIGN(&SIG, &M, &S);
     printf("Signature= 0x");
     OCT_output(&SIG);
 
     //message[7]='f'; // change the message
 
-    res = BLS_VERIFY(&SIG, message, &W);
+    res = BLS_CORE_VERIFY(&SIG, &M, &W);
     if (res == BLS_OK) printf("Signature is OK\n");
     else printf("Signature is *NOT* OK\n");
     return res;

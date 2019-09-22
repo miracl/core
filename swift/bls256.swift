@@ -39,6 +39,10 @@
 
 /* Boneh-Lynn-Shacham Signature API Functions */
 
+/* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-00 */
+
+// Minimal-signature-size variant
+
 import Foundation
 import core
 
@@ -51,6 +55,47 @@ public struct BLS256
     
     static var G2_TAB=[FP16]()
     
+    static func ceil(_ a: Int,_ b:Int) -> Int {
+        return (((a)-1)/(b)+1)
+    }
+
+/* output u \in F_p */
+    static func hash_to_base(_ hf: Int,_ hlen: Int,_ DST: [UInt8],_ M: [UInt8],_ ctr:Int) -> BIG {
+        let q=BIG(ROM.Modulus)
+        let L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8)
+
+        let tag = "H2C"
+        let T=[UInt8](tag.utf8)
+        var INFO=[UInt8](repeating: 0,count: T.count+1)
+        for i in 0..<T.count {
+            INFO[i]=T[i]
+        }
+        INFO[T.count]=UInt8(ctr)
+
+        let PRK=HMAC.HKDF_Extract(hf,hlen,DST,M)
+        let OKM=HMAC.HKDF_Expand(hf,hlen,L,PRK,INFO)
+
+        var dx = DBIG.fromBytes(OKM)
+        let u = dx.mod(q)
+
+        return u
+    }
+
+/* hash a message to an ECP point, using SHA2, random oracle method */
+    static public func bls_hash_to_point(_ M: [UInt8]) -> ECP
+    {
+        let dst = "BLS_SIG_G1-SHA512-SSWU-RO-_NUL_";
+        let u=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](dst.utf8),M,0)
+        let u1=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](dst.utf8),M,1)
+
+        var P=ECP.hashit(u)
+        let P1=ECP.hashit(u1)
+        P.add(P1)
+        P.cfp()
+        P.affine()
+        return P
+    }
+
     static public func initit() -> Int
     {
         let G=ECP8.generator()
@@ -59,27 +104,22 @@ public struct BLS256
         return BLS_OK
     }
 
-/* hash a message to an ECP point, using SHA3 */
-
-    static public func bls_hashit(_ m: String) -> ECP
-    {
-        var sh=SHA3(SHA3.SHAKE256)
-        var hm=[UInt8](repeating: 0,count: BFS)  
-        let t=[UInt8](m.utf8)     
-        for i in 0..<t.count {sh.process(t[i])}
-        sh.shake(&hm,BFS)
-        let P=ECP.mapit(hm) 
-        return P
-    }
-
 /* generate key pair, private key S, public key W */
-
-    @discardableResult static public func KeyPairGenerate(_ rng: inout RAND,_ S:inout [UInt8],_ W:inout [UInt8]) -> Int
+    @discardableResult static public func KeyPairGenerate(_ IKM: [UInt8],_ S:inout [UInt8],_ W:inout [UInt8]) -> Int
     {
-        var G=ECP8.generator()
+        let r = BIG(ROM.CURVE_Order)
+        let L = ceil(3*ceil(r.nbits(),8),2)
+        var G = ECP8.generator()
         if G.is_infinity() {return BLS_FAIL}
-        let q=BIG(ROM.CURVE_Order)
-        let s=BIG.randtrunc(q,16*CONFIG_CURVE.AESKEY,&rng)
+        let salt = "BLS-SIG-KEYGEN-SALT-"
+        let info = ""
+
+        let PRK=HMAC.HKDF_Extract(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](salt.utf8),IKM)
+        let OKM=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,PRK,[UInt8](info.utf8))
+        
+        var dx = DBIG.fromBytes(OKM)
+        let s = dx.mod(r)
+
         s.toBytes(&S)      
         G=PAIR256.G2mul(G,s) 
         G.toBytes(&W,true)       
@@ -87,10 +127,9 @@ public struct BLS256
     }
 
 /* Sign message m using private key S to produce signature SIG */
-
-    @discardableResult static public func sign(_ SIG:inout [UInt8],_ m: String,_ S: [UInt8]) -> Int
+    @discardableResult static public func core_sign(_ SIG:inout [UInt8],_ M: [UInt8],_ S: [UInt8]) -> Int
     {
-        var D=bls_hashit(m)
+        var D=bls_hash_to_point(M)
         let s=BIG.fromBytes(S)
         D=PAIR256.G1mul(D,s)         
         D.toBytes(&SIG,true)
@@ -99,9 +138,9 @@ public struct BLS256
 
 /* Verify signature given message m, the signature SIG, and the public key W */
 
-    static public func verify(_ SIG: [UInt8],_ m: String,_ W: [UInt8]) -> Int
+    static public func core_verify(_ SIG: [UInt8],_ M: [UInt8],_ W: [UInt8]) -> Int
     {
-        let HM=bls_hashit(m)     
+        let HM=bls_hash_to_point(M)     
 
         var D=ECP.fromBytes(SIG)  
         if !PAIR256.G1member(D) {return BLS_FAIL}

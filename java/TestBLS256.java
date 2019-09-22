@@ -41,6 +41,8 @@ Switch G1/G2 parameter order in pairing function calls
 
 Swap G1S and G2S in this program
 
+See CPP library version for example
+
 */
 
 package org.miracl.core.XXX;  //
@@ -67,12 +69,16 @@ public class TestBLS256 extends TestCase { //
         byte[] S = new byte[BGS];
         byte[] W = new byte[G2S];
         byte[] SIG = new byte[G1S];
-
         byte[] RAW = new byte[100];
+        byte[] IKM = new byte[64];
 
         rng.clean();
         for (int i = 0; i < 100; i++) RAW[i] = (byte)(i);
         rng.seed(100, RAW);
+
+        for (int i=0;i<64;i++)
+            //IKM[i]=(byte)(i+1);
+            IKM[i]=(byte)rng.getByte();
 
         System.out.println("\nTesting BLS code");
 
@@ -82,16 +88,16 @@ public class TestBLS256 extends TestCase { //
 
         String mess = new String("This is a test message");
 
-        res = BLS256.KeyPairGenerate(rng, S, W);
+        res = BLS256.KeyPairGenerate(IKM, S, W);
         if (res != 0)
             fail("Failed to Generate Keys");
         System.out.print("Private key : 0x");  printBinary(S);
         System.out.print("Public  key : 0x");  printBinary(W);
 
-        BLS256.sign(SIG, mess, S);
+        BLS256.core_sign(SIG, mess.getBytes(), S);
         System.out.print("Signature : 0x");  printBinary(SIG);
 
-        res = BLS256.verify(SIG, mess, W);
+        res = BLS256.core_verify(SIG, mess.getBytes(), W);
 
         if (res == 0)
             System.out.println("Signature is OK");

@@ -29,6 +29,7 @@ MIRACL Core features:-
 - Deterministic hashing to curve points
 - Point compression in G2
 - Demonstrated support for low-powered IoT processor nodes
+- Emerging-standards-compliant implementation of BLS signature
 - An updated manual
 
 

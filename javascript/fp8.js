@@ -665,12 +665,15 @@ var FP8 = function(ctx) {
             wb.copy(wt); wb.sub(ws);
             wb.norm(); wb.div2();
 
+            wa.cmove(wb,wb.qr());
+
             wa.sqrt();
             wt.copy(this.b);
             ws.copy(wa); ws.add(wa); ws.norm();
             ws.inverse();
 
             wt.mul(ws);
+
             this.a.copy(wa);
             this.b.copy(wt);
         }

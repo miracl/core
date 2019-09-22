@@ -29,7 +29,12 @@
    without disclosing the source code of your own applications, or shipping
    the MIRACL Core Crypto SDK with a closed source product.
 */
+
 /* Boneh-Lynn-Shacham  API Functions */
+
+/* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-00 */
+
+// Minimal-signature-size variant
 
 package XXX
 
@@ -44,17 +49,36 @@ const BLS_FAIL int = -1
 
 var G2_TAB []*FP8
 
-/* hash a message to an ECP point, using SHA3 */
+func ceil(a int,b int) int {
+    return (((a)-1)/(b)+1)
+}
 
-func bls192_hash(m string) *ECP {
-	sh := core.NewSHA3(core.SHA3_SHAKE256)
-	var hm [BFS]byte
-	t := []byte(m)
-	for i := 0; i < len(t); i++ {
-		sh.Process(t[i])
-	}
-	sh.Shake(hm[:], BFS)
-	P := ECP_mapit(hm[:])
+/* output u \in F_p */
+func hash_to_base(hash int,hlen int ,DST []byte,M []byte,ctr int) *BIG {
+	q := NewBIGints(Modulus)
+	L := ceil(q.nbits()+AESKEY*8,8)
+	INFO := []byte("H2C")
+	INFO = append(INFO,byte(ctr))
+
+	PRK:=core.HKDF_Extract(hash,hlen,DST,M)
+	OKM:=core.HKDF_Expand(hash,hlen,L,PRK,INFO)
+
+	dx:= DBIG_fromBytes(OKM[:])
+	u:= dx.mod(q)
+	return u
+}
+
+/* hash a message to an ECP point, using SHA2, random oracle method */
+func bls192_hash_to_point(M []byte) *ECP {
+	DST := []byte("BLS_SIG_G1-SHA384-SSWU-RO-_NUL_")
+	u := hash_to_base(core.MC_SHA2,HASH_TYPE,DST,M,0)
+	u1 := hash_to_base(core.MC_SHA2,HASH_TYPE,DST,M,1)
+
+	P:=ECP_hashit(u)
+	P1 := ECP_hashit(u1);
+	P.Add(P1)
+	P.Cfp()
+	P.Affine()
 	return P
 }
 
@@ -68,24 +92,30 @@ func Init() int {
 }
 
 /* generate key pair, private key S, public key W */
-
-func KeyPairGenerate(rng *core.RAND, S []byte, W []byte) int {
+func KeyPairGenerate(IKM []byte, S []byte, W []byte) int {
+	r := NewBIGints(CURVE_Order)
+	L := ceil(3*ceil(r.nbits(),8),2)
 	G := ECP4_generator()
 	if G.Is_infinity() {
 		return BLS_FAIL
 	}
-	q := NewBIGints(CURVE_Order)
-	s := Randtrunc(q, 16*AESKEY, rng)
+	SALT := []byte("BLS-SIG-KEYGEN-SALT-")
+	INFO := []byte("")
+	PRK := core.HKDF_Extract(core.MC_SHA2,HASH_TYPE,SALT,IKM)
+	OKM := core.HKDF_Expand(core.MC_SHA2,HASH_TYPE,L,PRK,INFO)
+
+	dx:= DBIG_fromBytes(OKM[:])
+	s:= dx.mod(r)
+
 	s.ToBytes(S)
 	G = G2mul(G, s)
 	G.ToBytes(W,true)
 	return BLS_OK
 }
 
-/* Sign message m using private key S to produce signature SIG */
-
-func Sign(SIG []byte, m string, S []byte) int {
-	D := bls192_hash(m)
+/* Sign message M using private key S to produce signature SIG */
+func Core_Sign(SIG []byte, M []byte, S []byte) int {
+	D := bls192_hash_to_point(M)
 	s := FromBytes(S)
 	D = G1mul(D, s)
 	D.ToBytes(SIG, true)
@@ -94,8 +124,8 @@ func Sign(SIG []byte, m string, S []byte) int {
 
 /* Verify signature given message m, the signature SIG, and the public key W */
 
-func Verify(SIG []byte, m string, W []byte) int {
-	HM := bls192_hash(m)
+func Core_Verify(SIG []byte, M []byte, W []byte) int {
+	HM := bls192_hash_to_point(M)
 
 	D := ECP_fromBytes(SIG)
 	if !G1member(D) {return BLS_FAIL}

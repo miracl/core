@@ -69,30 +69,30 @@ int BLS_INIT();
 
 /** @brief Generate Key Pair
  *
-    @param RNG is a pointer to a cryptographically secure random number generator
+    @param IKM contains truly random keying material
     @param S on output a private key
     @param V on output a private key = S*G, where G is fixed generator
     @return BLS_OK
  */
-int BLS_KEY_PAIR_GENERATE(csprng *RNG, octet* S, octet *W);
+int BLS_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W);
 
 /** @brief Calculate a signature
  *
     @param SIG the ouput signature
-    @param m is the message to be signed
+    @param M is the message to be signed
     @param S an input private key
     @return BLS_OK
  */
-int BLS_SIGN(octet *SIG, char *m, octet *S);
+int BLS_CORE_SIGN(octet *SIG, octet *M, octet *S);
 
 /** @brief Verify a signature
  *
     @param SIG an input signature
-    @param m is the message whose signature is to be verified.
+    @param M is the message whose signature is to be verified.
     @param W an public key
     @return BLS_OK if verified, otherwise BLS_FAIL
  */
-int BLS_VERIFY(octet *SIG, char *m, octet *W);
+int BLS_CORE_VERIFY(octet *SIG, octet *M, octet *W);
 }
 
 #endif

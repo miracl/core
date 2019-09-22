@@ -77,9 +77,9 @@ pub const FRB: [Chunk; NLEN] = [
 pub const CURVE_A: isize = 0;
 pub const CURVE_COF_I: isize = 0;
 pub const CURVE_COF: [Chunk; NLEN] = [
-    0x150556155169EAB,
-    0x2AAB0002AAEFFED,
-    0x555,
+    0x80000010011FF,
+    0x40,
+    0x0
     0x0,
     0x0,
     0x0,

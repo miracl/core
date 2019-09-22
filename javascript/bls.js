@@ -86,37 +86,68 @@ var BLS = function(ctx) {
 			return this.BLS_OK;
         },
 
+        ceil: function(a,b) {
+            return Math.floor(((a)-1)/(b)+1);
+        },
+
+/* output u \in F_p */
+        hash_to_base: function(hash,hlen,DST,M,ctr) {
+            var q = new ctx.BIG(0);
+            q.rcopy(ctx.ROM_FIELD.Modulus);
+            var L = this.ceil(q.nbits()+ctx.ECP.AESKEY*8,8);
+
+            var tag= "H2C";
+            var INFO=this.asciitobytes(tag);
+            INFO[INFO.length]=ctr;
+
+            var PRK=ctx.HMAC.HKDF_Extract(hash,hlen,DST,M);
+            var OKM=ctx.HMAC.HKDF_Expand(hash,hlen,L,PRK,INFO);
+
+            var dx=ctx.DBIG.fromBytes(OKM);
+            var u=dx.mod(q);
+            return u;
+        },
+
         /* hash a message to an ECP point, using SHA3 */
 
-        bls_hashit: function(m) {
-            var sh = new ctx.SHA3(ctx.SHA3.SHAKE256);
-            var hm = [];
-            var t = this.asciitobytes(m);
-            for (var i = 0; i < t.length; i++)
-                sh.process(t[i]);
-            sh.shake(hm, this.BFS);
-            var P = ctx.ECP.mapit(hm);
+        bls_hash_to_point: function(M) {
+            var dst= "BLS_SIG_G1-SHA256-SSWU-RO-_NUL_";
+            var u=this.hash_to_base(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,0);
+            var u1=this.hash_to_base(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,1);
+
+            var P=ctx.ECP.hashit(u);
+            var P1=ctx.ECP.hashit(u1);
+            P.add(P1);
+            P.cfp();
+            P.affine();
             return P;
         },
 
         /* generate key pair, private key S, public key W */
 
-        KeyPairGenerate: function(rng, S, W) {
+        KeyPairGenerate: function(IKM, S, W) {
+            var r = new ctx.BIG(0);
+            r.rcopy(ctx.ROM_CURVE.CURVE_Order); 
+            var L = this.ceil(3*this.ceil(r.nbits(),8),2);
             var G = ctx.ECP2.generator();
-			if (G.is_infinity()) return this.BLS_FAIL;
-            var q = new ctx.BIG(0);
-            q.rcopy(ctx.ROM_CURVE.CURVE_Order);
-            var s = ctx.BIG.randtrunc(q, 16 * ctx.ECP.AESKEY, rng);
+            var salt="BLS-SIG-KEYGEN-SALT-";
+            var info="";
+            var PRK=ctx.HMAC.HKDF_Extract(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(salt),IKM);
+            var OKM=ctx.HMAC.HKDF_Expand(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,L,PRK,this.asciitobytes(info));
+
+            var dx=ctx.DBIG.fromBytes(OKM);
+            var s=dx.mod(r);
+
             s.toBytes(S);
             G = ctx.PAIR.G2mul(G, s);
-            G.toBytes(W, true); // To use point compression on public keys, change to true 
+            G.toBytes(W,true);
             return this.BLS_OK;
         },
 
         /* Sign message m using private key S to produce signature SIG */
 
-        sign: function(SIG, m, S) {
-            var D = this.bls_hashit(m);
+        core_sign: function(SIG, M, S) {
+            var D = this.bls_hash_to_point(M);
             var s = ctx.BIG.fromBytes(S);
             D = ctx.PAIR.G1mul(D, s);
             D.toBytes(SIG, true);
@@ -125,8 +156,8 @@ var BLS = function(ctx) {
 
         /* Verify signature given message m, the signature SIG, and the public key W */
 
-        verify: function(SIG, m, W) {
-            var HM = this.bls_hashit(m);
+        core_verify: function(SIG, M, W) {
+            var HM = this.bls_hash_to_point(M);
 
             var D = ctx.ECP.fromBytes(SIG);
             if (!ctx.PAIR.G1member(D)) return this.BLS_FAIL;

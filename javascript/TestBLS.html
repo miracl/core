@@ -96,6 +96,11 @@ function bn254() {
 
 	rng.seed(100,RAW);
 
+	var IKM=[];
+	for (i=0;i<32;i++)
+		//IKM[i]=i+1;
+		IKM[i]=rng.getByte();
+
 	var res = ctx.BLS.init();
 	if (res!=0)
 	{
@@ -105,8 +110,7 @@ function bn254() {
 
 	mywindow.document.write ("Testing BLS code <br>");
 	var mess="This is a test message";
-
-	res=ctx.BLS.KeyPairGenerate(rng,S,W);
+	res=ctx.BLS.KeyPairGenerate(IKM,S,W);
 	if (res!=0)
 	{
 		mywindow.document.write("Failed to Generate Keys" + "<br>");
@@ -115,10 +119,10 @@ function bn254() {
 	mywindow.document.write("Private key : 0x"+ctx.BLS.bytestostring(S) + "<br>");
 	mywindow.document.write("Public  key : 0x"+ctx.BLS.bytestostring(W) + "<br>");
 
-	ctx.BLS.sign(SIG,mess,S);
+	ctx.BLS.core_sign(SIG,ctx.BLS.asciitobytes(mess),S);
 	mywindow.document.write("Signature : 0x"+ctx.BLS.bytestostring(SIG) + "<br>");
 
-	res=ctx.BLS.verify(SIG,mess,W);
+	res=ctx.BLS.core_verify(SIG,ctx.BLS.asciitobytes(mess),W);
 
 	if (res==0)
 		mywindow.document.write("Signature is OK" + "<br>");
@@ -155,6 +159,11 @@ function bls383() {
 
 	rng.seed(100,RAW);
 
+	var IKM=[];
+	for (i=0;i<32;i++)
+		//IKM[i]=i+1;
+		IKM[i]=rng.getByte();
+
 	var res=ctx.BLS.init();
 	if (res!=0)
 	{
@@ -165,7 +174,7 @@ function bls383() {
 	mywindow.document.write ("Testing BLS code <br>");
 	var mess="This is a test message";
 
-	res=ctx.BLS.KeyPairGenerate(rng,S,W);
+	res=ctx.BLS.KeyPairGenerate(IKM,S,W);
 	if (res!=0)
 	{
 		mywindow.document.write("Failed to Generate Keys" + "<br>");
@@ -174,10 +183,10 @@ function bls383() {
 	mywindow.document.write("Private key : 0x"+ctx.BLS.bytestostring(S) + "<br>");
 	mywindow.document.write("Public  key : 0x"+ctx.BLS.bytestostring(W) + "<br>");
 
-	ctx.BLS.sign(SIG,mess,S);
+	ctx.BLS.core_sign(SIG,ctx.BLS.asciitobytes(mess),S);
 	mywindow.document.write("Signature : 0x"+ctx.BLS.bytestostring(SIG) + "<br>");
 
-	res=ctx.BLS.verify(SIG,mess,W);
+	res=ctx.BLS.core_verify(SIG,ctx.BLS.asciitobytes(mess),W);
 
 	if (res==0)
 		mywindow.document.write("Signature is OK" + "<br>");
@@ -214,6 +223,11 @@ function bls24() {
 
 	rng.seed(100,RAW);
 
+	var IKM=[];
+	for (i=0;i<48;i++)
+		//IKM[i]=i+1;
+		IKM[i]=rng.getByte();
+
 	var res=ctx.BLS192.init();
 	if (res!=0)
 	{
@@ -224,7 +238,7 @@ function bls24() {
 	mywindow.document.write ("Testing BLS code <br>");
 	var mess="This is a test message";
 
-	res=ctx.BLS192.KeyPairGenerate(rng,S,W);
+	res=ctx.BLS192.KeyPairGenerate(IKM,S,W);
 	if (res!=0)
 	{
 		mywindow.document.write("Failed to Generate Keys" + "<br>");
@@ -233,10 +247,10 @@ function bls24() {
 	mywindow.document.write("Private key : 0x"+ctx.BLS192.bytestostring(S) + "<br>");
 	mywindow.document.write("Public  key : 0x"+ctx.BLS192.bytestostring(W) + "<br>");
 
-	ctx.BLS192.sign(SIG,mess,S);
+	ctx.BLS192.core_sign(SIG,ctx.BLS192.asciitobytes(mess),S);
 	mywindow.document.write("Signature : 0x"+ctx.BLS192.bytestostring(SIG) + "<br>");
 
-	res=ctx.BLS192.verify(SIG,mess,W);
+	res=ctx.BLS192.core_verify(SIG,ctx.BLS192.asciitobytes(mess),W);
 
 	if (res==0)
 		mywindow.document.write("Signature is OK" + "<br>");
@@ -273,6 +287,11 @@ function bls48() {
 
 	rng.seed(100,RAW);
 
+	var IKM=[];
+	for (i=0;i<64;i++)
+		//IKM[i]=i+1;
+		IKM[i]=rng.getByte();
+
 	var res=ctx.BLS256.init();
 	if (res!=0)
 	{
@@ -283,7 +302,7 @@ function bls48() {
 	mywindow.document.write ("Testing BLS code <br>");
 	var mess="This is a test message";
 
-	res=ctx.BLS256.KeyPairGenerate(rng,S,W);
+	res=ctx.BLS256.KeyPairGenerate(IKM,S,W);
 	if (res!=0)
 	{
 		mywindow.document.write("Failed to Generate Keys" + "<br>");
@@ -292,10 +311,10 @@ function bls48() {
 	mywindow.document.write("Private key : 0x"+ctx.BLS256.bytestostring(S) + "<br>");
 	mywindow.document.write("Public  key : 0x"+ctx.BLS256.bytestostring(W) + "<br>");
 
-	ctx.BLS256.sign(SIG,mess,S);
+	ctx.BLS256.core_sign(SIG,ctx.BLS256.asciitobytes(mess),S);
 	mywindow.document.write("Signature : 0x"+ctx.BLS256.bytestostring(SIG) + "<br>");
 
-	res=ctx.BLS256.verify(SIG,mess,W);
+	res=ctx.BLS256.core_verify(SIG,ctx.BLS256.asciitobytes(mess),W);
 
 	if (res==0)
 		mywindow.document.write("Signature is OK" + "<br>");

@@ -78,6 +78,12 @@ public func TestBLS_bn254(_ rng: inout RAND)
     var S=[UInt8](repeating: 0,count: BGS)
     var W=[UInt8](repeating: 0,count: G2S)
     var SIG=[UInt8](repeating: 0,count: G1S)
+    var IKM=[UInt8](repeating: 0,count: 32)
+
+    for i in 0..<32 {
+        //IKM[i]=UInt8(i+1)
+        IKM[i]=rng.getByte()
+    }
 
     var res=bn254.BLS.initit()
     if res != 0 {
@@ -85,7 +91,7 @@ public func TestBLS_bn254(_ rng: inout RAND)
         return
     }
 
-    res=bn254.BLS.KeyPairGenerate(&rng,&S,&W)
+    res=bn254.BLS.KeyPairGenerate(IKM,&S,&W)
     if res != 0 {
         print("Failed to Generate Keys\n")
         return
@@ -97,10 +103,10 @@ public func TestBLS_bn254(_ rng: inout RAND)
     let mess="This is a test message"
     print("Signing string - "+mess)
 
-    bn254.BLS.sign(&SIG,mess,S)
+    bn254.BLS.core_sign(&SIG,[UInt8](mess.utf8),S)
     print("Signature : 0x",terminator: "");  printBinary(SIG);
 
-    res=bn254.BLS.verify(SIG,mess,W)
+    res=bn254.BLS.core_verify(SIG,[UInt8](mess.utf8),W)
     if res == 0 {
         print("Signature is OK\n");
     } else {
@@ -119,13 +125,19 @@ public func TestBLS_bls383(_ rng: inout RAND)
     var S=[UInt8](repeating: 0,count: BGS)
     var W=[UInt8](repeating: 0,count: G2S)
     var SIG=[UInt8](repeating: 0,count: G1S)
+    var IKM=[UInt8](repeating: 0,count: 32)
+
+    for i in 0..<32 {
+        //IKM[i]=UInt8(i+1)
+        IKM[i]=rng.getByte()
+    }
 
     var res=bls383.BLS.initit()
     if res != 0 {
         print("Failed to Initialize\n")
         return
     }
-    res=bls383.BLS.KeyPairGenerate(&rng,&S,&W)
+    res=bls383.BLS.KeyPairGenerate(IKM,&S,&W)
     if res != 0 {
         print("Failed to Generate Keys\n")
         return
@@ -136,10 +148,10 @@ public func TestBLS_bls383(_ rng: inout RAND)
     let mess="This is a test message"
     print("Signing string - "+mess)    
 
-    bls383.BLS.sign(&SIG,mess,S)
+    bls383.BLS.core_sign(&SIG,[UInt8](mess.utf8),S)
     print("Signature : 0x",terminator: "");  printBinary(SIG);
 
-    res=bls383.BLS.verify(SIG,mess,W)
+    res=bls383.BLS.core_verify(SIG,[UInt8](mess.utf8),W)
     if res == 0 {
         print("Signature is OK\n");
     } else {
@@ -158,13 +170,19 @@ public func TestBLS_bls24(_ rng: inout RAND)
     var S=[UInt8](repeating: 0,count: BGS)
     var W=[UInt8](repeating: 0,count: G2S)
     var SIG=[UInt8](repeating: 0,count: G1S)
+    var IKM=[UInt8](repeating: 0,count: 48)
+
+    for i in 0..<48 {
+        //IKM[i]=UInt8(i+1)
+        IKM[i]=rng.getByte()
+    }
 
     var res=bls24.BLS192.initit()
     if res != 0 {
         print("Failed to Initialize\n")
         return
     }
-    res=bls24.BLS192.KeyPairGenerate(&rng,&S,&W)
+    res=bls24.BLS192.KeyPairGenerate(IKM,&S,&W)
     if res != 0 {
         print("Failed to Generate Keys\n")
         return
@@ -175,10 +193,10 @@ public func TestBLS_bls24(_ rng: inout RAND)
     let mess="This is a test message"
     print("Signing string - "+mess)
 
-    bls24.BLS192.sign(&SIG,mess,S)
+    bls24.BLS192.core_sign(&SIG,[UInt8](mess.utf8),S)
     print("Signature : 0x",terminator: "");  printBinary(SIG);
 
-    res=bls24.BLS192.verify(SIG,mess,W)
+    res=bls24.BLS192.core_verify(SIG,[UInt8](mess.utf8),W)
     if res == 0 {
         print("Signature is OK\n");
     } else {
@@ -196,13 +214,19 @@ public func TestBLS_bls48(_ rng: inout RAND)
     var S=[UInt8](repeating: 0,count: BGS)
     var W=[UInt8](repeating: 0,count: G2S)
     var SIG=[UInt8](repeating: 0,count: G1S)
+    var IKM=[UInt8](repeating: 0,count: 64)
+
+    for i in 0..<64 {
+        //IKM[i]=UInt8(i+1)
+        IKM[i]=rng.getByte()
+    }
 
     var res=bls48.BLS256.initit()
     if res != 0 {
         print("Failed to Initialize\n")
         return
     }
-    res=bls48.BLS256.KeyPairGenerate(&rng,&S,&W)
+    res=bls48.BLS256.KeyPairGenerate(IKM,&S,&W)
     if res != 0 {
         print("Failed to Generate Keys\n")
         return
@@ -213,10 +237,10 @@ public func TestBLS_bls48(_ rng: inout RAND)
     let mess="This is a test message"
     print("Signing string - "+mess)
     
-    bls48.BLS256.sign(&SIG,mess,S)
+    bls48.BLS256.core_sign(&SIG,[UInt8](mess.utf8),S)
     print("Signature : 0x",terminator: "");  printBinary(SIG);
 
-    res=bls48.BLS256.verify(SIG,mess,W)
+    res=bls48.BLS256.core_verify(SIG,[UInt8](mess.utf8),W)
     if res == 0 {
         print("Signature is OK\n");
     } else {

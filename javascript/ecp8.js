@@ -296,9 +296,11 @@ var ECP8 = function(ctx) {
 			this.x.norm();
             rhs = ECP8.RHS(this.x);
 
+            //alert("0. rhs= "+rhs.toString());
 		    if (rhs.qr()==1) 
 		    {
                 rhs.sqrt();
+                //alert("1. rhs= "+rhs.toString());
                 if (rhs.sign() != s)
                     rhs.neg();
                 rhs.reduce();

@@ -41,6 +41,8 @@ Switch G1/G2 parameter order in pairing function calls
 
 Swap G1S and G2S in this program
 
+See CPP library version for example
+
 */
 
 
@@ -71,6 +73,12 @@ func bls_BN254(rng *core.RAND) {
 	var S [BGS]byte
 	var W [G2S]byte
 	var SIG [G1S]byte
+	var IKM [32]byte
+
+    for i:=0;i<32;i++ {
+		//IKM[i] = byte(i+1)
+        IKM[i]=byte(rng.GetByte())
+	}
 
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
 	mess := "This is a test message"
@@ -81,7 +89,7 @@ func bls_BN254(rng *core.RAND) {
 		return
 	}
 
-	res = BN254.KeyPairGenerate(rng, S[:], W[:])
+	res = BN254.KeyPairGenerate(IKM[:], S[:], W[:])
 	if res != 0 {
 		fmt.Printf("Failed to generate keys\n")
 		return
@@ -91,11 +99,11 @@ func bls_BN254(rng *core.RAND) {
 	fmt.Printf("Public  key : 0x")
 	printBinary(W[:])
 
-	BN254.Sign(SIG[:], mess, S[:])
+	BN254.Core_Sign(SIG[:], []byte(mess), S[:])
 	fmt.Printf("Signature : 0x")
 	printBinary(SIG[:])
 
-	res = BN254.Verify(SIG[:], mess, W[:])
+	res = BN254.Core_Verify(SIG[:], []byte(mess), W[:])
 
 	if res == 0 {
 		fmt.Printf("Signature is OK\n")
@@ -114,6 +122,12 @@ func bls_BLS383(rng *core.RAND) {
 	var S [BGS]byte
 	var W [G2S]byte
 	var SIG [G1S]byte
+	var IKM [32]byte
+
+    for i:=0;i<32;i++ {
+		//IKM[i] = byte(i+1)
+        IKM[i]=byte(rng.GetByte())
+	}
 
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
 	mess := "This is a test message"
@@ -124,7 +138,7 @@ func bls_BLS383(rng *core.RAND) {
 		return
 	}
 
-	res = BLS383.KeyPairGenerate(rng, S[:], W[:])
+	res = BLS383.KeyPairGenerate(IKM[:], S[:], W[:])
 	if res != 0 {
 		fmt.Printf("Failed to generate keys\n")
 		return
@@ -134,11 +148,11 @@ func bls_BLS383(rng *core.RAND) {
 	fmt.Printf("Public  key : 0x")
 	printBinary(W[:])
 
-	BLS383.Sign(SIG[:], mess, S[:])
+	BLS383.Core_Sign(SIG[:], []byte(mess), S[:])
 	fmt.Printf("Signature : 0x")
 	printBinary(SIG[:])
 
-	res = BLS383.Verify(SIG[:], mess, W[:])
+	res = BLS383.Core_Verify(SIG[:], []byte(mess), W[:])
 
 	if res == 0 {
 		fmt.Printf("Signature is OK\n")
@@ -157,6 +171,12 @@ func bls_BLS24(rng *core.RAND) {
 	var S [BGS]byte
 	var W [G2S]byte
 	var SIG [G1S]byte
+	var IKM [48]byte
+
+    for i:=0;i<48;i++ {
+		//IKM[i] = byte(i+1)
+        IKM[i]=byte(rng.GetByte())
+	}
 
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
 	mess := "This is a test message"
@@ -167,7 +187,7 @@ func bls_BLS24(rng *core.RAND) {
 		return
 	}
 
-	res = BLS24.KeyPairGenerate(rng, S[:], W[:])
+	res = BLS24.KeyPairGenerate(IKM[:], S[:], W[:])
 	if res != 0 {
 		fmt.Printf("Failed to generate keys\n")
 		return
@@ -177,11 +197,11 @@ func bls_BLS24(rng *core.RAND) {
 	fmt.Printf("Public  key : 0x")
 	printBinary(W[:])
 
-	BLS24.Sign(SIG[:], mess, S[:])
+	BLS24.Core_Sign(SIG[:], []byte(mess), S[:])
 	fmt.Printf("Signature : 0x")
 	printBinary(SIG[:])
 
-	res = BLS24.Verify(SIG[:], mess, W[:])
+	res = BLS24.Core_Verify(SIG[:], []byte(mess), W[:])
 
 	if res == 0 {
 		fmt.Printf("Signature is OK\n")
@@ -200,6 +220,12 @@ func bls_BLS48(rng *core.RAND) {
 	var S [BGS]byte
 	var W [G2S]byte
 	var SIG [G1S]byte
+	var IKM [64]byte
+
+    for i:=0;i<64;i++ {
+		//IKM[i] = byte(i+1)
+        IKM[i]=byte(rng.GetByte())
+	}
 
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
 	mess := "This is a test message"
@@ -210,7 +236,7 @@ func bls_BLS48(rng *core.RAND) {
 		return
 	}
 
-	res = BLS48.KeyPairGenerate(rng, S[:], W[:])
+	res = BLS48.KeyPairGenerate(IKM[:], S[:], W[:])
 	if res != 0 {
 		fmt.Printf("Failed to generate keys\n")
 		return
@@ -220,11 +246,11 @@ func bls_BLS48(rng *core.RAND) {
 	fmt.Printf("Public  key : 0x")
 	printBinary(W[:])
 
-	BLS48.Sign(SIG[:], mess, S[:])
+	BLS48.Core_Sign(SIG[:], []byte(mess), S[:])
 	fmt.Printf("Signature : 0x")
 	printBinary(SIG[:])
 
-	res = BLS48.Verify(SIG[:], mess, W[:])
+	res = BLS48.Core_Verify(SIG[:], []byte(mess), W[:])
 
 	if res == 0 {
 		fmt.Printf("Signature is OK\n")

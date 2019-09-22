@@ -52,7 +52,7 @@ pub fn printbinary(array: &[u8]) {
     println!("")
 }
 
-fn bls_bn254(mut rng: &mut RAND) {
+fn bls_bn254(rng: &mut RAND) {
     use core::bn254::bls;
 
     const BFS: usize = bls::BFS;
@@ -65,6 +65,12 @@ fn bls_bn254(mut rng: &mut RAND) {
 
     let mut w: [u8; G2S] = [0; G2S];
     let mut sig: [u8; G1S] = [0; G1S];
+    let mut ikm: [u8; 32] = [0; 32];
+
+    for i in 0..32 {
+        //ikm[i] = (i+1) as u8;
+        ikm[i]=rng.getbyte();
+    }
 
     let m = String::from("This is a test message");
 
@@ -74,7 +80,7 @@ fn bls_bn254(mut rng: &mut RAND) {
         return;
     }
 
-    res = bls::key_pair_generate(&mut rng, &mut s, &mut w);
+    res = bls::key_pair_generate(&ikm, &mut s, &mut w);
     if res != 0 {
         println!("Failed to Generate Keys");
         return;
@@ -85,11 +91,11 @@ fn bls_bn254(mut rng: &mut RAND) {
     print!("Public  key : 0x");
     printbinary(&w);
 
-    bls::sign(&mut sig, &m, &s);
+    bls::core_sign(&mut sig, &m.as_bytes(), &s);
     print!("Signature : 0x");
     printbinary(&sig);
 
-    res = bls::verify(&sig, &m, &w);
+    res = bls::core_verify(&sig, &m.as_bytes(), &w);
     if res == 0 {
         println!("Signature is OK");
     } else {
@@ -97,7 +103,7 @@ fn bls_bn254(mut rng: &mut RAND) {
     }
 }
 
-fn bls_bls383(mut rng: &mut RAND) {
+fn bls_bls383(rng: &mut RAND) {
     use core::bls383::bls;
 
     const BFS: usize = bls::BFS;
@@ -110,6 +116,12 @@ fn bls_bls383(mut rng: &mut RAND) {
 
     let mut w: [u8; G2S] = [0; G2S];
     let mut sig: [u8; G1S] = [0; G1S];
+    let mut ikm: [u8; 32] = [0; 32];
+
+    for i in 0..32 {
+        //ikm[i] = (i+1) as u8;
+        ikm[i]=rng.getbyte();
+    }
 
     let m = String::from("This is a test message");
 
@@ -118,7 +130,7 @@ fn bls_bls383(mut rng: &mut RAND) {
         println!("Failed to Initialize");
         return;
     }
-    res = bls::key_pair_generate(&mut rng, &mut s, &mut w);
+    res = bls::key_pair_generate(&ikm, &mut s, &mut w);
     if res != 0 {
         println!("Failed to Generate Keys");
         return;
@@ -128,11 +140,11 @@ fn bls_bls383(mut rng: &mut RAND) {
     print!("Public  key : 0x");
     printbinary(&w);
 
-    bls::sign(&mut sig, &m, &s);
+    bls::core_sign(&mut sig, &m.as_bytes(), &s);
     print!("Signature : 0x");
     printbinary(&sig);
 
-    res = bls::verify(&sig, &m, &w);
+    res = bls::core_verify(&sig, &m.as_bytes(), &w);
     if res == 0 {
         println!("Signature is OK");
     } else {
@@ -140,7 +152,7 @@ fn bls_bls383(mut rng: &mut RAND) {
     }
 }
 
-fn bls_bls24(mut rng: &mut RAND) {
+fn bls_bls24(rng: &mut RAND) {
     use core::bls24::bls192;
 
     const BFS: usize = bls192::BFS;
@@ -153,15 +165,20 @@ fn bls_bls24(mut rng: &mut RAND) {
 
     let mut w: [u8; G2S] = [0; G2S];
     let mut sig: [u8; G1S] = [0; G1S];
+    let mut ikm: [u8; 48] = [0; 48];
+
+    for i in 0..48 {
+        //ikm[i] = (i+1) as u8;
+        ikm[i]=rng.getbyte();
+    }
 
     let m = String::from("This is a test message");
-
     let mut res = bls192::init();
     if res != 0 {
         println!("Failed to Initialize");
         return;
     }
-    res = bls192::key_pair_generate(&mut rng, &mut s, &mut w);
+    res = bls192::key_pair_generate(&ikm, &mut s, &mut w);
     if res != 0 {
         println!("Failed to Generate Keys");
         return;
@@ -171,11 +188,11 @@ fn bls_bls24(mut rng: &mut RAND) {
     print!("Public  key : 0x");
     printbinary(&w);
 
-    bls192::sign(&mut sig, &m, &s);
+    bls192::core_sign(&mut sig, &m.as_bytes(), &s);
     print!("Signature : 0x");
     printbinary(&sig);
 
-    res = bls192::verify(&sig, &m, &w);
+    res = bls192::core_verify(&sig, &m.as_bytes(), &w);
     if res == 0 {
         println!("Signature is OK");
     } else {
@@ -183,7 +200,7 @@ fn bls_bls24(mut rng: &mut RAND) {
     }
 }
 
-fn bls_bls48(mut rng: &mut RAND) {
+fn bls_bls48(rng: &mut RAND) {
     use core::bls48::bls256;
 
     const BFS: usize = bls256::BFS;
@@ -196,6 +213,12 @@ fn bls_bls48(mut rng: &mut RAND) {
 
     let mut w: [u8; G2S] = [0; G2S];
     let mut sig: [u8; G1S] = [0; G1S];
+    let mut ikm: [u8; 64] = [0; 64];
+
+    for i in 0..64 {
+        //ikm[i] = (i+1) as u8;
+        ikm[i]=rng.getbyte();
+    }
 
     let m = String::from("This is a test message");
     let mut res = bls256::init();
@@ -203,7 +226,7 @@ fn bls_bls48(mut rng: &mut RAND) {
         println!("Failed to Initialize");
         return;
     }
-    res = bls256::key_pair_generate(&mut rng, &mut s, &mut w);
+    res = bls256::key_pair_generate(&ikm, &mut s, &mut w);
     if res != 0 {
         println!("Failed to Generate Keys");
         return;
@@ -213,11 +236,11 @@ fn bls_bls48(mut rng: &mut RAND) {
     print!("Public  key : 0x");
     printbinary(&w);
 
-    bls256::sign(&mut sig, &m, &s);
+    bls256::core_sign(&mut sig, &m.as_bytes(), &s);
     print!("Signature : 0x");
     printbinary(&sig);
 
-    res = bls256::verify(&sig, &m, &w);
+    res = bls256::core_verify(&sig, &m.as_bytes(), &w);
     if res == 0 {
         println!("Signature is OK");
     } else {

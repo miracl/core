@@ -133,6 +133,7 @@ pub fn GPhashit(hash: usize, sha: usize,w: &mut [u8],pad: usize,a: Option<&[u8]>
     }
 }
 
+#[allow(non_snake_case)]
 pub fn SPhashit(hash: usize, sha: usize,w: &mut [u8],a: Option<&[u8]>) {
     GPhashit(hash,sha,w,0,a,-1,None);
 }

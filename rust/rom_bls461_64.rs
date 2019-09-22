@@ -116,9 +116,9 @@ pub const CURVE_GY: [Chunk; NLEN] = [
 
 pub const CURVE_BNX: [Chunk; NLEN] = [0xFFBFFFE00000000, 0x1FFFF, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0];
 pub const CURVE_COF: [Chunk; NLEN] = [
-    0xAA7FFFEAAAAAAAB,
-    0xFFD55AAAB01556A,
-    0x1555554FF,
+    0xFFBFFFE00000001,
+    0x1FFFF,
+    0x0
     0x0,
     0x0,
     0x0,
