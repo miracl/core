@@ -47,9 +47,9 @@
 #if CHUNK==32 || CHUNK==64
 #include "ecp_NIST256.h"
 #include "ecp_GOLDILOCKS.h"
-#include "pair_BLS383.h"
-#include "pair192_BLS24.h"
-#include "pair256_BLS48.h"
+#include "pair_BLS12383.h"
+#include "pair192_BLS24479.h"
+#include "pair256_BLS48556.h"
 #endif
 
 #define MIN_TIME 10.0
@@ -573,9 +573,9 @@ int BN_254(csprng *RNG)
 #if CHUNK==32 || CHUNK==64
 int BLS_383(csprng *RNG)
 {
-    using namespace BLS383;
-    using namespace BLS383_FP;
-    using namespace BLS383_BIG;
+    using namespace BLS12383;
+    using namespace BLS12383_FP;
+    using namespace BLS12383_BIG;
 
     int i, iterations;
     clock_t start;
@@ -588,12 +588,12 @@ int BLS_383(csprng *RNG)
     FP2 wx, wy;
 
     BIG s, r, x, y;
-    printf("\nTesting/Timing BLS383 Pairings\n");
+    printf("\nTesting/Timing BLS12383 Pairings\n");
 
     ECP_generator(&G);
 
     BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS383, RNG);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS12383, RNG);
 
     ECP_hashit(&P,s);
     ECP_cfp(&P);
@@ -814,9 +814,9 @@ int BLS_383(csprng *RNG)
 
 int BLS_24(csprng *RNG)
 {
-    using namespace BLS24;
-    using namespace BLS24_FP;
-    using namespace BLS24_BIG;
+    using namespace BLS24479;
+    using namespace BLS24479_FP;
+    using namespace BLS24479_BIG;
 
     int i, iterations;
     clock_t start;
@@ -829,12 +829,12 @@ int BLS_24(csprng *RNG)
     FP8 cm;
     BIG a, b, s, r;
 
-    printf("\nTesting/Timing BLS24 Pairings\n");
+    printf("\nTesting/Timing BLS24479 Pairings\n");
 
     ECP_generator(&G);
 
     BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS24, RNG);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS24479, RNG);
 
     ECP_hashit(&P,s);
     ECP_cfp(&P);
@@ -1056,9 +1056,9 @@ int BLS_24(csprng *RNG)
 
 int BLS_48(csprng *RNG)
 {
-    using namespace BLS48;
-    using namespace BLS48_FP;
-    using namespace BLS48_BIG;
+    using namespace BLS48556;
+    using namespace BLS48556_FP;
+    using namespace BLS48556_BIG;
 
     int i, iterations;
     clock_t start;
@@ -1071,12 +1071,12 @@ int BLS_48(csprng *RNG)
     FP16 cm;
     BIG a, b, s, r;
 
-    printf("\nTesting/Timing BLS48 Pairings\n");
+    printf("\nTesting/Timing BLS48556 Pairings\n");
 
     ECP_generator(&G);
 
     BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS48, RNG);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS48556, RNG);
 
     ECP_hashit(&P,s);
     ECP_cfp(&P);

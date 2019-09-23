@@ -50,9 +50,9 @@
 <p><a id="myLink2" href="#" onclick="location.reload(false);nist256();">NIST256 256-bit Weierstrass Elliptic Curve</a></p>
 <p><a id="myLink3" href="#" onclick="location.reload(false);goldilocks();">GOLDILOCKS 448-bit Edwards Elliptic Curve</a></p>
 <p><a id="myLink4" href="#" onclick="location.reload(false);bn254();">BN254 254-bit k=12 Pairing-Friendly BN Curve</a></p>
-<p><a id="myLink5" href="#" onclick="location.reload(false);bls383();">BLS383 383-bit k=12 Pairing-Friendly BLS Curve</a></p>
-<p><a id="myLink6" href="#" onclick="location.reload(false);bls24();">BLS24 479-bit k=24 Pairing-Friendly BLS Curve</a></p>
-<p><a id="myLink7" href="#" onclick="location.reload(false);bls48();">BLS48 556-bit k=48 Pairing-Friendly BLS Curve</a></p>
+<p><a id="myLink5" href="#" onclick="location.reload(false);bls12383();">BLS12383 383-bit k=12 Pairing-Friendly BLS Curve</a></p>
+<p><a id="myLink6" href="#" onclick="location.reload(false);bls24479();">BLS24479 479-bit k=24 Pairing-Friendly BLS Curve</a></p>
+<p><a id="myLink7" href="#" onclick="location.reload(false);bls48556();">BLS48556 556-bit k=48 Pairing-Friendly BLS Curve</a></p>
 <p><a id="myLink8" href="#" onclick="location.reload(false);rsa2048();">RSA2048 2048-bit RSA Method</a></p>
 
 
@@ -150,10 +150,10 @@
 
 	}
 
-// BLS383 context
+// BLS12383 context
 
-	function bls383() {
-		var ctx = new CTX('BLS383');
+	function bls12383() {
+		var ctx = new CTX('BLS12383');
 		var i;
 		var result;
 		var MIN_ITERS=5;
@@ -171,7 +171,7 @@
 
 		mywindow=window.open();
 
-		mywindow.document.write("<br> Curve BLS383"+ "<br>");
+		mywindow.document.write("<br> Curve BLS12383"+ "<br>");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
 		{
 			mywindow.document.write("BN Pairing-Friendly Curve"+ "<br>");
@@ -737,10 +737,10 @@
 		}
 	}
 
-// BLS24 context
-	function bls24() {
+// BLS24479 context
+	function bls24479() {
 
-		var ctx = new CTX('BLS24');
+		var ctx = new CTX('BLS24479');
 		var i;
 		var result;
 		var MIN_ITERS=3;
@@ -758,7 +758,7 @@
 
 		mywindow=window.open();
 
-		mywindow.document.write("<br> Curve BLS24"+ "<br>");
+		mywindow.document.write("<br> Curve BLS24479"+ "<br>");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
 		{
 			mywindow.document.write("BN Pairing-Friendly Curve"+ "<br>");
@@ -928,10 +928,10 @@
 		}
 	}
 
-// BLS48 context
-	function bls48() {
+// BLS48556 context
+	function bls48556() {
 
-		var ctx = new CTX('BLS48');
+		var ctx = new CTX('BLS48556');
 		var i;
 		var result;
 		var MIN_ITERS=1;
@@ -949,7 +949,7 @@
 
 		mywindow=window.open();
 
-		mywindow.document.write("<br> Curve BLS48"+ "<br>");
+		mywindow.document.write("<br> Curve BLS48556"+ "<br>");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
 		{
 			mywindow.document.write("BN Pairing-Friendly Curve"+ "<br>");

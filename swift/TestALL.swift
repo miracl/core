@@ -45,9 +45,9 @@ import ed25519
 import nist256
 import goldilocks
 import bn254
-import bls383
-import bls24
-import bls48
+import bls12383
+import bls24479
+import bls48556
 import rsa2048
 
 public func printBinary(_ array: [UInt8])
@@ -754,7 +754,7 @@ public func TestMPIN_bn254(_ rng: inout RAND)
     rng=REALRNG!
 }
 
-public func TestMPIN_bls383(_ rng: inout RAND)
+public func TestMPIN_bls12383(_ rng: inout RAND)
 {
     let PERMITS=true
     let PINERROR=true
@@ -762,13 +762,13 @@ public func TestMPIN_bls383(_ rng: inout RAND)
     let SINGLE_PASS=true
 
 
-    let EGS=bls383.MPIN.EGS
-    let EFS=bls383.MPIN.EFS
+    let EGS=bls12383.MPIN.EGS
+    let EFS=bls12383.MPIN.EFS
     let G1S=2*EFS+1    // Group 1 Size
     let G2S=4*EFS+1;     // Group 2 Size
-    let EAS=bls383.CONFIG_CURVE.AESKEY
+    let EAS=bls12383.CONFIG_CURVE.AESKEY
 
-    let sha=bls383.CONFIG_CURVE.HASH_TYPE
+    let sha=bls12383.CONFIG_CURVE.HASH_TYPE
 
     var S=[UInt8](repeating: 0,count: EGS)
     var SST=[UInt8](repeating: 0,count: G2S)
@@ -797,49 +797,49 @@ public func TestMPIN_bls383(_ rng: inout RAND)
 
     // Trusted Authority set-up
 
-    bls383.MPIN.RANDOM_GENERATE(&rng,&S)
+    bls12383.MPIN.RANDOM_GENERATE(&rng,&S)
     print("\nMPIN Master Secret s: 0x",terminator: "");  printBinary(S)
 
     // Create Client Identity
     let IDstr = "testUser@miracl.com"
     let CLIENT_ID=[UInt8](IDstr.utf8)
 
-    var HCID=bls383.MPIN.HASH_ID(sha,CLIENT_ID)  // Either Client or TA calculates Hash(ID) - you decide!
+    var HCID=bls12383.MPIN.HASH_ID(sha,CLIENT_ID)  // Either Client or TA calculates Hash(ID) - you decide!
 
     print("Client ID= "); printBinary(CLIENT_ID)
 
     // Client and Server are issued secrets by DTA
-    bls383.MPIN.GET_SERVER_SECRET(S,&SST);
+    bls12383.MPIN.GET_SERVER_SECRET(S,&SST);
     print("Server Secret SS: 0x",terminator: "");  printBinary(SST);
 
-    bls383.MPIN.GET_CLIENT_SECRET(&S,HCID,&TOKEN);
+    bls12383.MPIN.GET_CLIENT_SECRET(&S,HCID,&TOKEN);
     print("Client Secret CS: 0x",terminator: ""); printBinary(TOKEN);
 
     // Client extracts PIN from secret to create Token
     var pin:Int32=1234
     print("Client extracts PIN= \(pin)")
-    var rtn=bls383.MPIN.EXTRACT_PIN(sha,CLIENT_ID,pin,&TOKEN)
+    var rtn=bls12383.MPIN.EXTRACT_PIN(sha,CLIENT_ID,pin,&TOKEN)
     if rtn != 0 {print("FAILURE: EXTRACT_PIN rtn: \(rtn)")}
 
     print("Client Token TK: 0x",terminator: ""); printBinary(TOKEN);
 
     if FULL
     {
-        bls383.MPIN.PRECOMPUTE(TOKEN,HCID,&G1,&G2);
+        bls12383.MPIN.PRECOMPUTE(TOKEN,HCID,&G1,&G2);
     }
 
     var date:Int32=0
     if (PERMITS)
     {
-        date=bls383.MPIN.today()
+        date=bls12383.MPIN.today()
         // Client gets "Time Token" permit from DTA
-        bls383.MPIN.GET_CLIENT_PERMIT(sha,date,S,HCID,&PERMIT)
+        bls12383.MPIN.GET_CLIENT_PERMIT(sha,date,S,HCID,&PERMIT)
         print("Time Permit TP: 0x",terminator: "");  printBinary(PERMIT)
 
         // This encoding makes Time permit look random - Elligator squared
-        bls383.MPIN.ENCODING(&rng,&PERMIT);
+        bls12383.MPIN.ENCODING(&rng,&PERMIT);
         print("Encoded Time Permit TP: 0x",terminator: "");  printBinary(PERMIT)
-        bls383.MPIN.DECODING(&PERMIT)
+        bls12383.MPIN.DECODING(&PERMIT)
         print("Decoded Time Permit TP: 0x",terminator: "");  printBinary(PERMIT)
     }
 
@@ -894,25 +894,25 @@ public func TestMPIN_bls383(_ rng: inout RAND)
     if (SINGLE_PASS)
     {
         print("MPIN Single Pass")
-        let timeValue = bls383.MPIN.GET_TIME()
+        let timeValue = bls12383.MPIN.GET_TIME()
 
-        rtn=bls383.MPIN.CLIENT(sha,date,CLIENT_ID,&REALRNG,&X,pin,TOKEN,&SEC,&pxID,&pxCID,pPERMIT,timeValue,&Y)
+        rtn=bls12383.MPIN.CLIENT(sha,date,CLIENT_ID,&REALRNG,&X,pin,TOKEN,&SEC,&pxID,&pxCID,pPERMIT,timeValue,&Y)
 
         if rtn != 0 {print("FAILURE: CLIENT rtn: \(rtn)")}
 
         if (FULL)
         {
-            HCID=bls383.MPIN.HASH_ID(sha,CLIENT_ID);
-            bls383.MPIN.GET_G1_MULTIPLE(&REALRNG,1,&R,HCID,&Z); // Also Send Z=r.ID to Server, remember random r
+            HCID=bls12383.MPIN.HASH_ID(sha,CLIENT_ID);
+            bls12383.MPIN.GET_G1_MULTIPLE(&REALRNG,1,&R,HCID,&Z); // Also Send Z=r.ID to Server, remember random r
         }
-        rtn=bls383.MPIN.SERVER(sha,date,&pHID,&pHTID,&Y,SST,pxID,pxCID!,SEC,&pE,&pF,CLIENT_ID,timeValue)
+        rtn=bls12383.MPIN.SERVER(sha,date,&pHID,&pHTID,&Y,SST,pxID,pxCID!,SEC,&pE,&pF,CLIENT_ID,timeValue)
         if rtn != 0 {print("FAILURE: SERVER rtn: \(rtn)")}
 
         if (FULL)
         { // Also send T=w.ID to client, remember random w
-            HSID=bls383.MPIN.HASH_ID(sha,CLIENT_ID);
-            if date != 0 {bls383.MPIN.GET_G1_MULTIPLE(&REALRNG,0,&W,pHTID!,&T)}
-            else {bls383.MPIN.GET_G1_MULTIPLE(&REALRNG,0,&W,pHID,&T)}
+            HSID=bls12383.MPIN.HASH_ID(sha,CLIENT_ID);
+            if date != 0 {bls12383.MPIN.GET_G1_MULTIPLE(&REALRNG,0,&W,pHTID!,&T)}
+            else {bls12383.MPIN.GET_G1_MULTIPLE(&REALRNG,0,&W,pHID,&T)}
 
         }
     }
@@ -920,43 +920,43 @@ public func TestMPIN_bls383(_ rng: inout RAND)
     {
         print("MPIN Multi Pass");
         // Send U=x.ID to server, and recreate secret from token and pin
-        rtn=bls383.MPIN.CLIENT_1(sha,date,CLIENT_ID,&REALRNG,&X,pin,TOKEN,&SEC,&pxID,&pxCID,pPERMIT)
+        rtn=bls12383.MPIN.CLIENT_1(sha,date,CLIENT_ID,&REALRNG,&X,pin,TOKEN,&SEC,&pxID,&pxCID,pPERMIT)
         if rtn != 0 {print("FAILURE: CLIENT_1 rtn: \(rtn)")}
 
         if (FULL)
         {
-            HCID=bls383.MPIN.HASH_ID(sha,CLIENT_ID);
-            bls383.MPIN.GET_G1_MULTIPLE(&REALRNG,1,&R,HCID,&Z);  // Also Send Z=r.ID to Server, remember random r
+            HCID=bls12383.MPIN.HASH_ID(sha,CLIENT_ID);
+            bls12383.MPIN.GET_G1_MULTIPLE(&REALRNG,1,&R,HCID,&Z);  // Also Send Z=r.ID to Server, remember random r
         }
         // Server calculates H(ID) and H(T|H(ID)) (if time permits enabled), and maps them to points on the curve HID and HTID resp.
-        bls383.MPIN.SERVER_1(sha,date,CLIENT_ID,&pHID,&pHTID);
+        bls12383.MPIN.SERVER_1(sha,date,CLIENT_ID,&pHID,&pHTID);
             // Server generates Random number Y and sends it to Client
-        bls383.MPIN.RANDOM_GENERATE(&REALRNG!,&Y);
+        bls12383.MPIN.RANDOM_GENERATE(&REALRNG!,&Y);
 
         if (FULL)
         { // Also send T=w.ID to client, remember random w
-            HSID=bls383.MPIN.HASH_ID(sha,CLIENT_ID);
-            if date != 0 {bls383.MPIN.GET_G1_MULTIPLE(&REALRNG,0,&W,pHTID!,&T)}
-            else {bls383.MPIN.GET_G1_MULTIPLE(&REALRNG,0,&W,pHID,&T)}
+            HSID=bls12383.MPIN.HASH_ID(sha,CLIENT_ID);
+            if date != 0 {bls12383.MPIN.GET_G1_MULTIPLE(&REALRNG,0,&W,pHTID!,&T)}
+            else {bls12383.MPIN.GET_G1_MULTIPLE(&REALRNG,0,&W,pHID,&T)}
         }
 
         // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC
-        rtn=bls383.MPIN.CLIENT_2(X,Y,&SEC);
+        rtn=bls12383.MPIN.CLIENT_2(X,Y,&SEC);
         if rtn != 0 {print("FAILURE: CLIENT_2 rtn: \(rtn)")}
 
         // Server Second pass. Inputs hashed client id, random Y, -(x+y)*SEC, xID and xCID and Server secret SST. E and F help kangaroos to find error.
         // If PIN error not required, set E and F = null
 
-        rtn=bls383.MPIN.SERVER_2(date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,&pE,&pF);
+        rtn=bls12383.MPIN.SERVER_2(date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,&pE,&pF);
 
         if rtn != 0 {print("FAILURE: SERVER_1 rtn: \(rtn)")}
     }
-    if (rtn == bls383.MPIN.BAD_PIN)
+    if (rtn == bls12383.MPIN.BAD_PIN)
     {
         print("Server says - Bad Pin. I don't know you. Feck off.\n");
         if (PINERROR)
         {
-            let err=bls383.MPIN.KANGAROO(pE,pF);
+            let err=bls12383.MPIN.KANGAROO(pE,pF);
             if err != 0 {print("(Client PIN is out by \(err))\n")}
         }
         return;
@@ -965,19 +965,19 @@ public func TestMPIN_bls383(_ rng: inout RAND)
 
     if (FULL)
     {
-        var H=bls383.MPIN.HASH_ALL(sha,HCID,pxID,pxCID,SEC,Y,Z,T);
-        bls383.MPIN.CLIENT_KEY(sha,G1,G2,pin,R,X,H,T,&CK);
+        var H=bls12383.MPIN.HASH_ALL(sha,HCID,pxID,pxCID,SEC,Y,Z,T);
+        bls12383.MPIN.CLIENT_KEY(sha,G1,G2,pin,R,X,H,T,&CK);
         print("Client Key =  0x",terminator: "");  printBinary(CK)
 
-        H=bls383.MPIN.HASH_ALL(sha,HSID,pxID,pxCID,SEC,Y,Z,T);
-        bls383.MPIN.SERVER_KEY(sha,Z,SST,W,H,pHID,pxID!,pxCID,&SK);
+        H=bls12383.MPIN.HASH_ALL(sha,HSID,pxID,pxCID,SEC,Y,Z,T);
+        bls12383.MPIN.SERVER_KEY(sha,Z,SST,W,H,pHID,pxID!,pxCID,&SK);
         print("Server Key =  0x",terminator: "");  printBinary(SK)
     }
     rng=REALRNG!
 }
 
 
-public func TestMPIN_bls24(_ rng: inout RAND)
+public func TestMPIN_bls24479(_ rng: inout RAND)
 {
     let PERMITS=true
     let PINERROR=true
@@ -985,13 +985,13 @@ public func TestMPIN_bls24(_ rng: inout RAND)
     let SINGLE_PASS=true
 
 
-    let EGS=bls24.MPIN192.EGS
-    let EFS=bls24.MPIN192.EFS
+    let EGS=bls24479.MPIN192.EGS
+    let EFS=bls24479.MPIN192.EFS
     let G1S=2*EFS+1    // Group 1 Size
     let G2S=8*EFS+1;     // Group 2 Size
-    let EAS=bls24.CONFIG_CURVE.AESKEY
+    let EAS=bls24479.CONFIG_CURVE.AESKEY
 
-    let sha=bls24.CONFIG_CURVE.HASH_TYPE
+    let sha=bls24479.CONFIG_CURVE.HASH_TYPE
 
     var S=[UInt8](repeating: 0,count: EGS)
     var SST=[UInt8](repeating: 0,count: G2S)
@@ -1199,7 +1199,7 @@ public func TestMPIN_bls24(_ rng: inout RAND)
     rng=REALRNG!
 }
 
-public func TestMPIN_bls48(_ rng: inout RAND)
+public func TestMPIN_bls48556(_ rng: inout RAND)
 {
     let PERMITS=true
     let PINERROR=true
@@ -1207,13 +1207,13 @@ public func TestMPIN_bls48(_ rng: inout RAND)
     let SINGLE_PASS=true
 
 
-    let EGS=bls48.MPIN256.EGS
-    let EFS=bls48.MPIN256.EFS
+    let EGS=bls48556.MPIN256.EGS
+    let EFS=bls48556.MPIN256.EFS
     let G1S=2*EFS+1    // Group 1 Size
     let G2S=16*EFS+1;     // Group 2 Size
-    let EAS=bls48.CONFIG_CURVE.AESKEY
+    let EAS=bls48556.CONFIG_CURVE.AESKEY
 
-    let sha=bls48.CONFIG_CURVE.HASH_TYPE
+    let sha=bls48556.CONFIG_CURVE.HASH_TYPE
 
     var S=[UInt8](repeating: 0,count: EGS)
     var SST=[UInt8](repeating: 0,count: G2S)
@@ -1435,6 +1435,6 @@ TestECDH_nist256(&rng)
 TestECDH_goldilocks(&rng)
 TestRSA_2048(&rng)
 TestMPIN_bn254(&rng)
-TestMPIN_bls383(&rng)
-TestMPIN_bls24(&rng)
-TestMPIN_bls48(&rng)
+TestMPIN_bls12383(&rng)
+TestMPIN_bls24479(&rng)
+TestMPIN_bls48556(&rng)

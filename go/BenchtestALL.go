@@ -41,10 +41,10 @@ import "github.com/miracl/core/go/core/ED25519"
 import "github.com/miracl/core/go/core/NIST256"
 import "github.com/miracl/core/go/core/GOLDILOCKS"
 import "github.com/miracl/core/go/core/BN254"
-import "github.com/miracl/core/go/core/BLS383"
+import "github.com/miracl/core/go/core/BLS12383"
 import "github.com/miracl/core/go/core/RSA2048"
-import "github.com/miracl/core/go/core/BLS24"
-import "github.com/miracl/core/go/core/BLS48"
+import "github.com/miracl/core/go/core/BLS24479"
+import "github.com/miracl/core/go/core/BLS48556"
 
 //import "core"
 //import "core/BN254"
@@ -427,30 +427,30 @@ func BN_254(rng *core.RAND) {
 
 func BLS_383(rng *core.RAND) {
 
-	fmt.Printf("\nTesting/Timing BLS383 Pairings\n")
+	fmt.Printf("\nTesting/Timing BLS12383 Pairings\n")
 
-	if BLS383.CURVE_PAIRING_TYPE == BLS383.BN {
+	if BLS12383.CURVE_PAIRING_TYPE == BLS12383.BN {
 		fmt.Printf("BN Pairing-Friendly Curve\n")
 	}
-	if BLS383.CURVE_PAIRING_TYPE == BLS383.BLS {
+	if BLS12383.CURVE_PAIRING_TYPE == BLS12383.BLS {
 		fmt.Printf("BLS Pairing-Friendly Curve\n")
 	}
 
-	fmt.Printf("Modulus size %d bits\n", BLS383.MODBITS)
-	fmt.Printf("%d bit build\n", BLS383.CHUNK)
+	fmt.Printf("Modulus size %d bits\n", BLS12383.MODBITS)
+	fmt.Printf("%d bit build\n", BLS12383.CHUNK)
 
-	G := BLS383.ECP_generator()
-	r := BLS383.NewBIGints(BLS383.CURVE_Order)
-	s := BLS383.Randtrunc(r, 16*BLS383.AESKEY, rng)
+	G := BLS12383.ECP_generator()
+	r := BLS12383.NewBIGints(BLS12383.CURVE_Order)
+	s := BLS12383.Randtrunc(r, 16*BLS12383.AESKEY, rng)
 
-	P:=BLS383.ECP_hashit(s)
+	P:=BLS12383.ECP_hashit(s)
 	P.Cfp();
     if (P.Is_infinity()) {
         fmt.Printf("HASHING FAILURE - P=O\n");
 		return
     }
 
-	P = BLS383.G1mul(G, r)
+	P = BLS12383.G1mul(G, r)
 
 	if !P.Is_infinity() {
 		fmt.Printf("FAILURE - rP!=O\n")
@@ -461,7 +461,7 @@ func BLS_383(rng *core.RAND) {
 	iterations := 0
 	elapsed := time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		P = BLS383.G1mul(G, s)
+		P = BLS12383.G1mul(G, s)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -469,21 +469,21 @@ func BLS_383(rng *core.RAND) {
 	fmt.Printf("G1 mul              - %8d iterations  ", iterations)
 	fmt.Printf(" %8.2f ms per iteration\n", dur)
 
-	Q := BLS383.ECP2_generator()
+	Q := BLS12383.ECP2_generator()
 
-    W := BLS383.ECP2_hashit(s)
+    W := BLS12383.ECP2_hashit(s)
     W.Cfp()
     if W.Is_infinity() {
         fmt.Printf("HASHING FAILURE - P=O\n")
 		return
     }
-    W = BLS383.G2mul(W, r);
+    W = BLS12383.G2mul(W, r);
     if !W.Is_infinity() {
         fmt.Printf("FAILURE - rQ!=O\n")
 		return
     }
 
-	W = BLS383.G2mul(Q, r)
+	W = BLS12383.G2mul(Q, r)
 
 	if !W.Is_infinity() {
 		fmt.Printf("FAILURE - rQ!=O\n")
@@ -494,7 +494,7 @@ func BLS_383(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		W = BLS383.G2mul(Q, s)
+		W = BLS12383.G2mul(Q, s)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -502,10 +502,10 @@ func BLS_383(rng *core.RAND) {
 	fmt.Printf("G2 mul              - %8d iterations  ", iterations)
 	fmt.Printf(" %8.2f ms per iteration\n", dur)
 
-	w := BLS383.Ate(Q, P)
-	w = BLS383.Fexp(w)
+	w := BLS12383.Ate(Q, P)
+	w = BLS12383.Fexp(w)
 
-	g := BLS383.GTpow(w, r)
+	g := BLS12383.GTpow(w, r)
 
 	if !g.Isunity() {
 		fmt.Printf("FAILURE - g^r!=1\n")
@@ -516,7 +516,7 @@ func BLS_383(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		g = BLS383.GTpow(w, s)
+		g = BLS12383.GTpow(w, s)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -540,7 +540,7 @@ func BLS_383(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		w = BLS383.Ate(Q, P)
+		w = BLS12383.Ate(Q, P)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -552,7 +552,7 @@ func BLS_383(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		g = BLS383.Fexp(w)
+		g = BLS12383.Fexp(w)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -563,28 +563,28 @@ func BLS_383(rng *core.RAND) {
 	P.Copy(G)
 	Q.Copy(W)
 
-	P = BLS383.G1mul(P, s)
+	P = BLS12383.G1mul(P, s)
 
-	g = BLS383.Ate(Q, P)
-	g = BLS383.Fexp(g)
+	g = BLS12383.Ate(Q, P)
+	g = BLS12383.Fexp(g)
 
 	P.Copy(G)
-	Q = BLS383.G2mul(Q, s)
+	Q = BLS12383.G2mul(Q, s)
 
-	w = BLS383.Ate(Q, P)
-	w = BLS383.Fexp(w)
+	w = BLS12383.Ate(Q, P)
+	w = BLS12383.Fexp(w)
 
-	if !BLS383.G1member(P) {
+	if !BLS12383.G1member(P) {
 		fmt.Printf("FAILURE - P not in G1 \n")
 		return
 	}
 
-	if !BLS383.G2member(Q) {
+	if !BLS12383.G2member(Q) {
 		fmt.Printf("FAILURE - Q not in G2 \n")
 		return
 	}
 
-	if !BLS383.GTmember(w) {
+	if !BLS12383.GTmember(w) {
 		fmt.Printf("FAILURE - e(Q,P) not in GT \n")
 		return
 
@@ -597,9 +597,9 @@ func BLS_383(rng *core.RAND) {
 	}
 
 	Q.Copy(W)
-	g = BLS383.Ate(Q, P)
-	g = BLS383.Fexp(g)
-	g = BLS383.GTpow(g, s)
+	g = BLS12383.Ate(Q, P)
+	g = BLS12383.Fexp(g)
+	g = BLS12383.GTpow(g, s)
 
 	if !g.Equals(w) {
 		fmt.Printf("FAILURE - e(sQ,p)!=e(Q,P)^s \n")
@@ -610,30 +610,30 @@ func BLS_383(rng *core.RAND) {
 
 func BLS_24(rng *core.RAND) {
 
-	fmt.Printf("\nTesting/Timing BLS24 Pairings\n")
+	fmt.Printf("\nTesting/Timing BLS24479 Pairings\n")
 
-	if BLS24.CURVE_PAIRING_TYPE == BLS24.BN {
+	if BLS24479.CURVE_PAIRING_TYPE == BLS24479.BN {
 		fmt.Printf("BN Pairing-Friendly Curve\n")
 	}
-	if BLS24.CURVE_PAIRING_TYPE == BLS24.BLS {
+	if BLS24479.CURVE_PAIRING_TYPE == BLS24479.BLS {
 		fmt.Printf("BLS Pairing-Friendly Curve\n")
 	}
 
-	fmt.Printf("Modulus size %d bits\n", BLS24.MODBITS)
-	fmt.Printf("%d bit build\n", BLS24.CHUNK)
+	fmt.Printf("Modulus size %d bits\n", BLS24479.MODBITS)
+	fmt.Printf("%d bit build\n", BLS24479.CHUNK)
 
-	G := BLS24.ECP_generator()
-	r := BLS24.NewBIGints(BLS24.CURVE_Order)
-	s := BLS24.Randtrunc(r, 16*BLS24.AESKEY, rng)
+	G := BLS24479.ECP_generator()
+	r := BLS24479.NewBIGints(BLS24479.CURVE_Order)
+	s := BLS24479.Randtrunc(r, 16*BLS24479.AESKEY, rng)
 
-	P:=BLS24.ECP_hashit(s)
+	P:=BLS24479.ECP_hashit(s)
 	P.Cfp()
     if (P.Is_infinity()) {
         fmt.Printf("HASHING FAILURE - P=O\n");
 		return
     }
 
-	P = BLS24.G1mul(G, r)
+	P = BLS24479.G1mul(G, r)
 
 	if !P.Is_infinity() {
 		fmt.Printf("FAILURE - rP!=O\n")
@@ -644,7 +644,7 @@ func BLS_24(rng *core.RAND) {
 	iterations := 0
 	elapsed := time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		P = BLS24.G1mul(G, s)
+		P = BLS24479.G1mul(G, s)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -652,23 +652,23 @@ func BLS_24(rng *core.RAND) {
 	fmt.Printf("G1 mul              - %8d iterations  ", iterations)
 	fmt.Printf(" %8.2f ms per iteration\n", dur)
 
-	Q := BLS24.ECP4_generator()
+	Q := BLS24479.ECP4_generator()
 
 
-    W := BLS24.ECP4_hashit(s)
+    W := BLS24479.ECP4_hashit(s)
     W.Cfp()
     if W.Is_infinity() {
         fmt.Printf("HASHING FAILURE - P=O\n")
 		return
     }
-    W = BLS24.G2mul(W, r);
+    W = BLS24479.G2mul(W, r);
     if !W.Is_infinity() {
         fmt.Printf("FAILURE - rQ!=O\n")
 		return
     }
 
 
-	W = BLS24.G2mul(Q, r)
+	W = BLS24479.G2mul(Q, r)
 
 	if !W.Is_infinity() {
 		fmt.Printf("FAILURE - rQ!=O\n")
@@ -679,7 +679,7 @@ func BLS_24(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		W = BLS24.G2mul(Q, s)
+		W = BLS24479.G2mul(Q, s)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -687,10 +687,10 @@ func BLS_24(rng *core.RAND) {
 	fmt.Printf("G2 mul              - %8d iterations  ", iterations)
 	fmt.Printf(" %8.2f ms per iteration\n", dur)
 
-	w := BLS24.Ate(Q, P)
-	w = BLS24.Fexp(w)
+	w := BLS24479.Ate(Q, P)
+	w = BLS24479.Fexp(w)
 
-	g := BLS24.GTpow(w, r)
+	g := BLS24479.GTpow(w, r)
 
 	if !g.Isunity() {
 		fmt.Printf("FAILURE - g^r!=1\n")
@@ -701,7 +701,7 @@ func BLS_24(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		g = BLS24.GTpow(w, s)
+		g = BLS24479.GTpow(w, s)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -725,7 +725,7 @@ func BLS_24(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		w = BLS24.Ate(Q, P)
+		w = BLS24479.Ate(Q, P)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -737,7 +737,7 @@ func BLS_24(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		g = BLS24.Fexp(w)
+		g = BLS24479.Fexp(w)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -748,28 +748,28 @@ func BLS_24(rng *core.RAND) {
 	P.Copy(G)
 	Q.Copy(W)
 
-	P = BLS24.G1mul(P, s)
+	P = BLS24479.G1mul(P, s)
 
-	g = BLS24.Ate(Q, P)
-	g = BLS24.Fexp(g)
+	g = BLS24479.Ate(Q, P)
+	g = BLS24479.Fexp(g)
 
 	P.Copy(G)
-	Q = BLS24.G2mul(Q, s)
+	Q = BLS24479.G2mul(Q, s)
 
-	w = BLS24.Ate(Q, P)
-	w = BLS24.Fexp(w)
+	w = BLS24479.Ate(Q, P)
+	w = BLS24479.Fexp(w)
 
-	if !BLS24.G1member(P) {
+	if !BLS24479.G1member(P) {
 		fmt.Printf("FAILURE - P not in G1 \n")
 		return
 	}
 
-	if !BLS24.G2member(Q) {
+	if !BLS24479.G2member(Q) {
 		fmt.Printf("FAILURE - Q not in G2 \n")
 		return
 	}
 
-	if !BLS24.GTmember(w) {
+	if !BLS24479.GTmember(w) {
 		fmt.Printf("FAILURE - e(Q,P) not in GT \n")
 		return
 
@@ -781,9 +781,9 @@ func BLS_24(rng *core.RAND) {
 	}
 
 	Q.Copy(W)
-	g = BLS24.Ate(Q, P)
-	g = BLS24.Fexp(g)
-	g = BLS24.GTpow(g, s)
+	g = BLS24479.Ate(Q, P)
+	g = BLS24479.Fexp(g)
+	g = BLS24479.GTpow(g, s)
 
 	if !g.Equals(w) {
 		fmt.Printf("FAILURE - e(sQ,p)!=e(Q,P)^s \n")
@@ -794,30 +794,30 @@ func BLS_24(rng *core.RAND) {
 
 func BLS_48(rng *core.RAND) {
 
-	fmt.Printf("\nTesting/Timing BLS48 Pairings\n")
+	fmt.Printf("\nTesting/Timing BLS48556 Pairings\n")
 
-	if BLS48.CURVE_PAIRING_TYPE == BLS48.BN {
+	if BLS48556.CURVE_PAIRING_TYPE == BLS48556.BN {
 		fmt.Printf("BN Pairing-Friendly Curve\n")
 	}
-	if BLS48.CURVE_PAIRING_TYPE == BLS48.BLS {
+	if BLS48556.CURVE_PAIRING_TYPE == BLS48556.BLS {
 		fmt.Printf("BLS Pairing-Friendly Curve\n")
 	}
 
-	fmt.Printf("Modulus size %d bits\n", BLS48.MODBITS)
-	fmt.Printf("%d bit build\n", BLS48.CHUNK)
+	fmt.Printf("Modulus size %d bits\n", BLS48556.MODBITS)
+	fmt.Printf("%d bit build\n", BLS48556.CHUNK)
 
-	G := BLS48.ECP_generator()
-	r := BLS48.NewBIGints(BLS48.CURVE_Order)
-	s := BLS48.Randtrunc(r, 16*BLS48.AESKEY, rng)
+	G := BLS48556.ECP_generator()
+	r := BLS48556.NewBIGints(BLS48556.CURVE_Order)
+	s := BLS48556.Randtrunc(r, 16*BLS48556.AESKEY, rng)
 
-	P:=BLS48.ECP_hashit(s)
+	P:=BLS48556.ECP_hashit(s)
 	P.Cfp()
     if (P.Is_infinity()) {
         fmt.Printf("HASHING FAILURE - P=O\n");
 		return
     }
 
-	P = BLS48.G1mul(G, r)
+	P = BLS48556.G1mul(G, r)
 
 	if !P.Is_infinity() {
 		fmt.Printf("FAILURE - rP!=O\n")
@@ -828,7 +828,7 @@ func BLS_48(rng *core.RAND) {
 	iterations := 0
 	elapsed := time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		P = BLS48.G1mul(G, s)
+		P = BLS48556.G1mul(G, s)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -836,21 +836,21 @@ func BLS_48(rng *core.RAND) {
 	fmt.Printf("G1 mul              - %8d iterations  ", iterations)
 	fmt.Printf(" %8.2f ms per iteration\n", dur)
 
-	Q := BLS48.ECP8_generator()
+	Q := BLS48556.ECP8_generator()
 
-    W := BLS48.ECP8_hashit(s)
+    W := BLS48556.ECP8_hashit(s)
     W.Cfp()
     if W.Is_infinity() {
         fmt.Printf("HASHING FAILURE - P=O\n")
 		return
     }
-    W = BLS48.G2mul(W, r);
+    W = BLS48556.G2mul(W, r);
     if !W.Is_infinity() {
         fmt.Printf("FAILURE - rQ!=O\n")
 		return
     }
 
-	W = BLS48.G2mul(Q, r)
+	W = BLS48556.G2mul(Q, r)
 
 	if !W.Is_infinity() {
 		fmt.Printf("FAILURE - rQ!=O\n")
@@ -861,7 +861,7 @@ func BLS_48(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		W = BLS48.G2mul(Q, s)
+		W = BLS48556.G2mul(Q, s)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -869,10 +869,10 @@ func BLS_48(rng *core.RAND) {
 	fmt.Printf("G2 mul              - %8d iterations  ", iterations)
 	fmt.Printf(" %8.2f ms per iteration\n", dur)
 
-	w := BLS48.Ate(Q, P)
-	w = BLS48.Fexp(w)
+	w := BLS48556.Ate(Q, P)
+	w = BLS48556.Fexp(w)
 
-	g := BLS48.GTpow(w, r)
+	g := BLS48556.GTpow(w, r)
 
 	if !g.Isunity() {
 		fmt.Printf("FAILURE - g^r!=1\n")
@@ -883,7 +883,7 @@ func BLS_48(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		g = BLS48.GTpow(w, s)
+		g = BLS48556.GTpow(w, s)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -907,7 +907,7 @@ func BLS_48(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		w = BLS48.Ate(Q, P)
+		w = BLS48556.Ate(Q, P)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -919,7 +919,7 @@ func BLS_48(rng *core.RAND) {
 	iterations = 0
 	elapsed = time.Since(start)
 	for (int(elapsed/time.Second)) < MIN_TIME || iterations < MIN_ITERS {
-		g = BLS48.Fexp(w)
+		g = BLS48556.Fexp(w)
 		iterations++
 		elapsed = time.Since(start)
 	}
@@ -930,28 +930,28 @@ func BLS_48(rng *core.RAND) {
 	P.Copy(G)
 	Q.Copy(W)
 
-	P = BLS48.G1mul(P, s)
+	P = BLS48556.G1mul(P, s)
 
-	g = BLS48.Ate(Q, P)
-	g = BLS48.Fexp(g)
+	g = BLS48556.Ate(Q, P)
+	g = BLS48556.Fexp(g)
 
 	P.Copy(G)
-	Q = BLS48.G2mul(Q, s)
+	Q = BLS48556.G2mul(Q, s)
 
-	w = BLS48.Ate(Q, P)
-	w = BLS48.Fexp(w)
+	w = BLS48556.Ate(Q, P)
+	w = BLS48556.Fexp(w)
 
-	if !BLS48.G1member(P) {
+	if !BLS48556.G1member(P) {
 		fmt.Printf("FAILURE - P not in G1 \n")
 		return
 	}
 
-	if !BLS48.G2member(Q) {
+	if !BLS48556.G2member(Q) {
 		fmt.Printf("FAILURE - Q not in G2 \n")
 		return
 	}
 
-	if !BLS48.GTmember(w) {
+	if !BLS48556.GTmember(w) {
 		fmt.Printf("FAILURE - e(Q,P) not in GT \n")
 		return
 
@@ -963,9 +963,9 @@ func BLS_48(rng *core.RAND) {
 	}
 
 	Q.Copy(W)
-	g = BLS48.Ate(Q, P)
-	g = BLS48.Fexp(g)
-	g = BLS48.GTpow(g, s)
+	g = BLS48556.Ate(Q, P)
+	g = BLS48556.Fexp(g)
+	g = BLS48556.GTpow(g, s)
 
 	if !g.Equals(w) {
 		fmt.Printf("FAILURE - e(sQ,p)!=e(Q,P)^s \n")

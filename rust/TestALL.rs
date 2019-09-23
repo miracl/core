@@ -719,10 +719,10 @@ fn mpin_bn254(mut rng: &mut RAND) {
     }
 }
 
-fn mpin_bls383(mut rng: &mut RAND) {
-    //use core::bls383;
-    use core::bls383::ecp;
-    use core::bls383::mpin;
+fn mpin_bls12383(mut rng: &mut RAND) {
+    //use core::bls12383;
+    use core::bls12383::ecp;
+    use core::bls12383::mpin;
     pub const PERMITS: bool = true;
     pub const PINERROR: bool = true;
     pub const FULL: bool = true;
@@ -940,10 +940,10 @@ fn mpin_bls383(mut rng: &mut RAND) {
     }
 }
 
-fn mpin_bls24(mut rng: &mut RAND) {
+fn mpin_bls24479(mut rng: &mut RAND) {
     //use core::bls24;
-    use core::bls24::ecp;
-    use core::bls24::mpin192;
+    use core::bls24479::ecp;
+    use core::bls24479::mpin192;
 
     pub const PERMITS: bool = true;
     pub const PINERROR: bool = true;
@@ -1162,10 +1162,10 @@ fn mpin_bls24(mut rng: &mut RAND) {
     }
 }
 
-fn mpin_bls48(mut rng: &mut RAND) {
+fn mpin_bls48556(mut rng: &mut RAND) {
     //use core::bls48;
-    use core::bls48::ecp;
-    use core::bls48::mpin256;
+    use core::bls48556::ecp;
+    use core::bls48556::mpin256;
 
     pub const PERMITS: bool = true;
     pub const PINERROR: bool = true;
@@ -1464,8 +1464,8 @@ fn main() {
     ecdh_nist256(&mut rng);
     ecdh_goldilocks(&mut rng);
     mpin_bn254(&mut rng);
-    mpin_bls383(&mut rng);
-    mpin_bls24(&mut rng);
-    mpin_bls48(&mut rng);
+    mpin_bls12383(&mut rng);
+    mpin_bls24479(&mut rng);
+    mpin_bls48556(&mut rng);
     rsa_2048(&mut rng);
 }

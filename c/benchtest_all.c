@@ -47,9 +47,9 @@
 #if CHUNK==32 || CHUNK==64
 #include "ecp_NIST256.h"
 #include "ecp_GOLDILOCKS.h"
-#include "pair_BLS383.h"
-#include "pair192_BLS24.h"
-#include "pair256_BLS48.h"
+#include "pair_BLS12383.h"
+#include "pair192_BLS24479.h"
+#include "pair256_BLS48556.h"
 #endif
 
 #define MIN_TIME 10.0
@@ -98,15 +98,15 @@
 #define BIG_BLS12_randomnum BIG_384_29_randomnum
 #define BIG_BLS12_randtrunc BIG_384_29_randtrunc
 
-#define BIG_BLS24 BIG_480_29
-#define BIG_BLS24_rcopy BIG_480_29_rcopy
-#define BIG_BLS24_randomnum BIG_480_29_randomnum
-#define BIG_BLS24_randtrunc BIG_480_29_randtrunc
+#define BIG_BLS24479 BIG_480_29
+#define BIG_BLS24479_rcopy BIG_480_29_rcopy
+#define BIG_BLS24479_randomnum BIG_480_29_randomnum
+#define BIG_BLS24479_randtrunc BIG_480_29_randtrunc
 
-#define BIG_BLS48 BIG_560_29
-#define BIG_BLS48_rcopy BIG_560_29_rcopy
-#define BIG_BLS48_randomnum BIG_560_29_randomnum
-#define BIG_BLS48_randtrunc BIG_560_29_randtrunc
+#define BIG_BLS48556 BIG_560_29
+#define BIG_BLS48556_rcopy BIG_560_29_rcopy
+#define BIG_BLS48556_randomnum BIG_560_29_randomnum
+#define BIG_BLS48556_randtrunc BIG_560_29_randtrunc
 
 #endif
 
@@ -137,15 +137,15 @@
 #define BIG_BLS12_randomnum BIG_384_58_randomnum
 #define BIG_BLS12_randtrunc BIG_384_58_randtrunc
 
-#define BIG_BLS24 BIG_480_56
-#define BIG_BLS24_rcopy BIG_480_56_rcopy
-#define BIG_BLS24_randomnum BIG_480_56_randomnum
-#define BIG_BLS24_randtrunc BIG_480_56_randtrunc
+#define BIG_BLS24479 BIG_480_56
+#define BIG_BLS24479_rcopy BIG_480_56_rcopy
+#define BIG_BLS24479_randomnum BIG_480_56_randomnum
+#define BIG_BLS24479_randtrunc BIG_480_56_randtrunc
 
-#define BIG_BLS48 BIG_560_58
-#define BIG_BLS48_rcopy BIG_560_58_rcopy
-#define BIG_BLS48_randomnum BIG_560_58_randomnum
-#define BIG_BLS48_randtrunc BIG_560_58_randtrunc
+#define BIG_BLS48556 BIG_560_58
+#define BIG_BLS48556_rcopy BIG_560_58_rcopy
+#define BIG_BLS48556_randomnum BIG_560_58_randomnum
+#define BIG_BLS48556_randtrunc BIG_560_58_randtrunc
 
 #endif
 
@@ -573,23 +573,23 @@ int BLS_383(csprng *RNG)
     clock_t start;
     double elapsed;
 
-    ECP_BLS383 P, G;
-    ECP2_BLS383 Q, W;
-    FP12_BLS383 g, w;
-    FP4_BLS383 cm;
+    ECP_BLS12383 P, G;
+    ECP2_BLS12383 Q, W;
+    FP12_BLS12383 g, w;
+    FP4_BLS12383 cm;
 
     BIG_BLS12 s, r, x, y;
-    printf("\nTesting/Timing BLS383 Pairings\n");
+    printf("\nTesting/Timing BLS12383 Pairings\n");
 
-    ECP_BLS383_generator(&G);
+    ECP_BLS12383_generator(&G);
 
 
-    BIG_BLS12_rcopy(r, CURVE_Order_BLS383);
-    BIG_BLS12_randtrunc(s, r, 2 * CURVE_SECURITY_BLS383, RNG);
-    ECP_BLS383_copy(&P, &G);
-    PAIR_BLS383_G1mul(&P, r);
+    BIG_BLS12_rcopy(r, CURVE_Order_BLS12383);
+    BIG_BLS12_randtrunc(s, r, 2 * CURVE_SECURITY_BLS12383, RNG);
+    ECP_BLS12383_copy(&P, &G);
+    PAIR_BLS12383_G1mul(&P, r);
 
-    if (!ECP_BLS383_isinf(&P))
+    if (!ECP_BLS12383_isinf(&P))
     {
         printf("FAILURE - rG!=O\n");
         return 0;
@@ -598,8 +598,8 @@ int BLS_383(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        ECP_BLS383_copy(&P, &G);
-        PAIR_BLS383_G1mul(&P, s);
+        ECP_BLS12383_copy(&P, &G);
+        PAIR_BLS12383_G1mul(&P, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -608,27 +608,27 @@ int BLS_383(csprng *RNG)
     printf("G1 mul              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 
-    ECP2_BLS383_generator(&W);
+    ECP2_BLS12383_generator(&W);
 
-    ECP2_BLS383_hashit(&Q,s);
-    ECP2_BLS383_cfp(&Q);
+    ECP2_BLS12383_hashit(&Q,s);
+    ECP2_BLS12383_cfp(&Q);
 
-    if (ECP2_BLS383_isinf(&Q))
+    if (ECP2_BLS12383_isinf(&Q))
     {
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
-    ECP2_BLS383_mul(&Q,r);
-    if (!ECP2_BLS383_isinf(&Q))
+    ECP2_BLS12383_mul(&Q,r);
+    if (!ECP2_BLS12383_isinf(&Q))
     {
         printf("FAILURE - rQ!=O\n");
         return 0;
     }
 
-    ECP2_BLS383_copy(&Q, &W);
-    ECP2_BLS383_mul(&Q, r);
+    ECP2_BLS12383_copy(&Q, &W);
+    ECP2_BLS12383_mul(&Q, r);
 
-    if (!ECP2_BLS383_isinf(&Q))
+    if (!ECP2_BLS12383_isinf(&Q))
     {
         printf("FAILURE - rQ!=O\n");
         return 0;
@@ -637,8 +637,8 @@ int BLS_383(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        ECP2_BLS383_copy(&Q, &W);
-        PAIR_BLS383_G2mul(&Q, s);
+        ECP2_BLS12383_copy(&Q, &W);
+        PAIR_BLS12383_G2mul(&Q, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -647,14 +647,14 @@ int BLS_383(csprng *RNG)
     printf("G2 mul              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 
-    PAIR_BLS383_ate(&w, &Q, &P);
-    PAIR_BLS383_fexp(&w);
+    PAIR_BLS12383_ate(&w, &Q, &P);
+    PAIR_BLS12383_fexp(&w);
 
-    FP12_BLS383_copy(&g, &w);
+    FP12_BLS12383_copy(&g, &w);
 
-    PAIR_BLS383_GTpow(&g, r);
+    PAIR_BLS12383_GTpow(&g, r);
 
-    if (!FP12_BLS383_isunity(&g))
+    if (!FP12_BLS12383_isunity(&g))
     {
         printf("FAILURE - g^r!=1\n");
         return 0;
@@ -663,8 +663,8 @@ int BLS_383(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        FP12_BLS383_copy(&g, &w);
-        PAIR_BLS383_GTpow(&g, s);
+        FP12_BLS12383_copy(&g, &w);
+        PAIR_BLS12383_GTpow(&g, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -673,12 +673,12 @@ int BLS_383(csprng *RNG)
     printf("GT pow              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 
-    FP12_BLS383_copy(&g, &w);
+    FP12_BLS12383_copy(&g, &w);
 
     iterations = 0;
     start = clock();
     do {
-        FP12_BLS383_compow(&cm, &g, s, r);
+        FP12_BLS12383_compow(&cm, &g, s, r);
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
     } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
@@ -689,7 +689,7 @@ int BLS_383(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        PAIR_BLS383_ate(&w, &Q, &P);
+        PAIR_BLS12383_ate(&w, &Q, &P);
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
     } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
@@ -700,8 +700,8 @@ int BLS_383(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        FP12_BLS383_copy(&g, &w);
-        PAIR_BLS383_fexp(&g);
+        FP12_BLS12383_copy(&g, &w);
+        PAIR_BLS12383_fexp(&g);
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
     } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
@@ -709,50 +709,50 @@ int BLS_383(csprng *RNG)
     printf("PAIRing FEXP        - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
     
-    ECP_BLS383_copy(&P, &G);
-    ECP2_BLS383_copy(&Q, &W);
+    ECP_BLS12383_copy(&P, &G);
+    ECP2_BLS12383_copy(&Q, &W);
 
-    PAIR_BLS383_G1mul(&P, s);
-    PAIR_BLS383_ate(&g, &Q, &P);
-    PAIR_BLS383_fexp(&g);
+    PAIR_BLS12383_G1mul(&P, s);
+    PAIR_BLS12383_ate(&g, &Q, &P);
+    PAIR_BLS12383_fexp(&g);
 
-    ECP_BLS383_copy(&P, &G);
+    ECP_BLS12383_copy(&P, &G);
 
-    PAIR_BLS383_G2mul(&Q, s);
-    PAIR_BLS383_ate(&w, &Q, &P);
-    PAIR_BLS383_fexp(&w);
+    PAIR_BLS12383_G2mul(&Q, s);
+    PAIR_BLS12383_ate(&w, &Q, &P);
+    PAIR_BLS12383_fexp(&w);
 
-	if (!PAIR_BLS383_G1member(&P))
+	if (!PAIR_BLS12383_G1member(&P))
 	{
         printf("FAILURE - P not in G1\n");
         return 0;
 	}
 
-	if (!PAIR_BLS383_G2member(&Q))
+	if (!PAIR_BLS12383_G2member(&Q))
 	{
         printf("FAILURE - Q not in G2\n");
         return 0;
 	}
 
-	if (!PAIR_BLS383_GTmember(&w))
+	if (!PAIR_BLS12383_GTmember(&w))
 	{
         printf("FAILURE - e(Q,P) not in GT\n");
         return 0;
 	}
 
-    if (!FP12_BLS383_equals(&g, &w))
+    if (!FP12_BLS12383_equals(&g, &w))
     {
         printf("FAILURE - e(sQ,p)!=e(Q,sP) \n");
         return 0;
     }
 
-    ECP2_BLS383_copy(&Q, &W);
-    PAIR_BLS383_ate(&g, &Q, &P);
-    PAIR_BLS383_fexp(&g);
+    ECP2_BLS12383_copy(&Q, &W);
+    PAIR_BLS12383_ate(&g, &Q, &P);
+    PAIR_BLS12383_fexp(&g);
 
-    PAIR_BLS383_GTpow(&g, s);
+    PAIR_BLS12383_GTpow(&g, s);
 
-    if (!FP12_BLS383_equals(&g, &w))
+    if (!FP12_BLS12383_equals(&g, &w))
     {
         printf("FAILURE - e(sQ,p)!=e(Q,P)^s \n");
         return 0;
@@ -766,24 +766,24 @@ int BLS_24(csprng *RNG)
     clock_t start;
     double elapsed;
 
-    ECP_BLS24 P, G;
-    ECP4_BLS24 Q, W;
-    FP24_BLS24 g, w;
-    FP8_BLS24 cm;
+    ECP_BLS24479 P, G;
+    ECP4_BLS24479 Q, W;
+    FP24_BLS24479 g, w;
+    FP8_BLS24479 cm;
 
-    BIG_BLS24 s, r, x, y;
+    BIG_BLS24479 s, r, x, y;
 
-    printf("\nTesting/Timing BLS24 Pairings\n");
+    printf("\nTesting/Timing BLS24479 Pairings\n");
 
-    ECP_BLS24_generator(&G);
+    ECP_BLS24479_generator(&G);
 
 
-    BIG_BLS24_rcopy(r, CURVE_Order_BLS24);
-    BIG_BLS24_randtrunc(s, r, 2 * CURVE_SECURITY_BLS24, RNG);
-    ECP_BLS24_copy(&P, &G);
-    PAIR_BLS24_G1mul(&P, r);
+    BIG_BLS24479_rcopy(r, CURVE_Order_BLS24479);
+    BIG_BLS24479_randtrunc(s, r, 2 * CURVE_SECURITY_BLS24479, RNG);
+    ECP_BLS24479_copy(&P, &G);
+    PAIR_BLS24479_G1mul(&P, r);
 
-    if (!ECP_BLS24_isinf(&P))
+    if (!ECP_BLS24479_isinf(&P))
     {
         printf("FAILURE - rG!=O\n");
         return 0;
@@ -792,8 +792,8 @@ int BLS_24(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        ECP_BLS24_copy(&P, &G);
-        PAIR_BLS24_G1mul(&P, s);
+        ECP_BLS24479_copy(&P, &G);
+        PAIR_BLS24479_G1mul(&P, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -802,27 +802,27 @@ int BLS_24(csprng *RNG)
     printf("G1 mul              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 
-    ECP4_BLS24_generator(&W);
+    ECP4_BLS24479_generator(&W);
 
-    ECP4_BLS24_hashit(&Q,s);
-    ECP4_BLS24_cfp(&Q);
+    ECP4_BLS24479_hashit(&Q,s);
+    ECP4_BLS24479_cfp(&Q);
 
-    if (ECP4_BLS24_isinf(&Q))
+    if (ECP4_BLS24479_isinf(&Q))
     {
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
-    ECP4_BLS24_mul(&Q,r);
-    if (!ECP4_BLS24_isinf(&Q))
+    ECP4_BLS24479_mul(&Q,r);
+    if (!ECP4_BLS24479_isinf(&Q))
     {
         printf("FAILURE - rQ!=O\n");
         return 0;
     }
 
-    ECP4_BLS24_copy(&Q, &W);
-    ECP4_BLS24_mul(&Q, r);
+    ECP4_BLS24479_copy(&Q, &W);
+    ECP4_BLS24479_mul(&Q, r);
 
-    if (!ECP4_BLS24_isinf(&Q))
+    if (!ECP4_BLS24479_isinf(&Q))
     {
         printf("FAILURE - rQ!=O\n");
         return 0;
@@ -831,8 +831,8 @@ int BLS_24(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        ECP4_BLS24_copy(&Q, &W);
-        PAIR_BLS24_G2mul(&Q, s);
+        ECP4_BLS24479_copy(&Q, &W);
+        PAIR_BLS24479_G2mul(&Q, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -841,14 +841,14 @@ int BLS_24(csprng *RNG)
     printf("G2 mul              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 
-    PAIR_BLS24_ate(&w, &Q, &P);
-    PAIR_BLS24_fexp(&w);
+    PAIR_BLS24479_ate(&w, &Q, &P);
+    PAIR_BLS24479_fexp(&w);
 
-    FP24_BLS24_copy(&g, &w);
+    FP24_BLS24479_copy(&g, &w);
 
-    PAIR_BLS24_GTpow(&g, r);
+    PAIR_BLS24479_GTpow(&g, r);
 
-    if (!FP24_BLS24_isunity(&g))
+    if (!FP24_BLS24479_isunity(&g))
     {
         printf("FAILURE - g^r!=1\n");
         return 0;
@@ -857,8 +857,8 @@ int BLS_24(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        FP24_BLS24_copy(&g, &w);
-        PAIR_BLS24_GTpow(&g, s);
+        FP24_BLS24479_copy(&g, &w);
+        PAIR_BLS24479_GTpow(&g, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -867,12 +867,12 @@ int BLS_24(csprng *RNG)
     printf("GT pow              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 /*
-    FP24_BLS24_copy(&g, &w);
+    FP24_BLS24479_copy(&g, &w);
 
     iterations = 0;
     start = clock();
     do {
-        FP24_BLS24_compow(&cm, &g, s, r);
+        FP24_BLS24479_compow(&cm, &g, s, r);
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
     } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
@@ -883,7 +883,7 @@ int BLS_24(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        PAIR_BLS24_ate(&w, &Q, &P);
+        PAIR_BLS24479_ate(&w, &Q, &P);
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
     } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
@@ -894,8 +894,8 @@ int BLS_24(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        FP24_BLS24_copy(&g, &w);
-        PAIR_BLS24_fexp(&g);
+        FP24_BLS24479_copy(&g, &w);
+        PAIR_BLS24479_fexp(&g);
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
     } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
@@ -903,50 +903,50 @@ int BLS_24(csprng *RNG)
     printf("PAIRing FEXP        - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 
-    ECP_BLS24_copy(&P, &G);
-    ECP4_BLS24_copy(&Q, &W);
+    ECP_BLS24479_copy(&P, &G);
+    ECP4_BLS24479_copy(&Q, &W);
 
-    PAIR_BLS24_G1mul(&P, s);
-    PAIR_BLS24_ate(&g, &Q, &P);
-    PAIR_BLS24_fexp(&g);
+    PAIR_BLS24479_G1mul(&P, s);
+    PAIR_BLS24479_ate(&g, &Q, &P);
+    PAIR_BLS24479_fexp(&g);
 
-    ECP_BLS24_copy(&P, &G);
+    ECP_BLS24479_copy(&P, &G);
 
-    PAIR_BLS24_G2mul(&Q, s);
-    PAIR_BLS24_ate(&w, &Q, &P);
-    PAIR_BLS24_fexp(&w);
+    PAIR_BLS24479_G2mul(&Q, s);
+    PAIR_BLS24479_ate(&w, &Q, &P);
+    PAIR_BLS24479_fexp(&w);
 
-	if (!PAIR_BLS24_G1member(&P))
+	if (!PAIR_BLS24479_G1member(&P))
 	{
         printf("FAILURE - P not in G1\n");
         return 0;
 	}
 
-	if (!PAIR_BLS24_G2member(&Q))
+	if (!PAIR_BLS24479_G2member(&Q))
 	{
         printf("FAILURE - Q not in G2\n");
         return 0;
 	}
 
-	if (!PAIR_BLS24_GTmember(&w))
+	if (!PAIR_BLS24479_GTmember(&w))
 	{
         printf("FAILURE - e(Q,P) not in GT\n");
         return 0;
 	}
 
-    if (!FP24_BLS24_equals(&g, &w))
+    if (!FP24_BLS24479_equals(&g, &w))
     {
         printf("FAILURE - e(sQ,p)!=e(Q,sP) \n");
         return 0;
     }
 
-    ECP4_BLS24_copy(&Q, &W);
-    PAIR_BLS24_ate(&g, &Q, &P);
-    PAIR_BLS24_fexp(&g);
+    ECP4_BLS24479_copy(&Q, &W);
+    PAIR_BLS24479_ate(&g, &Q, &P);
+    PAIR_BLS24479_fexp(&g);
 
-    PAIR_BLS24_GTpow(&g, s);
+    PAIR_BLS24479_GTpow(&g, s);
 
-    if (!FP24_BLS24_equals(&g, &w))
+    if (!FP24_BLS24479_equals(&g, &w))
     {
         printf("FAILURE - e(sQ,p)!=e(Q,P)^s \n");
         return 0;
@@ -961,23 +961,23 @@ int BLS_48(csprng *RNG)
     clock_t start;
     double elapsed;
 
-    ECP_BLS48 P, G;
-    ECP8_BLS48 Q, W;
-    FP48_BLS48 g, w;
-    FP16_BLS48 cm;
+    ECP_BLS48556 P, G;
+    ECP8_BLS48556 Q, W;
+    FP48_BLS48556 g, w;
+    FP16_BLS48556 cm;
 
-    BIG_BLS48 s, r, x, y;
-    printf("\nTesting/Timing BLS48 Pairings\n");
+    BIG_BLS48556 s, r, x, y;
+    printf("\nTesting/Timing BLS48556 Pairings\n");
 
-    ECP_BLS48_generator(&G);
+    ECP_BLS48556_generator(&G);
 
 
-    BIG_BLS48_rcopy(r, CURVE_Order_BLS48);
-    BIG_BLS48_randtrunc(s, r, 2 * CURVE_SECURITY_BLS48, RNG);
-    ECP_BLS48_copy(&P, &G);
-    PAIR_BLS48_G1mul(&P, r);
+    BIG_BLS48556_rcopy(r, CURVE_Order_BLS48556);
+    BIG_BLS48556_randtrunc(s, r, 2 * CURVE_SECURITY_BLS48556, RNG);
+    ECP_BLS48556_copy(&P, &G);
+    PAIR_BLS48556_G1mul(&P, r);
 
-    if (!ECP_BLS48_isinf(&P))
+    if (!ECP_BLS48556_isinf(&P))
     {
         printf("FAILURE - rG!=O\n");
         return 0;
@@ -986,8 +986,8 @@ int BLS_48(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        ECP_BLS48_copy(&P, &G);
-        PAIR_BLS48_G1mul(&P, s);
+        ECP_BLS48556_copy(&P, &G);
+        PAIR_BLS48556_G1mul(&P, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -996,27 +996,27 @@ int BLS_48(csprng *RNG)
     printf("G1 mul              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 
-    ECP8_BLS48_generator(&W);
+    ECP8_BLS48556_generator(&W);
 
-    ECP8_BLS48_hashit(&Q,s);
-    ECP8_BLS48_cfp(&Q);
+    ECP8_BLS48556_hashit(&Q,s);
+    ECP8_BLS48556_cfp(&Q);
 
-    if (ECP8_BLS48_isinf(&Q))
+    if (ECP8_BLS48556_isinf(&Q))
     {
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
-    ECP8_BLS48_mul(&Q,r);
-    if (!ECP8_BLS48_isinf(&Q))
+    ECP8_BLS48556_mul(&Q,r);
+    if (!ECP8_BLS48556_isinf(&Q))
     {
         printf("FAILURE - rQ!=O\n");
         return 0;
     }
 
-    ECP8_BLS48_copy(&Q, &W);
-    ECP8_BLS48_mul(&Q, r);
+    ECP8_BLS48556_copy(&Q, &W);
+    ECP8_BLS48556_mul(&Q, r);
 
-    if (!ECP8_BLS48_isinf(&Q))
+    if (!ECP8_BLS48556_isinf(&Q))
     {
         printf("FAILURE - rQ!=O\n");
         return 0;
@@ -1025,8 +1025,8 @@ int BLS_48(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        ECP8_BLS48_copy(&Q, &W);
-        PAIR_BLS48_G2mul(&Q, s);
+        ECP8_BLS48556_copy(&Q, &W);
+        PAIR_BLS48556_G2mul(&Q, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -1035,14 +1035,14 @@ int BLS_48(csprng *RNG)
     printf("G2 mul              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 
-    PAIR_BLS48_ate(&w, &Q, &P);
-    PAIR_BLS48_fexp(&w);
+    PAIR_BLS48556_ate(&w, &Q, &P);
+    PAIR_BLS48556_fexp(&w);
 
-    FP48_BLS48_copy(&g, &w);
+    FP48_BLS48556_copy(&g, &w);
 
-    PAIR_BLS48_GTpow(&g, r);
+    PAIR_BLS48556_GTpow(&g, r);
 
-    if (!FP48_BLS48_isunity(&g))
+    if (!FP48_BLS48556_isunity(&g))
     {
         printf("FAILURE - g^r!=1\n");
         return 0;
@@ -1051,8 +1051,8 @@ int BLS_48(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        FP48_BLS48_copy(&g, &w);
-        PAIR_BLS48_GTpow(&g, s);
+        FP48_BLS48556_copy(&g, &w);
+        PAIR_BLS48556_GTpow(&g, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -1061,12 +1061,12 @@ int BLS_48(csprng *RNG)
     printf("GT pow              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 /*
-    FP48_BLS48_copy(&g, &w);
+    FP48_BLS48556_copy(&g, &w);
 
     iterations = 0;
     start = clock();
     do {
-        FP48_BLS48_compow(&cm, &g, s, r);
+        FP48_BLS48556_compow(&cm, &g, s, r);
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
     } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
@@ -1077,7 +1077,7 @@ int BLS_48(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        PAIR_BLS48_ate(&w, &Q, &P);
+        PAIR_BLS48556_ate(&w, &Q, &P);
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
     } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
@@ -1088,8 +1088,8 @@ int BLS_48(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        FP48_BLS48_copy(&g, &w);
-        PAIR_BLS48_fexp(&g);
+        FP48_BLS48556_copy(&g, &w);
+        PAIR_BLS48556_fexp(&g);
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
     } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
@@ -1097,50 +1097,50 @@ int BLS_48(csprng *RNG)
     printf("PAIRing FEXP        - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
 
-    ECP_BLS48_copy(&P, &G);
-    ECP8_BLS48_copy(&Q, &W);
+    ECP_BLS48556_copy(&P, &G);
+    ECP8_BLS48556_copy(&Q, &W);
 
-    PAIR_BLS48_G1mul(&P, s);
-    PAIR_BLS48_ate(&g, &Q, &P);
-    PAIR_BLS48_fexp(&g);
+    PAIR_BLS48556_G1mul(&P, s);
+    PAIR_BLS48556_ate(&g, &Q, &P);
+    PAIR_BLS48556_fexp(&g);
 
-    ECP_BLS48_copy(&P, &G);
+    ECP_BLS48556_copy(&P, &G);
 
-    PAIR_BLS48_G2mul(&Q, s);
-    PAIR_BLS48_ate(&w, &Q, &P);
-    PAIR_BLS48_fexp(&w);
+    PAIR_BLS48556_G2mul(&Q, s);
+    PAIR_BLS48556_ate(&w, &Q, &P);
+    PAIR_BLS48556_fexp(&w);
 
-	if (!PAIR_BLS48_G1member(&P))
+	if (!PAIR_BLS48556_G1member(&P))
 	{
         printf("FAILURE - P not in G1\n");
         return 0;
 	}
 
-	if (!PAIR_BLS48_G2member(&Q))
+	if (!PAIR_BLS48556_G2member(&Q))
 	{
         printf("FAILURE - Q not in G2\n");
         return 0;
 	}
 
-	if (!PAIR_BLS48_GTmember(&w))
+	if (!PAIR_BLS48556_GTmember(&w))
 	{
         printf("FAILURE - e(Q,P) not in GT\n");
         return 0;
 	}
 
-    if (!FP48_BLS48_equals(&g, &w))
+    if (!FP48_BLS48556_equals(&g, &w))
     {
         printf("FAILURE - e(sQ,p)!=e(Q,sP) \n");
         return 0;
     }
 
-    ECP8_BLS48_copy(&Q, &W);
-    PAIR_BLS48_ate(&g, &Q, &P);
-    PAIR_BLS48_fexp(&g);
+    ECP8_BLS48556_copy(&Q, &W);
+    PAIR_BLS48556_ate(&g, &Q, &P);
+    PAIR_BLS48556_fexp(&g);
 
-    PAIR_BLS48_GTpow(&g, s);
+    PAIR_BLS48556_GTpow(&g, s);
 
-    if (!FP48_BLS48_equals(&g, &w))
+    if (!FP48_BLS48556_equals(&g, &w))
     {
         printf("FAILURE - e(sQ,p)!=e(Q,P)^s \n");
         return 0;

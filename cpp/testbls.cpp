@@ -39,9 +39,9 @@
 #include "bls_BN254.h"
 
 #if CHUNK==32 || CHUNK==64
-#include "bls_BLS383.h"
-#include "bls192_BLS24.h"
-#include "bls256_BLS48.h"
+#include "bls_BLS12383.h"
+#include "bls192_BLS24479.h"
+#include "bls256_BLS48556.h"
 #endif
 
 #include "randapi.h"
@@ -123,17 +123,17 @@ int bls_BN254(csprng *RNG)
 
 #if CHUNK==32 || CHUNK==64
 
-int bls_BLS383(csprng *RNG)
+int bls_BLS12383(csprng *RNG)
 {
-    using namespace BLS383;
+    using namespace BLS12383;
 
     int i,res;
-    char s[BGS_BLS383];
+    char s[BGS_BLS12383];
     char ikm[64];
 #ifdef REVERSE
-    char w[BFS_BLS383+1], sig[4 * BFS_BLS383 + 1];
+    char w[BFS_BLS12383+1], sig[4 * BFS_BLS12383 + 1];
 #else
-    char w[4 * BFS_BLS383 + 1], sig[BFS_BLS383 + 1];
+    char w[4 * BFS_BLS12383 + 1], sig[BFS_BLS12383 + 1];
 #endif
     octet S = {0, sizeof(s), s};
     octet W = {0, sizeof(w), w};
@@ -179,17 +179,17 @@ int bls_BLS383(csprng *RNG)
     return res;
 }
 
-int bls_BLS24(csprng *RNG)
+int bls_BLS24479(csprng *RNG)
 {
-    using namespace BLS24;
+    using namespace BLS24479;
 
     int i,res;
-    char s[BGS_BLS24];
+    char s[BGS_BLS24479];
     char ikm[64];
 #ifdef REVERSE
-    char w[BFS_BLS24+1], sig[8 * BFS_BLS24 + 1];
+    char w[BFS_BLS24479+1], sig[8 * BFS_BLS24479 + 1];
 #else
-    char w[8 * BFS_BLS24 + 1], sig[BFS_BLS24 + 1];
+    char w[8 * BFS_BLS24479 + 1], sig[BFS_BLS24479 + 1];
 #endif
     octet S = {0, sizeof(s), s};
     octet W = {0, sizeof(w), w};
@@ -235,17 +235,17 @@ int bls_BLS24(csprng *RNG)
     return res;
 }
 
-int bls_BLS48(csprng *RNG)
+int bls_BLS48556(csprng *RNG)
 {
-    using namespace BLS48;
+    using namespace BLS48556;
 
     int i,res;
-    char s[BGS_BLS48];
+    char s[BGS_BLS48556];
     char ikm[64];
 #ifdef REVERSE
-    char w[BFS_BLS48+1], sig[16 * BFS_BLS48 + 1];
+    char w[BFS_BLS48556+1], sig[16 * BFS_BLS48556 + 1];
 #else
-    char w[16 * BFS_BLS48 + 1], sig[BFS_BLS48 + 1];
+    char w[16 * BFS_BLS48556 + 1], sig[BFS_BLS48556 + 1];
 #endif
     octet S = {0, sizeof(s), s};
     octet W = {0, sizeof(w), w};
@@ -320,13 +320,13 @@ int main()
 
 #if CHUNK!=16
     printf("\nTesting BLS signature for curve BLS383\n");
-    bls_BLS383(&RNG);
+    bls_BLS12383(&RNG);
 
-    printf("\nTesting BLS signature for curve BLS24\n");
-    bls_BLS24(&RNG);
+    printf("\nTesting BLS signature for curve BLS24479\n");
+    bls_BLS24479(&RNG);
 
-    printf("\nTesting BLS signature for curve BLS48\n");
-    bls_BLS48(&RNG);
+    printf("\nTesting BLS signature for curve BLS48556\n");
+    bls_BLS48556(&RNG);
 #endif
 
     KILL_CSPRNG(&RNG);

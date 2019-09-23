@@ -33,12 +33,12 @@
 /* Fixed Data in ROM - Field and Curve parameters */
 
 var ROM_CURVE_ANSSI,
-    ROM_CURVE_BLS383,
-    ROM_CURVE_BLS24,
-    ROM_CURVE_BLS48,
-	ROM_CURVE_BLS48_581,
-    ROM_CURVE_BLS381,
-    ROM_CURVE_BLS461,
+    ROM_CURVE_BLS12383,
+    ROM_CURVE_BLS24479,
+    ROM_CURVE_BLS48556,
+	ROM_CURVE_BLS48581,
+    ROM_CURVE_BLS12381,
+    ROM_CURVE_BLS12461,
 	ROM_CURVE_BN462,
     ROM_CURVE_FP256BN,
     ROM_CURVE_FP512BN,
@@ -80,12 +80,12 @@ ROM_CURVE_ANSSI = function() {
     return ROM_CURVE_ANSSI;
 };
 
-ROM_CURVE_BLS383 = function() {
+ROM_CURVE_BLS12383 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */
 
-    var ROM_CURVE_BLS383 = {
+    var ROM_CURVE_BLS12383 = {
 
-        // BLS383 Curve
+        // BLS12383 Curve
         // Base Bits= 23
 
         CURVE_Cof_I: 0,
@@ -160,16 +160,16 @@ ROM_CURVE_BLS383 = function() {
 
     };
 
-    return ROM_CURVE_BLS383;
+    return ROM_CURVE_BLS12383;
 };
 
 
-ROM_CURVE_BLS24 = function() {
+ROM_CURVE_BLS24479 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */
 
-    var ROM_CURVE_BLS24 = {
+    var ROM_CURVE_BLS24479 = {
 
-        // BLS24 Curve
+        // BLS24479 Curve
         // Base Bits= 23
         CURVE_Cof_I: 0,
         CURVE_A: 0,
@@ -246,13 +246,13 @@ ROM_CURVE_BLS24 = function() {
         //debug: false,
     };
 
-    return ROM_CURVE_BLS24;
+    return ROM_CURVE_BLS24479;
 };
 
-ROM_CURVE_BLS48_581 = function() {
+ROM_CURVE_BLS48581 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */
 
-    var ROM_CURVE_BLS48_581 = {
+    var ROM_CURVE_BLS48581 = {
 
 // Base Bits= 23
 // Ate Bits= 33
@@ -298,7 +298,7 @@ ROM_CURVE_BLS48_581 = function() {
 
     };
 
-    return ROM_CURVE_BLS48_581;
+    return ROM_CURVE_BLS48581;
 };
 
 
@@ -342,12 +342,12 @@ ROM_CURVE_BN462 = function() {
 };
 
 
-ROM_CURVE_BLS48 = function() {
+ROM_CURVE_BLS48556 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */
 
-    var ROM_CURVE_BLS48 = {
+    var ROM_CURVE_BLS48556 = {
 
-        // BLS48 Curve
+        // BLS48556 Curve
         // Base Bits= 23
         CURVE_Cof_I: 0,
         CURVE_A: 0,
@@ -434,16 +434,16 @@ ROM_CURVE_BLS48 = function() {
 
     };
 
-    return ROM_CURVE_BLS48;
+    return ROM_CURVE_BLS48556;
 };
 
 
-ROM_CURVE_BLS381 = function() {
+ROM_CURVE_BLS12381 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */
 
-    var ROM_CURVE_BLS381 = {
+    var ROM_CURVE_BLS12381 = {
 
-        // BLS381 Curve
+        // BLS12381 Curve
         // Base Bits= 23
 
         CURVE_Cof_I: 0,
@@ -519,16 +519,16 @@ ROM_CURVE_BLS381 = function() {
 
     };
 
-    return ROM_CURVE_BLS381;
+    return ROM_CURVE_BLS12381;
 };
 
 
-ROM_CURVE_BLS461 = function() {
+ROM_CURVE_BLS12461 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */
 
-    var ROM_CURVE_BLS461 = {
+    var ROM_CURVE_BLS12461 = {
 
-        // BLS461 Curve
+        // BLS12461 Curve
         // Base Bits= 23
 
         Curve_Cof_I : 0,
@@ -603,7 +603,7 @@ ROM_CURVE_BLS461 = function() {
 
     };
 
-    return ROM_CURVE_BLS461;
+    return ROM_CURVE_BLS12461;
 };
 
 ROM_CURVE_FP256BN = function() {

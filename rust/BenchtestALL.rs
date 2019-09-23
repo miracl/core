@@ -445,16 +445,16 @@ fn bn254(mut rng: &mut RAND) {
     }
 }
 
-fn bls383(mut rng: &mut RAND) {
-    //use core::bls383;
-    use core::bls383::big;
-    use core::bls383::ecp;
-    use core::bls383::ecp2;
-    use core::bls383::fp;
-    use core::bls383::pair;
-    use core::bls383::rom;
+fn bls12383(mut rng: &mut RAND) {
+    //use core::bls12383;
+    use core::bls12383::big;
+    use core::bls12383::ecp;
+    use core::bls12383::ecp2;
+    use core::bls12383::fp;
+    use core::bls12383::pair;
+    use core::bls12383::rom;
     let mut fail = false;
-    println!("\nTesting/Timing bls383 Pairings");
+    println!("\nTesting/Timing bls12383 Pairings");
 
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
         println!("BN Pairing-Friendly Curve");
@@ -639,16 +639,16 @@ fn bls383(mut rng: &mut RAND) {
     }
 }
 
-fn bls24(mut rng: &mut RAND) {
-    //use core::bls24;
-    use core::bls24::big;
-    use core::bls24::ecp;
-    use core::bls24::ecp4;
-    use core::bls24::fp;
-    use core::bls24::pair192;
-    use core::bls24::rom;
+fn bls24479(mut rng: &mut RAND) {
+    //use core::bls24479;
+    use core::bls24479::big;
+    use core::bls24479::ecp;
+    use core::bls24479::ecp4;
+    use core::bls24479::fp;
+    use core::bls24479::pair192;
+    use core::bls24479::rom;
     let mut fail = false;
-    println!("\nTesting/Timing bls24 Pairings");
+    println!("\nTesting/Timing bls24479 Pairings");
 
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
         println!("BN Pairing-Friendly Curve");
@@ -820,16 +820,16 @@ fn bls24(mut rng: &mut RAND) {
     }
 }
 
-fn bls48(mut rng: &mut RAND) {
-    //use core::bls48;
-    use core::bls48::big;
-    use core::bls48::ecp;
-    use core::bls48::ecp8;
-    use core::bls48::fp;
-    use core::bls48::pair256;
-    use core::bls48::rom;
+fn bls48556(mut rng: &mut RAND) {
+    //use core::bls48556;
+    use core::bls48556::big;
+    use core::bls48556::ecp;
+    use core::bls48556::ecp8;
+    use core::bls48556::fp;
+    use core::bls48556::pair256;
+    use core::bls48556::rom;
     let mut fail = false;
-    println!("\nTesting/Timing bls48 Pairings");
+    println!("\nTesting/Timing bls48556 Pairings");
 
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
         println!("BN Pairing-Friendly Curve");
@@ -1090,8 +1090,8 @@ fn main() {
     nist256(&mut rng);
     goldilocks(&mut rng);
     bn254(&mut rng);
-    bls383(&mut rng);
-    bls24(&mut rng);
-    bls48(&mut rng);
+    bls12383(&mut rng);
+    bls24479(&mut rng);
+    bls48556(&mut rng);
     rsa2048(&mut rng);
 }

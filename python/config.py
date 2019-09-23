@@ -88,8 +88,8 @@ print("7. SEC256K1")
 print("Pairing-Friendly Elliptic Curves")
 print("8. BN254")
 print("9. BN254CX")
-print("10. BLS383")
-print("11. BLS381")
+print("10. BLS12383")
+print("11. BLS12381")
 print("12. BN462")
 
 selection = []
@@ -148,10 +148,10 @@ while ptr < max:
         curveset("bn254cx", "BN")
         pfcurve_selected = True
     if x == 10:
-        curveset("bls383", "BLS")
+        curveset("bls12383", "BLS")
         pfcurve_selected = True
     if x == 11:
-        curveset("bls381", "BLS")
+        curveset("bls12381", "BLS")
         pfcurve_selected = True
     if x == 12:
         curveset("bn462", "BN")
@@ -173,9 +173,9 @@ os.system(deltext + " ed25519.py")
 os.system(deltext + " nist256.py")
 os.system(deltext + " bn254.py")
 os.system(deltext + " bn254cx.py")
-os.system(deltext + " bls383.py")
+os.system(deltext + " bls12383.py")
 os.system(deltext + " goldilocks.py")
-os.system(deltext + " bls381.py")
+os.system(deltext + " bls12381.py")
 os.system(deltext + " bn462.py")
 os.system(deltext + " nist384.py")
 os.system(deltext + " nist521.py")

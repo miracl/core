@@ -522,10 +522,10 @@ var CTX = function(input_parameter) {
             "@AK": 16
         },
 
-        "BLS383": {
+        "BLS12383": {
             "BITS": "384",
-            "FIELD": "BLS383",
-            "CURVE": "BLS383",
+            "FIELD": "BLS12383",
+            "CURVE": "BLS12383",
             "@NB": 48,
             "@BASE": 23,
             "@NBT": 383,
@@ -543,10 +543,10 @@ var CTX = function(input_parameter) {
             "@AK": 16
         },
 
-        "BLS24": {
+        "BLS24479": {
             "BITS": "480",
-            "FIELD": "BLS24",
-            "CURVE": "BLS24",
+            "FIELD": "BLS24479",
+            "CURVE": "BLS24479",
             "@NB": 60,
             "@BASE": 23,
             "@NBT": 479,
@@ -564,10 +564,10 @@ var CTX = function(input_parameter) {
             "@AK": 24
         },
 
-        "BLS48": {
+        "BLS48556": {
             "BITS": "560",
-            "FIELD": "BLS48",
-            "CURVE": "BLS48",
+            "FIELD": "BLS48556",
+            "CURVE": "BLS48556",
             "@NB": 70,
             "@BASE": 23,
             "@NBT": 556,
@@ -585,10 +585,10 @@ var CTX = function(input_parameter) {
             "@AK": 32
         },
 
-        "BLS48_581": {
+        "BLS48581": {
             "BITS": "584",
-            "FIELD": "BLS48_581",
-            "CURVE": "BLS48_581",
+            "FIELD": "BLS48581",
+            "CURVE": "BLS48581",
             "@NB": 73,
             "@BASE": 23,
             "@NBT": 581,
@@ -606,10 +606,10 @@ var CTX = function(input_parameter) {
             "@AK": 32
         },
 
-        "BLS381": {
+        "BLS12381": {
             "BITS": "381",
-            "FIELD": "BLS381",
-            "CURVE": "BLS381",
+            "FIELD": "BLS12381",
+            "CURVE": "BLS12381",
             "@NB": 48,
             "@BASE": 23,
             "@NBT": 381,
@@ -627,10 +627,10 @@ var CTX = function(input_parameter) {
             "@AK": 16
         },
 
-        "BLS461": {
+        "BLS12461": {
             "BITS": "464",
-            "FIELD": "BLS461",
-            "CURVE": "BLS461",
+            "FIELD": "BLS12461",
+            "CURVE": "BLS12461",
             "@NB": 58,
             "@BASE": 23,
             "@NBT": 461,

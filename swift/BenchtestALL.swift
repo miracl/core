@@ -43,9 +43,9 @@ import ed25519
 import nist256
 import goldilocks
 import bn254
-import bls383
-import bls24
-import bls48
+import bls12383
+import bls24479
+import bls48556
 import rsa2048
 
 public func TimeRSA_2048(_ rng: inout RAND)
@@ -499,34 +499,34 @@ public func TimeMPIN_bn254(_ rng: inout RAND)
     }
 }
 
-public func TimeMPIN_bls383(_ rng: inout RAND)
+public func TimeMPIN_bls12383(_ rng: inout RAND)
 {
     let MIN_TIME=10.0
     let MIN_ITERS=10
     var fail=false;
 
-    print("\nTiming/Testing BLS383 Pairings")
-    if bls383.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls383.CONFIG_CURVE.BN {
+    print("\nTiming/Testing bls12383 Pairings")
+    if bls12383.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls12383.CONFIG_CURVE.BN {
         print("BN Pairing-Friendly Curve")
     }
-    if bls383.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls383.CONFIG_CURVE.BLS {
+    if bls12383.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls12383.CONFIG_CURVE.BLS {
         print("BLS Pairing-Friendly Curve")
     }
-    print("Modulus size \(bls383.CONFIG_FIELD.MODBITS) bits")
-    print("\(bls383.CONFIG_BIG.CHUNK) bit build")
+    print("Modulus size \(bls12383.CONFIG_FIELD.MODBITS) bits")
+    print("\(bls12383.CONFIG_BIG.CHUNK) bit build")
 
-    let G=bls383.ECP.generator();
+    let G=bls12383.ECP.generator();
 
-    let r=bls383.BIG(bls383.ROM.CURVE_Order)
-    let s=bls383.BIG.randtrunc(r,16*bls383.CONFIG_CURVE.AESKEY,&rng)
+    let r=bls12383.BIG(bls12383.ROM.CURVE_Order)
+    let s=bls12383.BIG.randtrunc(r,16*bls12383.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bls383.ECP.hashit(s);
+    var P=bls12383.ECP.hashit(s);
     if P.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
     }
 
-    P=bls383.PAIR.G1mul(G,r);
+    P=bls12383.PAIR.G1mul(G,r);
 
     if !P.is_infinity() {
         print("FAILURE - rP!=O")
@@ -537,7 +537,7 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     var iterations=0
     var elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        P=bls383.PAIR.G1mul(G,s)
+        P=bls12383.PAIR.G1mul(G,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -545,22 +545,22 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     print(String(format: "G1  mul              - %d iterations",iterations),terminator: "");
     print(String(format: " %.2f ms per iteration",elapsed))
 
-    var Q=bls383.ECP2.generator();
+    var Q=bls12383.ECP2.generator();
 
-    var W = bls383.ECP2.hashit(s)
+    var W = bls12383.ECP2.hashit(s)
     W.cfp();
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true
     }
-    W = bls383.PAIR.G2mul(W, r);
+    W = bls12383.PAIR.G2mul(W, r);
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
         fail=true
     }
 
 
-    W=bls383.PAIR.G2mul(Q,r)
+    W=bls12383.PAIR.G2mul(Q,r)
 
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
@@ -571,7 +571,7 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        W=bls383.PAIR.G2mul(Q,s)
+        W=bls12383.PAIR.G2mul(Q,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -579,10 +579,10 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     print(String(format: "G2  mul              - %d iterations",iterations),terminator: "");
     print(String(format: " %.2f ms per iteration",elapsed))
 
-    var w=bls383.PAIR.ate(Q,P)
-    w=bls383.PAIR.fexp(w)
+    var w=bls12383.PAIR.ate(Q,P)
+    w=bls12383.PAIR.fexp(w)
 
-    var g=bls383.PAIR.GTpow(w,r)
+    var g=bls12383.PAIR.GTpow(w,r)
 
     if !g.isunity() {
         print("FAILURE - g^r!=1")
@@ -593,7 +593,7 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        g=bls383.PAIR.GTpow(w,s)
+        g=bls12383.PAIR.GTpow(w,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -619,7 +619,7 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        w=bls383.PAIR.ate(Q,P)
+        w=bls12383.PAIR.ate(Q,P)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -631,7 +631,7 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        g=bls383.PAIR.fexp(w)
+        g=bls12383.PAIR.fexp(w)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -642,26 +642,26 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     P.copy(G)
     Q.copy(W)
 
-    P=bls383.PAIR.G1mul(P,s)
-    g=bls383.PAIR.ate(Q,P)
-    g=bls383.PAIR.fexp(g)
+    P=bls12383.PAIR.G1mul(P,s)
+    g=bls12383.PAIR.ate(Q,P)
+    g=bls12383.PAIR.fexp(g)
 
     P.copy(G)
-    Q=bls383.PAIR.G2mul(Q,s)
-    w=bls383.PAIR.ate(Q,P)
-    w=bls383.PAIR.fexp(w)
+    Q=bls12383.PAIR.G2mul(Q,s)
+    w=bls12383.PAIR.ate(Q,P)
+    w=bls12383.PAIR.fexp(w)
 
-    if !bls383.PAIR.G1member(P) {
+    if !bls12383.PAIR.G1member(P) {
         print("FAILURE - P is not in G1")
         fail=true
     }
 
-    if !bls383.PAIR.G2member(Q) {
+    if !bls12383.PAIR.G2member(Q) {
         print("FAILURE - Q is not in G2")
         fail=true
     }
 
-    if !bls383.PAIR.GTmember(w) {
+    if !bls12383.PAIR.GTmember(w) {
         print("FAILURE - e(Q,P) is not in GT")
         fail=true
     }
@@ -676,35 +676,35 @@ public func TimeMPIN_bls383(_ rng: inout RAND)
     }
 }
 
-public func TimeMPIN_bls24(_ rng: inout RAND)
+public func TimeMPIN_bls24479(_ rng: inout RAND)
 {
     let MIN_TIME=10.0
     let MIN_ITERS=10
     var fail=false;
 
 
-    print("\nTiming/Testing BLS24 Pairings")
-    if bls24.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls24.CONFIG_CURVE.BN {
+    print("\nTiming/Testing bls24479 Pairings")
+    if bls24479.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls24479.CONFIG_CURVE.BN {
         print("BN Pairing-Friendly Curve")
     }
-    if bls24.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls24.CONFIG_CURVE.BLS {
-        print("BLS24 Pairing-Friendly Curve")
+    if bls24479.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls24479.CONFIG_CURVE.BLS {
+        print("bls24479 Pairing-Friendly Curve")
     }
-    print("Modulus size \(bls24.CONFIG_FIELD.MODBITS) bits")
-    print("\(bls24.CONFIG_BIG.CHUNK) bit build")
+    print("Modulus size \(bls24479.CONFIG_FIELD.MODBITS) bits")
+    print("\(bls24479.CONFIG_BIG.CHUNK) bit build")
 
-    let G=bls24.ECP.generator();
+    let G=bls24479.ECP.generator();
 
-    let r=bls24.BIG(bls24.ROM.CURVE_Order)
-    let s=bls24.BIG.randtrunc(r,16*bls24.CONFIG_CURVE.AESKEY,&rng)
+    let r=bls24479.BIG(bls24479.ROM.CURVE_Order)
+    let s=bls24479.BIG.randtrunc(r,16*bls24479.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bls24.ECP.hashit(s);
+    var P=bls24479.ECP.hashit(s);
     if P.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
     }
 
-    P=bls24.PAIR192.G1mul(G,r);
+    P=bls24479.PAIR192.G1mul(G,r);
 
     if !P.is_infinity() {
         print("FAILURE - rP!=O")
@@ -715,7 +715,7 @@ public func TimeMPIN_bls24(_ rng: inout RAND)
     var iterations=0
     var elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        P=bls24.PAIR192.G1mul(G,s)
+        P=bls24479.PAIR192.G1mul(G,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -723,15 +723,15 @@ public func TimeMPIN_bls24(_ rng: inout RAND)
     print(String(format: "G1  mul              - %d iterations",iterations),terminator: "");
     print(String(format: " %.2f ms per iteration",elapsed))
 
-    var Q=bls24.ECP4.generator();
+    var Q=bls24479.ECP4.generator();
 
-    var W = bls24.ECP4.hashit(s)
+    var W = bls24479.ECP4.hashit(s)
     W.cfp();
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true
     }
-    W = bls24.PAIR192.G2mul(W, r);
+    W = bls24479.PAIR192.G2mul(W, r);
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
         fail=true
@@ -840,28 +840,28 @@ public func TimeMPIN_bls24(_ rng: inout RAND)
 }
 
 
-public func TimeMPIN_bls48(_ rng: inout RAND)
+public func TimeMPIN_bls48556(_ rng: inout RAND)
 {
     let MIN_TIME=10.0
     let MIN_ITERS=10
     var fail=false;
 
-    print("\nTiming/Testing BLS48 Pairings")
-    if bls48.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls48.CONFIG_CURVE.BN {
+    print("\nTiming/Testing bls48556 Pairings")
+    if bls48556.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls48556.CONFIG_CURVE.BN {
         print("BN Pairing-Friendly Curve")
     }
-    if bls48.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls48.CONFIG_CURVE.BLS {
-        print("BLS48 Pairing-Friendly Curve")
+    if bls48556.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls48556.CONFIG_CURVE.BLS {
+        print("bls48556 Pairing-Friendly Curve")
     }
-    print("Modulus size \(bls48.CONFIG_FIELD.MODBITS) bits")
-    print("\(bls48.CONFIG_BIG.CHUNK) bit build")
+    print("Modulus size \(bls48556.CONFIG_FIELD.MODBITS) bits")
+    print("\(bls48556.CONFIG_BIG.CHUNK) bit build")
 
-    let G=bls48.ECP.generator();
+    let G=bls48556.ECP.generator();
 
-    let r=bls48.BIG(bls48.ROM.CURVE_Order)
-    let s=bls48.BIG.randtrunc(r,16*bls48.CONFIG_CURVE.AESKEY,&rng)
+    let r=bls48556.BIG(bls48556.ROM.CURVE_Order)
+    let s=bls48556.BIG.randtrunc(r,16*bls48556.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bls48.ECP.hashit(s);
+    var P=bls48556.ECP.hashit(s);
     if P.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
@@ -888,13 +888,13 @@ public func TimeMPIN_bls48(_ rng: inout RAND)
 
     var Q=ECP8.generator();
 
-    var W = bls48.ECP8.hashit(s)
+    var W = bls48556.ECP8.hashit(s)
     W.cfp();
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true
     }
-    W = bls48.PAIR256.G2mul(W, r);
+    W = bls48556.PAIR256.G2mul(W, r);
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
         fail=true
@@ -1015,7 +1015,7 @@ TimeECDH_nist256(&rng)
 TimeECDH_goldilocks(&rng)
 TimeRSA_2048(&rng)
 TimeMPIN_bn254(&rng)
-TimeMPIN_bls383(&rng)
-TimeMPIN_bls24(&rng)
-TimeMPIN_bls48(&rng)
+TimeMPIN_bls12383(&rng)
+TimeMPIN_bls24479(&rng)
+TimeMPIN_bls48556(&rng)
 

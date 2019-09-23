@@ -52,9 +52,9 @@ import "fmt"
 
 import "github.com/miracl/core/go/core"
 import "github.com/miracl/core/go/core/BN254"
-import "github.com/miracl/core/go/core/BLS383"
-import "github.com/miracl/core/go/core/BLS24"
-import "github.com/miracl/core/go/core/BLS48"
+import "github.com/miracl/core/go/core/BLS12383"
+import "github.com/miracl/core/go/core/BLS24479"
+import "github.com/miracl/core/go/core/BLS48556"
 
 func printBinary(array []byte) {
 	for i := 0; i < len(array); i++ {
@@ -112,10 +112,10 @@ func bls_BN254(rng *core.RAND) {
 	}
 }
 
-func bls_BLS383(rng *core.RAND) {
+func bls_BLS12383(rng *core.RAND) {
 
-	const BGS = BLS383.BGS
-	const BFS = BLS383.BFS
+	const BGS = BLS12383.BGS
+	const BFS = BLS12383.BFS
 	const G1S = BFS + 1 /* Group 1 Size */
 	const G2S = 2 * BFS + 1 /* Group 2 Size */
 
@@ -132,13 +132,13 @@ func bls_BLS383(rng *core.RAND) {
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
 	mess := "This is a test message"
 
-	res := BLS383.Init()
+	res := BLS12383.Init()
 	if res != 0 {
 		fmt.Printf("Failed to Initialize\n")
 		return
 	}
 
-	res = BLS383.KeyPairGenerate(IKM[:], S[:], W[:])
+	res = BLS12383.KeyPairGenerate(IKM[:], S[:], W[:])
 	if res != 0 {
 		fmt.Printf("Failed to generate keys\n")
 		return
@@ -148,11 +148,11 @@ func bls_BLS383(rng *core.RAND) {
 	fmt.Printf("Public  key : 0x")
 	printBinary(W[:])
 
-	BLS383.Core_Sign(SIG[:], []byte(mess), S[:])
+	BLS12383.Core_Sign(SIG[:], []byte(mess), S[:])
 	fmt.Printf("Signature : 0x")
 	printBinary(SIG[:])
 
-	res = BLS383.Core_Verify(SIG[:], []byte(mess), W[:])
+	res = BLS12383.Core_Verify(SIG[:], []byte(mess), W[:])
 
 	if res == 0 {
 		fmt.Printf("Signature is OK\n")
@@ -161,10 +161,10 @@ func bls_BLS383(rng *core.RAND) {
 	}
 }
 
-func bls_BLS24(rng *core.RAND) {
+func bls_BLS24479(rng *core.RAND) {
 
-	const BGS = BLS24.BGS
-	const BFS = BLS24.BFS
+	const BGS = BLS24479.BGS
+	const BFS = BLS24479.BFS
 	const G1S = BFS + 1 /* Group 1 Size */
 	const G2S = 4 * BFS + 1 /* Group 2 Size */
 
@@ -181,13 +181,13 @@ func bls_BLS24(rng *core.RAND) {
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
 	mess := "This is a test message"
 
-	res := BLS24.Init()
+	res := BLS24479.Init()
 	if res != 0 {
 		fmt.Printf("Failed to Initialize\n")
 		return
 	}
 
-	res = BLS24.KeyPairGenerate(IKM[:], S[:], W[:])
+	res = BLS24479.KeyPairGenerate(IKM[:], S[:], W[:])
 	if res != 0 {
 		fmt.Printf("Failed to generate keys\n")
 		return
@@ -197,11 +197,11 @@ func bls_BLS24(rng *core.RAND) {
 	fmt.Printf("Public  key : 0x")
 	printBinary(W[:])
 
-	BLS24.Core_Sign(SIG[:], []byte(mess), S[:])
+	BLS24479.Core_Sign(SIG[:], []byte(mess), S[:])
 	fmt.Printf("Signature : 0x")
 	printBinary(SIG[:])
 
-	res = BLS24.Core_Verify(SIG[:], []byte(mess), W[:])
+	res = BLS24479.Core_Verify(SIG[:], []byte(mess), W[:])
 
 	if res == 0 {
 		fmt.Printf("Signature is OK\n")
@@ -210,10 +210,10 @@ func bls_BLS24(rng *core.RAND) {
 	}
 }
 
-func bls_BLS48(rng *core.RAND) {
+func bls_BLS48556(rng *core.RAND) {
 
-	const BGS = BLS48.BGS
-	const BFS = BLS48.BFS
+	const BGS = BLS48556.BGS
+	const BFS = BLS48556.BFS
 	const G1S = BFS + 1  /* Group 1 Size */
 	const G2S = 8 * BFS + 1 /* Group 2 Size */
 
@@ -230,13 +230,13 @@ func bls_BLS48(rng *core.RAND) {
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
 	mess := "This is a test message"
 
-	res := BLS48.Init()
+	res := BLS48556.Init()
 	if res != 0 {
 		fmt.Printf("Failed to Initialize\n")
 		return
 	}
 
-	res = BLS48.KeyPairGenerate(IKM[:], S[:], W[:])
+	res = BLS48556.KeyPairGenerate(IKM[:], S[:], W[:])
 	if res != 0 {
 		fmt.Printf("Failed to generate keys\n")
 		return
@@ -246,11 +246,11 @@ func bls_BLS48(rng *core.RAND) {
 	fmt.Printf("Public  key : 0x")
 	printBinary(W[:])
 
-	BLS48.Core_Sign(SIG[:], []byte(mess), S[:])
+	BLS48556.Core_Sign(SIG[:], []byte(mess), S[:])
 	fmt.Printf("Signature : 0x")
 	printBinary(SIG[:])
 
-	res = BLS48.Core_Verify(SIG[:], []byte(mess), W[:])
+	res = BLS48556.Core_Verify(SIG[:], []byte(mess), W[:])
 
 	if res == 0 {
 		fmt.Printf("Signature is OK\n")
@@ -268,7 +268,7 @@ func main() {
 	rng.Seed(100, raw[:])
 
 	bls_BN254(rng)
-	bls_BLS383(rng)
-	bls_BLS24(rng)
-	bls_BLS48(rng)
+	bls_BLS12383(rng)
+	bls_BLS24479(rng)
+	bls_BLS48556(rng)
 }

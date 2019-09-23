@@ -242,15 +242,15 @@ print("18. sm2\n")
 print("Pairing-Friendly Elliptic Curves")
 print("19. bn254")
 print("20. bn254CX")
-print("21. bls383")
-print("22. bls381")
+print("21. bls12383")
+print("22. bls12381")
 print("23. fp256BN")
 print("24. fp512BN")
-print("25. bls461")
+print("25. bls12461")
 print("26. bn462\n")
-print("27. bls24")
-print("28. bls48")
-print("29. bls48_581\n")
+print("27. bls24479")
+print("28. bls48556")
+print("29. bls48581\n")
 
 print("RSA")
 print("30. rsa2048")
@@ -362,11 +362,11 @@ while ptr<max:
 		curveset("bn254CX","56","254","3","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
 		pfcurve_selected=True
 	if x==21:
-		curveset("bls383","58","383","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128")
+		curveset("bls12383","58","383","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128")
 		pfcurve_selected=True
 
 	if x==22:
-		curveset("bls381","58","381","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128")
+		curveset("bls12381","58","381","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128")
 		pfcurve_selected=True
 
 	if x==23:
@@ -377,7 +377,7 @@ while ptr<max:
 		pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
 	if x==25:
-		curveset("bls461","60","461","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","79","78","128")
+		curveset("bls12461","60","461","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","79","78","128")
 		pfcurve_selected=True
 
 	if x==26:
@@ -385,15 +385,15 @@ while ptr<max:
 		pfcurve_selected=True
 
 	if x==27:
-		curveset("bls24","56","479","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","52","49","192")
+		curveset("bls24479","56","479","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","52","49","192")
 		pfcurve_selected=True
 
 	if x==28:
-		curveset("bls48","58","556","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","35","32","256")
+		curveset("bls48556","58","556","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","35","32","256")
 		pfcurve_selected=True
 
 	if x==29:
-		curveset("bls48_581","60","581","3","NOT_SPECIAL","10","WEIERSTRASS","BLS","D_TYPE","NEGATIVEX","36","33","256")
+		curveset("bls48581","60","581","3","NOT_SPECIAL","10","WEIERSTRASS","BLS","D_TYPE","NEGATIVEX","36","33","256")
 		pfcurve_selected=True
 # rsaset(rsaname,big_length_bytes,bits_in_base,multiplier)
 # The RSA name reflects the modulus size, which is a 2^m multiplier

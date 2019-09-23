@@ -53,9 +53,9 @@ Swap G1S and G2S in this program
 import Foundation
 import core // comment out for Xcode
 import bn254
-import bls383
-import bls24
-import bls48
+import bls12383
+import bls24479
+import bls48556
 
 public func printBinary(_ array: [UInt8])
 {
@@ -115,10 +115,10 @@ public func TestBLS_bn254(_ rng: inout RAND)
 
 }
 
-public func TestBLS_bls383(_ rng: inout RAND)
+public func TestBLS_bls12383(_ rng: inout RAND)
 {
-    let BGS=bls383.BLS.BGS
-    let BFS=bls383.BLS.BFS
+    let BGS=bls12383.BLS.BGS
+    let BFS=bls12383.BLS.BFS
     let G1S=BFS+1    // Group 1 Size - compressed
     let G2S=2*BFS+1;     // Group 2 Size - compressed
    
@@ -132,26 +132,26 @@ public func TestBLS_bls383(_ rng: inout RAND)
         IKM[i]=rng.getByte()
     }
 
-    var res=bls383.BLS.initit()
+    var res=bls12383.BLS.initit()
     if res != 0 {
         print("Failed to Initialize\n")
         return
     }
-    res=bls383.BLS.KeyPairGenerate(IKM,&S,&W)
+    res=bls12383.BLS.KeyPairGenerate(IKM,&S,&W)
     if res != 0 {
         print("Failed to Generate Keys\n")
         return
     }
-    print("Testing bls383 curve\n")    
+    print("Testing bls12383 curve\n")    
     print("Private key : 0x",terminator: "");  printBinary(S);
     print("Public  key : 0x",terminator: "");  printBinary(W);
     let mess="This is a test message"
     print("Signing string - "+mess)    
 
-    bls383.BLS.core_sign(&SIG,[UInt8](mess.utf8),S)
+    bls12383.BLS.core_sign(&SIG,[UInt8](mess.utf8),S)
     print("Signature : 0x",terminator: "");  printBinary(SIG);
 
-    res=bls383.BLS.core_verify(SIG,[UInt8](mess.utf8),W)
+    res=bls12383.BLS.core_verify(SIG,[UInt8](mess.utf8),W)
     if res == 0 {
         print("Signature is OK\n");
     } else {
@@ -160,10 +160,10 @@ public func TestBLS_bls383(_ rng: inout RAND)
 
 }
 
-public func TestBLS_bls24(_ rng: inout RAND)
+public func TestBLS_bls24479(_ rng: inout RAND)
 {
-    let BGS=bls24.BLS192.BGS
-    let BFS=bls24.BLS192.BFS
+    let BGS=bls24479.BLS192.BGS
+    let BFS=bls24479.BLS192.BFS
     let G1S=BFS+1    // Group 1 Size  - compressed
     let G2S=4*BFS+1;     // Group 2 Size - compressed
    
@@ -177,26 +177,26 @@ public func TestBLS_bls24(_ rng: inout RAND)
         IKM[i]=rng.getByte()
     }
 
-    var res=bls24.BLS192.initit()
+    var res=bls24479.BLS192.initit()
     if res != 0 {
         print("Failed to Initialize\n")
         return
     }
-    res=bls24.BLS192.KeyPairGenerate(IKM,&S,&W)
+    res=bls24479.BLS192.KeyPairGenerate(IKM,&S,&W)
     if res != 0 {
         print("Failed to Generate Keys\n")
         return
     }
-    print("Testing bls24 curve\n")      
+    print("Testing bls24479 curve\n")      
     print("Private key : 0x",terminator: "");  printBinary(S);
     print("Public  key : 0x",terminator: "");  printBinary(W);
     let mess="This is a test message"
     print("Signing string - "+mess)
 
-    bls24.BLS192.core_sign(&SIG,[UInt8](mess.utf8),S)
+    bls24479.BLS192.core_sign(&SIG,[UInt8](mess.utf8),S)
     print("Signature : 0x",terminator: "");  printBinary(SIG);
 
-    res=bls24.BLS192.core_verify(SIG,[UInt8](mess.utf8),W)
+    res=bls24479.BLS192.core_verify(SIG,[UInt8](mess.utf8),W)
     if res == 0 {
         print("Signature is OK\n");
     } else {
@@ -204,10 +204,10 @@ public func TestBLS_bls24(_ rng: inout RAND)
     }
 }
 
-public func TestBLS_bls48(_ rng: inout RAND)
+public func TestBLS_bls48556(_ rng: inout RAND)
 {
-    let BGS=bls48.BLS256.BGS
-    let BFS=bls48.BLS256.BFS
+    let BGS=bls48556.BLS256.BGS
+    let BFS=bls48556.BLS256.BFS
     let G1S=BFS+1    // Group 1 Size - compressed
     let G2S=8*BFS+1;     // Group 2 Size - compressed
    
@@ -221,26 +221,26 @@ public func TestBLS_bls48(_ rng: inout RAND)
         IKM[i]=rng.getByte()
     }
 
-    var res=bls48.BLS256.initit()
+    var res=bls48556.BLS256.initit()
     if res != 0 {
         print("Failed to Initialize\n")
         return
     }
-    res=bls48.BLS256.KeyPairGenerate(IKM,&S,&W)
+    res=bls48556.BLS256.KeyPairGenerate(IKM,&S,&W)
     if res != 0 {
         print("Failed to Generate Keys\n")
         return
     }
-    print("Testing bls48 curve\n")      
+    print("Testing bls48556 curve\n")      
     print("Private key : 0x",terminator: "");  printBinary(S);
     print("Public  key : 0x",terminator: "");  printBinary(W);
     let mess="This is a test message"
     print("Signing string - "+mess)
     
-    bls48.BLS256.core_sign(&SIG,[UInt8](mess.utf8),S)
+    bls48556.BLS256.core_sign(&SIG,[UInt8](mess.utf8),S)
     print("Signature : 0x",terminator: "");  printBinary(SIG);
 
-    res=bls48.BLS256.core_verify(SIG,[UInt8](mess.utf8),W)
+    res=bls48556.BLS256.core_verify(SIG,[UInt8](mess.utf8),W)
     if res == 0 {
         print("Signature is OK\n");
     } else {
@@ -259,6 +259,6 @@ for i in 0 ..< 100 {RAW[i]=UInt8(i&0xff)}
 rng.seed(100,RAW)
 
 TestBLS_bn254(&rng)
-TestBLS_bls383(&rng)
-TestBLS_bls24(&rng)
-TestBLS_bls48(&rng)
+TestBLS_bls12383(&rng)
+TestBLS_bls24479(&rng)
+TestBLS_bls48556(&rng)

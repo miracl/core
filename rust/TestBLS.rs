@@ -103,8 +103,8 @@ fn bls_bn254(rng: &mut RAND) {
     }
 }
 
-fn bls_bls383(rng: &mut RAND) {
-    use core::bls383::bls;
+fn bls_bls12383(rng: &mut RAND) {
+    use core::bls12383::bls;
 
     const BFS: usize = bls::BFS;
     const BGS: usize = bls::BGS;
@@ -152,8 +152,8 @@ fn bls_bls383(rng: &mut RAND) {
     }
 }
 
-fn bls_bls24(rng: &mut RAND) {
-    use core::bls24::bls192;
+fn bls_bls24479(rng: &mut RAND) {
+    use core::bls24479::bls192;
 
     const BFS: usize = bls192::BFS;
     const BGS: usize = bls192::BGS;
@@ -200,8 +200,8 @@ fn bls_bls24(rng: &mut RAND) {
     }
 }
 
-fn bls_bls48(rng: &mut RAND) {
-    use core::bls48::bls256;
+fn bls_bls48556(rng: &mut RAND) {
+    use core::bls48556::bls256;
 
     const BFS: usize = bls256::BFS;
     const BGS: usize = bls256::BGS;
@@ -266,9 +266,9 @@ fn main() {
     println!("Testing BLS signature for curve bn254");
     bls_bn254(&mut rng);
     println!("\nTesting BLS signature for curve bls383");
-    bls_bls383(&mut rng);
+    bls_bls12383(&mut rng);
     println!("\nTesting BLS signature for curve bls24");
-    bls_bls24(&mut rng);
+    bls_bls24479(&mut rng);
     println!("\nTesting BLS signature for curve bls48");
-    bls_bls48(&mut rng);
+    bls_bls48556(&mut rng);
 }

@@ -269,15 +269,15 @@ print("18. SM2\n")
 print("Pairing-Friendly Elliptic Curves")
 print("19. BN254")
 print("20. BN254CX")
-print("21. BLS383")
-print("22. BLS381")
+print("21. BLS12383")
+print("22. BLS12381")
 print("23. FP256BN")
 print("24. FP512BN")
-print("25. BLS461")
+print("25. BLS12461")
 print("26. BN462\n")
-print("27. BLS24")
-print("28. BLS48")
-print("29. BLS48_581\n")
+print("27. BLS24479")
+print("28. BLS48556")
+print("29. BLS48581\n")
 
 print("RSA")
 print("30. RSA2048")
@@ -390,11 +390,11 @@ while ptr<max:
 		curveset("BN254CX","28","254","3","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")  
 		pfcurve_selected=True
 	if x==21:
-		curveset("BLS383","29","383","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128") 
+		curveset("BLS12383","29","383","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128") 
 		pfcurve_selected=True
 
 	if x==22:
-		curveset("BLS381","29","381","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128") 
+		curveset("BLS12381","29","381","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128") 
 		pfcurve_selected=True
 
 
@@ -406,7 +406,7 @@ while ptr<max:
 		pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
 	if x==25:
-		curveset("BLS461","28","461","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","79","78","128")
+		curveset("BLS12461","28","461","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","79","78","128")
 		pfcurve_selected=True
 
 	if x==26:
@@ -414,14 +414,14 @@ while ptr<max:
 		pfcurve_selected=True
 
 	if x==27:
-		curveset("BLS24","29","479","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","52","49","192")
+		curveset("BLS24479","29","479","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","52","49","192")
 		pfcurve_selected=True
 	if x==28:
-		curveset("BLS48","29","556","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","35","32","256")
+		curveset("BLS48556","29","556","3","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","35","32","256")
 		pfcurve_selected=True
 
 	if x==29:
-		curveset("BLS48_581","29","581","3","NOT_SPECIAL","10","WEIERSTRASS","BLS","D_TYPE","NEGATIVEX","36","33","256")
+		curveset("BLS48581","29","581","3","NOT_SPECIAL","10","WEIERSTRASS","BLS","D_TYPE","NEGATIVEX","36","33","256")
 		pfcurve_selected=True
 
 # rsaset(rsaname,big_length_bytes,bits_in_base,multiplier)
