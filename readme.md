@@ -21,7 +21,7 @@ AMCL but not develop it further.
 
 MIRACL Core features:- 
 
-- New curves (SM2, BN462, BLS48_581)
+- New curves (SM2, BN462, BLS48581)
 - Support for precomputation for pairings (see BLS API)
 - Performance and security improvements
 - New HMAC message authentication module
