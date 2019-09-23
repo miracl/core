@@ -81,7 +81,7 @@ static void BLS_HASH_TO_POINT(ECP *P, octet *M)
     char dst[50];
     octet DST = {0,sizeof(dst),dst};
 
-    OCT_jstring(&DST,(char *)"BLS_SIG_G1-SHA512-SSWU-RO-_NUL_");
+    OCT_jstring(&DST,(char *)"BLS_SIG_ZZZG1-SHA512-SSWU-RO-_NUL_");
     hash_to_base(MC_SHA2,HASH_TYPE_ZZZ,u,&DST,M,0);
     hash_to_base(MC_SHA2,HASH_TYPE_ZZZ,u1,&DST,M,1);
 

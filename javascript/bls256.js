@@ -112,7 +112,7 @@ var BLS256 = function(ctx) {
         /* hash a message to an ECP point, using SHA3 */
 
         bls_hash_to_point: function(M) {
-            var dst= "BLS_SIG_G1-SHA512-SSWU-RO-_NUL_";
+            var dst= "BLS_SIG_ZZZG1-SHA512-SSWU-RO-_NUL_";
             var u=this.hash_to_base(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,0);
             var u1=this.hash_to_base(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,1);
 

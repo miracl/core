@@ -83,7 +83,7 @@ fn hash_to_base(hash: usize,hlen: usize ,dst: &[u8],m: &[u8],ctr: isize) -> BIG 
 /* hash a message to an ECP point, using SHA2, random oracle method */
 #[allow(non_snake_case)]
 pub fn bls_hash_to_point(m: &[u8]) -> ECP {
-    let dst= String::from("BLS_SIG_G1-SHA512-SSWU-RO-_NUL_");
+    let dst= String::from("BLS_SIG_ZZZG1-SHA512-SSWU-RO-_NUL_".to_ascii_uppercase());
     let u=hash_to_base(hmac::MC_SHA2,ecp::HASH_TYPE,dst.as_bytes(),m,0);
     let u1=hash_to_base(hmac::MC_SHA2,ecp::HASH_TYPE,dst.as_bytes(),m,1);
 

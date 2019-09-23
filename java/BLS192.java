@@ -75,7 +75,7 @@ public class BLS192 {
 
     /* hash a message to an ECP point, using SHA2, random oracle method */
     public static ECP bls_hash_to_point(byte[] M) {
-        String dst= new String("BLS_SIG_G1-SHA384-SSWU-RO-_NUL_");
+        String dst= new String("BLS_SIG_ZZZG1-SHA384-SSWU-RO-_NUL_");
         BIG u=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,0);
         BIG u1=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,1);
 

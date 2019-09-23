@@ -70,7 +70,7 @@ func hash_to_base(hash int,hlen int ,DST []byte,M []byte,ctr int) *BIG {
 
 /* hash a message to an ECP point, using SHA2, random oracle method */
 func bls192_hash_to_point(M []byte) *ECP {
-	DST := []byte("BLS_SIG_G1-SHA384-SSWU-RO-_NUL_")
+	DST := []byte("BLS_SIG_ZZZG1-SHA384-SSWU-RO-_NUL_")
 	u := hash_to_base(core.MC_SHA2,HASH_TYPE,DST,M,0)
 	u1 := hash_to_base(core.MC_SHA2,HASH_TYPE,DST,M,1)
 

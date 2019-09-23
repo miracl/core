@@ -79,7 +79,7 @@ pub const CURVE_COF_I: isize = 0;
 pub const CURVE_COF: [Chunk; NLEN] = [
     0x80000010011FF,
     0x40,
-    0x0
+    0x0,
     0x0,
     0x0,
     0x0,
