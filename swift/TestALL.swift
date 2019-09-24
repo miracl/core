@@ -86,7 +86,7 @@ public func TestRSA_2048(_ rng: inout RAND)
 
     print("Decrypting test string\n");
     RSA.DECRYPT(priv,C,&ML)
-    var MS=RSA.OAEP_DECODE(RSA.HASH_TYPE,nil,&ML) /* OAEP encode message m to e  */
+    let MS=RSA.OAEP_DECODE(RSA.HASH_TYPE,nil,&ML) /* OAEP encode message m to e  */
 
     message=""
     for i in 0 ..< MS.count

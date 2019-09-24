@@ -128,7 +128,7 @@ struct GCM {
         j=0
         for i in 0 ..< GCM.NB
         {
-            var b=GCM.unpack(P[i])
+            let b=GCM.unpack(P[i])
             stateX[j]=b[0]; stateX[j+1]=b[1]; stateX[j+2]=b[2]; stateX[j+3]=b[3];
             j+=4
         }
@@ -146,7 +146,7 @@ struct GCM {
         var j=0
         for i in 0 ..< GCM.NB
         {
-            var b=GCM.unpack(F[i]);
+            let b=GCM.unpack(F[i]);
             L[j]=b[0]; L[j+1]=b[1]; L[j+2]=b[2]; L[j+3]=b[3]
             j+=4
         }
@@ -192,7 +192,7 @@ struct GCM {
         if (niv==12)
         {
             for i in 0 ..< 12 {a.f[i]=iv[i]}
-            var b=GCM.unpack(UInt32(1))
+            let b=GCM.unpack(UInt32(1))
             a.f[12]=b[0]; a.f[13]=b[1]; a.f[14]=b[2]; a.f[15]=b[3];  /* initialise IV */
             for i in 0 ..< 16 {Y_0[i]=a.f[i]}
         }
@@ -321,7 +321,7 @@ struct GCM {
 
     static func hex2bytes(_ s: String) -> [UInt8]
     {
-        var array=Array(arrayLiteral: s)
+        let array=Array(arrayLiteral: s)
         let len=array.count;
         var data=[UInt8](repeating: 0,count: len/2)
 

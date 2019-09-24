@@ -414,7 +414,7 @@ public struct FP {
 // return this^(p-3)/4 or this^(p-5)/8
     mutating func fpow() -> FP 
     {
-        var ac: [Int] = [1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255]
+        let ac: [Int] = [1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255]
         var xp=[FP]() 
 // phase 1
         xp.append(FP(self))

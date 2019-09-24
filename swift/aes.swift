@@ -286,8 +286,8 @@ public struct AES {
 
     private static func product(_ x: UInt32,_ y: UInt32) -> UInt8
     { /* dot product of two 4-byte arrays */
-        var xb=unpack(x);
-        var yb=unpack(y);
+        let xb=unpack(x);
+        let yb=unpack(y);
 
         return (bmul(xb[0],yb[0])^bmul(xb[1],yb[1])^bmul(xb[2],yb[2])^bmul(xb[3],yb[3]))
     }

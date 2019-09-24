@@ -152,7 +152,7 @@ public struct RSA {
         for counter:Int32 in 0 ..< cthreshold
         {
             //var B=RSA.hashit(sha,Z,counter)
-            var B=HMAC.GPhashit(HMAC.MC_SHA2,sha,0,Z,counter,nil)
+            let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,0,Z,counter,nil)
 
             if (k+hlen>olen) {for i in 0 ..< olen%hlen {K[k]=B[i]; k+=1}}
             else {for i in 0 ..< hlen {K[k]=B[i]; k+=1}}
@@ -220,7 +220,7 @@ public struct RSA {
 
         var DBMASK=[UInt8](repeating: 0,count: olen-seedlen)
 
-        var h=HMAC.SPhashit(HMAC.MC_SHA2,sha,p)
+        let h=HMAC.SPhashit(HMAC.MC_SHA2,sha,p)
 
         for i in 0 ..< hlen {f[i]=h[i]}
 
@@ -274,7 +274,7 @@ public struct RSA {
 
         }
 
-        var h=HMAC.SPhashit(HMAC.MC_SHA2,sha,p)
+        let h=HMAC.SPhashit(HMAC.MC_SHA2,sha,p)
 
         for i in 0 ..< hlen {CHASH[i]=h[i]}
 

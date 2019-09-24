@@ -244,13 +244,13 @@ public struct ECDH
         for i in 0 ..< ECDH.EFS {VZ[2*ECDH.EFS+1+i]=Z[i]}
 
 
-        var K=HMAC.KDF2(HMAC.MC_SHA2,sha,VZ,P1,2*CONFIG_CURVE.AESKEY)
+        let K=HMAC.KDF2(HMAC.MC_SHA2,sha,VZ,P1,2*CONFIG_CURVE.AESKEY)
 
         for i in 0 ..< CONFIG_CURVE.AESKEY {K1[i]=K[i]; K2[i]=K[CONFIG_CURVE.AESKEY+i];}
 
-        var C=AES.CBC_IV0_ENCRYPT(K1,M)
+        let C=AES.CBC_IV0_ENCRYPT(K1,M)
 
-        var L2=HMAC.inttoBytes(P2.count,8)
+        let L2=HMAC.inttoBytes(P2.count,8)
 
         var AC=[UInt8](repeating: 0,count: C.count+P2.count+8)
 
@@ -288,7 +288,7 @@ public struct ECDH
         for i in 0 ..< 2*ECDH.EFS+1 {VZ[i]=V[i]}
         for i in 0 ..< ECDH.EFS {VZ[2*EFS+1+i]=Z[i]}
 
-        var K=HMAC.KDF2(HMAC.MC_SHA2,sha,VZ,P1,2*CONFIG_CURVE.AESKEY)
+        let K=HMAC.KDF2(HMAC.MC_SHA2,sha,VZ,P1,2*CONFIG_CURVE.AESKEY)
 
         for i in 0 ..< CONFIG_CURVE.AESKEY {K1[i]=K[i]; K2[i]=K[CONFIG_CURVE.AESKEY+i]}
 
@@ -296,7 +296,7 @@ public struct ECDH
 
         if M.count==0 {return M}
 
-        var L2=HMAC.inttoBytes(P2.count,8)
+        let L2=HMAC.inttoBytes(P2.count,8)
 
         var AC=[UInt8](repeating: 0,count: C.count+P2.count+8)
 

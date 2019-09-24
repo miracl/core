@@ -155,7 +155,7 @@ public struct HMAC
         for i in 1...d
         {
             for j in 0 ..< Salt.count {S[j]=Salt[j]}
-            var N=HMAC.inttoBytes(i,4);
+            let N=HMAC.inttoBytes(i,4);
             for j in 0 ..< 4 {S[Salt.count+j]=N[j]}
 
             HMAC1(hf, sha,&F,sha,Pass,S);
