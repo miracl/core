@@ -35,8 +35,8 @@ const GCM_ACCEPTING_HEADER: usize = 0;
 const GCM_ACCEPTING_CIPHER: usize = 1;
 const GCM_NOT_ACCEPTING_MORE: usize = 2;
 const GCM_FINISHED: usize = 3;
-const GCM_ENCRYPTING: usize = 0;
-const GCM_DECRYPTING: usize = 1;
+//const GCM_ENCRYPTING: usize = 0;
+//const GCM_DECRYPTING: usize = 1;
 
 use crate::aes;
 use crate::aes::AES;
