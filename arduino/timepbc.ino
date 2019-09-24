@@ -31,7 +31,7 @@
 */
 
 /* Timing Pairing-Based Crypto */
-/* Only suitable for curves of embedding degree 12 */
+/* Only suitable for BN and BLS12 curves of embedding degree 12 */
 
 #include <stdio.h>
 #include <stdlib.h>

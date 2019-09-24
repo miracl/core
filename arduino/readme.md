@@ -45,7 +45,8 @@ Then run the script
     python3 config.py
 
 Choose one scheme to support. Realistically these small devices could probably 
-only support one method at a time.
+only support one method at a time. Example programs only support BN and BLS12
+pairing-friendly curves.
 
 Note that RSA key generation can take a very long time, perhaps hours.
 

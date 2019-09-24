@@ -32,6 +32,9 @@
 
 /* test driver and function exerciser for BLS Signature API Functions */
 
+/* This example program ONLY supports BN and BLS12 curves. But easily edited to support others. 
+   Also modifiable to reverse roles of G1 and G2. See ../cpp/testbls.cpp                        */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,12 +59,18 @@ int bls_XXX()
 
     int res;
     char s[BGS_XXX], w[4 * BFS_XXX + 1], sig[BFS_XXX + 1];
+    char ikm[64];
     octet S = {0, sizeof(s), s};
     octet W = {0, sizeof(w), w};
     octet SIG = {0, sizeof(sig), sig};
+    octet IKM = {0, sizeof(ikm), ikm};
+    octet M = {0,sizeof(message), message};
+
+    OCT_jstring(&M,message);
+    OCT_rand(&IKM,&RNG,32);
 
     Serial.println("Generating key pair");
-    res = BLS_KEY_PAIR_GENERATE(&RNG, &S, &W);
+    res = BLS_KEY_PAIR_GENERATE(&IKM, &S, &W);
     if (res == BLS_FAIL)
     {
         Serial.println("Failed to generate keys");
@@ -74,13 +83,13 @@ int bls_XXX()
     OCT_output(&W);
 
     Serial.println("Signing");
-    BLS_SIGN(&SIG, message, &S);
+    BLS_CORE_SIGN(&SIG, &M, &S);
     Serial.print("Signature= 0x");
     OCT_output(&SIG);
 
     //message[7]='f'; // change the message
     Serial.println("Verifying");
-    res = BLS_VERIFY(&SIG, message, &W);
+    res = BLS_CORE_VERIFY(&SIG,&M , &W);
     if (res == BLS_OK)
     {
         Serial.println("Signature is OK");
