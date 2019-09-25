@@ -49,6 +49,11 @@ and then for example point your browser at http://localhost:8080/testbls.html
 
 Wait for programs to complete (which may take a while).
 
+Alternatively run the examples in Node.js
+
+    node testall.js
+    node testbls.js
+    node benchtest_all.js
 
 # Installation and Testing using Rust
 
@@ -84,7 +89,7 @@ Finally build one of the test programs by, for example
 
     rustc -O --target=wasm32-unknown-emscripten TestBLS.rs --extern core=libcore.rlib -o TestBLS.html
 
-This will create a HTML file, which can be loaded into a browser as 
-described above.
+This will create a .html file which can be loaded into a browser as described above, and a .js file which can be run via Node.js
+
 
 
