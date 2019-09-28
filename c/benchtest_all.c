@@ -168,19 +168,19 @@ int ED_25519(csprng *RNG)
     printf("Montgomery parameterization\n");
 #endif
 
-#if MODTYPE_F25519 == PSEUDO_MERSENNE
+#if MODTYPE_25519 == PSEUDO_MERSENNE
     printf("Pseudo-Mersenne Modulus\n");
 #endif
 
-#if MODTYPE_F25519 == GENERALISED_MERSENNE
+#if MODTYPE_25519 == GENERALISED_MERSENNE
     printf("Generalised-Mersenne Modulus\n");
 #endif
 
-#if MODTYPE_F25519 == MONTGOMERY_FRIENDLY
+#if MODTYPE_25519 == MONTGOMERY_FRIENDLY
     printf("Montgomery Friendly Modulus\n");
 #endif
 
-#if MODTYPE_F25519 == NOT_SPECIAL
+#if MODTYPE_25519 == NOT_SPECIAL
     printf("Not special Modulus\n");
 #endif
 
