@@ -2,8 +2,7 @@
 
 
 The original contribution to the Apache Milagro Cryptographic Library (AMCL) 
-has now been extended and is being re-released as MIRACL Core. It also has new
-licensing conditions, which should be read carefully.
+has now been extended and is being re-released as MIRACL Core. 
 
 
 MIRACL Core is a multi-lingual and architecturally agnostic Cryptographic 
