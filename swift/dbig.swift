@@ -24,11 +24,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   You can be released from the requirements of the license by purchasing     
+   You can be released from the requirements of the license by purchasing
    a commercial license. Buying such a license is mandatory as soon as you
    develop commercial activities involving the MIRACL Core Crypto SDK
    without disclosing the source code of your own applications, or shipping
-   the MIRACL Core Crypto SDK with a closed source product.     
+   the MIRACL Core Crypto SDK with a closed source product.
 */
 
 //
@@ -40,6 +40,7 @@
 
     struct DBIG{
     var w=[Chunk](repeating: 0,count: CONFIG_BIG.DNLEN)
+    //var w=ContiguousArray<Chunk>(repeating: 0,count: CONFIG_BIG.DNLEN)
     init() {
         for i in 0 ..< CONFIG_BIG.DNLEN {w[i]=0}
     }
@@ -67,7 +68,7 @@
     mutating func cmove(_ g: DBIG,_ d: Int)
     {
         let b = Chunk(-d)
-    
+
         for i in 0 ..< CONFIG_BIG.DNLEN
         {
             w[i]^=(w[i]^g.w[i])&b;
@@ -83,7 +84,7 @@
     mutating func ucopy(_ x: BIG)
     {
         for i in 0 ..< CONFIG_BIG.NLEN {w[i] = 0}
-        for i in CONFIG_BIG.NLEN ..< CONFIG_BIG.DNLEN {w[i] = x.w[i-CONFIG_BIG.NLEN]}        
+        for i in CONFIG_BIG.NLEN ..< CONFIG_BIG.DNLEN {w[i] = x.w[i-CONFIG_BIG.NLEN]}
     }
 
     /* this+=x */
@@ -111,7 +112,7 @@
         {
             w[i]=x.w[i]-w[i]
         }
-    }    
+    }
     /* general shift left */
     mutating func shl(_ k: UInt)
     {
@@ -155,11 +156,11 @@
     static func fromBytes(_ b: [UInt8]) -> DBIG
     {
         var m=DBIG();
-    
+
         for i in 0 ..< b.count
         {
             m.shl(8)
-            m.w[0]+=Chunk(b[i])&0xff   
+            m.w[0]+=Chunk(b[i])&0xff
         }
         return m;
     }
@@ -184,16 +185,16 @@
         norm()
         var m=DBIG(c)
         var r=DBIG(0)
-    
+
         if DBIG.comp(self,m)<0 {return BIG(self)}
-    
+
         repeat
         {
             m.shl(1)
             k += 1
         }
         while (DBIG.comp(self,m)>=0);
-    
+
         while (k>0)
         {
             m.shr(1)
@@ -218,14 +219,14 @@
         var dr=DBIG(0)
 
         norm()
-    
+
         while (DBIG.comp(self,m)>=0)
         {
             e.fshl(1)
             m.shl(1)
             k += 1
         }
-    
+
         while (k>0)
         {
             m.shr(1)
@@ -245,14 +246,14 @@
         }
         return a
     }
-    
+
     /* split DBIG at position n, return higher half, keep lower half */
     mutating func split(_ n: UInt) -> BIG
     {
         var t=BIG(0)
         let m=n%CONFIG_BIG.BASEBITS
         var carry=w[CONFIG_BIG.DNLEN-1]<<Chunk(CONFIG_BIG.BASEBITS-m)
-    
+
         for i in (CONFIG_BIG.NLEN-1...CONFIG_BIG.DNLEN-2).reversed()
         {
             let nw=(w[i]>>Chunk(m))|carry;
@@ -266,7 +267,7 @@
     func nbits() -> Int
     {
         var k=(CONFIG_BIG.DNLEN-1)
-        var t=BIG(self)        
+        var t=BIG(self)
         t.norm()
         while k>=0 && t.w[k]==0 {k -= 1}
         if k<0 {return 0}
@@ -283,7 +284,7 @@
         var len=nbits()
         if len%4 == 0 {len/=4}
         else {len/=4; len += 1}
-        
+
         for i in (0...len-1).reversed()
         {
             var b = DBIG(self)
@@ -291,8 +292,8 @@
             let n=String(b.w[0]&15,radix:16,uppercase:false)
             s+=n
         }
-        
+
         return s
     }
-    
+
 }

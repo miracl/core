@@ -540,8 +540,9 @@ extern void HKDF_Expand(int hash,int hlen,octet *E,int olen,octet *K,octet *I);
 
 /**	@brief Key Derivation Function - generates key K from inputs Z and P
  *
-	IEEE-1363 KDF2 Key Derivation Function. Uses SHA256 internally.
-	@param h is the hash type
+	IEEE-1363 KDF2 Key Derivation Function. 
+	@param hash is the hash family (SHA2 or SHA3)
+    @param hlen the hash function output length (32,48 or 64)
 	@param Z input octet
 	@param P input key derivation parameters - can be NULL
 	@param len is output desired length of key
@@ -550,8 +551,9 @@ extern void HKDF_Expand(int hash,int hlen,octet *E,int olen,octet *K,octet *I);
 extern void KDF2(int hash, int hlen, octet *K, int len, octet *Z, octet *P);
 /**	@brief Password Based Key Derivation Function - generates key K from password, salt and repeat counter
  *
-	PBKDF2 Password Based Key Derivation Function. Uses SHA256 internally.
-	@param h is the hash type
+	PBKDF2 Password Based Key Derivation Function. 
+	@param hash is the hash family (SHA2 or SHA3)
+    @param hlen the hash function output length (32,48 or 64)
 	@param P input password
 	@param S input salt
 	@param rep Number of times to be iterated.

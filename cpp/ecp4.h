@@ -190,21 +190,6 @@ extern void ECP4_neg(ECP4 *P);
 extern void ECP4_reduce(ECP4 *P);
 
 
-/**	@brief Doubles an ECP4 instance P and returns slope
- *
-	@param P ECP4 instance, on exit =2*P
-	@param lam FP4 instance, slope of line
- */
-//extern int ECP4_sdbl(ECP4 *P,FP4 *lam);
-/**	@brief Adds ECP4 instance Q to ECP4 instance P and returns slope
- *
-	@param P ECP4 instance, on exit =P+Q
-	@param Q ECP4 instance to be added to P
-	@param lam FP4 instance, slope of line
- */
-//extern int ECP4_sadd(ECP4 *P,ECP4 *Q,FP4 *lam);
-
-
 /**	@brief Doubles an ECP4 instance P
  *
 	@param P ECP4 instance, on exit =2*P
@@ -276,7 +261,7 @@ extern void ECP4_hashit(ECP4 *Q, XXX::BIG  x);
 	@param P ECP4 instance of correct order
 	@param W OCTET byte array to be mapped
  */
-extern void ECP4_mapit(ECP4 *P, octet *w);
+extern void ECP4_mapit(ECP4 *P, octet *W);
 
 /**	@brief Get Group Generator from ROM
  *

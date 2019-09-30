@@ -66,9 +66,9 @@ int BLS_ZZZ_INIT();
 
 /** @brief Generate Key Pair
  *
-    @param RNG is a pointer to a cryptographically secure random number generator
+    @param IKM is an octet containing random Initial Keying Material
     @param S on output a private key
-    @param V on output a private key = S*G, where G is fixed generator
+    @param W on output a public key = S*G, where G is fixed generator
     @return BLS_OK
  */
 int BLS_ZZZ_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W);

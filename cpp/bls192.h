@@ -71,7 +71,7 @@ int BLS_INIT();
  *
     @param IKM contains truly random keying material
     @param S on output a private key
-    @param V on output a private key = S*G, where G is fixed generator
+    @param W on output a public key = S*G, where G is fixed generator
     @return BLS_OK
  */
 int BLS_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W);

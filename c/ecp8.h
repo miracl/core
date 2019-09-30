@@ -201,22 +201,6 @@ extern void ECP8_ZZZ_neg(ECP8_ZZZ *P);
  */
 extern void ECP8_ZZZ_reduce(ECP8_ZZZ *P);
 
-
-/**	@brief Doubles an ECP8 instance P and returns slope
- *
-	@param P ECP8 instance, on exit =2*P
-	@param lam FP8 instance, slope of line
- */
-//extern int ECP8_ZZZ_sdbl(ECP8_ZZZ *P,FP8_YYY *lam);
-/**	@brief Adds ECP8 instance Q to ECP8 instance P and returns slope
- *
-	@param P ECP8 instance, on exit =P+Q
-	@param Q ECP8 instance to be added to P
-	@param lam FP8 instance, slope of line
- */
-//extern int ECP8_ZZZ_sadd(ECP8_ZZZ *P,ECP8_ZZZ *Q,FP8_YYY *lam);
-
-
 /**	@brief Doubles an ECP8 instance P
  *
 	@param P ECP8 instance, on exit =2*P
@@ -287,7 +271,7 @@ extern void ECP8_ZZZ_hashit(ECP8_ZZZ *Q, BIG_XXX  x);
 	@param P ECP8 instance of correct order
 	@param W OCTET byte array to be mapped
  */
-extern void ECP8_ZZZ_mapit(ECP8_ZZZ *P, octet *w);
+extern void ECP8_ZZZ_mapit(ECP8_ZZZ *P, octet *W);
 
 /**	@brief Get Group Generator from ROM
  *
