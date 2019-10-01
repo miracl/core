@@ -1,0 +1,22 @@
+dist: xenial
+language: generic
+
+matrix:
+  include:
+    - language: c
+      env: DIR=c SCRIPT=config64.py
+    - language: cpp
+      env: DIR=cpp SCRIPT=config64.py
+    - language: java
+      env: DIR=java SCRIPT=config64.py
+    - language: python
+      python: 3.6
+      env: DIR=python SCRIPT=config.py
+    - language: rust
+      env: DIR=rust SCRIPT=config64.py
+    - language: swift
+      env: DIR=swift SCRIPT=config64.py
+
+script:
+  - cd $DIR
+  - python3 $SCRIPT test
