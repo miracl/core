@@ -17,6 +17,12 @@ if sys.platform.startswith("win"):
     deltext = "del "
     slashtext = "\\"
 
+testing=False
+if len(sys.argv)==2 :
+    if sys.argv[1]=="test":
+        testing=True
+if testing :
+    sys.stdin=open("test.txt","r")
 
 chosen = []
 cptr = 0
@@ -180,3 +186,6 @@ os.system(deltext + " bn462.py")
 os.system(deltext + " nist384.py")
 os.system(deltext + " nist521.py")
 os.system(deltext + " sec256k1.py")
+
+if testing:
+    os.system("python test.py < pins.txt")
