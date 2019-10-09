@@ -484,7 +484,7 @@ void ECP_ZZZ_hashit(ECP_ZZZ *P,BIG_XXX h)
     return;
 #endif
 #if CURVETYPE_ZZZ==WEIERSTRASS
-// SWU method. Assumes p=3 mod 4.
+// SWU method. 
     int sgn,ne;
     BIG_XXX a,x,y;
     FP_YYY X1,X2,X3,t,w,one,A,B,Y,j,NY;
@@ -498,7 +498,10 @@ void ECP_ZZZ_hashit(ECP_ZZZ *P,BIG_XXX h)
         //BIG_XXX_zero(a); BIG_XXX_inc(a,CURVE_A_ZZZ); BIG_XXX_norm(a); FP_YYY_nres(&A,a);
         FP_YYY_from_int(&A,CURVE_A_ZZZ);
         FP_YYY_sqr(&t,&t);
-        FP_YYY_neg(&t,&t);   // t2=-t^2
+        if (MOD8_YYY == 5)
+            FP_YYY_add(&t,&t,&t);
+        else
+            FP_YYY_neg(&t,&t);   // t2=-t^2
         FP_YYY_norm(&t);
         FP_YYY_add(&w,&t,&one);  
         FP_YYY_norm(&w);

@@ -1282,8 +1282,12 @@ func ECP_hashit(h *BIG) *ECP {
             sgn:=t.sign();
             if CURVE_A!=0 {
                 A:=NewFPint(CURVE_A)
-                t.sqr()
-                t.neg()
+				t.sqr();
+				if (MOD8 == 5) {
+					t.add(t)
+				} else {
+					t.neg()
+				}
                 t.norm()
                 w:=NewFPcopy(t); w.add(one); w.norm()
                 w.mul(t)

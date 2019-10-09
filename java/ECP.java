@@ -1106,7 +1106,11 @@ public final class ECP {
             {
                 FP A=new FP(ROM.CURVE_A);
                 t.sqr();
-                t.neg();
+                if (CONFIG_FIELD.MOD8 == 5) {
+                    t.add(t);
+                } else {
+                    t.neg();
+                }
                 t.norm();
                 FP w=new FP(t); w.add(one); w.norm();
                 w.mul(t);

@@ -1344,7 +1344,11 @@ impl ECP {
             {
                 let mut A=FP::new_int(rom::CURVE_A);
                 t.sqr();
-                t.neg();
+                if fp::MOD8 == 5 {
+                    t.dbl();
+                } else {
+                    t.neg();
+                }
                 t.norm();
                 let mut w=FP::new_copy(&t); w.add(&one); w.norm();
                 w.mul(&t);

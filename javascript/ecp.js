@@ -1438,7 +1438,11 @@ var ECP = function(ctx) {
             {
                 var A=new ctx.FP(ctx.ROM_CURVE.CURVE_A);
                 t.sqr();
-                t.neg();
+                if (ctx.FP.MOD8 == 5) {
+                    t.add(t);
+                } else {
+                    t.neg();
+                }
                 t.norm();
                 var w=new ctx.FP(t); w.add(one); w.norm();
                 w.mul(t);

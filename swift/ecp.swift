@@ -1116,7 +1116,11 @@ public struct ECP {
             {
                 var A=FP(ROM.CURVE_A)
                 t.sqr()
-                t.neg()
+                if CONFIG_FIELD.MOD8 == 5 {
+                    t.add(t)
+                } else {
+                    t.neg()
+                }
                 t.norm()
                 var w=FP(t); w.add(one); w.norm()
                 w.mul(t)
