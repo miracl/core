@@ -28,7 +28,7 @@ MIRACL Core features:-
 - Improved side-channel resistance
 - Deterministic hashing to curve points
 - Point compression in G2
-- Demonstrated support for low-powered IoT processor nodes (ARM, MIPS32)
+- Demonstrated support for low-powered IoT processor nodes (ARM, MIPS32, RISC-V)
 - Emerging-standards-compliant implementation of BLS signature
 - An updated manual
 
