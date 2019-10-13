@@ -24,9 +24,9 @@ MIRACL Core features:-
 - New curves (SM2, BN462, BLS48581)
 - Support for precomputation for pairings (see BLS API)
 - Performance and security improvements
-- New HMAC message authentication module
+- New HMAC message authentication module (KDFs, HMAC, HKDF_Extract/Expand)
 - Improved side-channel resistance
-- Deterministic hashing to curve points
+- Deterministic hashing to curve points (Elligator, SWU)
 - Point compression in G2
 - Demonstrated support for low-powered IoT processor nodes (ARM, MIPS32, RISC-V)
 - Emerging-standards-compliant implementation of BLS signature
