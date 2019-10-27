@@ -35,21 +35,6 @@
 
 package XXX
 
-//import "fmt"
-
-//const NOT_SPECIAL int = 0
-//const PSEUDO_MERSENNE int = 1
-//const MONTGOMERY_FRIENDLY int = 2
-//const GENERALISED_MERSENNE int = 3
-
-//const MODBITS uint = @NBT@ /* Number of bits in Modulus */
-//const MOD8 uint = @M8@  /* Modulus mod 8 */
-//const MODTYPE int = @MT@ //NOT_SPECIAL
-//const FEXCESS int32=((int32(1)<<@SH@)-1)
-
-//const OMASK Chunk = ((Chunk(-1)) << (MODBITS % BASEBITS))
-//const TBITS uint = MODBITS % BASEBITS // Number of active bits in top word
-//const TMASK Chunk = (Chunk(1) << TBITS) - 1
 
 type FP struct {
 	x   *BIG
@@ -239,6 +224,12 @@ func (F *FP) iszilch() bool {
 	return W.x.iszilch()
 }
 
+func (F *FP) isunity() bool {
+	W:=NewFPcopy(F)
+	W.reduce()
+	return W.redc().isunity()
+}
+
 /* copy from FP b */
 func (F *FP) copy(b *FP) {
 	F.x.copy(b.x)
@@ -259,7 +250,9 @@ func (F *FP) one() {
 
 /* return sign */
 func (F *FP) sign() int {
-	return F.redc().parity()
+	W:=NewFPcopy(F)
+	W.reduce()
+	return W.redc().parity()
 }
 
 /* normalise this */
@@ -378,15 +371,60 @@ func (F *FP) div2() {
 	w.add(p); w.norm()
 	w.fshr(1)
 	F.x.cmove(w,pr)
-/*
-	if F.x.parity() == 0 {
-		F.x.fshr(1)
-	} else {
-		p := NewBIGints(Modulus)
-		F.x.add(p)
-		F.x.norm()
-		F.x.fshr(1)
-	} */
+}
+
+
+/* return jacobi symbol (this/Modulus) */
+func (F *FP) jacobi() int {
+	w := F.redc()
+	p := NewBIGints(Modulus)
+	return w.Jacobi(p)
+}
+
+/* return TRUE if this==a */
+func (F *FP) Equals(a *FP) bool {
+	f := NewFPcopy(F)
+	s := NewFPcopy(a)
+
+	s.reduce()
+	f.reduce()
+	if Comp(s.x, f.x) == 0 {
+		return true
+	}
+	return false
+}
+
+func (F *FP) pow(e *BIG) *FP {
+	var tb []*FP
+	var w [1 + (NLEN*int(BASEBITS)+3)/4]int8
+	F.norm()
+	t := NewBIGcopy(e)
+	t.norm()
+	nb := 1 + (t.nbits()+3)/4
+
+	for i := 0; i < nb; i++ {
+		lsbs := t.lastbits(4)
+		t.dec(lsbs)
+		t.norm()
+		w[i] = int8(lsbs)
+		t.fshr(4)
+	}
+	tb = append(tb, NewFPint(1))
+	tb = append(tb, NewFPcopy(F))
+	for i := 2; i < 16; i++ {
+		tb = append(tb, NewFPcopy(tb[i-1]))
+		tb[i].mul(F)
+	}
+	r := NewFPcopy(tb[w[nb-1]])
+	for i := nb - 2; i >= 0; i-- {
+		r.sqr()
+		r.sqr()
+		r.sqr()
+		r.sqr()
+		r.mul(tb[w[i]])
+	}
+	r.reduce()
+	return r
 }
 
 // See https://eprint.iacr.org/2018/1038
@@ -418,18 +456,25 @@ func (F *FP) fpow() *FP {
 	xp[10].mul(xp[5])
 	var n, c int
 
+	e := int(PM1D2)
+
 	n = int(MODBITS)
 	if MODTYPE == GENERALISED_MERSENNE { // Goldilocks ONLY
 		n /= 2
 	}
-	if MOD8 == 5 {
-		n -= 3
-		c = (int(MConst) + 5) / 8
-	} else {
-		n -= 2
-		c = (int(MConst) + 3) / 4
 
-	}
+	n-=(e+1)
+	c=(int(MConst)+(1<<e)+1)/(1<<(e+1))
+	
+
+	//if PM1D2 == 2 {
+	//	n -= 3
+	//	c = (int(MConst) + 5) / 8
+	//} else {
+	//	n -= 2
+	//	c = (int(MConst) + 3) / 4
+
+	//}
 
 	bw := 0
 	w := 1
@@ -515,12 +560,44 @@ func (F *FP) fpow() *FP {
 	return r
 }
 
+// calculates r=x^(p-1-2^e)/2^{e+1) where 2^e|p-1
+func (F *FP) invsqrt() {
+	if (MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE) {
+		F.copy(F.fpow())
+		return
+	}
+	e:=uint(PM1D2)
+	m := NewBIGints(Modulus)
+	m.dec(1);
+	m.shr(e);
+	m.dec(1);
+	m.fshr(1);    
+	F.copy(F.pow(m));
+}
+
 /* this=1/this mod Modulus */
+func (F *FP) inverse() {
+        e:=int(PM1D2)
+        s:=NewFPcopy(F)
+        for i:=0;i<e-1;i++ {
+            s.sqr()
+            s.mul(F)
+        }
+        F.invsqrt()
+        for i:=0;i<=e;i++ {
+            F.sqr()
+		}
+        F.mul(s)
+        F.reduce()
+}
+
+
+/* this=1/this mod Modulus 
 func (F *FP) inverse() {
 
 	if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
 		y := F.fpow()
-		if MOD8 == 5 {
+		if PM1D2 == 2 {
 			t := NewFPcopy(F)
 			t.sqr()
 			F.mul(t)
@@ -536,58 +613,107 @@ func (F *FP) inverse() {
 		F.copy(F.pow(m2))
 	}
 
+} */
+
+
+/* test for Quadratic residue */
+func (F *FP) qr(h *FP) int {
+	r:=NewFPcopy(F)
+	e:=int(PM1D2)
+	r.invsqrt()
+	if h!=nil {
+		h.copy(r)
+	}
+	for i:=0;i<e;i++ { 
+		r.sqr()
+	}
+	s:=NewFPcopy(F)
+	for i:=0;i<e-1;i++ {
+		s.sqr()
+	}
+	r.mul(s)
+	if r.isunity() {
+		return 1
+	} else {
+		return 0
+	}
 }
-
-/* return TRUE if this==a */
-func (F *FP) Equals(a *FP) bool {
-	f := NewFPcopy(F)
-	s := NewFPcopy(a)
-
-	s.reduce()
-	f.reduce()
-	if Comp(s.x, f.x) == 0 {
-		return true
+/*
+func (F *FP) qr() int {
+	var r *FP
+	if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
+		r=F.fpow()
+		if PM1D2 == 2 {
+			r.sqr()
+			r.sqr()
+			r.mul(F)
+			r.mul(F)
+		} else {
+			r.sqr()
+			r.mul(F)
+		}
+		r.reduce()
+	} else {
+		m := NewBIGints(Modulus)
+		m.dec(1)
+		m.norm()
+		m.shr(1)
+		r=F.pow(m)
 	}
-	return false
-}
+	w:=r.redc()
+	if w.isunity() {
+		return 1
+	} else {
+		return 0
+	}
 
-func (F *FP) pow(e *BIG) *FP {
-	var tb []*FP
-	var w [1 + (NLEN*int(BASEBITS)+3)/4]int8
-	F.norm()
-	t := NewBIGcopy(e)
-	t.norm()
-	nb := 1 + (t.nbits()+3)/4
+} */
 
-	for i := 0; i < nb; i++ {
-		lsbs := t.lastbits(4)
-		t.dec(lsbs)
-		t.norm()
-		w[i] = int8(lsbs)
-		t.fshr(4)
+/* return sqrt(this) mod Modulus */
+func (F *FP) sqrt(h *FP) *FP {
+	e:=int(PM1D2)
+	g:=NewFPcopy(F)
+	if h==nil {
+		g.invsqrt()
+	} else {
+		g.copy(h)
 	}
-	tb = append(tb, NewFPint(1))
-	tb = append(tb, NewFPcopy(F))
-	for i := 2; i < 16; i++ {
-		tb = append(tb, NewFPcopy(tb[i-1]))
-		tb[i].mul(F)
+
+	m := NewBIGints(ROI)
+	v := NewFPbig(m)
+
+	t:=NewFPcopy(g)
+	t.sqr()
+	t.mul(F)
+
+	r:=NewFPcopy(F)
+	r.mul(g)
+	b:=NewFPcopy(t)
+       
+	for k:=e;k>1;k-- {
+		for j:=1;j<k-1;j++ {
+			b.sqr()
+		}
+		var u int
+		if b.isunity() {
+			u=0
+		} else {
+			u=1
+		}
+		g.copy(r); g.mul(v)
+		r.cmove(g,u)
+		v.sqr()
+		g.copy(t); g.mul(v)
+		t.cmove(g,u)
+		b.copy(t)
 	}
-	r := NewFPcopy(tb[w[nb-1]])
-	for i := nb - 2; i >= 0; i-- {
-		r.sqr()
-		r.sqr()
-		r.sqr()
-		r.sqr()
-		r.mul(tb[w[i]])
-	}
-	r.reduce()
 	return r
 }
 
-/* return sqrt(this) mod Modulus */
+/* return sqrt(this) mod Modulus 
 func (F *FP) sqrt() *FP {
 	F.reduce()
-	if MOD8 == 5 {
+	if PM1D2 == 2 {
 		var v *FP
 		i := NewFPcopy(F)
 		i.x.shl(1)
@@ -623,41 +749,6 @@ func (F *FP) sqrt() *FP {
 		}
 		return r
 	}
-}
+} */
 
-func (F *FP) qr() int {
-	var r *FP
-	if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
-		r=F.fpow()
-		if MOD8 == 5 {
-			r.sqr()
-			r.sqr()
-			r.mul(F)
-			r.mul(F)
-		} else {
-			r.sqr()
-			r.mul(F)
-		}
-		r.reduce()
-	} else {
-		m := NewBIGints(Modulus)
-		m.dec(1)
-		m.norm()
-		m.shr(1)
-		r=F.pow(m)
-	}
-	w:=r.redc()
-	if w.isunity() {
-		return 1
-	} else {
-		return 0
-	}
 
-}
-
-/* return jacobi symbol (this/Modulus) */
-func (F *FP) jacobi() int {
-	w := F.redc()
-	p := NewBIGints(Modulus)
-	return w.Jacobi(p)
-}

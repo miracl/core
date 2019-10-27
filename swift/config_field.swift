@@ -40,7 +40,7 @@ public struct CONFIG_FIELD{
     static public let POSITOWER=1
 
     static public let MODBITS:UInt = @NBT@
-    static let MOD8:UInt = @M8@
+    static let PM1D2:UInt = @M8@
     static public let MODTYPE =  @MT@   
     static public let QNRI =  @QI@   
     static public let TOWER = @TW@

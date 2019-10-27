@@ -153,15 +153,18 @@ public func TimeECDH_ed25519(_ rng: inout RAND)
 
 
     var s:ed25519.BIG
+    var W:ed25519.ECP
     let G=ed25519.ECP.generator();
 
     let r=ed25519.BIG(ed25519.ROM.CURVE_Order)
     s=ed25519.BIG.randtrunc(r,16*ed25519.CONFIG_CURVE.AESKEY,&rng)
-
-    var W=ed25519.ECP.hashit(s);
-    if W.is_infinity() {
-        print("HASHING FAILURE - P=O")
-        fail=true;
+    for _ in 0..<10 {
+        s=ed25519.BIG.randtrunc(r,16*ed25519.CONFIG_CURVE.AESKEY,&rng)
+        W=ed25519.ECP.hashit(s);
+        if W.is_infinity() {
+            print("HASHING FAILURE - P=O")
+            fail=true;
+        }
     }
 
     W=G.mul(r)
@@ -194,7 +197,7 @@ public func TimeECDH_nist256(_ rng: inout RAND)
 
     var fail=false;
 
-    print("\nTiming/Testing NIST256 ECC")
+    print("\nTiming/Testing nist256 ECC")
     if nist256.CONFIG_CURVE.CURVETYPE==nist256.CONFIG_CURVE.WEIERSTRASS {
         print("Weierstrass parameterisation")
     }
@@ -262,7 +265,7 @@ public func TimeECDH_goldilocks(_ rng: inout RAND)
 
     var fail=false;
 
-    print("\nTiming/Testing GOLDILOCKS ECC")
+    print("\nTiming/Testing goldilocks ECC")
     if goldilocks.CONFIG_CURVE.CURVETYPE==goldilocks.CONFIG_CURVE.WEIERSTRASS {
         print("Weierstrass parameterisation")
     }

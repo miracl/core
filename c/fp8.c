@@ -632,7 +632,7 @@ int FP8_YYY_qr(FP8_YYY *x)
 }
 
 /* sqrt(a+xb) = sqrt((a+sqrt(a*a-n*b*b))/2)+x.b/(2*sqrt((a+sqrt(a*a-n*b*b))/2)) */
-/* returns true if x is QR */
+
 void FP8_YYY_sqrt(FP8_YYY *r, FP8_YYY* x)
 {
     FP4_YYY a, b, s, t;

@@ -188,7 +188,7 @@ func lbits(n3 *BIG, n *BIG) int {
 }
 
 /* prepare for multi-pairing */
-func initmp() []*FP12 {
+func Initmp() []*FP12 {
 	var r []*FP12
 	for i := ATE_BITS - 1; i >= 0; i-- {
 		r = append(r, NewFP12int(1))
@@ -197,7 +197,7 @@ func initmp() []*FP12 {
 }
 
 /* basic Miller loop */
-func miller(r []*FP12) *FP12 {
+func Miller(r []*FP12) *FP12 {
 	res := NewFP12int(1)
 	for i := ATE_BITS - 1; i >= 1; i-- {
 		res.sqr()
@@ -305,7 +305,7 @@ func precomp(GV *ECP2) []*FP4 {
 }
 
 /* Accumulate another set of line functions for n-pairing, assuming precomputation on G2 */
-func another_pc(r []*FP12, T []*FP4, QV *ECP) {
+func Another_pc(r []*FP12, T []*FP4, QV *ECP) {
 	n := NewBIG()
 	n3 := NewBIG()
 	var lv, lv2 *FP12
@@ -350,7 +350,7 @@ func another_pc(r []*FP12, T []*FP4, QV *ECP) {
 }
 
 /* Accumulate another set of line functions for n-pairing */
-func another(r []*FP12, P1 *ECP2, Q1 *ECP) {
+func Another(r []*FP12, P1 *ECP2, Q1 *ECP) {
 	f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
 	n := NewBIG()
 	n3 := NewBIG()
@@ -843,7 +843,7 @@ func G1mul(P *ECP, e *BIG) *ECP {
 		nn := t.nbits()
 		if nn < np {
 			u[0].copy(t)
-			R.neg()
+			R.Neg()
 		}
 
 		np = u[1].nbits()
@@ -851,7 +851,7 @@ func G1mul(P *ECP, e *BIG) *ECP {
 		nn = t.nbits()
 		if nn < np {
 			u[1].copy(t)
-			Q.neg()
+			Q.Neg()
 		}
 		u[0].norm()
 		u[1].norm()

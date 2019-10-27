@@ -248,7 +248,7 @@ int ECP_ZZZ_set(ECP_ZZZ *P, BIG_XXX x)
     
     //FP_YYY_redc(b, &rhs);
     //if (BIG_XXX_jacobi(b, m) != 1)
-    if (!FP_YYY_qr(&rhs))
+    if (!FP_YYY_qr(&rhs,NULL))
     {
         ECP_ZZZ_inf(P);
         return 0;
@@ -320,7 +320,7 @@ int ECP_ZZZ_set(ECP_ZZZ *P, BIG_XXX x, BIG_XXX y)
 /* SU=136 */
 int ECP_ZZZ_setx(ECP_ZZZ *P, BIG_XXX x, int s)
 {
-    FP_YYY rhs;
+    FP_YYY rhs,hint;
     BIG_XXX t;//, m;
     //BIG_XXX_rcopy(m, Modulus_YYY);
 
@@ -330,14 +330,14 @@ int ECP_ZZZ_setx(ECP_ZZZ *P, BIG_XXX x, int s)
 
     //FP_YYY_redc(t, &rhs);
     //if (BIG_XXX_jacobi(t, m) != 1)
-    if (!FP_YYY_qr(&rhs))
+    if (!FP_YYY_qr(&rhs,&hint))
     {
         ECP_ZZZ_inf(P);
         return 0;
     }
 
     FP_YYY_nres(&(P->x), x);
-    FP_YYY_sqrt(&(P->y), &rhs);
+    FP_YYY_sqrt(&(P->y), &rhs,&hint);
 
     FP_YYY_redc(t, &(P->y));
 
@@ -384,9 +384,14 @@ void ECP_ZZZ_hashit(ECP_ZZZ *P,BIG_XXX h)
     FP_YYY_from_int(&A,CURVE_A_ZZZ);
     FP_YYY_nres(&t,h);
     FP_YYY_sqr(&t,&t);   // t^2
-    if (MOD8_YYY == 5)
-         FP_YYY_add(&t,&t,&t);  // 2t^2
-    else FP_YYY_neg(&t,&t);     // -t^2
+
+    if (PM1D2_YYY == 2)
+        FP_YYY_add(&t,&t,&t);  // 2t^2
+    if (PM1D2_YYY == 1)
+        FP_YYY_neg(&t,&t);      // -t^2
+    if (PM1D2_YYY > 2)
+        FP_YYY_imul(&t,&t,QNRI_YYY); // precomputed QNR
+
     FP_YYY_one(&one);
     FP_YYY_add(&t,&t,&one); FP_YYY_norm(&t);
     FP_YYY_inv(&t,&t);      // 1/(1+z.t^2)
@@ -398,7 +403,7 @@ void ECP_ZZZ_hashit(ECP_ZZZ *P,BIG_XXX h)
 
     ECP_ZZZ_rhs(&t,&X2);
 
-    FP_YYY_cmove(&X1,&X2,FP_YYY_qr(&t));
+    FP_YYY_cmove(&X1,&X2,FP_YYY_qr(&t,NULL));
     FP_YYY_redc(a,&X1);
 
     ECP_ZZZ_set(P,a);
@@ -430,9 +435,15 @@ void ECP_ZZZ_hashit(ECP_ZZZ *P,BIG_XXX h)
 
     FP_YYY_nres(&t,h); sgn=FP_YYY_sign(&t);
     FP_YYY_sqr(&t,&t);   // t^2
-    if (MOD8_YYY == 5)
+
+    if (PM1D2_YYY == 2)
          FP_YYY_add(&t,&t,&t);  // 2t^2
-    else FP_YYY_neg(&t,&t);     // -t^2
+    if (PM1D2_YYY == 1)
+        FP_YYY_neg(&t,&t);      // -t^2
+    if (PM1D2_YYY > 2)
+        FP_YYY_imul(&t,&t,QNRI_YYY);  // precomputed QNR
+
+
     FP_YYY_add(&t,&t,&one); FP_YYY_norm(&t);
     FP_YYY_inv(&t,&t);      // 1/(1+z.t^2)
 
@@ -457,11 +468,11 @@ void ECP_ZZZ_hashit(ECP_ZZZ *P,BIG_XXX h)
     FP_YYY_add(&w2,&w2,&t);   // w2=X1^3+AX1^2+BX1
     FP_YYY_norm(&w2);
 
-    qres=FP_YYY_qr(&w2);
+    qres=FP_YYY_qr(&w2,NULL);
     FP_YYY_cmove(&X1,&X2,qres);
     FP_YYY_cmove(&w1,&w2,qres);
 
-    FP_YYY_sqrt(&Y,&w1);
+    FP_YYY_sqrt(&Y,&w1,NULL);
     FP_YYY_copy(&t,&X1); FP_YYY_add(&t,&t,&t); FP_YYY_add(&t,&t,&t); FP_YYY_norm(&t); // t=4*x
     
     FP_YYY_sub(&w1,&t,&KB); FP_YYY_norm(&w1);  // w1 = 4x+(a-b)
@@ -498,7 +509,7 @@ void ECP_ZZZ_hashit(ECP_ZZZ *P,BIG_XXX h)
         //BIG_XXX_zero(a); BIG_XXX_inc(a,CURVE_A_ZZZ); BIG_XXX_norm(a); FP_YYY_nres(&A,a);
         FP_YYY_from_int(&A,CURVE_A_ZZZ);
         FP_YYY_sqr(&t,&t);
-        if (MOD8_YYY == 5)
+        if (PM1D2_YYY == 2)
             FP_YYY_add(&t,&t,&t);
         else
             FP_YYY_neg(&t,&t);   // t2=-t^2
@@ -515,15 +526,15 @@ void ECP_ZZZ_hashit(ECP_ZZZ *P,BIG_XXX h)
         FP_YYY_mul(&X2,&w,&A);   // -B(w+1)/Aw
         FP_YYY_mul(&X3,&t,&X2);
         ECP_ZZZ_rhs(&w,&X3);
-        FP_YYY_cmove(&X2,&X3,FP_YYY_qr(&w));
+        FP_YYY_cmove(&X2,&X3,FP_YYY_qr(&w,NULL));
         ECP_ZZZ_rhs(&w,&X2);
-        FP_YYY_sqrt(&Y,&w);
+        FP_YYY_sqrt(&Y,&w,NULL);
         FP_YYY_redc(x,&X2);
 
     } else {
         //BIG_XXX_zero(a); BIG_XXX_inc(a,-3); BIG_XXX_norm(a); FP_YYY_nres(&A,a);
         FP_YYY_from_int(&A,-3);
-        FP_YYY_sqrt(&w,&A);      // w=sqrt(-3)
+        FP_YYY_sqrt(&w,&A,NULL);      // w=sqrt(-3)
         FP_YYY_sub(&j,&w,&one);  FP_YYY_norm(&j);
         FP_YYY_div2(&j,&j);        // j=(w-1)/2
         FP_YYY_mul(&w,&w,&t);     // w=s.t
@@ -542,11 +553,11 @@ void ECP_ZZZ_hashit(ECP_ZZZ *P,BIG_XXX h)
         FP_YYY_add(&X3,&w,&one); FP_YYY_norm(&X3);
     
         ECP_ZZZ_rhs(&w,&X2);
-        FP_YYY_cmove(&X1,&X2,FP_YYY_qr(&w));
+        FP_YYY_cmove(&X1,&X2,FP_YYY_qr(&w,NULL));
         ECP_ZZZ_rhs(&w,&X3);
-        FP_YYY_cmove(&X1,&X3,FP_YYY_qr(&w));
+        FP_YYY_cmove(&X1,&X3,FP_YYY_qr(&w,NULL));
         ECP_ZZZ_rhs(&w,&X1);
-        FP_YYY_sqrt(&Y,&w);
+        FP_YYY_sqrt(&Y,&w,NULL);
         FP_YYY_redc(x,&X1);
     }
     ne=FP_YYY_sign(&Y)^sgn;

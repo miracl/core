@@ -44,7 +44,7 @@ const POSITOWER int = 1
 
 // Modulus details
 const MODBITS uint = @NBT@ /* Number of bits in Modulus */
-const MOD8 uint = @M8@  /* Modulus mod 8 */
+const PM1D2 uint = @M8@  /* Modulus mod 8 */
 const MODTYPE int = @MT@ //NOT_SPECIAL
 const QNRI int = @QI@    // Fp2 QNR
 const TOWER int = @TW@   // Tower type

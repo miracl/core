@@ -39,7 +39,7 @@
 // FP stuff
 
 #define MBITS_YYY @NBT@
-#define MOD8_YYY @M8@
+#define PM1D2_YYY @M8@
 #define MODTYPE_YYY @MT@
 #define MAXXES_YYY @SH@
 #define QNRI_YYY @QI@

@@ -1055,7 +1055,7 @@ var ECP8 = function(ctx) {
 		if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) B.times_i();
         B.norm();
         sgn=t.sign();
-        var w=s.sqrt();
+        var w=s.sqrt(null);
         var j=new ctx.FP(w); j.sub(one); j.norm(); j.div2();
 
         w.mul(t);

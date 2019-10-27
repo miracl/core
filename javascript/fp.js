@@ -78,7 +78,7 @@ var FP = function(ctx) {
 	FP.POSITOWER = 1;
 
     FP.MODBITS = ctx.config["@NBT"];
-    FP.MOD8 = ctx.config["@M8"];
+    FP.PM1D2 = ctx.config["@M8"];
     FP.MODTYPE = ctx.config["@MT"];
 	FP.QNRI = ctx.config["@QI"];
 	FP.TOWER = ctx.config["@TW"];
@@ -181,6 +181,19 @@ var FP = function(ctx) {
             return c.f.iszilch();
         },
 
+        /* test this=1 */
+        isunity: function() {
+			var c=new FP(0); c.copy(this);
+            c.reduce();
+            return c.redc().isunity();
+        },
+
+        sign: function () {
+			var c=new FP(0); c.copy(this);
+            c.reduce();
+            return c.redc().parity();
+        },
+
         /* reduce this mod Modulus */
         reduce: function() {
             var q,carry,sr,sb,m = new ctx.BIG(0);
@@ -218,10 +231,6 @@ var FP = function(ctx) {
         one: function() {
             this.f.one();
             this.nres();
-        },
-
-        sign: function () {
-            return this.redc().parity();
         },
 
         /* normalise this */
@@ -353,26 +362,72 @@ var FP = function(ctx) {
             w.add(p); w.norm();
             w.fshr(1);
             this.f.cmove(w,pr);
- 
-/*
-            if (this.f.parity() === 0) {
-                this.f.fshr(1);
-            } else {
-                p = new ctx.BIG(0);
-                p.rcopy(ctx.ROM_FIELD.Modulus);
-
-                this.f.add(p);
-                this.f.norm();
-                this.f.fshr(1);
-            } */
-
             return this;
+        },
+
+        /* return jacobi symbol (this/Modulus) */
+        jacobi: function() {
+            var p = new ctx.BIG(0),
+                w = this.redc();
+
+            p.rcopy(ctx.ROM_FIELD.Modulus);
+
+            return w.jacobi(p);
+        },
+
+        /* return TRUE if this==a */
+        equals: function(a) {
+			var ft=new FP(0); ft.copy(this);
+			var sd=new FP(0); sd.copy(a);
+            ft.reduce();
+            sd.reduce();
+
+            if (ctx.BIG.comp(ft.f, sd.f) === 0) {
+                return true;
+            }
+
+            return false;
+        },
+
+        /* return this^e mod Modulus */
+        pow: function(e) {
+            var i,w=[],
+                tb=[],
+                t=new ctx.BIG(e),
+                nb, lsbs, r;
+			this.norm();
+            t.norm();
+            nb= 1 + Math.floor((t.nbits() + 3) / 4);
+
+            for (i=0;i<nb;i++) {
+                lsbs=t.lastbits(4);
+                t.dec(lsbs);
+                t.norm();
+                w[i]=lsbs;
+                t.fshr(4);
+            }
+            tb[0]=new FP(1);
+            tb[1]=new FP(this);
+            for (i=2;i<16;i++) {
+                tb[i]=new FP(tb[i-1]);
+                tb[i].mul(this);
+            }
+            r=new FP(tb[w[nb-1]]);
+            for (i=nb-2;i>=0;i--) {
+                r.sqr();
+                r.sqr();
+                r.sqr();
+                r.sqr();
+                r.mul(tb[w[i]]);
+            }
+            r.reduce();
+            return r;
         },
 
 // return this^(p-3)/4 or this^(p-5)/8
 // See https://eprint.iacr.org/2018/1038
 		fpow: function() {
-			var i,j,k,bw,w,c,nw,lo,m,n;
+			var i,j,k,bw,w,c,nw,lo,m,n,e;
 			var xp=[];
 			var ac=[1,2,3,6,12,15,30,60,120,240,255];
 // phase 1
@@ -393,14 +448,11 @@ var FP = function(ctx) {
 			n=FP.MODBITS;
 			if (FP.MODTYPE == FP.GENERALISED_MERSENNE)   // Goldilocks ONLY
 				n/=2;
-			if (FP.MOD8==5)
-			{
-				n-=3;
-				c=(ctx.ROM_FIELD.MConst+5)/8;
-			} else {
-				n-=2;
-				c=(ctx.ROM_FIELD.MConst+3)/4;
-			}
+
+            e=FP.PM1D2;
+
+            n-=(e+1);
+            c=(ctx.ROM_FIELD.MConst+(1<<e)+1)/(1<<(e+1));
 
 			bw=0; w=1; while (w<c) {w*=2; bw+=1;}
 			k=w-c;
@@ -472,13 +524,49 @@ var FP = function(ctx) {
 			return r;
 		},
 
-        /* this=1/this mod Modulus */
+// calculates r=x^(p-1-2^e)/2^{e+1) where 2^e|p-1
+        invsqrt: function() {
+            if (FP.MODTYPE == FP.PSEUDO_MERSENNE || FP.MODTYPE == FP.GENERALISED_MERSENNE) 
+            {
+                this.copy(this.fpow());
+                return;
+            }
+            var e=FP.PM1D2;
+            var m=new ctx.BIG(0);
+			m.rcopy(ctx.ROM_FIELD.Modulus);
+            m.dec(1);
+            m.shr(e);
+            m.dec(1);
+            m.fshr(1);
+        
+            this.copy(this.pow(m));
+        },
+
+
+    /* this=1/this mod Modulus */
+        inverse: function() {
+            var e=FP.PM1D2;
+            var s=new FP(this);
+            for (var i=0;i<e-1;i++)
+            {
+                s.sqr();
+                s.mul(this);
+            }
+            this.invsqrt();
+            for (var i=0;i<=e;i++)
+                this.sqr();
+            this.mul(s);
+            this.reduce();
+            return this;
+        }, 
+
+        /* this=1/this mod Modulus 
         inverse: function() {
 
 			if (FP.MODTYPE == FP.PSEUDO_MERSENNE || FP.MODTYPE == FP.GENERALISED_MERSENNE)
 			{
 				var y=this.fpow();
-				if (FP.MOD8==5)
+				if (FP.PM1D2==2)
 				{
 					var t=new FP(this);
 					t.sqr();
@@ -497,62 +585,30 @@ var FP = function(ctx) {
 				this.copy(this.pow(m2));
 				return this;
 			}
+        }, */
+
+
+    /* test for Quadratic residue */
+        qr: function (h)  {
+            var r=new FP(this);
+            var e=FP.PM1D2;
+            r.invsqrt();
+            if (h!=null)
+                h.copy(r);
+            for (var i=0;i<e;i++ )
+                r.sqr();
+            var s=new FP(this);
+            for (var i=0;i<e-1;i++ )
+                s.sqr();
+            r.mul(s);
+            return r.isunity()?1:0;
         },
-
-        /* return TRUE if this==a */
-        equals: function(a) {
-			var ft=new FP(0); ft.copy(this);
-			var sd=new FP(0); sd.copy(a);
-            ft.reduce();
-            sd.reduce();
-
-            if (ctx.BIG.comp(ft.f, sd.f) === 0) {
-                return true;
-            }
-
-            return false;
-        },
-
-        /* return this^e mod Modulus */
-        pow: function(e) {
-            var i,w=[],
-                tb=[],
-                t=new ctx.BIG(e),
-                nb, lsbs, r;
-			this.norm();
-            t.norm();
-            nb= 1 + Math.floor((t.nbits() + 3) / 4);
-
-            for (i=0;i<nb;i++) {
-                lsbs=t.lastbits(4);
-                t.dec(lsbs);
-                t.norm();
-                w[i]=lsbs;
-                t.fshr(4);
-            }
-            tb[0]=new FP(1);
-            tb[1]=new FP(this);
-            for (i=2;i<16;i++) {
-                tb[i]=new FP(tb[i-1]);
-                tb[i].mul(this);
-            }
-            r=new FP(tb[w[nb-1]]);
-            for (i=nb-2;i>=0;i--) {
-                r.sqr();
-                r.sqr();
-                r.sqr();
-                r.sqr();
-                r.mul(tb[w[i]]);
-            }
-            r.reduce();
-            return r;
-        },
-
+/*
         qr: function () {
             var r;
             if (FP.MODTYPE == FP.PSEUDO_MERSENNE || FP.MODTYPE == FP.GENERALISED_MERSENNE) {
                 r=this.fpow();
-                if (FP.MOD8 == 5) {
+                if (FP.PM1D2 == 2) {
                     r.sqr();
                     r.sqr();
                     r.mul(this);
@@ -574,23 +630,53 @@ var FP = function(ctx) {
             if (w.isunity()) return 1;
             else return 0;
         },
+*/
 
-        /* return jacobi symbol (this/Modulus) */
-        jacobi: function() {
-            var p = new ctx.BIG(0),
-                w = this.redc();
+    /* return sqrt(this) mod Modulus */
+        sqrt: function(h) {
+            var e=FP.PM1D2;
+            var g=new FP(this);
+            if (h==null)
+                g.invsqrt();
+            else
+                g.copy(h);
 
-            p.rcopy(ctx.ROM_FIELD.Modulus);
+            var m=new ctx.BIG(0);
+			m.rcopy(ctx.ROM_FIELD.ROI);
+            
+            var v=new FP(m);
 
-            return w.jacobi(p);
-        },
+            var t=new FP(g);
+            t.sqr();
+            t.mul(this);
 
-        /* return sqrt(this) mod Modulus */
+            var r=new FP(this);
+            r.mul(g);
+            var b=new FP(t);
+       
+            for (var k=e;k>1;k--)
+            {
+                for (var j=1;j<k-1;j++)
+                    b.sqr();
+                var u=b.isunity()? 0:1
+                g.copy(r); g.mul(v);
+                r.cmove(g,u);
+                v.sqr();
+                g.copy(t); g.mul(v);
+                t.cmove(g,u);
+                b.copy(t);
+            }
+
+            return r;
+        }
+
+
+        /* return sqrt(this) mod Modulus 
         sqrt: function() {
             var i, v, r;
 
             this.reduce();
-            if (FP.MOD8 == 5) {
+            if (FP.PM1D2 == 2) {
                 i = new FP(0);
                 i.copy(this);
                 i.f.shl(1);
@@ -628,7 +714,7 @@ var FP = function(ctx) {
 					return this.pow(b);
 				}
             }
-        }
+        }*/
 
     };
 

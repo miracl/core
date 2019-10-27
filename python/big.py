@@ -126,7 +126,7 @@ def moddiv(a, b, p):
         return modmul(a, i, p)
     return 0
 
-# modular square root. Fails spectacularly if p!=3 mod 4
+# modular square root. Fails spectacularly if p=1 mod 8
 
 
 def sqrtmodp(a, p):

@@ -42,7 +42,7 @@ public class CONFIG_FIELD {
     public static final int POSITOWER = 1;
 
     public static final int MODBITS = @NBT@; /* Number of bits in Modulus */
-    public static final int MOD8 = @M8@; /* Modulus mod 8 */
+    public static final int PM1D2 = @M8@; /* Modulus mod 8 */
     public static final int MODTYPE = @MT@;
     public static final int QNRI = @QI@;
     public static final int TOWER = @TW@;

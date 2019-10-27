@@ -86,17 +86,19 @@ func ED_25519(rng *core.RAND) {
 	fmt.Printf("%d bit build\n", ED25519.CHUNK)
 
 	var es *ED25519.BIG
-
+	var WP *ED25519.ECP
 	EG := ED25519.ECP_generator()
 	er := ED25519.NewBIGints(ED25519.CURVE_Order)
-	es = ED25519.Randtrunc(er, 16*ED25519.AESKEY, rng)
 
-	WP:=ED25519.ECP_hashit(es)
-	WP.Cfp();
-    if (WP.Is_infinity()) {
-        fmt.Printf("HASHING FAILURE - P=O\n");
-		return
-    }
+	for i:=0;i<10;i++ {
+		es = ED25519.Randtrunc(er, 16*ED25519.AESKEY, rng)
+		WP = ED25519.ECP_hashit(es)
+		WP.Cfp();
+		if (WP.Is_infinity()) {
+			fmt.Printf("HASHING FAILURE - P=O\n");
+			return
+		}
+	}
 
 	WP = EG.Mul(er)
 	if !WP.Is_infinity() {
@@ -148,17 +150,20 @@ func NIST_256(rng *core.RAND) {
 	fmt.Printf("%d bit build\n", NIST256.CHUNK)
 
 	var es *NIST256.BIG
+	var WP *NIST256.ECP
 
 	EG := NIST256.ECP_generator()
 	er := NIST256.NewBIGints(NIST256.CURVE_Order)
-	es = NIST256.Randtrunc(er, 16*NIST256.AESKEY, rng)
-
-	WP:=NIST256.ECP_hashit(es)
-	WP.Cfp();
-    if (WP.Is_infinity()) {
-        fmt.Printf("HASHING FAILURE - P=O\n");
-		return
-    }
+	
+	for i:=0;i<10;i++ {
+		es = NIST256.Randtrunc(er, 16*NIST256.AESKEY, rng)
+		WP=NIST256.ECP_hashit(es)
+		WP.Cfp();
+		if (WP.Is_infinity()) {
+			fmt.Printf("HASHING FAILURE - P=O\n");
+			return
+		}
+	}
 
 	WP = EG.Mul(er)
 	if !WP.Is_infinity() {
@@ -210,17 +215,21 @@ func GOLDI_LOCKS(rng *core.RAND) {
 	fmt.Printf("%d bit build\n", GOLDILOCKS.CHUNK)
 
 	var es *GOLDILOCKS.BIG
+	var WP *GOLDILOCKS.ECP
 
 	EG := GOLDILOCKS.ECP_generator()
 	er := GOLDILOCKS.NewBIGints(GOLDILOCKS.CURVE_Order)
-	es = GOLDILOCKS.Randtrunc(er, 16*GOLDILOCKS.AESKEY, rng)
+	
+	for i:=0;i<10;i++ {
+		es = GOLDILOCKS.Randtrunc(er, 16*GOLDILOCKS.AESKEY, rng)
+		WP=GOLDILOCKS.ECP_hashit(es)
+		WP.Cfp();
 
-	WP:=GOLDILOCKS.ECP_hashit(es)
-	WP.Cfp();
-    if (WP.Is_infinity()) {
-        fmt.Printf("HASHING FAILURE - P=O\n");
-		return
-    }
+		if (WP.Is_infinity()) {
+			fmt.Printf("HASHING FAILURE - P=O\n");
+			return
+		}
+	}
 
 	WP = EG.Mul(er)
 	if !WP.Is_infinity() {

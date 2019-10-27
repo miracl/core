@@ -438,12 +438,10 @@ int YYY::FP2_qr(FP2 *x)
     FP2_conj(&c,x);
     FP2_mul(&c,&c,x);
 
-    return FP_qr(&(c.a));
+    return FP_qr(&(c.a),NULL);
 }
 
 /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-/* returns true if u is QR */
-/* Note that if p=3 mod 4, then -1 is a QNR */
 
 void YYY::FP2_sqrt(FP2 *w, FP2 *u)
 {
@@ -455,7 +453,7 @@ void YYY::FP2_sqrt(FP2 *w, FP2 *u)
     FP_sqr(&w2, &(w->a));
     FP_add(&w1, &w1, &w2); FP_norm(&w1);
 
-    FP_sqrt(&w1, &w1);
+    FP_sqrt(&w1, &w1, NULL);
 
     FP_add(&w2, &(w->a), &w1);
     FP_norm(&w2);
@@ -465,9 +463,9 @@ void YYY::FP2_sqrt(FP2 *w, FP2 *u)
     FP_norm(&w3);
     FP_div2(&w3, &w3);    
 
-    FP_cmove(&w2,&w3,FP_qr(&w3)); // one or the other will be a QR
+    FP_cmove(&w2,&w3,FP_qr(&w3,NULL)); // one or the other will be a QR
 
-    FP_sqrt(&w2, &w2);
+    FP_sqrt(&w2, &w2, NULL);
     FP_copy(&(w->a), &w2);
     FP_add(&w2, &w2, &w2);
     FP_norm(&w2);

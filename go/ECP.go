@@ -63,7 +63,7 @@ func NewECPbigs(ix *BIG, iy *BIG) *ECP {
 	rhs := RHS(E.x)
 
 	if CURVETYPE == MONTGOMERY {
-		if rhs.qr() != 1 {
+		if rhs.qr(nil) != 1 {
 			E.inf()
 		}
 	} else {
@@ -84,8 +84,9 @@ func NewECPbigint(ix *BIG, s int) *ECP {
 	E.x.norm()
 	rhs := RHS(E.x)
 	E.z = NewFPint(1)
-	if rhs.qr() == 1 {
-		ny := rhs.sqrt()
+	hint := NewFP()
+	if rhs.qr(hint) == 1 {
+		ny := rhs.sqrt(hint)
 		if ny.redc().parity() != s {
 			ny.neg()
 		}
@@ -104,9 +105,10 @@ func NewECPbig(ix *BIG) *ECP {
 	E.x.norm()
 	rhs := RHS(E.x)
 	E.z = NewFPint(1)
-	if rhs.qr() == 1 {
+	hint := NewFP()
+	if rhs.qr(hint) == 1 {
 		if CURVETYPE != MONTGOMERY {
-			E.y.copy(rhs.sqrt())
+			E.y.copy(rhs.sqrt(hint))
 		}
 	} else {
 		E.inf()
@@ -165,7 +167,7 @@ func (E *ECP) Copy(P *ECP) {
 }
 
 /* this=-this */
-func (E *ECP) neg() {
+func (E *ECP) Neg() {
 	if CURVETYPE == WEIERSTRASS {
 		E.y.neg()
 		E.y.norm()
@@ -195,7 +197,7 @@ func (E *ECP) selector(W []*ECP, b int32) {
 	E.cmove(W[7], teq(babs, 7))
 
 	MP.Copy(E)
-	MP.neg()
+	MP.Neg()
 	E.cmove(MP, int(m&1))
 }
 
@@ -928,7 +930,7 @@ func (E *ECP) dadd(Q *ECP, W *ECP) {
 func (E *ECP) Sub(Q *ECP) {
 	NQ := NewECP()
 	NQ.Copy(Q)
-	NQ.neg()
+	NQ.Neg()
 	E.Add(NQ)
 }
 
@@ -1176,11 +1178,17 @@ func ECP_hashit(h *BIG) *ECP {
 			t:=NewFPbig(h)
 
             t.sqr();
-            if (MOD8 == 5) {
+
+            if PM1D2 == 2 {
                 t.add(t)
-            } else {
-                t.neg()
+            } 
+            if PM1D2 == 1 {
+                t.neg();
             }
+            if PM1D2 > 2 {
+                t.imul(QNRI);
+            }
+
             t.add(one)
             t.norm()
             t.inverse()
@@ -1190,7 +1198,7 @@ func ECP_hashit(h *BIG) *ECP {
             X2.add(A); X2.norm()
             X2.neg()
             rhs:=RHS(X2)
-            X1.cmove(X2,rhs.qr())
+            X1.cmove(X2,rhs.qr(nil))
 
             a:=X1.redc()
             P.Copy(NewECPbig(a))
@@ -1218,11 +1226,17 @@ func ECP_hashit(h *BIG) *ECP {
             B.sqr()
             
             t.sqr()
-            if (MOD8 == 5) {
+
+            if PM1D2 == 2 {
                 t.add(t)
-            } else {
-                t.neg()
+            } 
+            if PM1D2 == 1 {
+                t.neg();
             }
+            if PM1D2 > 2 {
+                t.imul(QNRI);
+            }
+
             t.add(one); t.norm()
             t.inverse()
 			X1:=NewFPcopy(t); X1.mul(A)
@@ -1246,11 +1260,11 @@ func ECP_hashit(h *BIG) *ECP {
             w2.add(t)
             w2.norm()
 
-            qres:=w2.qr()
+            qres:=w2.qr(nil)
             X1.cmove(X2,qres)
             w1.cmove(w2,qres)
 
-            Y:=w1.sqrt()
+            Y:=w1.sqrt(nil)
             t.copy(X1); t.add(t); t.add(t); t.norm()
 
             w1.copy(t); w1.sub(KB); w1.norm()
@@ -1283,7 +1297,7 @@ func ECP_hashit(h *BIG) *ECP {
             if CURVE_A!=0 {
                 A:=NewFPint(CURVE_A)
 				t.sqr();
-				if (MOD8 == 5) {
+				if (PM1D2 == 2) {
 					t.add(t)
 				} else {
 					t.neg()
@@ -1299,13 +1313,13 @@ func ECP_hashit(h *BIG) *ECP {
                 X2:=NewFPcopy(w); X2.mul(A)
                 X3:=NewFPcopy(t); X3.mul(X2)
                 rhs:=RHS(X3)
-                X2.cmove(X3,rhs.qr())
+                X2.cmove(X3,rhs.qr(nil))
                 rhs.copy(RHS(X2))
-                Y.copy(rhs.sqrt())
+                Y.copy(rhs.sqrt(nil))
                 x.copy(X2.redc())
             } else {
                 A:=NewFPint(-3)
-                w:=A.sqrt()
+                w:=A.sqrt(nil)
                 j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
                 w.mul(t)
                 B.add(one)
@@ -1318,11 +1332,11 @@ func ECP_hashit(h *BIG) *ECP {
                 w.sqr(); w.inverse()
                 X3:=NewFPcopy(w); X3.add(one); X3.norm()
                 rhs:=RHS(X2)
-                X1.cmove(X2,rhs.qr())
+                X1.cmove(X2,rhs.qr(nil))
                 rhs.copy(RHS(X3))
-                X1.cmove(X3,rhs.qr())
+                X1.cmove(X3,rhs.qr(nil))
                 rhs.copy(RHS(X1))
-                Y.copy(rhs.sqrt())
+                Y.copy(rhs.sqrt(nil))
                 x.copy(X1.redc())
             }
             ne:=Y.sign()^sgn

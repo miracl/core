@@ -767,7 +767,7 @@ impl ECP2 {
         }
         B.norm();
         let sgn=t.sign();
-        let mut w=s.sqrt();
+        let mut w=s.sqrt(None);
         let mut j=FP::new_copy(&w); j.sub(&one); j.norm(); j.div2();
 
         w.mul(&t);

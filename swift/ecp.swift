@@ -105,7 +105,7 @@ public struct ECP {
         z.copy(P.z)
     }
     /* self=-self */
-    mutating func neg() {
+    public mutating func neg() {
         if (CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.WEIERSTRASS)
         {
             y.neg(); y.norm();
@@ -222,13 +222,14 @@ public struct ECP {
         x=FP(ix)
         y=FP(iy)
         z=FP(1)
+        var pNIL:FP?=nil
 
         x.norm()
         let rhs=ECP.RHS(x);
     
         if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.MONTGOMERY
         {
-            if rhs.qr() != 1 {inf()}
+            if rhs.qr(&pNIL) != 1 {inf()}
         }
         else
         {
@@ -246,10 +247,10 @@ public struct ECP {
         var rhs=ECP.RHS(x)
         y=FP()
         z=FP(1)
-
-        if rhs.qr()==1
+        var hint:FP?=FP()
+        if rhs.qr(&hint)==1
         {
-            var ny=rhs.sqrt()
+            var ny=rhs.sqrt(hint)
             if (ny.redc().parity() != s) {ny.neg()}
             y.copy(ny)
         }
@@ -264,9 +265,10 @@ public struct ECP {
         var rhs=ECP.RHS(x)
         y=FP()
         z=FP(1)
-        if rhs.qr()==1
+        var hint:FP?=FP()
+        if rhs.qr(&hint)==1
         {
-            if CONFIG_CURVE.CURVETYPE != CONFIG_CURVE.MONTGOMERY {y.copy(rhs.sqrt())}
+            if CONFIG_CURVE.CURVETYPE != CONFIG_CURVE.MONTGOMERY {y.copy(rhs.sqrt(hint))}
         }
         else {inf()}
     }
@@ -989,7 +991,7 @@ public struct ECP {
 
     static public func hashit(_ h: BIG) -> ECP {
         var P=ECP()    
-        
+        var pNIL:FP?=nil        
         if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.MONTGOMERY { 
 // Elligator 2
             var X1=FP()
@@ -998,11 +1000,17 @@ public struct ECP {
             let one=FP(1)
             let A=FP(ROM.CURVE_A)
             t.sqr()
-            if CONFIG_FIELD.MOD8 == 5 {
+
+            if CONFIG_FIELD.PM1D2 == 2 {
                 t.add(t)
-            } else {
+            } 
+            if CONFIG_FIELD.PM1D2 == 1 {
                 t.neg()
             }
+            if CONFIG_FIELD.PM1D2 > 2 {
+                t.imul(CONFIG_FIELD.QNRI)
+            }
+
             t.add(one)
             t.norm()
             t.inverse()
@@ -1012,7 +1020,7 @@ public struct ECP {
             X2.add(A); X2.norm()
             X2.neg()
             let rhs=ECP.RHS(X2)
-            X1.cmove(X2,rhs.qr())
+            X1.cmove(X2,rhs.qr(&pNIL))
 
             let a=X1.redc()
             P.copy(ECP(a))
@@ -1046,11 +1054,17 @@ public struct ECP {
             B.sqr()
             
             t.sqr()
-            if CONFIG_FIELD.MOD8 == 5 {
+
+            if CONFIG_FIELD.PM1D2 == 2 {
                 t.add(t)
-            } else {
+            } 
+            if CONFIG_FIELD.PM1D2 == 1 {
                 t.neg()
             }
+            if CONFIG_FIELD.PM1D2 > 2 {
+                t.imul(CONFIG_FIELD.QNRI)
+            }
+
             t.add(one); t.norm()
             t.inverse()
             X1.copy(t); X1.mul(A)
@@ -1074,11 +1088,11 @@ public struct ECP {
             w2.add(t)
             w2.norm()
 
-            let qres=w2.qr()
+            let qres=w2.qr(&pNIL)
             X1.cmove(X2,qres)
             w1.cmove(w2,qres)
 
-            var Y=w1.sqrt()
+            var Y=w1.sqrt(pNIL)
             t.copy(X1); t.add(t); t.add(t); t.norm()
 
             w1.copy(t); w1.sub(KB); w1.norm()
@@ -1116,7 +1130,7 @@ public struct ECP {
             {
                 var A=FP(ROM.CURVE_A)
                 t.sqr()
-                if CONFIG_FIELD.MOD8 == 5 {
+                if CONFIG_FIELD.PM1D2 == 2 {
                     t.add(t)
                 } else {
                     t.neg()
@@ -1132,13 +1146,13 @@ public struct ECP {
                 X2.copy(w); X2.mul(A)
                 X3.copy(t); X3.mul(X2)
                 var rhs=ECP.RHS(X3)
-                X2.cmove(X3,rhs.qr())
+                X2.cmove(X3,rhs.qr(&pNIL))
                 rhs.copy(ECP.RHS(X2))
-                Y.copy(rhs.sqrt())
-                x.copy(X2.redc())
+                Y.copy(rhs.sqrt(pNIL))
+                x.copy(X2.redc()) 
             } else {
                 var A=FP(-3)
-                var w=A.sqrt()
+                var w=A.sqrt(pNIL)
                 var j=FP(w); j.sub(one); j.norm(); j.div2()
                 w.mul(t)
                 B.add(one)
@@ -1151,31 +1165,18 @@ public struct ECP {
                 w.sqr(); w.inverse()
                 X3.copy(w); X3.add(one); X3.norm()
                 var rhs=ECP.RHS(X2)
-                X1.cmove(X2,rhs.qr())
+                X1.cmove(X2,rhs.qr(&pNIL))
                 rhs.copy(ECP.RHS(X3))
-                X1.cmove(X3,rhs.qr())
+                X1.cmove(X3,rhs.qr(&pNIL))
                 rhs.copy(ECP.RHS(X1));
-                Y.copy(rhs.sqrt())
+                Y.copy(rhs.sqrt(pNIL))
                 x.copy(X1.redc())
             }
             let ne=Y.sign()^sgn
             var NY=FP(Y); NY.neg(); NY.norm()
             Y.cmove(NY,ne)
-
             let y=Y.redc();
             P.copy(ECP(x,y))           
-
-/*
-
-		    while (true) {
-			    if CONFIG_CURVE.CURVETYPE != CONFIG_CURVE.MONTGOMERY {
-				    P.copy(ECP(h,0))
-			    } else {
-				    P.copy(ECP(h))
-			    }
-			    h.inc(1); h.norm();
-			    if !P.is_infinity() {break}
-		    } */
         }
         return P
     }

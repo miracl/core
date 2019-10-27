@@ -39,10 +39,10 @@
 using namespace core;
 
 #define MODBITS_YYY MBITS_YYY
-#define TBITS_YYY (MBITS_YYY%BASEBITS_XXX)                    /**< Number of active bits in top word */
-#define TMASK_YYY (((chunk)1<<TBITS_YYY)-1)               /**< Mask for active bits in top word */
-#define FEXCESS_YYY (((sign32)1<<MAXXES_YYY)-1)				/**< 2^(BASEBITS*NLEN-MODBITS) - normalised BIG can be multiplied by less than this before reduction */
-#define OMASK_YYY (-((chunk)(1)<<TBITS_YYY))              /**<  for masking out overflow bits */
+#define TBITS_YYY (MBITS_YYY%BASEBITS_XXX)              /**< Number of active bits in top word */
+#define TMASK_YYY (((chunk)1<<TBITS_YYY)-1)             /**< Mask for active bits in top word */
+#define FEXCESS_YYY (((sign32)1<<MAXXES_YYY)-1)		    /**< 2^(BASEBITS*NLEN-MODBITS) - normalised BIG can be multiplied by less than this before reduction */
+#define OMASK_YYY (-((chunk)(1)<<TBITS_YYY))            /**<  for masking out overflow bits */
 
 namespace YYY {
 
@@ -57,12 +57,13 @@ typedef struct
 } FP;
 
 /* Field Params - see rom.c */
-extern const XXX::BIG Modulus;	/**< Actual Modulus set in romf.c */
+extern const XXX::BIG Modulus;	/**< Actual Modulus set in rom_field*.c */
+extern const XXX::BIG ROI;	    /**< Root of Unity  set in rom_field*.c */
 extern const XXX::BIG R2modp;	/**< Montgomery constant */
 extern const chunk MConst;		/**< Constant associated with Modulus - for Montgomery = 1/p mod 2^BASEBITS */
 //extern const int BTset;			/**< Set Bit in Generalised Mersenne */
-extern const XXX::BIG Fra; /**< real part of BN curve Frobenius Constant */
-extern const XXX::BIG Frb; /**< imaginary part of BN curve Frobenius Constant */
+extern const XXX::BIG Fra; /**< real part of Pairing-friendly curve Frobenius Constant */
+extern const XXX::BIG Frb; /**< imaginary part of Pairing-friendly curve Frobenius Constant */
 
 //#define FUSED_MODMUL
 //#define DEBUG_REDUCE
@@ -79,11 +80,18 @@ extern void FP_from_int(FP *x,int a);
 
 /**	@brief Tests for FP equal to zero mod Modulus
  *
-	@param x BIG number to be tested
+	@param x FP number to be tested
 	@return 1 if zero, else returns 0
  */
 extern int FP_iszilch(FP *x);
 
+
+/**	@brief Tests for FP equal to one mod Modulus
+ *
+	@param x FP number to be tested
+	@return 1 if one, else returns 0
+ */
+extern int FP_isunity(FP *x);
 
 /**	@brief Set FP to zero
  *
@@ -219,17 +227,27 @@ extern void FP_div2(FP *x, FP *y);
 	@param z BIG number exponent
  */
 extern void FP_pow(FP *x, FP *y, XXX::BIG z);
+
+/**	@brief Inverse square root precalculation
+ *
+	@param r FP number, on exit  = x^(p-2*e-1)/2^(e+1) mod Modulus
+	@param x FP number
+ */
+extern void FP_invsqrt(FP *r,FP *x);
+
 /**	@brief Fast Modular square root of a an FP, mod Modulus
  *
 	@param x FP number, on exit  = sqrt(y) mod Modulus
 	@param y FP number, the number whose square root is calculated
-
+    @param h an optional precalculation
  */
-extern void FP_sqrt(FP *x, FP *y);
+extern void FP_sqrt(FP *x, FP *y, FP *h);
+
 /**	@brief Modular negation of a an FP, mod Modulus
  *
 	@param x FP number, on exit = -y mod Modulus
 	@param y FP number
+
  */
 extern void FP_neg(FP *x, FP *y);
 /**	@brief Outputs an FP number to the console
@@ -256,9 +274,10 @@ extern void FP_norm(FP *x);
 /**	@brief Tests for FP a quadratic residue mod Modulus
  *
 	@param x FP number to be tested
+    @param h an optional precalculation
 	@return 1 if quadratic residue, else returns 0 if quadratic non-residue
  */
-extern int FP_qr(FP *x);
+extern int FP_qr(FP *x,FP *h);
 
 
 /**	@brief Modular inverse of a an FP, mod Modulus

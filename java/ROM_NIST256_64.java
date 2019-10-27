@@ -40,6 +40,7 @@ public class ROM
 
 // Base Bits= 56
 	public static final long[] Modulus= {0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFL,0x0L,0x1000000L,0xFFFFFFFFL};
+	public static final long[] ROI= {0xFFFFFFFFFFFFFEL,0xFFFFFFFFFFL,0x0L,0x1000000L,0xFFFFFFFFL};
 	public static final long[] R2modp= {0x3000000050000L,0x0L,0xFFFFFBFFFFFFFAL,0xFFFAFFFFFFFEFFL,0x2FFFFL};
 	public static final long MConst= 0x1L;
 

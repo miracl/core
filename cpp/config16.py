@@ -329,7 +329,7 @@ while ptr<max:
 # modulus_bits is the bit length of the modulus, typically the same or slightly smaller than "big"
 # Typically "field" describes the modulus, and "curve" is the common name for the elliptic curve   
 # Next give the number base used for 32 bit architecture, as n where the base is 2^n (note that these must be fixed for the same "big" name, if is ever re-used for another curve)
-# modulus_mod_8 is the remainder when the modulus is divided by 8
+# m8 max m such that 2^m | modulus-1
 # modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
 # i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0)
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
@@ -342,18 +342,18 @@ while ptr<max:
 
 
 	if x==1:
-		curveset("255","F25519","ED25519","13","5","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("255","F25519","ED25519","13","2","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
 		curve_selected=True
 	if x==2:
-		curveset("256","F256PME","NUMS256E","13","3","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("256","F256PME","NUMS256E","13","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
 		curve_selected=True
 
 
 	if x==3:
-		curveset("254","BN254","BN254","13","3","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
+		curveset("254","BN254","BN254","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
 		pfcurve_selected=True
 	if x==4:
-		curveset("254","BN254CX","BN254CX","13","3","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
+		curveset("254","BN254CX","BN254CX","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
 		pfcurve_selected=True
 
 # rsaset(big,ring,bit_bits_in_base,multiplier)

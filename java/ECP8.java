@@ -848,7 +848,7 @@ public final class ECP8 {
 		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
         B.norm();
         sgn=t.sign();
-        FP w=s.sqrt();
+        FP w=s.sqrt(null);
         FP j=new FP(w); j.sub(one); j.norm(); j.div2();
 
         w.mul(t);

@@ -134,20 +134,22 @@ void help()
     printf("15. NUMS512W\n");
     printf("16. NUMS512E\n");
     printf("17. SECP256K1\n");
-    printf("18. SM2\n\n");
+    printf("18. SM2\n");
+    printf("19. C13318\n");
+    printf("20. JUBJUB\n\n");
 
-    printf("19. BN254\n");
-    printf("20. BN254CX\n");
-    printf("21. BLS12383\n");
-    printf("22. BLS12381\n");
-    printf("23. FP256BN\n");
-    printf("24. FP512BN\n");
-    printf("25. BLS12461\n");
-    printf("26. BN462\n");
+    printf("21. BN254\n");
+    printf("22. BN254CX\n");
+    printf("23. BLS12383\n");
+    printf("24. BLS12381\n");
+    printf("25. FP256BN\n");
+    printf("26. FP512BN\n");
+    printf("27. BLS12461\n");
+    printf("28. BN462\n");
 
-    printf("27. BLS24479\n");
-    printf("28. BLS48556\n");
-    printf("29. BLS48581\n");
+    printf("29. BLS24479\n");
+    printf("30. BLS48556\n");
+    printf("31. BLS48581\n");
 
     printf("\nromgen curve wordlength basebits language\n");
     printf("where wordlength is 16, 32 or 64\n");
@@ -189,7 +191,7 @@ int main(int argc, char **argv)
 {
     miracl *mip = &precision;
     Big p, R, B, mc, curve_b, cru, cof, tau[9];
-    Big m, x, y, w, t, c, n, r, a, b, gx, gy, r2modp;
+    Big m, x, y, w, t, c, n, r, a, b, gx, gy, r2modp,roi;
     Big np, PP, TT, FF;
     int i, A, curve, bb, chunk, words, mbits, bytes, ip = 0;
     int modtype, curvetype, curve_a, curve_b_i, cof_i, lang = 0;
@@ -210,7 +212,7 @@ int main(int argc, char **argv)
 
     char xxx[20], yyy[20], zzz[20];
 
-    char curvename[30], fieldname[30];
+    char curvename[32], fieldname[32];
 
     argv++; argc--;
 
@@ -246,7 +248,7 @@ int main(int argc, char **argv)
     {   // ED25519
         curve = 1;
         printf("Curve= ED25519\n");
-        strcpy(fieldname, "25519");
+        strcpy(fieldname, "F25519");
         mbits = 255;               // bits in modulus
         words = (1 + ((mbits - 1) / bb)); // words per Big
         curvetype = EDWARDS;
@@ -265,7 +267,7 @@ int main(int argc, char **argv)
     {
         curve = 2;
         printf("Curve= C25519\n");
-        strcpy(fieldname, "25519");
+        strcpy(fieldname, "F25519");
         mbits = 255;
         words = (1 + ((mbits - 1) / bb));
         curvetype = MONTGOMERY;
@@ -323,6 +325,45 @@ int main(int argc, char **argv)
 
     }
 
+    if (strcmp(curvename, "C13318") == 0)
+    {
+        curve = 19;
+        printf("Curve= C13318\n");
+        strcpy(fieldname, "F25519");
+        mbits = 255;
+        words = (1 + ((mbits - 1) / bb));
+        curvetype = WEIERSTRASS;  
+        modtype = PSEUDO_MERSENNE;
+        curve_a = -3;
+        cof = 1;
+        p=pow((Big)2, mbits) - 19;
+        
+        r=pow((Big)2,255)+(char *)"325610659388873400306201440571661405155";
+        curve_b=13318;
+        mip->IOBASE = 16;
+        gx=5 ;
+        gy=(char *)"6675AAD926BCA6F1381630E5166966369D4CCB04CF016DB5B8C8D3546B6EAD0B";
+    }
+
+    if (strcmp(curvename, "JUBJUB") == 0)
+    {
+        curve = 20;
+        printf("Curve= JUBJUB\n");
+        strcpy(fieldname, curvename);
+        mbits=255;
+        words = (1 + ((mbits - 1) / bb));
+        curvetype = EDWARDS;
+        modtype = NOT_SPECIAL;
+        curve_a = -1;			   // Curve A parameter
+        cof=8;
+        mip->IOBASE = 16;
+        p=(char *)"73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001";
+        r=(char *)"0e7db4ea6533afa906673b0101343b00a6682093ccc81082d0970e5ed6f72cb7";
+        curve_b=(char *)"2A9318E74BFA2B48F5FD9207E6BD7FD4292D7F6D37579D2601065FD6D6343EB1";
+
+        gx=(char *)"5183972af8eff38ca624b4df00384882000c546bf2f39ede7f4ecf1a74f976c4";
+        gy=(char *)"3b43f8472ca2fc2c9e8fcc5abd9dc308096c8707ffa6833b146bad709349702e";
+    }
 
     if (strcmp(curvename, "BRAINPOOL") == 0)
     {
@@ -615,7 +656,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "BN254") == 0)
     {
-        curve = 19;
+        curve = 21;
         printf("Curve= BN254\n");
         strcpy(fieldname, curvename);
         mbits = 254;
@@ -651,7 +692,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "BN254CX") == 0)
     {
-        curve = 20;
+        curve = 22;
         printf("Curve= BN254CX\n");
         strcpy(fieldname, curvename);
         mbits = 254;
@@ -687,7 +728,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "BLS12383") == 0)
     {
-        curve = 21;
+        curve = 23;
         printf("Curve= BLS12383\n");
         strcpy(fieldname, curvename);
         mbits = 383;
@@ -742,7 +783,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "BLS12381") == 0)
     {
-        curve = 22;
+        curve = 24;
         printf("Curve= BLS12381\n");
         strcpy(fieldname, curvename);
         mbits = 381;
@@ -799,7 +840,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "BLS12461") == 0)
     {
-        curve = 25;
+        curve = 27;
         printf("Curve= BLS12461\n");
         strcpy(fieldname, curvename);
         mbits = 461;
@@ -846,7 +887,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "BN462") == 0)
     {
-        curve = 26;
+        curve = 28;
         printf("Curve= BN462\n");
         strcpy(fieldname, curvename);
         mbits = 462;
@@ -903,7 +944,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "FP256BN") == 0)
     {
-        curve = 23;
+        curve = 25;
         printf("Curve= FP256BN\n");
         strcpy(fieldname, curvename);
         mbits = 256;
@@ -918,6 +959,9 @@ int main(int argc, char **argv)
         hw = hamming(6 * x - 2) + 2;
 
         p = 36 * pow(x, 4) - 36 * pow(x, 3) + 24 * x * x - 6 * x + 1;
+//mip->IOBASE=10;
+//cout << "p= " << p << endl;
+//mip->IOBASE=16;
         t = 6 * x * x + 1;
         r = p + 1 - t;
         curve_b = 3;
@@ -939,7 +983,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "FP512BN") == 0)
     {
-        curve = 24;
+        curve = 26;
         printf("Curve= FP512BN\n");
         strcpy(fieldname, curvename);
         mbits = 512;
@@ -954,6 +998,11 @@ int main(int argc, char **argv)
         hw = hamming(6 * x + 2) + 2;
 
         p = 36 * pow(x, 4) + 36 * pow(x, 3) + 24 * x * x + 6 * x + 1;
+
+//mip->IOBASE=10;
+//cout << "p= " << p << endl;
+//mip->IOBASE=16;
+
         t = 6 * x * x + 1;
         r = p + 1 - t;
         curve_b = 3;
@@ -972,7 +1021,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "BLS24479") == 0)
     {
-        curve = 27;
+        curve = 29;
         printf("Curve= BLS24479\n");
         strcpy(fieldname, curvename);
 
@@ -1043,7 +1092,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "BLS48556") == 0)
     {
-        curve = 28;
+        curve = 30;
         printf("Curve= BLS48556\n");
         strcpy(fieldname, curvename);
 
@@ -1123,7 +1172,7 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "BLS48581") == 0)
     {
-        curve = 29;
+        curve = 31;
         printf("Curve= BLS48581\n");
         strcpy(fieldname, curvename);
 
@@ -1507,12 +1556,31 @@ int main(int argc, char **argv)
     cout << pre7 << toupperit((char *)"Modulus", lang) << post7; mc = output(chunk, words, p, m); cout << term << endl;
     r2modp = pow((Big)2, 2 * words * bb) % p;
 
+    int e=0;
+    Big is=p-1;
+    while (is%2==0)
+    {
+        is/=2;
+        e++;
+    }
+    if (e==1) roi=p-1;
+    if (e==2) roi=pow((Big)2,(p-1)/4,p);
+    if (e>2) 
+    {
+        int qnr=2;
+        while (pow(qnr,(p-1)/2,p)==1)
+        {
+            qnr+=1;
+        }
+        roi=pow((Big)qnr,(p-1)/pow((Big)2,e),p);
+        //cout << "qnr= " << qnr << endl;
+    }
 
 //cout << "\ngx*R2modp= " << r2modp*gx << endl;
 //cout << "mod p = " << redc(r2modp*gx) << endl << endl;
 
     cout << pre7 << toupperit((char *)"R2modp", lang) << post7; output(chunk, words, r2modp, m); cout << term << endl;
-
+    cout << pre7 << toupperit((char *)"ROI", lang) << post7; output(chunk, words, roi, m); cout << term << endl;
 
 
     if (modtype == NOT_SPECIAL)
@@ -1531,15 +1599,15 @@ int main(int argc, char **argv)
     else cout << term << endl;
 
 
-    if (curve > 18)
+    if (curve > 20)
     {   // Frobenius constants -  depend on embedding degree
-        if (curve < 27)
+        if (curve < 29)
             set_frobenius_constant(X, 12);
         else
         {
-            if (curve == 27) set_frobenius_constant(X, 24);
-            if (curve == 28 || curve == 29) set_frobenius_constant(X, 48);
-            if (curve == 29) X = -X;
+            if (curve == 29) set_frobenius_constant(X, 24);
+            if (curve == 30 || curve == 31) set_frobenius_constant(X, 48);
+            if (curve == 31) X = -X;
         }
 
 
@@ -1559,7 +1627,7 @@ int main(int argc, char **argv)
 
     cout << "//*** rom curve parameters *****" << endl;
     cout << "// Base Bits= " << bb << endl;
-    if (curve > 18)
+    if (curve > 20)
     {
         cout << "// Ate Bits= " << atebits << endl;
         cout << "// G2 Table size= " << atebits + hw - 1 << endl;
@@ -1589,7 +1657,7 @@ int main(int argc, char **argv)
     cout << pre1 << toupperit((char *)"CURVE_Gy", lang) << post1; output(chunk, words, gy, m); cout << term << endl;
 
 // BN curves, negative x
-    if (curve == 19 || curve == 20 || curve == 23)
+    if (curve == 21 || curve == 22 || curve == 25)
     {
         cout << endl;
 
@@ -1639,7 +1707,7 @@ int main(int argc, char **argv)
     }
 
 // BN curves, positive x
-    if (curve == 24 || curve == 26)
+    if (curve == 26 || curve == 28)
     {
         cout << endl;
 
@@ -1692,7 +1760,7 @@ int main(int argc, char **argv)
 
 
 //BLS curves
-    if (curve == 21 || curve == 22 || curve == 25)
+    if (curve == 23 || curve == 24 || curve == 27)
     {
         cout << endl;
 
@@ -1750,7 +1818,7 @@ int main(int argc, char **argv)
 
 
 
-    if (curve == 27)
+    if (curve == 29)
     {
         cout << endl;
 
@@ -1816,14 +1884,14 @@ int main(int argc, char **argv)
 
     }
 
-    if (curve == 28 || curve == 29)
+    if (curve == 30 || curve == 31)
     {
         cout << endl;
 
         cout << pre1 << toupperit((char *)"CURVE_Bnx", lang) << post1 ; output(chunk, words, x, m); cout << term << endl;
         cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
 
-        if (curve == 28)
+        if (curve == 30)
             Q8.get(X8, Y8);
         X8.get(AA, BB);
 
@@ -1861,7 +1929,7 @@ int main(int argc, char **argv)
         cout << pre1 << toupperit((char *)"CURVE_Pybba", lang) << post1; output(chunk, words, a, m); cout << term << endl;
         cout << pre1 << toupperit((char *)"CURVE_Pybbb", lang) << post1; output(chunk, words, b, m); cout << term << endl;
 
-        if (curve == 28)
+        if (curve == 30)
         {
             Q8 *= r;
             if (!Q.iszero())

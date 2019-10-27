@@ -324,7 +324,7 @@ impl FP2 {
         let mut c=FP2::new_copy(self);
         c.conj();
         c.mul(self);
-        return c.getA().qr();
+        return c.getA().qr(None);
     }
 
     /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
@@ -341,7 +341,7 @@ impl FP2 {
         w2.sqr();
         w1.add(&w2); w1.norm();
 
-        w2.copy(&w1.sqrt());
+        w2.copy(&w1.sqrt(None));
         w1.copy(&w2);
 
         w2.copy(&self.a);
@@ -354,10 +354,10 @@ impl FP2 {
         w3.norm();
         w3.div2();
 
-        let d=w3.qr();
+        let d=w3.qr(None);
         w2.cmove(&w3,d);
 
-        w1.copy(&w2.sqrt());
+        w1.copy(&w2.sqrt(None));
         self.a.copy(&w1);
         w1.dbl(); w1.norm();
         w1.inverse();

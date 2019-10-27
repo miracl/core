@@ -46,8 +46,8 @@
 <script type="text/javascript"src=./bls256.js></script>
 
 <p><a id="myLink1" href="#" onclick="location.reload(false);ed25519();">ED25519 255-bit Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
-<p><a id="myLink2" href="#" onclick="location.reload(false);nist256();">NIST256 256-bit Weierstrass Elliptic Curve ECDH/ECIES/ECDSA</a></p>
-<p><a id="myLink3" href="#" onclick="location.reload(false);goldilocks();">GOLDILOCKS 448-bit Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
+<p><a id="myLink2" href="#" onclick="location.reload(false);NIST256();">NIST256 256-bit Weierstrass Elliptic Curve ECDH/ECIES/ECDSA</a></p>
+<p><a id="myLink3" href="#" onclick="location.reload(false);GOLDILOCKS();">GOLDILOCKS 448-bit Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
 <p><a id="myLink4" href="#" onclick="location.reload(false);bn254();">BN254 254-bit k=12 Pairing-Friendly BN Curve MPIN</a></p>
 <p><a id="myLink5" href="#" onclick="location.reload(false);bls12383();">BLS12383 383-bit k=12 Pairing-Friendly BLS Curve MPIN</a></p>
 <p><a id="myLink6" href="#" onclick="location.reload(false);bls24479();">BLS24479 479-bit k=24 Pairing-Friendly BLS Curve MPIN</a></p>
@@ -185,7 +185,7 @@ function ed25519() {
 }
 // NIST256 context
 
-function nist256() {
+function NIST256() {
 	var ctx = new CTX('NIST256');
 	mywindow=window.open();
 
@@ -309,7 +309,7 @@ function nist256() {
 
 
 // GOLDILOCKS context
-function goldilocks() {
+function GOLDILOCKS() {
 	var ctx = new CTX('GOLDILOCKS');
 	mywindow=window.open();
 
@@ -1521,8 +1521,8 @@ function bls48556() {
 //bls24();
 //bls383();
 //bn254();
-//goldilocks();
-//nist256();
+//GOLDILOCKS();
+//NIST256();
 //ed25519();
 //rsa2048();
 

@@ -34,7 +34,7 @@ example program provided). Select 0 to exit.
 
 Then execute
 
-    swift -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls383 -lbls24 -lbls48 -lrsa2048 TestALL.swift 
+    swift -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 TestALL.swift 
 
 and
 
@@ -42,7 +42,7 @@ and
 
 and 
 
-    swift -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls383 -lbls24 -lbls48 -lrsa2048 BenchtestALL.swift 
+    swift -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 BenchtestALL.swift 
 
 Also
 
@@ -55,7 +55,7 @@ than the JIT swift compiler (there is a known bug in swift 5.0)
 
 So for example
 
-    swiftc -I. -L. -lcore -lbn254 -lbls383 -lbls24 -lbls48 TestBLS.swift 
+    swiftc -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestBLS.swift 
     sudo cp lib*.so /usr/lib/.
     ./TestBLS
 

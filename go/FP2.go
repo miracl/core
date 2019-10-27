@@ -303,7 +303,7 @@ func (F *FP2) qr() int {
 	c := NewFP2copy(F)
 	c.conj()
 	c.mul(F)
-	return c.a.qr()
+	return c.a.qr(nil)
 }
 
 /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
@@ -318,7 +318,7 @@ func (F *FP2) sqrt() {
 	w2.sqr()
 	w1.add(w2); w1.norm()
 
-	w1 = w1.sqrt()
+	w1 = w1.sqrt(nil)
 	w2.copy(F.a)
 	w3.copy(F.a)
 
@@ -330,9 +330,9 @@ func (F *FP2) sqrt() {
 	w3.norm()
 	w3.div2()
 	
-	w2.cmove(w3,w3.qr())
+	w2.cmove(w3,w3.qr(nil))
 
-	w2 = w2.sqrt()
+	w2 = w2.sqrt(nil)
 	F.a.copy(w2)
 	w2.add(w2); w2.norm()
 	w2.inverse()

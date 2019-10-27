@@ -81,12 +81,16 @@ fn ed25519(mut rng: &mut RAND) {
     let G = ecp::ECP::generator();
 
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let s = big::BIG::randomnum(&r, &mut rng);
-
-    let mut P = ecp::ECP::hashit(&s);
-    if P.is_infinity() {
-        println!("HASH FAILURE - P=O");
-        fail = true;
+    
+    let mut P = ecp::ECP::new();
+    let mut s = big::BIG::new();
+    for _ in 0..10 {
+        s = big::BIG::randomnum(&r, &mut rng);
+        P.copy(&ecp::ECP::hashit(&s));
+        if P.is_infinity() {
+            println!("HASH FAILURE - P=O");
+            fail = true;
+        }
     }
 
     P = G.mul(&r);
@@ -150,12 +154,16 @@ fn nist256(mut rng: &mut RAND) {
     let G = ecp::ECP::generator();
 
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let s = big::BIG::randomnum(&r, &mut rng);
-    
-    let mut P = ecp::ECP::hashit(&s);
-    if P.is_infinity() {
-        println!("HASH FAILURE - P=O");
-        fail = true;
+
+    let mut P = ecp::ECP::new();
+    let mut s = big::BIG::new();
+    for _ in 0..10 {
+        s = big::BIG::randomnum(&r, &mut rng);
+        P.copy(&ecp::ECP::hashit(&s));
+        if P.is_infinity() {
+            println!("HASH FAILURE - P=O");
+            fail = true;
+        }
     }
     
     P = G.mul(&r);
@@ -219,14 +227,18 @@ fn goldilocks(mut rng: &mut RAND) {
     let G = ecp::ECP::generator();
 
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let s = big::BIG::randomnum(&r, &mut rng);
 
-    let mut P = ecp::ECP::hashit(&s);
-    if P.is_infinity() {
-        println!("HASH FAILURE - P=O");
-        fail = true;
+    let mut P = ecp::ECP::new();
+    let mut s = big::BIG::new();
+    for _ in 0..10 {
+        s = big::BIG::randomnum(&r, &mut rng);
+        P.copy(&ecp::ECP::hashit(&s));
+        if P.is_infinity() {
+            println!("HASH FAILURE - P=O");
+            fail = true;
+        }
     }
-    
+
     P = G.mul(&r);
     if !P.is_infinity() {
         println!("FAILURE - rG!=O");

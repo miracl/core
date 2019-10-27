@@ -129,16 +129,16 @@ func Core_Verify(SIG []byte, M []byte, W []byte) int {
 
 	D := ECP_fromBytes(SIG)
 	if !G1member(D) {return BLS_FAIL}
-	D.neg()
+	D.Neg()
 
 	PK := ECP4_fromBytes(W)
 
 	// Use new multi-pairing mechanism
 
-	r := initmp()
-	another_pc(r, G2_TAB, D)
-	another(r, PK, HM)
-	v := miller(r)
+	r := Initmp()
+	Another_pc(r, G2_TAB, D)
+	Another(r, PK, HM)
+	v := Miller(r)
 
 	//.. or alternatively
 	//	G := ECP4_generator()

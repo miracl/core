@@ -42,6 +42,13 @@ pub const MODULUS: [Chunk; NLEN] = [
     0x8702A0DB0BDDF,
     0x24000000,
 ];
+pub const ROI: [Chunk; NLEN] = [
+    0x6623EF5C1B55B2,
+    0xD6EE18093EE1BE,
+    0x647A6366D3243F,
+    0x8702A0DB0BDDF,
+    0x24000000,
+];
 pub const R2MODP: [Chunk; NLEN] = [
     0x466A0618A0800A,
     0x2B3A22543056A3,

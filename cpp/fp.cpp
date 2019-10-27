@@ -246,6 +246,17 @@ int YYY::FP_iszilch(FP *x)
     return BIG_iszilch(t);
 }
 
+/* input must be reduced */
+int YYY::FP_isunity(FP *x)
+{
+    BIG m;
+    FP y;
+    FP_copy(&y,x);
+    FP_reduce(&y);
+    FP_redc(m,&y);
+    return BIG_isunity(m);
+}
+
 void YYY::FP_copy(FP *y, FP *x)
 {
     BIG_copy(y->g, x->g);
@@ -561,14 +572,52 @@ void YYY::FP_div2(FP *r, FP *a)
     BIG_cmove(r->g,w,pr);
 }
 
+void YYY::FP_pow(FP *r, FP *a, BIG b)
+{
+    sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 3) / 4];
+    FP tb[16];
+    BIG t;
+    int i, nb;
+
+    FP_copy(r,a);
+    FP_norm(r);
+    BIG_copy(t, b);
+    BIG_norm(t);
+    nb = 1 + (BIG_nbits(t) + 3) / 4;
+    // convert exponent to 4-bit window
+    for (i = 0; i < nb; i++)
+    {
+        w[i] = BIG_lastbits(t, 4);
+        BIG_dec(t, w[i]);
+        BIG_norm(t);
+        BIG_fshr(t, 4);
+    }
+
+    FP_one(&tb[0]);
+    FP_copy(&tb[1], r);
+    for (i = 2; i < 16; i++)
+        FP_mul(&tb[i], &tb[i - 1], r);
+
+    FP_copy(r, &tb[w[nb - 1]]);
+    for (i = nb - 2; i >= 0; i--)
+    {
+        FP_sqr(r, r);
+        FP_sqr(r, r);
+        FP_sqr(r, r);
+        FP_sqr(r, r);
+        FP_mul(r, r, &tb[w[i]]);
+    }
+    FP_reduce(r);
+}
+
 #if MODTYPE_YYY==PSEUDO_MERSENNE  || MODTYPE_YYY==GENERALISED_MERSENNE
 
 // See eprint paper https://eprint.iacr.org/2018/1038
-// If p=3 mod 4 r= x^{(p-3)/4}, if p=5 mod 8 r=x^{(p-5)/8}
+// e.g. If p=3 mod 4 r= x^{(p-3)/4}, if p=5 mod 8 r=x^{(p-5)/8}
 
 void YYY::FP_fpow(FP *r, FP *x)
 {
-    int i, j, k, bw, w, nw, lo, m, n, c;
+    int i, j, k, bw, w, nw, lo, m, n, c, e=PM1D2_YYY;
     FP xp[11], t, key;
     const int ac[] = {1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255};
 // phase 1
@@ -591,14 +640,8 @@ void YYY::FP_fpow(FP *r, FP *x)
     n = MODBITS_YYY / 2;
 #endif
 
-    if (MOD8_YYY == 5)
-    {
-        n -= 3;
-        c = (MConst + 5) / 8;
-    } else {
-        n -= 2;
-        c = (MConst + 3) / 4;
-    }
+    n-=(e+1);
+    c=(MConst+(1<<e)+1)/(1<<(e+1));
 
     bw = 0; w = 1; while (w < c) {w *= 2; bw += 1;}
     k = w - c;
@@ -658,7 +701,7 @@ void YYY::FP_fpow(FP *r, FP *x)
 #if MODTYPE_YYY==GENERALISED_MERSENNE  // Goldilocks ONLY
     FP_copy(&key, r);
     FP_sqr(&t, &key);
-    FP_mul(r, &t, x);
+    FP_mul(r, &t, &xp[0]);
     for (i = 0; i < n + 1; i++)
         FP_sqr(r, r);
     FP_mul(r, r, &key);
@@ -666,77 +709,96 @@ void YYY::FP_fpow(FP *r, FP *x)
 
 }
 
-void YYY::FP_inv(FP *r, FP *x)
-{
-    FP y, t;
-    FP_fpow(&y, x);
-    if (MOD8_YYY == 5)
-    {   // r=x^3.y^8
-        FP_sqr(&t, x);
-        FP_mul(&t, &t, x);
-        FP_sqr(&y, &y);
-        FP_sqr(&y, &y);
-        FP_sqr(&y, &y);
-        FP_mul(r, &t, &y);
-    } else {
-        FP_sqr(&y, &y);
-        FP_sqr(&y, &y);
-        FP_mul(r, &y, x);
-    }
-}
+#endif
 
+// calculates r=x^(p-1-2^e)/2^{e+1) where 2^e|p-1
+void YYY::FP_invsqrt(FP *r,FP *x)
+{
+#if MODTYPE_YYY==PSEUDO_MERSENNE  || MODTYPE_YYY==GENERALISED_MERSENNE
+    FP_fpow(r, x);  
 #else
-
-/* set w=1/x */
-void YYY::FP_inv(FP *w, FP *x)
-{
-    BIG m2;
-    BIG_rcopy(m2, Modulus);
-    BIG_dec(m2, 2);
-    BIG_norm(m2);
-    FP_pow(w, x, m2);
+    int e=PM1D2_YYY;
+    BIG m;
+    BIG_rcopy(m, Modulus);
+    BIG_dec(m,1);
+    BIG_shr(m,e);
+    BIG_dec(m,1);
+    BIG_fshr(m,1);
+    FP_pow(r,x,m);
+#endif
 }
 
-void YYY::FP_pow(FP *r, FP *a, BIG b)
+/* Is x a QR? return optional hint for fast follow-up square root */
+int YYY::FP_qr(FP *x,FP *h)
 {
-    sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 3) / 4];
-    FP tb[16];
-    BIG t;
-    int i, nb;
+    FP r,s;
+    int i,e=PM1D2_YYY;
+    FP_invsqrt(&r,x);
+    if (h!=NULL)
+        FP_copy(h,&r);
 
-    FP_copy(r,a);
-    FP_norm(r);
-    BIG_copy(t, b);
-    BIG_norm(t);
-    nb = 1 + (BIG_nbits(t) + 3) / 4;
-    // convert exponent to 4-bit window
-    for (i = 0; i < nb; i++)
-    {
-        w[i] = BIG_lastbits(t, 4);
-        BIG_dec(t, w[i]);
-        BIG_norm(t);
-        BIG_fshr(t, 4);
+    for (i=0;i<e;i++)
+        FP_sqr(&r,&r);
+    FP_copy(&s,x);
+    for (i=0;i<e-1;i++ )
+        FP_sqr(&s,&s);
+    FP_mul(&r,&r,&s);
+    
+    return FP_isunity(&r);
+}
+
+/* Modular inversion */
+void YYY::FP_inv(FP *r,FP *x)
+{
+    int i,e=PM1D2_YYY;
+    FP s,t;
+    FP_copy(&s,x);
+    for (i=0;i<e-1;i++)
+    {  
+        FP_sqr(&s,&s);
+        FP_mul(&s,&s,x);
     }
-
-    FP_one(&tb[0]);
-    FP_copy(&tb[1], r);
-    for (i = 2; i < 16; i++)
-        FP_mul(&tb[i], &tb[i - 1], r);
-
-    FP_copy(r, &tb[w[nb - 1]]);
-    for (i = nb - 2; i >= 0; i--)
-    {
-        FP_sqr(r, r);
-        FP_sqr(r, r);
-        FP_sqr(r, r);
-        FP_sqr(r, r);
-        FP_mul(r, r, &tb[w[i]]);
-    }
+    FP_invsqrt(&t,x);
+    for (i=0;i<=e;i++)
+        FP_sqr(&t,&t);
+    
+    FP_mul(r,&t,&s);
     FP_reduce(r);
 }
 
-#endif
+// Tonelli-Shanks constant time
+void YYY::FP_sqrt(FP *r, FP *a, FP* h)
+{
+    int i,j,k,u,e=PM1D2_YYY;
+    FP v,g,t,b;
+    BIG m;
 
+    if (h==NULL)
+        FP_invsqrt(&g,a);
+    else
+        FP_copy(&g,h);
+
+    BIG_rcopy(m,ROI);
+    FP_nres(&v,m);
+
+    FP_sqr(&t,&g);
+    FP_mul(&t,&t,a);
+   
+    FP_mul(r,&g,a);
+    FP_copy(&b,&t);
+    for (k=e;k>1;k--)
+    {
+        for (j=1;j<k-1;j++)
+            FP_sqr(&b,&b);
+        u=1-FP_isunity(&b);
+        FP_mul(&g,r,&v);
+        FP_cmove(r,&g,u);
+        FP_sqr(&v,&v);
+        FP_mul(&g,&t,&v);
+        FP_cmove(&t,&g,u);
+        FP_copy(&b,&t);
+    }
+}
 
 /* SU=8 */
 /* set n=1 */
@@ -747,99 +809,12 @@ void YYY::FP_one(FP *n)
     FP_nres(n, b);
 }
 
-int YYY::FP_sign(FP *w)
+int YYY::FP_sign(FP *x)
 {
     BIG m;
-    FP_redc(m,w);
+    FP y;
+    FP_copy(&y,x);
+    FP_reduce(&y);
+    FP_redc(m,&y);
     return BIG_parity(m);
-}
-
-/* is r a QR? */
-/*
-int YYY::FP_qr(FP *r)
-{
-    int j;
-    BIG m;
-    BIG b;
-    BIG_rcopy(m, Modulus);
-    FP_redc(b, r);
-    j = BIG_jacobi(b, m);
-    FP_nres(r, b);
-    if (j == 1) return 1;
-    return 0;
-
-}
-*/
-
-/* Is x a QR? Constant time version */
-int YYY::FP_qr(FP *x)
-{
-    FP r;
-    BIG m;
-#if MODTYPE_YYY == PSEUDO_MERSENNE   || MODTYPE_YYY==GENERALISED_MERSENNE
-    FP_fpow(&r, x);
-    if (MOD8_YYY == 5)
-    {
-        FP_sqr(&r,&r);
-        FP_sqr(&r,&r);
-        FP_mul(&r,&r,x);
-        FP_mul(&r,&r,x); 
-    } else {
-        FP_sqr(&r,&r);
-        FP_mul(&r,&r,x);
-    }
-    FP_reduce(&r);
-#else
-    BIG_rcopy(m, Modulus);
-    BIG_dec(m,1);
-    BIG_norm(m);
-    BIG_fshr(m,1);
-    FP_pow(&r,x,m);
-#endif
-    FP_redc(m,&r);
-    return BIG_isunity(m);
-}
-
-/* Set a=sqrt(b) mod Modulus */
-/* SU= 160 */
-void YYY::FP_sqrt(FP *r, FP *a)
-{
-    FP v, i;
-    BIG b;
-    BIG m;
-    BIG_rcopy(m, Modulus);
-    BIG_mod(a->g, m);
-    BIG_copy(b, m);
-    if (MOD8_YYY == 5)
-    {
-        FP_copy(&i, a);
-        BIG_fshl(i.g, 1);
-#if MODTYPE_YYY == PSEUDO_MERSENNE   || MODTYPE_YYY==GENERALISED_MERSENNE
-        FP_fpow(&v, &i);
-#else
-        BIG_dec(b, 5);
-        BIG_norm(b);
-        BIG_fshr(b, 3); /* (p-5)/8 */
-        FP_pow(&v, &i, b);
-#endif
-        FP_mul(&i, &i, &v);
-        FP_mul(&i, &i, &v);
-        BIG_dec(i.g, 1);
-        FP_norm(&i);
-        FP_mul(r, a, &v);
-        FP_mul(r, r, &i);
-        FP_reduce(r);
-    }
-    if (MOD8_YYY == 3 || MOD8_YYY == 7)
-    {
-#if MODTYPE_YYY == PSEUDO_MERSENNE   || MODTYPE_YYY==GENERALISED_MERSENNE
-        FP_fpow(r, a);
-        FP_mul(r, r, a);
-#else
-        BIG_inc(b, 1);
-        BIG_norm(b);
-        BIG_fshr(b, 2); /* (p+1)/4 */
-        FP_pow(r, a, b);
-#endif
-    }
 }

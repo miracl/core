@@ -38,6 +38,7 @@ package org.miracl.core.NUMS256E;
 public class ROM
 {
 	public static final long[] Modulus= {0xFFFFFFFFFFFF43L,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFL};
+	public static final long[] ROI= {0xFFFFFFFFFFFF42L,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFL};
 	public static final long[] R2modp= {0x89000000000000L,0x8BL,0x0L,0x0L,0x0L};
 	public static final long MConst= 0xBDL;
 

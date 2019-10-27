@@ -602,7 +602,7 @@ public final class ECP2 {
 		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.mul_ip();
         B.norm();
         sgn=t.sign();
-        FP w=s.sqrt();
+        FP w=s.sqrt(null);
         FP j=new FP(w); j.sub(one); j.norm(); j.div2();
 //System.out.print("s= "+w.toString()+"\n");
         w.mul(t);

@@ -55,8 +55,8 @@ int ZZZ::ECP_KEY_PAIR_GENERATE(csprng *RNG, octet* S, octet *W)
     int res = 0;
 
     ECP_generator(&G);
-
     BIG_rcopy(r, CURVE_Order);
+
     if (RNG != NULL)
     {
         BIG_randtrunc(s, r, 2 * CURVE_SECURITY_ZZZ, RNG);
@@ -99,7 +99,6 @@ int ZZZ::ECP_PUBLIC_KEY_VALIDATE(octet *W)
         BIG_shl(k, (nb + 4) / 2);
         BIG_add(k, q, k);
         BIG_sdiv(k, r); /* get co-factor */
-
         while (BIG_parity(k) == 0)
         {
             ECP_dbl(&WP);

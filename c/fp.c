@@ -235,6 +235,17 @@ int FP_YYY_iszilch(FP_YYY *x)
     return BIG_XXX_iszilch(t);
 }
 
+int FP_YYY_isunity(FP_YYY *x)
+{
+    BIG_XXX m;
+    FP_YYY y;
+    FP_YYY_copy(&y,x);
+    FP_YYY_reduce(&y);
+    FP_YYY_redc(m,&y);
+    return BIG_XXX_isunity(m);
+}
+
+
 void FP_YYY_copy(FP_YYY *y, FP_YYY *x)
 {
     BIG_XXX_copy(y->g, x->g);
@@ -551,19 +562,47 @@ void FP_YYY_div2(FP_YYY *r, FP_YYY *a)
     
     BIG_XXX_cmove(r->g,w,pr);
 
-/*
-    if (BIG_XXX_parity(a->g) == 0)
-    {
-
-        BIG_XXX_fshr(r->g, 1);
-    }
-    else
-    {
-        BIG_XXX_add(r->g, r->g, m);
-        BIG_XXX_norm(r->g);
-        BIG_XXX_fshr(r->g, 1);
-    } */
 }
+
+
+void FP_YYY_pow(FP_YYY *r, FP_YYY *a, BIG_XXX b)
+{
+    sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 3) / 4];
+    FP_YYY tb[16];
+    BIG_XXX t;
+    int i, nb;
+
+    FP_YYY_copy(r,a);
+    FP_YYY_norm(r);
+    BIG_XXX_copy(t, b);
+    BIG_XXX_norm(t);
+    nb = 1 + (BIG_XXX_nbits(t) + 3) / 4;
+    /* convert exponent to 4-bit window */
+    for (i = 0; i < nb; i++)
+    {
+        w[i] = BIG_XXX_lastbits(t, 4);
+        BIG_XXX_dec(t, w[i]);
+        BIG_XXX_norm(t);
+        BIG_XXX_fshr(t, 4);
+    }
+
+    FP_YYY_one(&tb[0]);
+    FP_YYY_copy(&tb[1], r);
+    for (i = 2; i < 16; i++)
+        FP_YYY_mul(&tb[i], &tb[i - 1], r);
+
+    FP_YYY_copy(r, &tb[w[nb - 1]]);
+    for (i = nb - 2; i >= 0; i--)
+    {
+        FP_YYY_sqr(r, r);
+        FP_YYY_sqr(r, r);
+        FP_YYY_sqr(r, r);
+        FP_YYY_sqr(r, r);
+        FP_YYY_mul(r, r, &tb[w[i]]);
+    }
+    FP_YYY_reduce(r);
+}
+
 
 #if MODTYPE_YYY == PSEUDO_MERSENNE || MODTYPE_YYY==GENERALISED_MERSENNE
 
@@ -572,7 +611,7 @@ void FP_YYY_div2(FP_YYY *r, FP_YYY *a)
 
 static void FP_YYY_fpow(FP_YYY *r, FP_YYY *x)
 {
-    int i, j, k, bw, w, c, nw, lo, m, n;
+    int i, j, k, bw, w, c, nw, lo, m, n, e=PM1D2_YYY;
     FP_YYY xp[11], t, key;
     const int ac[] = {1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255};
 // phase 1
@@ -595,14 +634,8 @@ static void FP_YYY_fpow(FP_YYY *r, FP_YYY *x)
     n = MODBITS_YYY / 2;
 #endif
 
-    if (MOD8_YYY == 5)
-    {
-        n -= 3;
-        c = (MConst_YYY + 5) / 8;
-    } else {
-        n -= 2;
-        c = (MConst_YYY + 3) / 4;
-    }
+    n-=(e+1);
+    c=(MConst_YYY+(1<<e)+1)/(1<<(e+1));
 
     bw = 0; w = 1; while (w < c) {w *= 2; bw += 1;}
     k = w - c;
@@ -661,83 +694,105 @@ static void FP_YYY_fpow(FP_YYY *r, FP_YYY *x)
 #if MODTYPE_YYY==GENERALISED_MERSENNE  // Goldilocks ONLY
     FP_YYY_copy(&key, r);
     FP_YYY_sqr(&t, &key);
-    FP_YYY_mul(r, &t, x);
+    FP_YYY_mul(r, &t, &xp[0]);
     for (i = 0; i < n + 1; i++)
         FP_YYY_sqr(r, r);
     FP_YYY_mul(r, r, &key);
 #endif
 }
 
-void FP_YYY_inv(FP_YYY *r, FP_YYY *x)
+#endif
+
+
+// calculates r=x^(p-1-2^e)/2^{e+1) where 2^e|p-1
+void FP_YYY_invsqrt(FP_YYY *r,FP_YYY *x)
 {
-    FP_YYY y, t;
-    FP_YYY_fpow(&y, x);
-    if (MOD8_YYY == 5)
-    {   // r=x^3.y^8
-        FP_YYY_sqr(&t, x);
-        FP_YYY_mul(&t, &t, x);
-        FP_YYY_sqr(&y, &y);
-        FP_YYY_sqr(&y, &y);
-        FP_YYY_sqr(&y, &y);
-        FP_YYY_mul(r, &t, &y);
-    } else {
-        FP_YYY_sqr(&y, &y);
-        FP_YYY_sqr(&y, &y);
-        FP_YYY_mul(r, &y, x);
-    }
+#if MODTYPE_YYY==PSEUDO_MERSENNE  || MODTYPE_YYY==GENERALISED_MERSENNE
+    FP_YYY_fpow(r, x);  
+#else
+    int e=PM1D2_YYY;
+    BIG_XXX m;
+    BIG_XXX_rcopy(m, Modulus_YYY);
+    BIG_XXX_dec(m,1);
+    BIG_XXX_shr(m,e);
+    BIG_XXX_dec(m,1);
+    BIG_XXX_fshr(m,1);
+    FP_YYY_pow(r,x,m);
+#endif
 }
 
-#else
-
-void FP_YYY_pow(FP_YYY *r, FP_YYY *a, BIG_XXX b)
+/* Is x a QR? return optional hint for fast follow-up square root */
+int FP_YYY_qr(FP_YYY *x,FP_YYY *h)
 {
-    sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 3) / 4];
-    FP_YYY tb[16];
-    BIG_XXX t;
-    int i, nb;
+    FP_YYY r,s;
+    int i,e=PM1D2_YYY;
+    FP_YYY_invsqrt(&r,x);
+    if (h!=NULL)
+        FP_YYY_copy(h,&r);
 
-    FP_YYY_copy(r,a);
-    FP_YYY_norm(r);
-    BIG_XXX_copy(t, b);
-    BIG_XXX_norm(t);
-    nb = 1 + (BIG_XXX_nbits(t) + 3) / 4;
-    /* convert exponent to 4-bit window */
-    for (i = 0; i < nb; i++)
-    {
-        w[i] = BIG_XXX_lastbits(t, 4);
-        BIG_XXX_dec(t, w[i]);
-        BIG_XXX_norm(t);
-        BIG_XXX_fshr(t, 4);
+    for (i=0;i<e;i++)
+        FP_YYY_sqr(&r,&r);
+    FP_YYY_copy(&s,x);
+    for (i=0;i<e-1;i++ )
+        FP_YYY_sqr(&s,&s);
+    FP_YYY_mul(&r,&r,&s);
+    
+    return FP_YYY_isunity(&r);
+}
+
+/* Modular inversion */
+void FP_YYY_inv(FP_YYY *r,FP_YYY *x)
+{
+    int i,e=PM1D2_YYY;
+    FP_YYY s,t;
+    FP_YYY_copy(&s,x);
+    for (i=0;i<e-1;i++)
+    {  
+        FP_YYY_sqr(&s,&s);
+        FP_YYY_mul(&s,&s,x);
     }
-
-    FP_YYY_one(&tb[0]);
-    FP_YYY_copy(&tb[1], r);
-    for (i = 2; i < 16; i++)
-        FP_YYY_mul(&tb[i], &tb[i - 1], r);
-
-    FP_YYY_copy(r, &tb[w[nb - 1]]);
-    for (i = nb - 2; i >= 0; i--)
-    {
-        FP_YYY_sqr(r, r);
-        FP_YYY_sqr(r, r);
-        FP_YYY_sqr(r, r);
-        FP_YYY_sqr(r, r);
-        FP_YYY_mul(r, r, &tb[w[i]]);
-    }
+    FP_YYY_invsqrt(&t,x);
+    for (i=0;i<=e;i++)
+        FP_YYY_sqr(&t,&t);
+    
+    FP_YYY_mul(r,&t,&s);
     FP_YYY_reduce(r);
 }
 
-/* set w=1/x */
-void FP_YYY_inv(FP_YYY *w, FP_YYY *x)
+// Tonelli-Shanks in constant time
+void FP_YYY_sqrt(FP_YYY *r, FP_YYY *a, FP_YYY *h)
 {
+    int i,j,k,u,e=PM1D2_YYY;
+    FP_YYY v,g,t,b;
+    BIG_XXX m;
 
-    BIG_XXX m2;
-    BIG_XXX_rcopy(m2, Modulus_YYY);
-    BIG_XXX_dec(m2, 2);
-    BIG_XXX_norm(m2);
-    FP_YYY_pow(w, x, m2);
+    if (h==NULL)
+        FP_YYY_invsqrt(&g,a);
+    else
+        FP_YYY_copy(&g,h);
+
+    BIG_XXX_rcopy(m,ROI_YYY);
+    FP_YYY_nres(&v,m);
+
+    FP_YYY_sqr(&t,&g);
+    FP_YYY_mul(&t,&t,a);
+   
+    FP_YYY_mul(r,&g,a);
+    FP_YYY_copy(&b,&t);
+    for (k=e;k>1;k--)
+    {
+        for (j=1;j<k-1;j++)
+            FP_YYY_sqr(&b,&b);
+        u=1-FP_YYY_isunity(&b);
+        FP_YYY_mul(&g,r,&v);
+        FP_YYY_cmove(r,&g,u);
+        FP_YYY_sqr(&v,&v);
+        FP_YYY_mul(&g,&t,&v);
+        FP_YYY_cmove(&t,&g,u);
+        FP_YYY_copy(&b,&t);
+    }
 }
-#endif
+
 
 /* SU=8 */
 /* set n=1 */
@@ -748,98 +803,15 @@ void FP_YYY_one(FP_YYY *n)
     FP_YYY_nres(n, b);
 }
 
-int FP_YYY_sign(FP_YYY *w)
+int FP_YYY_sign(FP_YYY *x)
 {
     BIG_XXX m;
-    FP_YYY_redc(m,w);
+    FP_YYY y;
+    FP_YYY_copy(&y,x);
+    FP_YYY_reduce(&y);
+    FP_YYY_redc(m,&y);
     return BIG_XXX_parity(m);
 }
 
 
-/* is r a QR? 
-int FP_YYY_qr(FP_YYY *r)
-{
-    int j;
-    BIG_XXX m;
-    BIG_XXX b;
-    BIG_XXX_rcopy(m, Modulus_YYY);
-    FP_YYY_redc(b, r);
-    j = BIG_XXX_jacobi(b, m);
-    FP_YYY_nres(r, b);
-    if (j == 1) return 1;
-    return 0;
 
-}
-*/
-/* is x a QR? Constant time */
-int FP_YYY_qr(FP_YYY *x)
-{
-    FP_YYY r;
-    BIG_XXX m;
-#if MODTYPE_YYY == PSEUDO_MERSENNE   || MODTYPE_YYY==GENERALISED_MERSENNE
-    FP_YYY_fpow(&r, x);
-    if (MOD8_YYY == 5)
-    {
-        FP_YYY_sqr(&r,&r);
-        FP_YYY_sqr(&r,&r);
-        FP_YYY_mul(&r,&r,x);
-        FP_YYY_mul(&r,&r,x);
-    } else {
-        FP_YYY_sqr(&r,&r);
-        FP_YYY_mul(&r,&r,x);
-    }
-    FP_YYY_reduce(&r);
-#else
-    BIG_XXX_rcopy(m, Modulus_YYY);
-    BIG_XXX_dec(m,1);
-    BIG_XXX_norm(m);
-    BIG_XXX_fshr(m,1);
-    FP_YYY_pow(&r,x,m);
-#endif
-    FP_YYY_redc(m,&r);
-    return BIG_XXX_isunity(m);
-}
-
-/* Set a=sqrt(b) mod Modulus */
-/* SU= 160 */
-void FP_YYY_sqrt(FP_YYY *r, FP_YYY *a)
-{
-    FP_YYY v, i;
-    BIG_XXX b;
-    BIG_XXX m;
-    BIG_XXX_rcopy(m, Modulus_YYY);
-    BIG_XXX_mod(a->g, m);
-    BIG_XXX_copy(b, m);
-    if (MOD8_YYY == 5)
-    {
-        FP_YYY_copy(&i, a); // i=x
-        BIG_XXX_fshl(i.g, 1); // i=2x
-#if MODTYPE_YYY == PSEUDO_MERSENNE   || MODTYPE_YYY==GENERALISED_MERSENNE
-        FP_YYY_fpow(&v, &i);
-#else
-        BIG_XXX_dec(b, 5);
-        BIG_XXX_norm(b);
-        BIG_XXX_fshr(b, 3); // (p-5)/8
-        FP_YYY_pow(&v, &i, b); // v=(2x)^(p-5)/8
-#endif
-        FP_YYY_mul(&i, &i, &v); // i=(2x)^(p+3)/8
-        FP_YYY_mul(&i, &i, &v); // i=(2x)^(p-1)/4
-        BIG_XXX_dec(i.g, 1); // i=(2x)^(p-1)/4 - 1
-        FP_YYY_norm(&i);
-        FP_YYY_mul(r, a, &v);
-        FP_YYY_mul(r, r, &i);
-        FP_YYY_reduce(r);
-    }
-    if (MOD8_YYY == 3 || MOD8_YYY == 7)
-    {
-#if MODTYPE_YYY == PSEUDO_MERSENNE   || MODTYPE_YYY==GENERALISED_MERSENNE
-        FP_YYY_fpow(r, a);
-        FP_YYY_mul(r, r, a);
-#else
-        BIG_XXX_inc(b, 1);
-        BIG_XXX_norm(b);
-        BIG_XXX_fshr(b, 2); /* (p+1)/4 */
-        FP_YYY_pow(r, a, b);
-#endif
-    }
-}

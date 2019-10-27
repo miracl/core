@@ -246,7 +246,16 @@ public final class FP {
 /* get sign */ 
     public int sign()
     {
-        return redc().parity();
+        FP n = new FP(this);
+        n.reduce();
+        return n.redc().parity();
+    }
+
+    public boolean isunity()
+    {
+        FP n= new FP(this);
+        n.reduce();
+        return n.redc().isunity();
     }
 
     /* normalise this */
@@ -375,21 +384,60 @@ public final class FP {
         w.add(m); w.norm();
         w.fshr(1);
         x.cmove(w,pr); 
+    }
 
-/*
-        if (x.parity() == 0)
-            x.fshr(1);
-        else {
-            x.add(new BIG(ROM.Modulus));
-            x.norm();
-            x.fshr(1);
-        }  */
+    /* return TRUE if this==a */
+    public boolean equals(FP a) {
+        FP f = new FP(this);
+        FP s = new FP(a);
+        f.reduce();
+        s.reduce();
+        if (BIG.comp(f.x, s.x) == 0) return true;
+        return false;
+    }
+
+    /* return jacobi symbol (this/Modulus) */
+    public int jacobi() {
+        BIG w = redc();
+        return w.jacobi(new BIG(ROM.Modulus));
+    }
+
+    private FP pow(BIG e) {
+        byte[] w = new byte[1 + (BIG.NLEN * CONFIG_BIG.BASEBITS + 3) / 4];
+        FP [] tb = new FP[16];
+        norm();
+        BIG t = new BIG(e);
+        t.norm();
+        int nb = 1 + (t.nbits() + 3) / 4;
+
+        for (int i = 0; i < nb; i++) {
+            int lsbs = t.lastbits(4);
+            t.dec(lsbs);
+            t.norm();
+            w[i] = (byte)lsbs;
+            t.fshr(4);
+        }
+        tb[0] = new FP(1);
+        tb[1] = new FP(this);
+        for (int i = 2; i < 16; i++) {
+            tb[i] = new FP(tb[i - 1]);
+            tb[i].mul(this);
+        }
+        FP r = new FP(tb[w[nb - 1]]);
+        for (int i = nb - 2; i >= 0; i--) {
+            r.sqr();
+            r.sqr();
+            r.sqr();
+            r.sqr();
+            r.mul(tb[w[i]]);
+        }
+        r.reduce();
+        return r;
     }
 
 // See eprint paper https://eprint.iacr.org/2018/1038
-// return this^(p-3)/4 or this^(p-5)/8
     private FP fpow() {
-        int i, j, k, bw, w, c, nw, lo, m, n;
+        int i, j, k, bw, w, c, nw, lo, m, n, e=CONFIG_FIELD.PM1D2;
         FP [] xp = new FP[11];
         int[]  ac = {1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255};
 // phase 1
@@ -411,13 +459,8 @@ public final class FP {
         if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE) // Goldilocks ONLY
             n /= 2;
 
-        if (CONFIG_FIELD.MOD8 == 5) {
-            n -= 3;
-            c = (ROM.MConst + 5) / 8;
-        } else {
-            n -= 2;
-            c = (ROM.MConst + 3) / 4;
-        }
+        n-=(e+1);
+        c=(ROM.MConst+(1<<e)+1)/(1<<(e+1));
 
         bw = 0; w = 1; while (w < c) {w *= 2; bw += 1;}
         k = w - c;
@@ -485,133 +528,89 @@ public final class FP {
         return r;
     }
 
+// calculates r=x^(p-1-2^e)/2^{e+1) where 2^e|p-1
+    private void invsqrt() {
+        if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.PSEUDO_MERSENNE || CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE) 
+        {
+            copy(fpow());
+            return;
+        }
+        int e=CONFIG_FIELD.PM1D2;
+        BIG m = new BIG(ROM.Modulus);
+        m.dec(1);
+        m.shr(e);
+        m.dec(1);
+        m.fshr(1);
+        
+        copy(pow(m));
+    }
+
     /* this=1/this mod Modulus */
     public void inverse() {
-
-        if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.PSEUDO_MERSENNE || CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE) {
-            FP y = fpow();
-            if (CONFIG_FIELD.MOD8 == 5) {
-                FP t = new FP(this);
-                t.sqr();
-                mul(t);
-                y.sqr();
-
-            }
-            y.sqr();
-            y.sqr();
-            mul(y);
-        } else {
-            BIG m2 = new BIG(ROM.Modulus);
-            m2.dec(2); m2.norm();
-            copy(pow(m2));
+        int e=CONFIG_FIELD.PM1D2;
+        FP s=new FP(this);
+        for (int i=0;i<e-1;i++)
+        {
+            s.sqr();
+            s.mul(this);
         }
-    }
+        invsqrt();
+        for (int i=0;i<=e;i++)
+            sqr();
+        mul(s);
+        reduce();
+    } 
 
-    /* return TRUE if this==a */
-    public boolean equals(FP a) {
-        FP f = new FP(this);
-        FP s = new FP(a);
-        f.reduce();
-        s.reduce();
-        if (BIG.comp(f.x, s.x) == 0) return true;
-        return false;
-    }
-
-    private FP pow(BIG e) {
-        byte[] w = new byte[1 + (BIG.NLEN * CONFIG_BIG.BASEBITS + 3) / 4];
-        FP [] tb = new FP[16];
-        norm();
-        BIG t = new BIG(e);
-        t.norm();
-        int nb = 1 + (t.nbits() + 3) / 4;
-
-        for (int i = 0; i < nb; i++) {
-            int lsbs = t.lastbits(4);
-            t.dec(lsbs);
-            t.norm();
-            w[i] = (byte)lsbs;
-            t.fshr(4);
-        }
-        tb[0] = new FP(1);
-        tb[1] = new FP(this);
-        for (int i = 2; i < 16; i++) {
-            tb[i] = new FP(tb[i - 1]);
-            tb[i].mul(this);
-        }
-        FP r = new FP(tb[w[nb - 1]]);
-        for (int i = nb - 2; i >= 0; i--) {
+    /* test for Quadratic residue */
+    public int qr(FP h) {
+        FP r=new FP(this);
+        int e=CONFIG_FIELD.PM1D2;
+        r.invsqrt();
+        if (h!=null)
+            h.copy(r);
+        for (int i=0;i<e;i++ )
             r.sqr();
-            r.sqr();
-            r.sqr();
-            r.sqr();
-            r.mul(tb[w[i]]);
-        }
-        r.reduce();
-        return r;
+        FP s=new FP(this);
+        for (int i=0;i<e-1;i++ )
+            s.sqr();
+        r.mul(s);
+        return r.isunity()?1:0;
     }
 
     /* return sqrt(this) mod Modulus */
-    public FP sqrt() {
-        reduce();
-        if (CONFIG_FIELD.MOD8 == 5) {
-            FP i = new FP(this); i.x.shl(1);
-            FP v;
-            if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.PSEUDO_MERSENNE || CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE) {
-                v = i.fpow();
-            } else {
-                BIG b = new BIG(ROM.Modulus);
-                b.dec(5); b.norm(); b.shr(3);
-                v = i.pow(b);
-            }
-            i.mul(v); i.mul(v);
-            i.x.dec(1);
-            FP r = new FP(this);
-            r.mul(v); r.mul(i);
-            r.reduce();
-            return r;
-        } else {
-            if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.PSEUDO_MERSENNE || CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE) {
-                FP r = fpow();
-                r.mul(this);
-                return r;
-            } else {
-                BIG b = new BIG(ROM.Modulus);
-                b.inc(1); b.norm(); b.shr(2);
-                return pow(b);
-            }
-        }
-    }
+    public FP sqrt(FP h) {
+        int u,e=CONFIG_FIELD.PM1D2;
+        FP g=new FP(this);
+        if (h==null)
+            g.invsqrt();
+        else
+            g.copy(h);
 
-    public int qr() {
-        FP r;
-        if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.PSEUDO_MERSENNE || CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE) {
-            r=this.fpow();
-            if (CONFIG_FIELD.MOD8 == 5) {
-                r.sqr();
-                r.sqr();
-                r.mul(this);
-                r.mul(this);
-            } else {
-                r.sqr();
-                r.mul(this);
-            }
-            r.reduce();
-        } else {
-            BIG m = new BIG(ROM.Modulus);
-            m.dec(1);
-            m.norm();
-            m.shr(1);
-            r=this.pow(m);
-        }
-        BIG w=r.redc();
-        if (w.isunity()) return 1;
-        else return 0;
-    }
+        BIG m = new BIG(ROM.ROI);
+        FP v=new FP(m);
 
-    /* return jacobi symbol (this/Modulus) */
-    public int jacobi() {
-        BIG w = redc();
-        return w.jacobi(new BIG(ROM.Modulus));
+        FP t=new FP(g);
+        t.sqr();
+        t.mul(this);
+
+        FP r=new FP(this);
+        r.mul(g);
+        FP b=new FP(t);
+       
+        for (int k=e;k>1;k--)
+        {
+            for (int j=1;j<k-1;j++)
+                b.sqr();
+            u=b.isunity()? 0:1;
+            g.copy(r); g.mul(v);
+            r.cmove(g,u);
+            v.sqr();
+            g.copy(t); g.mul(v);
+            t.cmove(g,u);
+            b.copy(t);
+        }
+
+        return r;
     }
 
 }

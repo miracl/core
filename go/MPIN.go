@@ -319,7 +319,7 @@ func MPIN_CLIENT_2(X []byte, Y []byte, SEC []byte) int {
 	px.Mod(r)
 
 	P = G1mul(P, px)
-	P.neg()
+	P.Neg()
 	P.ToBytes(SEC, false)
 
 	return 0
@@ -383,7 +383,6 @@ func MPIN_CLIENT_1(sha int, date int, CLIENT_ID []byte, rng *core.RAND, X []byte
 /* Extract Server Secret SST=S*Q where Q is fixed generator in G2 and S is master secret */
 func MPIN_GET_SERVER_SECRET(S []byte, SST []byte) int {
 	Q := ECP2_generator()
-
 	s := FromBytes(S)
 	Q = G2mul(Q, s)
 	Q.ToBytes(SST,false)

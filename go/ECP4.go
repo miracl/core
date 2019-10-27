@@ -722,7 +722,7 @@ func ECP4_generator() *ECP4 {
 	}
     B.norm()
     sgn:=t.sign()
-    w:=s.sqrt()
+    w:=s.sqrt(nil)
     j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
 
     w.mul(t)

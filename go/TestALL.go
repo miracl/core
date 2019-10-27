@@ -83,7 +83,7 @@ func ecdh_ED25519(rng *core.RAND) {
 		SALT[i] = byte(i + 1)
 	} // set Salt
 
-	fmt.Printf("\nTesting ECDH/ECDSA/ECIES\n")
+	fmt.Printf("\nTesting ECDH/ECDSA/ECIES for curve ED25519\n")
 	fmt.Printf("Alice's Passphrase= " + pp)
 	fmt.Printf("\n")
 	PW := []byte(pp)
@@ -227,7 +227,7 @@ func ecdh_NIST256(rng *core.RAND) {
 		SALT[i] = byte(i + 1)
 	} // set Salt
 
-	fmt.Printf("\nTesting ECDH/ECDSA/ECIES\n")
+	fmt.Printf("\nTesting ECDH/ECDSA/ECIES for curve NIST256\n")
 	fmt.Printf("Alice's Passphrase= " + pp)
 	fmt.Printf("\n")
 	PW := []byte(pp)
@@ -371,7 +371,7 @@ func ecdh_GOLDILOCKS(rng *core.RAND) {
 		SALT[i] = byte(i + 1)
 	} // set Salt
 
-	fmt.Printf("\nTesting ECDH/ECDSA/ECIES\n")
+	fmt.Printf("\nTesting ECDH/ECDSA/ECIES for curve GOLDILOCKS\n")
 	fmt.Printf("Alice's Passphrase= " + pp)
 	fmt.Printf("\n")
 	PW := []byte(pp)
@@ -533,7 +533,7 @@ func mpin_BN254(rng *core.RAND) {
 
 	/* Trusted Authority set-up */
 
-	fmt.Printf("\nTesting MPIN\n")
+	fmt.Printf("\nTesting MPIN curve BN254\n")
 	BN254.MPIN_RANDOM_GENERATE(rng, S[:])
 	fmt.Printf("Master Secret s: 0x")
 	printBinary(S[:])
@@ -546,7 +546,7 @@ func mpin_BN254(rng *core.RAND) {
 
 	fmt.Printf("Client ID= ")
 	printBinary(CLIENT_ID)
-	fmt.Printf("\n")
+	//fmt.Printf("\n")
 
 	/* Client and Server are issued secrets by DTA */
 	BN254.MPIN_GET_SERVER_SECRET(S[:], SST[:])
@@ -745,7 +745,7 @@ func mpin_BLS12383(rng *core.RAND) {
 
 	/* Trusted Authority set-up */
 
-	fmt.Printf("\nTesting MPIN\n")
+	fmt.Printf("\nTesting MPIN curve BLS12383\n")
 	BLS12383.MPIN_RANDOM_GENERATE(rng, S[:])
 	fmt.Printf("Master Secret s: 0x")
 	printBinary(S[:])
@@ -758,7 +758,7 @@ func mpin_BLS12383(rng *core.RAND) {
 
 	fmt.Printf("Client ID= ")
 	printBinary(CLIENT_ID)
-	fmt.Printf("\n")
+	//fmt.Printf("\n")
 
 	/* Client and Server are issued secrets by DTA */
 	BLS12383.MPIN_GET_SERVER_SECRET(S[:], SST[:])
@@ -957,7 +957,7 @@ func mpin_BLS24479(rng *core.RAND) {
 
 	/* Trusted Authority set-up */
 
-	fmt.Printf("\nTesting MPIN\n")
+	fmt.Printf("\nTesting MPIN curve BLS24479\n")
 	BLS24479.MPIN_RANDOM_GENERATE(rng, S[:])
 	fmt.Printf("Master Secret s: 0x")
 	printBinary(S[:])
@@ -970,7 +970,7 @@ func mpin_BLS24479(rng *core.RAND) {
 
 	fmt.Printf("Client ID= ")
 	printBinary(CLIENT_ID)
-	fmt.Printf("\n")
+	//fmt.Printf("\n")
 
 	/* Client and Server are issued secrets by DTA */
 	BLS24479.MPIN_GET_SERVER_SECRET(S[:], SST[:])
@@ -1169,7 +1169,7 @@ func mpin_BLS48556(rng *core.RAND) {
 
 	/* Trusted Authority set-up */
 
-	fmt.Printf("\nTesting MPIN\n")
+	fmt.Printf("\nTesting MPIN curve BLS48556\n")
 	BLS48556.MPIN_RANDOM_GENERATE(rng, S[:])
 	fmt.Printf("Master Secret s: 0x")
 	printBinary(S[:])
@@ -1182,7 +1182,7 @@ func mpin_BLS48556(rng *core.RAND) {
 
 	fmt.Printf("Client ID= ")
 	printBinary(CLIENT_ID)
-	fmt.Printf("\n")
+	//fmt.Printf("\n")
 
 	/* Client and Server are issued secrets by DTA */
 	BLS48556.MPIN_GET_SERVER_SECRET(S[:], SST[:])

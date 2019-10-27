@@ -56,7 +56,8 @@ typedef struct
 
 
 /* Field Params - see rom.c */
-extern const BIG_XXX Modulus_YYY;	/**< Actual Modulus set in romf_yyy.c */
+extern const BIG_XXX Modulus_YYY;	/**< Actual Modulus set in rom_field_yyy.c */
+extern const BIG_XXX ROI_YYY;	    /**< Root of unity set in rom_field_yyy.c */
 extern const BIG_XXX R2modp_YYY;	/**< Montgomery constant */
 extern const chunk MConst_YYY;		/**< Constant associated with Modulus - for Montgomery = 1/p mod 2^BASEBITS */
 
@@ -81,10 +82,18 @@ extern void FP_YYY_from_int(FP_YYY *x,int a);
 
 /**	@brief Tests for FP equal to zero mod Modulus
  *
-	@param x BIG number to be tested
+	@param x FP number to be tested
 	@return 1 if zero, else returns 0
  */
 extern int FP_YYY_iszilch(FP_YYY *x);
+
+
+/**	@brief Tests for FP equal to one mod Modulus
+ *
+	@param x FP number to be tested
+	@return 1 if one, else returns 0
+ */
+extern int FP_YYY_isunity(FP_YYY *x);
 
 
 /**	@brief Set FP to zero
@@ -221,13 +230,23 @@ extern void FP_YYY_div2(FP_YYY *x, FP_YYY *y);
 	@param z BIG number exponent
  */
 extern void FP_YYY_pow(FP_YYY *x, FP_YYY *y, BIG_XXX z);
+
+
+/**	@brief Inverse square root precalculation
+ *
+	@param r FP number, on exit  = x^(p-2*e-1)/2^(e+1) mod Modulus
+	@param x FP number
+ */
+extern void FP_YYY_invsqrt(FP_YYY *r,FP_YYY *x);
+
 /**	@brief Fast Modular square root of a an FP, mod Modulus
  *
 	@param x FP number, on exit  = sqrt(y) mod Modulus
 	@param y FP number, the number whose square root is calculated
-
+    @param h an optional precalculation
  */
-extern void FP_YYY_sqrt(FP_YYY *x, FP_YYY *y);
+extern void FP_YYY_sqrt(FP_YYY *x, FP_YYY *y, FP_YYY *h);
+
 /**	@brief Modular negation of a an FP, mod Modulus
  *
 	@param x FP number, on exit = -y mod Modulus
@@ -258,9 +277,10 @@ extern void FP_YYY_norm(FP_YYY *x);
 /**	@brief Tests for FP a quadratic residue mod Modulus
  *
 	@param x FP number to be tested
+    @param h an optional precalculation
 	@return 1 if quadratic residue, else returns 0 if quadratic non-residue
  */
-extern int FP_YYY_qr(FP_YYY *x);
+extern int FP_YYY_qr(FP_YYY *x,FP_YYY *h);
 /**	@brief Modular inverse of a an FP, mod Modulus
  *
 	@param x FP number, on exit = 1/y mod Modulus

@@ -52,7 +52,7 @@ pub const NEGATOWER: usize = 0;
 pub const POSITOWER: usize = 1;
 
 pub const MODBITS:usize = @NBT@; /* Number of bits in Modulus */
-pub const MOD8: usize = @M8@;  /* Modulus mod 8 */
+pub const PM1D2: usize = @M8@;  /* Modulus mod 8 */
 pub const MODTYPE:usize=@MT@;
 pub const QNRI:usize=@QI@; /* Fp2 QNR 2^i+sqrt(-1) */
 pub const TOWER:usize=@TW@; /* Tower type */
@@ -232,6 +232,19 @@ impl FP {
         return a.x.iszilch();
     }
 
+    /* test this=0? */
+    pub fn isunity(&self) -> bool {
+        let mut a = FP::new_copy(self);
+        a.reduce();
+        return a.redc().isunity();
+    }
+
+    pub fn sign(&mut self) -> isize {
+        let mut a = FP::new_copy(self);
+        a.reduce();
+        return a.redc().parity();
+    }
+
     /* copy from FP b */
     pub fn copy(&mut self, b: &FP) {
         self.x.copy(&(b.x));
@@ -259,10 +272,6 @@ impl FP {
     /* normalise this */
     pub fn norm(&mut self) {
         self.x.norm();
-    }
-
-    pub fn sign(&mut self) -> isize {
-        return self.redc().parity();
     }
 
     /* swap FPs depending on d */
@@ -418,15 +427,80 @@ impl FP {
         w.add(&p); w.norm();
         w.fshr(1);
         self.x.cmove(&w,pr);
-/*
-        if self.x.parity() == 0 {
-            self.x.fshr(1);
-        } else {
-            let p = BIG::new_ints(&rom::MODULUS);
-            self.x.add(&p);
-            self.x.norm();
-            self.x.fshr(1);
-        } */
+    }
+    /* return jacobi symbol (this/Modulus) */
+    pub fn jacobi(&mut self) -> isize {
+        let mut p = BIG::new_ints(&rom::MODULUS);
+        let mut w = self.redc();
+        return w.jacobi(&mut p);
+    }
+    /* return TRUE if self==a */
+    pub fn equals(&self, a: &FP) -> bool {
+        let mut f = FP::new_copy(self);
+        let mut s = FP::new_copy(a);
+        f.reduce();
+        s.reduce();
+        if BIG::comp(&(f.x), &(s.x)) == 0 {
+            return true;
+        }
+        return false;
+    }
+
+    /* return self^e mod Modulus */
+    pub fn pow(&self, e: &BIG) -> FP {
+        let mut tb: [FP; 16] = [
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+            FP::new(),
+        ];
+        const CT: usize = 1 + (big::NLEN * (big::BASEBITS as usize) + 3) / 4;
+        let mut w: [i8; CT] = [0; CT];
+
+        let mut s = FP::new_copy(&self);
+        s.norm();
+        let mut t = BIG::new_copy(e);
+        t.norm();
+        let nb = 1 + (t.nbits() + 3) / 4;
+
+        for i in 0..nb {
+            let lsbs = t.lastbits(4);
+            t.dec(lsbs);
+            t.norm();
+            w[i] = lsbs as i8;
+            t.fshr(4);
+        }
+        tb[0].one();
+        tb[1].copy(&s);
+
+        let mut c = FP::new();
+        for i in 2..16 {
+            c.copy(&tb[i - 1]);
+            tb[i].copy(&c);
+            tb[i].mul(&s);
+        }
+        let mut r = FP::new_copy(&tb[w[nb - 1] as usize]);
+        for i in (0..nb - 1).rev() {
+            r.sqr();
+            r.sqr();
+            r.sqr();
+            r.sqr();
+            r.mul(&tb[w[i] as usize])
+        }
+        r.reduce();
+        return r;
     }
 
     // See eprint paper https://eprint.iacr.org/2018/1038
@@ -487,13 +561,11 @@ impl FP {
             n /= 2;
         }
 
-        if MOD8 == 5 {
-            n -= 3;
-            c = ((rom::MCONST as isize) + 5) / 8;
-        } else {
-            n -= 2;
-            c = ((rom::MCONST as isize) + 3) / 4;
-        }
+        let e = PM1D2 as isize;
+
+        n-=e+1;
+        c=((rom::MCONST as isize)+(1<<e)+1)/(1<<(e+1));
+
         let mut bw = 0;
         let mut w = 1;
         while w < c {
@@ -579,167 +651,92 @@ impl FP {
         }
         return r;
     }
+
+    /* Pseudo_inverse square root */
+    pub fn invsqrt(&mut self) {
+        if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
+            self.copy(&self.fpow());
+            return;
+        }
+        let e=PM1D2 as usize;
+        let mut m = BIG::new_ints(&rom::MODULUS);
+        m.dec(1);
+        m.shr(e);
+        m.dec(1);
+        m.fshr(1);
+        
+        self.copy(&self.pow(&m));
+    }
+
     /* self=1/self mod Modulus */
     pub fn inverse(&mut self) {
-        if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
-            let mut y = self.fpow();
-            if MOD8 == 5 {
-                let mut t = FP::new_copy(self);
-                t.sqr();
-                self.mul(&t);
-                y.sqr();
-            }
-            y.sqr();
-            y.sqr();
-            self.mul(&y);
-        } else {
-            let mut m2 = BIG::new_ints(&rom::MODULUS);
-            m2.dec(2);
-            m2.norm();
-            let inv = self.pow(&mut m2);
-            self.copy(&inv);
+        let e=PM1D2 as isize;
+        let mut s=FP::new_copy(self);
+        for _ in 0..e-1 {
+            s.sqr();
+            s.mul(self);
         }
+        self.invsqrt();
+        for _ in 0..=e {
+            self.sqr();
+        }
+        self.mul(&s);
+        self.reduce();
     }
 
-    /* return TRUE if self==a */
-    pub fn equals(&self, a: &FP) -> bool {
-        let mut f = FP::new_copy(self);
-        let mut s = FP::new_copy(a);
-        f.reduce();
-        s.reduce();
-        if BIG::comp(&(f.x), &(s.x)) == 0 {
-            return true;
+    /* Test for Quadratic Residue */
+    pub fn qr(&self,give_hint: Option<&mut FP>) -> isize {
+        let e=PM1D2 as isize;
+        let mut r=FP::new_copy(self);
+        r.invsqrt();
+        if let Some(hint) = give_hint {
+            hint.copy(&r);
         }
-        return false;
-    }
-
-    /* return self^e mod Modulus */
-    pub fn pow(&self, e: &BIG) -> FP {
-        let mut tb: [FP; 16] = [
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-            FP::new(),
-        ];
-        const CT: usize = 1 + (big::NLEN * (big::BASEBITS as usize) + 3) / 4;
-        let mut w: [i8; CT] = [0; CT];
-
-        let mut s = FP::new_copy(&self);
-        s.norm();
-        let mut t = BIG::new_copy(e);
-        t.norm();
-        let nb = 1 + (t.nbits() + 3) / 4;
-
-        for i in 0..nb {
-            let lsbs = t.lastbits(4);
-            t.dec(lsbs);
-            t.norm();
-            w[i] = lsbs as i8;
-            t.fshr(4);
+        for _ in 0..e {
+            r.sqr();
         }
-        tb[0].one();
-        tb[1].copy(&s);
-
-        let mut c = FP::new();
-        for i in 2..16 {
-            c.copy(&tb[i - 1]);
-            tb[i].copy(&c);
-            tb[i].mul(&s);
+        let mut s=FP::new_copy(self);
+        for _ in 0..e-1 {
+            s.sqr();
         }
-        let mut r = FP::new_copy(&tb[w[nb - 1] as usize]);
-        for i in (0..nb - 1).rev() {
-            r.sqr();
-            r.sqr();
-            r.sqr();
-            r.sqr();
-            r.mul(&tb[w[i] as usize])
-        }
-        r.reduce();
-        return r;
+        r.mul(&s);
+        return r.isunity() as isize;
     }
 
     /* return sqrt(this) mod Modulus */
-    pub fn sqrt(&mut self) -> FP {
-        self.reduce();
+    pub fn sqrt(&mut self,take_hint: Option<&FP>) -> FP {
+        let e=PM1D2 as isize;
+        let mut g=FP::new_copy(self);
 
-        if MOD8 == 5 {
-            let v: FP;
-            let mut i = FP::new_copy(self);
-            i.x.shl(1);
-            if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
-                v = i.fpow();
-            } else {
-                let mut p = BIG::new_ints(&rom::MODULUS);
-                p.dec(5);
-                p.norm();
-                p.shr(3);
-                v = i.pow(&p);
-            }
-            i.mul(&v);
-            i.mul(&v);
-            i.x.dec(1);
-            let mut r = FP::new_copy(self);
-            r.mul(&v);
-            r.mul(&i);
-            r.reduce();
-            return r;
+        if let Some(hint) = take_hint {
+            g.copy(&hint);
         } else {
-            let mut r: FP;
-            if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
-                r = self.fpow();
-                r.mul(self);
-            } else {
-                let mut p = BIG::new_ints(&rom::MODULUS);
-                p.inc(1);
-                p.norm();
-                p.shr(2);
-                r = self.pow(&p);
-            }
-            return r;
+            g.invsqrt();
         }
+        let m = BIG::new_ints(&rom::ROI);
+        let mut v=FP::new_big(&m);
+        let mut t=FP::new_copy(&g);
+        t.sqr();
+        t.mul(self);
+
+        let mut r=FP::new_copy(self);
+        r.mul(&g);
+        let mut b=FP::new_copy(&t);
+       
+        for k in (2..=e).rev()   //(int k=e;k>1;k--)
+        {
+            for _ in 1..k-1 {
+                b.sqr();
+            }
+            let u=!b.isunity() as isize;
+            g.copy(&r); g.mul(&v);
+            r.cmove(&g,u);
+            v.sqr();
+            g.copy(&t); g.mul(&v);
+            t.cmove(&g,u);
+            b.copy(&t);
+        }
+        return r;
     }
 
-    pub fn qr(&self) -> isize {
-        let mut r: FP;
-        if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
-            r=self.fpow();
-            if MOD8 == 5 {
-                r.sqr();
-                r.sqr();
-                r.mul(self);
-                r.mul(self);                
-            } else {
-                r.sqr();
-                r.mul(self);
-            }
-            r.reduce();
-        } else {
-            let mut m = BIG::new_ints(&rom::MODULUS);         
-            m.dec(1);
-            m.norm();
-            m.shr(1);
-            r=self.pow(&m);                
-        }
-        let w=r.redc();
-        return w.isunity() as isize;
-    }
-
-    /* return jacobi symbol (this/Modulus) */
-    pub fn jacobi(&mut self) -> isize {
-        let mut p = BIG::new_ints(&rom::MODULUS);
-        let mut w = self.redc();
-        return w.jacobi(&mut p);
-    }
 }

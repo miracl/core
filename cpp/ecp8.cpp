@@ -968,7 +968,7 @@ void ZZZ::ECP8_hashit(ECP8 *Q,BIG h)
     sgn=FP_sign(&t);
         
     FP_from_int(&s,-3);
-    FP_sqrt(&s,&s);         // s=sqrt(-3)
+    FP_sqrt(&s,&s,NULL);         // s=sqrt(-3)
     FP_sub(&j,&s,&one);     FP_norm(&j);
     FP_div2(&j,&j);         // j=(s-1)/2
 

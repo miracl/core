@@ -634,7 +634,7 @@ int YYY::FP4_qr(FP4 *x)
 }
 
 /* sqrt(a+xb) = sqrt((a+sqrt(a*a-n*b*b))/2)+x.b/(2*sqrt((a+sqrt(a*a-n*b*b))/2)) */
-/* returns true if x is QR */
+
 void YYY::FP4_sqrt(FP4 *r, FP4* x)
 {
     FP2 a, b, s, t;

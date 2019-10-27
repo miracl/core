@@ -743,6 +743,11 @@ void XXX::BIG_monty(BIG a, BIG md, chunk MC, DBIG d)
     chunk v[NLEN_XXX];
 #endif
 
+
+#ifdef DEBUG_NORM
+    if ((d[DMPV_XXX] != 1 && d[DMPV_XXX] != 0) || d[DMNV_XXX] != 0) printf("Input to redc not normed\n");
+#endif
+
 #ifdef COMBA
 
 #ifdef UNWOUND

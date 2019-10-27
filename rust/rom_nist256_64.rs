@@ -38,6 +38,7 @@ use crate::nist256::big::NLEN;
 // Base Bits= 56
 // nist256 modulus
 pub const MODULUS: [Chunk; NLEN] = [0xFFFFFFFFFFFFFF, 0xFFFFFFFFFF, 0x0, 0x1000000, 0xFFFFFFFF];
+pub const ROI: [Chunk; NLEN] = [0xFFFFFFFFFFFFFE, 0xFFFFFFFFFF, 0x0, 0x1000000, 0xFFFFFFFF];
 pub const R2MODP: [Chunk; NLEN] = [
     0x3000000050000,
     0x0,

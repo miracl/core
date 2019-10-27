@@ -46,7 +46,7 @@
 // FP stuff
 
 #define MBITS_YYY @NBT@	/**< Modulus bits */
-#define MOD8_YYY @M8@     /**< Modulus mod 8 */
+#define PM1D2_YYY @M8@     /**< Largest m such that 2^m|(p-1) */
 #define MODTYPE_YYY @MT@  /**< Modulus type */
 #define MAXXES_YYY @SH@
 #define QNRI_YYY @QI@

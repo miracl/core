@@ -35,6 +35,7 @@ use crate::bn254::big::NLEN;
 // BN254 Modulus
 // Base Bits= 56
 pub const MODULUS: [Chunk; NLEN] = [0x13, 0x13A7, 0x80000000086121, 0x40000001BA344D, 0x25236482];
+pub const ROI: [Chunk; NLEN] = [0x12, 0x13A7, 0x80000000086121, 0x40000001BA344D, 0x25236482];
 pub const R2MODP: [Chunk; NLEN] = [
     0x2F2A96FF5E7E39,
     0x64E8642B96F13C,

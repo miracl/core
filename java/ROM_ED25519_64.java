@@ -39,6 +39,7 @@ public class ROM
 {
 
 public static final long[] Modulus= {0xFFFFFFFFFFFFEDL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0x7FFFFFFFL};
+public static final long[] ROI= {0xEE1B274A0EA0B0L,0x1806AD2FE478C4L,0x993DFBD7A72F43L,0x4FC1DF0B2B4D00L,0x2B832480L};
 public static final long[] R2modp= {0xA4000000000000L,0x5L,0x0L,0x0L,0x0L};
 public static final long MConst= 0x13;
 

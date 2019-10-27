@@ -309,7 +309,7 @@ public final class FP2 {
         c.conj();
         c.mul(this);
 
-        return c.geta().qr();
+        return c.geta().qr(null);
     }
 
 /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
@@ -321,7 +321,7 @@ public final class FP2 {
 		FP w3=new FP(a);
 		w1.sqr(); w2.sqr(); w1.add(w2); w1.norm();
 		
-		w1=w1.sqrt();
+		w1=w1.sqrt(null);
 		
         w2.copy(a); w2.add(w1); 
 		w2.norm(); w2.div2();
@@ -329,9 +329,9 @@ public final class FP2 {
         w3.copy(a); w3.sub(w1); 
 		w3.norm(); w3.div2();
       
-        w2.cmove(w3,w3.qr());
+        w2.cmove(w3,w3.qr(null));
 
-		w2=w2.sqrt();
+		w2=w2.sqrt(null);
 		a.copy(w2);
 		w2.add(w2); w2.norm();
 		w2.inverse();

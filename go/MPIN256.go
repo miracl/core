@@ -367,7 +367,7 @@ func MPIN_CLIENT_2(X []byte, Y []byte, SEC []byte) int {
 	px.Mod(r)
 
 	P = G1mul(P, px)
-	P.neg()
+	P.Neg()
 	P.ToBytes(SEC, false)
 	return 0
 }

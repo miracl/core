@@ -961,7 +961,7 @@ void ECP8_ZZZ_hashit(ECP8_ZZZ *Q,BIG_XXX h)
     sgn=FP_YYY_sign(&t);
         
     FP_YYY_from_int(&s,-3);
-    FP_YYY_sqrt(&s,&s);         // s=sqrt(-3)
+    FP_YYY_sqrt(&s,&s,NULL);         // s=sqrt(-3)
     FP_YYY_sub(&j,&s,&one);     FP_YYY_norm(&j);
     FP_YYY_div2(&j,&j);         // j=(s-1)/2
 

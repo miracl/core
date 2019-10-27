@@ -296,7 +296,7 @@ var FP2 = function(ctx) {
             c.conj();
             c.mul(this);
 
-            return c.geta().qr();
+            return c.geta().qr(null);
         },
 
         /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
@@ -315,7 +315,7 @@ var FP2 = function(ctx) {
             w2.sqr();
             w1.add(w2); w1.norm();
 
-            w1 = w1.sqrt();
+            w1 = w1.sqrt(null);
 
             w2.copy(this.a);
             w2.add(w1);
@@ -327,9 +327,9 @@ var FP2 = function(ctx) {
             w3.norm();
             w3.div2();
 
-            w2.cmove(w3,w3.qr())
+            w2.cmove(w3,w3.qr(null))
 
-            w2 = w2.sqrt();
+            w2 = w2.sqrt(null);
             this.a.copy(w2);
             w2.add(w2); w2.norm();
             w2.inverse();

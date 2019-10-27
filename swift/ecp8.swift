@@ -930,7 +930,7 @@ public struct ECP8 {
         }
         B.norm()
         let sgn=t.sign()
-        var w=s.sqrt()
+        var w=s.sqrt(nil)
         var j=FP(w); j.sub(one); j.norm(); j.div2()
 
         w.mul(t)

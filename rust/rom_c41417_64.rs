@@ -44,6 +44,15 @@ pub const MODULUS: [Chunk; NLEN] = [
     0xFFFFFFFFFFFFFFF,
     0x3FFFFFFFFFFFFF,
 ];
+pub const ROI: [Chunk; NLEN] = [
+    0xFFFFFFFFFFFFFEE,
+    0xFFFFFFFFFFFFFFF,
+    0xFFFFFFFFFFFFFFF,
+    0xFFFFFFFFFFFFFFF,
+    0xFFFFFFFFFFFFFFF,
+    0xFFFFFFFFFFFFFFF,
+    0x3FFFFFFFFFFFFF,
+];
 pub const R2MODP: [Chunk; NLEN] = [0x121000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0];
 pub const MCONST: Chunk = 0x11;
 

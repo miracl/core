@@ -250,7 +250,7 @@ int ZZZ::ECP_set(ECP *P, BIG x)
 
     ECP_rhs(&rhs, &rhs);
  
-    if (!FP_qr(&rhs))
+    if (!FP_qr(&rhs,NULL))
     {
         ECP_inf(P);
         return 0;
@@ -323,21 +323,21 @@ int ZZZ::ECP_set(ECP *P, BIG x, BIG y)
 /* SU=136 */
 int ZZZ::ECP_setx(ECP *P, BIG x, int s)
 {
-    FP rhs;
+    FP rhs,hint;
     BIG t;
 
     FP_nres(&rhs, x);
 
     ECP_rhs(&rhs, &rhs);
 
-    if (!FP_qr(&rhs))
+    if (!FP_qr(&rhs,&hint))
     {
         ECP_inf(P);
         return 0;
     }
 
     FP_nres(&(P->x), x);
-    FP_sqrt(&(P->y), &rhs);
+    FP_sqrt(&(P->y), &rhs, &hint);
 
     FP_redc(t, &(P->y));
 
@@ -1206,9 +1206,14 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
     FP_from_int(&A,CURVE_A);
     FP_nres(&t,h);
     FP_sqr(&t,&t);   // t^2
-    if (MOD8_YYY == 5)
+
+    if (PM1D2_YYY == 2)
          FP_add(&t,&t,&t);  // 2t^2
-    else FP_neg(&t,&t);     // -t^2
+    if (PM1D2_YYY == 1)
+        FP_neg(&t,&t);      // -t^2
+    if (PM1D2_YYY > 2)
+        FP_imul(&t,&t,QNRI_YYY); // precomputed QNR
+
     FP_one(&one);
     FP_add(&t,&t,&one); FP_norm(&t);
     FP_inv(&t,&t);      // 1/(1+z.t^2)
@@ -1220,7 +1225,7 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
 
     ECP_rhs(&t,&X2);
 
-    FP_cmove(&X1,&X2,FP_qr(&t));
+    FP_cmove(&X1,&X2,FP_qr(&t,NULL));
     FP_redc(a,&X1);
 
     ECP_set(P,a);
@@ -1252,9 +1257,14 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
 
     FP_nres(&t,h); sgn=FP_sign(&t);
     FP_sqr(&t,&t);   // t^2
-    if (MOD8_YYY == 5)
+
+    if (PM1D2_YYY == 2)
          FP_add(&t,&t,&t);  // 2t^2
-    else FP_neg(&t,&t);     // -t^2
+    if (PM1D2_YYY == 1)
+        FP_neg(&t,&t);      // -t^2
+    if (PM1D2_YYY > 2)
+        FP_imul(&t,&t,QNRI_YYY);  // precomputed QNR
+
     FP_add(&t,&t,&one); FP_norm(&t);
     FP_inv(&t,&t);      // 1/(1+z.t^2)
 
@@ -1279,11 +1289,11 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
     FP_add(&w2,&w2,&t);   // w2=X1^3+AX1^2+BX1
     FP_norm(&w2);
 
-    qres=FP_qr(&w2);
+    qres=FP_qr(&w2,NULL);
     FP_cmove(&X1,&X2,qres);
     FP_cmove(&w1,&w2,qres);
 
-    FP_sqrt(&Y,&w1);
+    FP_sqrt(&Y,&w1,NULL);
     FP_copy(&t,&X1); FP_add(&t,&t,&t); FP_add(&t,&t,&t); FP_norm(&t); // t=4*x
     
     FP_sub(&w1,&t,&KB); FP_norm(&w1);  // w1 = 4x+(a-b)
@@ -1317,10 +1327,9 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
     sgn=FP_sign(&t);
     if (CURVE_A!=0)
     {
-        //BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
         FP_from_int(&A,CURVE_A);
         FP_sqr(&t,&t);
-        if (MOD8_YYY == 5)
+        if (PM1D2_YYY == 2)
             FP_add(&t,&t,&t);  // t2=2*t*t 2 is QNR
         else
             FP_neg(&t,&t);     // t2=-t^2 -1 is QNR
@@ -1337,15 +1346,14 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
         FP_mul(&X2,&w,&A);   // -B(w+1)/Aw
         FP_mul(&X3,&t,&X2);
         ECP_rhs(&w,&X3);
-        FP_cmove(&X2,&X3,FP_qr(&w));
+        FP_cmove(&X2,&X3,FP_qr(&w,NULL));
         ECP_rhs(&w,&X2);
-        FP_sqrt(&Y,&w);
+        FP_sqrt(&Y,&w,NULL);
         FP_redc(x,&X2);
 
     } else {
-        //BIG_zero(a); BIG_inc(a,-3); BIG_norm(a); FP_nres(&A,a);
         FP_from_int(&A,-3);
-        FP_sqrt(&w,&A);      // w=sqrt(-3)
+        FP_sqrt(&w,&A,NULL);      // w=sqrt(-3)
         FP_sub(&j,&w,&one);  FP_norm(&j);
         FP_div2(&j,&j);        // j=(w-1)/2
         FP_mul(&w,&w,&t);     // w=s.t
@@ -1364,11 +1372,11 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
         FP_add(&X3,&w,&one); FP_norm(&X3);
     
         ECP_rhs(&w,&X2);
-        FP_cmove(&X1,&X2,FP_qr(&w));
+        FP_cmove(&X1,&X2,FP_qr(&w,NULL));
         ECP_rhs(&w,&X3);
-        FP_cmove(&X1,&X3,FP_qr(&w));
+        FP_cmove(&X1,&X3,FP_qr(&w,NULL));
         ECP_rhs(&w,&X1);
-        FP_sqrt(&Y,&w);
+        FP_sqrt(&Y,&w,NULL);
         FP_redc(x,&X1);
     }
     ne=FP_sign(&Y)^sgn;

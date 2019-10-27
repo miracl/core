@@ -423,11 +423,10 @@ int FP2_YYY_qr(FP2_YYY *x)
     FP2_YYY_conj(&c,x);
     FP2_YYY_mul(&c,&c,x);
 
-    return FP_YYY_qr(&(c.a));
+    return FP_YYY_qr(&(c.a),NULL);
 }
 
 /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-/* returns true if u is QR */
 
 void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
 {
@@ -439,7 +438,7 @@ void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
     FP_YYY_sqr(&w2, &(w->a));
     FP_YYY_add(&w1, &w1, &w2);
     FP_YYY_norm(&w1);
-    FP_YYY_sqrt(&w1, &w1);
+    FP_YYY_sqrt(&w1, &w1,NULL);
 
     FP_YYY_add(&w2, &(w->a), &w1);
     FP_YYY_norm(&w2);
@@ -449,9 +448,9 @@ void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
     FP_YYY_norm(&w3);
     FP_YYY_div2(&w3, &w3);
 
-    FP_YYY_cmove(&w2,&w3,FP_YYY_qr(&w3)); // one or the other will be a QR
+    FP_YYY_cmove(&w2,&w3,FP_YYY_qr(&w3,NULL)); // one or the other will be a QR
 
-    FP_YYY_sqrt(&w2, &w2);
+    FP_YYY_sqrt(&w2, &w2,NULL);
     FP_YYY_copy(&(w->a), &w2);
     FP_YYY_add(&w2, &w2, &w2);
     FP_YYY_norm(&w2);

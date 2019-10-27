@@ -183,8 +183,6 @@ public struct FP {
         return s
     }
 
-
-
 /* reduce this mod Modulus */
     mutating func reduce()
     {
@@ -224,6 +222,21 @@ public struct FP {
         return z.x.iszilch()
     }
     
+/* test this=0? */
+    func isunity() -> Bool
+    {
+        var z=FP(self)
+        z.reduce()
+        return z.redc().isunity()
+    }
+
+    func sign() -> Int
+    {
+        var z=FP(self)
+        z.reduce()
+        return z.redc().parity()
+    }
+
 /* copy from FP b */
     mutating func copy(_ b: FP)
     {
@@ -242,11 +255,6 @@ public struct FP {
     mutating func one()
     {
         x.one(); nres()
-    }
-    
-    func sign() -> Int
-    {
-        return redc().parity()
     }
 
 /* normalise this */
@@ -410,6 +418,60 @@ public struct FP {
         } */
     }
 
+/* return jacobi symbol (this/Modulus) */
+    func jacobi() -> Int
+    {
+        var w=redc()
+        return w.jacobi(FP.p)
+    }
+
+/* return TRUE if this==a */
+    func equals(_ a: FP) -> Bool
+    {
+        var f=FP(self)
+        var s=FP(a)
+        f.reduce()
+        s.reduce()
+        if (BIG.comp(f.x,s.x)==0) {return true}
+        return false;
+    }
+
+
+/* return this^e mod Modulus */
+    mutating func pow(_ e: BIG) -> FP
+    {
+        var tb=[FP]() 
+        let n=1+(CONFIG_BIG.NLEN*Int(CONFIG_BIG.BASEBITS)+3)/4
+        var w=[Int8](repeating: 0,count: n)     
+        norm()
+        var t=BIG(e); t.norm()
+        let nb=1+(t.nbits()+3)/4    
+
+        for i in 0 ..< nb  {
+            let lsbs=t.lastbits(4)
+            t.dec(lsbs)
+            t.norm()
+            w[i]=Int8(lsbs)
+            t.fshr(4);
+        }
+        tb.append(FP(1))
+        tb.append(FP(self))
+        for i in 2 ..< 16 {
+            tb.append(FP(tb[i-1]))
+            tb[i].mul(self)
+        }
+        var r=FP(tb[Int(w[nb-1])])
+        for i in (0...nb-2).reversed() {
+            r.sqr()
+            r.sqr()
+            r.sqr()
+            r.sqr()
+            r.mul(tb[Int(w[i])])
+        }
+        r.reduce()
+        return r
+    }
+
 // See eprint paper https://eprint.iacr.org/2018/1038
 // return this^(p-3)/4 or this^(p-5)/8
     mutating func fpow() -> FP 
@@ -435,15 +497,9 @@ public struct FP {
             n=n/2
         }
 
-        if (CONFIG_FIELD.MOD8==5)
-        {
-            n=n-3
-            c=(Int(ROM.MConst)+5)/8
-        } else {
-            n=n-2
-            c=(Int(ROM.MConst)+3)/4            
-        }
-
+        let e=Int(CONFIG_FIELD.PM1D2)
+        n = n-(e+1)
+        c=((Int(ROM.MConst))+(1<<e)+1)/(1<<(e+1));
 
         var bw=0; var w=1; while w<c {w*=2; bw+=1}
         var k=w-c
@@ -506,81 +562,134 @@ public struct FP {
         return r        
     }
 
+    /* Pseudo_inverse square root */
+    mutating func invsqrt()
+    {
+        if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.PSEUDO_MERSENNE || CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {
+            copy(fpow())
+            return
+        }
+        let e=CONFIG_FIELD.PM1D2
+        var m=BIG(ROM.Modulus)
+        m.dec(1)
+        m.shr(e)
+        m.dec(1)
+        m.fshr(1)
+        
+        copy(pow(m))
+    }
+
 /* this=1/this mod Modulus */
     mutating func inverse()
     {
-        if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.PSEUDO_MERSENNE || CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {
-            var y=fpow()
-            if (CONFIG_FIELD.MOD8==5)
-            {
-                var t=FP(self)
-                t.sqr()
-                mul(t)
-                y.sqr()
+        let e=CONFIG_FIELD.PM1D2
+        var s=(self);
+        for _ in 0..<(e-1) {
+            s.sqr()
+            s.mul(self)
+        }
+        invsqrt()
+        for _ in 0...e {
+            sqr();
+        }
+        mul(s)
+        reduce()
+    }
+/* Test for Quadratic Residue */    
+    func qr(_ hint:inout FP?) -> Int
+    {
+        let e=CONFIG_FIELD.PM1D2
+        var r=FP(self);
+        r.invsqrt()
+        if hint != nil {
+            hint!.copy(r)
+        }
+        for _ in 0..<e {
+            r.sqr()
+        }
+        var s=FP(self);
+        for _ in 0..<(e-1) {
+            s.sqr()
+        }
+        r.mul(s)
+        return r.isunity() ? 1:0
+    }
 
-            } 
-            y.sqr()
-            y.sqr()
-            mul(y)
+/* Test for Quadratic Residue 
+    func qr() -> Int
+    {
+        var r: FP
+        var w=FP(self)
+        if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.PSEUDO_MERSENNE  || CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {
+            r=w.fpow()
+            if CONFIG_FIELD.PM1D2==2 {
+                r.sqr()
+                r.sqr()
+                r.mul(self)
+                r.mul(self)               
+            } else {
+                r.sqr()
+                r.mul(self)
+            }
+            r.reduce()
         } else {
-            var m2=BIG(ROM.Modulus)
-            m2.dec(2); m2.norm()
-            copy(pow(m2))
+            var m=BIG(FP.p)       
+            m.dec(1)
+            m.norm()
+            m.shr(1)
+            r=w.pow(m)             
         }
-    }
+        let z=r.redc()
+        return z.isunity() ? 1 : 0
+    } */
+ 
     
-/* return TRUE if this==a */
-    func equals(_ a: FP) -> Bool
-    {
-        var f=FP(self)
-        var s=FP(a)
-        f.reduce()
-        s.reduce()
-        if (BIG.comp(f.x,s.x)==0) {return true}
-        return false;
-    }
-
-
-/* return this^e mod Modulus */
-    mutating func pow(_ e: BIG) -> FP
-    {
-        var tb=[FP]() 
-        let n=1+(CONFIG_BIG.NLEN*Int(CONFIG_BIG.BASEBITS)+3)/4
-        var w=[Int8](repeating: 0,count: n)     
-        norm()
-        var t=BIG(e); t.norm()
-        let nb=1+(t.nbits()+3)/4    
-
-        for i in 0 ..< nb  {
-            let lsbs=t.lastbits(4)
-            t.dec(lsbs)
-            t.norm()
-            w[i]=Int8(lsbs)
-            t.fshr(4);
-        }
-        tb.append(FP(1))
-        tb.append(FP(self))
-        for i in 2 ..< 16 {
-            tb.append(FP(tb[i-1]))
-            tb[i].mul(self)
-        }
-        var r=FP(tb[Int(w[nb-1])])
-        for i in (0...nb-2).reversed() {
-            r.sqr()
-            r.sqr()
-            r.sqr()
-            r.sqr()
-            r.mul(tb[Int(w[i])])
-        }
-        r.reduce()
-        return r
-    }
-
 /* return sqrt(this) mod Modulus */
+    mutating func sqrt(_ hint: FP?) -> FP
+    {
+        let e=CONFIG_FIELD.PM1D2
+        var g=FP(self);
+
+        if hint != nil {
+            g.copy(hint!)
+        } else {
+            g.invsqrt()
+        }
+        let m=BIG(ROM.ROI)
+      
+        var v=FP(m)
+        var t=FP(g)
+        t.sqr()
+        t.mul(self)
+
+        var r=FP(self)
+        r.mul(g)
+        var b=FP(t)
+       
+        for k in stride(from: e, to: 1, by: -1) //(int k=e;k>1;k--)
+        {
+            for _ in 1..<k-1 {
+                b.sqr()
+            }
+            let u=b.isunity() ? 0 : 1
+            g.copy(r); g.mul(v)
+            r.cmove(g,u)
+            v.sqr()
+            g.copy(t); g.mul(v)
+            t.cmove(g,u)
+            b.copy(t)
+        }
+
+        //print("root= "+r.toString()+"\n")
+        return r
+
+    }
+
+/* return sqrt(this) mod Modulus
     mutating func sqrt() -> FP
     {
         reduce();
-        if (CONFIG_FIELD.MOD8==5)
+        if (CONFIG_FIELD.PM1D2==2)
         {
             var v: FP
             var i=FP(self); i.x.shl(1)
@@ -610,40 +719,5 @@ public struct FP {
                 return pow(b)
             }
         }
-    }
-
-    func qr() -> Int
-    {
-        var r: FP
-        var w=FP(self)
-        if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.PSEUDO_MERSENNE  || CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {
-            r=w.fpow()
-            if CONFIG_FIELD.MOD8==5 {
-                r.sqr()
-                r.sqr()
-                r.mul(self)
-                r.mul(self)               
-            } else {
-                r.sqr()
-                r.mul(self)
-            }
-            r.reduce()
-        } else {
-            var m=BIG(FP.p)       
-            m.dec(1)
-            m.norm()
-            m.shr(1)
-            r=w.pow(m)             
-        }
-        let z=r.redc()
-        return z.isunity() ? 1 : 0
-    }
-
-/* return jacobi symbol (this/Modulus) */
-    func jacobi() -> Int
-    {
-        var w=redc()
-        return w.jacobi(FP.p)
-    }
-    
+    }  */
 }

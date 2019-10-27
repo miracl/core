@@ -91,7 +91,7 @@ impl ECP {
         E.x.norm();
         let mut rhs = ECP::rhs(&E.x);
         if CURVETYPE == MONTGOMERY {
-            if rhs.qr() != 1 {
+            if rhs.qr(None) != 1 {
                 E.inf();
             }
         } else {
@@ -107,14 +107,15 @@ impl ECP {
     /* set (x,y) from BIG and a bit */
     pub fn new_bigint(ix: &BIG, s: isize) -> ECP {
         let mut E = ECP::new();
+        let mut hint = FP::new();
         E.x.bcopy(ix);
         E.x.norm();
         E.z.one();
 
         let mut rhs = ECP::rhs(&E.x);
 
-        if rhs.qr() == 1 {
-            let mut ny = rhs.sqrt();
+        if rhs.qr(Some(&mut hint)) == 1 {
+            let mut ny = rhs.sqrt(Some(&hint));
             if ny.redc().parity() != s {
                 ny.neg()
             }
@@ -129,13 +130,14 @@ impl ECP {
     /* set from x - calculate y from curve equation */
     pub fn new_big(ix: &BIG) -> ECP {
         let mut E = ECP::new();
+        let mut hint = FP::new();
         E.x.bcopy(ix);
         E.x.norm();
         E.z.one();
         let mut rhs = ECP::rhs(&E.x);
-        if rhs.qr() == 1 {
+        if rhs.qr(Some(&mut hint)) == 1 {
             if CURVETYPE != MONTGOMERY {
-                E.y.copy(&rhs.sqrt())
+                E.y.copy(&rhs.sqrt(Some(&hint)))
             }
         } else {
             E.inf();
@@ -1226,11 +1228,17 @@ impl ECP {
             let A=FP::new_int(rom::CURVE_A);
 
             t.sqr();
-            if fp::MOD8 == 5 {
+
+            if fp::PM1D2 == 2 {
                 t.dbl();
-            } else {
+            } 
+            if fp::PM1D2 == 1 {
                 t.neg();
             }
+            if fp::PM1D2 > 2 {
+                t.imul(fp::QNRI as isize);
+            }
+
             t.add(&one);
             t.norm();
             t.inverse();
@@ -1240,7 +1248,7 @@ impl ECP {
             X2.add(&A); X2.norm();
             X2.neg();
             let rhs=ECP::rhs(&X2);
-            X1.cmove(&X2,rhs.qr());
+            X1.cmove(&X2,rhs.qr(None));
 
             let a=X1.redc();
             P.copy(&ECP::new_big(&a));
@@ -1273,10 +1281,14 @@ impl ECP {
             B.sqr();
             
             t.sqr();
-            if fp::MOD8 == 5 {
+            if fp::PM1D2 == 2 {
                 t.dbl();
-            } else {
+            } 
+            if fp::PM1D2 == 1 {
                 t.neg();
+            }
+            if fp::PM1D2 > 2 {
+                t.imul(fp::QNRI as isize);
             }
             t.add(&one); t.norm();
             t.inverse();
@@ -1301,11 +1313,11 @@ impl ECP {
             w2.add(&t);
             w2.norm();
 
-            let qres=w2.qr();
+            let qres=w2.qr(None);
             X1.cmove(&X2,qres);
             w1.cmove(&w2,qres);
 
-            let mut Y=w1.sqrt();
+            let mut Y=w1.sqrt(None);
             t.copy(&X1); t.dbl(); t.dbl(); t.norm();
 
             w1.copy(&t); w1.sub(&KB); w1.norm();
@@ -1344,7 +1356,7 @@ impl ECP {
             {
                 let mut A=FP::new_int(rom::CURVE_A);
                 t.sqr();
-                if fp::MOD8 == 5 {
+                if fp::PM1D2 == 2 {
                     t.dbl();
                 } else {
                     t.neg();
@@ -1360,13 +1372,13 @@ impl ECP {
                 X2.copy(&w); X2.mul(&A);
                 X3.copy(&t); X3.mul(&X2);
                 let mut rhs=ECP::rhs(&X3);
-                X2.cmove(&X3,rhs.qr());
+                X2.cmove(&X3,rhs.qr(None));
                 rhs.copy(&ECP::rhs(&X2));
-                Y.copy(&rhs.sqrt());
+                Y.copy(&rhs.sqrt(None));
                 x.copy(&X2.redc());
             } else {
                 let mut A=FP::new_int(-3);
-                let mut w=A.sqrt();
+                let mut w=A.sqrt(None);
                 let mut j=FP::new_copy(&w); j.sub(&one); j.norm(); j.div2();
                 w.mul(&t);
                 B.add(&one);
@@ -1379,11 +1391,11 @@ impl ECP {
                 w.sqr(); w.inverse();
                 X3.copy(&w); X3.add(&one); X3.norm();
                 let mut rhs=ECP::rhs(&X2);
-                X1.cmove(&X2,rhs.qr());
+                X1.cmove(&X2,rhs.qr(None));
                 rhs.copy(&ECP::rhs(&X3));
-                X1.cmove(&X3,rhs.qr());
+                X1.cmove(&X3,rhs.qr(None));
                 rhs.copy(&ECP::rhs(&X1));
-                Y.copy(&rhs.sqrt());
+                Y.copy(&rhs.sqrt(None));
                 x.copy(&X1.redc());
             }
             let ne=Y.sign()^sgn;

@@ -208,7 +208,7 @@ var ECP = function(ctx) {
             rhs = ECP.RHS(this.x);
 
             if (ECP.CURVETYPE == ECP.MONTGOMERY) {
-                if (rhs.qr() != 1) {
+                if (rhs.qr(null) != 1) {
                     this.inf();
                 }
  
@@ -232,9 +232,9 @@ var ECP = function(ctx) {
 			this.x.norm();
             rhs = ECP.RHS(this.x);
             this.z = new ctx.FP(1);
-
-            if (rhs.qr() == 1) {
-                ny = rhs.sqrt();
+            var hint=new ctx.FP(0);
+            if (rhs.qr(hint) == 1) {
+                ny = rhs.sqrt(hint);
                 if (ny.redc().parity() != s) {
                     ny.neg();
                 }
@@ -253,10 +253,11 @@ var ECP = function(ctx) {
 			this.x.norm();
             rhs = ECP.RHS(this.x);
             this.z = new ctx.FP(1);
+            var hint=new ctx.FP(0);
 
-            if (rhs.qr() == 1) {
+            if (rhs.qr(hint) == 1) {
                 if (ECP.CURVETYPE != ECP.MONTGOMERY) {
-                    this.y = rhs.sqrt();
+                    this.y = rhs.sqrt(hint);
                 }
             } else {
                 this.inf();
@@ -1320,11 +1321,17 @@ var ECP = function(ctx) {
             var one=new ctx.FP(1);
             var A=new ctx.FP(ctx.ROM_CURVE.CURVE_A);
             t.sqr();
-            if (ctx.FP.MOD8 == 5) {
+
+            if (ctx.FP.PM1D2 == 2) {
                 t.add(t);
-            } else {
+            } 
+            if (ctx.FP.PM1D2 == 1) {
                 t.neg();
             }
+            if (ctx.FP.PM1D2 > 2) {
+                t.imul(ctx.FP.PM1D2);
+            }
+
             t.add(one);
             t.norm();
             t.inverse();
@@ -1334,7 +1341,7 @@ var ECP = function(ctx) {
             X2.add(A); X2.norm();
             X2.neg();
             var rhs=ECP.RHS(X2);
-            X1.cmove(X2,rhs.qr());
+            X1.cmove(X2,rhs.qr(null));
 
             var a=X1.redc();
             P.setx(a);
@@ -1367,11 +1374,17 @@ var ECP = function(ctx) {
             B.sqr();
             
             t.sqr();
-            if (ctx.FP.MOD8 == 5) {
+
+            if (ctx.FP.PM1D2 == 2) {
                 t.add(t);
-            } else {
+            } 
+            if (ctx.FP.PM1D2 == 1) {
                 t.neg();
             }
+            if (ctx.FP.PM1D2 > 2) {
+                t.imul(ctx.FP.PM1D2);
+            }
+
             t.add(one); t.norm();
             t.inverse();
             X1.copy(t); X1.mul(A);
@@ -1395,11 +1408,11 @@ var ECP = function(ctx) {
             w2.add(t);
             w2.norm();
 
-            var qres=w2.qr();
+            var qres=w2.qr(null);
             X1.cmove(X2,qres);
             w1.cmove(w2,qres);
 
-            var Y=w1.sqrt();
+            var Y=w1.sqrt(null);
             t.copy(X1); t.add(t); t.add(t); t.norm();
 
             w1.copy(t); w1.sub(KB); w1.norm();
@@ -1438,7 +1451,7 @@ var ECP = function(ctx) {
             {
                 var A=new ctx.FP(ctx.ROM_CURVE.CURVE_A);
                 t.sqr();
-                if (ctx.FP.MOD8 == 5) {
+                if (ctx.FP.PM1D2 == 2) {
                     t.add(t);
                 } else {
                     t.neg();
@@ -1455,13 +1468,13 @@ var ECP = function(ctx) {
                 X3.copy(t); X3.mul(X2);
                 var rhs=ECP.RHS(X2);
                 rhs=ECP.RHS(X3);
-                X2.cmove(X3,rhs.qr());
+                X2.cmove(X3,rhs.qr(null));
                 rhs.copy(ECP.RHS(X2));
-                Y.copy(rhs.sqrt());
+                Y.copy(rhs.sqrt(null));
                 x.copy(X2.redc());
             } else {
                 var A=new ctx.FP(-3);
-                var w=A.sqrt();
+                var w=A.sqrt(null);
                 var j=new ctx.FP(w); j.sub(one); j.norm(); j.div2();
                 w.mul(t);
                 B.add(one);
@@ -1474,11 +1487,11 @@ var ECP = function(ctx) {
                 w.sqr(); w.inverse();
                 X3.copy(w); X3.add(one); X3.norm();
                 var rhs=ECP.RHS(X2);
-                X1.cmove(X2,rhs.qr());
+                X1.cmove(X2,rhs.qr(null));
                 rhs.copy(ECP.RHS(X3));
-                X1.cmove(X3,rhs.qr());
+                X1.cmove(X3,rhs.qr(null));
                 rhs.copy(ECP.RHS(X1));
-                Y.copy(rhs.sqrt());
+                Y.copy(rhs.sqrt(null));
                 x.copy(X1.redc());
             }
             var ne=Y.sign()^sgn;
