@@ -446,26 +446,28 @@ print("14. NUMS384E")
 print("15. NUMS512W")
 print("16. NUMS512E")
 print("17. SECP256K1")
-print("18. SM2\n")
+print("18. SM2")
+print("19. C13318")
+print("20. JUBJUB\n")
 
 print("Pairing-Friendly Elliptic Curves")
-print("19. BN254")
-print("20. BN254CX")
-print("21. BLS12383")
-print("22. BLS12381")
-print("23. FP256BN")
-print("24. FP512BN")
-print("25. BLS12461")
-print("26. BN462")
-print("27. BLS24479")
-print("28. BLS48556")
-print("29. BLS48581\n")
+print("21. BN254")
+print("22. BN254CX")
+print("23. BLS12383")
+print("24. BLS12381")
+print("25. FP256BN")
+print("26. FP512BN")
+print("27. BLS12461")
+print("28. BN462\n")
+print("29. BLS24479")
+print("30. BLS48556\n")
+print("31. BLS48581\n")
 
 print("RSA")
-print("30. RSA2048")
-print("31. RSA3072")
-print("32. RSA4096\n")
-print("33. NewHope\n")
+print("32. RSA2048")
+print("33. RSA3072")
+print("34. RSA4096")
+print("35. NewHope\n")
 
 selection=[]
 ptr=0
@@ -737,7 +739,7 @@ os.system(deltext+" timepbc.ino")
 #	if selected(selection,i,ptr) :
 #		print (i)
 
-if not selected(selection,1,ptr) and not selected(selection,2,ptr) :
+if not selected(selection,1,ptr) and not selected(selection,2,ptr) and not selected(selection,19,ptr):
 	os.system(deltext+" rom_field_F25519.cpp")
 if not selected(selection,1,ptr) :
 	os.system(deltext+" rom_curve_ED25519.cpp")

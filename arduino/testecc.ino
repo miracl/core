@@ -81,7 +81,7 @@ int ecdh_XXX()
 
     // private key S0 of size EGS_XXX bytes derived from Password and Salt
 
-    PBKDF2(HASH_TYPE_XXX, &PW, &SALT, 1000, EGS_XXX, &S0);
+    PBKDF2(MC_SHA2,HASH_TYPE_XXX,&S0, EGS_XXX,&PW, &SALT, 1000);
 
     Serial.print("Alices private key= 0x");
     OCT_output(&S0);
@@ -123,7 +123,7 @@ int ecdh_XXX()
         return 0;
     }
 
-    KDF2(HASH_TYPE_XXX, &Z0, NULL, AESKEY_XXX, &KEY);
+    KDF2(MC_SHA2,HASH_TYPE_XXX,&KEY,AESKEY_XXX, &Z0, NULL);
 
     Serial.print("Alice's DH Key=  0x");
     OCT_output(&KEY);
