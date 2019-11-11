@@ -604,44 +604,23 @@ public struct FP {
         if hint != nil {
             hint!.copy(r)
         }
-        for _ in 0..<e {
+
+        r.sqr()
+        r.mul(self)
+        for _ in 0..<(e-1) {
             r.sqr()
         }
-        var s=FP(self);
-        for _ in 0..<(e-1) {
-            s.sqr()
-        }
-        r.mul(s)
+
+        //for _ in 0..<e {
+        //    r.sqr()
+        //}
+        //var s=FP(self);
+        //for _ in 0..<(e-1) {
+        //    s.sqr()
+        //}
+        //r.mul(s)
         return r.isunity() ? 1:0
     }
-
-/* Test for Quadratic Residue 
-    func qr() -> Int
-    {
-        var r: FP
-        var w=FP(self)
-        if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.PSEUDO_MERSENNE  || CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {
-            r=w.fpow()
-            if CONFIG_FIELD.PM1D2==2 {
-                r.sqr()
-                r.sqr()
-                r.mul(self)
-                r.mul(self)               
-            } else {
-                r.sqr()
-                r.mul(self)
-            }
-            r.reduce()
-        } else {
-            var m=BIG(FP.p)       
-            m.dec(1)
-            m.norm()
-            m.shr(1)
-            r=w.pow(m)             
-        }
-        let z=r.redc()
-        return z.isunity() ? 1 : 0
-    } */
  
     
 /* return sqrt(this) mod Modulus */

@@ -44,7 +44,7 @@ import org.miracl.core.AES;
 public final class ECDH {
     public static final int INVALID_PUBLIC_KEY = -2;
     public static final int ERROR = -3;
-    public static final int INVALID = -4;
+    //public static final int INVALID = -4;
     public static final int EFS = CONFIG_BIG.MODBYTES;
     public static final int EGS = CONFIG_BIG.MODBYTES;
 
@@ -196,7 +196,7 @@ public final class ECDH {
         f = BIG.fromBytes(B);
 
         if (c.iszilch() || BIG.comp(c, r) >= 0 || d.iszilch() || BIG.comp(d, r) >= 0)
-            res = INVALID;
+            res = ERROR;
 
         if (res == 0) {
             d.invmodp(r);
@@ -209,11 +209,11 @@ public final class ECDH {
                 P = new ECP();
                 P.copy(WP);
                 P = P.mul2(h2, G, f);
-                if (P.is_infinity()) res = INVALID;
+                if (P.is_infinity()) res = ERROR;
                 else {
                     d = P.getX();
                     d.mod(r);
-                    if (BIG.comp(d, c) != 0) res = INVALID;
+                    if (BIG.comp(d, c) != 0) res = ERROR;
                 }
             }
         }

@@ -591,31 +591,6 @@ func (F *FP) inverse() {
         F.reduce()
 }
 
-
-/* this=1/this mod Modulus 
-func (F *FP) inverse() {
-
-	if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
-		y := F.fpow()
-		if PM1D2 == 2 {
-			t := NewFPcopy(F)
-			t.sqr()
-			F.mul(t)
-			y.sqr()
-		}
-		y.sqr()
-		y.sqr()
-		F.mul(y)
-	} else {
-		m2 := NewBIGints(Modulus)
-		m2.dec(2)
-		m2.norm()
-		F.copy(F.pow(m2))
-	}
-
-} */
-
-
 /* test for Quadratic residue */
 func (F *FP) qr(h *FP) int {
 	r:=NewFPcopy(F)
@@ -624,50 +599,27 @@ func (F *FP) qr(h *FP) int {
 	if h!=nil {
 		h.copy(r)
 	}
-	for i:=0;i<e;i++ { 
-		r.sqr()
-	}
-	s:=NewFPcopy(F)
+
+	r.sqr()
+	r.mul(F)
 	for i:=0;i<e-1;i++ {
-		s.sqr()
+            r.sqr()
 	}
-	r.mul(s)
+
+//	for i:=0;i<e;i++ { 
+//		r.sqr()
+//	}
+//	s:=NewFPcopy(F)
+//	for i:=0;i<e-1;i++ {
+//		s.sqr()
+//	}
+//	r.mul(s)
 	if r.isunity() {
 		return 1
 	} else {
 		return 0
 	}
 }
-/*
-func (F *FP) qr() int {
-	var r *FP
-	if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
-		r=F.fpow()
-		if PM1D2 == 2 {
-			r.sqr()
-			r.sqr()
-			r.mul(F)
-			r.mul(F)
-		} else {
-			r.sqr()
-			r.mul(F)
-		}
-		r.reduce()
-	} else {
-		m := NewBIGints(Modulus)
-		m.dec(1)
-		m.norm()
-		m.shr(1)
-		r=F.pow(m)
-	}
-	w:=r.redc()
-	if w.isunity() {
-		return 1
-	} else {
-		return 0
-	}
-
-} */
 
 /* return sqrt(this) mod Modulus */
 func (F *FP) sqrt(h *FP) *FP {

@@ -731,18 +731,25 @@ void YYY::FP_invsqrt(FP *r,FP *x)
 /* Is x a QR? return optional hint for fast follow-up square root */
 int YYY::FP_qr(FP *x,FP *h)
 {
-    FP r,s;
+    FP r;
     int i,e=PM1D2_YYY;
     FP_invsqrt(&r,x);
     if (h!=NULL)
         FP_copy(h,&r);
 
-    for (i=0;i<e;i++)
-        FP_sqr(&r,&r);
-    FP_copy(&s,x);
+
+    FP_sqr(&r,&r);
+    FP_mul(&r,x,&r);
     for (i=0;i<e-1;i++ )
-        FP_sqr(&s,&s);
-    FP_mul(&r,&r,&s);
+        FP_sqr(&r,&r);
+
+
+ //   for (i=0;i<e;i++)
+ //       FP_sqr(&r,&r);
+ //   FP_copy(&s,x);
+ //   for (i=0;i<e-1;i++ )
+ //       FP_sqr(&s,&s);
+ //   FP_mul(&r,&r,&s);
     
     return FP_isunity(&r);
 }

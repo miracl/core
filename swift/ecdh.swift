@@ -47,7 +47,7 @@ public struct ECDH
 {
     static let INVALID_PUBLIC_KEY:Int = -2
     static let ERROR:Int = -3
-    static let INVALID:Int = -4
+    //static let INVALID:Int = -4
     static public let EFS=Int(CONFIG_BIG.MODBYTES);
     static public let EGS=Int(CONFIG_BIG.MODBYTES);
     static public let SHA256=32
@@ -135,7 +135,7 @@ public struct ECDH
             s.mod(r)
 
             W=W.mul(s);
-            if W.is_infinity() {res=ERROR}
+            if W.is_infinity() {res=ECDH.ERROR}
             else
             {
                 W.getX().toBytes(&T);
@@ -199,7 +199,7 @@ public struct ECDH
         var f=BIG.fromBytes(B)
 
         if c.iszilch() || BIG.comp(c,r)>=0 || d.iszilch() || BIG.comp(d,r)>=0
-            {res=ECDH.INVALID}
+            {res=ECDH.ERROR}
 
         if res==0
         {
@@ -214,12 +214,12 @@ public struct ECDH
 				var P=ECP();
 				P.copy(WP);
 				P=P.mul2(h2,G,f);
-                if P.is_infinity() {res=INVALID}
+                if P.is_infinity() {res=ECDH.ERROR}
 				else
 				{
                     d=P.getX();
                     d.mod(r);
-                    if (BIG.comp(d,c) != 0) {res=ECDH.INVALID}
+                    if (BIG.comp(d,c) != 0) {res=ECDH.ERROR}
 				}
             }
         }

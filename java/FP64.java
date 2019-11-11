@@ -569,14 +569,20 @@ public final class FP {
         r.invsqrt();
         if (h!=null)
             h.copy(r);
-        for (int i=0;i<e;i++ )
+
+        r.sqr();
+        r.mul(this);
+        for (int i=0;i<e-1;i++)
             r.sqr();
-        FP s=new FP(this);
-        for (int i=0;i<e-1;i++ )
-            s.sqr();
-        r.mul(s);
-        if (r.isunity()) return 1;
-        else return 0;
+
+
+//        for (int i=0;i<e;i++ )
+//            r.sqr();
+//        FP s=new FP(this);
+//        for (int i=0;i<e-1;i++ )
+//            s.sqr();
+//        r.mul(s);
+        return r.isunity()?1:0;
     }
 
     /* return sqrt(this) mod Modulus */

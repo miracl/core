@@ -39,7 +39,7 @@ import "github.com/miracl/core/go/core"
 
 const INVALID_PUBLIC_KEY int = -2
 const ERROR int = -3
-const INVALID int = -4
+//const INVALID int = -4
 const EFS int = int(MODBYTES)
 const EGS int = int(MODBYTES)
 
@@ -198,7 +198,7 @@ func ECDH_ECPVP_DSA(sha int, W []byte, F []byte, C []byte, D []byte) int {
 	f := FromBytes(B[:])
 
 	if c.iszilch() || Comp(c, r) >= 0 || d.iszilch() || Comp(d, r) >= 0 {
-		res = INVALID
+		res = ERROR
 	}
 
 	if res == 0 {
@@ -216,13 +216,13 @@ func ECDH_ECPVP_DSA(sha int, W []byte, F []byte, C []byte, D []byte) int {
 			P = P.Mul2(h2, G, f)
 
 			if P.Is_infinity() {
-				res = INVALID
+				res = ERROR
 			} else {
 				d = P.GetX()
 				d.Mod(r)
 
 				if Comp(d, c) != 0 {
-					res = INVALID
+					res = ERROR
 				}
 			}
 		}

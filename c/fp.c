@@ -724,18 +724,24 @@ void FP_YYY_invsqrt(FP_YYY *r,FP_YYY *x)
 /* Is x a QR? return optional hint for fast follow-up square root */
 int FP_YYY_qr(FP_YYY *x,FP_YYY *h)
 {
-    FP_YYY r,s;
+    FP_YYY r;
     int i,e=PM1D2_YYY;
     FP_YYY_invsqrt(&r,x);
     if (h!=NULL)
         FP_YYY_copy(h,&r);
 
-    for (i=0;i<e;i++)
-        FP_YYY_sqr(&r,&r);
-    FP_YYY_copy(&s,x);
+    FP_YYY_sqr(&r,&r);
+    FP_YYY_mul(&r,x,&r);
     for (i=0;i<e-1;i++ )
-        FP_YYY_sqr(&s,&s);
-    FP_YYY_mul(&r,&r,&s);
+        FP_YYY_sqr(&r,&r);
+
+
+//    for (i=0;i<e;i++)
+//        FP_YYY_sqr(&r,&r);
+//    FP_YYY_copy(&s,x);
+//    for (i=0;i<e-1;i++ )
+//        FP_YYY_sqr(&s,&s);
+//    FP_YYY_mul(&r,&r,&s);
     
     return FP_YYY_isunity(&r);
 }

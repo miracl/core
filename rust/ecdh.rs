@@ -42,7 +42,7 @@ use crate::rand::RAND;
 
 pub const INVALID_PUBLIC_KEY: isize = -2;
 pub const ERROR: isize = -3;
-pub const INVALID: isize = -4;
+//pub const INVALID: isize = -4;
 pub const EFS: usize = big::MODBYTES as usize;
 pub const EGS: usize = big::MODBYTES as usize;
 
@@ -226,7 +226,7 @@ pub fn ecpvp_dsa(sha: usize, w: &[u8], f: &[u8], c: &[u8], d: &[u8]) -> isize {
     let mut tb = BIG::new();
 
     if cb.iszilch() || BIG::comp(&cb, &r) >= 0 || db.iszilch() || BIG::comp(&db, &r) >= 0 {
-        res = INVALID;
+        res = ERROR;
     }
 
     if res == 0 {
@@ -245,13 +245,13 @@ pub fn ecpvp_dsa(sha: usize, w: &[u8], f: &[u8], c: &[u8], d: &[u8]) -> isize {
             P = P.mul2(&h2, &mut G, &fb);
 
             if P.is_infinity() {
-                res = INVALID;
+                res = ERROR;
             } else {
                 db = P.getx();
                 db.rmod(&r);
 
                 if BIG::comp(&db, &cb) != 0 {
-                    res = INVALID
+                    res = ERROR
                 }
             }
         }

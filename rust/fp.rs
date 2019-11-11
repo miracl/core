@@ -692,14 +692,21 @@ impl FP {
         if let Some(hint) = give_hint {
             hint.copy(&r);
         }
-        for _ in 0..e {
+
+        r.sqr();
+        r.mul(self);
+        for _ in 0..e-1 {
             r.sqr();
         }
-        let mut s=FP::new_copy(self);
-        for _ in 0..e-1 {
-            s.sqr();
-        }
-        r.mul(&s);
+
+        //for _ in 0..e {
+        //    r.sqr();
+        //}
+        //let mut s=FP::new_copy(self);
+        //for _ in 0..e-1 {
+        //    s.sqr();
+        //}
+        //r.mul(&s);
         return r.isunity() as isize;
     }
 

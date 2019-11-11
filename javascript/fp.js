@@ -560,33 +560,6 @@ var FP = function(ctx) {
             return this;
         }, 
 
-        /* this=1/this mod Modulus 
-        inverse: function() {
-
-			if (FP.MODTYPE == FP.PSEUDO_MERSENNE || FP.MODTYPE == FP.GENERALISED_MERSENNE)
-			{
-				var y=this.fpow();
-				if (FP.PM1D2==2)
-				{
-					var t=new FP(this);
-					t.sqr();
-					this.mul(t);
-					y.sqr();
-
-				} 
-				y.sqr();
-				y.sqr();
-				this.mul(y);
-				return this;
-			} else {
-				var m2=new ctx.BIG(0);
-				m2.rcopy(ctx.ROM_FIELD.Modulus);
-				m2.dec(2); m2.norm();
-				this.copy(this.pow(m2));
-				return this;
-			}
-        }, */
-
 
     /* test for Quadratic residue */
         qr: function (h)  {
@@ -595,42 +568,20 @@ var FP = function(ctx) {
             r.invsqrt();
             if (h!=null)
                 h.copy(r);
-            for (var i=0;i<e;i++ )
+
+            r.sqr();
+            r.mul(this);
+            for (var i=0;i<e-1;i++)
                 r.sqr();
-            var s=new FP(this);
-            for (var i=0;i<e-1;i++ )
-                s.sqr();
-            r.mul(s);
+
+            //for (var i=0;i<e;i++ )
+            //    r.sqr();
+            //var s=new FP(this);
+            //for (var i=0;i<e-1;i++ )
+            //    s.sqr();
+            //r.mul(s);
             return r.isunity()?1:0;
         },
-/*
-        qr: function () {
-            var r;
-            if (FP.MODTYPE == FP.PSEUDO_MERSENNE || FP.MODTYPE == FP.GENERALISED_MERSENNE) {
-                r=this.fpow();
-                if (FP.PM1D2 == 2) {
-                    r.sqr();
-                    r.sqr();
-                    r.mul(this);
-                    r.mul(this);
-                } else {
-                    r.sqr();
-                    r.mul(this);                    
-                }
-                r.reduce();
-            } else {
-			    var m = new ctx.BIG(0);
-			    m.rcopy(ctx.ROM_FIELD.Modulus);
-                m.dec(1);
-                m.norm();
-                m.shr(1);
-                r=this.pow(m);
-            }
-            var w=r.redc();
-            if (w.isunity()) return 1;
-            else return 0;
-        },
-*/
 
     /* return sqrt(this) mod Modulus */
         sqrt: function(h) {
@@ -670,51 +621,6 @@ var FP = function(ctx) {
             return r;
         }
 
-
-        /* return sqrt(this) mod Modulus 
-        sqrt: function() {
-            var i, v, r;
-
-            this.reduce();
-            if (FP.PM1D2 == 2) {
-                i = new FP(0);
-                i.copy(this);
-                i.f.shl(1);
-				if (FP.MODTYPE == FP.PSEUDO_MERSENNE || FP.MODTYPE == FP.GENERALISED_MERSENNE) {
-					v=i.fpow();
-				} else {
-					var b = new ctx.BIG(0);
-					b.rcopy(ctx.ROM_FIELD.Modulus);
-					b.dec(5);
-					b.norm();
-					b.shr(3);
-					v = i.pow(b);
-				}
-                i.mul(v);
-                i.mul(v);
-                i.f.dec(1);
-                r = new FP(0);
-                r.copy(this);
-                r.mul(v);
-                r.mul(i);
-                r.reduce();
-
-                return r;
-            } else {
-				if (FP.MODTYPE == FP.PSEUDO_MERSENNE || FP.MODTYPE == FP.GENERALISED_MERSENNE) {
-					var r=this.fpow();
-					r.mul(this);
-					return r;
-				} else {
-					var b = new ctx.BIG(0);
-					b.rcopy(ctx.ROM_FIELD.Modulus);
-					b.inc(1);
-					b.norm();
-					b.shr(2);
-					return this.pow(b);
-				}
-            }
-        }*/
 
     };
 

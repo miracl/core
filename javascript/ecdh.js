@@ -37,7 +37,7 @@ var ECDH = function(ctx) {
 
         INVALID_PUBLIC_KEY: -2,
         ERROR: -3,
-        INVALID: -4,
+        //INVALID: -4,
         EFS: ctx.BIG.MODBYTES,
         EGS: ctx.BIG.MODBYTES,
         SHA256: 32,
@@ -246,7 +246,7 @@ var ECDH = function(ctx) {
             f = ctx.BIG.fromBytes(B);
 
             if (c.iszilch() || ctx.BIG.comp(c, r) >= 0 || d.iszilch() || ctx.BIG.comp(d, r) >= 0) {
-                res = this.INVALID;
+                res = this.ERROR;
             }
 
             if (res === 0) {
@@ -263,12 +263,12 @@ var ECDH = function(ctx) {
                     P = P.mul2(h2, G, f);
 
                     if (P.is_infinity()) {
-                        res = this.INVALID;
+                        res = this.ERROR;
                     } else {
                         d = P.getX();
                         d.mod(r);
                         if (ctx.BIG.comp(d, c) !== 0) {
-                            res = this.INVALID;
+                            res = this.ERROR;
                         }
                     }
                 }

@@ -63,7 +63,7 @@ using namespace core;
 /*#define ECDH_DOMAIN_ERROR          -1*/
 #define ECDH_INVALID_PUBLIC_KEY    -2	/**< Public Key is Invalid */
 #define ECDH_ERROR                 -3	/**< ECDH Internal Error */
-#define ECDH_INVALID               -4	/**< ECDH Internal Error */
+//#define ECDH_INVALID               -4	/**< ECDH Internal Error */
 /*#define ECDH_DOMAIN_NOT_FOUND      -5
 #define ECDH_OUT_OF_MEMORY         -6
 #define ECDH_DIV_BY_ZERO           -7

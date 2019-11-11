@@ -270,7 +270,7 @@ int ZZZ::ECP_VP_DSA(int hlen, octet *W, octet *F, octet *C, octet *D)
     //BIG_fromBytes(f,H.val);
 
     if (BIG_iszilch(c) || BIG_comp(c, r) >= 0 || BIG_iszilch(d) || BIG_comp(d, r) >= 0)
-        res = ECDH_INVALID;
+        res = ECDH_ERROR;
 
     if (res == 0)
     {
@@ -285,12 +285,12 @@ int ZZZ::ECP_VP_DSA(int hlen, octet *W, octet *F, octet *C, octet *D)
         {
             ECP_mul2(&WP, &G, h2, f);
 
-            if (ECP_isinf(&WP)) res = ECDH_INVALID;
+            if (ECP_isinf(&WP)) res = ECDH_ERROR;
             else
             {
                 ECP_get(d, d, &WP);
                 BIG_mod(d, r);
-                if (BIG_comp(d, c) != 0) res = ECDH_INVALID;
+                if (BIG_comp(d, c) != 0) res = ECDH_ERROR;
             }
         }
     }
