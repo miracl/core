@@ -117,6 +117,35 @@ void YYY::FP_redc(BIG x, FP *y)
 /* reduce a DBIG to a BIG exploiting the special form of a modulus 2^m - 2^n -c */
 void YYY::FP_mod(BIG r, DBIG d)
 {
+
+    BIG t, b;
+    chunk carry;
+    BIG_split(t, b, d, MBITS_YYY);
+
+    BIG_add(r, t, b);
+
+    BIG_dscopy(d, t);
+    BIG_dshl(d, MBITS_YYY / 2);
+
+    BIG_split(t, b, d, MBITS_YYY);
+
+    BIG_add(r, r, t);
+    BIG_add(r, r, b);
+    BIG_norm(r);
+    BIG_shl(t, MBITS_YYY / 2);
+
+    BIG_add(r, r, t);
+
+    carry = r[NLEN_XXX - 1] >> TBITS_YYY;
+
+    r[NLEN_XXX - 1] &= TMASK_YYY;
+    r[0] += carry;
+
+    r[224 / BASEBITS_XXX] += carry << (224 % BASEBITS_XXX); /* need to check that this falls mid-word */
+    BIG_norm(r);
+
+/*
+
     BIG t, b, t2, b2;
     int BTset = MBITS_YYY / 2;
     chunk carry;
@@ -146,11 +175,12 @@ void YYY::FP_mod(BIG r, DBIG d)
     carry = r[NLEN_XXX - 1] >> TBITS_YYY; // + (carry<<(BASEBITS_XXX-TBITS_YYY));
     r[NLEN_XXX - 1] &= TMASK_YYY;
 
-    r[BTset / BASEBITS_XXX] += carry << (BTset % BASEBITS_XXX); /* need to check that this falls mid-word */
+    r[BTset / BASEBITS_XXX] += carry << (BTset % BASEBITS_XXX); // need to check that this falls mid-word 
 //  if (MConst!=1) carry*=MConst;
     r[0] += carry;
 
     BIG_norm(r);
+*/
 }
 
 #endif
