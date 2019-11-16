@@ -173,7 +173,6 @@ MAXPIN = 10000
 TS = 10
 TRAP = 200
 
-
 def kangaroo(E, F):
     FS = curve.EFS
 

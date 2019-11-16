@@ -557,12 +557,12 @@ void XXX::BIG_smul(BIG c, BIG a, BIG b)
 /* SU= 72 */
 void XXX::BIG_mul(DBIG c, BIG a, BIG b)
 {
-    int i;
+    int i,k;
 #ifdef dchunk
-    dchunk t, co;
+    dchunk t;
     dchunk s;
     dchunk d[NLEN_XXX];
-    int k;
+    int m;
 #endif
 
 //XXX::BIGMULS++;
@@ -579,34 +579,57 @@ void XXX::BIG_mul(DBIG c, BIG a, BIG b)
     /* faster psuedo-Karatsuba method */
 #ifdef UNWOUND
 
-    /* Insert output of faster.c here */
+    /* Insert output of faster.cpp here */
 
 #else
+/*
+    t=(dchunk)a[0]*b[0];
+    c[0]=(chunk)t & BMASK_XXX;
+    t = t >> BASEBITS_XXX;
+    for (i=1;i<NLEN_XXX;i++)
+    {
+        k=0; 
+        while (k<=i) {t+=(dchunk)a[k]*b[i-k]; k++;}
+        c[i]=(chunk)t & BMASK_XXX;
+        t = t >> BASEBITS_XXX;
+    }
+
+    for (i=NLEN_XXX;i<2*NLEN_XXX-1;i++)
+    {
+        k=i-(NLEN_XXX-1);
+        while (k<=NLEN_XXX-1) {t+=(dchunk)a[k]*b[i-k]; k++;}
+        c[i]=(chunk)t & BMASK_XXX;
+        t = t >> BASEBITS_XXX;
+    }
+
+    c[2 * NLEN_XXX - 1] = (chunk)t;
+*/
+
     for (i = 0; i < NLEN_XXX; i++)
         d[i] = (dchunk)a[i] * b[i];
 
     s = d[0];
     t = s;
     c[0] = (chunk)t & BMASK_XXX;
-    co = t >> BASEBITS_XXX;
+    t = t >> BASEBITS_XXX;
 
     for (k = 1; k < NLEN_XXX; k++)
     {
         s += d[k];
-        t = co + s;
-        for (i = k; i >= 1 + k / 2; i--) t += (dchunk)(a[i] - a[k - i]) * (b[k - i] - b[i]);
+        t += s;
+        for (i=1+k/2;i<=k;i++) t += (dchunk)(a[i] - a[k - i]) * (b[k - i] - b[i]);
         c[k] = (chunk)t & BMASK_XXX;
-        co = t >> BASEBITS_XXX;
+        t = t >> BASEBITS_XXX;
     }
     for (k = NLEN_XXX; k < 2 * NLEN_XXX - 1; k++)
     {
         s -= d[k - NLEN_XXX];
-        t = co + s;
-        for (i = NLEN_XXX - 1; i >= 1 + k / 2; i--) t += (dchunk)(a[i] - a[k - i]) * (b[k - i] - b[i]);
+        t += s;
+        for (i=1+k/2;i<NLEN_XXX;i++) t += (dchunk)(a[i] - a[k - i]) * (b[k - i] - b[i]);
         c[k] = (chunk)t & BMASK_XXX;
-        co = t >> BASEBITS_XXX;
+        t = t >> BASEBITS_XXX;
     }
-    c[2 * NLEN_XXX - 1] = (chunk)co;
+    c[2 * NLEN_XXX - 1] = (chunk)t;
 
 #endif
 
@@ -738,7 +761,7 @@ void XXX::BIG_monty(BIG a, BIG md, chunk MC, DBIG d)
     int i, k;
 
 #ifdef dchunk
-    dchunk t, c, s;
+    dchunk t,s;
     dchunk dd[NLEN_XXX];
     chunk v[NLEN_XXX];
 #endif
@@ -752,35 +775,60 @@ void XXX::BIG_monty(BIG a, BIG md, chunk MC, DBIG d)
 
 #ifdef UNWOUND
 
-    /* Insert output of faster.c here */
+    /* Insert output of faster.cpp here */
 
 #else
+/*
+    t = d[0];
+    v[0] = ((chunk)t * MC)&BMASK_XXX;
+    t += (dchunk)v[0] * md[0];
+    t = (t >> BASEBITS_XXX) + d[1];
+   
+    for (i = 1; i < NLEN_XXX; i++)
+    {
+        k=1;
+        t += (dchunk)v[0] * md[i];
+        while (k<i) {t += (dchunk)v[k]*md[i-k]; k++;}
+        v[i] = ((chunk)t * MC)&BMASK_XXX;
+        t += (dchunk)v[i] * md[0];
+        t = (t >> BASEBITS_XXX) + d[i + 1];
+    }
+    for (i = NLEN_XXX; i < 2 * NLEN_XXX - 1; i++)
+    {
+        k=i-(NLEN_XXX-1);
+        while (k<=NLEN_XXX-1) {t += (dchunk)v[k]*md[i-k]; k++;}
+        a[i - NLEN_XXX] = (chunk)t & BMASK_XXX;
+        t = (t >> BASEBITS_XXX) + d[i + 1];
+    }
+    a[NLEN_XXX - 1] = (chunk)t & BMASK_XXX;
+*/
 
     t = d[0];
     v[0] = ((chunk)t * MC)&BMASK_XXX;
     t += (dchunk)v[0] * md[0];
-    c = (t >> BASEBITS_XXX) + d[1];
+    t = (t >> BASEBITS_XXX) + d[1];
     s = 0;
 
     for (k = 1; k < NLEN_XXX; k++)
     {
-        t = c + s + (dchunk)v[0] * md[k];
-        for (i = k - 1; i > k / 2; i--) t += (dchunk)(v[k - i] - v[i]) * (md[i] - md[k - i]);
+        t = t + s + (dchunk)v[0] * md[k];
+
+        for (i=1+k/2;i<k;i++) t += (dchunk)(v[k - i] - v[i]) * (md[i] - md[k - i]);
         v[k] = ((chunk)t * MC)&BMASK_XXX;
         t += (dchunk)v[k] * md[0];
-        c = (t >> BASEBITS_XXX) + d[k + 1];
+        t = (t >> BASEBITS_XXX) + d[k + 1];
         dd[k] = (dchunk)v[k] * md[k];
         s += dd[k];
     }
     for (k = NLEN_XXX; k < 2 * NLEN_XXX - 1; k++)
     {
-        t = c + s;
-        for (i = NLEN_XXX - 1; i >= 1 + k / 2; i--) t += (dchunk)(v[k - i] - v[i]) * (md[i] - md[k - i]);
+        t = t + s;
+        for (i=1+k/2;i<NLEN_XXX;i++) t += (dchunk)(v[k - i] - v[i]) * (md[i] - md[k - i]);
         a[k - NLEN_XXX] = (chunk)t & BMASK_XXX;
-        c = (t >> BASEBITS_XXX) + d[k + 1];
+        t = (t >> BASEBITS_XXX) + d[k + 1];
         s -= dd[k - NLEN_XXX + 1];
     }
-    a[NLEN_XXX - 1] = (chunk)c & BMASK_XXX;
+    a[NLEN_XXX - 1] = (chunk)t & BMASK_XXX;
 
 #endif
 
