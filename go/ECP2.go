@@ -186,7 +186,6 @@ func (E *ECP2) ToBytes(b []byte,compress bool) {
 	W := NewECP2()
 	W.Copy(E)
 	W.Affine()
-	b[0]=0x06
 
 	W.x.GetA().ToBytes(t[:])
 	for i := 0; i < MB; i++ {

@@ -285,7 +285,6 @@ class ECp2:
             PK = bytearray(2 * FS + 1)
         else :
             PK = bytearray(4 * FS + 1)
-        PK[0]=0x04
         x, y = self.get()
         xa, xb = x.get()
         ya, yb = y.get()

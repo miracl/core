@@ -195,7 +195,6 @@ void ECP2_ZZZ_toOctet(octet *W, ECP2_ZZZ *Q, bool compress)
     FP2_YYY qx, qy;
     ECP2_ZZZ_get(&qx, &qy, Q);
 
-    W->val[0]=0x06;
     FP_YYY_redc(b, &(qx.a));
     BIG_XXX_toBytes(&(W->val[1]), b);
     FP_YYY_redc(b, &(qx.b));

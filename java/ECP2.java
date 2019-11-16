@@ -182,7 +182,6 @@ public final class ECP2 {
 		byte[] t=new byte[CONFIG_BIG.MODBYTES];
 		ECP2 W=new ECP2(this);
 		W.affine();
-        b[0]=0x06;
 
 		W.x.getA().toBytes(t);
 		for (int i=0;i<CONFIG_BIG.MODBYTES;i++)
