@@ -176,7 +176,6 @@ public struct ECP2 {
         var t=[UInt8](repeating: 0,count: RM)
         var W=ECP2(); W.copy(self)
         W.affine()
-        b[0]=0x06
 
         W.x.getA().toBytes(&t)
         for i in 0 ..< RM

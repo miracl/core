@@ -230,7 +230,6 @@ impl ECP2 {
         let mut W = ECP2::new();
         W.copy(self);
         W.affine();
-        b[0]=0x06;
 
         W.x.geta().tobytes(&mut t);
         for i in 0..mb {

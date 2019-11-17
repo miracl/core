@@ -190,7 +190,6 @@ var ECP2 = function(ctx) {
                 i;
 			var W=new ECP2(); W.copy(this);
             W.affine();
-            b[0] = 0x06;
 
             W.x.getA().toBytes(t);
             for (i = 0; i < ctx.BIG.MODBYTES; i++) {
