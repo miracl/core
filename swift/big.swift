@@ -1006,7 +1006,7 @@ public struct BIG{
     /* return a*b mod m */
     static func modmul(_ a1: BIG,_ b1 :BIG,_ m: BIG) -> BIG
     {
-        var a=BIG(a1); var b=BIG(b1);
+        var a=BIG(a1); var b=BIG(b1)
         a.mod(m)
         b.mod(m)
         var d=mul(a,b)
@@ -1027,8 +1027,19 @@ public struct BIG{
     {
         var a=BIG(a1)
         a.mod(m)
-	a.rsub(m)
-	a.mod(m)
+	    a.rsub(m)
+	    a.mod(m)
+        return a
+    }
+
+    /* return a+b mod m */
+    static func modadd(_ a1: BIG,_ b1 :BIG,_ m: BIG) -> BIG
+    {
+        var a=BIG(a1); var b=BIG(b1)
+        a.mod(m)
+        b.mod(m)
+        a.add(b); a.norm()
+        a.mod(m)
         return a
     }
 

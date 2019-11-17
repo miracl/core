@@ -617,6 +617,7 @@ void XXX::BIG_mul(DBIG c, BIG a, BIG b)
     {
         s += d[k];
         t += s;
+        /*for (i = k; i >= 1 + k / 2; i--) This causes a huge slow down! gcc/g++ optimizer problem (I think) */
         for (i=1+k/2;i<=k;i++) t += (dchunk)(a[i] - a[k - i]) * (b[k - i] - b[i]);
         c[k] = (chunk)t & BMASK_XXX;
         t = t >> BASEBITS_XXX;
@@ -1387,6 +1388,18 @@ void XXX::BIG_modneg(BIG r, BIG a1, BIG m)
     BIG_mod(a, m);
     BIG_sub(r, m, a);
     BIG_mod(r, m);
+}
+
+/* Set r=a+b mod m */
+void XXX::BIG_modadd(BIG r, BIG a1, BIG b1, BIG m)
+{
+    BIG a, b;
+    BIG_copy(a, a1);
+    BIG_copy(b, b1);
+    BIG_mod(a, m);
+    BIG_mod(b, m);
+    BIG_add(r,a,b); BIG_norm(r);
+    BIG_mod(r,m);
 }
 
 /* Set a=a/b mod m */

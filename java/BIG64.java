@@ -754,6 +754,17 @@ public class BIG {
         return a;
     }
 
+    /* return a+b mod m */
+    public static BIG modadd(BIG a1, BIG b1, BIG m) {
+        BIG a = new BIG(a1);
+        BIG b = new BIG(b1);
+        a.mod(m);
+        b.mod(m);
+        a.add(b); a.norm();
+        a.mod(m);
+        return a;
+    }
+
     /* return this^e mod m */
     public BIG powmod(BIG e1, BIG m) {
         BIG e = new BIG(e1);

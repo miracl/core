@@ -813,6 +813,17 @@ func Modneg(a1, m *BIG) *BIG {
 	return a
 }
 
+/* return a+b mod m */
+func Modadd(a1, b1, m *BIG) *BIG {
+	a := NewBIGcopy(a1)
+	b := NewBIGcopy(b1)
+	a.Mod(m)
+	b.Mod(m)
+	a.add(b); a.norm()
+	a.Mod(m)
+	return a
+}
+
 /* Jacobi Symbol (this/p). Returns 0, 1 or -1 */
 func (r *BIG) Jacobi(p *BIG) int {
 	m := 0

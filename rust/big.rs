@@ -989,8 +989,19 @@ impl BIG {
     pub fn modneg(a1: &BIG, m: &BIG) -> BIG {
         let mut a = BIG::new_copy(a1);
         a.rmod(m);
-	a.rsub(m);
-	a.rmod(m);
+	    a.rsub(m);
+	    a.rmod(m);
+        return a;
+    }
+
+    /* return a+b mod m */
+    pub fn modadd(a1: &BIG, b1: &BIG, m: &BIG) -> BIG {
+        let mut a = BIG::new_copy(a1);
+        let mut b = BIG::new_copy(b1);
+        a.rmod(m);
+        b.rmod(m);
+        a.add(&b); a.norm();
+        a.rmod(m);
         return a;
     }
 

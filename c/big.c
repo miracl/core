@@ -1365,6 +1365,18 @@ void BIG_XXX_modneg(BIG_XXX r, BIG_XXX a1, BIG_XXX m)
     BIG_XXX_mod(r, m);
 }
 
+/* Set r=a+b mod m */
+void BIG_XXX_modadd(BIG_XXX r, BIG_XXX a1, BIG_XXX b1, BIG_XXX m)
+{
+    BIG_XXX a, b;
+    BIG_XXX_copy(a, a1);
+    BIG_XXX_copy(b, b1);
+    BIG_XXX_mod(a, m);
+    BIG_XXX_mod(b, m);
+    BIG_XXX_add(r,a,b); BIG_XXX_norm(r);
+    BIG_XXX_mod(r,m);
+}
+
 /* Set a=a/b mod m */
 /* SU= 136 */
 void BIG_XXX_moddiv(BIG_XXX r, BIG_XXX a1, BIG_XXX b1, BIG_XXX m)

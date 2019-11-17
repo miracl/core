@@ -569,6 +569,17 @@ extern void BIG_modsqr(BIG x, BIG y, BIG n);
 	@param n The BIG Modulus
  */
 extern void BIG_modneg(BIG x, BIG y, BIG n);
+
+/**	@brief  Calculate x=y+z mod n
+ *
+	Slow method for modular addition
+	@param x BIG number, on exit = y+z mod n
+	@param y BIG number
+	@param z BIG number
+	@param n The BIG Modulus
+ */
+extern void BIG_modadd(BIG x, BIG y, BIG z, BIG n);
+
 /**	@brief  Calculate jacobi Symbol (x/y)
  *
 	@param x BIG number

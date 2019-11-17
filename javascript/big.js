@@ -1101,6 +1101,18 @@ BIG = function(ctx) {
 		return a;
     };
 
+    /* return a+b mod m */
+    BIG.modadd = function(a1, b1, m) {
+        var d;
+		var a=new BIG(0); a.copy(a1);
+		var b=new BIG(0); b.copy(b1);
+        a.mod(m);
+        b.mod(m);
+        a.add(b); a.norm();
+        a.mod(m);
+        return a;
+    };
+
     /* Arazi and Qi inversion mod 256 */
     BIG.invmod256 = function(a) {
         var U, t1, t2, b, c;
