@@ -21,7 +21,7 @@ As a quick example execute from your root directory
 
     python3 config64.py
 
-Then select options 1, 3, 7, 19, 21, 27, 28 and 30 (these are fixed for 
+Then select options 1, 3, 7, 21, 23, 29, 30 and 32 (these are fixed for 
 the example program provided). Select 0 to exit.
 
 Then copy the library from core/target/release/libcore.rlib to the

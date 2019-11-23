@@ -18,7 +18,7 @@ To create a 64-bit library
 
     python3 config64.py
 
-Choose options 1, 3, 7, 19, 21, 27, 28 and 30, for example.
+Choose options 1, 3, 7, 21, 23, 29, 30 and 32, for example.
 
 Once the library is configured, you can compile and install with maven:
 
