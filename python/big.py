@@ -124,7 +124,7 @@ def sqrtmodp(a, p):
         return pow(a, (p + 1) // 4, p)
 
     if p % 8 == 5:
-        b = (p - 5) / 8
+        b = (p - 5) // 8
         i = a * 2
         v = pow(i, b, p)
         i = modmul(i, v, p)
