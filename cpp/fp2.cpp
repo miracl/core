@@ -323,9 +323,7 @@ void YYY::FP2_inv(FP2 *w, FP2 *x)
     FP_sqr(&w1, &(x->a));
     FP_sqr(&w2, &(x->b));
     FP_add(&w1, &w1, &w2);
-
     FP_inv(&w1, &w1);
-
     FP_mul(&(w->a), &(x->a), &w1);
     FP_neg(&w1, &w1);
     FP_norm(&w1);

@@ -671,6 +671,7 @@ impl FP {
     /* self=1/self mod Modulus */
     pub fn inverse(&mut self) {
         let e=PM1D2 as isize;
+        self.norm();
         let mut s=FP::new_copy(self);
         for _ in 0..e-1 {
             s.sqr();

@@ -583,6 +583,7 @@ public struct FP {
     mutating func inverse()
     {
         let e=CONFIG_FIELD.PM1D2
+        norm()
         var s=(self);
         for _ in 0..<(e-1) {
             s.sqr()

@@ -578,6 +578,7 @@ func (F *FP) invsqrt() {
 /* this=1/this mod Modulus */
 func (F *FP) inverse() {
         e:=int(PM1D2)
+		F.norm()
         s:=NewFPcopy(F)
         for i:=0;i<e-1;i++ {
             s.sqr()

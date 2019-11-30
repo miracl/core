@@ -789,7 +789,9 @@ void YYY::FP_inv(FP *r,FP *x)
 {
     int i,e=PM1D2_YYY;
     FP s,t;
+    FP_norm(x);
     FP_copy(&s,x);
+
     for (i=0;i<e-1;i++)
     {  
         FP_sqr(&s,&s);
@@ -800,6 +802,7 @@ void YYY::FP_inv(FP *r,FP *x)
         FP_sqr(&t,&t);
     
     FP_mul(r,&t,&s);
+
     FP_reduce(r);
 }
 

@@ -751,6 +751,7 @@ void FP_YYY_inv(FP_YYY *r,FP_YYY *x)
 {
     int i,e=PM1D2_YYY;
     FP_YYY s,t;
+    FP_YYY_norm(x);
     FP_YYY_copy(&s,x);
     for (i=0;i<e-1;i++)
     {  

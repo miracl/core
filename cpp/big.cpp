@@ -374,8 +374,8 @@ void XXX::BIG_add(BIG c, BIG a, BIG b)
 #ifdef DEBUG_NORM
     c[MPV_XXX] = a[MPV_XXX] + b[MPV_XXX];
     c[MNV_XXX] = a[MNV_XXX] + b[MNV_XXX];
-    if (c[MPV_XXX] > NEXCESS_XXX)  printf("add problem - positive digit overflow %d\n", c[MPV_XXX]);
-    if (c[MNV_XXX] > NEXCESS_XXX)  printf("add problem - negative digit overflow %d\n", c[MNV_XXX]);
+    if (c[MPV_XXX] > NEXCESS_XXX)  printf("add problem - positive digit overflow %d\n", (int)c[MPV_XXX]);
+    if (c[MNV_XXX] > NEXCESS_XXX)  printf("add problem - negative digit overflow %d\n", (int)c[MNV_XXX]);
 
 #endif
 }
@@ -417,8 +417,8 @@ void XXX::BIG_sub(BIG c, BIG a, BIG b)
 #ifdef DEBUG_NORM
     c[MPV_XXX] = a[MPV_XXX] + b[MNV_XXX];
     c[MNV_XXX] = a[MNV_XXX] + b[MPV_XXX];
-    if (c[MPV_XXX] > NEXCESS_XXX)  printf("sub problem - positive digit overflow %d\n", c[MPV_XXX]);
-    if (c[MNV_XXX] > NEXCESS_XXX)  printf("sub problem - negative digit overflow %d\n", c[MNV_XXX]);
+    if (c[MPV_XXX] > NEXCESS_XXX)  printf("sub problem - positive digit overflow %d\n", (int)c[MPV_XXX]);
+    if (c[MNV_XXX] > NEXCESS_XXX)  printf("sub problem - negative digit overflow %d\n", (int)c[MNV_XXX]);
 
 #endif
 }
@@ -433,8 +433,8 @@ void XXX::BIG_dsub(DBIG c, DBIG a, DBIG b)
 #ifdef DEBUG_NORM
     c[DMPV_XXX] = a[DMPV_XXX] + b[DMNV_XXX];
     c[DMNV_XXX] = a[DMNV_XXX] + b[DMPV_XXX];
-    if (c[DMPV_XXX] > NEXCESS_XXX)  printf("double sub problem - positive digit overflow %d\n", c[DMPV_XXX]);
-    if (c[DMNV_XXX] > NEXCESS_XXX)  printf("double sub problem - negative digit overflow %d\n", c[DMNV_XXX]);
+    if (c[DMPV_XXX] > NEXCESS_XXX)  printf("double sub problem - positive digit overflow %d\n", (int)c[DMPV_XXX]);
+    if (c[DMNV_XXX] > NEXCESS_XXX)  printf("double sub problem - negative digit overflow %d\n", (int)c[DMNV_XXX]);
 #endif
 }
 
@@ -446,8 +446,8 @@ void XXX::BIG_dadd(DBIG c, DBIG a, DBIG b)
 #ifdef DEBUG_NORM
     c[DMPV_XXX] = a[DMPV_XXX] + b[DMNV_XXX];
     c[DMNV_XXX] = a[DMNV_XXX] + b[DMPV_XXX];
-    if (c[DMPV_XXX] > NEXCESS_XXX)  printf("double add problem - positive digit overflow %d\n", c[DMPV_XXX]);
-    if (c[DMNV_XXX] > NEXCESS_XXX)  printf("double add problem - negative digit overflow %d\n", c[DMNV_XXX]);
+    if (c[DMPV_XXX] > NEXCESS_XXX)  printf("double add problem - positive digit overflow %d\n", (int)c[DMPV_XXX]);
+    if (c[DMNV_XXX] > NEXCESS_XXX)  printf("double add problem - negative digit overflow %d\n", (int)c[DMNV_XXX]);
 #endif
 }
 
@@ -469,8 +469,8 @@ void XXX::BIG_imul(BIG r, BIG a, int c)
 #ifdef DEBUG_NORM
     r[MPV_XXX] = a[MPV_XXX] * c;
     r[MNV_XXX] = a[MNV_XXX] * c;
-    if (r[MPV_XXX] > NEXCESS_XXX)  printf("int mul problem - positive digit overflow %d\n", r[MPV_XXX]);
-    if (r[MNV_XXX] > NEXCESS_XXX)  printf("int mul problem - negative digit overflow %d\n", r[MNV_XXX]);
+    if (r[MPV_XXX] > NEXCESS_XXX)  printf("int mul problem - positive digit overflow %d\n", (int)r[MPV_XXX]);
+    if (r[MNV_XXX] > NEXCESS_XXX)  printf("int mul problem - negative digit overflow %d\n", (int)r[MNV_XXX]);
 
 #endif
 }

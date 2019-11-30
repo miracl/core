@@ -252,6 +252,7 @@ void ZZZ::ECP2_rhs(FP2 *rhs, FP2 *x)
     /* calculate RHS of elliptic curve equation */
     FP2 t;
     BIG b;
+
     FP2_sqr(&t, x);
     FP2_mul(rhs, &t, x);
 
@@ -280,9 +281,9 @@ void ZZZ::ECP2_rhs(FP2 *rhs, FP2 *x)
 int ZZZ::ECP2_set(ECP2 *P, FP2 *x, FP2 *y)
 {
     FP2 rhs, y2;
-
     FP2_sqr(&y2, y);
     ECP2_rhs(&rhs, x);
+
     if (!FP2_equals(&y2, &rhs))
     {
         ECP2_inf(P);

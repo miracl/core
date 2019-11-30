@@ -135,6 +135,7 @@ int ZZZ::BLS_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W)
     BIG_toBytes(S->val, s);
     S->len = MODBYTES_XXX;
     PAIR_G2mul(&G, s);
+
     ECP2_toOctet(W, &G, true);
     return BLS_OK;
 }

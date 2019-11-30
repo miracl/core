@@ -546,6 +546,7 @@ var FP = function(ctx) {
     /* this=1/this mod Modulus */
         inverse: function() {
             var e=FP.PM1D2;
+            this.norm();
             var s=new FP(this);
             for (var i=0;i<e-1;i++)
             {

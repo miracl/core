@@ -549,6 +549,7 @@ public final class FP {
     /* this=1/this mod Modulus */
     public void inverse() {
         int e=CONFIG_FIELD.PM1D2;
+        norm();
         FP s=new FP(this);
         for (int i=0;i<e-1;i++)
         {
