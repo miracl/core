@@ -351,13 +351,18 @@ func (E *ECP) ToBytes(b []byte, compress bool) {
 	W.Copy(E)
 	W.Affine()
 	W.x.redc().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		b[i+1] = t[i]
-	}
+
 
 	if CURVETYPE == MONTGOMERY {
-		b[0] = 0x06
+		for i := 0; i < MB; i++ {
+			b[i] = t[i]
+		}
+		//b[0] = 0x06
 		return
+	}
+
+	for i := 0; i < MB; i++ {
+		b[i+1] = t[i]
 	}
 
 	if compress {
@@ -382,16 +387,23 @@ func ECP_fromBytes(b []byte) *ECP {
 	MB := int(MODBYTES)
 	p := NewBIGints(Modulus)
 
+	if CURVETYPE == MONTGOMERY {
+		for i := 0; i < MB; i++ {
+			t[i] = b[i]
+		}
+		px := FromBytes(t[:])
+		if Comp(px, p) >= 0 {
+			return NewECP()
+		}
+		return NewECPbig(px)
+	}
+
 	for i := 0; i < MB; i++ {
 		t[i] = b[i+1]
 	}
 	px := FromBytes(t[:])
 	if Comp(px, p) >= 0 {
 		return NewECP()
-	}
-
-	if CURVETYPE == MONTGOMERY {
-		return NewECPbig(px)
 	}
 
 	if b[0] == 0x04 {

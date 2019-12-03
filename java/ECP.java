@@ -321,14 +321,14 @@ public final class ECP {
 		W.affine();
 
 		W.x.redc().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i+1]=t[i];
 
 		if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.MONTGOMERY)
 		{
-			b[0]=0x06;
+		    for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i]=t[i];
+			//b[0]=0x06;
 			return;
 		}
-
+		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i+1]=t[i];
 		if (compress)
 		{
 			b[0]=0x02;
@@ -347,14 +347,19 @@ public final class ECP {
 		byte[] t=new byte[CONFIG_BIG.MODBYTES];
 		BIG p=new BIG(ROM.Modulus);
 
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=b[i+1];
-		BIG px=BIG.fromBytes(t);
-		if (BIG.comp(px,p)>=0) return new ECP();
 
 		if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.MONTGOMERY)
 		{
+		    for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=b[i];
+		    BIG px=BIG.fromBytes(t);
+		    if (BIG.comp(px,p)>=0) return new ECP();
+
 			return new ECP(px);
 		}
+
+		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=b[i+1];
+		BIG px=BIG.fromBytes(t);
+		if (BIG.comp(px,p)>=0) return new ECP();
 
 		if (b[0]==0x04)
 		{

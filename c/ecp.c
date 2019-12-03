@@ -707,9 +707,9 @@ void ECP_ZZZ_toOctet(octet *W, ECP_ZZZ *P, bool compress)
 #if CURVETYPE_ZZZ==MONTGOMERY
     BIG_XXX x;
     ECP_ZZZ_get(x, P);
-    W->len = MODBYTES_XXX + 1;
-    W->val[0] = 6;
-    BIG_XXX_toBytes(&(W->val[1]), x);
+    W->len = MODBYTES_XXX;// + 1;
+    //W->val[0] = 6;
+    BIG_XXX_toBytes(&(W->val[0]), x);
 #else
     BIG_XXX x, y;
     ECP_ZZZ_get(x, y, P);
@@ -722,7 +722,7 @@ void ECP_ZZZ_toOctet(octet *W, ECP_ZZZ *P, bool compress)
     }
     else
     {
-        W->val[0] = 4;
+        W->val[0] = 0x04;
         W->len = 2 * MODBYTES_XXX + 1;
         BIG_XXX_toBytes(&(W->val[1]), x);
         BIG_XXX_toBytes(&(W->val[MODBYTES_XXX + 1]), y);
@@ -736,7 +736,7 @@ int ECP_ZZZ_fromOctet(ECP_ZZZ *P, octet *W)
 {
 #if CURVETYPE_ZZZ==MONTGOMERY
     BIG_XXX x;
-    BIG_XXX_fromBytes(x, &(W->val[1]));
+    BIG_XXX_fromBytes(x, &(W->val[0]));
     if (ECP_ZZZ_set(P, x)) return 1;
     return 0;
 #else

@@ -383,13 +383,18 @@ impl ECP {
 
         W.affine();
         W.x.redc().tobytes(&mut t);
-        for i in 0..mb {
-            b[i + 1] = t[i]
-        }
+
 
         if CURVETYPE == MONTGOMERY {
-            b[0] = 0x06;
+            for i in 0..mb {
+                b[i] = t[i]
+            }
+            //b[0] = 0x06;
             return;
+        }
+        
+        for i in 0..mb {
+            b[i + 1] = t[i]
         }
 
         if compress {
@@ -414,16 +419,23 @@ impl ECP {
         let mb = big::MODBYTES as usize;
         let p = BIG::new_ints(&rom::MODULUS);
 
+        if CURVETYPE == MONTGOMERY {
+            for i in 0..mb {
+                t[i] = b[i]
+            }
+            let px = BIG::frombytes(&t);
+            if BIG::comp(&px, &p) >= 0 {
+                return ECP::new();
+            }
+            return ECP::new_big(&px);
+        }
+
         for i in 0..mb {
             t[i] = b[i + 1]
         }
         let px = BIG::frombytes(&t);
         if BIG::comp(&px, &p) >= 0 {
             return ECP::new();
-        }
-
-        if CURVETYPE == MONTGOMERY {
-            return ECP::new_big(&px);
         }
 
         if b[0] == 0x04 {

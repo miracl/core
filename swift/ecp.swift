@@ -336,24 +336,27 @@ public struct ECP {
         var W=ECP(); W.copy(self)
         W.affine()
         W.x.redc().toBytes(&t)
-        for i in 0 ..< RM {b[i+1]=t[i]}
 
         if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.MONTGOMERY {
-		b[0]=0x06
-		return
-	}
-    
-	if compress {
-		b[0]=0x02
-		if W.y.redc().parity()==1 {b[0]=0x03}
-		return
-	}
+            for i in 0 ..< RM {b[i]=t[i]}
+		    //b[0]=0x06
+		    return
+        }
 
-	b[0]=0x04
+        for i in 0 ..< RM {b[i+1]=t[i]}
+
+	    if compress {
+		    b[0]=0x02
+		    if W.y.redc().parity()==1 {b[0]=0x03}
+		    return
+	    }
+
+	    b[0]=0x04
 
         W.y.redc().toBytes(&t);
         for i in 0 ..< RM {b[i+RM+1]=t[i]}
     }
+
     /* convert from byte array to point */
     static func fromBytes(_ b: [UInt8]) -> ECP
     {
@@ -361,14 +364,19 @@ public struct ECP {
         var t=[UInt8](repeating: 0,count: RM)
         let p=BIG(ROM.Modulus);
     
+  
+        if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.MONTGOMERY {
+            for i in 0 ..< RM {t[i]=b[i]}
+            let px=BIG.fromBytes(t)
+            if BIG.comp(px,p)>=0 {return ECP()}
+
+		    return ECP(px)
+	    }
+
         for i in 0 ..< RM {t[i]=b[i+1]}
         let px=BIG.fromBytes(t)
         if BIG.comp(px,p)>=0 {return ECP()}
-    
-        if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.MONTGOMERY {
-		return ECP(px)
-	}
-
+  
         if b[0]==0x04 {
             for i in 0 ..< RM {t[i]=b[i+RM+1]}
             let py=BIG.fromBytes(t)
@@ -376,11 +384,11 @@ public struct ECP {
             return ECP(px,py)
         }
         
-	if b[0]==0x02 || b[0]==0x03 {
-	    return ECP(px,Int(b[0]&1))
-	}
+	    if b[0]==0x02 || b[0]==0x03 {
+	        return ECP(px,Int(b[0]&1))
+	    }
 
-	return ECP()
+	    return ECP()
     }
     /* convert to hex string */
     func toString() -> String

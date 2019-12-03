@@ -71,7 +71,6 @@ int ZZZ::ECP_KEY_PAIR_GENERATE(csprng *RNG, octet* S, octet *W)
     BIG_toBytes(S->val, s);
 
     ECP_mul(&G, s);
-
     ECP_toOctet(W, &G, false);  // To use point compression on public keys, change to true
 
     return res;

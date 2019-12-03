@@ -178,8 +178,9 @@ void HMAC(int hash,int hlen,octet *TAG,int olen,octet *K,octet *M)
 void HKDF_Extract(int hash,int hlen,octet *PRK,octet *SALT,octet *IKM)
 {
     char h[64];
-    octet H={hlen,sizeof(h),h};
+    octet H={0,sizeof(h),h};
     if (SALT==NULL) {
+        OCT_jbyte(&H,0,hlen);
         HMAC(hash,hlen,PRK,hlen,&H,IKM);
     } else {
         HMAC(hash,hlen,PRK,hlen,SALT,IKM);

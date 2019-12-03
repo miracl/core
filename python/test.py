@@ -43,7 +43,7 @@ import bn254.bls
 
 # first test ECDH/ECDSA on curve ed25519
 
-print("Test ECDH/ECDSA on curve ED25519\n")
+print("Test ECDH/ECDSA on curve ed25519\n")
 salt = bytearray(8)
 for i in range(0, 8):
     salt[i] = i + 1

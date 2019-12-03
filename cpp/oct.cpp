@@ -68,6 +68,18 @@ void core::OCT_output(octet *w)
 #endif
 }
 
+/* reverse bytes. Useful if dealing with those little-endian bastards */
+void core::OCT_reverse(octet *w)
+{
+    int i;
+    unsigned char ch;
+    for (i = 0; i < w->len/2; i++) { 
+        ch = w->val[i]; 
+        w->val[i] = w->val[w->len - i - 1]; 
+        w->val[w->len - i - 1] = ch; 
+    } 
+}
+
 /* SU= 16 */
 void core::OCT_output_string(octet *w)
 {

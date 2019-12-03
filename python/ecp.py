@@ -589,12 +589,15 @@ class ECp:
 
 # convert from and to an array of bytes
     def fromBytes(self, W):
+        if curve.CurveType == MONTGOMERY:
+            x = big.from_bytes(W[0:curve.EFS])
+            return self.set(x)
+
         t = W[0]  # ord(W[0])
         sp1 = curve.EFS + 1	  # splits
         sp2 = sp1 + curve.EFS
+
         x = big.from_bytes(W[1:sp1])
-        if curve.CurveType == MONTGOMERY:
-            return self.set(x)
         if t == 4:
             y = big.from_bytes(W[sp1:sp2])
             return self.setxy(x, y)
@@ -610,12 +613,12 @@ class ECp:
     def toBytes(self, compress):
         FS = curve.EFS
         if curve.CurveType == MONTGOMERY:
-            PK = bytearray(FS + 1)
-            PK[0] = 6
+            PK = bytearray(FS)
+            #PK[0] = 6
             x = self.get()
             W = big.to_bytes(x)
             for i in range(0, FS):
-                PK[1 + i] = W[i]
+                PK[i] = W[i]
             return PK
         if compress:
             PK = bytearray(FS + 1)

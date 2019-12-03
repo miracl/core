@@ -335,13 +335,17 @@ var ECP = function(ctx) {
             W.affine();
             W.x.redc().toBytes(t);
 
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                b[i + 1] = t[i];
-            }
 
             if (ECP.CURVETYPE == ECP.MONTGOMERY) {
-                b[0] = 0x06;
+                for (i = 0; i < ctx.BIG.MODBYTES; i++) {
+                    b[i] = t[i];
+                }
+                //b[0] = 0x06;
                 return;
+            }
+
+            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
+                b[i + 1] = t[i];
             }
 
             if (compress) {
@@ -1221,17 +1225,23 @@ var ECP = function(ctx) {
 
         p.rcopy(ctx.ROM_FIELD.Modulus);
 
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = b[i + 1];
-        }
-
-        px = ctx.BIG.fromBytes(t);
-        if (ctx.BIG.comp(px, p) >= 0) {
+        if (ECP.CURVETYPE == ECP.MONTGOMERY) {
+            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
+                t[i] = b[i];
+            }
+            px = ctx.BIG.fromBytes(t);
+            if (ctx.BIG.comp(px, p) >= 0) {
+               return P;
+            }
+            P.setx(px);
             return P;
         }
 
-        if (ECP.CURVETYPE == ECP.MONTGOMERY) {
-            P.setx(px);
+        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
+            t[i] = b[i + 1];
+        }
+        px = ctx.BIG.fromBytes(t);
+        if (ctx.BIG.comp(px, p) >= 0) {
             return P;
         }
 
