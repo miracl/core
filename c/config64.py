@@ -189,6 +189,16 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	replace(fnameh,"XXX",bd)
 	os.system("gcc -O3 -std=c99 -c "+fnamec)
 
+	fnamec="hpke_"+tc+".c"
+	fnameh="hpke_"+tc+".h"
+
+	os.system(copytext+" hpke.c "+fnamec)
+	os.system(copytext+" hpke.h "+fnameh)
+
+	replace(fnamec,"ZZZ",tc)
+	replace(fnameh,"ZZZ",tc)
+	os.system("gcc -O3 -std=c99 -c "+fnamec)
+
 	os.system("gcc -O3 -std=c99 -c rom_curve_"+tc+".c");
 
 	if pf != "NOT" :
@@ -680,6 +690,7 @@ os.system(deltext+" big.*")
 os.system(deltext+" fp.*")
 os.system(deltext+" ecp.*")
 os.system(deltext+" ecdh.*")
+os.system(deltext+" hpke.*")
 os.system(deltext+" ff.*")
 os.system(deltext+" rsa.*")
 os.system(deltext+" config_big.h")

@@ -177,6 +177,15 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	replace(fnameh,"YYY",tf)
 	replace(fnameh,"XXX",bd)
 
+	fnamec="hpke_"+tc+".cpp"
+	fnameh="hpke_"+tc+".h"
+
+	os.system(copytext+" hpke.cpp "+fnamec)
+	os.system(copytext+" hpke.h "+fnameh)
+
+	replace(fnamec,"ZZZ",tc)
+	replace(fnameh,"ZZZ",tc)	
+
 	if pf != "NOT" :
 		fnamec="fp2_"+tf+".cpp"
 		fnameh="fp2_"+tf+".h"
@@ -660,6 +669,7 @@ os.system(deltext+" big.*")
 os.system(deltext+" fp.*")
 os.system(deltext+" ecp.*")
 os.system(deltext+" ecdh.*")
+os.system(deltext+" hpke.*")
 os.system(deltext+" ff.*")
 os.system(deltext+" rsa.*")
 os.system(deltext+" config_big.h")
@@ -692,6 +702,7 @@ os.system(deltext+" mpin256.*")
 os.system(deltext+" bls256.*")
 
 os.system(deltext+" blsrev*.cpp")
+os.system(deltext+ " hpke*.* ")
 
 # create library
 
@@ -848,6 +859,7 @@ if not selected(selection,31,ptr) :
 
 	os.system(deltext+" testbls.cpp")
 	os.system(deltext+" testall.cpp")
+	os.system(deltext+" testhpke.cpp")
 	os.system(deltext+" testnhs.cpp")
 
 	os.system(deltext+" config*.py")

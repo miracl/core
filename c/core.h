@@ -255,6 +255,13 @@ extern void OCT_output_string(octet *O);
 	@param O Octet to be cleaned
  */
 extern void OCT_clear(octet *O);
+
+/**	@brief Reverse bytes in an octet
+ *
+	@param O Octet to be reversed
+ */
+extern void OCT_reverse(octet *O);
+
 /**	@brief Compare two octets
  *
 	@param O first Octet to be compared

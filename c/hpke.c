@@ -39,7 +39,7 @@
 #include <string.h>
 #include "hpke_ZZZ.h"
 
-void ZZZ::HPKE_Encap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pkE,octet *pkR)
+void HPKE_ZZZ_Encap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pkE,octet *pkR)
 {
     int res,kem;
     char ske[EGS_ZZZ];
@@ -57,11 +57,11 @@ void ZZZ::HPKE_Encap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pkE,oc
         }
     }
 
-    res=ECP_KEY_PAIR_GENERATE(RNG, &skE, pkE);
+    res=ECP_ZZZ_KEY_PAIR_GENERATE(RNG, &skE, pkE);
     if (kem==2)
         OCT_reverse(pkR);
 
-    res=ECP_SVDP_DH(&skE, pkR, Z);
+    res=ECP_ZZZ_SVDP_DH(&skE, pkR, Z);
     if (kem==2) {
         OCT_reverse(pkR);
         OCT_reverse(pkE);
@@ -69,7 +69,7 @@ void ZZZ::HPKE_Encap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pkE,oc
     }
 }
 
-void ZZZ::HPKE_Decap(int config_id,octet *Z,octet *pkE,octet *SKR)
+void HPKE_ZZZ_Decap(int config_id,octet *Z,octet *pkE,octet *SKR)
 {
     int res,kem;
     char skr[EGS_ZZZ];
@@ -84,14 +84,14 @@ void ZZZ::HPKE_Decap(int config_id,octet *Z,octet *pkE,octet *SKR)
         skR.val[0]|=64;
         OCT_reverse(pkE);
     }
-    ECP_SVDP_DH(&skR, pkE, Z);
+    ECP_ZZZ_SVDP_DH(&skR, pkE, Z);
     if (kem==2) {
         OCT_reverse(pkE);
         OCT_reverse(Z);
     }
 }
 
-void ZZZ::HPKE_AuthEncap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pkE,octet *pkR,octet *SKI)
+void HPKE_ZZZ_AuthEncap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pkE,octet *pkR,octet *SKI)
 {
     int res,kem;
     char ske[EGS_ZZZ];
@@ -118,12 +118,12 @@ void ZZZ::HPKE_AuthEncap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pk
         }
     }
 
-    ECP_KEY_PAIR_GENERATE(RNG, &skE, pkE);
+    ECP_ZZZ_KEY_PAIR_GENERATE(RNG, &skE, pkE);
     if (kem==2)
         OCT_reverse(pkR);
 
-    ECP_SVDP_DH(&skE, pkR, Z);
-    ECP_SVDP_DH(&skI, pkR, &NZ);
+    ECP_ZZZ_SVDP_DH(&skE, pkR, Z);
+    ECP_ZZZ_SVDP_DH(&skI, pkR, &NZ);
     if (kem==2) {
         OCT_reverse(pkR);
         OCT_reverse(pkE);
@@ -133,7 +133,7 @@ void ZZZ::HPKE_AuthEncap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pk
     OCT_joctet(Z,&NZ);
 }
 
-void ZZZ::HPKE_AuthDecap(int config_id,octet *Z,octet *pkE,octet *SKR,octet *pkI)
+void HPKE_ZZZ_AuthDecap(int config_id,octet *Z,octet *pkE,octet *SKR,octet *pkI)
 {
     int res,kem;
     char skr[EGS_ZZZ];
@@ -152,8 +152,8 @@ void ZZZ::HPKE_AuthDecap(int config_id,octet *Z,octet *pkE,octet *SKR,octet *pkI
         OCT_reverse(pkI);
     }
 
-    ECP_SVDP_DH(&skR, pkE, Z);
-    ECP_SVDP_DH(&skR, pkI, &NZ);
+    ECP_ZZZ_SVDP_DH(&skR, pkE, Z);
+    ECP_ZZZ_SVDP_DH(&skR, pkI, &NZ);
     if (kem==2) {
         OCT_reverse(pkE);
         OCT_reverse(pkI);
@@ -163,7 +163,7 @@ void ZZZ::HPKE_AuthDecap(int config_id,octet *Z,octet *pkE,octet *SKR,octet *pkI
     OCT_joctet(Z,&NZ);
 }
 
-void ZZZ::HPKE_KeySchedule(int config_id,octet *key,octet *nonce,int mode,octet *pkR,octet *Z,octet *pkE,octet *info,octet *psk,octet *pskID,octet *pkI)
+void HPKE_ZZZ_KeySchedule(int config_id,octet *key,octet *nonce,int mode,octet *pkR,octet *Z,octet *pkE,octet *info,octet *psk,octet *pskID,octet *pkI)
 {
     char context[550];
     octet CONTEXT={0,sizeof(context),context};

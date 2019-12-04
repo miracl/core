@@ -52,7 +52,7 @@ def rsaset(tb,tff,base,ml) :
 
 	replace(fnamec,"XXX",bd)
 	replace(fnameh,"XXX",bd)
-	os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+	os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 	fnamec="ff_"+tff+".c"
 	fnamebc="ff_"+tff+".bc"
@@ -65,7 +65,7 @@ def rsaset(tb,tff,base,ml) :
 	replace(fnamec,"XXX",bd)
 	replace(fnameh,"WWW",tff)
 	replace(fnameh,"XXX",bd)
-	os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+	os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 	fnamec="rsa_"+tff+".c"
 	fnamebc="rsa_"+tff+".bc"
@@ -78,7 +78,7 @@ def rsaset(tb,tff,base,ml) :
 	replace(fnamec,"XXX",bd)
 	replace(fnameh,"WWW",tff)
 	replace(fnameh,"XXX",bd)
-	os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+	os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 
@@ -141,7 +141,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 
 	replace(fnamec,"XXX",bd)
 	replace(fnameh,"XXX",bd)
-	os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+	os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 	fnamec="fp_"+tf+".c"
 	fnamebc="fp_"+tf+".bc"
@@ -154,9 +154,9 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	replace(fnamec,"XXX",bd)
 	replace(fnameh,"YYY",tf)
 	replace(fnameh,"XXX",bd)
-	os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+	os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
-	os.system("emcc -O2 rom_field_"+tf+".c -o rom_field_"+tf+".bc");
+	os.system("emcc -O2 -c rom_field_"+tf+".c -o rom_field_"+tf+".bc");
 
 	fnamec="ecp_"+tc+".c"
 	fnamebc="ecp_"+tc+".bc"
@@ -171,7 +171,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	replace(fnameh,"ZZZ",tc)
 	replace(fnameh,"YYY",tf)
 	replace(fnameh,"XXX",bd)
-	os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+	os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 	fnamec="ecdh_"+tc+".c"
 	fnamebc="ecdh_"+tc+".bc"
@@ -186,9 +186,20 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	replace(fnameh,"ZZZ",tc)
 	replace(fnameh,"YYY",tf)
 	replace(fnameh,"XXX",bd)
-	os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+	os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
-	os.system("emcc -O2 rom_curve_"+tc+".c -o rom_curve_"+tc+".bc");
+	fnamec="hpke_"+tc+".c"
+	fnamebc="hpke_"+tc+".bc"
+	fnameh="hpke_"+tc+".h"
+
+	os.system(copytext+" hpke.c "+fnamec)
+	os.system(copytext+" hpke.h "+fnameh)
+
+	replace(fnamec,"ZZZ",tc)
+	replace(fnameh,"ZZZ",tc)
+	os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
+
+	os.system("emcc -O2 -c rom_curve_"+tc+".c -o rom_curve_"+tc+".bc");
 
 	if pf != "NOT" :
 		fnamec="fp2_"+tf+".c"
@@ -201,7 +212,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 		replace(fnamec,"XXX",bd)
 		replace(fnameh,"YYY",tf)
 		replace(fnameh,"XXX",bd)
-		os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+		os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 		fnamec="fp4_"+tf+".c"
 		fnamebc="fp4_"+tf+".bc"
@@ -215,7 +226,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 		replace(fnameh,"YYY",tf)
 		replace(fnameh,"XXX",bd)
 		replace(fnameh,"ZZZ",tc)
-		os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+		os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 		if cs == "128" :
 			fnamec="fp12_"+tf+".c"
@@ -230,7 +241,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
 			replace(fnameh,"ZZZ",tc)	
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="ecp2_"+tc+".c"
 			fnamebc="ecp2_"+tc+".bc"
@@ -244,7 +255,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="pair_"+tc+".c"
 			fnamebc="pair_"+tc+".bc"
@@ -258,7 +269,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="mpin_"+tc+".c"
 			fnamebc="mpin_"+tc+".bc"
@@ -272,7 +283,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="bls_"+tc+".c"
 			fnamebc="bls_"+tc+".bc"
@@ -286,7 +297,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 		if cs == "192" :
 			fnamec="fp8_"+tf+".c"
@@ -301,7 +312,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
 			replace(fnameh,"ZZZ",tc)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 
 			fnamec="fp24_"+tf+".c"
@@ -316,7 +327,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
 			replace(fnameh,"ZZZ",tc)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="ecp4_"+tc+".c"
 			fnamebc="ecp4_"+tc+".bc"
@@ -330,7 +341,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="pair192_"+tc+".c"
 			fnamebc="pair192_"+tc+".bc"
@@ -344,7 +355,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="mpin192_"+tc+".c"
 			fnamebc="mpin192_"+tc+".bc"
@@ -358,7 +369,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="bls192_"+tc+".c"
 			fnamebc="bls192_"+tc+".bc"
@@ -372,7 +383,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 		if cs == "256" :
 
@@ -388,7 +399,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
 			replace(fnameh,"ZZZ",tc)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 
 			fnamec="ecp8_"+tc+".c"
@@ -403,7 +414,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 
 			fnamec="fp16_"+tf+".c"
@@ -418,7 +429,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
 			replace(fnameh,"ZZZ",tc)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 
 			fnamec="fp48_"+tf+".c"
@@ -433,7 +444,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
 			replace(fnameh,"ZZZ",tc)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 
 			fnamec="pair256_"+tc+".c"
@@ -448,7 +459,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="mpin256_"+tc+".c"
 			fnamebc="mpin256_"+tc+".bc"
@@ -462,7 +473,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 			fnamec="bls256_"+tc+".c"
 			fnamebc="bls256_"+tc+".bc"
@@ -476,7 +487,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			replace(fnameh,"ZZZ",tc)
 			replace(fnameh,"YYY",tf)
 			replace(fnameh,"XXX",bd)
-			os.system("emcc -O2 "+fnamec+" -o "+fnamebc)
+			os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
 replace("arch.h","@WL@","64")
 print("Elliptic Curves")
@@ -559,10 +570,10 @@ while ptr<max:
 # curve security is AES equiavlent, rounded up.
 
 	if x==1:
-		curveset("255","25519","ED25519","56","2","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("255","F25519","ED25519","56","2","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
 		curve_selected=True
 	if x==2:
-		curveset("255","25519","C25519","56","2","PSEUDO_MERSENNE","0","MONTGOMERY","NOT","","","","","128")
+		curveset("255","F25519","C25519","56","2","PSEUDO_MERSENNE","0","MONTGOMERY","NOT","","","","","128")
 		curve_selected=True
 	if x==3:
 		curveset("256","NIST256","NIST256","56","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
@@ -696,6 +707,7 @@ os.system(deltext+" big.*")
 os.system(deltext+" fp.*")
 os.system(deltext+" ecp.*")
 os.system(deltext+" ecdh.*")
+os.system(deltext+" hpke.*")
 os.system(deltext+" ff.*")
 os.system(deltext+" rsa.*")
 os.system(deltext+" config_big.h")
@@ -728,16 +740,16 @@ os.system(deltext+" mpin256.*")
 os.system(deltext+" bls256.*")
 
 # create library
-os.system("emcc -O2  randapi.c -o randapi.bc")
+os.system("emcc -O2 -c  randapi.c -o randapi.bc")
 
 
-os.system("emcc -O2 hash.c -o hash.bc")
-os.system("emcc -O2 hmac.c -o hmac.bc")
-os.system("emcc -O2 rand.c -o rand.bc")
-os.system("emcc -O2 oct.c -o oct.bc")
-os.system("emcc -O2 aes.c -o aes.bc")
-os.system("emcc -O2 gcm.c -o gcm.bc")
-os.system("emcc -O2 newhope.c -o newhope.bc")
+os.system("emcc -O2 -c hash.c -o hash.bc")
+os.system("emcc -O2 -c hmac.c -o hmac.bc")
+os.system("emcc -O2 -c rand.c -o rand.bc")
+os.system("emcc -O2 -c oct.c -o oct.bc")
+os.system("emcc -O2 -c aes.c -o aes.bc")
+os.system("emcc -O2 -c gcm.c -o gcm.bc")
+os.system("emcc -O2 -c newhope.c -o newhope.bc")
 
 if sys.platform.startswith("win") :
 	os.system("for %i in (*.o) do @echo %~nxi >> f.list")
