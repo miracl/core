@@ -286,7 +286,7 @@ pub fn hkdf_expand(hash: usize, hlen: usize, okm: &mut [u8], olen: usize, prk: &
     let n=olen/hlen;
     let flen=olen%hlen;
 
-    let mut t: [u8; 200] = [0; 200];
+    let mut t: [u8; 1024] = [0; 1024];  // >= info.length+hlen+1
     let mut k: [u8; 64] = [0; 64];
 
     let mut l=0;

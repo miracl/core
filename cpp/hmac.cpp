@@ -191,12 +191,12 @@ void core::HKDF_Extract(int hash,int hlen,octet *PRK,octet *SALT,octet *IKM)
 void core::HKDF_Expand(int hash,int hlen,octet *OKM,int olen,octet *PRK,octet *INFO)
 {
     int i;
-    char t[200];
+    char t[1024];  // >= info.length+hlen+1
     octet T={0,sizeof(t),t};
     int n=olen/hlen; 
     int flen=olen%hlen;
-
     OCT_empty(OKM);
+
     for (i=1;i<=n;i++)
     {
         OCT_joctet(&T,INFO);

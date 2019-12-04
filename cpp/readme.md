@@ -70,6 +70,23 @@ where XX can be 16, 32 or 64
 
 -------------------------------------------------
 
+NEW: Experimental support for emerging HPKE (Hybrid Public Key Encryption) standard.
+See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hpke/
+
+New hpke.cpp/.h api files
+
+Supports KEM_IDs for X25519, P256 and P521
+Supports HDF_IDs for SHA256/512
+Supports AEAD_IDs for AES-GCM-128/256 only
+
+Create 32 or 64-bit library selecting curves 2 and 10 (X25519 and P521)
+
+    g++ -O2 testhpke.cpp core.a -o testhpke
+
+Test program runs through test vectors for all modes 1-4.
+
+---------------------------------------------------
+
 *Using clang on Windows
 Download latest clang from http://releases.llvm.org/download.html
 Choose Clang for Windows (64-bit) (.sig) 
