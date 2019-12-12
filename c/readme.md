@@ -44,8 +44,8 @@ To create a 32-bit library
     python3 config32.py
 
 
-Then select options 1, 3, 7, 21, 23, 29, 30 and 32, which are fixed for the example 
-program. (For a 16-bit build select 1,3 and 5). Select 0 then to exit.
+Then select options 1, 3, 7, 23, 25, 31, 32 and 34, which are fixed for the example 
+program. (For a 16-bit build select 1,4 and 6). Select 0 then to exit.
 
 Then compile
 
@@ -92,7 +92,7 @@ See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hpke/
 
 New hpke.c/.h api files
 
-- Supports KEM_IDs for X25519, P256 and P521
+- Supports KEM_IDs for X25519, X448, P256 and P521
 - Supports HDF_IDs for SHA256/512
 - Supports AEAD_IDs for AES-GCM-128/256 only
 

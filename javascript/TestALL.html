@@ -45,14 +45,14 @@
 <script type="text/javascript"src=./bls192.js></script>
 <script type="text/javascript"src=./bls256.js></script>
 
-<p><a id="myLink1" href="#" onclick="location.reload(false);ed25519();">ED25519 255-bit Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
+<p><a id="myLink1" href="#" onclick="location.reload(false);ED25519();">ED25519 255-bit Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
 <p><a id="myLink2" href="#" onclick="location.reload(false);NIST256();">NIST256 256-bit Weierstrass Elliptic Curve ECDH/ECIES/ECDSA</a></p>
 <p><a id="myLink3" href="#" onclick="location.reload(false);GOLDILOCKS();">GOLDILOCKS 448-bit Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
-<p><a id="myLink4" href="#" onclick="location.reload(false);bn254();">BN254 254-bit k=12 Pairing-Friendly BN Curve MPIN</a></p>
-<p><a id="myLink5" href="#" onclick="location.reload(false);bls12383();">BLS12383 383-bit k=12 Pairing-Friendly BLS Curve MPIN</a></p>
-<p><a id="myLink6" href="#" onclick="location.reload(false);bls24479();">BLS24479 479-bit k=24 Pairing-Friendly BLS Curve MPIN</a></p>
-<p><a id="myLink7" href="#" onclick="location.reload(false);bls48556();">BLS48556 556-bit k=48 Pairing-Friendly BLS Curve MPIN</a></p>
-<p><a id="myLink8" href="#" onclick="location.reload(false);rsa2048();">RSA2048 2048-bit RSA Key generation/Encryption/Decryption</a></p>
+<p><a id="myLink4" href="#" onclick="location.reload(false);BN254();">BN254 254-bit k=12 Pairing-Friendly BN Curve MPIN</a></p>
+<p><a id="myLink5" href="#" onclick="location.reload(false);BLS12383();">BLS12383 383-bit k=12 Pairing-Friendly BLS Curve MPIN</a></p>
+<p><a id="myLink6" href="#" onclick="location.reload(false);BLS24479();">BLS24479 479-bit k=24 Pairing-Friendly BLS Curve MPIN</a></p>
+<p><a id="myLink7" href="#" onclick="location.reload(false);BLS48556();">BLS48556 556-bit k=48 Pairing-Friendly BLS Curve MPIN</a></p>
+<p><a id="myLink8" href="#" onclick="location.reload(false);RSA2048();">RSA2048 2048-bit RSA Key generation/Encryption/Decryption</a></p>
 
 
 <script>
@@ -61,7 +61,7 @@
 /* test driver and function exerciser for ECDH/ECIES/ECDSA API Functions */
 
 // ED25519 context
-function ed25519() {
+function ED25519() {
 	var ctx = new CTX('ED25519');
 
 	mywindow=window.open();
@@ -438,7 +438,7 @@ function GOLDILOCKS() {
 
 
 // RSA2048 context
-function rsa2048() {
+function RSA2048() {
 	var ctx = new CTX('RSA2048');
 
 	var i,j=0,res;
@@ -539,7 +539,7 @@ function rsa2048() {
 /* Test M-Pin */
 
 // BN254 context
-function bn254() {
+function BN254() {
 	var ctx = new CTX('BN254');
 	mywindow=window.open();
 
@@ -783,7 +783,7 @@ If Time permits are ON, AND pin error detection is NOT required, set xID=null, H
 }
 
 // BLS12383 context
-function bls12383() {
+function BLS12383() {
 	var ctx = new CTX('BLS12383');
 	mywindow=window.open();
 
@@ -1030,7 +1030,7 @@ If Time permits are ON, AND pin error detection is NOT required, set xID=null, H
 
 
 // BLS24479 context
-function bls24479() {
+function BLS24479() {
 	var ctx = new CTX('BLS24479');
 	mywindow=window.open();
 
@@ -1274,7 +1274,7 @@ If Time permits are ON, AND pin error detection is NOT required, set xID=null, H
 } 
 
 // BLS48556 context
-function bls48556() {
+function BLS48556() {
 	var ctx = new CTX('BLS48556');
 	mywindow=window.open();
 
@@ -1520,11 +1520,11 @@ function bls48556() {
 //bls48();
 //bls24();
 //bls383();
-//bn254();
+//BN254();
 //GOLDILOCKS();
 //NIST256();
-//ed25519();
-//rsa2048();
+//ED25519();
+//RSA2048();
 
 </script>
 </body>

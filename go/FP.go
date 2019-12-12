@@ -158,7 +158,8 @@ func mod(d *DBIG) *BIG {
 		b.w[NLEN-1] &= TMASK
 		b.w[0] += carry
 
-		b.w[224/BASEBITS] += carry << (224 % BASEBITS)
+		ix := 224/int(BASEBITS)
+		b.w[ix] += carry << (224 % BASEBITS)
 		b.norm()
 		return b
 	}

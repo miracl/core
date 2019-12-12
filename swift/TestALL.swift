@@ -150,7 +150,8 @@ public func TestECDH_ed25519(_ rng: inout RAND)
 
     for i in 0 ..< 8 {SALT[i]=UInt8(i+1)}  // set Salt
 
-    print("\nAlice's Passphrase= " + pp)
+    print("\nTest Curve ed25519");
+    print("Alice's Passphrase= " + pp)
     let PW=[UInt8]( (pp).utf8 )
 
     /* private key S0 of size EGS bytes derived from Password and Salt */
@@ -289,7 +290,8 @@ public func TestECDH_nist256(_ rng: inout RAND)
 
     for i in 0 ..< 8 {SALT[i]=UInt8(i+1)}  // set Salt
 
-    print("\nAlice's Passphrase= " + pp)
+    print("\nTest Curve nist256");
+    print("Alice's Passphrase= " + pp)
     let PW=[UInt8]( (pp).utf8 )
 
     /* private key S0 of size EGS bytes derived from Password and Salt */
@@ -301,11 +303,11 @@ public func TestECDH_nist256(_ rng: inout RAND)
     print("Alice's private key= 0x",terminator: ""); printBinary(S0)
 
     /* Generate Key pair S/W */
-    nist256.ECDH.KEY_PAIR_GENERATE(&NULLRNG,&S0,&W0);
+    nist256.ECDH.KEY_PAIR_GENERATE(&NULLRNG,&S0,&W0)
 
     print("Alice's public key= 0x",terminator: ""); printBinary(W0)
 
-    var res=nist256.ECDH.PUBLIC_KEY_VALIDATE(W0);
+    var res=nist256.ECDH.PUBLIC_KEY_VALIDATE(W0)
 
     if res != 0
     {
@@ -318,7 +320,7 @@ public func TestECDH_nist256(_ rng: inout RAND)
 
     print("Servers private key= 0x",terminator: ""); printBinary(S1)
 
-    print("Servers public key= 0x",terminator: ""); printBinary(W1);
+    print("Servers public key= 0x",terminator: ""); printBinary(W1)
 
     res=nist256.ECDH.PUBLIC_KEY_VALIDATE(W1)
     if res != 0
@@ -425,7 +427,8 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
 
     for i in 0 ..< 8 {SALT[i]=UInt8(i+1)}  // set Salt
 
-    print("\nAlice's Passphrase= " + pp)
+    print("\nTest Curve goldilocks");
+    print("Alice's Passphrase= " + pp)
     let PW=[UInt8]( (pp).utf8 )
 
     /* private key S0 of size EGS bytes derived from Password and Salt */
@@ -575,7 +578,8 @@ public func TestMPIN_bn254(_ rng: inout RAND)
     // Trusted Authority set-up
 
     bn254.MPIN.RANDOM_GENERATE(&rng,&S)
-    print("\nMPIN Master Secret s: 0x",terminator: "");  printBinary(S)
+    print("\nTest Curve bn254");
+    print("MPIN Master Secret s: 0x",terminator: "");  printBinary(S)
 
     // Create Client Identity
     let IDstr = "testUser@miracl.com"
@@ -797,7 +801,8 @@ public func TestMPIN_bls12383(_ rng: inout RAND)
     // Trusted Authority set-up
 
     bls12383.MPIN.RANDOM_GENERATE(&rng,&S)
-    print("\nMPIN Master Secret s: 0x",terminator: "");  printBinary(S)
+    print("\nTest Curve bls12383");
+    print("MPIN Master Secret s: 0x",terminator: "");  printBinary(S)
 
     // Create Client Identity
     let IDstr = "testUser@miracl.com"
@@ -1020,7 +1025,8 @@ public func TestMPIN_bls24479(_ rng: inout RAND)
     // Trusted Authority set-up
 
     MPIN192.RANDOM_GENERATE(&rng,&S)
-    print("\nMPIN Master Secret s: 0x",terminator: "");  printBinary(S)
+    print("\nTest Curve bls24479");
+    print("MPIN Master Secret s: 0x",terminator: "");  printBinary(S)
 
     // Create Client Identity
     let IDstr = "testUser@miracl.com"
@@ -1242,7 +1248,8 @@ public func TestMPIN_bls48556(_ rng: inout RAND)
     // Trusted Authority set-up
 
     MPIN256.RANDOM_GENERATE(&rng,&S)
-    print("\nMPIN Master Secret s: 0x",terminator: "");  printBinary(S)
+    print("\nTest Curve bls48556");
+    print("MPIN Master Secret s: 0x",terminator: "");  printBinary(S)
 
     // Create Client Identity
     let IDstr = "testUser@miracl.com"

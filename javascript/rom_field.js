@@ -56,6 +56,7 @@ var ROM_FIELD_25519,
     ROM_FIELD_NIST384,
     ROM_FIELD_NIST521,
     ROM_FIELD_SECP256K1,
+    ROM_FIELD_SECP160R1,
 	ROM_FIELD_SM2,
     ROM_FIELD_JUBJUB;
 
@@ -516,6 +517,23 @@ ROM_FIELD_SECP256K1 = function() {
     };
     return ROM_FIELD_SECP256K1;
 };
+
+ROM_FIELD_SECP160R1 = function() {
+    "use strict";
+    /* Fixed Data in ROM - Field and Curve parameters */
+
+    var ROM_FIELD_SECP160R1 = {
+
+        // SECP160R1 modulus
+        // Base Bits= 24
+        Modulus: [0xFFFFFF,0xFFFF7F,0xFFFFFF,0xFFFFFF,0xFFFFFF,0xFFFFFF,0xFFFF],
+        R2modp: [0x10000,0x0,0x1,0x40,0x0,0x0,0x0],
+        ROI: [0xFFFFFE,0xFFFF7F,0xFFFFFF,0xFFFFFF,0xFFFFFF,0xFFFFFF,0xFFFF],
+        MConst: 0x1,
+    };
+    return ROM_FIELD_SECP160R1;
+};
+
 
 ROM_FIELD_JUBJUB = function() {
     "use strict";

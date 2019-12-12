@@ -239,12 +239,13 @@ public struct BIG{
     {
         let n=k%CONFIG_BIG.BASEBITS
         let m=Int(k/CONFIG_BIG.BASEBITS)
-
         w[CONFIG_BIG.NLEN-1]=(w[CONFIG_BIG.NLEN-1-m]<<Chunk(n))
         if CONFIG_BIG.NLEN>=m+2 {w[CONFIG_BIG.NLEN-1]|=(w[CONFIG_BIG.NLEN-m-2]>>Chunk(CONFIG_BIG.BASEBITS-n))}
-        for i in (m+1...CONFIG_BIG.NLEN-2).reversed()
-        {
-            w[i]=((w[i-m]<<Chunk(n))&CONFIG_BIG.BMASK)|(w[i-m-1]>>Chunk(CONFIG_BIG.BASEBITS-n))
+        if m+1 <= CONFIG_BIG.NLEN-2 {
+            for i in (m+1...CONFIG_BIG.NLEN-2).reversed()
+            {
+                w[i]=((w[i-m]<<Chunk(n))&CONFIG_BIG.BMASK)|(w[i-m-1]>>Chunk(CONFIG_BIG.BASEBITS-n))
+            }
         }
         w[m]=(w[0]<<Chunk(n))&CONFIG_BIG.BMASK
         for i in 0 ..< m {w[i]=0}

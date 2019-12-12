@@ -46,14 +46,14 @@
 <script type="text/javascript"src=./bls192.js></script>
 <script type="text/javascript"src=./bls256.js></script>
 
-<p><a id="myLink1" href="#" onclick="location.reload(false);ed25519();">ED25519 255-bit Edwards Elliptic Curve</a></p>
-<p><a id="myLink2" href="#" onclick="location.reload(false);NIST256();">NIST256 256-bit Weierstrass Elliptic Curve</a></p>
-<p><a id="myLink3" href="#" onclick="location.reload(false);GOLDILOCKS();">GOLDILOCKS 448-bit Edwards Elliptic Curve</a></p>
-<p><a id="myLink4" href="#" onclick="location.reload(false);bn254();">BN254 254-bit k=12 Pairing-Friendly BN Curve</a></p>
-<p><a id="myLink5" href="#" onclick="location.reload(false);bls12383();">BLS12383 383-bit k=12 Pairing-Friendly BLS Curve</a></p>
-<p><a id="myLink6" href="#" onclick="location.reload(false);bls24479();">BLS24479 479-bit k=24 Pairing-Friendly BLS Curve</a></p>
-<p><a id="myLink7" href="#" onclick="location.reload(false);bls48556();">BLS48556 556-bit k=48 Pairing-Friendly BLS Curve</a></p>
-<p><a id="myLink8" href="#" onclick="location.reload(false);rsa2048();">RSA2048 2048-bit RSA Method</a></p>
+<p><a id="myLink1" href="#" onclick="location.reload(false);ED25519();">ED25519 Edwards Elliptic Curve</a></p>
+<p><a id="myLink2" href="#" onclick="location.reload(false);NIST256();">NIST256 Weierstrass Elliptic Curve</a></p>
+<p><a id="myLink3" href="#" onclick="location.reload(false);GOLDILOCKS();">GOLDILOCKS Edwards Elliptic Curve</a></p>
+<p><a id="myLink4" href="#" onclick="location.reload(false);BN254();">BN254 k=12 Pairing-Friendly BN Curve</a></p>
+<p><a id="myLink5" href="#" onclick="location.reload(false);BLS12383();">BLS12383 k=12 Pairing-Friendly BLS Curve</a></p>
+<p><a id="myLink6" href="#" onclick="location.reload(false);BLS24479();">BLS24479 k=24 Pairing-Friendly BLS Curve</a></p>
+<p><a id="myLink7" href="#" onclick="location.reload(false);BLS48556();">BLS48556 k=48 Pairing-Friendly BLS Curve</a></p>
+<p><a id="myLink8" href="#" onclick="location.reload(false);rsa2048();">RSA2048 RSA Method</a></p>
 
 
 <script>
@@ -63,7 +63,7 @@
 // otherwise the optimizer may bail out on subsequent calls (it doesn't like it when code is modified at runtime).
 
 // ED25519 context
-	function ed25519() {
+	function ED25519() {
 		var ctx = new CTX('ED25519');
 		var i,j;
 		var result;
@@ -152,7 +152,7 @@
 
 // BLS12383 context
 
-	function bls12383() {
+	function BLS12383() {
 		var ctx = new CTX('BLS12383');
 		var i;
 		var result;
@@ -535,7 +535,7 @@
 
 
 // BN254 context
-	function bn254() {
+	function BN254() {
 
 		var ctx = new CTX('BN254');
 		var i;
@@ -738,7 +738,7 @@
 	}
 
 // BLS24479 context
-	function bls24479() {
+	function BLS24479() {
 
 		var ctx = new CTX('BLS24479');
 		var i;
@@ -929,7 +929,7 @@
 	}
 
 // BLS48556 context
-	function bls48556() {
+	function BLS48556() {
 
 		var ctx = new CTX('BLS48556');
 		var i;

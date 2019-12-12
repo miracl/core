@@ -96,22 +96,18 @@ public struct ECDH
         let r=BIG(ROM.CURVE_Order)
 
         if WP.is_infinity() {res=INVALID_PUBLIC_KEY}
-
         if res==0
         {
-
-
             let q=BIG(ROM.Modulus)
             let nb=UInt(q.nbits())
-            var k=BIG(1); k.shl((nb+4)/2)
+            var k=BIG(1); 
+            k.shl((nb+4)/2)
             k.add(q)
             k.div(r)
-
             while k.parity()==0 {
                 k.shr(1)
                 WP.dbl()
             }
-
             if !k.isunity() {WP=WP.mul(k)}
             if WP.is_infinity() {res=INVALID_PUBLIC_KEY}
 

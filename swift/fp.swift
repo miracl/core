@@ -128,7 +128,8 @@ public struct FP {
             b.w[CONFIG_BIG.NLEN-1]&=CONFIG_FIELD.TMASK
             b.w[0]+=carry
             
-            b.w[Int(224/CONFIG_BIG.BASEBITS)]+=carry<<Chunk(224%CONFIG_BIG.BASEBITS)
+            let ix=Int(224/CONFIG_BIG.BASEBITS)
+            b.w[ix]+=carry<<Chunk(224%CONFIG_BIG.BASEBITS)
             b.norm()
             return b;
         }

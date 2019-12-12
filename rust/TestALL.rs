@@ -77,6 +77,7 @@ fn ecdh_ed25519(mut rng: &mut RAND) {
     } // set Salt
 
     println!("\nTesting ECDH/ECDSA/ECIES");
+    println!("Curve ed25519");
     println!("Alice's Passphrase= {}", pw);
 
     let mut s0: [u8; EFS] = [0; EGS];
@@ -228,6 +229,7 @@ fn ecdh_nist256(mut rng: &mut RAND) {
     } // set Salt
 
     println!("\nTesting ECDH/ECDSA/ECIES");
+    println!("Curve nist256");
     println!("Alice's Passphrase= {}", pw);
 
     let mut s0: [u8; EFS] = [0; EGS];
@@ -352,6 +354,7 @@ fn ecdh_goldilocks(mut rng: &mut RAND) {
     use core::goldilocks::ecdh;
     use core::goldilocks::ecp;
 
+    
     let pw = "M0ng00se";
     let pp: &[u8] = b"M0ng00se";
     const EFS: usize = ecdh::EFS;
@@ -379,6 +382,7 @@ fn ecdh_goldilocks(mut rng: &mut RAND) {
     } // set Salt
 
     println!("\nTesting ECDH/ECDSA/ECIES");
+    println!("Curve goldilocks");
     println!("Alice's Passphrase= {}", pw);
 
     let mut s0: [u8; EFS] = [0; EGS];
@@ -545,6 +549,7 @@ fn mpin_bn254(mut rng: &mut RAND) {
     let sha = ecp::HASH_TYPE;
 
     println!("\nTesting MPIN - PIN is 1234");
+    println!("Curve bn254");
     /* Trusted Authority set-up */
 
     mpin::random_generate(&mut rng, &mut s);
@@ -766,6 +771,7 @@ fn mpin_bls12383(mut rng: &mut RAND) {
     let sha = ecp::HASH_TYPE;
 
     println!("\nTesting MPIN - PIN is 1234");
+    println!("Curve bls12383");
     /* Trusted Authority set-up */
 
     mpin::random_generate(&mut rng, &mut s);
@@ -988,6 +994,7 @@ fn mpin_bls24479(mut rng: &mut RAND) {
     let sha = ecp::HASH_TYPE;
 
     println!("\nTesting MPIN - PIN is 1234");
+    println!("Curve bls24479");
     /* Trusted Authority set-up */
 
     mpin192::random_generate(&mut rng, &mut s);
@@ -1210,6 +1217,7 @@ fn mpin_bls48556(mut rng: &mut RAND) {
     let sha = ecp::HASH_TYPE;
 
     println!("\nTesting MPIN - PIN is 1234");
+    println!("Curve bls48556");
     /* Trusted Authority set-up */
 
     mpin256::random_generate(&mut rng, &mut s);

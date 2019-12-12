@@ -284,6 +284,7 @@ replace("arch.h","@WL@","16")
 print("Elliptic Curves")
 print("1. ED25519")
 print("2. NUMS256E")
+print("3. SECP160R1\n")
 
 print("Pairing-Friendly Elliptic Curves")
 print("3. BN254")
@@ -295,7 +296,7 @@ print("5. RSA2048")
 
 selection=[]
 ptr=0
-max=6
+max=7
 
 curve_selected=False
 pfcurve_selected=False
@@ -333,7 +334,7 @@ while ptr<max:
 # if pairing friendly. M or D type twist, and sign of the family parameter x
 # ate bits is number of bits in Ate parameter (from romgen program)
 # g2_table size is number of entries in precomputed table 
-# curve security is AES equiavlent, rounded up.
+# curve security is AES equivalent, rounded up.
 
 	if x==1:
 		curveset("255","F25519","ED25519","13","2","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
@@ -342,11 +343,15 @@ while ptr<max:
 		curveset("256","F256PME","NUMS256E","13","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
 		curve_selected=True
 
-
 	if x==3:
+		curveset("160","SECP160R1","SECP160R1","13","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curve_selected=True
+
+
+	if x==4:
 		curveset("254","BN254","BN254","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
 		pfcurve_selected=True
-	if x==4:
+	if x==5:
 		curveset("254","BN254CX","BN254CX","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
 		pfcurve_selected=True
 
@@ -359,7 +364,7 @@ while ptr<max:
 
 
 # There are choices here, different ways of getting the same result, but some faster than others
-	if x==5:
+	if x==6:
 		#256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
 		#512 is faster.. but best is 1024
 		rsaset("256","2048","13","8")

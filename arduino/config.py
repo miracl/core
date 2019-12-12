@@ -457,30 +457,32 @@ print("16. NUMS512E")
 print("17. SECP256K1")
 print("18. SM2")
 print("19. C13318")
-print("20. JUBJUB\n")
+print("20. JUBJUB")
+print("21. X448")
+print("22. SECP160R1\n")
 
 print("Pairing-Friendly Elliptic Curves")
-print("21. BN254")
-print("22. BN254CX")
-print("23. BLS12383")
-print("24. BLS12381")
-print("25. FP256BN")
-print("26. FP512BN")
-print("27. BLS12461")
-print("28. BN462\n")
-print("29. BLS24479")
-print("30. BLS48556\n")
-print("31. BLS48581\n")
+print("23. BN254")
+print("24. BN254CX")
+print("25. BLS12383")
+print("26. BLS12381")
+print("27. FP256BN")
+print("28. FP512BN")
+print("29. BLS12461")
+print("30. BN462\n")
+print("31. BLS24479")
+print("32. BLS48556\n")
+print("33. BLS48581\n")
 
 print("RSA")
-print("32. RSA2048")
-print("33. RSA3072")
-print("34. RSA4096")
-print("35. NewHope\n")
+print("34. RSA2048")
+print("35. RSA3072")
+print("36. RSA4096")
+print("37. NewHope\n")
 
 selection=[]
 ptr=0
-max=36
+max=38
 
 def selected(selection,sel,len) :
 	for i in range(0,len):
@@ -591,44 +593,54 @@ while ptr<max:
 		curveset("255","JUBJUB","JUBJUB","29","32","NOT_SPECIAL","5","EDWARDS","NOT","","","","","128")
 		curve_selected=True
 
+
 	if x==21:
+		curveset("448","GOLDILOCKS","X448","29","1","GENERALISED_MERSENNE","0","MONTGOMERY","NOT","","","","","256")
+		curve_selected=True
+
+	if x==22:
+		curveset("160","SECP160R1","SECP160R1","29","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curve_selected=True
+
+
+	if x==23:
 		curveset("254","BN254","BN254","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
 		pfcurve_selected=True
-	if x==22:
+	if x==24:
 		curveset("254","BN254CX","BN254CX","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
 		pfcurve_selected=True
-	if x==23:
+	if x==25:
 		curveset("383","BLS12383","BLS12383","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128")
 		pfcurve_selected=True
 
-	if x==24:
+	if x==26:
 		curveset("381","BLS12381","BLS12381","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128")
 		pfcurve_selected=True
 
 
-	if x==25:
+	if x==27:
 		curveset("256","FP256BN","FP256BN","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","NEGATIVEX","83","66","128")
 		pfcurve_selected=True
-	if x==26:
+	if x==28:
 		curveset("512","FP512BN","FP512BN","29","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","POSITIVEX","172","130","128")
 		pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
-	if x==27:
+	if x==29:
 		curveset("461","BLS12461","BLS12461","28","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","79","78","128")
 		pfcurve_selected=True
 
-	if x==28:
+	if x==30:
 		curveset("462","BN462","BN462","28","1","NOT_SPECIAL","1","WEIERSTRASS","BN","D_TYPE","POSITIVEX","125","118","128")
 		pfcurve_selected=True
-	if x==29:
+	if x==31:
 		curveset("479","BLS24479","BLS24479","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","52","49","192")
 		pfcurve_selected=True
 
-	if x==30:
+	if x==32:
 		curveset("556","BLS48556","BLS48556","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","35","32","256")
 		pfcurve_selected=True
 
-	if x==31:
+	if x==33:
 		curveset("581","BLS48581","BLS48581","29","1","NOT_SPECIAL","10","WEIERSTRASS","BLS","D_TYPE","NEGATIVEX","36","33","256")
 		pfcurve_selected=True
 # rsaset(big,ring,big_length_bytes,bit_bits_in_base,multiplier)
@@ -641,22 +653,22 @@ while ptr<max:
 
 # There are choices here, different ways of getting the same result, but some faster than others
 # There are choices here, different ways of getting the same result, but some faster than others
-	if x==32:
+	if x==34:
 		#256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
 		#512 is faster.. but best is 1024
 		rsaset("1024","RSA2048","28","2")
 		#rsaset("512","RSA2048","29","4")
 		#rsaset("256","RSA2048","29","8")
 		rsa_selected=True
-	if x==33:
+	if x==35:
 		rsaset("384","RSA3072","28","8")
 		rsa_selected=True
-	if x==34:
+	if x==36:
 		#rsaset("256","RSA4096","29","16")
 		rsaset("512","RSA4096","29","8")
 		rsa_selected=True
 
-	if x==35:
+	if x==37:
 		nhs_selected=True
 
 	break;
@@ -768,8 +780,11 @@ if not selected(selection,5,ptr) :
 if not selected(selection,6,ptr) :
 	os.system(deltext+" rom_field_HIFIVE.cpp")
 	os.system(deltext+" rom_curve_HIFIVE.cpp")
-if not selected(selection,7,ptr) :
+
+if not selected(selection,7,ptr) and not selected(selection,21,ptr):
 	os.system(deltext+" rom_field_GOLDILOCKS.cpp")
+
+if not selected(selection,7,ptr) :
 	os.system(deltext+" rom_curve_GOLDILOCKS.cpp")
 if not selected(selection,8,ptr) :
 	os.system(deltext+" rom_field_NIST384.cpp")
@@ -817,42 +832,46 @@ if not selected(selection,20,ptr) :
 	os.system(deltext+" rom_field_JUBJUB.cpp")
 	os.system(deltext+" rom_curve_JUBJUB.cpp")
 
-
-
 if not selected(selection,21,ptr) :
+    os.system(deltext+" rom_curve_X448.cpp")
+if not selected(selection,22,ptr) :
+	os.system(deltext+" rom_field_SECP160R1.cpp")
+	os.system(deltext+" rom_curve_SECP160R1.cpp")
+
+if not selected(selection,23,ptr) :
 	os.system(deltext+" rom_field_BN254.cpp")
 	os.system(deltext+" rom_curve_BN254.cpp")
-if not selected(selection,22,ptr) :
+if not selected(selection,24,ptr) :
 	os.system(deltext+" rom_field_BN254CX.cpp")
 	os.system(deltext+" rom_curve_BN254CX.cpp")
-if not selected(selection,23,ptr) :
+if not selected(selection,25,ptr) :
 	os.system(deltext+" rom_field_BLS12383.cpp")
 	os.system(deltext+" rom_curve_BLS12383.cpp")
-if not selected(selection,24,ptr) :
+if not selected(selection,26,ptr) :
 	os.system(deltext+" rom_field_BLS12381.cpp")
 	os.system(deltext+" rom_curve_BLS12381.cpp")
-if not selected(selection,25,ptr) :
+if not selected(selection,27,ptr) :
 	os.system(deltext+" rom_field_FP256BN.cpp")
 	os.system(deltext+" rom_curve_FP256BN.cpp")
-if not selected(selection,26,ptr) :
+if not selected(selection,28,ptr) :
 	os.system(deltext+" rom_field_FP512BN.cpp")
 	os.system(deltext+" rom_curve_FP512BN.cpp")
-if not selected(selection,27,ptr) :
+if not selected(selection,29,ptr) :
 	os.system(deltext+" rom_field_BLS12461.cpp")
 	os.system(deltext+" rom_curve_BLS12461.cpp")
 
-if not selected(selection,28,ptr) :
+if not selected(selection,30,ptr) :
 	os.system(deltext+" rom_field_BN462.cpp")
 	os.system(deltext+" rom_curve_BN462.cpp")
 
-if not selected(selection,29,ptr) :
+if not selected(selection,31,ptr) :
 	os.system(deltext+" rom_field_BLS24479.cpp")
 	os.system(deltext+" rom_curve_BLS24479.cpp")
-if not selected(selection,30,ptr) :
+if not selected(selection,32,ptr) :
 	os.system(deltext+" rom_field_BLS48556.cpp")
 	os.system(deltext+" rom_curve_BLS48556.cpp")
 
-if not selected(selection,31,ptr) :
+if not selected(selection,33,ptr) :
 	os.system(deltext+" rom_field_BLS48581.cpp")
 	os.system(deltext+" rom_curve_BLS48581.cpp")
 

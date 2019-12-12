@@ -59,6 +59,48 @@ var CTX = function(input_parameter) {
             "@AK": 16       /* AES key size */
         },
 
+        "X448": {
+            "BITS": "448",
+            "FIELD": "GOLDILOCKS",
+            "CURVE": "X448",
+            "@NB": 56,
+            "@BASE": 23,
+            "@NBT": 448,
+            "@M8": 1,
+            "@MT": 2,
+			"@QI": 0,
+			"@TW": 0,
+            "@CT": 2,
+            "@PF": 0,
+            "@ST": 0,
+            "@SX": 0,
+            "@AB": 0,
+            "@HT": 64,
+			"@SH": 11, 
+            "@AK": 32
+        },
+
+        "SECP160R1": {
+            "BITS": "160",
+            "FIELD": "SECP160R1",
+            "CURVE": "SECP160R1",
+            "@NB": 20,
+            "@BASE": 24,
+            "@NBT": 160,
+            "@M8": 1,
+            "@MT": 0,
+			"@QI": 0,
+			"@TW": 0,
+            "@CT": 0,
+            "@PF": 0,
+            "@ST": 0,
+            "@SX": 0,
+            "@AB": 0,
+            "@HT": 32,
+			"@SH": 8, 
+            "@AK": 16
+        },
+
         "C25519": {
             "BITS": "256",
             "FIELD": "25519",

@@ -180,7 +180,8 @@ impl FP {
             b.w[big::NLEN - 1] &= TMASK;
             b.w[0] += carry;
 
-            b.w[(224 / big::BASEBITS) as usize] += carry << (224 % big::BASEBITS);
+            let ix=(224 / big::BASEBITS) as usize;
+            b.w[ix] += carry << (224 % big::BASEBITS);
             b.norm();
             return b;
         }
