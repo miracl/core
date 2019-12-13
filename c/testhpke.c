@@ -44,7 +44,7 @@
 int hpke_C25519(csprng *RNG)
 {
     int res=0;
-    int config_id=0x16; // 01|01|10 = 1, 1, 2
+    int config_id=0x2A; // 01|01|010 = 1, 1, 2
     int i,mode;
     char info[32];
     char skr[EGS_C25519];
@@ -204,7 +204,7 @@ int hpke_C25519(csprng *RNG)
 int hpke_NIST521(csprng *RNG)
 {
     int res=0;
-    int config_id=0x2b; // 10|10|11 = 2, 2, 3
+    int config_id=0x53; // 10|10|011 = 2, 2, 3
     int i,mode;
     char info[32];
     char skr[EGS_NIST521];

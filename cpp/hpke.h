@@ -47,12 +47,13 @@
 
 using namespace core;
 
-//#define CONFIG_ID 0x16 // 01|01|10 = 1, 1, 2
-//#define KEM_ID 2  // Curve 25519
+//#define CONFIG_ID 0x2A // 01|01|010 = 1, 1, 2
+//#define KEM_ID 2  // Curve X25519
+//#define KEM_ID 3  // Curve X448
 //#define KDF_ID 1  // HKDF-SHA256
 //#define AEAD_ID 1 // AES-GCM-128
 
-#define HPKE_OK                     0     /**< Function completed without error */
+#define HPKE_OK                     0   /**< Function completed without error */
 #define HPKE_INVALID_PUBLIC_KEY    -2	/**< Public Key is Invalid */
 #define HPKE_ERROR                 -3	/**< HPKE Internal Error */
 

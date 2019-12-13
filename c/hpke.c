@@ -45,24 +45,30 @@ void HPKE_ZZZ_Encap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pkE,oct
     char ske[EGS_ZZZ];
     octet skE={0,sizeof(ske),ske};
 
-    kem=config_id&3;
+    kem=config_id&7;
     if (RNG==NULL)
     {
         OCT_copy(&skE,SKE);
-        if (kem==2) {
+        if (kem==2 || kem==4) {
             OCT_reverse(&skE);
-            skE.val[31]&=248;  // x25519 scalar processing
-            skE.val[0]&=127;
-            skE.val[0]|=64;
+            if (kem==2)
+            {
+                skE.val[31]&=248;  // x25519 scalar processing
+                skE.val[0]&=127;
+                skE.val[0]|=64;
+            } else {
+                skE.val[55]&=252;
+                skE.val[0]|=128;
+            }
         }
     }
 
     res=ECP_ZZZ_KEY_PAIR_GENERATE(RNG, &skE, pkE);
-    if (kem==2)
+    if (kem==2 || kem==4)
         OCT_reverse(pkR);
 
     res=ECP_ZZZ_SVDP_DH(&skE, pkR, Z);
-    if (kem==2) {
+    if (kem==2 || kem==4) {
         OCT_reverse(pkR);
         OCT_reverse(pkE);
         OCT_reverse(Z);
@@ -74,18 +80,24 @@ void HPKE_ZZZ_Decap(int config_id,octet *Z,octet *pkE,octet *SKR)
     int res,kem;
     char skr[EGS_ZZZ];
     octet skR={0,sizeof(skr),skr};
-    kem=config_id&3;
+    kem=config_id&7;
     OCT_copy(&skR,SKR);
 
-    if (kem==2) {
+    if (kem==2 || kem==4) {
         OCT_reverse(&skR);
-        skR.val[31]&=248;
-        skR.val[0]&=127;
-        skR.val[0]|=64;
         OCT_reverse(pkE);
+        if (kem==2)
+        {
+            skR.val[31]&=248;
+            skR.val[0]&=127;
+            skR.val[0]|=64;
+        } else {
+            skR.val[55]&=252;
+            skR.val[0]|=128;
+        }
     }
     ECP_ZZZ_SVDP_DH(&skR, pkE, Z);
-    if (kem==2) {
+    if (kem==2 || kem==4) {
         OCT_reverse(pkE);
         OCT_reverse(Z);
     }
@@ -100,31 +112,39 @@ void HPKE_ZZZ_AuthEncap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pkE
     octet skI={0,sizeof(ski),ski};
     char nz[EFS_ZZZ];
     octet NZ={0,sizeof(nz),nz};
-    kem=config_id&3;
+    kem=config_id&7;
 
     if (RNG==NULL)
     {
         OCT_copy(&skE,SKE);
         OCT_copy(&skI,SKI);
-        if (kem==2) {
+        if (kem==2 || kem==4) {
             OCT_reverse(&skE);
-            skE.val[31]&=248;
-            skE.val[0]&=127;
-            skE.val[0]|=64;
             OCT_reverse(&skI);
-            skI.val[31]&=248;
-            skI.val[0]&=127;
-            skI.val[0]|=64;
+            if (kem==2)
+            {
+                skE.val[31]&=248;
+                skE.val[0]&=127;
+                skE.val[0]|=64;
+                skI.val[31]&=248;
+                skI.val[0]&=127;
+                skI.val[0]|=64;
+            } else {
+                skE.val[55]&=252;
+                skE.val[0]|=128;
+                skI.val[55]&=252;
+                skI.val[0]|=128;
+            }
         }
     }
 
     ECP_ZZZ_KEY_PAIR_GENERATE(RNG, &skE, pkE);
-    if (kem==2)
+    if (kem==2 || kem==4)
         OCT_reverse(pkR);
 
     ECP_ZZZ_SVDP_DH(&skE, pkR, Z);
     ECP_ZZZ_SVDP_DH(&skI, pkR, &NZ);
-    if (kem==2) {
+    if (kem==2 || kem==4) {
         OCT_reverse(pkR);
         OCT_reverse(pkE);
         OCT_reverse(Z);
@@ -141,20 +161,26 @@ void HPKE_ZZZ_AuthDecap(int config_id,octet *Z,octet *pkE,octet *SKR,octet *pkI)
     char nz[EFS_ZZZ];
     octet NZ={0,sizeof(nz),nz};
     OCT_copy(&skR,SKR);
-    kem=config_id&3;
+    kem=config_id&7;
 
-    if (kem==2) {
+    if (kem==2 || kem==4) {
         OCT_reverse(&skR);
-        skR.val[31]&=248;
-        skR.val[0]&=127;
-        skR.val[0]|=64;
         OCT_reverse(pkE);
         OCT_reverse(pkI);
+        if (kem==2)
+        {
+            skR.val[31]&=248;
+            skR.val[0]&=127;
+            skR.val[0]|=64;
+        } else {
+            skR.val[55]&=252;
+            skR.val[0]|=128;
+        }
     }
 
     ECP_ZZZ_SVDP_DH(&skR, pkE, Z);
     ECP_ZZZ_SVDP_DH(&skR, pkI, &NZ);
-    if (kem==2) {
+    if (kem==2 || kem==4) {
         OCT_reverse(pkE);
         OCT_reverse(pkI);
         OCT_reverse(Z);
@@ -174,9 +200,9 @@ void HPKE_ZZZ_KeySchedule(int config_id,octet *key,octet *nonce,int mode,octet *
     char full_context[550];
     octet FULL_CONTEXT={0,sizeof(full_context),full_context};
 
-    int kem_id=config_id&3;
-    int kdf_id=(config_id>>2)&3;
-    int aead_id=(config_id>>4)&3;
+    int kem_id=config_id&7;
+    int kdf_id=(config_id>>3)&3;
+    int aead_id=(config_id>>5)&3;
 
     OCT_jint(&CONTEXT,mode,1);
     OCT_jint(&CONTEXT,kem_id,2);

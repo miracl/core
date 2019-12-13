@@ -45,8 +45,9 @@
 
 #include "ecdh_ZZZ.h"
 
-//#define CONFIG_ID 0x16 // 01|01|10 = 1, 1, 2
-//#define KEM_ID 2  // Curve 25519
+//#define CONFIG_ID 0x2A // 01|01|010 = 1, 1, 2
+//#define KEM_ID 2  // Curve X25519
+//#define KEM_ID 3  // Curve X448
 //#define KDF_ID 1  // HKDF-SHA256
 //#define AEAD_ID 1 // AES-GCM-128
 
