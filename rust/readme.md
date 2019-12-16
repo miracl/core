@@ -50,3 +50,20 @@ Alternatively building and testing can be combined via
     python3 configXX.py test
 
 where XX can be 32 or 64
+
+-------------------------------------------------
+
+## Using MIRACL core with Cargo
+
+Once you have built the library by running the python script, the contents of the rust folder will have changed, specifically all code files will now be under the folder core. This folder is just a rust library and can be included in any rust project.
+
+Create a new rust project
+```    cargo new mynewmiraclproject```
+
+Copy the core folder into this new projects root directory
+
+Finally, update the cargo.toml file in your new project to include the core library as a dependency. Here path must equal the path to the core folder, which if copied into the project should be just under the root.
+```
+[dependencies]
+core={path="core", version="0.1.0"}
+```
