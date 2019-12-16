@@ -300,6 +300,28 @@ public class GCM {
         }
         return data;
     }
+
+    public static void encrypt(byte[] C,byte[] T,byte[] K,byte[] IV,byte[] H,byte[] P) {
+	    GCM g=new GCM();
+	    g.init(K.length,K,IV.length,IV);
+	    g.add_header(H,H.length);
+	    byte[] b=g.add_plain(P,P.length);
+        for (int i=0;i<b.length;i++) C[i]=b[i];
+	    b=g.finish(true);
+        for (int i=0;i<b.length;i++) T[i]=b[i];
+    }
+
+    public static void decrypt(byte[] P,byte[] T,byte[] K,byte[] IV,byte[] H,byte[] C) {
+	    GCM g=new GCM();
+	    g.init(K.length,K,IV.length,IV);
+	    g.add_header(H,H.length);
+	    byte[] b=g.add_cipher(C,C.length);
+        for (int i=0;i<b.length;i++) P[i]=b[i];
+	    b=g.finish(true);
+	    for (int i=0;i<b.length;i++) T[i]=b[i];
+    }
+
+
     /*
     	public static void main(String[] args) {
     		int i;

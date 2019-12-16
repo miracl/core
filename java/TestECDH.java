@@ -62,7 +62,7 @@ public class TestECDH extends TestCase { //
 
         int EGS = ECDH.EGS;
         int EFS = ECDH.EFS;
-        int EAS = AES.KS;
+        int EAS = CONFIG_CURVE.AESKEY;
         int sha = CONFIG_CURVE.HASH_TYPE;
 
         byte[] S1 = new byte[EGS];

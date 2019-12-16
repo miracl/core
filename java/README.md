@@ -38,3 +38,22 @@ Alternatively building and testing can be combined via
 
 where XX can be 32 or 64
 
+-------------------------------------------------
+
+NEW: Experimental support for emerging HPKE (Hybrid Public Key Encryption) standard.
+See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hpke/
+
+New HPKE.java api file
+
+- Supports KEM_IDs for X25519, X448, P256 and P521
+- Supports HDF_IDs for SHA256/512
+- Supports AEAD_IDs for AES-GCM-128/256 only
+
+Create 32 or 64-bit library selecting curves 2 and 10 (C25519 and P521)
+
+Then compile and install with maven as above
+
+    cd core
+    mvn clean install
+
+Test program TestHPKE.java runs through test vectors for all modes 0-3.

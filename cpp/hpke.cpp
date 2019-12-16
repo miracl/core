@@ -53,11 +53,11 @@ void ZZZ::HPKE_Encap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pkE,oc
             OCT_reverse(&skE);
             if (kem==2)
             {
-                skE.val[31]&=248;  // x25519 scalar processing
+                skE.val[EGS_ZZZ-1]&=248;  // x2EGS_ZZZ-119 scalar processing
                 skE.val[0]&=127;
                 skE.val[0]|=64;
             } else {
-                skE.val[55]&=252;
+                skE.val[EGS_ZZZ-1]&=252;
                 skE.val[0]|=128;
             }
         }
@@ -88,14 +88,13 @@ void ZZZ::HPKE_Decap(int config_id,octet *Z,octet *pkE,octet *SKR)
         OCT_reverse(pkE);
         if (kem==2)
         {
-            skR.val[31]&=248;
+            skR.val[EGS_ZZZ-1]&=248;
             skR.val[0]&=127;
             skR.val[0]|=64;
-            } else {
-                skR.val[55]&=252;
-                skR.val[0]|=128;
-            }       
-
+        } else {
+            skR.val[EGS_ZZZ-1]&=252;
+            skR.val[0]|=128;
+        }       
     }
     ECP_SVDP_DH(&skR, pkE, Z);
     if (kem==2 || kem==4) {
@@ -124,16 +123,16 @@ void ZZZ::HPKE_AuthEncap(int config_id,csprng *RNG,octet *SKE,octet *Z,octet *pk
             OCT_reverse(&skI);
             if (kem==2)
             {
-                skE.val[31]&=248;
+                skE.val[EGS_ZZZ-1]&=248;
                 skE.val[0]&=127;
                 skE.val[0]|=64;
-                skI.val[31]&=248;
+                skI.val[EGS_ZZZ-1]&=248;
                 skI.val[0]&=127;
                 skI.val[0]|=64;
             } else {
-                skE.val[55]&=252;
+                skE.val[EGS_ZZZ-1]&=252;
                 skE.val[0]|=128;
-                skI.val[55]&=252;
+                skI.val[EGS_ZZZ-1]&=252;
                 skI.val[0]|=128;
             }
         }
@@ -170,11 +169,11 @@ void ZZZ::HPKE_AuthDecap(int config_id,octet *Z,octet *pkE,octet *SKR,octet *pkI
         OCT_reverse(pkI);
         if (kem==2)
         {
-            skR.val[31]&=248;
+            skR.val[EGS_ZZZ-1]&=248;
             skR.val[0]&=127;
             skR.val[0]|=64;
         } else {
-            skR.val[55]&=252;
+            skR.val[EGS_ZZZ-1]&=252;
             skR.val[0]|=128;
         }
 

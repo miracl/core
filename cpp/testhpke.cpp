@@ -30,7 +30,7 @@
    the MIRACL Core Crypto SDK with a closed source product.
 */
 
-/* test driver and function exerciser for BLS Signature API Functions */
+/* test driver and function exerciser for HPKE API Functions */
 
 #include <stdio.h>
 #include <stdlib.h>
