@@ -44,7 +44,7 @@ If you want to create a context supporting only those general functions then ini
 --------------------------------------
 
 
-To see some running examples, load TestALL.html or TestBLS.html or TestNHS.html or BenchtestALL.html into your favourite browser.
+To see some running examples, load TestALL.html or or TestHPKE.html or TestBLS.html or TestNHS.html or BenchtestALL.html into your favourite browser.
 You might have to wait a few seconds for the benchmarking scripts to complete.
 
 For TestALL.html the correct PIN number is 1234.
