@@ -812,6 +812,7 @@ var CTX = function(input_parameter) {
         prepareModule("FP");
         prepareModule("ECP");
         prepareModule("ECDH");
+        prepareModule("HPKE");
 
         if (ctx.config["@PF"] == 1   || ctx.config["@PF"] == 2) {
             prepareModule("FP2");

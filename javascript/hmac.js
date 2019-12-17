@@ -273,9 +273,9 @@ var HMAC = function(ctx) {
             var PRK=[];
             if (SALT==null)
             {
-                H=[];
+                var H=[];
                 for (var i=0;i<hlen;i++) H[i]=0;
-                this.HMAC1(hash,len,PRK,hlen,SALT,IKM);
+                this.HMAC1(hash,hlen,PRK,hlen,H,IKM);
             } else {
                 this.HMAC1(hash,hlen,PRK,hlen,SALT,IKM);
             }

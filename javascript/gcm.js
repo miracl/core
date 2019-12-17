@@ -437,5 +437,25 @@ var GCM = function(ctx) {
         return data;
     };
 
+    GCM.encrypt = function(C,T,K,IV,H,P) {
+	    var g=new GCM();
+	    g.init(K.length,K,IV.length,IV);
+	    g.add_header(H,H.length);
+	    var b=g.add_plain(P,P.length);
+        for (var i=0;i<b.length;i++) C[i]=b[i];
+	    b=g.finish(true);
+        for (var i=0;i<b.length;i++) T[i]=b[i];
+    };
+
+    GCM.decrypt = function(P,T,K,IV,H,C) {
+	    var g=new GCM();
+	    g.init(K.length,K,IV.length,IV);
+	    g.add_header(H,H.length);
+	    var b=g.add_cipher(C,C.length);
+        for (var i=0;i<b.length;i++) P[i]=b[i];
+	    b=g.finish(true);
+	    for (var i=0;i<b.length;i++) T[i]=b[i];
+    };
+
     return GCM;
 };
