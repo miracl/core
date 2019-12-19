@@ -377,10 +377,8 @@ impl GCM {
     }
 
     /* Finish and extract Tag */
-    pub fn finish(&mut self, extract: bool) -> [u8; 16] {
+    pub fn finish(&mut self,tag: &mut [u8], extract: bool) {
         /* Finish off GHASH and extract tag (MAC) */
-        let mut tag: [u8; 16] = [0; 16];
-
         self.wrap();
         /* extract tag */
         if extract {
@@ -396,7 +394,6 @@ impl GCM {
         }
         self.status = GCM_FINISHED;
         self.a.end();
-        return tag;
     }
 
     pub fn hex2bytes(hex: &[u8], bin: &mut [u8]) {
@@ -429,6 +426,23 @@ impl GCM {
         }
     }
 }
+
+pub fn encrypt(c: &mut [u8],t: &mut [u8],k: &[u8],iv: &[u8],h: &[u8],p: &[u8]) {
+	let mut g=GCM::new();
+	g.init(k.len(),k,iv.len(),iv);
+	g.add_header(h,h.len());
+	g.add_plain(c,p,p.len());
+	g.finish(t,true)
+}
+
+pub fn decrypt(p: &mut [u8],t: &mut [u8],k: &[u8],iv: &[u8],h: &[u8],c: &[u8]) {
+	let mut g=GCM::new();
+	g.init(k.len(),k,iv.len(),iv);
+	g.add_header(h,h.len());
+	g.add_cipher(p,c,c.len());
+	g.finish(t,true);
+}
+
 /*
 fn main()
 {

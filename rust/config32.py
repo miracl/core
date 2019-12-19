@@ -93,6 +93,7 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	os.system(copytext+"fp.rs "+fpath+"fp.rs")
 	os.system(copytext+"ecp.rs "+fpath+"ecp.rs")
 	os.system(copytext+"ecdh.rs "+fpath+"ecdh.rs")
+	os.system(copytext+"hpke.rs "+fpath+"hpke.rs")
 	os.system(copytext+"rom_"+tc+"_32.rs "+fpath+"rom.rs")
 
 	replace(fpath+"big.rs","xxx",tc)
@@ -100,6 +101,7 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	replace(fpath+"fp.rs","xxx",tc)
 	replace(fpath+"ecp.rs","xxx",tc)
 	replace(fpath+"ecdh.rs","xxx",tc)
+	replace(fpath+"hpke.rs","xxx",tc)
 
 	replace(fpath+"big.rs","@NB@",nb)
 	replace(fpath+"big.rs","@BASE@",base)
@@ -460,6 +462,7 @@ os.system(deltext+" mod*.rs")
 os.system(deltext+" lib.rs")
 
 os.system(deltext+" ecdh.rs")
+os.system(deltext+" hpke.rs")
 os.system(deltext+" ff.rs")
 os.system(deltext+" rsa.rs")
 os.system(deltext+" ecp*.rs")
