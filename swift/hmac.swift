@@ -240,18 +240,19 @@ public struct HMAC
 
         var l=0;
         var m=0;
-
-        for i in 1...n {
-            for j in 0..<INFO.count {
-                t[l]=INFO[j]; l=l+1
-            }
-            t[l]=UInt8(i); l=l+1
-            HMAC1(hf,hlen,&k,hlen,PRK,t)
-            l=0
-            if i==1 {t=[UInt8](repeating: 0,count: hlen+INFO.count+1)}
-            for j in 0..<hlen {
-                OKM[m]=k[j]; m=m+1
-                t[l]=k[j]; l=l+1
+        if n>0 {
+            for i in 1...n {
+                for j in 0..<INFO.count {
+                    t[l]=INFO[j]; l=l+1
+                }
+                t[l]=UInt8(i); l=l+1
+                HMAC1(hf,hlen,&k,hlen,PRK,t)
+                l=0
+                if i==1 {t=[UInt8](repeating: 0,count: hlen+INFO.count+1)}
+                for j in 0..<hlen {
+                    OKM[m]=k[j]; m=m+1
+                    t[l]=k[j]; l=l+1
+                }
             }
         }
         if flen>0 {
@@ -262,7 +263,7 @@ public struct HMAC
             HMAC1(hf,hlen,&k,flen,PRK,t);
             for j in 0..<flen {
                 OKM[m]=k[j]; m=m+1;
-        }
+            }
         }
 
         return OKM

@@ -58,7 +58,7 @@ import Foundation
 * See http://www.mindspring.com/~dmcgrew/gcm-nist-6.pdf
 */
 
-struct GCM {
+public struct GCM {
     static let NB:Int=4
     static let GCM_ACCEPTING_HEADER:Int=0
     static let GCM_ACCEPTING_CIPHER:Int=1
@@ -208,7 +208,7 @@ struct GCM {
     }
 
     /* Add Header data - included but not encrypted */
-    mutating func add_header(_ header: [UInt8],_ len: Int) -> Bool
+    @discardableResult mutating func add_header(_ header: [UInt8],_ len: Int) -> Bool
     { /* Add some header. Won't be encrypted, but will be authenticated. len is length of header */
         if status != GCM.GCM_ACCEPTING_HEADER {return false}
 
@@ -334,6 +334,22 @@ struct GCM {
         return data;
     }
 
+    static public func ENCRYPT(_ K: [UInt8],_ IV: [UInt8],_ H: [UInt8],_ P: [UInt8]) -> ([UInt8],[UInt8]) {
+        var g=GCM()
+        g.init_it(K.count,K,IV.count,IV)
+        g.add_header(H,H.count)
+        let C=g.add_plain(P,P.count)
+        let T=g.finish(true)
+        return (C,T)
+    }
 
+    static public func DECRYPT(_ K: [UInt8],_ IV: [UInt8],_ H: [UInt8],_ C: [UInt8]) -> ([UInt8],[UInt8]) {
+        var g=GCM()
+        g.init_it(K.count,K,IV.count,IV)
+        g.add_header(H,H.count)
+        let P=g.add_cipher(C,C.count)
+        let T=g.finish(true)
+        return (P,T)
+    }
 }
 

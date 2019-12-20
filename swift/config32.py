@@ -156,6 +156,7 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,ab,cs) :
 			os.system(copytext+"bls256.swift "+fpath+"bls256.swift")
 	else :
 		os.system(copytext+"ecdh.swift "+fpath+"ecdh.swift")
+		os.system(copytext+"hpke.swift "+fpath+"hpke.swift")
 
 
 	os.system("swiftc -DD32 "+fpath+"*.swift -L. -lcore -I. -O -Ounchecked -whole-module-optimization -emit-library -emit-module -module-name "+tc)
@@ -410,6 +411,7 @@ os.system(deltext+" config*.swift")
 
 os.system(deltext+" ecp*.swift")
 os.system(deltext+" ecdh.swift")
+os.system(deltext+" hpke.swift")
 os.system(deltext+" ff.swift")
 os.system(deltext+" rsa.swift")
 os.system(deltext+" pair*.swift")
