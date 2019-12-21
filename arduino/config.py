@@ -471,7 +471,7 @@ print("28. FP512BN")
 print("29. BLS12461")
 print("30. BN462\n")
 print("31. BLS24479")
-print("32. BLS48556\n")
+print("32. BLS48556")
 print("33. BLS48581\n")
 
 print("RSA")
