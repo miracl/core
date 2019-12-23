@@ -559,7 +559,7 @@ void XXX::BIG_mul(DBIG c, BIG a, BIG b)
 {
     int i,k;
 #ifdef dchunk
-    dchunk t;
+    dchunk co,t;
     dchunk s;
     dchunk d[NLEN_XXX];
     int m;
@@ -673,7 +673,7 @@ void XXX::BIG_sqr(DBIG c, BIG a)
 
 #ifdef UNWOUND
 
-    /* Insert output of faster.c here */
+    /* Insert output of faster.cpp here */
 
 #else
 
@@ -762,7 +762,7 @@ void XXX::BIG_monty(BIG a, BIG md, chunk MC, DBIG d)
     int i, k;
 
 #ifdef dchunk
-    dchunk t,s;
+    dchunk c,t,s;
     dchunk dd[NLEN_XXX];
     chunk v[NLEN_XXX];
 #endif
