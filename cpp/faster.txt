@@ -11,7 +11,7 @@ faster.cpp
 Then compile and execute the program faster.cpp like this (using MinGW 
 port of GCC as an example), in the same directory as arch.h and big_B256_28.h
 
-g++ -O2 -faster.cpp -o faster.exe
+g++ -O2 faster.cpp -o faster.exe
 faster > t.txt
 
 Now extract the code fragments from t.txt and insert them where indicated

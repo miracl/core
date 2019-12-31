@@ -116,7 +116,7 @@ int main()
         for (i = N - 1; i >= 1 + k / 2; i--) printf("+(dchunk)(v[%d]-v[%d])*(md[%d]-md[%d])", k - i, i, i, k - i);
         printf("; a[%d]=(chunk)t&BMASK_XXX;  s-=dd[%d]; c=(t>>BASEBITS_XXX); \n", k - N, k - N + 1);
     }
-    printf("\ta[%d]=d[%d]+(chunk)c&BMASK_XXX;\n", N - 1, 2 * N - 1);
+    printf("\ta[%d]=d[%d]+((chunk)c&BMASK_XXX);\n", N - 1, 2 * N - 1);
 
 
 
