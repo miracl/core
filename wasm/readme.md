@@ -32,13 +32,14 @@ build in the new directory execute
 
     python3 config32.py
 
-Then select options 1, 3, 7, 23, 25, 31, 32 and 34, which are fixed for 
+Then select options 1, 3, 7, 24, 26, 32, 33 and 35, which are fixed for 
 the example programs.
 
 Build the test programs with
 
     emcc -O2 benchtest_all.c core.a -s WASM=1 -o benchtest_all.html
-    emcc -O2 testall.c core.a -s WASM=1 -o testall.html
+    emcc -O2 testecc.c core.a -s WASM=1 -o testecc.html
+    emcc -O2 testmpin.c core.a -s WASM=1 -o testmpin.html
     emcc -O2 testbls.c core.a -s WASM=1 -o testbls.html
 
 Then run a local HTML server (as described in the link above) 
@@ -51,7 +52,8 @@ Wait for programs to complete (which may take a while).
 
 Alternatively run the examples in Node.js
 
-    node testall.js
+    node testecc.js
+    node testmpin.js
     node testbls.js
     node benchtest_all.js
 
@@ -78,7 +80,7 @@ Build the Rust library by executing
 
     python3 config32.py
 
-Then select options 1, 3, 7, 23, 25, 31, 32 and 34, which are fixed for 
+Then select options 1, 3, 7, 24, 26, 32, 33 and 35, which are fixed for 
 the example programs.
 
 Copy the MIRACL Core library to the current directory

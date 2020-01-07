@@ -1,0 +1,36 @@
+#include "arch.h"
+#include "fp_C1174.h"
+
+namespace C1174 {
+
+/* Curve C1174 */
+
+#if CHUNK==16
+
+#error Not supported
+
+#endif
+
+#if CHUNK==32
+
+using namespace B256_29;
+
+// Base Bits= 29
+const BIG Modulus= {0x1FFFFFF7,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x7FFFF};
+const BIG R2modp= {0x5100000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
+const BIG ROI= {0x1FFFFFF6,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x7FFFF};
+const chunk MConst= 0x9;
+#endif
+
+#if CHUNK==64
+
+using namespace B256_56;
+
+// Base Bits= 56
+const BIG Modulus= {0xFFFFFFFFFFFFF7L,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0x7FFFFFFL};
+const BIG R2modp= {0x0L,0x144L,0x0L,0x0L,0x0L};
+const BIG ROI= {0xFFFFFFFFFFFFF6L,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0x7FFFFFFL};
+const chunk MConst= 0x9L;
+#endif
+
+}

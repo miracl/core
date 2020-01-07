@@ -200,29 +200,30 @@ print("18. sm2")
 print("19. c13318")
 print("20. jubjub")
 print("21. x448")
-print("22. secp160r1\n")
+print("22. secp160r1")
+print("23. c1174\n")
 
 print("Pairing-Friendly Elliptic Curves")
-print("23. bn254")
-print("24. bn254CX")
-print("25. bls12383")
-print("26. bls12381")
-print("27. fp256BN")
-print("28. fp512BN")
-print("29. bls12461")
-print("30. bn462\n")
-print("31. bls24479")
-print("32. bls48556")
-print("33. bls48581\n")
+print("24. bn254")
+print("25. bn254CX")
+print("26. bls12383")
+print("27. bls12381")
+print("28. fp256BN")
+print("29. fp512BN")
+print("30. bls12461")
+print("31. bn462\n")
+print("32. bls24479")
+print("33. bls48556")
+print("34. bls48581\n")
 
 print("RSA")
-print("34. rsa2048")
-print("35. rsa3072")
-print("36. rsa4096")
+print("35. rsa2048")
+print("36. rsa3072")
+print("37. rsa4096")
 
 selection=[]
 ptr=0
-max=37
+max=38
 
 curve_selected=False
 pfcurve_selected=False
@@ -337,43 +338,48 @@ while ptr<max:
 		curve_selected=True
 
 	if x==23:
+		curveset("c1174","29","251","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","NOT","NOT","NOT","128")
+		curve_selected=True
+
+
+	if x==24:
 		curveset("bn254","28","254","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","66","128")
 		pfcurve_selected=True
-	if x==24:
+	if x==25:
 		curveset("bn254CX","28","254","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","66","128")
 		pfcurve_selected=True
-	if x==25:
+	if x==26:
 		curveset("bls12383","29","383","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","65","128")
 		pfcurve_selected=True
 
-	if x==26:
+	if x==27:
 		curveset("bls12381","29","381","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","65","128")
 		pfcurve_selected=True
 
-	if x==27:
+	if x==28:
 		curveset("fp256bn","28","256","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","NEGATIVEX","66","128")
 		pfcurve_selected=True
-	if x==28:
+	if x==29:
 		curveset("fp512bn","29","512","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","POSITIVEX","130","128")
 		pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
-	if x==29:
+	if x==30:
 		curveset("bls12461","28","461","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","78","128")
 		pfcurve_selected=True
 
-	if x==30:
+	if x==31:
 		curveset("bn462","28","462","1","NOT_SPECIAL","1","WEIERSTRASS","BN","D_TYPE","POSITIVEX","118","128")
 		pfcurve_selected=True
 
-	if x==31:
+	if x==32:
 		curveset("bls24479","29","479","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","49","192")
 		pfcurve_selected=True
 
-	if x==32:
+	if x==33:
 		curveset("bls48556","29","556","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","32","256")
 		pfcurve_selected=True
 
-	if x==33:
+	if x==34:
 		curveset("bls48581","29","581","1","NOT_SPECIAL","10","WEIERSTRASS","BLS","D_TYPE","NEGATIVEX","33","256")
 		pfcurve_selected=True
 # rsaset(rsaname,big_length_bytes,bits_in_base,multiplier)
@@ -381,17 +387,17 @@ while ptr<max:
 # of the underlying big length
 
 # There are choices here, different ways of getting the same result, but some faster than others
-	if x==34:
+	if x==35:
 		#256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
 		#512 is faster.. but best is 1024
 		rsaset("rsa2048","128","28","2")
 		#rsaset("rsa2048","64","29","60",4")
 		#rsaset("rsa2048","32","29","56","8")
 		rsa_selected=True
-	if x==35:
+	if x==36:
 		rsaset("rsa3072","48","28","8")
 		rsa_selected=True
-	if x==36:
+	if x==37:
 		#rsaset("rsa4096","32","29","56",16")
 		rsaset("rsa4096","64","29","8")
 		rsa_selected=True
@@ -423,12 +429,14 @@ os.system(deltext+"core"+slashtext+"*.*")
 os.system("rmdir core")
 
 if testing :
-	os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 TestALL.swift ")
+	os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lrsa2048 TestECC.swift ")
+	os.system("swiftc -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestMPIN.swift ")
 	os.system("swiftc -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestBLS.swift")
 	os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 BenchtestALL.swift ")
 	os.system("swiftc -I. -L. -lcore TestNHS.swift")
 	os.system("sudo cp lib*.so /usr/lib/.")
-	os.system("./TestALL")
+	os.system("./TestECC")
+	os.system("./TestMPIN")
 	os.system("./TestBLS")
 	os.system("./BenchtestALL")
 	os.system("./TestNHS")

@@ -44,17 +44,25 @@ To create a 32-bit library
     python3 config32.py
 
 
-Then select options 1, 3, 7, 23, 25, 31, 32 and 34, which are fixed for the example 
+Then select options 1, 3, 7, 24, 26, 32, 33 and 35, which are fixed for the example 
 program. (For a 16-bit build select 1,4 and 6). Select 0 then to exit.
 
 Then compile
 
-    gcc -O2 -std=c99 testall.c core.a -o testall
+    gcc -O2 -std=c99 testecc.c core.a -o testecc
 
 (if using MINGW-W64 in Windows change -o testall to -o testall.exe)
 
-The test program exercises 3 different ordinary elliptic curves, a 
-pairing friendly curve and RSA, all in the one binary.
+The test program exercises 3 different ordinary elliptic curves (for ECDH 
+Key exchange, ECDSA signature and ECIES encryption), plus RSA, all in the 
+one binary
+
+Next compile
+
+    gcc -O2  -std=c99 testmpin.c core.a -o testmpin
+
+This test program exercises 4 different pairing friendly curves using 
+the MPIN authentication protocol.
 
 The correct PIN is 1234
 

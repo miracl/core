@@ -38,12 +38,16 @@ To create a 64-bit library
 
     python3 config64.py
 
-Then select options 1, 3, 7, 23, 25, 31, 32 and 34 (these are fixed for the example 
+Then select options 1, 3, 7, 24, 26, 32, 33 and 35 (these are fixed for the example 
 program provided). Select 0 to exit.
 
-Run the test program by executing
+Run the ECC test program by executing
 
-    go run TestALL.go
+    go run TestECC.go
+
+Run the MPIN test program by executing
+
+    go run TestMPIN.go
 
 The correct PIN is 1234
 

@@ -29,12 +29,16 @@ To create a 64-bit library
 
     python3 config64.py
 
-Then select options 1, 3, 7, 23, 25, 31, 32 and 34 (these are fixed for the 
+Then select options 1, 3, 7, 24, 26, 32, 33 and 35 (these are fixed for the 
 example program provided). Select 0 to exit.
 
 Then execute
 
-    swift -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 TestALL.swift 
+    swift -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lrsa2048 TestECC.swift 
+
+and
+
+    swift -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestMPIN.swift 
 
 and
 

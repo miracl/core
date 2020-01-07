@@ -252,7 +252,6 @@ int ZZZ::ECP_VP_DSA(int hlen, octet *W, octet *F, octet *C, octet *D)
     SPhash(MC_SHA2, hlen, &H, F);
 
     ECP_generator(&G);
-
     BIG_rcopy(r, CURVE_Order);
 
     OCT_shl(C, C->len - MODBYTES_XXX);
@@ -266,24 +265,21 @@ int ZZZ::ECP_VP_DSA(int hlen, octet *W, octet *F, octet *C, octet *D)
 
     BIG_fromBytesLen(f, H.val, blen);
 
-    //BIG_fromBytes(f,H.val);
-
     if (BIG_iszilch(c) || BIG_comp(c, r) >= 0 || BIG_iszilch(d) || BIG_comp(d, r) >= 0)
         res = ECDH_ERROR;
 
     if (res == 0)
     {
         BIG_invmodp(d, d, r);
+
         BIG_modmul(f, f, d, r);
         BIG_modmul(h2, c, d, r);
 
         valid = ECP_fromOctet(&WP, W);
-
         if (!valid) res = ECDH_ERROR;
         else
         {
             ECP_mul2(&WP, &G, h2, f);
-
             if (ECP_isinf(&WP)) res = ECDH_ERROR;
             else
             {

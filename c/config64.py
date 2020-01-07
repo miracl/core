@@ -492,29 +492,30 @@ print("18. SM2")
 print("19. C13318")
 print("20. JUBJUB")
 print("21. X448")
-print("22. SECP160R1\n")
+print("22. SECP160R1")
+print("23. C1174\n");
 
 print("Pairing-Friendly Elliptic Curves")
-print("23. BN254")
-print("24. BN254CX")
-print("25. BLS12383")
-print("26. BLS12381")
-print("27. FP256BN")
-print("28. FP512BN")
-print("29. BLS12461")
-print("30. BN462\n")
-print("31. BLS24479")
-print("32. BLS48556\n")
-print("33. BLS48581\n")
+print("24. BN254")
+print("25. BN254CX")
+print("26. BLS12383")
+print("27. BLS12381")
+print("28. FP256BN")
+print("29. FP512BN")
+print("30. BLS12461")
+print("31. BN462\n")
+print("32. BLS24479")
+print("33. BLS48556\n")
+print("34. BLS48581\n")
 
 print("RSA")
-print("34. RSA2048")
-print("35. RSA3072")
-print("36. RSA4096")
+print("35. RSA2048")
+print("36. RSA3072")
+print("37. RSA4096")
 
 selection=[]
 ptr=0
-max=37
+max=38
 
 curve_selected=False
 pfcurve_selected=False
@@ -627,48 +628,51 @@ while ptr<max:
 	if x==22:
 		curveset("160","SECP160R1","SECP160R1","56","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
 		curve_selected=True
-
-
 	if x==23:
+		curveset("251","C1174","C1174","56","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curve_selected=True
+
+
+	if x==24:
 		curveset("254","BN254","BN254","56","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
 		pfcurve_selected=True
-	if x==24:
+	if x==25:
 		curveset("254","BN254CX","BN254CX","56","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
 		pfcurve_selected=True
-	if x==25:
+	if x==26:
 		curveset("383","BLS12383","BLS12383","58","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128")
 		pfcurve_selected=True
 
-	if x==26:
+	if x==27:
 		curveset("381","BLS12381","BLS12381","58","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128")
 		pfcurve_selected=True
 
 
-	if x==27:
+	if x==28:
 		curveset("256","FP256BN","FP256BN","56","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","NEGATIVEX","83","66","128")
 		pfcurve_selected=True
-	if x==28:
+	if x==29:
 		curveset("512","FP512BN","FP512BN","60","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","POSITIVEX","172","130","128")
 		pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
-	if x==29:
+	if x==30:
 		curveset("461","BLS12461","BLS12461","60","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","79","78","128")
 		pfcurve_selected=True
 
-	if x==30:
+	if x==31:
 		curveset("462","BN462","BN462","60","1","NOT_SPECIAL","1","WEIERSTRASS","BN","D_TYPE","POSITIVEX","125","118","128")
 		pfcurve_selected=True
 
-	if x==31:
+	if x==32:
 		curveset("479","BLS24479","BLS24479","56","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","52","49","192")
 		pfcurve_selected=True
 
-	if x==32:
+	if x==33:
 		curveset("556","BLS48556","BLS48556","58","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","35","32","256")
 		pfcurve_selected=True
 
 
-	if x==33:
+	if x==34:
 		curveset("581","BLS48581","BLS48581","60","1","NOT_SPECIAL","10","WEIERSTRASS","BLS","D_TYPE","NEGATIVEX","36","33","256")
 		pfcurve_selected=True
 
@@ -680,17 +684,17 @@ while ptr<max:
 # multiplier is 2^m (see above)
 
 # There are choices here, different ways of getting the same result, but some faster than others
-	if x==34:
+	if x==35:
 		#256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
 		#512 is faster.. but best is 1024
 		rsaset("1024","2048","58","2")
 		#rsaset("512","2048","60","4")
 		#rsaset("256","2048","56","8")
 		rsa_selected=True
-	if x==35:
+	if x==36:
 		rsaset("384","3072","56","8")
 		rsa_selected=True
-	if x==36:
+	if x==37:
 		#rsaset("256","4096","56","16")
 		rsaset("512","4096","60","8")
 		rsa_selected=True
@@ -755,20 +759,24 @@ os.system(deltext+" *.o")
 
 if testing :
 	if sys.platform.startswith("win") :
-		os.system("gcc -O2 -std=c99 testall.c core.a -o testall.exe")
+		os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc.exe")
+		os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin.exe")
 		os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls.exe")
 		os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all.exe")
 		os.system("gcc -O2 -std=c99 testnhs.c core.a -o testnhs.exe")
-		os.system("testall < pins.txt")
+		os.system("testecc")
+		os.system("testmpin < pins.txt")
 		os.system("testbls")
 		os.system("benchtest_all")
 		os.system("testnhs")
 	else :
-		os.system("gcc -O2 -std=c99 testall.c core.a -o testall")
+		os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc")
+		os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin")
 		os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls")
 		os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all")
 		os.system("gcc -O2 -std=c99 testnhs.c core.a -o testnhs")
-		os.system("./testall < pins.txt")
+		os.system("./testecc")
+		os.system("./testmpin < pins.txt")
 		os.system("./testbls")
 		os.system("./benchtest_all")
 		os.system("./testnhs")
