@@ -611,7 +611,7 @@ void FP_YYY_pow(FP_YYY *r, FP_YYY *a, BIG_XXX b)
 
 static void FP_YYY_fpow(FP_YYY *r, FP_YYY *x)
 {
-    int i, j, k, bw, w, c, nw, lo, m, n, e=PM1D2_YYY;
+    int i, j, k, bw, w, c, nw, lo, m, n, nd, e=PM1D2_YYY;
     FP_YYY xp[11], t, key;
     const int ac[] = {1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255};
 // phase 1
@@ -636,6 +636,15 @@ static void FP_YYY_fpow(FP_YYY *r, FP_YYY *x)
 
     n-=(e+1);
     c=(MConst_YYY+(1<<e)+1)/(1<<(e+1));
+
+// need c to be odd
+    nd=0;
+    while (c%2==0)
+    {
+        c/=2;
+        n-=1;
+        nd++;
+    }
 
     bw = 0; w = 1; while (w < c) {w *= 2; bw += 1;}
     k = w - c;
@@ -699,6 +708,9 @@ static void FP_YYY_fpow(FP_YYY *r, FP_YYY *x)
         FP_YYY_sqr(r, r);
     FP_YYY_mul(r, r, &key);
 #endif
+
+    for (i=0;i<nd;i++)
+        FP_YYY_sqr(r,r);
 }
 
 #endif

@@ -48,6 +48,7 @@ var ROM_CURVE_ANSSI,
     ROM_CURVE_C25519,
     ROM_CURVE_C41417,
     ROM_CURVE_C1174,
+    ROM_CURVE_C1665,
     ROM_CURVE_ED25519,
     ROM_CURVE_GOLDILOCKS,
     ROM_CURVE_X448,
@@ -1024,6 +1025,25 @@ ROM_CURVE_C1174 = function() {
     return ROM_CURVE_C1174;
 };
 
+
+ROM_CURVE_C1665 = function() {
+    /* Fixed Data in ROM - Field and Curve parameters */
+
+    var ROM_CURVE_C1665 = {
+
+        // C1665 curve
+        CURVE_A: 1,
+        CURVE_Cof_I: 4,
+        CURVE_Cof: [0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0],
+        CURVE_B_I: 5766,
+        CURVE_B: [0x1686,0x0,0x0,0x0,0x0,0x0,0x0,0x0],
+        CURVE_Order: [0x3A8B27,0x61533B,0x40603F,0x7FEAF7,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7],
+        CURVE_Gx: [0x552398,0x73B7F3,0x1B19C6,0x7707B3,0x1A0618,0x20B701,0x325369,0xA],
+        CURVE_Gy: [0x120345,0xF6489,0x70B1C2,0x1CEB16,0x3BFC77,0x378142,0x505152,0x14],
+    };
+
+    return ROM_CURVE_C1665;
+};
 
 ROM_CURVE_ED25519 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */

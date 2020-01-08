@@ -287,11 +287,11 @@ print("2. NUMS256E")
 print("3. SECP160R1\n")
 
 print("Pairing-Friendly Elliptic Curves")
-print("3. BN254")
-print("4. BN254CX")
+print("4. BN254")
+print("5. BN254CX")
 
 print("RSA")
-print("5. RSA2048")
+print("6. RSA2048")
 
 
 selection=[]
@@ -412,17 +412,21 @@ os.system(deltext+" *.o")
 
 if testing :
 	if sys.platform.startswith("win") :
-		os.system("gcc -O2 -std=c99 testall.c core.a -o testall.exe")
+		os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc.exe")
+		os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin.exe")
 		os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls.exe")
 		os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all.exe")
-		os.system("testall < pins.txt")
+		os.system("testecc")
+		os.system("testmpin < pins.txt")
 		os.system("testbls")
 		os.system("benchtest_all")
 	else :
-		os.system("gcc -O2 -std=c99 testall.c core.a -o testall")
+		os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc")
+		os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin")
 		os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls")
 		os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all")
-		os.system("./testall < pins.txt")
+		os.system("./testecc")
+		os.system("./testmpin < pins.txt")
 		os.system("./testbls")
 		os.system("./benchtest_all")
 

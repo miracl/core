@@ -467,15 +467,12 @@ func (F *FP) fpow() *FP {
 	n-=(e+1)
 	c=(int(MConst)+(1<<e)+1)/(1<<(e+1))
 	
-
-	//if PM1D2 == 2 {
-	//	n -= 3
-	//	c = (int(MConst) + 5) / 8
-	//} else {
-	//	n -= 2
-	//	c = (int(MConst) + 3) / 4
-
-	//}
+	nd := 0
+	for c%2 == 0 {
+		c/=2
+		n-=1
+		nd++
+	}
 
 	bw := 0
 	w := 1
@@ -557,7 +554,10 @@ func (F *FP) fpow() *FP {
 		}
 		r.mul(key)
 	}
-
+	for nd>0 {
+		r.sqr()
+		nd--
+	}
 	return r
 }
 

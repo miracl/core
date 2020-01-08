@@ -23,11 +23,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   You can be released from the requirements of the license by purchasing     
+   You can be released from the requirements of the license by purchasing
    a commercial license. Buying such a license is mandatory as soon as you
    develop commercial activities involving the MIRACL Core Crypto SDK
    without disclosing the source code of your own applications, or shipping
-   the MIRACL Core Crypto SDK with a closed source product.     
+   the MIRACL Core Crypto SDK with a closed source product.
 */
 //
 //  fp.swift
@@ -68,11 +68,11 @@ public struct FP {
             return r;
         }
     }
-    
+
     /* reduce a DBIG to a BIG using the appropriate form of the modulus */
     static func mod(_ d: inout DBIG) -> BIG
     {
- 
+
         if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.PSEUDO_MERSENNE
         {
             var t=d.split(CONFIG_FIELD.MODBITS)
@@ -86,7 +86,7 @@ public struct FP {
             let tw=t.w[CONFIG_BIG.NLEN-1]
             t.w[CONFIG_BIG.NLEN-1] &= CONFIG_FIELD.TMASK
             t.inc(Int(ROM.MConst*((tw>>Chunk(CONFIG_FIELD.TBITS))+(v<<Chunk(CONFIG_BIG.BASEBITS-CONFIG_FIELD.TBITS)))))
-    
+
             t.norm()
             return t
 
@@ -97,9 +97,9 @@ public struct FP {
                 let (top,bot)=BIG.muladd(d.w[i],ROM.MConst-1,d.w[i],d.w[CONFIG_BIG.NLEN+i-1])
                 d.w[CONFIG_BIG.NLEN+i]+=top; d.w[CONFIG_BIG.NLEN+i-1]=bot
             }
-    
+
             var b=BIG(0);
-    
+
             for i in 0 ..< CONFIG_BIG.NLEN
             {
                 b.w[i]=d.w[CONFIG_BIG.NLEN+i]
@@ -115,7 +115,7 @@ public struct FP {
             b.add(t)
             var dd=DBIG(t)
             dd.shl(RM2)
-            
+
             var tt=dd.split(CONFIG_FIELD.MODBITS)
             let lo=BIG(dd)
             b.add(tt)
@@ -123,11 +123,11 @@ public struct FP {
             b.norm()
             tt.shl(RM2)
             b.add(tt)
-            
+
             let carry=b.w[CONFIG_BIG.NLEN-1]>>Chunk(CONFIG_FIELD.TBITS)
             b.w[CONFIG_BIG.NLEN-1]&=CONFIG_FIELD.TMASK
             b.w[0]+=carry
-            
+
             let ix=Int(224/CONFIG_BIG.BASEBITS)
             b.w[ix]+=carry<<Chunk(224%CONFIG_BIG.BASEBITS)
             b.norm()
@@ -177,7 +177,7 @@ public struct FP {
         let s=redc().toString()
         return s
     }
-    
+
     func toRawString() -> String
     {
         let s=x.toRawString()
@@ -199,7 +199,7 @@ public struct FP {
 		  let carry=r.pmul(q)
 		  r.w[CONFIG_BIG.NLEN-1]+=carry<<Chunk(CONFIG_BIG.BASEBITS); // correction - put any carry out back in again
 		  x.sub(r)
-		  x.norm()		
+		  x.norm()
 		  sb=2
 	   } else {
 		  sb=FP.logb2(UInt32(xes-Int32(1)))
@@ -211,10 +211,10 @@ public struct FP {
             x.cmove(r,1-sr)
             sb -= 1
         }
-	
+
         xes=1
     }
-    
+
 /* test this=0? */
     func iszilch() -> Bool
     {
@@ -222,7 +222,7 @@ public struct FP {
         z.reduce()
         return z.x.iszilch()
     }
-    
+
 /* test this=0? */
     func isunity() -> Bool
     {
@@ -244,14 +244,14 @@ public struct FP {
         x.copy(b.x)
         xes=b.xes
     }
-    
+
 /* set this=0 */
     mutating func zero()
     {
         x.zero();
         xes=1;
     }
-    
+
 /* set this=1 */
     mutating func one()
     {
@@ -271,22 +271,22 @@ public struct FP {
         c = ~(c-1)
         let t=c&(xes^b.xes)
         xes^=t
-        b.xes^=t        
+        b.xes^=t
     }
-    
+
 /* copy FPs depending on d */
     mutating func cmove(_ b: FP,_ d:Int)
     {
         let c=Int32(-d)
         x.cmove(b.x,d)
-        xes^=(xes^b.xes)&c        
+        xes^=(xes^b.xes)&c
     }
 /* this*=b mod Modulus */
     mutating func mul(_ b: FP)
     {
 
         if Int64(xes)*Int64(b.xes) > Int64(CONFIG_FIELD.FEXCESS) {reduce()}
-        
+
         var d=BIG.mul(x,b.x)
         x.copy(FP.mod(&d))
         xes=2
@@ -299,7 +299,7 @@ public struct FP {
         v |= (v >> 4)
         v |= (v >> 8)
         v |= (v >> 16)
-        
+
         v = v - ((v >> 1) & 0x55555555)
         v = (v & 0x33333333) + ((v >> 2) & 0x33333333)
         let r = Int((   ((v + (v >> 4)) & 0xF0F0F0F)   &* 0x1010101) >> 24)
@@ -365,18 +365,18 @@ public struct FP {
         }
 
         if s {neg();  norm()}
-       
+
     }
-    
+
 /* this*=this mod Modulus */
     mutating func sqr()
     {
-        if Int64(xes)*Int64(xes) > Int64(CONFIG_FIELD.FEXCESS) {reduce()}   
+        if Int64(xes)*Int64(xes) > Int64(CONFIG_FIELD.FEXCESS) {reduce()}
         var d=BIG.sqr(x);
         x.copy(FP.mod(&d));
         xes=2
     }
-    
+
     /* this+=b */
     mutating func add(_ b: FP)
     {
@@ -441,12 +441,12 @@ public struct FP {
 /* return this^e mod Modulus */
     mutating func pow(_ e: BIG) -> FP
     {
-        var tb=[FP]() 
+        var tb=[FP]()
         let n=1+(CONFIG_BIG.NLEN*Int(CONFIG_BIG.BASEBITS)+3)/4
-        var w=[Int8](repeating: 0,count: n)     
+        var w=[Int8](repeating: 0,count: n)
         norm()
         var t=BIG(e); t.norm()
-        let nb=1+(t.nbits()+3)/4    
+        let nb=1+(t.nbits()+3)/4
 
         for i in 0 ..< nb  {
             let lsbs=t.lastbits(4)
@@ -475,10 +475,10 @@ public struct FP {
 
 // See eprint paper https://eprint.iacr.org/2018/1038
 // return this^(p-3)/4 or this^(p-5)/8
-    mutating func fpow() -> FP 
+    mutating func fpow() -> FP
     {
         let ac: [Int] = [1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255]
-        var xp=[FP]() 
+        var xp=[FP]()
 // phase 1
         xp.append(FP(self))
         xp.append(FP(self)); xp[1].sqr()
@@ -502,6 +502,13 @@ public struct FP {
         n = n-(e+1)
         c=((Int(ROM.MConst))+(1<<e)+1)/(1<<(e+1));
 
+        var nd=0
+        while c%2 == 0 {
+            c /= 2
+            n -= 1
+            nd += 1
+        }
+
         var bw=0; var w=1; while w<c {w*=2; bw+=1}
         var k=w-c
 
@@ -516,10 +523,10 @@ public struct FP {
             i-=1
             if ac[i]>k {continue}
             key.mul(xp[i])
-            k-=ac[i] 
+            k-=ac[i]
         }
 
-// phase 2 
+// phase 2
         xp[1].copy(xp[2])
         xp[2].copy(xp[5])
         xp[3].copy(xp[10])
@@ -530,7 +537,7 @@ public struct FP {
 
         while 2*m<nw {
             t.copy(xp[j]); j+=1
-            for _ in 0..<m {t.sqr()} 
+            for _ in 0..<m {t.sqr()}
             xp[j].copy(xp[j-1])
             xp[j].mul(t)
             m*=2
@@ -558,9 +565,13 @@ public struct FP {
             r.sqr()
             r.mul(self)
             for _ in 0..<n+1 {r.sqr()}
-            r.mul(key)         
-        }        
-        return r        
+            r.mul(key)
+        }
+        while nd > 0 {
+            r.sqr()
+            nd -= 1
+        }
+        return r
     }
 
     /* Pseudo_inverse square root */
@@ -576,7 +587,7 @@ public struct FP {
         m.shr(e)
         m.dec(1)
         m.fshr(1)
-        
+
         copy(pow(m))
     }
 
@@ -597,7 +608,7 @@ public struct FP {
         mul(s)
         reduce()
     }
-/* Test for Quadratic Residue */    
+/* Test for Quadratic Residue */
     func qr(_ hint:inout FP?) -> Int
     {
         let e=CONFIG_FIELD.PM1D2
@@ -623,8 +634,8 @@ public struct FP {
         //r.mul(s)
         return r.isunity() ? 1:0
     }
- 
-    
+
+
 /* return sqrt(this) mod Modulus */
     mutating func sqrt(_ hint: FP?) -> FP
     {
@@ -637,7 +648,7 @@ public struct FP {
             g.invsqrt()
         }
         let m=BIG(ROM.ROI)
-      
+
         var v=FP(m)
         var t=FP(g)
         t.sqr()
@@ -646,7 +657,7 @@ public struct FP {
         var r=FP(self)
         r.mul(g)
         var b=FP(t)
-       
+
         for k in stride(from: e, to: 1, by: -1) //(int k=e;k>1;k--)
         {
             for _ in 1..<k-1 {
@@ -676,7 +687,7 @@ public struct FP {
             var i=FP(self); i.x.shl(1)
             if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.PSEUDO_MERSENNE  || CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {
                 v=i.fpow()
-            } else {       
+            } else {
                 var b=BIG(FP.p)
                 b.dec(5); b.norm(); b.shr(3)
                 v=i.pow(b)
@@ -694,7 +705,7 @@ public struct FP {
                 var r=fpow()
                 r.mul(self)
                 return r
-            } else {                   
+            } else {
                 var b=BIG(FP.p)
                 b.inc(1); b.norm(); b.shr(2)
                 return pow(b)

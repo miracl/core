@@ -427,7 +427,7 @@ var FP = function(ctx) {
 // return this^(p-3)/4 or this^(p-5)/8
 // See https://eprint.iacr.org/2018/1038
 		fpow: function() {
-			var i,j,k,bw,w,c,nw,lo,m,n,e;
+			var i,j,k,bw,w,c,nw,lo,m,n,nd,e;
 			var xp=[];
 			var ac=[1,2,3,6,12,15,30,60,120,240,255];
 // phase 1
@@ -453,6 +453,14 @@ var FP = function(ctx) {
 
             n-=(e+1);
             c=(ctx.ROM_FIELD.MConst+(1<<e)+1)/(1<<(e+1));
+
+            nd=0;
+            while (c%2==0)
+            {
+                c/=2;
+                n-=1;
+                nd++;
+            }
 
 			bw=0; w=1; while (w<c) {w*=2; bw+=1;}
 			k=w-c;
@@ -521,6 +529,10 @@ var FP = function(ctx) {
 					r.sqr();
 				r.mul(key);
 			}
+
+            for (i=0;i<nd;i++)
+                r.sqr();
+
 			return r;
 		},
 

@@ -555,7 +555,7 @@ impl FP {
         xp[10].copy(&t); // 255
 
         let mut n = MODBITS as isize;
-        let c: isize;
+        let mut c: isize;
 
         if MODTYPE == GENERALISED_MERSENNE {
             // Goldilocks ONLY
@@ -566,6 +566,13 @@ impl FP {
 
         n-=e+1;
         c=((rom::MCONST as isize)+(1<<e)+1)/(1<<(e+1));
+
+        let mut nd=0;
+        while c%2==0 {
+            c/=2;
+            n-=1;
+            nd+=1;
+        }
 
         let mut bw = 0;
         let mut w = 1;
@@ -649,6 +656,10 @@ impl FP {
                 r.sqr();
             }
             r.mul(&key);
+        }
+        while nd>0 {
+            r.sqr();
+            nd-=1;
         }
         return r;
     }

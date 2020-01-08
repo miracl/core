@@ -375,6 +375,27 @@ var CTX = function(input_parameter) {
             "@AK": 16
         },
 
+        "C1665": {
+            "BITS": "168",
+            "FIELD": "C1665",
+            "CURVE": "C1665",
+            "@NB": 21,
+            "@BASE": 23,
+            "@NBT": 166,
+            "@M8": 1,
+            "@MT": 1,
+			"@QI": 0,
+			"@TW": 0,
+            "@CT": 1,
+            "@PF": 0,
+            "@ST": 0,
+            "@SX": 0,
+            "@AB": 0,
+            "@HT": 32,
+			"@SH": 11, 
+            "@AK": 16
+        },
+
         "NIST521": {
             "BITS": "528",
             "FIELD": "NIST521",

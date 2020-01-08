@@ -647,7 +647,7 @@ void YYY::FP_pow(FP *r, FP *a, BIG b)
 
 void YYY::FP_fpow(FP *r, FP *x)
 {
-    int i, j, k, bw, w, nw, lo, m, n, c, e=PM1D2_YYY;
+    int i, j, k, bw, w, nw, lo, m, n, c, nd, e=PM1D2_YYY;
     FP xp[11], t, key;
     const int ac[] = {1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255};
 // phase 1
@@ -672,6 +672,15 @@ void YYY::FP_fpow(FP *r, FP *x)
 
     n-=(e+1);
     c=(MConst+(1<<e)+1)/(1<<(e+1));
+
+// need c to be odd
+    nd=0;
+    while (c%2==0)
+    {
+        c/=2;
+        n-=1;
+        nd++;
+    }
 
     bw = 0; w = 1; while (w < c) {w *= 2; bw += 1;}
     k = w - c;
@@ -737,6 +746,9 @@ void YYY::FP_fpow(FP *r, FP *x)
     FP_mul(r, r, &key);
 #endif
 
+    for (i=0;i<nd;i++)
+        FP_sqr(r,r);
+
 }
 
 #endif
@@ -767,20 +779,11 @@ int YYY::FP_qr(FP *x,FP *h)
     if (h!=NULL)
         FP_copy(h,&r);
 
-
     FP_sqr(&r,&r);
     FP_mul(&r,x,&r);
     for (i=0;i<e-1;i++ )
         FP_sqr(&r,&r);
 
-
- //   for (i=0;i<e;i++)
- //       FP_sqr(&r,&r);
- //   FP_copy(&s,x);
- //   for (i=0;i<e-1;i++ )
- //       FP_sqr(&s,&s);
- //   FP_mul(&r,&r,&s);
-    
     return FP_isunity(&r);
 }
 
@@ -800,9 +803,8 @@ void YYY::FP_inv(FP *r,FP *x)
     FP_invsqrt(&t,x);
     for (i=0;i<=e;i++)
         FP_sqr(&t,&t);
-    
-    FP_mul(r,&t,&s);
 
+    FP_mul(r,&t,&s);
     FP_reduce(r);
 }
 

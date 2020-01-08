@@ -288,7 +288,7 @@ replace("arch.h","@WL@","16")
 print("Elliptic Curves")
 print("1. ED25519")
 print("2. NUMS256E")
-print("3. SECP160R1\n")
+print("3. SECP160R1")
 
 print("Pairing-Friendly Elliptic Curves")
 print("4. BN254")
@@ -296,7 +296,6 @@ print("5. BN254CX")
 
 print("RSA")
 print("6. RSA2048")
-
 
 selection=[]
 ptr=0
@@ -424,17 +423,21 @@ os.system(deltext+" *.o")
 
 if testing :
 	if sys.platform.startswith("win") :
-		os.system("g++ -O2  testall.cpp core.a -o testall.exe")
+		os.system("g++ -O2  testecc.cpp core.a -o testecc.exe")
+		os.system("g++ -O2  testmpin.cpp core.a -o testmpin.exe")
 		os.system("g++ -O2  testbls.cpp core.a -o testbls.exe")
 		os.system("g++ -O2  benchtest_all.cpp core.a -o benchtest_all.exe")
-		os.system("testall < pins.txt")
+		os.system("testecc")
+		os.system("testmpin < pins.txt")
 		os.system("testbls")
 		os.system("benchtest_all")
 	else :
-		os.system("g++ -O2  testall.cpp core.a -o testall")
+		os.system("g++ -O2  testecc.cpp core.a -o testecc")
+		os.system("g++ -O2  testmpin.cpp core.a -o testmpin")
 		os.system("g++ -O2  testbls.cpp core.a -o testbls")
 		os.system("g++ -O2  benchtest_all.cpp core.a -o benchtest_all")
-		os.system("./testall < pins.txt")
+		os.system("./testecc")
+		os.system("./testmpin < pins.txt")
 		os.system("./testbls")
 		os.system("./benchtest_all")
 

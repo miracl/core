@@ -437,7 +437,7 @@ public final class FP {
 
 // See eprint paper https://eprint.iacr.org/2018/1038
     private FP fpow() {
-        int i, j, k, bw, w, c, nw, lo, m, n, e=CONFIG_FIELD.PM1D2;
+        int i, j, k, bw, w, c, nw, lo, m, n, nd, e=CONFIG_FIELD.PM1D2;
         FP [] xp = new FP[11];
         int[]  ac = {1, 2, 3, 6, 12, 15, 30, 60, 120, 240, 255};
 // phase 1
@@ -461,6 +461,15 @@ public final class FP {
 
         n-=(e+1);
         c=(ROM.MConst+(1<<e)+1)/(1<<(e+1));
+
+// need c to be odd
+        nd=0;
+        while (c%2==0)
+        {
+            c/=2;
+            n-=1;
+            nd++;
+        }
 
         bw = 0; w = 1; while (w < c) {w *= 2; bw += 1;}
         k = w - c;
@@ -525,6 +534,10 @@ public final class FP {
                 r.sqr();
             r.mul(key);
         }
+
+        for (i=0;i<nd;i++)
+            r.sqr();
+
         return r;
     }
 

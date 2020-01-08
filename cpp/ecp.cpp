@@ -311,8 +311,6 @@ int ZZZ::ECP_set(ECP *P, BIG x, BIG y)
         return 0;
     }
 
-    //  P->inf=0;
-
     FP_nres(&(P->x), x);
     FP_nres(&(P->y), y);
     FP_one(&(P->z));

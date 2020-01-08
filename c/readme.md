@@ -44,7 +44,7 @@ To create a 32-bit library
     python3 config32.py
 
 
-Then select options 1, 3, 7, 24, 26, 32, 33 and 35, which are fixed for the example 
+Then select options 1, 3, 7, 25, 27, 33, 34 and 36, which are fixed for the example 
 program. (For a 16-bit build select 1,4 and 6). Select 0 then to exit.
 
 Then compile

@@ -36,7 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "ecdh_ED25519.h"
+#include "ecdh_C1665.h"
 
 #include "rsa_2048.h"
 #include "randapi.h"
@@ -46,7 +46,7 @@
 #include "ecdh_GOLDILOCKS.h"
 #endif
 
-int ecdh_ED25519(csprng *RNG)
+int ecdh_C1665(csprng *RNG)
 {
     int i, res;
     unsigned long ran;
@@ -54,8 +54,8 @@ int ecdh_ED25519(csprng *RNG)
     // These octets are automatically protected against buffer overflow attacks
     // Note salt must be big enough to include an appended word
     // Note ECIES ciphertext C must be big enough to include at least 1 appended block
-    // Recall EFS_ED25519 is field size in bytes. So EFS_ED25519=32 for 256-bit curve
-    char s0[2 * EGS_ED25519], s1[EGS_ED25519], w0[2 * EFS_ED25519 + 1], w1[2 * EFS_ED25519 + 1], z0[EFS_ED25519], z1[EFS_ED25519], key[AESKEY_ED25519], salt[40], pw[40];
+    // Recall EFS_C1665 is field size in bytes. So EFS_C1665=32 for 256-bit curve
+    char s0[2 * EGS_C1665], s1[EGS_C1665], w0[2 * EFS_C1665 + 1], w1[2 * EFS_C1665 + 1], z0[EFS_C1665], z1[EFS_C1665], key[AESKEY_C1665], salt[40], pw[40];
     octet S0 = {0, sizeof(s0), s0};
     octet S1 = {0, sizeof(s1), s1};
     octet W0 = {0, sizeof(w0), w0};
@@ -74,20 +74,20 @@ int ecdh_ED25519(csprng *RNG)
     OCT_empty(&PW);
     OCT_jstring(&PW, pp);  // set Password from string
 
-    // private key S0 of size EGS_ED25519 bytes derived from Password and Salt
+    // private key S0 of size EGS_C1665 bytes derived from Password and Salt
 
-    PBKDF2(MC_SHA2,HASH_TYPE_ED25519, &S0, EGS_ED25519, &PW, &SALT, 1000);
+    PBKDF2(MC_SHA2,HASH_TYPE_C1665, &S0, EGS_C1665, &PW, &SALT, 1000);
 
     printf("Alices private key= 0x");
     OCT_output(&S0);
 
     // Generate Key pair S/W
 
-    ECP_ED25519_KEY_PAIR_GENERATE(NULL, &S0, &W0);
+    ECP_C1665_KEY_PAIR_GENERATE(NULL, &S0, &W0);
     printf("Alices public key= 0x");
     OCT_output(&W0);
 
-    res = ECP_ED25519_PUBLIC_KEY_VALIDATE(&W0);
+    res = ECP_C1665_PUBLIC_KEY_VALIDATE(&W0);
     if (res != 0)
     {
         printf("ECP Public Key is invalid!\n");
@@ -95,8 +95,8 @@ int ecdh_ED25519(csprng *RNG)
     }
 
     // Random private key for other party
-    ECP_ED25519_KEY_PAIR_GENERATE(RNG, &S1, &W1);
-    res = ECP_ED25519_PUBLIC_KEY_VALIDATE(&W1);
+    ECP_C1665_KEY_PAIR_GENERATE(RNG, &S1, &W1);
+    res = ECP_C1665_PUBLIC_KEY_VALIDATE(&W1);
     if (res != 0)
     {
         printf("ECP Public Key is invalid!\n");
@@ -109,8 +109,8 @@ int ecdh_ED25519(csprng *RNG)
 
     // Calculate common key using DH - IEEE 1363 method
 
-    ECP_ED25519_SVDP_DH(&S0, &W1, &Z0);
-    ECP_ED25519_SVDP_DH(&S1, &W0, &Z1);
+    ECP_C1665_SVDP_DH(&S0, &W1, &Z0);
+    ECP_C1665_SVDP_DH(&S1, &W0, &Z1);
 
     if (!OCT_comp(&Z0, &Z1))
     {
@@ -118,16 +118,16 @@ int ecdh_ED25519(csprng *RNG)
         return 0;
     }
 
-    KDF2(MC_SHA2, HASH_TYPE_ED25519, &KEY, AESKEY_ED25519, &Z0, NULL);
+    KDF2(MC_SHA2, HASH_TYPE_C1665, &KEY, AESKEY_C1665, &Z0, NULL);
 
     printf("Alice's DH Key=  0x");
     OCT_output(&KEY);
     printf("Servers DH Key=  0x");
     OCT_output(&KEY);
 
-#if CURVETYPE_ED25519 != MONTGOMERY
+#if CURVETYPE_C1665 != MONTGOMERY
 
-    char ds[EGS_ED25519], p1[30], p2[30], v[2 * EFS_ED25519 + 1], m[32], c[64], t[32], cs[EGS_ED25519];
+    char ds[EGS_C1665], p1[30], p2[30], v[2 * EFS_C1665 + 1], m[32], c[64], t[32], cs[EGS_C1665];
     octet DS = {0, sizeof(ds), ds};
     octet CS = {0, sizeof(cs), cs};
     octet P1 = {0, sizeof(p1), p1};
@@ -152,7 +152,7 @@ int ecdh_ED25519(csprng *RNG)
     M.len = 17;
     for (i = 0; i <= 16; i++) M.val[i] = i;
 
-    ECP_ED25519_ECIES_ENCRYPT(HASH_TYPE_ED25519, &P1, &P2, RNG, &W1, &M, 12, &V, &C, &T);
+    ECP_C1665_ECIES_ENCRYPT(HASH_TYPE_C1665, &P1, &P2, RNG, &W1, &M, 12, &V, &C, &T);
 
     printf("Ciphertext= \n");
     printf("V= 0x");
@@ -162,7 +162,7 @@ int ecdh_ED25519(csprng *RNG)
     printf("T= 0x");
     OCT_output(&T);
 
-    if (!ECP_ED25519_ECIES_DECRYPT(HASH_TYPE_ED25519, &P1, &P2, &V, &C, &T, &S1, &M))
+    if (!ECP_C1665_ECIES_DECRYPT(HASH_TYPE_C1665, &P1, &P2, &V, &C, &T, &S1, &M))
     {
         printf("*** ECIES Decryption Failed\n");
         return 0;
@@ -175,7 +175,7 @@ int ecdh_ED25519(csprng *RNG)
 
     printf("Testing ECDSA\n");
 
-    if (ECP_ED25519_SP_DSA(HASH_TYPE_ED25519, RNG, NULL, &S0, &M, &CS, &DS) != 0)
+    if (ECP_C1665_SP_DSA(HASH_TYPE_C1665, RNG, NULL, &S0, &M, &CS, &DS) != 0)
     {
         printf("***ECDSA Signature Failed\n");
         return 0;
@@ -186,7 +186,7 @@ int ecdh_ED25519(csprng *RNG)
     printf("Signature D = 0x");
     OCT_output(&DS);
 
-    if (ECP_ED25519_VP_DSA(HASH_TYPE_ED25519, &W0, &M, &CS, &DS) != 0)
+    if (ECP_C1665_VP_DSA(HASH_TYPE_C1665, &W0, &M, &CS, &DS) != 0)
     {
         printf("***ECDSA Verification Failed\n");
         return 0;
@@ -589,8 +589,8 @@ int main()
 
     CREATE_CSPRNG(&RNG, &RAW);  // initialise strong RNG
 
-    printf("\nTesting ECDH protocols for curve ED25519\n");
-    ecdh_ED25519(&RNG);
+    printf("\nTesting ECDH protocols for curve C1665\n");
+    ecdh_C1665(&RNG);
 #if CHUNK!=16
     printf("\nTesting ECDH protocols for curve NIST256\n");
     ecdh_NIST256(&RNG);

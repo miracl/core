@@ -1,0 +1,87 @@
+/*
+   Copyright (C) 2019 MIRACL UK Ltd.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+     https://www.gnu.org/licenses/agpl-3.0.en.html
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+   You can be released from the requirements of the license by purchasing
+   a commercial license. Buying such a license is mandatory as soon as you
+   develop commercial activities involving the MIRACL Core Crypto SDK
+   without disclosing the source code of your own applications, or shipping
+   the MIRACL Core Crypto SDK with a closed source product.
+*/
+
+//
+//  rom.swift
+//
+//  Created by Michael Scott on 12/06/2015.
+//  Copyright (c) 2015 Michael Scott. All rights reserved.
+//
+
+public struct ROM{
+
+#if D32
+
+// Base Bits= 29
+static let Modulus:[Chunk] = [0x1FFFFFFB,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFF]
+static let R2modp:[Chunk] = [0x190000,0x0,0x0,0x0,0x0,0x0]
+static let ROI:[Chunk] = [0x1FFFFFFA,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFF]
+static let MConst:Chunk = 0x5
+
+//*** rom curve parameters *****
+// Base Bits= 29
+
+static let CURVE_A:Int = 1
+static let CURVE_Cof_I:Int = 4
+static public let CURVE_Cof:[Chunk] = [0x4,0x0,0x0,0x0,0x0,0x0]
+static let CURVE_B_I:Int = 5766
+static public let CURVE_B:[Chunk] = [0x1686,0x0,0x0,0x0,0x0,0x0]
+static public let CURVE_Order:[Chunk] = [0x1DBA8B27,0x7F854C,0x1F57BC06,0x1FFFFFFF,0x1FFFFFFF,0x7FFFF]
+static public let CURVE_Gx:[Chunk] = [0x19D52398,0x138DCEDF,0x183D99B1,0x1340C31D,0x1A505B80,0xA64A6]
+static public let CURVE_Gy:[Chunk] = [0x4920345,0x3843D92,0x758B70B,0x77F8EE7,0x149BC0A1,0x14A0A2]
+
+#endif
+
+#if D64
+
+// Base Bits= 60
+static let Modulus:[Chunk] = [0xFFFFFFFFFFFFFFB,0xFFFFFFFFFFFFFFF,0x3FFFFFFFFFFF]
+static let R2modp:[Chunk] = [0x190000000,0x0,0x0]
+static let ROI:[Chunk] = [0xFFFFFFFFFFFFFFA,0xFFFFFFFFFFFFFFF,0x3FFFFFFFFFFF]
+static let MConst:Chunk = 0x5
+
+//*** rom curve parameters *****
+// Base Bits= 60
+
+static let CURVE_A:Int = 1
+static let CURVE_Cof_I:Int = 4
+static public let CURVE_Cof:[Chunk] = [0x4,0x0,0x0]
+static let CURVE_B_I:Int = 5766
+static public let CURVE_B:[Chunk] = [0x1686,0x0,0x0]
+static public let CURVE_Order:[Chunk] = [0x80FF0A99DBA8B27,0xFFFFFFFFFD5EF01,0xFFFFFFFFFFF]
+static public let CURVE_Gx:[Chunk] = [0x671B9DBF9D52398,0x9A0618EE0F666C,0x14C94DA505B8]
+static public let CURVE_Gy:[Chunk] = [0xC7087B244920345,0x13BFC7739D62DC2,0x29414549BC0A]
+
+#endif
+
+}
+

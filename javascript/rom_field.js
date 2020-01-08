@@ -51,6 +51,7 @@ var ROM_FIELD_25519,
     ROM_FIELD_BRAINPOOL,
     ROM_FIELD_C41417,
     ROM_FIELD_C1174,
+    ROM_FIELD_C1665,
     ROM_FIELD_GOLDILOCKS,
     ROM_FIELD_HIFIVE,
     ROM_FIELD_NIST256,
@@ -419,7 +420,22 @@ ROM_FIELD_C1174 = function() {
     return ROM_FIELD_C1174;
 };
 
+ROM_FIELD_C1665 = function() {
+    "use strict";
+    /* Fixed Data in ROM - Field and Curve parameters */
 
+
+    var ROM_FIELD_C1665 = {
+
+        // C1665 modulus
+        // Base Bits= 23
+        Modulus: [0x7FFFFB,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x1F],
+        R2modp: [0x0,0x32000,0x0,0x0,0x0,0x0,0x0,0x0],
+        ROI: [0x7FFFFA,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x1F],
+        MConst: 0x5,
+    };
+    return ROM_FIELD_C1665;
+};
 
 ROM_FIELD_GOLDILOCKS = function() {
     "use strict";

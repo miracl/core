@@ -1,0 +1,42 @@
+#include "arch.h"
+#include "ecp_C1665.h"
+
+namespace C1665 {
+
+/* Curve C1665 */
+
+#if CHUNK==16
+
+#error Not supported
+
+#endif
+
+#if CHUNK==32
+
+using namespace B168_29;
+
+const int CURVE_A= 1;
+const int CURVE_Cof_I= 4;
+const BIG CURVE_Cof= {0x4,0x0,0x0,0x0,0x0,0x0};
+const int CURVE_B_I= 5766;
+const BIG CURVE_B= {0x1686,0x0,0x0,0x0,0x0,0x0};
+const BIG CURVE_Order= {0x1DBA8B27,0x7F854C,0x1F57BC06,0x1FFFFFFF,0x1FFFFFFF,0x7FFFF};
+const BIG CURVE_Gx= {0x19D52398,0x138DCEDF,0x183D99B1,0x1340C31D,0x1A505B80,0xA64A6};
+const BIG CURVE_Gy= {0x4920345,0x3843D92,0x758B70B,0x77F8EE7,0x149BC0A1,0x14A0A2};
+#endif
+
+#if CHUNK==64
+
+using namespace B168_60;
+
+const int CURVE_A= 1;
+const int CURVE_Cof_I= 4;
+const BIG CURVE_Cof= {0x4L,0x0L,0x0L};
+const int CURVE_B_I= 5766;
+const BIG CURVE_B= {0x1686L,0x0L,0x0L};
+const BIG CURVE_Order= {0x80FF0A99DBA8B27L,0xFFFFFFFFFD5EF01L,0xFFFFFFFFFFFL};
+const BIG CURVE_Gx= {0x671B9DBF9D52398L,0x9A0618EE0F666CL,0x14C94DA505B8L};
+const BIG CURVE_Gy= {0xC7087B244920345L,0x13BFC7739D62DC2L,0x29414549BC0AL};
+#endif
+
+}
