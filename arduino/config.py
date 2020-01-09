@@ -724,7 +724,7 @@ os.system(deltext+" mpin256.*")
 os.system(deltext+" bls256.*")
 
 os.system(deltext+" blsrev*.cpp")
-os.system(deltext+ " hpke*.* ")
+#os.system(deltext+ " hpke*.* ")
 
 # create library
 
