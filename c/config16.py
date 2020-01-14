@@ -190,7 +190,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 
 	os.system("gcc -O3 -std=c99 -c rom_curve_"+tc+".c");
 
-	if pf != "NOT" :
+	if pf != "NOT_PF" :
 		fnamec="fp2_"+tf+".c"
 		fnameh="fp2_"+tf+".h"
 
@@ -337,22 +337,22 @@ while ptr<max:
 # curve security is AES equivalent, rounded up.
 
 	if x==1:
-		curveset("255","F25519","ED25519","13","2","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("255","F25519","ED25519","13","2","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
 		curve_selected=True
 	if x==2:
-		curveset("256","F256PME","NUMS256E","13","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("256","F256PME","NUMS256E","13","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
 		curve_selected=True
 
 	if x==3:
-		curveset("160","SECP160R1","SECP160R1","13","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("160","SECP160R1","SECP160R1","13","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 
 
 	if x==4:
-		curveset("254","BN254","BN254","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
+		curveset("254","BN254","BN254","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
 		pfcurve_selected=True
 	if x==5:
-		curveset("254","BN254CX","BN254CX","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
+		curveset("254","BN254CX","BN254CX","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
 		pfcurve_selected=True
 
 # rsaset(big,ring,bit_bits_in_base,multiplier)

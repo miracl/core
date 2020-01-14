@@ -162,7 +162,7 @@ int ZZZ::PAIR_nbits(BIG n3, BIG n)
     BIG x;
     BIG_rcopy(x, CURVE_Bnx);
 
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     BIG_pmul(n, x, 6);
 #if SIGN_OF_X_ZZZ==POSITIVEX
     BIG_inc(n, 2);
@@ -258,7 +258,7 @@ void ZZZ::PAIR_precomp(FP4 T[], ECP2* GV)
     BIG n, n3;
     FP2 AA, BB, CC;
     ECP2 A, G, NG;
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     ECP2 K;
     FP2 X;
     FP Qx, Qy;
@@ -296,7 +296,7 @@ void ZZZ::PAIR_precomp(FP4 T[], ECP2* GV)
             PAIR_pack(&T[j++], &AA, &BB, &CC);
         }
     }
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
 
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     ECP2_neg(&A);
@@ -353,7 +353,7 @@ void ZZZ::PAIR_another_pc(FP12 r[], FP4 T[], ECP *QV)
         FP12_ssmul(&r[i], &lv);
     }
 
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     PAIR_unpack(&lv, &T[j++], &Qx, &Qy);
     PAIR_unpack(&lv2, &T[j++], &Qx, &Qy);
     FP12_smul(&lv, &lv2);
@@ -370,7 +370,7 @@ void ZZZ::PAIR_another(FP12 r[], ECP2* PV, ECP* QV)
     ECP2 A, NP, P;
     ECP Q;
     FP Qx, Qy;
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     ECP2 K;
     FP2 X;
     FP_rcopy(&Qx, Fra);
@@ -416,7 +416,7 @@ void ZZZ::PAIR_another(FP12 r[], ECP2* PV, ECP* QV)
         FP12_ssmul(&r[i], &lv);
     }
 
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
 
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     ECP2_neg(&A);
@@ -443,7 +443,7 @@ void ZZZ::PAIR_ate(FP12 *r, ECP2 *P1, ECP *Q1)
     ECP2 A, NP, P;
     ECP Q;
     FP12 lv, lv2;
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     ECP2 KA;
     FP2 X;
 
@@ -500,7 +500,7 @@ void ZZZ::PAIR_ate(FP12 *r, ECP2 *P1, ECP *Q1)
 #endif
 
     /* R-ate fixup required for BN curves */
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
 
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     ECP2_neg(&A);
@@ -527,7 +527,7 @@ void ZZZ::PAIR_double_ate(FP12 *r, ECP2 *P1, ECP *Q1, ECP2 *R1, ECP *S1)
     ECP2 A, B, NP, NR, P, R;
     ECP Q, S;
     FP12 lv, lv2;
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     ECP2 K;
     FP2 X;
 
@@ -611,7 +611,7 @@ void ZZZ::PAIR_double_ate(FP12 *r, ECP2 *P1, ECP *Q1, ECP2 *R1, ECP *S1)
     FP12_conj(r, r);
 #endif
     /* R-ate fixup required for BN curves */
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
 
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     ECP2_neg(&A);
@@ -664,7 +664,7 @@ void ZZZ::PAIR_fexp(FP12 *r)
     FP12_mul(r, &t0);
 
     /* Hard part of final exp - see Duquesne & Ghamman eprint 2015/192.pdf */
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     FP12_pow(&t0, r, x); // t0=f^-u
 #if SIGN_OF_X_ZZZ==POSITIVEX
     FP12_conj(&t0, &t0);
@@ -778,7 +778,7 @@ void ZZZ::PAIR_fexp(FP12 *r)
 /* GLV method */
 static void ZZZ::glv(BIG u[2], BIG e)
 {
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     int i, j;
     BIG v[2], t, q;
     DBIG d;
@@ -825,7 +825,7 @@ static void ZZZ::glv(BIG u[2], BIG e)
 static void ZZZ::gs(BIG u[4], BIG e)
 {
     int i;
-#if PAIRING_FRIENDLY_ZZZ==BN
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     int j;
     BIG v[4], t, q;
     DBIG d;

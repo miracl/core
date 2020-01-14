@@ -50,7 +50,7 @@
 #define CURVE_SECURITY_ZZZ @CS@
 
 
-#if PAIRING_FRIENDLY_ZZZ != NOT
+#if PAIRING_FRIENDLY_ZZZ != NOT_PF
 //#define USE_GLV_ZZZ     /**< Note this method is patented (GLV), so maybe you want to comment this out */
 //#define USE_GS_G2_ZZZ /**< Well we didn't patent it :) But may be covered by GLV patent :( */
 #define USE_GS_GT_ZZZ /**< Not patented, so probably OK to always use this */

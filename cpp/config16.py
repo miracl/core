@@ -192,7 +192,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 
 	os.system("g++ -O3 -c rom_curve_"+tc+".cpp")
 
-	if pf != "NOT" :
+	if pf != "NOT_PF" :
 		fnamec="fp2_"+tf+".cpp"
 		fnameh="fp2_"+tf+".h"
 
@@ -333,7 +333,7 @@ while ptr<max:
 # modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
 # i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0)
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
-# pairing_friendly is BN, BLS or NOT (if not pairing friendly)
+# pairing_friendly is BN_CURVE, BLS_CURVE or NOT_PF (if not pairing friendly)
 # if pairing friendly. M or D type twist, and sign of the family parameter x
 # ate bits is number of bits in Ate parameter (from romgen program)
 # g2_table size is number of entries in precomputed table 
@@ -342,21 +342,21 @@ while ptr<max:
 
 
 	if x==1:
-		curveset("255","F25519","ED25519","13","2","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("255","F25519","ED25519","13","2","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
 		curve_selected=True
 	if x==2:
-		curveset("256","F256PME","NUMS256E","13","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("256","F256PME","NUMS256E","13","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
 		curve_selected=True
 
 	if x==3:
-		curveset("160","SECP160R1","SECP160R1","13","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("160","SECP160R1","SECP160R1","13","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 
 	if x==4:
-		curveset("254","BN254","BN254","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
+		curveset("254","BN254","BN254","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
 		pfcurve_selected=True
 	if x==5:
-		curveset("254","BN254CX","BN254CX","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
+		curveset("254","BN254CX","BN254CX","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
 		pfcurve_selected=True
 
 # rsaset(big,ring,bit_bits_in_base,multiplier)

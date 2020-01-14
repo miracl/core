@@ -22,7 +22,7 @@ using namespace std;
 Miracl precision(100, 0);
 
 char open, close, term, el = 0;
-int PS=24;  // start of pairing friendly curves
+int PS=25;  // start of pairing friendly curves
 
 Big output(int chunk, int w, Big t, Big m)
 {
@@ -140,20 +140,21 @@ void help()
     printf("20. JUBJUB\n");
     printf("21. X448\n");
     printf("22. SECP160R1\n");
-    printf("23. C1174\n\n");
+    printf("23. C1174\n");
+    printf("24. C1665\n");
 
-    printf("24. BN254\n");
-    printf("25. BN254CX\n");
-    printf("26. BLS12383\n");
-    printf("27. BLS12381\n");
-    printf("28. FP256BN\n");
-    printf("29. FP512BN\n");
-    printf("30. BLS12461\n");
-    printf("31. BN462\n");
+    printf("25. BN254\n");
+    printf("26. BN254CX\n");
+    printf("27. BLS12383\n");
+    printf("28. BLS12381\n");
+    printf("29. FP256BN\n");
+    printf("30. FP512BN\n");
+    printf("31. BLS12461\n");
+    printf("32. BN462\n");
 
-    printf("32. BLS24479\n");
-    printf("33. BLS48556\n");
-    printf("34. BLS48581\n");
+    printf("33. BLS24479\n");
+    printf("34. BLS48556\n");
+    printf("35. BLS48581\n");
 
     printf("\nromgen curve wordlength basebits language\n");
     printf("where wordlength is 16, 32 or 64\n");
@@ -551,6 +552,27 @@ int main(int argc, char **argv)
 
         gx=(char *)"037fbb0cea308c479343aee7c029a190c021d96a492ecd6516123f27bce29eda";
         gy=(char *)"06b72f82d47fb7cc6656841169840e0c4fe2dee2af3f976ba4ccb1bf9b46360e";
+
+    }
+
+    if (strcmp(curvename, "C1665") == 0)
+    {
+        curve = 24;
+        printf("Curve= C1665\n");
+        strcpy(fieldname, curvename);
+        mbits = 166;
+        words = (1 + ((mbits - 1) / bb));
+        curvetype = EDWARDS;
+        modtype = PSEUDO_MERSENNE;
+        curve_a = 1;
+        p = pow((Big)2, mbits) - 5;
+        cof = 4;
+        curve_b = 5766;
+        mip->IOBASE = 16;
+        r=(char *)"FFFFFFFFFFFFFFFFFFFFD5EF0180FF0A99DBA8B27";
+        //r=(char*)"1000000000000000000002A10FE7F00F56624574D7";
+        gx=(char *)"14C94DA505B809A0618EE0F666C671B9DBF9D52398";
+        gy=(char *)"29414549BC0A13BFC7739D62DC2C7087B244920345";
 
     }
 

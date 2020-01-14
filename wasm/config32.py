@@ -204,7 +204,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 
 	os.system("emcc -O2 -c rom_curve_"+tc+".c -o rom_curve_"+tc+".bc");
 
-	if pf != "NOT" :
+	if pf != "NOT_PF" :
 		fnamec="fp2_"+tf+".c"
 		fnamebc="fp2_"+tf+".bc"
 		fnameh="fp2_"+tf+".h"
@@ -574,135 +574,135 @@ while ptr<max:
 # modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
 # i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0)
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
-# pairing_friendly is BN, BLS or NOT (if not pairing friendly)
+# pairing_friendly is BN_CURVE, BLS_CURVE or NOT_PF (if not pairing friendly)
 # if pairing friendly. M or D type twist, and sign of the family parameter x
 # ate bits is number of bits in Ate parameter (from romgen program)
 # g2_table size is number of entries in precomputed table 
 # curve security is AES equiavlent, rounded up.
 
 	if x==1:
-		curveset("255","F25519","ED25519","29","2","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("255","F25519","ED25519","29","2","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
 		curve_selected=True
 	if x==2:
-		curveset("255","F25519","C25519","29","2","PSEUDO_MERSENNE","0","MONTGOMERY","NOT","","","","","128")
+		curveset("255","F25519","C25519","29","2","PSEUDO_MERSENNE","0","MONTGOMERY","NOT_PF","","","","","128")
 		curve_selected=True
 	if x==3:
-		curveset("256","NIST256","NIST256","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("256","NIST256","NIST256","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 	if x==4:
-		curveset("256","BRAINPOOL","BRAINPOOL","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("256","BRAINPOOL","BRAINPOOL","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 	if x==5:
-		curveset("256","ANSSI","ANSSI","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("256","ANSSI","ANSSI","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 
 	if x==6:
-		curveset("336","HIFIVE","HIFIVE","29","2","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","192")
+		curveset("336","HIFIVE","HIFIVE","29","2","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","192")
 		curve_selected=True
 	if x==7:
-		curveset("448","GOLDILOCKS","GOLDILOCKS","29","1","GENERALISED_MERSENNE","0","EDWARDS","NOT","","","","","256")
+		curveset("448","GOLDILOCKS","GOLDILOCKS","29","1","GENERALISED_MERSENNE","0","EDWARDS","NOT_PF","","","","","256")
 		curve_selected=True
 	if x==8:
-		curveset("384","NIST384","NIST384","29","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","192")
+		curveset("384","NIST384","NIST384","29","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","192")
 		curve_selected=True
 	if x==9:
-		curveset("414","C41417","C41417","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","256")
+		curveset("414","C41417","C41417","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","256")
 		curve_selected=True
 	if x==10:
-		curveset("521","NIST521","NIST521","28","1","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT","","","","","256")
+		curveset("521","NIST521","NIST521","28","1","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT_PF","","","","","256")
 		curve_selected=True
 
 	if x==11:
-		curveset("256","256PMW","NUMS256W","28","1","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("256","256PMW","NUMS256W","28","1","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 	if x==12:
-		curveset("256","256PME","NUMS256E","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("256","256PME","NUMS256E","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
 		curve_selected=True
 	if x==13:
-		curveset("384","384PM","NUMS384W","29","1","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT","","","","","192")
+		curveset("384","384PM","NUMS384W","29","1","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT_PF","","","","","192")
 		curve_selected=True
 	if x==14:
-		curveset("384","384PM","NUMS384E","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","192")
+		curveset("384","384PM","NUMS384E","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","192")
 		curve_selected=True
 	if x==15:
-		curveset("512","512PM","NUMS512W","29","1","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT","","","","","256")
+		curveset("512","512PM","NUMS512W","29","1","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT_PF","","","","","256")
 		curve_selected=True
 	if x==16:
-		curveset("512","512PM","NUMS512E","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","256")
+		curveset("512","512PM","NUMS512E","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","256")
 		curve_selected=True
 
 	if x==17:
-		curveset("256","SECP256K1","SECP256K1","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("256","SECP256K1","SECP256K1","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 
 	if x==18:
-		curveset("256","SM2","SM2","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("256","SM2","SM2","28","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 
 	if x==19:
-		curveset("255","F25519","C13318","29","2","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("255","F25519","C13318","29","2","PSEUDO_MERSENNE","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 
 	if x==20:
-		curveset("255","JUBJUB","JUBJUB","29","32","NOT_SPECIAL","5","EDWARDS","NOT","","","","","128")
+		curveset("255","JUBJUB","JUBJUB","29","32","NOT_SPECIAL","5","EDWARDS","NOT_PF","","","","","128")
 		curve_selected=True
 
 	if x==21:
-		curveset("448","GOLDILOCKS","X448","29","1","GENERALISED_MERSENNE","0","MONTGOMERY","NOT","","","","","256")
+		curveset("448","GOLDILOCKS","X448","29","1","GENERALISED_MERSENNE","0","MONTGOMERY","NOT_PF","","","","","256")
 		curve_selected=True
 
 	if x==22:
-		curveset("160","SECP160R1","SECP160R1","29","1","NOT_SPECIAL","0","WEIERSTRASS","NOT","","","","","128")
+		curveset("160","SECP160R1","SECP160R1","29","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
 		curve_selected=True
 
 	if x==23:
-		curveset("251","C1174","C1174","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("251","C1174","C1174","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
 		curve_selected=True
 	if x==24:
-		curveset("166","C1665","C1665","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT","","","","","128")
+		curveset("166","C1665","C1665","29","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
 		curve_selected=True
 
 
 	if x==25:
-		curveset("254","BN254","BN254","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
+		curveset("254","BN254","BN254","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
 		pfcurve_selected=True
 	if x==26:
-		curveset("254","BN254CX","BN254CX","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
+		curveset("254","BN254CX","BN254CX","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
 		pfcurve_selected=True
 	if x==27:
-		curveset("383","BLS12383","BLS12383","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128")
+		curveset("383","BLS12383","BLS12383","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS_CURVE","M_TYPE","POSITIVEX","68","65","128")
 		pfcurve_selected=True
 
 	if x==28:
-		curveset("381","BLS12381","BLS12381","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128")
+		curveset("381","BLS12381","BLS12381","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS_CURVE","M_TYPE","NEGATIVEX","69","65","128")
 		pfcurve_selected=True
 
 	if x==29:
-		curveset("256","FP256BN","FP256BN","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","NEGATIVEX","83","66","128")
+		curveset("256","FP256BN","FP256BN","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","M_TYPE","NEGATIVEX","83","66","128")
 		pfcurve_selected=True
 	if x==30:
-		curveset("512","FP512BN","FP512BN","29","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","POSITIVEX","172","130","128")
+		curveset("512","FP512BN","FP512BN","29","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","M_TYPE","POSITIVEX","172","130","128")
 		pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
 	if x==31:
-		curveset("461","BLS12461","BLS12461","28","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","79","78","128")
+		curveset("461","BLS12461","BLS12461","28","1","NOT_SPECIAL","0","WEIERSTRASS","BLS_CURVE","M_TYPE","NEGATIVEX","79","78","128")
 		pfcurve_selected=True
 
 	if x==32:
-		curveset("462","BN462","BN462","28","1","NOT_SPECIAL","1","WEIERSTRASS","BN","D_TYPE","POSITIVEX","125","118","128")
+		curveset("462","BN462","BN462","28","1","NOT_SPECIAL","1","WEIERSTRASS","BN_CURVE","D_TYPE","POSITIVEX","125","118","128")
 		pfcurve_selected=True
 
 	if x==33:
-		curveset("479","BLS24479","BLS24479","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","52","49","192")
+		curveset("479","BLS24479","BLS24479","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS_CURVE","M_TYPE","POSITIVEX","52","49","192")
 		pfcurve_selected=True
 
 
 	if x==34:
-		curveset("556","BLS48556","BLS48556","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","35","32","256")
+		curveset("556","BLS48556","BLS48556","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS_CURVE","M_TYPE","POSITIVEX","35","32","256")
 		pfcurve_selected=True
 
 	if x==35:
-		curveset("581","BLS48581","BLS48581","29","1","NOT_SPECIAL","10","WEIERSTRASS","BLS","D_TYPE","NEGATIVEX","36","33","256")
+		curveset("581","BLS48581","BLS48581","29","1","NOT_SPECIAL","10","WEIERSTRASS","BLS_CURVE","D_TYPE","NEGATIVEX","36","33","256")
 		pfcurve_selected=True
 
 # rsaset(big,ring,bit_bits_in_base,multiplier)

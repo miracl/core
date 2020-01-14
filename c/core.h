@@ -69,9 +69,9 @@
 
 /* Pairing-Friendly types */
 
-#define NOT 0
-#define BN 1
-#define BLS 2
+#define NOT_PF 0
+#define BN_CURVE 1
+#define BLS_CURVE 2
 
 #define D_TYPE 0
 #define M_TYPE 1
