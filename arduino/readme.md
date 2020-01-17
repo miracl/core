@@ -58,10 +58,4 @@ Your working folder should be there, so just click on the subdirectory
 containing the example code. Make sure to activate Tools &rightarrow; Serial Monitor to 
 observe the output.
 
--------------------------
-
-Note that a significant speed-up is possible - see faster.txt in the C++
-MIRACL Core folder
-
-
 

@@ -579,7 +579,7 @@ void XXX::BIG_mul(DBIG c, BIG a, BIG b)
     /* faster psuedo-Karatsuba method */
 #ifdef UNWOUND
 
-    /* Insert output of faster.cpp here */
+    INLINE_MUL
 
 #else
 /*
@@ -673,7 +673,7 @@ void XXX::BIG_sqr(DBIG c, BIG a)
 
 #ifdef UNWOUND
 
-    /* Insert output of faster.cpp here */
+    INLINE_SQR
 
 #else
 
@@ -745,7 +745,7 @@ void XXX::BIG_sqr(DBIG c, BIG a)
     for (i = 0; i < NLEN_XXX; i++)
         c[2 * i + 1] += muladd(a[i], a[i], 0, &c[2 * i]);
 
-    BIG_dnorm(c);
+    BIG_dnorm(c); 
 #endif
 
 
@@ -776,7 +776,7 @@ void XXX::BIG_monty(BIG a, BIG md, chunk MC, DBIG d)
 
 #ifdef UNWOUND
 
-    /* Insert output of faster.cpp here */
+    INLINE_REDC
 
 #else
 /*

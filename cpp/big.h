@@ -51,8 +51,8 @@
 
 using namespace core;
 
-
-//#define UNWOUND
+/* could comment this out if code size is a major issue */
+#define UNWOUND
 
 #define BIGBITS_XXX (8*MODBYTES_XXX)
 #define NLEN_XXX (1+((8*MODBYTES_XXX-1)/BASEBITS_XXX))

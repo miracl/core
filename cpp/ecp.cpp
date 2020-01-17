@@ -672,15 +672,15 @@ void ZZZ::ECP_dbl(ECP *P)
 #if CURVETYPE_ZZZ==MONTGOMERY
     FP A, B, AA, BB, C;
 
-    FP_add(&A, &(P->x), &(P->z));       //A.add(z);
+    FP_add(&A, &(P->x), &(P->z));   //A.add(z);
     FP_norm(&A);                    //A.norm();
-    FP_sqr(&AA, &A);            //AA.sqr();
-    FP_sub(&B, &(P->x), &(P->z));       //B.sub(z);
+    FP_sqr(&AA, &A);                //AA.sqr();
+    FP_sub(&B, &(P->x), &(P->z));   //B.sub(z);
     FP_norm(&B);                    //B.norm();
-    FP_sqr(&BB, &B);            //BB.sqr();
+    FP_sqr(&BB, &B);                //BB.sqr();
     FP_sub(&C, &AA, &BB);           //C.sub(BB);
     FP_norm(&C);                    //C.norm();
-    FP_mul(&(P->x), &AA, &BB);  //x.mul(BB);
+    FP_mul(&(P->x), &AA, &BB);      //x.mul(BB);
 
     FP_imul(&A, &C, (CURVE_A + 2) / 4); //A.imul((ROM.CURVE_A+2)/4);
 
@@ -702,12 +702,11 @@ void ZZZ::ECP_add(ECP *P, ECP *Q, ECP *W)
     FP_sub(&B, &(P->x), &(P->z)); //B.sub(z);
 
     FP_add(&C, &(Q->x), &(Q->z)); //C.add(Q.z);
-
     FP_sub(&D, &(Q->x), &(Q->z)); //D.sub(Q.z);
-    FP_norm(&A);            //A.norm();
 
+    FP_norm(&A);            //A.norm();
     FP_norm(&D);            //D.norm();
-    FP_mul(&DA, &D, &A);        //DA.mul(A);
+    FP_mul(&DA, &D, &A);    //DA.mul(A);
 
     FP_norm(&C);            //C.norm();
     FP_norm(&B);            //B.norm();
@@ -715,7 +714,7 @@ void ZZZ::ECP_add(ECP *P, ECP *Q, ECP *W)
 
     FP_add(&A, &DA, &CB);   //A.add(CB);
     FP_norm(&A);            //A.norm();
-    FP_sqr(&(P->x), &A);        //A.sqr();
+    FP_sqr(&(P->x), &A);    //A.sqr();
     FP_sub(&B, &DA, &CB);   //B.sub(CB);
     FP_norm(&B);            //B.norm();
     FP_sqr(&B, &B);         //B.sqr();

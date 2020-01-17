@@ -576,7 +576,7 @@ void BIG_XXX_mul(DBIG_XXX c, BIG_XXX a, BIG_XXX b)
     /* faster psuedo-Karatsuba method */
 #ifdef UNWOUND
 
-    /* Insert output of faster.c here */
+    INLINE_MUL
 
 #else
     for (i = 0; i < NLEN_XXX; i++)
@@ -648,7 +648,7 @@ void BIG_XXX_sqr(DBIG_XXX c, BIG_XXX a)
 
 #ifdef UNWOUND
 
-    /* Insert output of faster.c here */
+    INLINE_SQR
 
 #else
 
@@ -767,7 +767,7 @@ void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d)
 
 #ifdef UNWOUND
 
-    /* Insert output of faster.c here */
+    INLINE_REDC
 
 #else
 

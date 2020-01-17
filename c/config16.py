@@ -3,282 +3,423 @@ import sys
 
 deltext=""
 if sys.platform.startswith("linux")  :
-	deltext="rm"
-	copytext="cp"
+    deltext="rm"
+    copytext="cp"
 if sys.platform.startswith("darwin")  :
-	deltext="rm"
-	copytext="cp"
+    deltext="rm"
+    copytext="cp"
 if sys.platform.startswith("win") :
-	deltext="del"
-	copytext=">NUL copy"
+    deltext="del"
+    copytext=">NUL copy"
 
 testing=False
 if len(sys.argv)==2 :
-	if sys.argv[1]=="test":
-		testing=True
+    if sys.argv[1]=="test":
+        testing=True
 if testing :
-	sys.stdin=open("test16.txt","r")
+    sys.stdin=open("test16.txt","r")
+
+def inline_mul1(N,base)  :
+    str=""
+    str+="\tt=(dchunk)a[0]*b[0]; c[0]=(chunk)t & BMASK_XXX; t=t>>BASEBITS_XXX;\n"
+
+    for i in range(1,N) :
+        k=0;
+        str+="\tt=t"
+        while (k<=i) :
+            str+="+(dchunk)a[{}]*b[{}]".format(k,i-k)
+            k+=1
+        str+="; c[{}]=(chunk)t & BMASK_XXX; ".format(i)
+        str+="t=t>>BASEBITS_XXX;\n"
+
+    for i in range(N,2*N-1) :
+        k=i-(N-1)
+        str+="\tt=t"
+        while (k<=N-1) :
+            str+="+(dchunk)a[{}]*b[{}]".format(k,i-k)
+            k+=1
+        str+="; c[{}]=(chunk)t & BMASK_XXX; ".format(i)
+        str+="t=t>>BASEBITS_XXX;\n"
+
+    str+="\tc[{}]=(chunk)t;\n".format(2*N-1)
+
+    return str.replace("XXX",base)
+
+def inline_mul2(N,base)  :
+    str=""
+    for i in range(0,N) :
+        str+="\td[{}]=(dchunk)a[{}]*b[{}];\n".format(i, i, i)
+    str+="\n\ts=d[0];\n\tt = s; c[0]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX;\n"
+    for k in range(1,N) :
+        str+="\ts+=d[{}]; t=co+s ".format(k)
+        for i in range(k,int(k/2),-1) :
+            str+="+(dchunk)(a[{}]-a[{}])*(b[{}]-b[{}])".format(i,k - i, k - i, i)
+        str+="; c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n".format(k)
+    str+="\n"
+    for k in range(N,2 * N - 1) :
+        str+="\ts-=d[{}]; t=co+s ".format(k - N)
+        for i in range(N-1,int(k/2),-1) :
+            str+="+(dchunk)(a[{}]-a[{}])*(b[{}]-b[{}])".format(i, k - i, k - i, i)
+        str+="; c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n".format(k)
+  
+    str+="\tc[{}]=(chunk)co;\n".format(2 * N - 1)
+    return str.replace("XXX",base)
+    
+def inline_sqr(N,base) :
+    str=""
+    str+="\n\tt=(dchunk)a[0]*a[0]; c[0]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX;\n"
+
+    for k in range(1,N) :
+        str+="\tt= "
+        for i in range(k,int(k/2),-1) : 
+            str+="+(dchunk)a[{}]*a[{}]".format(i, k - i)
+        str+="; t+=t; t+=co;"
+        if k % 2 == 0 : 
+            str+=" t+=(dchunk)a[{}]*a[{}];".format(int(k/2), int(k/2))
+        str+=" c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n".format(k)
+    str+="\n"
+
+    for k in range(N,2*N-2) :
+        str+="\tt= "
+        for i in range(N-1,int(k/2),-1) : 
+            str+="+(dchunk)a[{}]*a[{}]".format(i, k - i)
+        str+="; t+=t; t+=co;"
+        if k % 2 == 0 :
+            str+=" t+=(dchunk)a[{}]*a[{}];".format(int(k/2),int(k/2))
+        str+=" c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n".format(k)
+    
+    str+="\tt=co; t+=(dchunk)a[{}]*a[{}]; c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n ".format(N-1,N-1,2*N-2)
+
+    str+="\tc[{}]=(chunk)co;\n".format(2 * N - 1)
+    return str.replace("XXX",base)
+
+def inline_redc2(N,base) :
+    str=""
+    str+="\tt=d[0]; v[0]=((chunk)t*MC)&BMASK_XXX; t+=(dchunk)v[0]*md[0];  s=0; c=(t>>BASEBITS_XXX);\n\n"
+
+    for k in range(1,N) :
+        str+="\tt=d[{}]+c+s+(dchunk)v[0]*md[{}]".format(k, k)
+        for i in range(k-1,int(k/2),-1) :
+            str+="+(dchunk)(v[{}]-v[{}])*(md[{}]-md[{}])".format(k - i, i, i, k - i)
+        str+="; v[{}]=((chunk)t*MC)&BMASK_XXX; t+=(dchunk)v[{}]*md[0]; ".format(k, k)
+        str+=" dd[{}]=(dchunk)v[{}]*md[{}]; s+=dd[{}]; c=(t>>BASEBITS_XXX); \n".format(k, k, k, k)
+   
+    str+="\n"
+    for k in range(N,2*N-1) :
+        str+="\tt=d[{}]+c+s".format(k)
+        for i in range(N-1,int(k/2),-1) :
+            str+="+(dchunk)(v[{}]-v[{}])*(md[{}]-md[{}])".format(k - i, i, i, k - i)
+        str+="; a[{}]=(chunk)t&BMASK_XXX;  s-=dd[{}]; c=(t>>BASEBITS_XXX); \n".format(k - N, k - N + 1)
+ 
+    str+="\ta[{}]=d[{}]+((chunk)c&BMASK_XXX);\n".format(N-1,2*N-1)
+    return str.replace("XXX",base)
+
+def inline_redc1(N,base) :
+    str=""
+
+    str+="\tt = d[0];\n"
+    str+="\tv[0] = ((chunk)t * MC)&BMASK_XXX;\n"
+    str+="\tt += (dchunk)v[0] * md[0];\n"
+    str+="\tt = (t >> BASEBITS_XXX) + d[1];\n"
+   
+    for i in range(1,N) :
+        k=1
+        str+="\tt += (dchunk)v[0] * md[{}] ".format(i)
+        while k<i :
+            str+="+ (dchunk)v[{}]*md[{}]".format(k,i-k) 
+            k+=1
+        str+="; v[{}] = ((chunk)t * MC)&BMASK_XXX; ".format(i)
+        str+="t += (dchunk)v[{}] * md[0]; ".format(i)
+        str+="t = (t >> BASEBITS_XXX) + d[{}];\n".format(i+1)
+
+    for i in range(N,2*N-1) :
+        k=i-(N-1)
+        str+="\tt=t "
+        while k<=N-1 :
+            str+="+ (dchunk)v[{}]*md[{}] ".format(k,i-k)
+            k+=1
+        str+="; a[{}] = (chunk)t & BMASK_XXX; ".format(i-N)
+        str+="t = (t >> BASEBITS_XXX) + d[{}];\n".format(i+1)
+   
+    str+="\ta[{}] = (chunk)t & BMASK_XXX;\n".format(N-1)
+    return str.replace("XXX",base)
 
 
 def replace(namefile,oldtext,newtext):
-	f = open(namefile,'r')
-	filedata = f.read()
-	f.close()
+    f = open(namefile,'r')
+    filedata = f.read()
+    f.close()
 
-	newdata = filedata.replace(oldtext,newtext)
+    newdata = filedata.replace(oldtext,newtext)
 
-	f = open(namefile,'w')
-	f.write(newdata)
-	f.close()
+    f = open(namefile,'w')
+    f.write(newdata)
+    f.close()
 
 
 def rsaset(tb,tff,base,ml) :
 
-	itb=int(tb)
-	inb=int(itb/8)
-	nb=str(inb)
+    itb=int(tb)
+    inb=int(itb/8)
+    nb=str(inb)
+    ib=int(base)
+    inb=int(nb)
+ 
+    nlen=(1+((8*inb-1)//ib))
 
-	bd=tb+"_"+base
-	fnameh="config_big_"+bd+".h"
-	os.system(copytext+" config_big.h "+fnameh)
-	replace(fnameh,"XXX",bd)
-	replace(fnameh,"@NB@",nb)
-	replace(fnameh,"@BASE@",base)
+    bd=tb+"_"+base
+    fnameh="config_big_"+bd+".h"
+    os.system(copytext+" config_big.h "+fnameh)
+    replace(fnameh,"XXX",bd)
+    replace(fnameh,"@NB@",nb)
+    replace(fnameh,"@BASE@",base)
 
-	fnameh="config_ff_"+tff+".h"
-	os.system(copytext+" config_ff.h "+fnameh)
-	replace(fnameh,"XXX",bd)
-	replace(fnameh,"WWW",tff)
-	replace(fnameh,"@ML@",ml);
+    fnameh="config_ff_"+tff+".h"
+    os.system(copytext+" config_ff.h "+fnameh)
+    replace(fnameh,"XXX",bd)
+    replace(fnameh,"WWW",tff)
+    replace(fnameh,"@ML@",ml);
 
-	fnamec="big_"+bd+".c"
-	fnameh="big_"+bd+".h"
+    fnamec="big_"+bd+".c"
+    fnameh="big_"+bd+".h"
 
-	os.system(copytext+" big.c "+fnamec)
-	os.system(copytext+" big.h "+fnameh)
+    os.system(copytext+" big.c "+fnamec)
+    os.system(copytext+" big.h "+fnameh)
 
-	replace(fnamec,"XXX",bd)
-	replace(fnameh,"XXX",bd)
-	os.system("gcc -O3 -std=c99 -c "+fnamec)
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"XXX",bd)
 
-	fnamec="ff_"+tff+".c"
-	fnameh="ff_"+tff+".h"
+    replace(fnamec,"INLINE_MUL",inline_mul2(nlen,bd))
+    replace(fnamec,"INLINE_SQR",inline_sqr(nlen,bd))
+    replace(fnamec,"INLINE_REDC",inline_redc2(nlen,bd))
 
-	os.system(copytext+" ff.c "+fnamec)
-	os.system(copytext+" ff.h "+fnameh)
+    os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-	replace(fnamec,"WWW",tff)
-	replace(fnamec,"XXX",bd)
-	replace(fnameh,"WWW",tff)
-	replace(fnameh,"XXX",bd)
-	os.system("gcc -O3 -std=c99 -c "+fnamec)
+    fnamec="ff_"+tff+".c"
+    fnameh="ff_"+tff+".h"
 
-	fnamec="rsa_"+tff+".c"
-	fnameh="rsa_"+tff+".h"
+    os.system(copytext+" ff.c "+fnamec)
+    os.system(copytext+" ff.h "+fnameh)
 
-	os.system(copytext+" rsa.c "+fnamec)
-	os.system(copytext+" rsa.h "+fnameh)
+    replace(fnamec,"WWW",tff)
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"WWW",tff)
+    replace(fnameh,"XXX",bd)
+    os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-	replace(fnamec,"WWW",tff)
-	replace(fnamec,"XXX",bd)
-	replace(fnameh,"WWW",tff)
-	replace(fnameh,"XXX",bd)
-	os.system("gcc -O3 -std=c99 -c "+fnamec)
+    fnamec="rsa_"+tff+".c"
+    fnameh="rsa_"+tff+".h"
+
+    os.system(copytext+" rsa.c "+fnamec)
+    os.system(copytext+" rsa.h "+fnameh)
+
+    replace(fnamec,"WWW",tff)
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"WWW",tff)
+    replace(fnameh,"XXX",bd)
+    os.system("gcc -O3 -std=c99 -c "+fnamec)
 
 def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
-	inbt=int(nbt)
-	itb=int(inbt+(8-inbt%8)%8)
-	inb=int(itb/8)
-	tb=str(itb)
-	nb=str(inb)
+    inbt=int(nbt)
+    itb=int(inbt+(8-inbt%8)%8)
+    inb=int(itb/8)
+    tb=str(itb)
+    nb=str(inb)
 
-	bd=tb+"_"+base
-	fnameh="config_big_"+bd+".h"
-	os.system(copytext+" config_big.h "+fnameh)
-	replace(fnameh,"XXX",bd)
-	replace(fnameh,"@NB@",nb)
-	replace(fnameh,"@BASE@",base)
+    bd=tb+"_"+base
+    fnameh="config_big_"+bd+".h"
+    os.system(copytext+" config_big.h "+fnameh)
+    replace(fnameh,"XXX",bd)
+    replace(fnameh,"@NB@",nb)
+    replace(fnameh,"@BASE@",base)
 
-	fnameh="config_field_"+tf+".h"
-	os.system(copytext+" config_field.h "+fnameh)
-	replace(fnameh,"XXX",bd)
-	replace(fnameh,"YYY",tf)
-	replace(fnameh,"@NBT@",nbt)
-	replace(fnameh,"@M8@",m8)
-	replace(fnameh,"@MT@",mt)
+    fnameh="config_field_"+tf+".h"
+    os.system(copytext+" config_field.h "+fnameh)
+    replace(fnameh,"XXX",bd)
+    replace(fnameh,"YYY",tf)
+    replace(fnameh,"@NBT@",nbt)
+    replace(fnameh,"@M8@",m8)
+    replace(fnameh,"@MT@",mt)
 
-	itw=int(qi)%10
-	replace(fnameh,"@QI@",str(itw))
-	if int(qi)//10 > 0 :
-		replace(fnameh,"@TW@","POSITOWER")
-	else :
-		replace(fnameh,"@TW@","NEGATOWER")
+    itw=int(qi)%10
+    replace(fnameh,"@QI@",str(itw))
+    if int(qi)//10 > 0 :
+        replace(fnameh,"@TW@","POSITOWER")
+    else :
+        replace(fnameh,"@TW@","NEGATOWER")
 
-	ib=int(base)
-	inb=int(nb)
-	inbt=int(nbt)
-	sh=ib*(1+((8*inb-1)//ib))-inbt
-	if sh > 6 :
-		sh=6
-	replace(fnameh,"@SH@",str(sh))
+    ib=int(base)
+    inb=int(nb)
+    inbt=int(nbt)
+    nlen=(1+((8*inb-1)//ib))
+    sh=ib*nlen-inbt
 
-	fnameh="config_curve_"+tc+".h"	
-	os.system(copytext+" config_curve.h "+fnameh)
-	replace(fnameh,"XXX",bd)
-	replace(fnameh,"YYY",tf)
-	replace(fnameh,"ZZZ",tc)
-	replace(fnameh,"@CT@",ct)
-	replace(fnameh,"@PF@",pf)
+    if sh > 6 :
+        sh=6
+    replace(fnameh,"@SH@",str(sh))
 
-	replace(fnameh,"@ST@",stw)
-	replace(fnameh,"@SX@",sx)
-	replace(fnameh,"@CS@",cs)
-	replace(fnameh,"@AB@",ab)
-	replace(fnameh,"@G2@",g2)
+    fnameh="config_curve_"+tc+".h"    
+    os.system(copytext+" config_curve.h "+fnameh)
+    replace(fnameh,"XXX",bd)
+    replace(fnameh,"YYY",tf)
+    replace(fnameh,"ZZZ",tc)
+    replace(fnameh,"@CT@",ct)
+    replace(fnameh,"@PF@",pf)
 
-	fnamec="big_"+bd+".c"
-	fnameh="big_"+bd+".h"
+    replace(fnameh,"@ST@",stw)
+    replace(fnameh,"@SX@",sx)
+    replace(fnameh,"@CS@",cs)
+    replace(fnameh,"@AB@",ab)
+    replace(fnameh,"@G2@",g2)
 
-	os.system(copytext+" big.c "+fnamec)
-	os.system(copytext+" big.h "+fnameh)
+    fnamec="big_"+bd+".c"
+    fnameh="big_"+bd+".h"
 
-	replace(fnamec,"XXX",bd)
-	replace(fnameh,"XXX",bd)
-	os.system("gcc -O3 -std=c99 -c "+fnamec)
+    os.system(copytext+" big.c "+fnamec)
+    os.system(copytext+" big.h "+fnameh)
 
-	fnamec="fp_"+tf+".c"
-	fnameh="fp_"+tf+".h"
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"XXX",bd)
 
-	os.system(copytext+" fp.c "+fnamec)
-	os.system(copytext+" fp.h "+fnameh)
+    replace(fnamec,"INLINE_MUL",inline_mul2(nlen,bd))    #for some architectures (e.g ARM M4) inline_mul1() and inline_redc1() may be faster
+    replace(fnamec,"INLINE_SQR",inline_sqr(nlen,bd))
+    replace(fnamec,"INLINE_REDC",inline_redc2(nlen,bd))
 
-	replace(fnamec,"YYY",tf)
-	replace(fnamec,"XXX",bd)
-	replace(fnameh,"YYY",tf)
-	replace(fnameh,"XXX",bd)
-	os.system("gcc -O3 -std=c99 -c "+fnamec)
+    os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-	os.system("gcc -O3 -std=c99 -c rom_field_"+tf+".c");
+    fnamec="fp_"+tf+".c"
+    fnameh="fp_"+tf+".h"
 
-	fnamec="ecp_"+tc+".c"
-	fnameh="ecp_"+tc+".h"
+    os.system(copytext+" fp.c "+fnamec)
+    os.system(copytext+" fp.h "+fnameh)
 
-	os.system(copytext+" ecp.c "+fnamec)
-	os.system(copytext+" ecp.h "+fnameh)
+    replace(fnamec,"YYY",tf)
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"YYY",tf)
+    replace(fnameh,"XXX",bd)
+    os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-	replace(fnamec,"ZZZ",tc)
-	replace(fnamec,"YYY",tf)
-	replace(fnamec,"XXX",bd)
-	replace(fnameh,"ZZZ",tc)
-	replace(fnameh,"YYY",tf)
-	replace(fnameh,"XXX",bd)
-	os.system("gcc -O3 -std=c99 -c "+fnamec)
+    os.system("gcc -O3 -std=c99 -c rom_field_"+tf+".c");
 
-	fnamec="ecdh_"+tc+".c"
-	fnameh="ecdh_"+tc+".h"
+    fnamec="ecp_"+tc+".c"
+    fnameh="ecp_"+tc+".h"
 
-	os.system(copytext+" ecdh.c "+fnamec)
-	os.system(copytext+" ecdh.h "+fnameh)
+    os.system(copytext+" ecp.c "+fnamec)
+    os.system(copytext+" ecp.h "+fnameh)
 
-	replace(fnamec,"ZZZ",tc)
-	replace(fnamec,"YYY",tf)
-	replace(fnamec,"XXX",bd)
-	replace(fnameh,"ZZZ",tc)
-	replace(fnameh,"YYY",tf)
-	replace(fnameh,"XXX",bd)
-	os.system("gcc -O3 -std=c99 -c "+fnamec)
+    replace(fnamec,"ZZZ",tc)
+    replace(fnamec,"YYY",tf)
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"ZZZ",tc)
+    replace(fnameh,"YYY",tf)
+    replace(fnameh,"XXX",bd)
+    os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-	os.system("gcc -O3 -std=c99 -c rom_curve_"+tc+".c");
+    fnamec="ecdh_"+tc+".c"
+    fnameh="ecdh_"+tc+".h"
 
-	if pf != "NOT_PF" :
-		fnamec="fp2_"+tf+".c"
-		fnameh="fp2_"+tf+".h"
+    os.system(copytext+" ecdh.c "+fnamec)
+    os.system(copytext+" ecdh.h "+fnameh)
 
-		os.system(copytext+" fp2.c "+fnamec)
-		os.system(copytext+" fp2.h "+fnameh)
-		replace(fnamec,"YYY",tf)
-		replace(fnamec,"XXX",bd)
-		replace(fnameh,"YYY",tf)
-		replace(fnameh,"XXX",bd)
-		os.system("gcc -O3 -std=c99 -c "+fnamec)
+    replace(fnamec,"ZZZ",tc)
+    replace(fnamec,"YYY",tf)
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"ZZZ",tc)
+    replace(fnameh,"YYY",tf)
+    replace(fnameh,"XXX",bd)
+    os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-		fnamec="fp4_"+tf+".c"
-		fnameh="fp4_"+tf+".h"
+    os.system("gcc -O3 -std=c99 -c rom_curve_"+tc+".c");
 
-		os.system(copytext+" fp4.c "+fnamec)
-		os.system(copytext+" fp4.h "+fnameh)
-		replace(fnamec,"YYY",tf)
-		replace(fnamec,"XXX",bd)
-		replace(fnamec,"ZZZ",tc)
-		replace(fnameh,"YYY",tf)
-		replace(fnameh,"XXX",bd)
-		replace(fnameh,"ZZZ",tc)
-		os.system("gcc -O3 -std=c99 -c "+fnamec)
+    if pf != "NOT_PF" :
+        fnamec="fp2_"+tf+".c"
+        fnameh="fp2_"+tf+".h"
 
-		fnamec="fp12_"+tf+".c"
-		fnameh="fp12_"+tf+".h"
+        os.system(copytext+" fp2.c "+fnamec)
+        os.system(copytext+" fp2.h "+fnameh)
+        replace(fnamec,"YYY",tf)
+        replace(fnamec,"XXX",bd)
+        replace(fnameh,"YYY",tf)
+        replace(fnameh,"XXX",bd)
+        os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-		os.system(copytext+" fp12.c "+fnamec)
-		os.system(copytext+" fp12.h "+fnameh)
-		replace(fnamec,"YYY",tf)
-		replace(fnamec,"XXX",bd)
-		replace(fnamec,"ZZZ",tc)
-		replace(fnameh,"YYY",tf)
-		replace(fnameh,"XXX",bd)
-		replace(fnameh,"ZZZ",tc)
-		os.system("gcc -O3 -std=c99 -c "+fnamec)
+        fnamec="fp4_"+tf+".c"
+        fnameh="fp4_"+tf+".h"
 
-		fnamec="ecp2_"+tc+".c"
-		fnameh="ecp2_"+tc+".h"
+        os.system(copytext+" fp4.c "+fnamec)
+        os.system(copytext+" fp4.h "+fnameh)
+        replace(fnamec,"YYY",tf)
+        replace(fnamec,"XXX",bd)
+        replace(fnamec,"ZZZ",tc)
+        replace(fnameh,"YYY",tf)
+        replace(fnameh,"XXX",bd)
+        replace(fnameh,"ZZZ",tc)
+        os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-		os.system(copytext+" ecp2.c "+fnamec)
-		os.system(copytext+" ecp2.h "+fnameh)
-		replace(fnamec,"ZZZ",tc)
-		replace(fnamec,"YYY",tf)
-		replace(fnamec,"XXX",bd)
-		replace(fnameh,"ZZZ",tc)
-		replace(fnameh,"YYY",tf)
-		replace(fnameh,"XXX",bd)
-		os.system("gcc -O3 -std=c99 -c "+fnamec)
+        fnamec="fp12_"+tf+".c"
+        fnameh="fp12_"+tf+".h"
 
-		fnamec="pair_"+tc+".c"
-		fnameh="pair_"+tc+".h"
+        os.system(copytext+" fp12.c "+fnamec)
+        os.system(copytext+" fp12.h "+fnameh)
+        replace(fnamec,"YYY",tf)
+        replace(fnamec,"XXX",bd)
+        replace(fnamec,"ZZZ",tc)
+        replace(fnameh,"YYY",tf)
+        replace(fnameh,"XXX",bd)
+        replace(fnameh,"ZZZ",tc)
+        os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-		os.system(copytext+" pair.c "+fnamec)
-		os.system(copytext+" pair.h "+fnameh)
-		replace(fnamec,"ZZZ",tc)
-		replace(fnamec,"YYY",tf)
-		replace(fnamec,"XXX",bd)
-		replace(fnameh,"ZZZ",tc)
-		replace(fnameh,"YYY",tf)
-		replace(fnameh,"XXX",bd)
-		os.system("gcc -O3 -std=c99 -c "+fnamec)
+        fnamec="ecp2_"+tc+".c"
+        fnameh="ecp2_"+tc+".h"
 
-		fnamec="mpin_"+tc+".c"
-		fnameh="mpin_"+tc+".h"
+        os.system(copytext+" ecp2.c "+fnamec)
+        os.system(copytext+" ecp2.h "+fnameh)
+        replace(fnamec,"ZZZ",tc)
+        replace(fnamec,"YYY",tf)
+        replace(fnamec,"XXX",bd)
+        replace(fnameh,"ZZZ",tc)
+        replace(fnameh,"YYY",tf)
+        replace(fnameh,"XXX",bd)
+        os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-		os.system(copytext+" mpin.c "+fnamec)
-		os.system(copytext+" mpin.h "+fnameh)
-		replace(fnamec,"ZZZ",tc)
-		replace(fnamec,"YYY",tf)
-		replace(fnamec,"XXX",bd)
-		replace(fnameh,"ZZZ",tc)
-		replace(fnameh,"YYY",tf)
-		replace(fnameh,"XXX",bd)
-		os.system("gcc -O3 -std=c99 -c "+fnamec)
+        fnamec="pair_"+tc+".c"
+        fnameh="pair_"+tc+".h"
 
-		fnamec="bls_"+tc+".c"
-		fnameh="bls_"+tc+".h"
+        os.system(copytext+" pair.c "+fnamec)
+        os.system(copytext+" pair.h "+fnameh)
+        replace(fnamec,"ZZZ",tc)
+        replace(fnamec,"YYY",tf)
+        replace(fnamec,"XXX",bd)
+        replace(fnameh,"ZZZ",tc)
+        replace(fnameh,"YYY",tf)
+        replace(fnameh,"XXX",bd)
+        os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-		os.system(copytext+" bls.c "+fnamec)
-		os.system(copytext+" bls.h "+fnameh)
-		replace(fnamec,"ZZZ",tc)
-		replace(fnamec,"YYY",tf)
-		replace(fnamec,"XXX",bd)
-		replace(fnameh,"ZZZ",tc)
-		replace(fnameh,"YYY",tf)
-		replace(fnameh,"XXX",bd)
-		os.system("gcc -O3 -std=c99 -c "+fnamec)
+        fnamec="mpin_"+tc+".c"
+        fnameh="mpin_"+tc+".h"
+
+        os.system(copytext+" mpin.c "+fnamec)
+        os.system(copytext+" mpin.h "+fnameh)
+        replace(fnamec,"ZZZ",tc)
+        replace(fnamec,"YYY",tf)
+        replace(fnamec,"XXX",bd)
+        replace(fnameh,"ZZZ",tc)
+        replace(fnameh,"YYY",tf)
+        replace(fnameh,"XXX",bd)
+        os.system("gcc -O3 -std=c99 -c "+fnamec)
+
+        fnamec="bls_"+tc+".c"
+        fnameh="bls_"+tc+".h"
+
+        os.system(copytext+" bls.c "+fnamec)
+        os.system(copytext+" bls.h "+fnameh)
+        replace(fnamec,"ZZZ",tc)
+        replace(fnamec,"YYY",tf)
+        replace(fnamec,"XXX",bd)
+        replace(fnameh,"ZZZ",tc)
+        replace(fnameh,"YYY",tf)
+        replace(fnameh,"XXX",bd)
+        os.system("gcc -O3 -std=c99 -c "+fnamec)
 
 replace("arch.h","@WL@","16")
 print("Elliptic Curves")
@@ -303,23 +444,23 @@ pfcurve_selected=False
 rsa_selected=False
 
 while ptr<max:
-	if testing :
-		x=int(input())
-	else :
-		x=int(input("Choose a Scheme to support - 0 to finish: "))
-	if x == 0:
-		break
-#	print("Choice= ",x)
-	already=False
-	for i in range(0,ptr):
-		if x==selection[i]:
-			already=True
-			break
-	if already:
-		continue
-	
-	selection.append(x)
-	ptr=ptr+1
+    if testing :
+        x=int(input())
+    else :
+        x=int(input("Choose a Scheme to support - 0 to finish: "))
+    if x == 0:
+        break
+#    print("Choice= ",x)
+    already=False
+    for i in range(0,ptr):
+        if x==selection[i]:
+            already=True
+            break
+    if already:
+        continue
+    
+    selection.append(x)
+    ptr=ptr+1
 
 # curveset(modulus_bits,field,curve,bits_in_base,modulus_mod_8,modulus_type,curve_type,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
 # for each curve give names for field and curve. In many cases the latter two will be the same. 
@@ -336,24 +477,24 @@ while ptr<max:
 # g2_table size is number of entries in precomputed table 
 # curve security is AES equivalent, rounded up.
 
-	if x==1:
-		curveset("255","F25519","ED25519","13","2","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
-		curve_selected=True
-	if x==2:
-		curveset("256","F256PME","NUMS256E","13","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
-		curve_selected=True
+    if x==1:
+        curveset("255","F25519","ED25519","13","2","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
+        curve_selected=True
+    if x==2:
+        curveset("256","F256PME","NUMS256E","13","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
+        curve_selected=True
 
-	if x==3:
-		curveset("160","SECP160R1","SECP160R1","13","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
-		curve_selected=True
+    if x==3:
+        curveset("160","SECP160R1","SECP160R1","13","1","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
+        curve_selected=True
 
 
-	if x==4:
-		curveset("254","BN254","BN254","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
-		pfcurve_selected=True
-	if x==5:
-		curveset("254","BN254CX","BN254CX","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
-		pfcurve_selected=True
+    if x==4:
+        curveset("254","BN254","BN254","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
+        pfcurve_selected=True
+    if x==5:
+        curveset("254","BN254CX","BN254CX","13","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
+        pfcurve_selected=True
 
 # rsaset(big,ring,bit_bits_in_base,multiplier)
 # for each choice give distinct names for "big" and "ring".
@@ -364,11 +505,11 @@ while ptr<max:
 
 
 # There are choices here, different ways of getting the same result, but some faster than others
-	if x==6:
-		#256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
-		#512 is faster.. but best is 1024
-		rsaset("256","2048","13","8")
-		rsa_selected=True
+    if x==6:
+        #256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
+        #512 is faster.. but best is 1024
+        rsaset("256","2048","13","8")
+        rsa_selected=True
 
 
 os.system(deltext+" big.*")
@@ -401,36 +542,36 @@ os.system("gcc -O3 -std=c99 -c gcm.c")
 os.system("gcc -O3 -std=c99 -c newhope.c")
 
 if sys.platform.startswith("win") :
-	os.system("for %i in (*.o) do @echo %~nxi >> f.list")
-	os.system("ar rc core.a @f.list")
-	os.system(deltext+" f.list")
+    os.system("for %i in (*.o) do @echo %~nxi >> f.list")
+    os.system("ar rc core.a @f.list")
+    os.system(deltext+" f.list")
 
 else :
-	os.system("ar rc core.a *.o")
+    os.system("ar rc core.a *.o")
 
 os.system(deltext+" *.o")
 
 if testing :
-	if sys.platform.startswith("win") :
-		os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc.exe")
-		os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin.exe")
-		os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls.exe")
-		os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all.exe")
-		os.system("testecc")
-		os.system("testmpin < pins.txt")
-		os.system("testbls")
-		os.system("benchtest_all")
-	else :
-		os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc")
-		os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin")
-		os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls")
-		os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all")
-		os.system("./testecc")
-		os.system("./testmpin < pins.txt")
-		os.system("./testbls")
-		os.system("./benchtest_all")
+    if sys.platform.startswith("win") :
+        os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc.exe")
+        os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin.exe")
+        os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls.exe")
+        os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all.exe")
+        os.system("testecc")
+        os.system("testmpin < pins.txt")
+        os.system("testbls")
+        os.system("benchtest_all")
+    else :
+        os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc")
+        os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin")
+        os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls")
+        os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all")
+        os.system("./testecc")
+        os.system("./testmpin < pins.txt")
+        os.system("./testbls")
+        os.system("./benchtest_all")
 
-#print("Your section was ");	
+#print("Your section was ");    
 #for i in range(0,ptr):
-#	print (selection[i])
+#    print (selection[i])
 
