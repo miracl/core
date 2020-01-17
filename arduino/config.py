@@ -763,11 +763,11 @@ while ptr<max:
         curveset("254","BN254CX","BN254CX","28","1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
         pfcurve_selected=True
     if x==27:
-        curveset("383","BLS12383","BLS12383","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128")
+        curveset("383","BLS12383","BLS12383","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS_CURVE","M_TYPE","POSITIVEX","68","65","128")
         pfcurve_selected=True
 
     if x==28:
-        curveset("381","BLS12381","BLS12381","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128")
+        curveset("381","BLS12381","BLS12381","29","1","NOT_SPECIAL","0","WEIERSTRASS","BLS_CURVE","M_TYPE","NEGATIVEX","69","65","128")
         pfcurve_selected=True
 
 
@@ -779,7 +779,7 @@ while ptr<max:
         pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
     if x==31:
-        curveset("461","BLS12461","BLS12461","28","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","79","78","128")
+        curveset("461","BLS12461","BLS12461","28","1","NOT_SPECIAL","0","WEIERSTRASS","BLS_CURVE","M_TYPE","NEGATIVEX","79","78","128")
         pfcurve_selected=True
 
     if x==32:
@@ -829,7 +829,7 @@ while ptr<max:
 os.system(deltext+" test.txt")
 os.system(deltext+" test16.txt")
 os.system(deltext+" pins.txt")
-os.system(deltext+" fast*.*")
+#os.system(deltext+" fast*.*")
 os.system(deltext+" big.*")
 os.system(deltext+" fp.*")
 os.system(deltext+" ecp.*")
@@ -906,6 +906,7 @@ if pfcurve_selected :
     os.system("mkdir examples"+slashtext+"timepbc")
     os.system(copytext+" timepbc.ino "+"examples"+slashtext+"timepbc"+slashtext+"timepbc.ino")
     os.system(deltext+ " ecdh*.* ")
+    os.system(deltext+ " hpke*.* ")
 os.system(deltext+" testbls.ino")
 os.system(deltext+" timepbc.ino")
 
