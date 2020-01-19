@@ -576,7 +576,16 @@ void BIG_XXX_mul(DBIG_XXX c, BIG_XXX a, BIG_XXX b)
     /* faster psuedo-Karatsuba method */
 #ifdef UNWOUND
 
-    INLINE_MUL
+#ifdef USE_KARATSUBA
+
+    INLINE_MUL2
+
+#else
+
+    INLINE_MUL1
+
+#endif
+
 
 #else
     for (i = 0; i < NLEN_XXX; i++)
@@ -767,7 +776,16 @@ void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d)
 
 #ifdef UNWOUND
 
-    INLINE_REDC
+#ifdef USE_KARATSUBA
+
+    INLINE_REDC2
+
+#else
+
+    INLINE_REDC1
+
+#endif
+
 
 #else
 

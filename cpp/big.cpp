@@ -579,10 +579,20 @@ void XXX::BIG_mul(DBIG c, BIG a, BIG b)
     /* faster psuedo-Karatsuba method */
 #ifdef UNWOUND
 
-    INLINE_MUL
+#ifdef USE_KARATSUBA
+
+    INLINE_MUL2
 
 #else
-/*
+
+    INLINE_MUL1
+
+#endif
+
+#else
+
+#ifndef USE_KARATSUBA
+
     t=(dchunk)a[0]*b[0];
     c[0]=(chunk)t & BMASK_XXX;
     t = t >> BASEBITS_XXX;
@@ -603,7 +613,7 @@ void XXX::BIG_mul(DBIG c, BIG a, BIG b)
     }
 
     c[2 * NLEN_XXX - 1] = (chunk)t;
-*/
+#else
 
     for (i = 0; i < NLEN_XXX; i++)
         d[i] = (dchunk)a[i] * b[i];
@@ -631,7 +641,7 @@ void XXX::BIG_mul(DBIG c, BIG a, BIG b)
         t = t >> BASEBITS_XXX;
     }
     c[2 * NLEN_XXX - 1] = (chunk)t;
-
+#endif
 #endif
 
 #else
@@ -776,10 +786,19 @@ void XXX::BIG_monty(BIG a, BIG md, chunk MC, DBIG d)
 
 #ifdef UNWOUND
 
-    INLINE_REDC
+#ifdef USE_KARATSUBA
+
+    INLINE_REDC2
 
 #else
-/*
+
+    INLINE_REDC1
+
+#endif
+
+#else
+
+#ifndef USE_KARATSUBA 
     t = d[0];
     v[0] = ((chunk)t * MC)&BMASK_XXX;
     t += (dchunk)v[0] * md[0];
@@ -802,7 +821,7 @@ void XXX::BIG_monty(BIG a, BIG md, chunk MC, DBIG d)
         t = (t >> BASEBITS_XXX) + d[i + 1];
     }
     a[NLEN_XXX - 1] = (chunk)t & BMASK_XXX;
-*/
+#else
 
     t = d[0];
     v[0] = ((chunk)t * MC)&BMASK_XXX;
@@ -830,6 +849,7 @@ void XXX::BIG_monty(BIG a, BIG md, chunk MC, DBIG d)
         s -= dd[k - NLEN_XXX + 1];
     }
     a[NLEN_XXX - 1] = (chunk)t & BMASK_XXX;
+#endif
 
 #endif
 

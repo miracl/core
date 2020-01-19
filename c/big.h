@@ -49,6 +49,8 @@
 
 /* could comment this out if code size is a major issue */
 #define UNWOUND
+/* Normally recommended, but may not be optimal for some architectures, for example 32-bit ARM M4 */
+#define USE_KARATSUBA
 
 #define BIGBITS_XXX (8*MODBYTES_XXX) /**< Length in bits */
 #define NLEN_XXX (1+((8*MODBYTES_XXX-1)/BASEBITS_XXX)) /**< length in bytes */

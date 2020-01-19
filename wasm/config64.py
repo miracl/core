@@ -183,9 +183,12 @@ def rsaset(tb,tff,base,ml) :
     replace(fnamec,"XXX",bd)
     replace(fnameh,"XXX",bd)
 
-    replace(fnamec,"INLINE_MUL",inline_mul2(nlen,bd))
+    replace(fnamec,"INLINE_MUL1",inline_mul1(nlen,bd))
+    replace(fnamec,"INLINE_MUL2",inline_mul2(nlen,bd))
     replace(fnamec,"INLINE_SQR",inline_sqr(nlen,bd))
-    replace(fnamec,"INLINE_REDC",inline_redc2(nlen,bd))
+    replace(fnamec,"INLINE_REDC1",inline_redc1(nlen,bd))
+    replace(fnamec,"INLINE_REDC2",inline_redc2(nlen,bd))
+
 
     os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 
@@ -278,9 +281,11 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
     replace(fnamec,"XXX",bd)
     replace(fnameh,"XXX",bd)
 
-    replace(fnamec,"INLINE_MUL",inline_mul2(nlen,bd))
+    replace(fnamec,"INLINE_MUL1",inline_mul1(nlen,bd))
+    replace(fnamec,"INLINE_MUL2",inline_mul2(nlen,bd))
     replace(fnamec,"INLINE_SQR",inline_sqr(nlen,bd))
-    replace(fnamec,"INLINE_REDC",inline_redc2(nlen,bd))
+    replace(fnamec,"INLINE_REDC1",inline_redc1(nlen,bd))
+    replace(fnamec,"INLINE_REDC2",inline_redc2(nlen,bd))
 
     os.system("emcc -O2 -c "+fnamec+" -o "+fnamebc)
 

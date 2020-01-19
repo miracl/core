@@ -4,7 +4,7 @@ Example implementation for Arduino MKR1000 board (48MHz ARM Cortex M0 IoT
 board). Also works with other compatible Arduino boards, for example Fishino
 Piranha (5-120MHz MIPS32 core).
 
-First buy the board (approx $50), and install free Arduino IDE on your PC.
+First buy the board (approx $30), and install free Arduino IDE on your PC.
 Connect the board to the PC with simple USB cable.
 
 # Installation and Testing
