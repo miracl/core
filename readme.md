@@ -26,7 +26,8 @@ MIRACL Core features:-
 - Performance and security improvements
 - New HMAC message authentication module (KDFs, HMAC, HKDF_Extract/Expand)
 - Improved side-channel resistance
-- Deterministic hashing to curve points (Elligator, SWU)
+- Deterministic hashing to curve points map2point (Elligator, SWU)
+- Probabilistic hashing to curve points hap2point (hunt-and-peck)
 - Point compression in G2
 - Demonstrated support for low-powered IoT processor nodes (ARM Cortex-M0/M4, MIPS32, RISC-V, ESP32)
 - Emerging-standards-compliant implementation of BLS signature

@@ -23,11 +23,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   You can be released from the requirements of the license by purchasing     
+   You can be released from the requirements of the license by purchasing
    a commercial license. Buying such a license is mandatory as soon as you
    develop commercial activities involving the MIRACL Core Crypto SDK
    without disclosing the source code of your own applications, or shipping
-   the MIRACL Core Crypto SDK with a closed source product.     
+   the MIRACL Core Crypto SDK with a closed source product.
 */
 
 //
@@ -52,9 +52,9 @@ public struct BLS192
     static public let BGS=Int(CONFIG_BIG.MODBYTES)
     static let BLS_OK:Int = 0
     static let BLS_FAIL:Int = -1
-    
+
     static var G2_TAB=[FP8]()
-    
+
     static func ceil(_ a: Int,_ b:Int) -> Int {
         return (((a)-1)/(b)+1)
     }
@@ -88,8 +88,8 @@ public struct BLS192
         let u=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](dst.utf8),M,0)
         let u1=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](dst.utf8),M,1)
 
-        var P=ECP.hashit(u)
-        let P1=ECP.hashit(u1)
+        var P=ECP.map2point(u)
+        let P1=ECP.map2point(u1)
         P.add(P1)
         P.cfp()
         P.affine()
@@ -116,13 +116,13 @@ public struct BLS192
 
         let PRK=HMAC.HKDF_Extract(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](salt.utf8),IKM)
         let OKM=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,PRK,[UInt8](info.utf8))
-        
+
         var dx = DBIG.fromBytes(OKM)
         let s = dx.mod(r)
 
-        s.toBytes(&S)      
-        G=PAIR192.G2mul(G,s) 
-        G.toBytes(&W,true)       
+        s.toBytes(&S)
+        G=PAIR192.G2mul(G,s)
+        G.toBytes(&W,true)
         return BLS_OK
     }
 
@@ -131,7 +131,7 @@ public struct BLS192
     {
         var D=bls_hash_to_point(M)
         let s=BIG.fromBytes(S)
-        D=PAIR192.G1mul(D,s)         
+        D=PAIR192.G1mul(D,s)
         D.toBytes(&SIG,true)
         return BLS_OK
     }
@@ -140,15 +140,15 @@ public struct BLS192
 
     static public func core_verify(_ SIG: [UInt8],_ M: [UInt8],_ W: [UInt8]) -> Int
     {
-        let HM=bls_hash_to_point(M)     
+        let HM=bls_hash_to_point(M)
 
-        var D=ECP.fromBytes(SIG)  
+        var D=ECP.fromBytes(SIG)
         if !PAIR192.G1member(D) {return BLS_FAIL}
         D.neg()
 
         let PK=ECP4.fromBytes(W)
 
-// Use new multi-pairing mechanism 
+// Use new multi-pairing mechanism
         var r=PAIR192.initmp()
         //PAIR192.another(&r,G,D)
         PAIR192.another_pc(&r,G2_TAB,D)
@@ -159,7 +159,7 @@ public struct BLS192
 //        var v=PAIR192.ate2(G,D,PK,HM)
 
         v=PAIR192.fexp(v)
-    
+
         if v.isunity() {
             return BLS_OK
         } else {
@@ -167,4 +167,3 @@ public struct BLS192
         }
     }
 }
- 

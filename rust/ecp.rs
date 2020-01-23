@@ -1229,7 +1229,29 @@ impl ECP {
         self.copy(&P);
     }
 
-    pub fn hashit(h: &BIG) -> ECP {
+/* Hunt and Peck a BIG to a curve point */
+    #[allow(non_snake_case)]
+    pub fn hap2point(h: &BIG) -> ECP {
+        let mut P: ECP;
+        let mut x =BIG::new_copy(&h);
+        loop {
+            if CURVETYPE != MONTGOMERY {
+                P = ECP::new_bigint(&x, 0);
+            } else {
+                P = ECP::new_big(&x);
+            }
+            x.inc(1);
+            x.norm();
+            if !P.is_infinity() {
+                break;
+            }
+        }
+        return P;
+    }
+
+/* Constant time Map to Point */
+    #[allow(non_snake_case)]
+    pub fn map2point(h: &BIG) -> ECP {
         let mut P = ECP::new();
 
         if CURVETYPE == MONTGOMERY {
@@ -1421,12 +1443,13 @@ impl ECP {
         return P;
     }
 
+/* Map byte string to curve point */
     #[allow(non_snake_case)]
     pub fn mapit(h: &[u8]) -> ECP {
         let q = BIG::new_ints(&rom::MODULUS);
         let mut dx = DBIG::frombytes(h);
         let mut x=dx.dmod(&q);
-        let mut P=ECP::hashit(&mut x);
+        let mut P=ECP::hap2point(&mut x);
         P.cfp();
         return P;
     }

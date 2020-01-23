@@ -786,9 +786,27 @@ var ECP2 = function(ctx) {
         return ((x >> 31) & 1);
     };
 
-/* Deterministic mapping of Fp to point on curve */
-    ECP2.hashit = function(h)
-    { // SWU method
+/* Hunt and Peck a BIG to a curve point */
+    ECP2.hap2point = function(h)
+    { 
+        var one=new ctx.BIG(1);
+        var x=new ctx.BIG(h);
+        var Q,X2;
+        for (;;) {
+            X2 = new ctx.FP2(one, x);
+            Q = new ECP2();
+            Q.setx(X2,0);
+            if (!Q.is_infinity()) break;
+            x.inc(1);
+            x.norm();
+        }
+        return Q;
+    };
+
+/* Constant time Map to Point */
+    ECP2.map2point = function(h)
+    { 
+    // SWU method
         var sgn,ne;
         var W=new ctx.FP2(1);
 
@@ -800,8 +818,8 @@ var ECP2 = function(ctx) {
         var s=new ctx.FP(-3);
         var one=new ctx.FP(1);
 
-		if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.D_TYPE) B.div_ip();
-		if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) B.mul_ip();
+        if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.D_TYPE) B.div_ip();
+        if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) B.mul_ip();
         B.norm();
         sgn=t.sign();
         var w=s.sqrt(null);
@@ -848,7 +866,7 @@ var ECP2 = function(ctx) {
 		var dx=ctx.DBIG.fromBytes(h);
         var x=dx.mod(q);
 		
-		var Q=ECP2.hashit(x);
+		var Q=ECP2.hap2point(x);
 		Q.cfp();
         return Q;
     };

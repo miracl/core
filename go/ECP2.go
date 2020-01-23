@@ -729,8 +729,26 @@ func mul4(Q []*ECP2, u []*BIG) *ECP2 {
 	return P
 }
 
-/* Deterministic mapping of Fp to point on curve */
- func ECP2_hashit(h *BIG) *ECP2 {
+/* Hunt and Peck a BIG to a curve point */
+func ECP2_hap2point(h *BIG) *ECP2 {
+	x := NewBIGcopy(h)
+	one := NewBIGint(1)
+	var X *FP2
+	var Q *ECP2
+	for true {
+		X = NewFP2bigs(one, x)
+		Q = NewECP2fp2(X,0)
+		if !Q.Is_infinity() {
+			break
+		}
+		x.inc(1)
+		x.norm()
+	}
+	return Q
+}
+
+/* Constant time Map to Point */
+ func ECP2_map2point(h *BIG) *ECP2 {
     // SWU method
     W:=NewFP2int(1)
 	B := NewFP2big(NewBIGints(CURVE_B))
@@ -785,7 +803,7 @@ func ECP2_mapit(h []byte) *ECP2 {
 	dx:=DBIG_fromBytes(h);
     x:=dx.mod(q);
 		
-	Q:=ECP2_hashit(x)
+	Q:=ECP2_hap2point(x)
 	Q.Cfp()
     return Q
 }

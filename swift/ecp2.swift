@@ -23,11 +23,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   You can be released from the requirements of the license by purchasing     
+   You can be released from the requirements of the license by purchasing
    a commercial license. Buying such a license is mandatory as soon as you
    develop commercial activities involving the MIRACL Core Crypto SDK
    without disclosing the source code of your own applications, or shipping
-   the MIRACL Core Crypto SDK with a closed source product.     
+   the MIRACL Core Crypto SDK with a closed source product.
 */
 //
 //  ecp2.swift
@@ -42,7 +42,7 @@ public struct ECP2 {
     private var x:FP2
     private var y:FP2
     private var z:FP2
-    
+
     /* Constructor - set self=O */
     init()
     {
@@ -75,7 +75,7 @@ public struct ECP2 {
         y.cmove(Q.y,d);
         z.cmove(Q.z,d);
     }
-    
+
     /* return 1 if b==c, no branching */
     private static func teq(_ b:Int32,_ c:Int32) -> Int
     {
@@ -89,9 +89,9 @@ public struct ECP2 {
         var MP=ECP2()
         let m=b>>31
         var babs=(b^m)-m
-        
+
         babs=(babs-1)/2
-    
+
         cmove(W[0],ECP2.teq(babs,0)) // conditional move
         cmove(W[1],ECP2.teq(babs,1))
         cmove(W[2],ECP2.teq(babs,2))
@@ -100,24 +100,24 @@ public struct ECP2 {
         cmove(W[5],ECP2.teq(babs,5))
         cmove(W[6],ECP2.teq(babs,6))
         cmove(W[7],ECP2.teq(babs,7))
-    
+
         MP.copy(self)
         MP.neg()
         cmove(MP,Int(m&1))
     }
- 
+
     /* Test if P == Q */
     func equals(_ Q:ECP2) -> Bool
     {
-    
-        var a=FP2(x)  
+
+        var a=FP2(x)
         var b=FP2(Q.x)
-        a.mul(Q.z); b.mul(z) 
+        a.mul(Q.z); b.mul(z)
         if !a.equals(b) {return false}
         a.copy(y); a.mul(Q.z)
         b.copy(Q.y); b.mul(z)
         if !a.equals(b) {return false}
-    
+
         return true;
     }
     /* set self=-self */
@@ -135,7 +135,7 @@ public struct ECP2 {
             return
         }
         z.inverse()
-    
+
         x.mul(z); x.reduce()
         y.mul(z); y.reduce()
         z.copy(one)
@@ -204,7 +204,7 @@ public struct ECP2 {
         let RM=Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
         let typ = Int(b[0])
-    
+
         for i in 0 ..< RM {t[i]=b[i+1]}
         var ra=BIG.fromBytes(t);
         for i in 0 ..< RM {t[i]=b[i+RM+1]}
@@ -216,7 +216,7 @@ public struct ECP2 {
             for i in 0 ..< RM {t[i]=b[i+3*RM+1]}
             rb=BIG.fromBytes(t)
             let ry=FP2(ra,rb)
-    
+
             return ECP2(rx,ry)
         } else {
             return ECP2(rx,typ&1)
@@ -230,7 +230,7 @@ public struct ECP2 {
         W.affine()
         return "("+W.x.toString()+","+W.y.toString()+")"
     }
-    
+
 /* Calculate RHS of twisted curve equation x^3+B/i */
     static func RHS(_ x:FP2) -> FP2
     {
@@ -247,7 +247,7 @@ public struct ECP2 {
         }
         r.mul(x)
         r.add(b)
-    
+
         r.reduce()
         return r
     }
@@ -281,7 +281,7 @@ public struct ECP2 {
         }
         else {inf()}
     }
-    
+
     /* this+=this */
     @discardableResult mutating func dbl() -> Int
     {
@@ -290,47 +290,47 @@ public struct ECP2 {
             inf();
             return -1;
         }
-    
+
         var iy=FP2(y)
-        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {       
+        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
             iy.mul_ip(); iy.norm()
         }
 
-        var t0=FP2(y) 
+        var t0=FP2(y)
         t0.sqr();
-        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {           
-            t0.mul_ip() 
-        }  
-        var t1=FP2(iy)  
+        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
+            t0.mul_ip()
+        }
+        var t1=FP2(iy)
         t1.mul(z)
         var t2=FP2(z)
         t2.sqr()
 
         z.copy(t0)
-        z.add(t0); z.norm() 
+        z.add(t0); z.norm()
         z.add(z)
-        z.add(z) 
-        z.norm()  
+        z.add(z)
+        z.norm()
 
-        t2.imul(3*ROM.CURVE_B_I) 
+        t2.imul(3*ROM.CURVE_B_I)
         if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
             t2.mul_ip()
-            t2.norm()   
+            t2.norm()
         }
         var x3=FP2(t2)
-        x3.mul(z) 
+        x3.mul(z)
 
-        var y3=FP2(t0)   
+        var y3=FP2(t0)
 
         y3.add(t2); y3.norm()
         z.mul(t1)
-        t1.copy(t2); t1.add(t2); t2.add(t1); t2.norm()  
+        t1.copy(t2); t1.add(t2); t2.add(t1); t2.norm()
         t0.sub(t2); t0.norm()                           //y^2-9bz^2
         y3.mul(t0); y3.add(x3)                          //(y^2+3z*2)(y^2-9z^2)+3b.z^2.8y^2
         t1.copy(x); t1.mul(iy)                     //
         x.copy(t0); x.norm(); x.mul(t1); x.add(x)       //(y^2-9bz^2)xy2
 
-        x.norm() 
+        x.norm()
         y.copy(y3); y.norm()
         return 1
     }
@@ -348,16 +348,16 @@ public struct ECP2 {
         t2.mul(Q.z)
         var t3=FP2(x)
         t3.add(y); t3.norm()          //t3=X1+Y1
-        var t4=FP2(Q.x)            
+        var t4=FP2(Q.x)
         t4.add(Q.y); t4.norm()         //t4=X2+Y2
         t3.mul(t4)                     //t3=(X1+Y1)(X2+Y2)
         t4.copy(t0); t4.add(t1)        //t4=X1.X2+Y1.Y2
 
-        t3.sub(t4); t3.norm(); 
+        t3.sub(t4); t3.norm();
         if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
             t3.mul_ip();  t3.norm()         //t3=(X1+Y1)(X2+Y2)-(X1.X2+Y1.Y2) = X1.Y2+X2.Y1
         }
-        t4.copy(y)                    
+        t4.copy(y)
         t4.add(z); t4.norm()           //t4=Y1+Z1
         var x3=FP2(Q.y)
         x3.add(Q.z); x3.norm()         //x3=Y2+Z2
@@ -365,32 +365,32 @@ public struct ECP2 {
         t4.mul(x3)                     //t4=(Y1+Z1)(Y2+Z2)
         x3.copy(t1)                    //
         x3.add(t2)                     //X3=Y1.Y2+Z1.Z2
-    
-        t4.sub(x3); t4.norm(); 
-        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {  
+
+        t4.sub(x3); t4.norm();
+        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
             t4.mul_ip(); t4.norm()          //t4=(Y1+Z1)(Y2+Z2) - (Y1.Y2+Z1.Z2) = Y1.Z2+Y2.Z1
         }
         x3.copy(x); x3.add(z); x3.norm()   // x3=X1+Z1
-        var y3=FP2(Q.x)                
+        var y3=FP2(Q.x)
         y3.add(Q.z); y3.norm()             // y3=X2+Z2
         x3.mul(y3)                         // x3=(X1+Z1)(X2+Z2)
         y3.copy(t0)
         y3.add(t2)                         // y3=X1.X2+Z1+Z2
         y3.rsub(x3); y3.norm()             // y3=(X1+Z1)(X2+Z2) - (X1.X2+Z1.Z2) = X1.Z2+X2.Z1
-        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {  
+        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
             t0.mul_ip(); t0.norm() // x.Q.x
             t1.mul_ip(); t1.norm() // y.Q.y
         }
-        x3.copy(t0); x3.add(t0) 
+        x3.copy(t0); x3.add(t0)
         t0.add(x3); t0.norm()
         t2.imul(b)
         if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
             t2.mul_ip(); t2.norm()
-        }  
+        }
         var z3=FP2(t1); z3.add(t2); z3.norm()
         t1.sub(t2); t1.norm()
         y3.imul(b)
-        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {          
+        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
             y3.mul_ip()
             y3.norm()
         }
@@ -400,7 +400,7 @@ public struct ECP2 {
 
         x.copy(x3); x.norm()
         y.copy(y3); y.norm()
-        z.copy(z3); z.norm()    
+        z.copy(z3); z.norm()
 
         return 0
     }
@@ -426,7 +426,7 @@ public struct ECP2 {
         y.mul(X2)
         y.mul(X)
     }
-    
+
     /* P*=e */
     func mul(_ e:BIG) -> ECP2
     {
@@ -436,25 +436,25 @@ public struct ECP2 {
         var P=ECP2()
         var Q=ECP2()
         var C=ECP2()
-        
+
         var W=[ECP2]();
         for _ in 0 ..< 8 {W.append(ECP2())}
-        
+
         var w=[Int8](repeating: 0,count: 1+(CONFIG_BIG.NLEN*Int(CONFIG_BIG.BASEBITS)+3)/4)
-    
+
         if is_infinity() {return ECP2()}
-    
+
     /* precompute table */
         Q.copy(self)
         Q.dbl()
         W[0].copy(self)
-    
+
         for i in 1 ..< 8
         {
             W[i].copy(W[i-1])
             W[i].add(Q)
         }
-    
+
     /* make exponent odd - add 2P if even, P if odd */
         t.copy(e)
         let s=t.parity()
@@ -462,7 +462,7 @@ public struct ECP2 {
         t.cmove(mt,s)
         Q.cmove(self,ns)
         C.copy(Q)
-    
+
         let nb=1+(t.nbits()+3)/4
     /* convert exponent to signed 4-bit window */
         for i in 0 ..< nb
@@ -472,7 +472,7 @@ public struct ECP2 {
             t.fshr(4)
         }
         w[nb]=Int8(t.lastbits(5))
-    
+
         P.copy(W[Int(w[nb]-1)/2])
         for i in (0...nb-1).reversed()
         {
@@ -487,7 +487,7 @@ public struct ECP2 {
         P.affine()
         return P;
     }
-    
+
 
     // clear cofactor
     mutating public func cfp()
@@ -496,12 +496,12 @@ public struct ECP2 {
         let Fra=BIG(ROM.Fra)
         let Frb=BIG(ROM.Frb)
         var X=FP2(Fra,Frb)
-        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE { 
+        if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
             X.inverse()
             X.norm()
-        }         
+        }
         let x=BIG(ROM.CURVE_Bnx)
-    
+
         if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
             var T=self.mul(x)
             if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
@@ -509,7 +509,7 @@ public struct ECP2 {
             }
             var K=ECP2(); K.copy(T)
             K.dbl(); K.add(T)
-    
+
             K.frob(X)
             self.frob(X); self.frob(X); self.frob(X)
             self.add(T); self.add(K)
@@ -536,37 +536,37 @@ public struct ECP2 {
 
             self.add(x2Q)
             self.add(xQ)
-        }        
+        }
         self.affine()
-    }   
+    }
 
 
     /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3 */
     // Bos & Costello https://eprint.iacr.org/2013/458.pdf
     // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
-    // Side channel attack secure 
+    // Side channel attack secure
 
     static func mul4(_ Q:[ECP2],_ u:[BIG]) -> ECP2
     {
         var W=ECP2()
         var P=ECP2()
-        
+
         var T=[ECP2]();
         for _ in 0 ..< 8 {T.append(ECP2())}
-    
+
         var mt=BIG()
         var t=[BIG]()
-    
+
         var w=[Int8](repeating: 0,count: CONFIG_BIG.NLEN*Int(CONFIG_BIG.BASEBITS)+1)
         var s=[Int8](repeating: 0,count: CONFIG_BIG.NLEN*Int(CONFIG_BIG.BASEBITS)+1)
-    
+
         for i in 0 ..< 4
         {
             t.append(BIG(u[i]))
             t[i].norm()
         }
 
-    // precompute table 
+    // precompute table
 
         T[0].copy(Q[0])  // Q[0]
         T[1].copy(T[0]); T[1].add(Q[1])  // Q[0]+Q[1]
@@ -580,17 +580,17 @@ public struct ECP2 {
 // Make it odd
         let pb=1-t[0].parity()
         t[0].inc(pb)
-        t[0].norm()  
+        t[0].norm()
 
 // Number of bits
         mt.zero();
         for i in 0 ..< 4 {
-            mt.or(t[i]); 
+            mt.or(t[i]);
         }
 
         let nb=1+mt.nbits()
 
-// Sign pivot 
+// Sign pivot
 
         s[nb-1]=1
         for i in 0 ..< nb-1 {
@@ -610,7 +610,7 @@ public struct ECP2 {
                 w[i]+=bt*Int8(k)
                 k=2*k
             }
-        }   
+        }
 
 // Main loop
         P.select(T,Int32(2*w[nb-1]+1));
@@ -618,17 +618,33 @@ public struct ECP2 {
             P.dbl()
             W.select(T,Int32(2*w[i]+s[i]))
             P.add(W)
-        }    
+        }
 
-        W.copy(P)  
+        W.copy(P)
         W.sub(Q[0])
-        P.cmove(W,pb) 
+        P.cmove(W,pb)
         P.affine()
         return P
     }
 
-/* Deterministic mapping of Fp to point on curve */
-    static public func hashit(_ h:BIG) -> ECP2
+/* Hunt and Peck a BIG to a curve point */
+    static public func hap2point(_ h:BIG) -> ECP2
+    {
+        let one=BIG(1)
+        var Q=ECP2()
+        var x=BIG(h)
+        while (true)
+        {
+            let X=FP2(one,x)
+            Q=ECP2(X,0)
+            if !Q.is_infinity() {break}
+            x.inc(1); x.norm()
+        }
+        return Q
+    }
+
+/* Constant time Map to Point */
+    static public func map2point(_ h:BIG) -> ECP2
     { // SWU method
         var W=FP2(1)
         var B=FP2(BIG(ROM.CURVE_B))
@@ -677,18 +693,18 @@ public struct ECP2 {
         return ECP2(X1,Y)
     }
 
-/* Map octet string to curve point */
+/* Map byte array to point */
 	static public func mapit(_ h:[UInt8]) -> ECP2
 	{
 		let q=BIG(ROM.Modulus)
 		var dx=DBIG.fromBytes(h)
         let x=dx.mod(q)
-		
-		var Q=ECP2.hashit(x);  
+
+		var Q=ECP2.hap2point(x);
 		Q.cfp()
         return Q
     }
-    
+
     static public func generator() -> ECP2
     {
         return ECP2(FP2(BIG(ROM.CURVE_Pxa),BIG(ROM.CURVE_Pxb)),FP2(BIG(ROM.CURVE_Pya),BIG(ROM.CURVE_Pyb)))

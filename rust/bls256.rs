@@ -87,8 +87,8 @@ pub fn bls_hash_to_point(m: &[u8]) -> ECP {
     let u=hash_to_base(hmac::MC_SHA2,ecp::HASH_TYPE,dst.as_bytes(),m,0);
     let u1=hash_to_base(hmac::MC_SHA2,ecp::HASH_TYPE,dst.as_bytes(),m,1);
 
-    let mut P=ECP::hashit(&u);
-    let P1=ECP::hashit(&u1);
+    let mut P=ECP::map2point(&u);
+    let P1=ECP::map2point(&u1);
     P.add(&P1);
     P.cfp();
     P.affine();

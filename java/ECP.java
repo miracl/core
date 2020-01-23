@@ -984,11 +984,27 @@ public final class ECP {
 		copy(mul(c));
 	}
 
-/* Hash random Fp element to point on curve */
-    public static ECP hashit(BIG h)
+/* Hunt and Peck a BIG to a curve point */
+    public static ECP hap2point(BIG h)
     {
         ECP P;
+        BIG x=new BIG(h);
+		while (true)
+		{
+			if (CONFIG_CURVE.CURVETYPE!=CONFIG_CURVE.MONTGOMERY)
+				P=new ECP(x,0);
+			else
+				P=new ECP(x);	
+			x.inc(1); x.norm();
+			if (!P.is_infinity()) break;
+		}
+        return P;
+    }
 
+/* Constant time Map to Point */
+    public static ECP map2point(BIG h)
+    {
+        ECP P;
         if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.MONTGOMERY)
         { // Elligator 2
             FP X1=new FP();
@@ -1183,7 +1199,7 @@ public final class ECP {
 		BIG q=new BIG(ROM.Modulus);
         DBIG dx=DBIG.fromBytes(h);
         BIG x=dx.mod(q);
-		ECP P=hashit(x);
+		ECP P=hap2point(x);
 		P.cfp();
 		return P;
 	}

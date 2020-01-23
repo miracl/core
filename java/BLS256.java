@@ -79,8 +79,8 @@ public class BLS256 {
         BIG u=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,0);
         BIG u1=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,1);
 
-        ECP P=ECP.hashit(u);
-        ECP P1=ECP.hashit(u1);
+        ECP P=ECP.map2point(u);
+        ECP P1=ECP.map2point(u1);
         P.add(P1);
         P.cfp();
         P.affine();

@@ -115,8 +115,8 @@ var BLS = function(ctx) {
             var u=this.hash_to_base(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,0);
             var u1=this.hash_to_base(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,1);
 
-            var P=ctx.ECP.hashit(u);
-            var P1=ctx.ECP.hashit(u1);
+            var P=ctx.ECP.map2point(u);
+            var P1=ctx.ECP.map2point(u1);
             P.add(P1);
             P.cfp();
             P.affine();

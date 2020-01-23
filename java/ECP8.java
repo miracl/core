@@ -834,18 +834,39 @@ public final class ECP8 {
 		P.affine();
 		return P;
 	}        
+/* Hunt and Peck a BIG to a curve point */
+    public static ECP8 hap2point(BIG h)
+    { 
+        BIG x=new BIG(h);
+	    BIG one=new BIG(1);
+		FP2 X2;
+        FP4 X4;
+        FP8 X8;
+        ECP8 Q;
+        while (true)
+        {
+            X2=new FP2(one,x);
+            X4=new FP4(X2);
+            X8=new FP8(X4);
+            Q=new ECP8(X8,0);
+            if (!Q.is_infinity()) break;
+            x.inc(1); x.norm();
+        }
+        return Q;
+    }         
 
-/* Deterministic mapping of Fp to point on curve */
-    public static ECP8 hashit(BIG h)
-    { // SWU method
+/* Constant time Map to Point */
+    public static ECP8 map2point(BIG h)
+    {   
+        // SWU method
         int sgn,ne;
         FP8 W=new FP8(1);
         FP8 B=new FP8(new FP4(new FP2(new BIG(ROM.CURVE_B))));
         FP t=new FP(h);
         FP s=new FP(-3);
         FP one=new FP(1);
-		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_i();
-		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
+        if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_i();
+        if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
         B.norm();
         sgn=t.sign();
         FP w=s.sqrt(null);
@@ -879,7 +900,7 @@ public final class ECP8 {
         W.copy(Y); W.neg(); W.norm();
         Y.cmove(W,ne);
 
-        return new ECP8(X1,Y);
+        return new ECP8(X1,Y);    
     }
 
 /* Map octet string to curve point */
@@ -889,7 +910,7 @@ public final class ECP8 {
 		DBIG dx=DBIG.fromBytes(h);
         BIG x=dx.mod(q);
 		
-		ECP8 Q=hashit(x);
+		ECP8 Q=hap2point(x);
 		Q.cfp();
         return Q;
     }

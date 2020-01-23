@@ -654,10 +654,25 @@ void ECP2_ZZZ_mul4(ECP2_ZZZ *P, ECP2_ZZZ Q[4], BIG_XXX u[4])
     ECP2_ZZZ_affine(P);
 }
 
+/* Hunt and Peck a BIG to a curve point */
+void ECP2_ZZZ_hap2point(ECP2_ZZZ *Q,BIG_XXX h)
+{
+    BIG_XXX one,hv;
+    FP2_YYY X;
+    BIG_XXX_one(one);
+    BIG_XXX_copy(hv,h);
+    for (;;)
+    {
+        FP2_YYY_from_BIGs(&X,one,hv);
+        if (ECP2_ZZZ_setx(Q,&X,0)) break;
+        BIG_XXX_inc(hv,1);
+    }
+}
 
-/* Deterministic Map of BIG to G2 curve point */
-void ECP2_ZZZ_hashit(ECP2_ZZZ *Q,BIG_XXX h)
+/* Constant time Map to Point in G2 */
+void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,BIG_XXX h)
 { // SWU method. Assumes p=3 mod 4.
+
     int sgn,ne;
     FP2_YYY X1,X2,X3,W,B,Y;
     FP_YYY t,b,j,s,one;
@@ -715,7 +730,7 @@ void ECP2_ZZZ_hashit(ECP2_ZZZ *Q,BIG_XXX h)
     ECP2_ZZZ_set(Q,&X1,&Y);
 }
 
-/* Map to hash value to point on G2 from random BIG */
+/* Map octet to point */
 void ECP2_ZZZ_mapit(ECP2_ZZZ *Q, octet *W)
 {
     BIG_XXX q, x;
@@ -726,7 +741,7 @@ void ECP2_ZZZ_mapit(ECP2_ZZZ *Q, octet *W)
     BIG_XXX_dmod(x,dx,q);
 
 
-    ECP2_ZZZ_hashit(Q,x);
+    ECP2_ZZZ_hap2point(Q,x);
     ECP2_ZZZ_cfp(Q);
 }
 

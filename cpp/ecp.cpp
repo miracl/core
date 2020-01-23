@@ -1192,8 +1192,8 @@ void ZZZ::ECP_cfp(ECP *P)
     return;
 }
 
-/* Hash random Fp element to point on curve */
-void ZZZ::ECP_hashit(ECP *P,BIG h)
+/* Constant time Map to Point */
+void ZZZ::ECP_map2point(ECP *P,BIG h)
 {
 #if CURVETYPE_ZZZ==MONTGOMERY
 // Elligator 2
@@ -1385,9 +1385,24 @@ void ZZZ::ECP_hashit(ECP *P,BIG h)
 #endif
 }
 
-/* map BIG to point on curve of correct order */
-/* The BIG should be the output of some hash function */
+/* Hunt and Peck a BIG to a curve point */
+void ZZZ::ECP_hap2point(ECP *P,BIG h)
+{
+    BIG x;
+    BIG_copy(x,h);
+	for (;;)
+	{
+#if CURVETYPE_ZZZ!=MONTGOMERY
+		ECP_setx(P,x,0);
+#else
+		ECP_set(P,x);
+#endif
+		BIG_inc(x,1); BIG_norm(x);
+		if (!ECP_isinf(P)) break;
+	}
+}
 
+/* Map octet to point */
 void ZZZ::ECP_mapit(ECP *P, octet *W)
 {
     BIG q, x;
@@ -1397,7 +1412,7 @@ void ZZZ::ECP_mapit(ECP *P, octet *W)
     BIG_dfromBytesLen(dx,W->val,W->len);
     BIG_dmod(x,dx,q);
 
-    ECP_hashit(P,x);
+    ECP_hap2point(P,x);
     ECP_cfp(P);
 }
 

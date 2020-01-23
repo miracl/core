@@ -588,22 +588,41 @@ public final class ECP2 {
 		return P;
 	}        
 
-/* Deterministic mapping of Fp to point on curve */
-    public static ECP2 hashit(BIG h)
-    { // SWU method
+/* Hunt and Peck a BIG to a curve point */
+    public static ECP2 hap2point(BIG h)
+    { 
+        BIG x=new BIG(h);
+		BIG one=new BIG(1);
+		FP2 X2;
+        ECP2 Q;
+        while (true)
+        {
+            X2=new FP2(one,x);
+            Q=new ECP2(X2,0);
+            if (!Q.is_infinity()) break;
+            x.inc(1); x.norm();
+        }
+        return Q;
+    }
+
+
+/* Constant time Map to Point */
+    public static ECP2 map2point(BIG h)
+    { 
+    // SWU method
         int sgn,ne;
         FP2 W=new FP2(1);
         FP2 B=new FP2(new BIG(ROM.CURVE_B));
         FP t=new FP(h);
         FP s=new FP(-3);
         FP one=new FP(1);
-		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_ip();
-		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.mul_ip();
+        if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_ip();
+        if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.mul_ip();
         B.norm();
         sgn=t.sign();
         FP w=s.sqrt(null);
         FP j=new FP(w); j.sub(one); j.norm(); j.div2();
-//System.out.print("s= "+w.toString()+"\n");
+    //System.out.print("s= "+w.toString()+"\n");
         w.mul(t);
         FP b=new FP(t);
         b.sqr();
@@ -611,9 +630,6 @@ public final class ECP2 {
         FP2 Y=new FP2(b);
         B.add(Y); B.norm(); B.inverse();
         B.pmul(w);
-
-//System.out.print("w= "+B.toString()+"\n");
-//System.out.print("j= "+j.toString()+"\n");
 
         FP2 X1=new FP2(B); X1.pmul(t);
         Y.copy(new FP2(j));
@@ -623,10 +639,6 @@ public final class ECP2 {
 
         B.sqr(); B.inverse();
         FP2 X3=new FP2(B); X3.add(W); X3.norm();
-
-    //System.out.print("X1= "+X1.toString()+"\n");
-   //System.out.print("X2= "+X2.toString()+"\n");
-      //System.out.print("X3= "+X3.toString()+"\n");
 
         Y.copy(RHS(X2));
         X1.cmove(X2,Y.qr());
@@ -639,10 +651,8 @@ public final class ECP2 {
         W.copy(Y); W.neg(); W.norm();
         Y.cmove(W,ne);
 
-
         return new ECP2(X1,Y);
     }
-
 
 /* Map octet string to curve point */
 	public static ECP2 mapit(byte[] h)
@@ -651,7 +661,7 @@ public final class ECP2 {
 		DBIG dx=DBIG.fromBytes(h);
         BIG x=dx.mod(q);
 		
-		ECP2 Q=hashit(x);
+		ECP2 Q=hap2point(x);
 		Q.cfp();
         return Q;
     }

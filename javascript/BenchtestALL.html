@@ -28,6 +28,7 @@
 <script type="text/javascript" src=./ecp.js></script>
 <script type="text/javascript" src=./ecp2.js></script>
 <script type="text/javascript" src=./ecdh.js></script>
+<script type="text/javascript" src=./hpke.js></script>
 <script type="text/javascript" src=./pair.js></script>
 <script type="text/javascript" src=./mpin.js></script>
 <script type="text/javascript" src=./bls.js></script>
@@ -123,7 +124,7 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
-		WP=ctx.ECP.hashit(s);
+		WP=ctx.ECP.map2point(s);
 		if (WP.is_infinity())
 		{
 			alert("HASHING FAILURE - P=O");
@@ -188,7 +189,7 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
-		var WP=ctx.ECP.hashit(s);
+		var WP=ctx.ECP.map2point(s);
 		if (WP.is_infinity())
 		{
 			alert("HASHING FAILURE - P=O");
@@ -218,7 +219,7 @@
 
 		Q=ctx.ECP2.generator();
 
-        W = ctx.ECP2.hashit(s);
+        W = ctx.ECP2.map2point(s);
         W.cfp();
         if (W.is_infinity()) {
             alert("HASHING FAILURE - P=O");
@@ -416,7 +417,7 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
-		WP=ctx.ECP.hashit(s);
+		WP=ctx.ECP.map2point(s);
 		if (WP.is_infinity())
 		{
 			alert("HASHING FAILURE - P=O");
@@ -506,7 +507,7 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
-		WP=ctx.ECP.hashit(s);
+		WP=ctx.ECP.map2point(s);
 		if (WP.is_infinity())
 		{
 			alert("HASHING FAILURE - P=O");
@@ -572,7 +573,7 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
-		var WP=ctx.ECP.hashit(s);
+		var WP=ctx.ECP.map2point(s);
 		if (WP.is_infinity())
 		{
 			alert("HASHING FAILURE - P=O");
@@ -601,7 +602,7 @@
 
 		Q=ctx.ECP2.generator();
 
-        W = ctx.ECP2.hashit(s);
+        W = ctx.ECP2.map2point(s);
         W.cfp();
         if (W.is_infinity()) {
             alert("HASHING FAILURE - P=O");
@@ -775,7 +776,7 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
-		var WP=ctx.ECP.hashit(s);
+		var WP=ctx.ECP.map2point(s);
 		if (WP.is_infinity())
 		{
 			alert("HASHING FAILURE - P=O");
@@ -804,7 +805,7 @@
 
 		Q=ctx.ECP4.generator();
 
-        W = ctx.ECP4.hashit(s);
+        W = ctx.ECP4.map2point(s);
         W.cfp();
         if (W.is_infinity()) {
             alert("HASHING FAILURE - P=O");
@@ -966,7 +967,7 @@
 		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
 
-		var WP=ctx.ECP.hashit(s);
+		var WP=ctx.ECP.map2point(s);
 		if (WP.is_infinity())
 		{
 			alert("HASHING FAILURE - P=O");
@@ -995,7 +996,7 @@
 
 		Q=ctx.ECP8.generator();
 
-        W = ctx.ECP8.hashit(s);
+        W = ctx.ECP8.map2point(s);
         W.cfp();
         if (W.is_infinity()) {
             alert("HASHING FAILURE - P=O");

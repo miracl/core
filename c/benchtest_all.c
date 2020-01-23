@@ -414,7 +414,7 @@ int BN_254(csprng *RNG)
 
     ECP2_BN254_generator(&W);
 
-    ECP2_BN254_hashit(&Q,s);
+    ECP2_BN254_map2point(&Q,s);
     ECP2_BN254_cfp(&Q);
 
     if (ECP2_BN254_isinf(&Q))
@@ -610,7 +610,7 @@ int BLS_383(csprng *RNG)
 
     ECP2_BLS12383_generator(&W);
 
-    ECP2_BLS12383_hashit(&Q,s);
+    ECP2_BLS12383_map2point(&Q,s);
     ECP2_BLS12383_cfp(&Q);
 
     if (ECP2_BLS12383_isinf(&Q))
@@ -804,7 +804,7 @@ int BLS_24(csprng *RNG)
 
     ECP4_BLS24479_generator(&W);
 
-    ECP4_BLS24479_hashit(&Q,s);
+    ECP4_BLS24479_map2point(&Q,s);
     ECP4_BLS24479_cfp(&Q);
 
     if (ECP4_BLS24479_isinf(&Q))
@@ -866,20 +866,7 @@ int BLS_24(csprng *RNG)
     elapsed = 1000.0 * elapsed / iterations;
     printf("GT pow              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
-/*
-    FP24_BLS24479_copy(&g, &w);
 
-    iterations = 0;
-    start = clock();
-    do {
-        FP24_BLS24479_compow(&cm, &g, s, r);
-        iterations++;
-        elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
-    } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
-    elapsed = 1000.0 * elapsed / iterations;
-    printf("GT pow (compressed) - %8d iterations  ", iterations);
-    printf(" %8.2lf ms per iteration\n", elapsed);
-*/
     iterations = 0;
     start = clock();
     do {
@@ -998,7 +985,7 @@ int BLS_48(csprng *RNG)
 
     ECP8_BLS48556_generator(&W);
 
-    ECP8_BLS48556_hashit(&Q,s);
+    ECP8_BLS48556_map2point(&Q,s);
     ECP8_BLS48556_cfp(&Q);
 
     if (ECP8_BLS48556_isinf(&Q))

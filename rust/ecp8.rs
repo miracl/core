@@ -1176,9 +1176,27 @@ impl ECP8 {
         );
     }
 
-/* Deterministic mapping of Fp to point on curve */
+/* Hunt and Peck a BIG to a curve point */
     #[allow(non_snake_case)]
-    pub fn hashit(h: &BIG) -> ECP8 {
+    pub fn hap2point(h: &BIG) -> ECP8 {
+        let mut Q: ECP8;
+        let one = BIG::new_int(1);
+        let mut x =BIG::new_copy(&h);
+        loop {
+            let X = FP8::new_fp4(&FP4::new_fp2(&FP2::new_bigs(&one, &x)));
+            Q = ECP8::new_fp8(&X,0);
+            if !Q.is_infinity() {
+                break;
+            }
+            x.inc(1);
+            x.norm();
+        }
+        return Q;
+    }
+
+/* Constant time Map to Point */
+    #[allow(non_snake_case)]
+    pub fn map2point(h: &BIG) -> ECP8 {
     // SWU method
         let mut W=FP8::new_int(1);
         let mut B = FP8::new_fp4(&FP4::new_fp2(&FP2::new_big(&BIG::new_ints(&rom::CURVE_B))));
@@ -1227,12 +1245,13 @@ impl ECP8 {
         return ECP8::new_fp8s(&X1,&Y);
     }
 
+/* Map byte string to curve point */
     #[allow(non_snake_case)]
     pub fn mapit(h: &[u8]) -> ECP8 {
         let q = BIG::new_ints(&rom::MODULUS);
         let mut dx = DBIG::frombytes(h);
         let mut x=dx.dmod(&q);
-        let mut P=ECP8::hashit(&mut x);
+        let mut P=ECP8::hap2point(&mut x);
         P.cfp();
         return P;
     }

@@ -1321,8 +1321,27 @@ var ECP = function(ctx) {
         return r;
     };
 
-    ECP.hashit = function(h) {
+/* Hunt and Peck a BIG to a curve point */
+    ECP.hap2point = function(h) {
         var P = new ECP();
+        var x=new ctx.BIG(h);
+        for (;;) {
+            if (ECP.CURVETYPE != ECP.MONTGOMERY) {
+                P.setxi(x, 0);
+            } else {
+                P.setx(x);
+            }
+            x.inc(1);
+            x.norm();
+            if (!P.is_infinity()) break;
+        }
+        return P;
+    };       
+
+/* Constant time Map to Point */
+    ECP.map2point = function(h) {
+        var P = new ECP();
+
         if (ECP.CURVETYPE == ECP.MONTGOMERY)
         {
             var X1=new ctx.FP(0);
@@ -1510,16 +1529,21 @@ var ECP = function(ctx) {
 
             var y=Y.redc();
             P.setxy(x,y);          
+          
         }
         return P;
     };
+
+
+
+
 
     ECP.mapit = function(h) {
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_FIELD.Modulus);
         var dx = ctx.DBIG.fromBytes(h);
         var x=dx.mod(q);
-        var P=ctx.ECP.hashit(x);
+        var P=ctx.ECP.hap2point(x);
         P.cfp();
         return P;
     };

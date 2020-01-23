@@ -703,8 +703,28 @@ func ECP4_generator() *ECP4 {
 	return G
 }
 
-/* Deterministic mapping of Fp to point on curve */
- func ECP4_hashit(h *BIG) *ECP4 {
+/* Hunt and Peck a BIG to a curve point */
+func ECP4_hap2point(h *BIG) *ECP4 {
+	one := NewBIGint(1)
+	x := NewBIGcopy(h)
+	var X2 *FP2
+	var X4 *FP4
+	var Q *ECP4
+	for true {
+		X2 = NewFP2bigs(one, x)
+		X4 = NewFP4fp2(X2)
+		Q = NewECP4fp4(X4,0)
+		if !Q.Is_infinity() {
+			break
+		}
+		x.inc(1)
+		x.norm()
+	}
+	return Q
+}
+
+/* Constant time Map to Point */
+func ECP4_map2point(h *BIG) *ECP4 {
     // SWU method
     W:=NewFP4int(1)
 
@@ -762,7 +782,7 @@ func ECP4_mapit(h []byte) *ECP4 {
 	dx:=DBIG_fromBytes(h);
     x:=dx.mod(q);
 		
-	Q:=ECP4_hashit(x)
+	Q:=ECP4_hap2point(x)
 	Q.Cfp()
     return Q
 }

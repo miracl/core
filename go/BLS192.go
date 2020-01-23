@@ -74,8 +74,8 @@ func bls192_hash_to_point(M []byte) *ECP {
 	u := hash_to_base(core.MC_SHA2,HASH_TYPE,DST,M,0)
 	u1 := hash_to_base(core.MC_SHA2,HASH_TYPE,DST,M,1)
 
-	P:=ECP_hashit(u)
-	P1 := ECP_hashit(u1);
+	P:=ECP_map2point(u)
+	P1 := ECP_map2point(u1);
 	P.Add(P1)
 	P.Cfp()
 	P.Affine()

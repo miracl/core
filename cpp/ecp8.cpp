@@ -945,8 +945,28 @@ void ZZZ::ECP8_mul16(ECP8 *P, ECP8 Q[16], BIG u[16])
     ECP8_affine(P);
 }
 
-/* Deterministic Map of BIG to G2 curve point */
-void ZZZ::ECP8_hashit(ECP8 *Q,BIG h)
+/* Hunt and Peck a BIG to G2 curve point */
+void ZZZ::ECP8_hap2point(ECP8 *Q,BIG h)
+{
+    BIG one,hv;
+    FP2 X2;
+    FP4 X4;
+    FP8 X8;
+    BIG_one(one);
+    BIG_copy(hv,h);
+
+    for (;;)
+    {
+        FP2_from_BIGs(&X2,one,hv);  /*******/
+		FP4_from_FP2(&X4,&X2);
+		FP8_from_FP4(&X8,&X4);
+        if (ECP8_setx(Q,&X8,0)) break;
+        BIG_inc(hv,1);
+    }
+}
+
+/* Constant time Map BIG to Point in G2 */
+void ZZZ::ECP8_map2point(ECP8 *Q,BIG h)
 {
     int sgn,ne;
     FP8 X1,X2,X3,W,B,Y;
@@ -1005,7 +1025,7 @@ void ZZZ::ECP8_hashit(ECP8 *Q,BIG h)
     ECP8_set(Q,&X1,&Y);
 }
 
-/* Map to hash value to point on G2 from random BIG */
+/* Map octet to point on G2 */
 void ZZZ::ECP8_mapit(ECP8 *Q, octet *W)
 {
     BIG q, x;
@@ -1015,7 +1035,7 @@ void ZZZ::ECP8_mapit(ECP8 *Q, octet *W)
     BIG_dfromBytesLen(dx,W->val,W->len);
     BIG_dmod(x,dx,q);
 
-    ECP8_hashit(Q,x);   
+    ECP8_hap2point(Q,x);   
     ECP8_cfp(Q);
 }
 

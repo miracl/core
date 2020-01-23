@@ -88,7 +88,7 @@ public class TesttimeECDH extends TestCase {
 
         
 
-        WP = ECP.hashit(s);
+        WP = ECP.map2point(s);
         //System.out.print("WP= "+WP.toString()+"\n");
         WP.cfp();
         if (WP.is_infinity()) {

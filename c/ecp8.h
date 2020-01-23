@@ -259,12 +259,20 @@ extern void ECP8_ZZZ_mul16(ECP8_ZZZ *P, ECP8_ZZZ *Q, BIG_XXX *b);
  */
 extern void ECP8_ZZZ_cfp(ECP8_ZZZ *Q);
 
-/**	@brief Hashes random BIG to curve point
+/**	@brief Hashes random BIG to curve point using hunt-and-peck
  *
 	@param Q ECP8 instance 
 	@param x Fp derived from hash
  */
-extern void ECP8_ZZZ_hashit(ECP8_ZZZ *Q, BIG_XXX  x);
+extern void ECP8_ZZZ_hap2point(ECP8_ZZZ *Q, BIG_XXX  x);
+
+/**	@brief Hashes random BIG to curve point in constant time
+ *
+	@param Q ECP8 instance 
+	@param x Fp derived from hash
+ */
+extern void ECP8_ZZZ_map2point(ECP8_ZZZ *Q, BIG_XXX  x);
+
 
 /**	@brief Maps random BIG to curve point of correct order
  *

@@ -833,8 +833,29 @@ func ECP8_generator() *ECP8 {
 	return G
 }
 
+func ECP8_hap2point(h *BIG) *ECP8 {
+	one := NewBIGint(1)
+	x := NewBIGcopy(h)
+	var X2 *FP2
+	var X4 *FP4
+	var X8 *FP8
+	var Q *ECP8
+	for true {
+		X2 = NewFP2bigs(one, x)
+		X4 = NewFP4fp2(X2)
+		X8 = NewFP8fp4(X4)
+		Q = NewECP8fp8(X8,0)
+		if !Q.Is_infinity() {
+			break
+		}
+		x.inc(1)
+		x.norm()
+	}
+	return Q
+}
+
 /* Deterministic mapping of Fp to point on curve */
- func ECP8_hashit(h *BIG) *ECP8 {
+func ECP8_map2point(h *BIG) *ECP8 {
     // SWU method
     W:=NewFP8int(1)
 
@@ -893,7 +914,7 @@ func ECP8_mapit(h []byte) *ECP8 {
 	dx:=DBIG_fromBytes(h);
     x:=dx.mod(q);
 		
-	Q:=ECP8_hashit(x)
+	Q:=ECP8_hap2point(x)
 	Q.Cfp()
     return Q
 }

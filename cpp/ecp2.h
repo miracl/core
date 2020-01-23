@@ -229,13 +229,19 @@ extern void ECP2_mul4(ECP2 *P, ECP2 *Q, XXX::BIG *b);
  */
 extern void ECP2_cfp(ECP2 *Q);
 
-/**	@brief Hashes random BIG to curve point
+/**	@brief Maps random BIG to curve point in constant time
  *
 	@param Q ECP2 instance 
 	@param x Fp derived from hash
  */
-extern void ECP2_hashit(ECP2 *Q, XXX::BIG  x);
+extern void ECP2_map2point(ECP2 *Q, XXX::BIG  x);
 
+/**	@brief Maps random BIG to curve point using hunt-and-peck
+ *
+	@param Q ECP2 instance 
+	@param x Fp derived from hash
+ */
+extern void ECP2_hap2point(ECP2 *Q, XXX::BIG  x);
 
 /**	@brief Maps random octet to curve point of correct order
  *

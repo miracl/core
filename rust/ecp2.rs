@@ -748,10 +748,27 @@ impl ECP2 {
         return P;
     }
 
-
-/* Deterministic mapping of Fp to point on curve */
+/* Hunt and Peck a BIG to a curve point */
     #[allow(non_snake_case)]
-    pub fn hashit(h: &BIG) -> ECP2 {
+    pub fn hap2point(h: &BIG) -> ECP2 {
+        let mut Q: ECP2;
+        let one = BIG::new_int(1);
+        let mut x =BIG::new_copy(&h);
+        loop {
+            let X = FP2::new_bigs(&one, &x);
+            Q = ECP2::new_fp2(&X,0);
+            if !Q.is_infinity() {
+                break;
+            }
+            x.inc(1);
+            x.norm();
+        }
+        return Q;
+    }
+
+/* Constant time Map to Point */
+    #[allow(non_snake_case)]
+    pub fn map2point(h: &BIG) -> ECP2 {
     // SWU method
         let mut W=FP2::new_int(1);
         let mut B = FP2::new_big(&BIG::new_ints(&rom::CURVE_B));
@@ -800,12 +817,13 @@ impl ECP2 {
         return ECP2::new_fp2s(&X1,&Y);
     }
 
+/* Map byte string to curve point */
     #[allow(non_snake_case)]
     pub fn mapit(h: &[u8]) -> ECP2 {
         let q = BIG::new_ints(&rom::MODULUS);
         let mut dx = DBIG::frombytes(h);
         let mut x=dx.dmod(&q);
-        let mut P=ECP2::hashit(&mut x);
+        let mut P=ECP2::hap2point(&mut x);
         P.cfp();
         return P;
     }

@@ -588,6 +588,31 @@ void BIG_XXX_mul(DBIG_XXX c, BIG_XXX a, BIG_XXX b)
 
 
 #else
+
+#ifndef USE_KARATSUBA
+
+    t=(dchunk)a[0]*b[0];
+    c[0]=(chunk)t & BMASK_XXX;
+    t = t >> BASEBITS_XXX;
+    for (i=1;i<NLEN_XXX;i++)
+    {
+        k=0; 
+        while (k<=i) {t+=(dchunk)a[k]*b[i-k]; k++;}
+        c[i]=(chunk)t & BMASK_XXX;
+        t = t >> BASEBITS_XXX;
+    }
+
+    for (i=NLEN_XXX;i<2*NLEN_XXX-1;i++)
+    {
+        k=i-(NLEN_XXX-1);
+        while (k<=NLEN_XXX-1) {t+=(dchunk)a[k]*b[i-k]; k++;}
+        c[i]=(chunk)t & BMASK_XXX;
+        t = t >> BASEBITS_XXX;
+    }
+
+    c[2 * NLEN_XXX - 1] = (chunk)t;
+#else
+
     for (i = 0; i < NLEN_XXX; i++)
         d[i] = (dchunk)a[i] * b[i];
 
@@ -615,7 +640,7 @@ void BIG_XXX_mul(DBIG_XXX c, BIG_XXX a, BIG_XXX b)
         co = t >> BASEBITS_XXX;
     }
     c[2 * NLEN_XXX - 1] = (chunk)co;
-
+#endif
 #endif
 
 #else
@@ -788,7 +813,30 @@ void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d)
 
 
 #else
-
+#ifndef USE_KARATSUBA 
+    t = d[0];
+    v[0] = ((chunk)t * MC)&BMASK_XXX;
+    t += (dchunk)v[0] * md[0];
+    t = (t >> BASEBITS_XXX) + d[1];
+   
+    for (i = 1; i < NLEN_XXX; i++)
+    {
+        k=1;
+        t += (dchunk)v[0] * md[i];
+        while (k<i) {t += (dchunk)v[k]*md[i-k]; k++;}
+        v[i] = ((chunk)t * MC)&BMASK_XXX;
+        t += (dchunk)v[i] * md[0];
+        t = (t >> BASEBITS_XXX) + d[i + 1];
+    }
+    for (i = NLEN_XXX; i < 2 * NLEN_XXX - 1; i++)
+    {
+        k=i-(NLEN_XXX-1);
+        while (k<=NLEN_XXX-1) {t += (dchunk)v[k]*md[i-k]; k++;}
+        a[i - NLEN_XXX] = (chunk)t & BMASK_XXX;
+        t = (t >> BASEBITS_XXX) + d[i + 1];
+    }
+    a[NLEN_XXX - 1] = (chunk)t & BMASK_XXX;
+#else
     t = d[0];
     v[0] = ((chunk)t * MC)&BMASK_XXX;
     t += (dchunk)v[0] * md[0];
@@ -816,7 +864,7 @@ void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d)
     a[NLEN_XXX - 1] = (chunk)c & BMASK_XXX;
 
 #endif
-
+#endif
 
 
 #else

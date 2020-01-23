@@ -112,7 +112,7 @@ int ED_25519(csprng *RNG)
     BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_ED25519, RNG);
 
-    ECP_hashit(&EP,s);
+    ECP_map2point(&EP,s);
     ECP_cfp(&EP);
 
     if (ECP_isinf(&EP))
@@ -202,7 +202,7 @@ int NIST_256(csprng *RNG)
     BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_NIST256, RNG);
 
-    ECP_hashit(&EP,s);
+    ECP_map2point(&EP,s);
     ECP_cfp(&EP);
 
     if (ECP_isinf(&EP))
@@ -289,7 +289,7 @@ int GOLDI_LOCKS(csprng *RNG)
     BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_GOLDILOCKS, RNG);
 
-    ECP_hashit(&EP,s);
+    ECP_map2point(&EP,s);
     ECP_cfp(&EP);
 
     if (ECP_isinf(&EP))
@@ -348,7 +348,7 @@ int BN_254(csprng *RNG)
     BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BN254, RNG);
 
-    ECP_hashit(&P,s);
+    ECP_map2point(&P,s);
     ECP_cfp(&P);
 
     if (ECP_isinf(&P))
@@ -381,7 +381,7 @@ int BN_254(csprng *RNG)
 
     ECP2_generator(&W);
 
-    ECP2_hashit(&Q,s);
+    ECP2_map2point(&Q,s);
     ECP2_cfp(&Q);
 
     if (ECP2_isinf(&Q))
@@ -595,7 +595,7 @@ int BLS_383(csprng *RNG)
     BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS12383, RNG);
 
-    ECP_hashit(&P,s);
+    ECP_map2point(&P,s);
     ECP_cfp(&P);
 
     if (ECP_isinf(&P))
@@ -628,7 +628,7 @@ int BLS_383(csprng *RNG)
 
     ECP2_generator(&W);
 
-    ECP2_hashit(&Q,s);
+    ECP2_map2point(&Q,s);
     ECP2_cfp(&Q);
 
     if (ECP2_isinf(&Q))
@@ -836,7 +836,7 @@ int BLS_24(csprng *RNG)
     BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS24479, RNG);
 
-    ECP_hashit(&P,s);
+    ECP_map2point(&P,s);
     ECP_cfp(&P);
 
     if (ECP_isinf(&P))
@@ -869,7 +869,7 @@ int BLS_24(csprng *RNG)
 
     ECP4_generator(&W);
 
-    ECP4_hashit(&Q,s);
+    ECP4_map2point(&Q,s);
     ECP4_cfp(&Q);
 
     if (ECP4_isinf(&Q))
@@ -1078,7 +1078,7 @@ int BLS_48(csprng *RNG)
     BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS48556, RNG);
 
-    ECP_hashit(&P,s);
+    ECP_map2point(&P,s);
     ECP_cfp(&P);
 
     if (ECP_isinf(&P))
@@ -1112,7 +1112,7 @@ int BLS_48(csprng *RNG)
 
     ECP8_generator(&W);
 
-    ECP8_hashit(&Q,s);
+    ECP8_map2point(&Q,s);
     ECP8_cfp(&Q);
 
     if (ECP8_isinf(&Q))

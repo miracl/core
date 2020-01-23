@@ -1180,7 +1180,27 @@ func (E *ECP) Cfp() {
 	E.Copy(E.mul(c))
 }
 
-func ECP_hashit(h *BIG) *ECP {
+/* Hunt and Peck a BIG to a curve point */
+func ECP_hap2point(h *BIG) *ECP {
+	var P *ECP
+	x := NewBIGcopy(h)
+	for true {
+		if CURVETYPE != MONTGOMERY {
+			P = NewECPbigint(x, 0)
+		} else {
+			P = NewECPbig(x)
+		}
+		x.inc(1)
+		x.norm()
+		if !P.Is_infinity() {
+			break
+		}
+	}
+	return P
+}
+
+/* Constant time Map to Point */
+func ECP_map2point(h *BIG) *ECP {
 	P := NewECP()
 
 	if CURVETYPE == MONTGOMERY {
@@ -1365,7 +1385,7 @@ func ECP_mapit(h []byte) *ECP {
 	q := NewBIGints(Modulus)
 	dx:= DBIG_fromBytes(h[:])
 	x:= dx.mod(q)
-	P:= ECP_hashit(x)
+	P:= ECP_hap2point(x)
 	P.Cfp()
 	return P
 }

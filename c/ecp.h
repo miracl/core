@@ -239,12 +239,20 @@ extern int ECP_ZZZ_setx(ECP_ZZZ *P, BIG_XXX x, int s);
  */
 extern void ECP_ZZZ_cfp(ECP_ZZZ *Q);
 
-/**	@brief Hashes random BIG to curve point
+
+/**	@brief Maps random BIG to curve point in constant time
  *
 	@param Q ECP instance 
 	@param x Fp derived from hash
  */
-extern void ECP_ZZZ_hashit(ECP_ZZZ *Q, BIG_XXX  x);
+extern void ECP_ZZZ_map2point(ECP_ZZZ *Q, BIG_XXX  x);
+
+/**	@brief Maps random BIG to curve point using hunt-and-peck
+ *
+	@param Q ECP instance 
+	@param x Fp derived from hash
+ */
+extern void ECP_ZZZ_hap2point(ECP_ZZZ *Q, BIG_XXX  x);
 
 
 /**	@brief Maps random octet to curve point of correct order

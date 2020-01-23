@@ -687,17 +687,37 @@ public final class ECP4 {
 		return P;
 	}        
 
-/* Deterministic mapping of Fp to point on curve */
-    public static ECP4 hashit(BIG h)
-    { // SWU method
+/* Hunt and Peck a BIG to a curve point */
+    public static ECP4 hap2point(BIG h)
+    { 
+        BIG x=new BIG(h);
+		BIG one=new BIG(1);
+        FP2 X2;
+        FP4 X4;
+        ECP4 Q;
+        while (true)
+        {
+            X2=new FP2(one,x);
+            X4=new FP4(X2);
+            Q=new ECP4(X4,0);
+            if (!Q.is_infinity()) break;
+            x.inc(1); x.norm();
+        }
+        return Q;
+    }
+
+/* Constant time Map to Point */
+    public static ECP4 map2point(BIG h)
+    {       
+    // SWU method
         int sgn,ne;
         FP4 W=new FP4(1);
         FP4 B=new FP4(new FP2(new BIG(ROM.CURVE_B)));
         FP t=new FP(h);
         FP s=new FP(-3);
         FP one=new FP(1);
-		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_i();
-		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
+        if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_i();
+        if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
         B.norm();
         sgn=t.sign();
         FP w=s.sqrt(null);
@@ -733,6 +753,7 @@ public final class ECP4 {
 
         return new ECP4(X1,Y);
     }
+ 
 
 /* Map octet string to curve point */
 	public static ECP4 mapit(byte[] h)
@@ -741,7 +762,7 @@ public final class ECP4 {
 		DBIG dx=DBIG.fromBytes(h);
         BIG x=dx.mod(q);
 		
-		ECP4 Q=hashit(x);
+		ECP4 Q=hap2point(x);
 		Q.cfp();
         return Q;
     }
