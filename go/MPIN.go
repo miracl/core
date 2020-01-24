@@ -338,7 +338,6 @@ func MPIN_CLIENT_1(sha int, date int, CLIENT_ID []byte, rng *core.RAND, X []byte
 	}
 
 	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,-1,CLIENT_ID)
-	//h := mhashit(sha, 0, CLIENT_ID)
 	P := ECP_mapit(h)
 
 	T := ECP_fromBytes(TOKEN)
@@ -355,7 +354,6 @@ func MPIN_CLIENT_1(sha int, date int, CLIENT_ID []byte, rng *core.RAND, X []byte
 		}
 		T.Add(W)
 		h = core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,int32(date),h)
-		//h = mhashit(sha, int32(date), h)
 		W = ECP_mapit(h)
 		if xID != nil {
 			P = G1mul(P, x)

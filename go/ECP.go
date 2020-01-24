@@ -31,7 +31,7 @@
 */
 
 package XXX
-
+//import "fmt"
 /* Elliptic Curve Point Structure */
 
 type ECP struct {
@@ -89,6 +89,7 @@ func NewECPbigint(ix *BIG, s int) *ECP {
 		ny := rhs.sqrt(hint)
 		if ny.redc().parity() != s {
 			ny.neg()
+			ny.norm()
 		}
 		E.y.copy(ny)
 	} else {
@@ -414,6 +415,7 @@ func ECP_fromBytes(b []byte) *ECP {
 		if Comp(py, p) >= 0 {
 			return NewECP()
 		}
+
 		return NewECPbigs(px, py)
 	}
 
@@ -1184,6 +1186,8 @@ func (E *ECP) Cfp() {
 func ECP_hap2point(h *BIG) *ECP {
 	var P *ECP
 	x := NewBIGcopy(h)
+
+
 	for true {
 		if CURVETYPE != MONTGOMERY {
 			P = NewECPbigint(x, 0)
@@ -1385,6 +1389,7 @@ func ECP_mapit(h []byte) *ECP {
 	q := NewBIGints(Modulus)
 	dx:= DBIG_fromBytes(h[:])
 	x:= dx.mod(q)
+
 	P:= ECP_hap2point(x)
 	P.Cfp()
 	return P

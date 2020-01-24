@@ -237,6 +237,7 @@ var ECP = function(ctx) {
                 ny = rhs.sqrt(hint);
                 if (ny.redc().parity() != s) {
                     ny.neg();
+                    ny.norm();
                 }
                 this.y = ny;
             } else {

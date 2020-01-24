@@ -117,7 +117,7 @@ impl ECP {
         if rhs.qr(Some(&mut hint)) == 1 {
             let mut ny = rhs.sqrt(Some(&hint));
             if ny.redc().parity() != s {
-                ny.neg()
+                ny.neg(); ny.norm()
             }
             E.y.copy(&ny);
         } else {

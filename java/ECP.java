@@ -243,7 +243,10 @@ public final class ECP {
 		if (rhs.qr(hint)==1)
 		{
 			FP ny=rhs.sqrt(hint);
-			if (ny.redc().parity()!=s) ny.neg();
+			if (ny.redc().parity()!=s) {
+                ny.neg();
+                ny.norm();
+            }
 			y.copy(ny);
 		}
 		else inf();

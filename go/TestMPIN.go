@@ -136,7 +136,7 @@ func mpin_BN254(rng *core.RAND) {
 
 	date := 0
 	if PERMITS {
-		date = BN254.Today()
+		date = 42 //BN254.Today()
 		/* Client gets "Time Token" permit from DTA */
 		BN254.MPIN_GET_CLIENT_PERMIT(sha, date, S[:], HCID, PERMIT[:])
 		fmt.Printf("Time Permit TP: 0x")
@@ -329,7 +329,8 @@ func mpin_BLS12383(rng *core.RAND) {
 	fmt.Printf("Client Secret CS: 0x")
 	printBinary(TOKEN[:])
 
-	/* Client extracts PIN from secret to create Token */
+	// Client extracts PIN from secret to create Token 
+
 	pin := 1234
 	fmt.Printf("Client extracts PIN= %d", pin)
 	fmt.Printf("\n")
@@ -349,12 +350,12 @@ func mpin_BLS12383(rng *core.RAND) {
 	date := 0
 	if PERMITS {
 		date = BLS12383.Today()
-		/* Client gets "Time Token" permit from DTA */
+		// Client gets "Time Token" permit from DTA 
 		BLS12383.MPIN_GET_CLIENT_PERMIT(sha, date, S[:], HCID, PERMIT[:])
 		fmt.Printf("Time Permit TP: 0x")
 		printBinary(PERMIT[:])
 
-		/* This encoding makes Time permit look random - Elligator squared */
+		// This encoding makes Time permit look random - Elligator squared 
 		BLS12383.MPIN_ENCODING(rng, PERMIT[:])
 		fmt.Printf("Encoded Time Permit TP: 0x")
 		printBinary(PERMIT[:])
@@ -402,7 +403,7 @@ func mpin_BLS12383(rng *core.RAND) {
 
 		if FULL {
 			HCID = BLS12383.MPIN_HASH_ID(sha, CLIENT_ID)
-			BLS12383.MPIN_GET_G1_MULTIPLE(rng, 1, R[:], HCID, Z[:]) /* Also Send Z=r.ID to Server, remember random r */
+			BLS12383.MPIN_GET_G1_MULTIPLE(rng, 1, R[:], HCID, Z[:]) // Also Send Z=r.ID to Server, remember random r 
 		}
 
 		rtn = BLS12383.MPIN_SERVER(sha, date, pHID, pHTID, Y[:], SST[:], pxID, pxCID, SEC[:], pE, pF, CLIENT_ID, timeValue)
@@ -412,11 +413,11 @@ func mpin_BLS12383(rng *core.RAND) {
 
 		if FULL {
 			HSID = BLS12383.MPIN_HASH_ID(sha, CLIENT_ID)
-			BLS12383.MPIN_GET_G1_MULTIPLE(rng, 0, W[:], prHID, T[:]) /* Also send T=w.ID to client, remember random w  */
+			BLS12383.MPIN_GET_G1_MULTIPLE(rng, 0, W[:], prHID, T[:]) // Also send T=w.ID to client, remember random w  
 		}
 	} else {
 		fmt.Printf("MPIN Multi Pass\n")
-		/* Send U=x.ID to server, and recreate secret from token and pin */
+		// Send U=x.ID to server, and recreate secret from token and pin 
 		rtn = BLS12383.MPIN_CLIENT_1(sha, date, CLIENT_ID, rng, X[:], pin, TOKEN[:], SEC[:], pxID, pxCID, pPERMIT)
 		if rtn != 0 {
 			fmt.Printf("FAILURE: CLIENT_1 rtn: %d\n", rtn)
@@ -424,28 +425,28 @@ func mpin_BLS12383(rng *core.RAND) {
 
 		if FULL {
 			HCID = BLS12383.MPIN_HASH_ID(sha, CLIENT_ID)
-			BLS12383.MPIN_GET_G1_MULTIPLE(rng, 1, R[:], HCID, Z[:]) /* Also Send Z=r.ID to Server, remember random r */
+			BLS12383.MPIN_GET_G1_MULTIPLE(rng, 1, R[:], HCID, Z[:]) // Also Send Z=r.ID to Server, remember random r 
 		}
 
-		/* Server calculates H(ID) and H(T|H(ID)) (if time permits enabled), and maps them to points on the curve HID and HTID resp. */
+		// Server calculates H(ID) and H(T|H(ID)) (if time permits enabled), and maps them to points on the curve HID and HTID resp. 
 		BLS12383.MPIN_SERVER_1(sha, date, CLIENT_ID, pHID, pHTID)
 
-		/* Server generates Random number Y and sends it to Client */
+		// Server generates Random number Y and sends it to Client 
 		BLS12383.MPIN_RANDOM_GENERATE(rng, Y[:])
 
 		if FULL {
 			HSID = BLS12383.MPIN_HASH_ID(sha, CLIENT_ID)
-			BLS12383.MPIN_GET_G1_MULTIPLE(rng, 0, W[:], prHID, T[:]) /* Also send T=w.ID to client, remember random w  */
+			BLS12383.MPIN_GET_G1_MULTIPLE(rng, 0, W[:], prHID, T[:]) // Also send T=w.ID to client, remember random w  
 		}
 
-		/* Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC */
+		// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
 		rtn = BLS12383.MPIN_CLIENT_2(X[:], Y[:], SEC[:])
 		if rtn != 0 {
 			fmt.Printf("FAILURE: CLIENT_2 rtn: %d\n", rtn)
 		}
 
-		/* Server Second pass. Inputs hashed client id, random Y, -(x+y)*SEC, xID and xCID and Server secret SST. E and F help kangaroos to find error. */
-		/* If PIN error not required, set E and F = null */
+		// Server Second pass. Inputs hashed client id, random Y, -(x+y)*SEC, xID and xCID and Server secret SST. E and F help kangaroos to find error. 
+		// If PIN error not required, set E and F = null 
 
 		rtn = BLS12383.MPIN_SERVER_2(date, pHID, pHTID, Y[:], SST[:], pxID, pxCID, SEC[:], pE, pF)
 
@@ -478,7 +479,7 @@ func mpin_BLS12383(rng *core.RAND) {
 			fmt.Printf("Server Key =  0x")
 			printBinary(SK[:])
 		}
-	}
+	} 
 }
 
 func mpin_BLS24479(rng *core.RAND) {

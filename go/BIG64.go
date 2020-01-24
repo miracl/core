@@ -35,9 +35,11 @@
 package XXX
 
 import "strconv"
+import "math/bits"
 import "github.com/miracl/core/go/core"
 
 //import "fmt"
+//import "os"
 
 //const MODBYTES uint = @NB@
 //const BASEBITS uint = @BASE@
@@ -88,13 +90,17 @@ func sqr(a *BIG) *DBIG {
 	for i := 0; i < NLEN; i++ {
 		carry = 0
 		for j := i + 1; j < NLEN; j++ {
+//if a.w[i]<0 {fmt.Printf("Negative m i in sqr\n")}
+//if a.w[j]<0 {fmt.Printf("Negative m j in sqr\n")}
 			carry, c.w[i+j] = muladd(2*a.w[i], a.w[j], carry, c.w[i+j])
 		}
 		c.w[NLEN+i] = carry
 	}
 
 	for i := 0; i < NLEN; i++ {
+//if a.w[i]<0 {fmt.Printf("Negative m s in sqr\n")}
 		top, bot := muladd(a.w[i], a.w[i], 0, c.w[2*i])
+
 		c.w[2*i] = bot
 		c.w[2*i+1] += top
 	}
@@ -119,6 +125,8 @@ func monty(md *BIG, mc Chunk, d *DBIG) *BIG {
 		carry = 0
 		for j := 0; j < NLEN; j++ {
 			carry, d.w[i+j] = muladd(m, md.w[j], carry, d.w[i+j])
+//if m<0 {fmt.Printf("Negative m in monty\n")}
+//if md.w[j]<0 {fmt.Printf("Negative m in monty\n")}
 		}
 		d.w[NLEN+i] += carry
 	}
@@ -133,23 +141,37 @@ func monty(md *BIG, mc Chunk, d *DBIG) *BIG {
 
 /* set this[i]+=x*y+c, and return high part */
 func muladd(a Chunk, b Chunk, c Chunk, r Chunk) (Chunk, Chunk) {
+
+	tp,bt := bits.Mul64(uint64(a),uint64(b))  // use math/bits intrinsic
+	bot := Chunk(bt&uint64(BMASK))
+	top := Chunk((tp << (64-BASEBITS)) | (bt >> BASEBITS))
+	bot += c; bot += r
+	carry := bot>>BASEBITS
+	bot &= BMASK
+	top+=carry
+	return top, bot
+
+/*
 	x0 := a & HMASK
 	x1 := (a >> HBITS)
 	y0 := b & HMASK
 	y1 := (b >> HBITS)
-	bot := x0 * y0
-	top := x1 * y1
+	botx := x0 * y0
+	topx := x1 * y1
 	mid := x0*y1 + x1*y0
 	x0 = mid & HMASK
 	x1 = (mid >> HBITS)
-	bot += x0 << HBITS
-	bot += c
-	bot += r
-	top += x1
-	carry := bot >> BASEBITS
-	bot &= BMASK
-	top += carry
-	return top, bot
+	botx += x0 << HBITS
+	botx += c
+	botx += r
+	topx += x1
+	carryx := botx >> BASEBITS
+	botx &= BMASK
+	topx += carryx
+
+	return topx, botx  
+*/
+
 }
 
 /************************************************************/
@@ -416,6 +438,8 @@ func (r *BIG) pxmul(c int) *DBIG {
 	carry := Chunk(0)
 	for j := 0; j < NLEN; j++ {
 		carry, m.w[j] = muladd(r.w[j], Chunk(c), carry, m.w[j])
+//if c<0 {fmt.Printf("Negative c in pxmul\n")}
+//if r.w[j]<0 {fmt.Printf("Negative c in pxmul\n")}
 	}
 	m.w[NLEN] = carry
 	return m
@@ -465,6 +489,8 @@ func (r *BIG) pmul(c int) Chunk {
 		ak := r.w[i]
 		r.w[i] = 0
 		carry, r.w[i] = muladd(ak, Chunk(c), carry, r.w[i])
+//if c<0 {fmt.Printf("Negative c in pmul\n")}
+//if ak<0 {fmt.Printf("Negative c in pmul\n")}
 	}
 	return carry
 }
