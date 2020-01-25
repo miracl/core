@@ -168,6 +168,23 @@ public class BIG {
     /* set this[i]+=x*y+c, and return high part */
 
     public static long[] muladd(long a, long b, long c, long r) {
+// need JDK 9+
+
+        long[] tb = new long[2];
+        long tp=Math.multiplyHigh(a,b);  // useful intrinsic
+        long bt=a*b;
+        long bot=bt&BMASK;
+        long top=(tp<<(64-CONFIG_BIG.BASEBITS)) | (bt >>> CONFIG_BIG.BASEBITS);
+        bot+=c; bot+=r;
+        long carry=bot >>> CONFIG_BIG.BASEBITS;
+        bot &= BMASK;
+        top+=carry;
+        tb[0] = top;
+        tb[1] = bot;
+        return tb;
+
+// alternate method
+/*
         long x0, x1, y0, y1;
         long[] tb = new long[2];
         x0 = a & HMASK;
@@ -186,7 +203,8 @@ public class BIG {
         top += carry;
         tb[0] = top;
         tb[1] = bot;
-        return tb;
+        return tb; 
+*/
     }
 
     /* this*=x, where x is >NEXCESS */
