@@ -1,13 +1,9 @@
 import os
 import sys
 
-deltext=""
-slashtext=""
-copytext=""
-if sys.platform.startswith("linux") or sys.platform.startswith("darwin") :
-	copytext="cp "
-	deltext="rm "
-	slashtext="/"
+copytext="cp "
+deltext="rm "
+slashtext="/"
 if sys.platform.startswith("win") :
 	copytext="copy "
 	deltext="del "
@@ -117,7 +113,7 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,ab,cs) :
 
 	replace(fpath+"config_curve.swift","@ST@",stw)
 	replace(fpath+"config_curve.swift","@SX@",sx)
-	replace(fpath+"config_curve.swift","@AB@",ab)	
+	replace(fpath+"config_curve.swift","@AB@",ab)
 
 	if cs == "128" :
 		replace(fpath+"config_curve.swift","@HT@","32")
@@ -242,7 +238,7 @@ while ptr<max:
 			break
 	if already:
 		continue
-	
+
 	selection.append(x)
 	ptr=ptr+1
 

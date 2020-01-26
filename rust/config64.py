@@ -1,13 +1,9 @@
 import os
 import sys
 
-deltext=""
-slashtext=""
-copytext=""
-if sys.platform.startswith("linux") or sys.platform.startswith("darwin") :
-	copytext="cp "
-	deltext="rm "
-	slashtext="/"
+copytext="cp "
+deltext="rm "
+slashtext="/"
 if sys.platform.startswith("win") :
 	copytext=">NUL copy "
 	deltext="del "
@@ -73,7 +69,7 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	itb=int(inbt+(8-inbt%8)%8)
 	inb=int(itb/8)
 	nb=str(inb)
-	
+
 	global deltext,slashtext,copytext
 	global cptr,chosen
 
@@ -206,7 +202,7 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 			os.system(copytext+"modpf256.rs "+fpath+"mod.rs")
 
 	else :
-		os.system(copytext+"modecc.rs "+fpath+"mod.rs")	
+		os.system(copytext+"modecc.rs "+fpath+"mod.rs")
 
 os.system("cargo new core")
 #os.system("mkdir core"+slashtext+"src")
@@ -288,7 +284,7 @@ while ptr<max:
 			break
 	if already:
 		continue
-	
+
 	selection.append(x)
 	ptr=ptr+1
 
@@ -302,7 +298,7 @@ while ptr<max:
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
 # pairing_friendly is BN, BLS or NOT (if not pairing friendly
 # ate bits is number of bits in Ate parameter (from romgen program)
-# g2_table size is number of entries in precomputed table 
+# g2_table size is number of entries in precomputed table
 # curve security is AES equiavlent, rounded up.
 
 	if x==1:

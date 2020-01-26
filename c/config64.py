@@ -1,13 +1,8 @@
 import os
 import sys
 
-deltext=""
-if sys.platform.startswith("linux")  :
-    deltext="rm"
-    copytext="cp"
-if sys.platform.startswith("darwin")  :
-    deltext="rm"
-    copytext="cp"
+deltext="rm"
+copytext="cp"
 if sys.platform.startswith("win") :
     deltext="del"
     copytext=">NUL copy"
@@ -61,33 +56,33 @@ def inline_mul2(N,base)  :
         for i in range(N-1,int(k/2),-1) :
             str+="+(dchunk)(a[{}]-a[{}])*(b[{}]-b[{}])".format(i, k - i, k - i, i)
         str+="; c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n".format(k)
-  
+
     str+="\tc[{}]=(chunk)co;\n".format(2 * N - 1)
     return str.replace("XXX",base)
-    
+
 def inline_sqr(N,base) :
     str=""
     str+="\n\tt=(dchunk)a[0]*a[0]; c[0]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX;\n"
 
     for k in range(1,N) :
         str+="\tt= "
-        for i in range(k,int(k/2),-1) : 
+        for i in range(k,int(k/2),-1) :
             str+="+(dchunk)a[{}]*a[{}]".format(i, k - i)
         str+="; t+=t; t+=co;"
-        if k % 2 == 0 : 
+        if k % 2 == 0 :
             str+=" t+=(dchunk)a[{}]*a[{}];".format(int(k/2), int(k/2))
         str+=" c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n".format(k)
     str+="\n"
 
     for k in range(N,2*N-2) :
         str+="\tt= "
-        for i in range(N-1,int(k/2),-1) : 
+        for i in range(N-1,int(k/2),-1) :
             str+="+(dchunk)a[{}]*a[{}]".format(i, k - i)
         str+="; t+=t; t+=co;"
         if k % 2 == 0 :
             str+=" t+=(dchunk)a[{}]*a[{}];".format(int(k/2),int(k/2))
         str+=" c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n".format(k)
-    
+
     str+="\tt=co; t+=(dchunk)a[{}]*a[{}]; c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n ".format(N-1,N-1,2*N-2)
 
     str+="\tc[{}]=(chunk)co;\n".format(2 * N - 1)
@@ -103,14 +98,14 @@ def inline_redc2(N,base) :
             str+="+(dchunk)(v[{}]-v[{}])*(md[{}]-md[{}])".format(k - i, i, i, k - i)
         str+="; v[{}]=((chunk)t*MC)&BMASK_XXX; t+=(dchunk)v[{}]*md[0]; ".format(k, k)
         str+=" dd[{}]=(dchunk)v[{}]*md[{}]; s+=dd[{}]; c=(t>>BASEBITS_XXX); \n".format(k, k, k, k)
-   
+
     str+="\n"
     for k in range(N,2*N-1) :
         str+="\tt=d[{}]+c+s".format(k)
         for i in range(N-1,int(k/2),-1) :
             str+="+(dchunk)(v[{}]-v[{}])*(md[{}]-md[{}])".format(k - i, i, i, k - i)
         str+="; a[{}]=(chunk)t&BMASK_XXX;  s-=dd[{}]; c=(t>>BASEBITS_XXX); \n".format(k - N, k - N + 1)
- 
+
     str+="\ta[{}]=d[{}]+((chunk)c&BMASK_XXX);\n".format(N-1,2*N-1)
     return str.replace("XXX",base)
 
@@ -121,12 +116,12 @@ def inline_redc1(N,base) :
     str+="\tv[0] = ((chunk)t * MC)&BMASK_XXX;\n"
     str+="\tt += (dchunk)v[0] * md[0];\n"
     str+="\tt = (t >> BASEBITS_XXX) + d[1];\n"
-   
+
     for i in range(1,N) :
         k=1
         str+="\tt += (dchunk)v[0] * md[{}] ".format(i)
         while k<i :
-            str+="+ (dchunk)v[{}]*md[{}]".format(k,i-k) 
+            str+="+ (dchunk)v[{}]*md[{}]".format(k,i-k)
             k+=1
         str+="; v[{}] = ((chunk)t * MC)&BMASK_XXX; ".format(i)
         str+="t += (dchunk)v[{}] * md[0]; ".format(i)
@@ -140,7 +135,7 @@ def inline_redc1(N,base) :
             k+=1
         str+="; a[{}] = (chunk)t & BMASK_XXX; ".format(i-N)
         str+="t = (t >> BASEBITS_XXX) + d[{}];\n".format(i+1)
-   
+
     str+="\ta[{}] = (chunk)t & BMASK_XXX;\n".format(N-1)
     return str.replace("XXX",base)
 
@@ -165,7 +160,7 @@ def rsaset(tb,tff,base,ml) :
 
     ib=int(base)
     inb=int(nb)
- 
+
     nlen=(1+((8*inb-1)//ib))
 
     bd=tb+"_"+base
@@ -262,7 +257,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
         sh=30
     replace(fnameh,"@SH@",str(sh))
 
-    fnameh="config_curve_"+tc+".h"    
+    fnameh="config_curve_"+tc+".h"
     os.system(copytext+" config_curve.h "+fnameh)
     replace(fnameh,"XXX",bd)
     replace(fnameh,"YYY",tf)
@@ -384,7 +379,7 @@ def curveset(nbt,tf,tc,base,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
             replace(fnamec,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            replace(fnameh,"ZZZ",tc)    
+            replace(fnameh,"ZZZ",tc)
             os.system("gcc -O3 -std=c99 -c "+fnamec)
 
             fnamec="ecp2_"+tc+".c"
@@ -685,14 +680,14 @@ while ptr<max:
             break
     if already:
         continue
-    
+
     selection.append(x)
     ptr=ptr+1
 
 # curveset(modulus_bits,field,curve,bits_in_base,modulus_mod_8,modulus_type,curve_type,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
-# for each curve give names for field and curve. In many cases the latter two will be the same. 
+# for each curve give names for field and curve. In many cases the latter two will be the same.
 # modulus_bits is the bit length of the modulus, typically the same or slightly smaller than "big"
-# Typically "field" describes the modulus, and "curve" is the common name for the elliptic curve   
+# Typically "field" describes the modulus, and "curve" is the common name for the elliptic curve
 # Next give the number base used for 32 bit architecture, as n where the base is 2^n (note that these must be fixed for the same "big" name, if is ever re-used for another curve)
 # m8 max m such that 2^m | modulus-1
 # modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
@@ -701,7 +696,7 @@ while ptr<max:
 # pairing_friendly is BN, BLS or NOT (if not pairing friendly)
 # if pairing friendly. M or D type twist, and sign of the family parameter x
 # ate bits is number of bits in Ate parameter (from romgen program)
-# g2_table size is number of entries in precomputed table 
+# g2_table size is number of entries in precomputed table
 # curve security is AES equiavlent, rounded up.
 
     if x==1:
@@ -933,7 +928,7 @@ if testing :
         os.system("./benchtest_all")
         os.system("./testnhs")
 
-#print("Your section was ");    
+#print("Your section was ");
 #for i in range(0,ptr):
 #    print (selection[i])
 
