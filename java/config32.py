@@ -1,18 +1,13 @@
 import os
 import sys
 
-deltext=""
-slashtext=""
-copytext=""
-makedir=""
+copytext="cp "
+deltext="rm "
+slashtext="/"
+makedir="mkdir -p "
 org1text="org"
 org2text="miracl"
 
-if (sys.platform.startswith("linux") or sys.platform.startswith("darwin"))  :
-	copytext="cp "
-	deltext="rm "
-	slashtext="/"
-	makedir="mkdir -p "
 if sys.platform.startswith("win") :
 	copytext=">NUL copy "
 	deltext="del "
@@ -63,10 +58,10 @@ def rsaset(tb,nb,base,ml) :
 	os.system(copytext+"FF32.java "+fpath+"FF.java")
 	os.system(copytext+"RSA.java "+fpath+"RSA.java")
 	os.system(copytext+"private_key.java "+fpath+"private_key.java")
-	os.system(copytext+"public_key.java "+fpath+"public_key.java")	
+	os.system(copytext+"public_key.java "+fpath+"public_key.java")
 	os.system(copytext+"TestRSA.java "+fpathTest+"TestRSA.java")	#ms
 	os.system(copytext+"TesttimeRSA.java "+fpathTest+"TesttimeRSA.java")	#ms
-	
+
 	replace(fpath+"CONFIG_BIG.java","XXX",tb)
 	replace(fpath+"CONFIG_FF.java","XXX",tb)
 	replace(fpath+"BIG.java","XXX",tb)
@@ -116,9 +111,9 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	os.system(copytext+"TestHPKE.java "+fpathTest+"TestHPKE.java")	#ms
 	os.system(copytext+"TesttimeECDH.java "+fpathTest+"TesttimeECDH.java")	#ms
 
-	replace(fpath+"CONFIG_BIG.java","XXX",tc)	
-	replace(fpath+"CONFIG_FIELD.java","XXX",tc)	
-	replace(fpath+"CONFIG_CURVE.java","XXX",tc)	
+	replace(fpath+"CONFIG_BIG.java","XXX",tc)
+	replace(fpath+"CONFIG_FIELD.java","XXX",tc)
+	replace(fpath+"CONFIG_CURVE.java","XXX",tc)
 	replace(fpath+"BIG.java","XXX",tc)
 	replace(fpath+"DBIG.java","XXX",tc)
 	replace(fpath+"FP.java","XXX",tc)
@@ -316,12 +311,12 @@ while ptr<max:
 			break
 	if already:
 		continue
-	
+
 	selection.append(x)
 	ptr=ptr+1
 
 # curveset(curve,bits_in_base,modulus_bits,modulus_mod_8,modulus_type,curve_type,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
-# where "curve" is the common name for the elliptic curve   
+# where "curve" is the common name for the elliptic curve
 # bits_in_base gives the number base used for 32 bit architectures, as n where the base is 2^n
 # modulus_bits is the actual bit length of the modulus.
 # modulus_mod_8 is the remainder when the modulus is divided by 8
@@ -331,7 +326,7 @@ while ptr<max:
 # pairing_friendly is BN, BLS or NOT (if not pairing friendly)
 # if pairing friendly. M or D type twist, and sign of the family parameter x
 # ate bits is number of bits in Ate parameter (from romgen program)
-# g2_table size is number of entries in precomputed table 
+# g2_table size is number of entries in precomputed table
 # curve security is AES equiavlent, rounded up.
 
 
@@ -418,22 +413,22 @@ while ptr<max:
 		curve_selected=True
 
 	if x==25:
-		curveset("BN254","28","254","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")  
+		curveset("BN254","28","254","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
 		pfcurve_selected=True
 	if x==26:
-		curveset("BN254CX","28","254","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")  
+		curveset("BN254CX","28","254","1","NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
 		pfcurve_selected=True
 	if x==27:
-		curveset("BLS12383","29","383","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128") 
+		curveset("BLS12383","29","383","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128")
 		pfcurve_selected=True
 
 	if x==28:
-		curveset("BLS12381","29","381","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128") 
+		curveset("BLS12381","29","381","1","NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128")
 		pfcurve_selected=True
 
 
 	if x==29:
-		curveset("FP256BN","28","256","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","NEGATIVEX","83","66","128") 
+		curveset("FP256BN","28","256","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","NEGATIVEX","83","66","128")
 		pfcurve_selected=True
 	if x==30:
 		curveset("FP512BN","29","512","1","NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","POSITIVEX","172","130","128")

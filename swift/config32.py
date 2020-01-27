@@ -1,13 +1,9 @@
 import os
 import sys
 
-deltext=""
-slashtext=""
-copytext=""
-if sys.platform.startswith("linux") or sys.platform.startswith("darwin") :
-	copytext="cp "
-	deltext="rm "
-	slashtext="/"
+copytext="cp "
+deltext="rm "
+slashtext="/"
 if sys.platform.startswith("win") :
 	copytext="copy "
 	deltext="del "
@@ -245,7 +241,7 @@ while ptr<max:
 			break
 	if already:
 		continue
-	
+
 	selection.append(x)
 	ptr=ptr+1
 

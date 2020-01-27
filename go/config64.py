@@ -1,17 +1,9 @@
 import os
 import sys
 
-deltext=""
-slashtext=""
-copytext=""
-if sys.platform.startswith("darwin")  :
-	copytext="cp "
-	deltext="rm "
-	slashtext="/"
-if sys.platform.startswith("linux")  :
-	copytext="cp "
-	deltext="rm "
-	slashtext="/"
+copytext="cp "
+deltext="rm "
+slashtext="/"
 if sys.platform.startswith("win") :
 	copytext=">NUL copy "
 	deltext="del "
@@ -158,7 +150,7 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 
 		replace(fpath+"FP2.go","XXX",tc)
 		replace(fpath+"FP4.go","XXX",tc)
-		
+
 		if cs == "128" :
 
 			os.system(copytext+"ECP2.go "+fpath+"ECP2.go")
@@ -296,7 +288,7 @@ while ptr<max:
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
 # pairing_friendly is BN, BLS or NOT (if not pairing friendly
 # ate bits is number of bits in Ate parameter (from romgen program)
-# g2_table size is number of entries in precomputed table 
+# g2_table size is number of entries in precomputed table
 # curve security is AES equiavlent, rounded up.
 
 

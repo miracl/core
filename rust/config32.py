@@ -1,13 +1,9 @@
 import os
 import sys
 
-deltext=""
-slashtext=""
-copytext=""
-if sys.platform.startswith("linux") or sys.platform.startswith("darwin") :
-	copytext="cp "
-	deltext="rm "
-	slashtext="/"
+copytext="cp "
+deltext="rm "
+slashtext="/"
 if sys.platform.startswith("win") :
 	copytext=">NUL copy "
 	deltext="del "
@@ -151,7 +147,7 @@ def curveset(tc,base,nbt,m8,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 		os.system(copytext+"fp4.rs "+fpath+"fp4.rs")
 		replace(fpath+"fp2.rs","xxx",tc)
 		replace(fpath+"fp4.rs","xxx",tc)
-		
+
 		if cs == "128" :
 			os.system(copytext+"ecp2.rs "+fpath+"ecp2.rs")
 			os.system(copytext+"fp12.rs "+fpath+"fp12.rs")
@@ -289,7 +285,7 @@ while ptr<max:
 			break
 	if already:
 		continue
-	
+
 	selection.append(x)
 	ptr=ptr+1
 
@@ -303,7 +299,7 @@ while ptr<max:
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
 # pairing_friendly is BN, BLS or NOT (if not pairing friendly
 # ate bits is number of bits in Ate parameter (from romgen program)
-# g2_table size is number of entries in precomputed table 
+# g2_table size is number of entries in precomputed table
 # curve security is AES equiavlent, rounded up.
 
 
