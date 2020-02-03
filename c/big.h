@@ -77,37 +77,37 @@ typedef chunk DBIG_XXX[DNLEN_XXX];   /**< Define type DBIG as array of chunks */
 
 /* BIG number prototypes */
 
-/**	@brief Tests for BIG equal to zero
+/**	@brief Tests for BIG equal to zero (Constant Time)
  *
 	@param x a BIG number
 	@return 1 if zero, else returns 0
  */
 extern int BIG_XXX_iszilch(BIG_XXX x);
-/**	@brief Tests for BIG equal to one
+/**	@brief Tests for BIG equal to one (Constant Time)
  *
 	@param x a BIG number
 	@return 1 if one, else returns 0
  */
 extern int BIG_XXX_isunity(BIG_XXX x);
-/**	@brief Tests for DBIG equal to zero
+/**	@brief Tests for DBIG equal to zero (Constant Time)
  *
 	@param x a DBIG number
 	@return 1 if zero, else returns 0
  */
 extern int BIG_XXX_diszilch(DBIG_XXX x);
-/**	@brief Outputs a BIG number to the console
+/**	@brief Outputs a BIG number to the console (Variable Time)
  *
 	@param x a BIG number
  */
 extern void BIG_XXX_output(BIG_XXX x);
-/**	@brief Outputs a BIG number to the console in raw form (for debugging)
+/**	@brief Outputs a BIG number to the console in raw form (Variable Time for debugging)
  *
 	@param x a BIG number
  */
 extern void BIG_XXX_rawoutput(BIG_XXX x);
 /**	@brief Conditional constant time swap of two BIG numbers
  *
-	Conditionally swaps parameters in constant time (without branching)
+	Conditionally swaps parameters in constant time (Constant Time without branching)
 	@param x a BIG number
 	@param y another BIG number
 	@param s swap takes place if not equal to 0
@@ -115,7 +115,7 @@ extern void BIG_XXX_rawoutput(BIG_XXX x);
 extern void BIG_XXX_cswap(BIG_XXX x, BIG_XXX y, int s);
 /**	@brief Conditional copy of BIG number
  *
-	Conditionally copies second parameter to the first (without branching)
+	Conditionally copies second parameter to the first (Constant Time without branching)
 	@param x a BIG number
 	@param y another BIG number
 	@param s copy takes place if not equal to 0
@@ -123,113 +123,113 @@ extern void BIG_XXX_cswap(BIG_XXX x, BIG_XXX y, int s);
 extern void BIG_XXX_cmove(BIG_XXX x, BIG_XXX y, int s);
 /**	@brief Conditional copy of DBIG number
  *
-	Conditionally copies second parameter to the first (without branching)
+	Conditionally copies second parameter to the first (Constant Time without branching)
 	@param x a DBIG number
 	@param y another DBIG number
 	@param s copy takes place if not equal to 0
  */
 extern void BIG_XXX_dcmove(BIG_XXX x, BIG_XXX y, int s);
-/**	@brief Convert from BIG number to byte array
+/**	@brief Convert from BIG number to byte array (Constant Time)
  *
 	@param a byte array
 	@param x BIG number
  */
 extern void BIG_XXX_toBytes(char *a, BIG_XXX x);
-/**	@brief Convert to BIG number from byte array
+/**	@brief Convert to BIG number from byte array (Constant Time)
  *
 	@param x BIG number
 	@param a byte array
  */
 extern void BIG_XXX_fromBytes(BIG_XXX x, char *a);
-/**	@brief Convert to BIG number from byte array of given length
+/**	@brief Convert to BIG number from byte array of given length (Variable Time)
  *
 	@param x BIG number
 	@param a byte array
 	@param s byte array length
  */
 extern void BIG_XXX_fromBytesLen(BIG_XXX x, char *a, int s);
-/**@brief Convert to DBIG number from byte array of given length
+/**@brief Convert to DBIG number from byte array of given length (Variable Time) 
  *
    @param x DBIG number
    @param a byte array
    @param s byte array length
  */
 extern void BIG_XXX_dfromBytesLen(DBIG_XXX x, char *a, int s);
-/**	@brief Outputs a DBIG number to the console
+/**	@brief Outputs a DBIG number to the console (Variable Time)
  *
 	@param x a DBIG number
  */
 extern void BIG_XXX_doutput(DBIG_XXX x);
 
-/**	@brief Outputs a DBIG number to the console
+/**	@brief Outputs a DBIG number to the console (Variable Time)
  *
 	@param x a DBIG number
  */
 extern void BIG_XXX_drawoutput(DBIG_XXX x);
 
-/**	@brief Copy BIG from Read-Only Memory to a BIG
+/**	@brief Copy BIG from Read-Only Memory to a BIG (Constant Time)
  *
 	@param x BIG number
 	@param y BIG number in ROM
  */
 extern void BIG_XXX_rcopy(BIG_XXX x, const BIG_XXX y);
-/**	@brief Copy BIG to another BIG
+/**	@brief Copy BIG to another BIG (Constant Time)
  *
 	@param x BIG number
 	@param y BIG number to be copied
  */
 extern void BIG_XXX_copy(BIG_XXX x, BIG_XXX y);
-/**	@brief Copy DBIG to another DBIG
+/**	@brief Copy DBIG to another DBIG (Constant Time)
  *
 	@param x DBIG number
 	@param y DBIG number to be copied
  */
 extern void BIG_XXX_dcopy(DBIG_XXX x, DBIG_XXX y);
-/**	@brief Copy BIG to upper half of DBIG
+/**	@brief Copy BIG to upper half of DBIG (Constant Time)
  *
 	@param x DBIG number
 	@param y BIG number to be copied
  */
 extern void BIG_XXX_dsucopy(DBIG_XXX x, BIG_XXX y);
-/**	@brief Copy BIG to lower half of DBIG
+/**	@brief Copy BIG to lower half of DBIG (Constant Time)
  *
 	@param x DBIG number
 	@param y BIG number to be copied
  */
 extern void BIG_XXX_dscopy(DBIG_XXX x, BIG_XXX y);
-/**	@brief Copy lower half of DBIG to a BIG
+/**	@brief Copy lower half of DBIG to a BIG (Constant Time)
  *
 	@param x BIG number
 	@param y DBIG number to be copied
  */
 extern void BIG_XXX_sdcopy(BIG_XXX x, DBIG_XXX y);
-/**	@brief Copy upper half of DBIG to a BIG
+/**	@brief Copy upper half of DBIG to a BIG (Constant Time)
  *
 	@param x BIG number
 	@param y DBIG number to be copied
  */
 extern void BIG_XXX_sducopy(BIG_XXX x, DBIG_XXX y);
-/**	@brief Set BIG to zero
+/**	@brief Set BIG to zero (Constant Time)
  *
 	@param x BIG number to be set to zero
  */
 extern void BIG_XXX_zero(BIG_XXX x);
-/**	@brief Set DBIG to zero
+/**	@brief Set DBIG to zero (Constant Time)
  *
 	@param x DBIG number to be set to zero
  */
 extern void BIG_XXX_dzero(DBIG_XXX x);
-/**	@brief Set BIG to one (unity)
+/**	@brief Set BIG to one (unity) (Constant Time)
  *
 	@param x BIG number to be set to one.
  */
 extern void BIG_XXX_one(BIG_XXX x);
-/**	@brief Set BIG to inverse mod 2^256
+/**	@brief Set BIG to inverse mod 2^256 (Constant Time)
  *
 	@param x BIG number to be inverted
  */
 extern void BIG_XXX_invmod2m(BIG_XXX x);
-/**	@brief Set BIG to sum of two BIGs - output not normalised
+/**	@brief Set BIG to sum of two BIGs - output not normalised (Constant Time)
  *
 	@param x BIG number, sum of other two
 	@param y BIG number
@@ -237,7 +237,7 @@ extern void BIG_XXX_invmod2m(BIG_XXX x);
  */
 extern void BIG_XXX_add(BIG_XXX x, BIG_XXX y, BIG_XXX z);
 
-/**	@brief Set BIG to logical or of two BIGs - output normalised
+/**	@brief Set BIG to logical or of two BIGs - output normalised (Constant Time)
  *
 	@param x BIG number, or of other two
 	@param y BIG number
@@ -245,47 +245,47 @@ extern void BIG_XXX_add(BIG_XXX x, BIG_XXX y, BIG_XXX z);
  */
 extern void BIG_XXX_or(BIG_XXX x, BIG_XXX y, BIG_XXX z);
 
-/**	@brief Increment BIG by a small integer - output not normalised
+/**	@brief Increment BIG by a small integer - output not normalised (Constant Time)
  *
 	@param x BIG number to be incremented
 	@param i integer
  */
 extern void BIG_XXX_inc(BIG_XXX x, int i);
-/**	@brief Set BIG to difference of two BIGs
+/**	@brief Set BIG to difference of two BIGs (Constant Time)
  *
 	@param x BIG number, difference of other two - output not normalised
 	@param y BIG number
 	@param z BIG number
  */
 extern void BIG_XXX_sub(BIG_XXX x, BIG_XXX y, BIG_XXX z);
-/**	@brief Decrement BIG by a small integer - output not normalised
+/**	@brief Decrement BIG by a small integer - output not normalised (Constant Time)
  *
 	@param x BIG number to be decremented
 	@param i integer
  */
 extern void BIG_XXX_dec(BIG_XXX x, int i);
-/**	@brief Set DBIG to sum of two DBIGs
+/**	@brief Set DBIG to sum of two DBIGs (Constant Time)
  *
 	@param x DBIG number, sum of other two - output not normalised
 	@param y DBIG number
 	@param z DBIG number
  */
 extern void BIG_XXX_dadd(DBIG_XXX x, DBIG_XXX y, DBIG_XXX z);
-/**	@brief Set DBIG to difference of two DBIGs
+/**	@brief Set DBIG to difference of two DBIGs (Constant Time)
  *
 	@param x DBIG number, difference of other two - output not normalised
 	@param y DBIG number
 	@param z DBIG number
  */
 extern void BIG_XXX_dsub(DBIG_XXX x, DBIG_XXX y, DBIG_XXX z);
-/**	@brief Multiply BIG by a small integer - output not normalised
+/**	@brief Multiply BIG by a small integer - output not normalised (Constant Time)
  *
 	@param x BIG number, product of other two
 	@param y BIG number
 	@param i small integer
  */
 extern void BIG_XXX_imul(BIG_XXX x, BIG_XXX y, int i);
-/**	@brief Multiply BIG by not-so-small small integer - output normalised
+/**	@brief Multiply BIG by not-so-small small integer - output normalised (Constant Time)
  *
 	@param x BIG number, product of other two
 	@param y BIG number
@@ -293,27 +293,27 @@ extern void BIG_XXX_imul(BIG_XXX x, BIG_XXX y, int i);
 	@return Overflowing bits
  */
 extern chunk BIG_XXX_pmul(BIG_XXX x, BIG_XXX y, int i);
-/**	@brief Divide BIG by 3 - output normalised
+/**	@brief Divide BIG by 3 - output normalised (Constant Time)
  *
 	@param x BIG number
 	@return Remainder
  */
 extern int BIG_XXX_div3(BIG_XXX x);
-/**	@brief Multiply BIG by even bigger small integer resulting in a DBIG - output normalised
+/**	@brief Multiply BIG by even bigger small integer resulting in a DBIG - output normalised (Constant Time)
  *
 	@param x DBIG number, product of other two
 	@param y BIG number
 	@param i small integer
  */
 extern void BIG_XXX_pxmul(DBIG_XXX x, BIG_XXX y, int i);
-/**	@brief Multiply BIG by another BIG resulting in DBIG - inputs normalised and output normalised
+/**	@brief Multiply BIG by another BIG resulting in DBIG - inputs normalised and output normalised (Constant Time)
  *
 	@param x DBIG number, product of other two
 	@param y BIG number
 	@param z BIG number
  */
 extern void BIG_XXX_mul(DBIG_XXX x, BIG_XXX y, BIG_XXX z);
-/**	@brief Multiply BIG by another BIG resulting in another BIG - inputs normalised and output normalised
+/**	@brief Multiply BIG by another BIG resulting in another BIG - inputs normalised and output normalised (Constant Time)
  *
 	Note that the product must fit into a BIG, and x must be distinct from y and z
 	@param x BIG number, product of other two
@@ -321,14 +321,14 @@ extern void BIG_XXX_mul(DBIG_XXX x, BIG_XXX y, BIG_XXX z);
 	@param z BIG number
  */
 extern void BIG_XXX_smul(BIG_XXX x, BIG_XXX y, BIG_XXX z);
-/**	@brief Square BIG resulting in a DBIG - input normalised and output normalised
+/**	@brief Square BIG resulting in a DBIG - input normalised and output normalised (Constant Time)
  *
 	@param x DBIG number, square of a BIG
 	@param y BIG number to be squared
  */
 extern void BIG_XXX_sqr(DBIG_XXX x, BIG_XXX y);
 
-/**	@brief Montgomery reduction of a DBIG to a BIG  - input normalised and output normalised
+/**	@brief Montgomery reduction of a DBIG to a BIG  - input normalised and output normalised (Constant Time)
  *
 	@param a BIG number, reduction of a BIG
 	@param md BIG number, the modulus
@@ -337,13 +337,13 @@ extern void BIG_XXX_sqr(DBIG_XXX x, BIG_XXX y);
  */
 extern void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d);
 
-/**	@brief Shifts a BIG left by any number of bits - input must be normalised, output normalised
+/**	@brief Shifts a BIG left by any number of bits - input must be normalised, output normalised (Constant Time)
  *
 	@param x BIG number to be shifted
 	@param s Number of bits to shift
  */
 extern void BIG_XXX_shl(BIG_XXX x, int s);
-/**	@brief Fast shifts a BIG left by a small number of bits - input must be normalised, output will be normalised
+/**	@brief Fast shifts a BIG left by a small number of bits - input must be normalised, output will be normalised (Constant Time)
  *
 	The number of bits to be shifted must be less than BASEBITS
 	@param x BIG number to be shifted
@@ -351,20 +351,20 @@ extern void BIG_XXX_shl(BIG_XXX x, int s);
 	@return Overflow bits
  */
 extern int BIG_XXX_fshl(BIG_XXX x, int s);
-/**	@brief Shifts a DBIG left by any number of bits - input must be normalised, output normalised
+/**	@brief Shifts a DBIG left by any number of bits - input must be normalised, output normalised (Constant Time)
  *
 	@param x DBIG number to be shifted
 	@param s Number of bits to shift
  */
 extern void BIG_XXX_dshl(DBIG_XXX x, int s);
-/**	@brief Shifts a BIG right by any number of bits - input must be normalised, output normalised
+/**	@brief Shifts a BIG right by any number of bits - input must be normalised, output normalised (Constant Time)
  *
 	@param x BIG number to be shifted
 	@param s Number of bits to shift
  */
 extern void BIG_XXX_shr(BIG_XXX x, int s);
 
-/**	@brief Fast time-critical combined shift by 1 bit, subtract and normalise
+/**	@brief Fast time-critical combined shift by 1 bit, subtract and normalise (Constant Time)
  *
 	@param r BIG number normalised output
 	@param a BIG number to be subtracted from
@@ -373,7 +373,7 @@ extern void BIG_XXX_shr(BIG_XXX x, int s);
  */
 extern int BIG_XXX_ssn(BIG_XXX r, BIG_XXX a, BIG_XXX m);
 
-/**	@brief Fast shifts a BIG right by a small number of bits - input must be normalised, output will be normalised
+/**	@brief Fast shifts a BIG right by a small number of bits - input must be normalised, output will be normalised (Constant Time)
  *
 	The number of bits to be shifted must be less than BASEBITS
 	@param x BIG number to be shifted
@@ -381,13 +381,13 @@ extern int BIG_XXX_ssn(BIG_XXX r, BIG_XXX a, BIG_XXX m);
 	@return Shifted out bits
  */
 extern int BIG_XXX_fshr(BIG_XXX x, int s);
-/**	@brief Shifts a DBIG right by any number of bits - input must be normalised, output normalised
+/**	@brief Shifts a DBIG right by any number of bits - input must be normalised, output normalised (Constant Time)
  *
 	@param x DBIG number to be shifted
 	@param s Number of bits to shift
  */
 extern void BIG_XXX_dshr(DBIG_XXX x, int s);
-/**	@brief Splits a DBIG into two BIGs - input must be normalised, outputs normalised
+/**	@brief Splits a DBIG into two BIGs - input must be normalised, outputs normalised (Constant Time as used)
  *
 	Internal function. The value of s must be approximately in the middle of the DBIG.
 	Typically used to extract z mod 2^MODBITS and z/2^MODBITS
@@ -398,59 +398,59 @@ extern void BIG_XXX_dshr(DBIG_XXX x, int s);
 	@return carry-out from top half
  */
 extern chunk BIG_XXX_split(BIG_XXX x, BIG_XXX y, DBIG_XXX z, int s);
-/**	@brief Normalizes a BIG number - output normalised
+/**	@brief Normalizes a BIG number - output normalised (Constant Time)
  *
 	All digits of the input BIG are reduced mod 2^BASEBITS
 	@param x BIG number to be normalised
  */
 extern chunk BIG_XXX_norm(BIG_XXX x);
-/**	@brief Normalizes a DBIG number - output normalised
+/**	@brief Normalizes a DBIG number - output normalised (Constant Time)
  *
 	All digits of the input DBIG are reduced mod 2^BASEBITS
 	@param x DBIG number to be normalised
  */
 extern void BIG_XXX_dnorm(DBIG_XXX x);
-/**	@brief Compares two BIG numbers. Inputs must be normalised externally
+/**	@brief Compares two BIG numbers. Inputs must be normalised externally (Constant Time)
  *
 	@param x first BIG number to be compared
 	@param y second BIG number to be compared
 	@return -1 is x<y, 0 if x=y, 1 if x>y
  */
 extern int BIG_XXX_comp(BIG_XXX x, BIG_XXX y);
-/**	@brief Compares two DBIG numbers. Inputs must be normalised externally
+/**	@brief Compares two DBIG numbers. Inputs must be normalised externally (Constant Time)
  *
 	@param x first DBIG number to be compared
 	@param y second DBIG number to be compared
 	@return -1 is x<y, 0 if x=y, 1 if x>y
  */
 extern int BIG_XXX_dcomp(DBIG_XXX x, DBIG_XXX y);
-/**	@brief Calculate number of bits in a BIG - output normalised
+/**	@brief Calculate number of bits in a BIG - output normalised (Variable Time)
  *
 	@param x BIG number
 	@return Number of bits in x
  */
 extern int BIG_XXX_nbits(BIG_XXX x);
-/**	@brief Calculate number of bits in a DBIG - output normalised
+/**	@brief Calculate number of bits in a DBIG - output normalised (Variable Time)
  *
 	@param x DBIG number
 	@return Number of bits in x
  */
 extern int BIG_XXX_dnbits(DBIG_XXX x);
-/**	@brief Reduce x mod n - input and output normalised
+/**	@brief Reduce x mod n - input and output normalised (Variable Time)
  *
 	Slow but rarely used
 	@param x BIG number to be reduced mod n
 	@param n The modulus
  */
-extern void BIG_XXX_mod(BIG_XXX x, BIG_XXX n);
-/**	@brief Divide x by n - output normalised
+extern void BIG_XXX_mod(BIG_XXX x, BIG_XXX n); 
+/**	@brief Divide x by n - output normalised (Variable Time)
  *
 	Slow but rarely used
 	@param x BIG number to be divided by n
 	@param n The Divisor
  */
 extern void BIG_XXX_sdiv(BIG_XXX x, BIG_XXX n);
-/**	@brief  x=y mod n - output normalised
+/**	@brief  x=y mod n - output normalised (Variable Time)
  *
 	Slow but rarely used. y is destroyed.
 	@param x BIG number, on exit = y mod n
@@ -458,7 +458,7 @@ extern void BIG_XXX_sdiv(BIG_XXX x, BIG_XXX n);
 	@param n Modulus
  */
 extern void BIG_XXX_dmod(BIG_XXX x, DBIG_XXX y, BIG_XXX n);
-/**	@brief  x=y/n - output normalised
+/**	@brief  x=y/n - output normalised (Variable Time)
  *
 	Slow but rarely used. y is destroyed.
 	@param x BIG number, on exit = y/n
@@ -466,34 +466,34 @@ extern void BIG_XXX_dmod(BIG_XXX x, DBIG_XXX y, BIG_XXX n);
 	@param n Modulus
  */
 extern void BIG_XXX_ddiv(BIG_XXX x, DBIG_XXX y, BIG_XXX n);
-/**	@brief  return parity of BIG, that is the least significant bit
+/**	@brief  return parity of BIG, that is the least significant bit (Constant Time)
  *
 	@param x BIG number
 	@return 0 or 1
  */
 extern int BIG_XXX_parity(BIG_XXX x);
-/**	@brief  return i-th of BIG
+/**	@brief  return i-th of BIG (Constant Time)
  *
 	@param x BIG number
 	@param i the bit of x to be returned
 	@return 0 or 1
  */
 extern int BIG_XXX_bit(BIG_XXX x, int i);
-/**	@brief  return least significant bits of a BIG
+/**	@brief  return least significant bits of a BIG (Constant Time)
  *
 	@param x BIG number
 	@param n number of bits to return. Assumed to be less than BASEBITS.
 	@return least significant n bits as an integer
  */
 extern int BIG_XXX_lastbits(BIG_XXX x, int n);
-/**	@brief  Create a random BIG from a random number generator
+/**	@brief  Create a random BIG from a random number generator (Constant Time)
  *
 	Assumes that the random number generator has been suitably initialised
 	@param x BIG number, on exit a random number
 	@param r A pointer to a Cryptographically Secure Random Number Generator
  */
 extern void BIG_XXX_random(BIG_XXX x, csprng *r);
-/**	@brief  Create an unbiased random BIG from a random number generator, reduced with respect to a modulus
+/**	@brief  Create an unbiased random BIG from a random number generator, reduced with respect to a modulus (Constant Time as used)
  *
 	Assumes that the random number generator has been suitably initialised
 	@param x BIG number, on exit a random number
@@ -502,7 +502,7 @@ extern void BIG_XXX_random(BIG_XXX x, csprng *r);
  */
 extern void BIG_XXX_randomnum(BIG_XXX x, BIG_XXX n, csprng *r);
 
-/**	@brief  Create an unbiased random BIG from a random number generator, reduced with respect to a modulus and truncated to max bit length
+/**	@brief  Create an unbiased random BIG from a random number generator, reduced with respect to a modulus and truncated to max bit length (Constant Time as used)
  *
 	Assumes that the random number generator has been suitably initialised
 	@param x BIG number, on exit a random number
@@ -523,16 +523,16 @@ extern void BIG_XXX_randtrunc(BIG_XXX x, BIG_XXX n, int t, csprng *r);
 	return + or - 1, 3 or 5
 */
 
-/**	@brief  Calculate x=y*z mod n
+/**	@brief  Calculate x=y*z mod n (Variable Time)
  *
-	Slow method for modular multiplication
+	Slow method for modular multiplication 
 	@param x BIG number, on exit = y*z mod n
 	@param y BIG number
 	@param z BIG number
 	@param n The BIG Modulus
  */
 extern void BIG_XXX_modmul(BIG_XXX x, BIG_XXX y, BIG_XXX z, BIG_XXX n);
-/**	@brief  Calculate x=y/z mod n
+/**	@brief  Calculate x=y/z mod n (Variable Time)
  *
 	Slow method for modular division
 	@param x BIG number, on exit = y/z mod n
@@ -541,7 +541,7 @@ extern void BIG_XXX_modmul(BIG_XXX x, BIG_XXX y, BIG_XXX z, BIG_XXX n);
 	@param n The BIG Modulus
  */
 extern void BIG_XXX_moddiv(BIG_XXX x, BIG_XXX y, BIG_XXX z, BIG_XXX n);
-/**	@brief  Calculate x=y^2 mod n
+/**	@brief  Calculate x=y^2 mod n (Variable Time)
  *
 	Slow method for modular squaring
 	@param x BIG number, on exit = y^2 mod n
@@ -549,7 +549,7 @@ extern void BIG_XXX_moddiv(BIG_XXX x, BIG_XXX y, BIG_XXX z, BIG_XXX n);
 	@param n The BIG Modulus
  */
 extern void BIG_XXX_modsqr(BIG_XXX x, BIG_XXX y, BIG_XXX n);
-/**	@brief  Calculate x=-y mod n
+/**	@brief  Calculate x=-y mod n (Variable Time)
  *
 	Modular negation
 	@param x BIG number, on exit = -y mod n
@@ -558,7 +558,7 @@ extern void BIG_XXX_modsqr(BIG_XXX x, BIG_XXX y, BIG_XXX n);
  */
 extern void BIG_XXX_modneg(BIG_XXX x, BIG_XXX y, BIG_XXX n);
 
-/**	@brief  Calculate x=y+z mod n
+/**	@brief  Calculate x=y+z mod n (Variable Time)
  *
 	Slow method for modular addition
 	@param x BIG number, on exit = y+z mod n
@@ -568,14 +568,14 @@ extern void BIG_XXX_modneg(BIG_XXX x, BIG_XXX y, BIG_XXX n);
  */
 extern void BIG_XXX_modadd(BIG_XXX x, BIG_XXX y, BIG_XXX z, BIG_XXX n);
 
-/**	@brief  Calculate jacobi Symbol (x/y)
+/**	@brief  Calculate jacobi Symbol (x/y) (Variable Time)
  *
 	@param x BIG number
 	@param y BIG number
 	@return Jacobi symbol, -1,0 or 1
  */
 extern int BIG_XXX_jacobi(BIG_XXX x, BIG_XXX y);
-/**	@brief  Calculate x=1/y mod n
+/**	@brief  Calculate x=1/y mod n (Variable Time)
  *
 	Modular Inversion - This is slow. Uses binary method.
 	@param x BIG number, on exit = 1/y mod n
@@ -583,7 +583,7 @@ extern int BIG_XXX_jacobi(BIG_XXX x, BIG_XXX y);
 	@param n The BIG Modulus
  */
 extern void BIG_XXX_invmodp(BIG_XXX x, BIG_XXX y, BIG_XXX n);
-/** @brief Calculate x=x mod 2^m
+/** @brief Calculate x=x mod 2^m (Variable Time)
  *
 	Truncation
 	@param x BIG number, on reduced mod 2^m
@@ -591,7 +591,7 @@ extern void BIG_XXX_invmodp(BIG_XXX x, BIG_XXX y, BIG_XXX n);
 */
 extern void BIG_XXX_mod2m(BIG_XXX x, int m);
 
-/**	@brief Calculates a*b+c+*d
+/**	@brief Calculates a*b+c+*d (Constant Time)
  *
 	Calculate partial product of a.b, add in carry c, and add total to d
 	@param x multiplier
