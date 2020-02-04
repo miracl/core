@@ -15,6 +15,11 @@ contained. MIRACL Core was designed from the ground up with side-channel
 attack resistance in mind. Multiple curves can be supported in a single
 application. Read the PDF manual for more details.
 
+MIRACL Core is currently available in the C, C++, Go, Rust, Python, Java, 
+Javascript and Swift programming languages. Via code translators it
+can be easily translated to other languages (like wasm and C#). It is
+particularly suitable for smaller devices, and those supported by the 
+Arduino infrastructure.
 
 MIRACL Core features several improvements over AMCL. We will still maintain
 AMCL but not develop it further.
