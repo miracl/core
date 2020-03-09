@@ -666,6 +666,7 @@ void ECP2_ZZZ_hap2point(ECP2_ZZZ *Q,BIG_XXX h)
         FP2_YYY_from_BIGs(&X,one,hv);
         if (ECP2_ZZZ_setx(Q,&X,0)) break;
         BIG_XXX_inc(hv,1);
+        BIG_XXX_norm(hv);
     }
 }
 

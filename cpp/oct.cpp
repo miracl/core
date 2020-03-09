@@ -399,13 +399,14 @@ void core::OCT_rand(octet *x, csprng *RNG, int len)
 /* Convert an octet to a hex string */
 void core::OCT_toHex(octet *src, char *dst)
 {
-    int i;
+    int i,len=src->len;
     unsigned char ch;
-    for (i = 0; i < src->len; i++)
+    for (i = 0; i < len; i++)
     {
         ch = src->val[i];
         sprintf(&dst[i * 2], "%02x", ch);
     }
+    dst[2*len]='\0';
 }
 
 static int char2int(char input)
@@ -425,7 +426,6 @@ void core::OCT_fromHex(octet *dst, char *src)
     int i = 0;
     int j = 0;
     OCT_clear(dst);
-
     while (src[j] != 0)
     {
         dst->val[i++] = char2int(src[j]) * 16 + char2int(src[j + 1]);

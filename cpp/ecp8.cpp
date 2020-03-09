@@ -962,6 +962,7 @@ void ZZZ::ECP8_hap2point(ECP8 *Q,BIG h)
 		FP8_from_FP4(&X8,&X4);
         if (ECP8_setx(Q,&X8,0)) break;
         BIG_inc(hv,1);
+        BIG_norm(hv);
     }
 }
 

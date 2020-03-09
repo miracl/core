@@ -955,6 +955,7 @@ void ECP8_ZZZ_hap2point(ECP8_ZZZ *Q,BIG_XXX h)
 		FP8_YYY_from_FP4(&X8,&X4);
         if (ECP8_ZZZ_setx(Q,&X8,0)) break;
         BIG_XXX_inc(hv,1);
+        BIG_XXX_norm(hv);
     }
 }
 

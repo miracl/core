@@ -773,6 +773,7 @@ void ECP4_ZZZ_hap2point(ECP4_ZZZ *Q,BIG_XXX h)
 		FP4_YYY_from_FP2(&X4,&X2);
         if (ECP4_ZZZ_setx(Q,&X4,0)) break;
         BIG_XXX_inc(hv,1);
+        BIG_XXX_norm(hv);
     }
 }
 
