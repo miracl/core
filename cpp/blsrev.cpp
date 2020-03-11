@@ -62,6 +62,7 @@ static void hash_to_base(int hash,int hlen,BIG u,octet *DST,octet *M, int ctr)
 
     OCT_jstring(&INFO,(char *)"H2C");
     OCT_jint(&INFO,ctr,1);
+
     HKDF_Extract(hash,hlen,&PRK,DST,M);
     HKDF_Expand(hash,hlen,&OKM,L,&PRK,&INFO);
 
@@ -82,8 +83,9 @@ static void BLS_HASH_TO_POINT(ECP2 *P, octet *M)
     hash_to_base(MC_SHA2,HASH_TYPE_ZZZ,u,&DST,M,0);
     hash_to_base(MC_SHA2,HASH_TYPE_ZZZ,u1,&DST,M,1);
 
-    ECP2_hashit(P,u);
-    ECP2_hashit(&P1,u1);
+    ECP2_map2point(P,u);
+    ECP2_map2point(&P1,u1);
+
     ECP2_add(P,&P1);
     ECP2_cfp(P);
     ECP2_affine(P);
@@ -119,6 +121,7 @@ int ZZZ::BLS_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W)
     BIG_toBytes(S->val, s);
     S->len = MODBYTES_XXX;
     PAIR_G1mul(&G, s);
+
     ECP_toOctet(W, &G, true);
     return BLS_OK;
 }

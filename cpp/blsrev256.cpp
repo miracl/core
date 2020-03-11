@@ -81,8 +81,8 @@ static void BLS_HASH_TO_POINT(ECP8 *P, octet *M)
     hash_to_base(MC_SHA2,HASH_TYPE_ZZZ,u,&DST,M,0);
     hash_to_base(MC_SHA2,HASH_TYPE_ZZZ,u1,&DST,M,1);
 
-    ECP8_hashit(P,u);
-    ECP8_hashit(&P1,u1);
+    ECP8_map2point(P,u);
+    ECP8_map2point(&P1,u1);
     ECP8_add(P,&P1);
     ECP8_cfp(P);
     ECP8_affine(P);
