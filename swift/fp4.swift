@@ -174,7 +174,11 @@ public struct FP4 {
 
     func sign() -> Int
     {
-        return a.geta().redc().parity()
+        var p1=a.sign()
+        let p2=b.sign()
+        let u=a.iszilch() ? 1 : 0
+	    p1^=(p1^p2)&u
+	    return p1
     }
 
     /* set self=-self */

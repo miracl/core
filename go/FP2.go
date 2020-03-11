@@ -162,8 +162,18 @@ func (F *FP2) one() {
 }
 /* Return sign */
 func (F *FP2) sign() int {
-	m := F.a.redc()
-	return m.parity() 
+	p1 := F.a.sign();
+	p2 := F.b.sign();
+	var u int
+	if F.a.iszilch() {
+		u=1;
+	} else {
+		u=0;
+	}
+	p1^=(p1^p2)&u;
+	return p1;
+//	m := F.a.redc()
+//	return m.parity() 
 }
 
 /* negate this mod Modulus */

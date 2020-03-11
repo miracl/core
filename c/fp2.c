@@ -41,8 +41,7 @@
 /* SU= 8 */
 int FP2_YYY_iszilch(FP2_YYY *x)
 {
-    if (FP_YYY_iszilch(&(x->a)) && FP_YYY_iszilch(&(x->b))) return 1;
-    return 0;
+    return (FP_YYY_iszilch(&(x->a)) & FP_YYY_iszilch(&(x->b)));
 }
 
 /* Move b to a if d=1 */
@@ -58,8 +57,7 @@ int FP2_YYY_isunity(FP2_YYY *x)
 {
     FP_YYY one;
     FP_YYY_one(&one);
-    if (FP_YYY_equals(&(x->a), &one) && FP_YYY_iszilch(&(x->b))) return 1;
-    return 0;
+    return (FP_YYY_equals(&(x->a), &one) & FP_YYY_iszilch(&(x->b)));
 }
 
 /* SU= 8 */
@@ -74,9 +72,7 @@ void FP2_YYY_reduce(FP2_YYY *w)
 /* SU= 16 */
 int FP2_YYY_equals(FP2_YYY *x, FP2_YYY *y)
 {
-    if (FP_YYY_equals(&(x->a), &(y->a)) && FP_YYY_equals(&(x->b), &(y->b)))
-        return 1;
-    return 0;
+    return (FP_YYY_equals(&(x->a), &(y->a)) & FP_YYY_equals(&(x->b), &(y->b)));
 }
 
 /* Create FP2 from two FPs */
@@ -152,9 +148,11 @@ void FP2_YYY_one(FP2_YYY *w)
 
 int FP2_YYY_sign(FP2_YYY *w)
 {
-    BIG_XXX m;
-    FP_YYY_redc(m,&(w->a));
-    return BIG_XXX_parity(m);
+    int p1,p2;
+    p1=FP_YYY_sign(&(w->a));
+    p2=FP_YYY_sign(&(w->b));
+    p1 ^= (p1 ^ p2)&FP_YYY_iszilch(&(w->a));
+    return p1;
 }
 
 /* Set w=-x */

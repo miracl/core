@@ -43,16 +43,14 @@ using namespace XXX;
 /* SU= 8 */
 int YYY::FP4_iszilch(FP4 *x)
 {
-    if (FP2_iszilch(&(x->a)) && FP2_iszilch(&(x->b))) return 1;
-    return 0;
+    return (FP2_iszilch(&(x->a)) & FP2_iszilch(&(x->b)));
 }
 
 /* test x==1 ? */
 /* SU= 8 */
 int YYY::FP4_isunity(FP4 *x)
 {
-    if (FP2_isunity(&(x->a)) && FP2_iszilch(&(x->b))) return 1;
-    return 0;
+    return (FP2_isunity(&(x->a)) & FP2_iszilch(&(x->b)));
 }
 
 /* test is w real? That is in a+ib test b is zero */
@@ -65,9 +63,7 @@ int YYY::FP4_isreal(FP4 *w)
 /* SU= 16 */
 int YYY::FP4_equals(FP4 *x, FP4 *y)
 {
-    if (FP2_equals(&(x->a), &(y->a)) && FP2_equals(&(x->b), &(y->b)))
-        return 1;
-    return 0;
+    return (FP2_equals(&(x->a), &(y->a)) & FP2_equals(&(x->b), &(y->b)));
 }
 
 /* set FP4 from two FP2s */
@@ -129,9 +125,14 @@ void YYY::FP4_one(FP4 *w)
 
 int YYY::FP4_sign(FP4 *w)
 {
-    BIG m;
-    FP_redc(m,&(w->a.a));
-    return BIG_parity(m);
+    int p1,p2;
+    p1=FP2_sign(&(w->a));
+    p2=FP2_sign(&(w->b));
+    p1 ^= (p1 ^ p2)&FP2_iszilch(&(w->a));
+    return p1;
+//    BIG m;
+//    FP_redc(m,&(w->a.a));
+//    return BIG_parity(m);
 }
 
 /* Set w=-x */

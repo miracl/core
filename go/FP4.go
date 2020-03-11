@@ -159,8 +159,16 @@ func (F *FP4) one() {
 
 /* Return sign */
 func (F *FP4) sign() int {
-	m := F.a.a.redc()
-	return m.parity() 
+	p1 := F.a.sign();
+	p2 := F.b.sign();
+	var u int
+	if F.a.iszilch() {
+		u=1;
+	} else {
+		u=0;
+	}
+	p1^=(p1^p2)&u;
+	return p1;
 }
 
 /* set this=-this */

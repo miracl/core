@@ -145,7 +145,11 @@ var FP2 = function(ctx) {
         },
 
         sign: function() {
-            return this.a.redc().parity();
+            var p1=this.a.sign();
+            var p2=this.b.sign();
+            var u=this.a.iszilch()? 1:0;
+            p1^=(p1^p2)&u;
+            return p1;
         },
 
         /* negate this */

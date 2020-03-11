@@ -172,7 +172,11 @@ public final class FP2 {
 /* get sign */ 
     public int sign()
     {
-        return a.redc().parity();
+        int p1=a.sign();
+        int p2=b.sign();
+        int u=a.iszilch()? 1:0;
+        p1^=(p1^p2)&u;
+        return p1;
     }
 
 /* negate this mod Modulus */

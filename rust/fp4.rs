@@ -175,7 +175,11 @@ impl FP4 {
     }
 
     pub fn sign(&mut self)  -> isize {
-        return self.geta().geta().parity();
+        let mut p1=self.a.sign();
+        let p2=self.b.sign();
+        let u=self.a.iszilch() as isize;
+	    p1^=(p1^p2)&u;
+	    return p1;
     }
 
     /* negate self mod Modulus */

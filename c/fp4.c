@@ -41,16 +41,14 @@
 /* SU= 8 */
 int FP4_YYY_iszilch(FP4_YYY *x)
 {
-    if (FP2_YYY_iszilch(&(x->a)) && FP2_YYY_iszilch(&(x->b))) return 1;
-    return 0;
+    return (FP2_YYY_iszilch(&(x->a)) & FP2_YYY_iszilch(&(x->b)));
 }
 
 /* test x==1 ? */
 /* SU= 8 */
 int FP4_YYY_isunity(FP4_YYY *x)
 {
-    if (FP2_YYY_isunity(&(x->a)) && FP2_YYY_iszilch(&(x->b))) return 1;
-    return 0;
+    return (FP2_YYY_isunity(&(x->a)) & FP2_YYY_iszilch(&(x->b)));
 }
 
 /* test is w real? That is in a+ib test b is zero */
@@ -63,9 +61,7 @@ int FP4_YYY_isreal(FP4_YYY *w)
 /* SU= 16 */
 int FP4_YYY_equals(FP4_YYY *x, FP4_YYY *y)
 {
-    if (FP2_YYY_equals(&(x->a), &(y->a)) && FP2_YYY_equals(&(x->b), &(y->b)))
-        return 1;
-    return 0;
+    return (FP2_YYY_equals(&(x->a), &(y->a)) & FP2_YYY_equals(&(x->b), &(y->b)));
 }
 
 /* set FP4 from two FP2s */
@@ -127,9 +123,11 @@ void FP4_YYY_one(FP4_YYY *w)
 
 int FP4_YYY_sign(FP4_YYY *w)
 {
-    BIG_XXX m;
-    FP_YYY_redc(m,&(w->a.a));
-    return BIG_XXX_parity(m);
+    int p1,p2;
+    p1=FP2_YYY_sign(&(w->a));
+    p2=FP2_YYY_sign(&(w->b));
+    p1 ^= (p1 ^ p2)&FP2_YYY_iszilch(&(w->a));
+    return p1;
 }
 
 /* Set w=-x */

@@ -129,7 +129,11 @@ class Fp2:
         return Fp2(-self.a, -self.b)
 
     def sign(self):
-        return self.a.int()&1
+        p1=self.a.int()&1
+        p2=self.b.int()&1
+        u=1 if self.a.iszero() else 0
+        p1^=(p1^p2)&u
+        return p1
 
     def real(self):
         return self.a

@@ -228,11 +228,12 @@ void FP_YYY_from_int(FP_YYY *x,int a)
 /* SU= 48 */
 int FP_YYY_iszilch(FP_YYY *x)
 {
-    BIG_XXX m, t;
-    BIG_XXX_rcopy(m, Modulus_YYY);
-    BIG_XXX_copy(t, x->g);
-    BIG_XXX_mod(t, m);
-    return BIG_XXX_iszilch(t);
+    BIG_XXX m;
+    FP_YYY y;
+    FP_YYY_copy(&y,x);
+    FP_YYY_reduce(&y);
+    FP_YYY_redc(m,&y);
+    return BIG_XXX_iszilch(m);
 }
 
 int FP_YYY_isunity(FP_YYY *x)

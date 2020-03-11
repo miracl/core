@@ -269,11 +269,12 @@ void YYY::FP_from_int(FP *x,int a)
 /* SU= 48 */
 int YYY::FP_iszilch(FP *x)
 {
-    BIG m, t;
-    BIG_rcopy(m, Modulus);
-    BIG_copy(t, x->g);
-    BIG_mod(t, m);
-    return BIG_iszilch(t);
+    BIG m;
+    FP y;
+    FP_copy(&y,x);
+    FP_reduce(&y);
+    FP_redc(m,&y);
+    return BIG_iszilch(m);
 }
 
 /* input must be reduced */

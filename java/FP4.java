@@ -152,7 +152,12 @@ public final class FP4 {
 /* get sign */ 
     public int sign()
     {
-        return a.geta().redc().parity();
+        int p1=a.sign();
+        int p2=b.sign();
+        int u=a.iszilch()? 1:0;
+        p1^=(p1^p2)&u;
+        return p1;
+//        return a.geta().redc().parity();
     }
 
 /* set this=-this */
