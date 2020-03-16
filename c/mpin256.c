@@ -99,7 +99,7 @@ static void mpin_hash(int sha, FP16_YYY *f, ECP_ZZZ *P, octet *w)
     BIG_XXX_toBytes(&T.val[16 * MODBYTES_XXX], x);
     BIG_XXX_toBytes(&T.val[17 * MODBYTES_XXX], y);
 
-    GPhash(MC_SHA2,sha,w,AESKEY_ZZZ,&T,-1,NULL);
+    GPhash(MC_SHA2,sha,w,AESKEY_ZZZ,0,&T,-1,NULL);
 /*
     OCT_empty(w);
     switch (sha)
@@ -286,7 +286,7 @@ int MPIN_ZZZ_EXTRACT_FACTOR(int sha, octet *CID, int factor, int facbits, octet 
     if (!ECP_ZZZ_fromOctet(&P, TOKEN))  res = MPIN_INVALID_POINT;
     if (res == 0)
     {
-        GPhash(MC_SHA2,sha,&H,H.max,NULL,-1,CID);
+        GPhash(MC_SHA2,sha,&H,H.max,0,NULL,-1,CID);
         ECP_ZZZ_mapit(&R, &H);
 
         ECP_ZZZ_pinmul(&R, factor, facbits);
@@ -308,7 +308,7 @@ int MPIN_ZZZ_RESTORE_FACTOR(int sha, octet *CID, int factor, int facbits, octet 
     if (!ECP_ZZZ_fromOctet(&P, TOKEN))  res = MPIN_INVALID_POINT;
     if (res == 0)
     {
-        GPhash(MC_SHA2,sha,&H,H.max,NULL,-1,CID);
+        GPhash(MC_SHA2,sha,&H,H.max,0,NULL,-1,CID);
         ECP_ZZZ_mapit(&R, &H);
 
         ECP_ZZZ_pinmul(&R, factor, facbits);
@@ -444,7 +444,7 @@ int MPIN_ZZZ_CLIENT_1(int sha, int date, octet *CLIENT_ID, csprng *RNG, octet *X
     else
         BIG_XXX_fromBytes(x, X->val);
 
-    GPhash(MC_SHA2,sha,&H,H.max,NULL,-1,CLIENT_ID);
+    GPhash(MC_SHA2,sha,&H,H.max,0,NULL,-1,CLIENT_ID);
 
     ECP_ZZZ_mapit(&P, &H);
 
@@ -465,7 +465,7 @@ int MPIN_ZZZ_CLIENT_1(int sha, int date, octet *CLIENT_ID, csprng *RNG, octet *X
                 if (!ECP_ZZZ_fromOctet(&W, PERMIT)) res = MPIN_INVALID_POINT;
                 ECP_ZZZ_add(&T, &W);                // SEC=s.H(ID)+s.H(T|ID)
             }
-            GPhash(MC_SHA2,sha,&H,H.max,NULL,date,&H);
+            GPhash(MC_SHA2,sha,&H,H.max,0,NULL,date,&H);
 
             ECP_ZZZ_mapit(&W, &H);
             if (xID != NULL)
@@ -529,7 +529,7 @@ int MPIN_ZZZ_GET_CLIENT_PERMIT(int sha, int date, octet *S, octet *CID, octet *C
     char h[MODBYTES_XXX];
     octet H = {0, sizeof(h), h};
 
-    GPhash(MC_SHA2,sha,&H,H.max,NULL,date,CID);
+    GPhash(MC_SHA2,sha,&H,H.max,0,NULL,date,CID);
 
     ECP_ZZZ_mapit(&P, &H);
 
@@ -555,7 +555,7 @@ void MPIN_ZZZ_SERVER_1(int sha, int date, octet *CID, octet *HID, octet *HTID)
 #ifdef USE_ANONYMOUS
     ECP_ZZZ_mapit(&P, CID);
 #else
-    GPhash(MC_SHA2,sha,&H,H.max,NULL,-1,CID);
+    GPhash(MC_SHA2,sha,&H,H.max,0,NULL,-1,CID);
     ECP_ZZZ_mapit(&P, &H);
 #endif
 
@@ -564,9 +564,9 @@ void MPIN_ZZZ_SERVER_1(int sha, int date, octet *CID, octet *HID, octet *HTID)
     if (date)
     {
 #ifdef USE_ANONYMOUS
-        GPhash(MC_SHA2,sha,&H,H.max,NULL,date,CID);
+        GPhash(MC_SHA2,sha,&H,H.max,0,NULL,date,CID);
 #else
-        GPhash(MC_SHA2,sha,&H,H.max,NULL,date,&H);
+        GPhash(MC_SHA2,sha,&H,H.max,0,NULL,date,&H);
 #endif
         ECP_ZZZ_mapit(&R, &H);
         ECP_ZZZ_add(&P, &R);
@@ -875,7 +875,7 @@ void MPIN_ZZZ_GET_Y(int sha, int TimeValue, octet *xCID, octet *Y)
     char h[MODBYTES_XXX];
     octet H = {0, sizeof(h), h};
 
-    GPhash(MC_SHA2,sha,&H,H.max,NULL,TimeValue,xCID);
+    GPhash(MC_SHA2,sha,&H,H.max,0,NULL,TimeValue,xCID);
     BIG_XXX_fromBytes(y, H.val);
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
     BIG_XXX_mod(y, q);

@@ -29,7 +29,7 @@ MIRACL Core features:-
 - New curves (SM2, BN462, BLS48581, C13318, JUBJUB, X448, SECP160R1, C1174)
 - Support for precomputation for pairings (see BLS API)
 - Performance and security improvements
-- New HMAC message authentication module (KDFs, HMAC, HKDF_Extract/Expand)
+- New HMAC message authentication module (KDFs, HMAC, HKDF_Extract/Expand, XOF_Expand, XMD_Expand)
 - Improved side-channel resistance
 - Deterministic hashing to curve points map2point (Elligator, SWU)
 - Probabilistic hashing to curve points hap2point (hunt-and-peck)

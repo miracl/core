@@ -66,13 +66,14 @@ public class HMAC {
         return b;
     }
 
-    public static byte[] GPhashit(int hash, int sha, int pad, byte[] A, int n, byte[] B) {
+    public static byte[] GPhashit(int hash, int sha, int pad, int zpad, byte[] A, int n, byte[] B) {
         byte[] R = null;
 
         if (hash == MC_SHA2)
         {
             if (sha == 32) {
                 HASH256 H = new HASH256();
+                for (int i=0;i<zpad;i++) H.process(0);
                 if (A != null) H.process_array(A); 
                 if (n >= 0) H.process_num(n);
                 if (B != null) H.process_array(B);
@@ -80,6 +81,7 @@ public class HMAC {
             }
             if (sha == 48) {
                 HASH384 H = new HASH384();
+                for (int i=0;i<zpad;i++) H.process(0);
                 if (A != null) H.process_array(A); 
                 if (n >= 0) H.process_num(n);
                 if (B != null) H.process_array(B);
@@ -87,6 +89,7 @@ public class HMAC {
             }
             if (sha == 64) {
                 HASH512 H = new HASH512();
+                for (int i=0;i<zpad;i++) H.process(0);
                 if (A != null) H.process_array(A); 
                 if (n >= 0) H.process_num(n);
                 if (B != null) H.process_array(B);
@@ -96,6 +99,7 @@ public class HMAC {
         if (hash == MC_SHA3)
         {
             SHA3 H = new SHA3(sha);
+            for (int i=0;i<zpad;i++) H.process(0);
             if (A != null) H.process_array(A); 
             if (n >= 0) H.process_num(n);
             if (B != null) H.process_array(B);
@@ -117,7 +121,7 @@ public class HMAC {
 
     public static byte[] SPhashit(int hash, int hlen, byte[] A)
     {
-        return GPhashit(hash, hlen, 0, A, -1, null);
+        return GPhashit(hash, hlen, 0, 0, A, -1, null);
     }
 
     public static byte[] KDF2(int hash, int sha, byte[] Z, byte[] P, int olen) {
@@ -132,7 +136,7 @@ public class HMAC {
         cthreshold = olen / hlen; if (olen % hlen != 0) cthreshold++;
 
         for (counter = 1; counter <= cthreshold; counter++) {
-            B = GPhashit(hash,sha, 0, Z, counter, P);
+            B = GPhashit(hash,sha, 0, 0, Z, counter, P);
             if (k + hlen > olen) for (int i = 0; i < olen % hlen; i++) K[k++] = B[i];
             else for (int i = 0; i < hlen; i++) K[k++] = B[i];
         }
@@ -172,12 +176,8 @@ public class HMAC {
         return key;
     }
 
-    /* Calculate HMAC of m using key k. HMAC is tag of length olen */
-    public static int HMAC1(int hash, int sha, byte[] tag, int olen, byte[] K, byte[] M ) {
-        /* Input is from an octet m        *
-        * olen is requested output length in bytes. k is the key  *
-        * The output is the calculated tag */
-        
+    private static int blksize(int hash,int sha)
+    {
         int b=0;
         if (hash == MC_SHA2)
         {
@@ -189,6 +189,16 @@ public class HMAC {
         {
             b=200-2*sha;
         }
+        return b;
+    }
+
+    /* Calculate HMAC of m using key k. HMAC is tag of length olen */
+    public static int HMAC1(int hash, int sha, byte[] tag, int olen, byte[] K, byte[] M ) {
+        /* Input is from an octet m        *
+        * olen is requested output length in bytes. k is the key  *
+        * The output is the calculated tag */
+        
+        int b=blksize(hash,sha);
         if (b==0) return 0;
 
         byte[] B;
@@ -203,15 +213,16 @@ public class HMAC {
             for (int i = 0; i < K.length; i++ ) K0[i] = K[i];
 
         for (int i = 0; i < b; i++) K0[i] ^= 0x36;
-        B = GPhashit(hash, sha, 0, K0, -1, M);
+        B = GPhashit(hash, sha, 0, 0, K0, -1, M);
 
         for (int i = 0; i < b; i++) K0[i] ^= 0x6a;
-        B = GPhashit(hash, sha, olen, K0, -1, B);
+        B = GPhashit(hash, sha, olen, 0, K0, -1, B);
 
         for (int i = 0; i < olen; i++) tag[i] = B[i];
 
         return 1;
     }
+
 
     public static byte[] HKDF_Extract(int hash, int hlen, byte[] SALT, byte[] IKM)  { 
         byte[] PRK = new byte[hlen];
@@ -256,8 +267,83 @@ public class HMAC {
 		    
 	    }
 	    return OKM;
-    }   
+    } 
+
+    static int ceil(int a,int b) {
+        return (((a)-1)/(b)+1);
+    }
+
+    public static byte[] XOF_Expand(int hlen,int olen,byte[] DST,byte[] MSG) {
+        byte[] OKM = new byte[olen];
+        SHA3 H = new SHA3(hlen);
+        for (int i=0;i<MSG.length;i++ )
+            H.process(MSG[i]);
+        H.process(olen/256);
+        H.process(olen%256);
+        H.process(DST.length);
+        for (int i=0;i<DST.length;i++ )
+            H.process(DST[i]);
+        H.shake(OKM,olen);
+        return OKM;
+    }
+
+    public static byte[] XMD_Expand(int hash,int hlen,int olen,byte[] DST,byte[] MSG) {
+        byte[] OKM = new byte[olen];
+        byte[] H1 = new byte[hlen];
+        byte[] TMP = new byte[DST.length+4];
+        byte[] TMP2 = new byte[DST.length+2];
+
+        int ell=ceil(olen,hlen);
+        int blk=blksize(hash,hlen);
+        TMP[0]=(byte)(olen/256);
+        TMP[1]=(byte)(olen%256);
+        TMP[2]=(byte)0;
+        TMP[3]=(byte)DST.length;
+        for (int j=0;j<DST.length;j++)
+            TMP[4+j]=DST[j];
+        byte[] H0=GPhashit(hash, hlen, 0, blk, MSG, -1, TMP);
+
+        int k=0;
+        for (int j=0;j<hlen;j++)
+            H1[j]=0;
+        
+        for (int i=1;i<=ell;i++)
+        {
+            for (int j=0;j<hlen;j++)
+                H1[j]^=H0[j];
+            TMP2[0]=(byte)i;
+            TMP2[1]=(byte)DST.length;
+            for (int j=0;j<DST.length;j++)
+                TMP2[2+j]=DST[j];
+            H1=GPhashit(hash, hlen, 0, 0, H1, -1, TMP2);
+            for (int j=0;j<hlen && k<olen;j++)
+                OKM[k++]=H1[j];
+        }
+        
+        return OKM;
+    }
+
+/*    
+
+//java org/miracl/core/HMAC.java org/miracl/core/SHA3.java ...
+//javac org/miracl/core/HMAC org/miracl/core/SHA3 ....
+
+    public static void main(String[] args) {
+        byte[] msg = "abc".getBytes();
+        byte[] dst = "P256_XMD:SHA-256_SSWU_RO_TESTGEN".getBytes();
+                 
+        byte[] okm=HMAC.XMD_Expand(HMAC.MC_SHA2,32,48,dst,msg);
+        //byte[] okm=HMAC.XOF_Expand(SHA3.SHAKE128,48,dst,msg);
+        for (int i = 0; i < 48; i++) System.out.format("%02x", okm[i]);
+
+        System.out.println("");
+    }    */
+
 }
+
+
+
+
 
 
 /*

@@ -213,7 +213,7 @@ public class HASH512 {
 
 //8e959b75dae313da 8cf4f72814fc143f 8f7779c6eb9f7fa1 7299aeadb6889018 501d289e4900f7e4 331b99dec4b5433a c7d329eeb6dd2654 5e96e55b874be909
 
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
 
         byte[] test = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu".getBytes();
         byte[] digest;
@@ -230,6 +230,6 @@ public class HASH512 {
 
         System.out.println("");
 
-    }
+    } */
 }
 

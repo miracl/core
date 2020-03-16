@@ -123,7 +123,7 @@ public final class RSA {
 		for (counter=0;counter<cthreshold;counter++)
 		{
 			//B=hashit(sha,Z,counter);
-            B=HMAC.GPhashit(HMAC.MC_SHA2,sha,0,Z,counter,null);
+            B=HMAC.GPhashit(HMAC.MC_SHA2,sha,0,0,Z,counter,null);
 			if (k+hlen>olen) for (int i=0;i<olen%hlen;i++) K[k++]=B[i];
 			else for (int i=0;i<hlen;i++) K[k++]=B[i];
 		}	

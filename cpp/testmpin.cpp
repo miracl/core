@@ -74,13 +74,13 @@ void HASH_ALL(int hlen, octet *HID, octet *xID, octet *xCID, octet *SEC, octet *
     OCT_joctet(&T, R);
     OCT_joctet(&T, W);
 
-    GPhash(MC_SHA2,hlen,H,H->max,NULL,-1,&T);
+    GPhash(MC_SHA2,hlen,H,H->max,0,NULL,-1,&T);
     //mhashit(sha, 0, &T, H);
 }
 
 void HASH_ID(int hlen, octet *ID, octet *HID)
 {
-    GPhash(MC_SHA2,hlen,HID,HID->max,NULL,-1,ID);
+    GPhash(MC_SHA2,hlen,HID,HID->max,0,NULL,-1,ID);
     //mhashit(sha, 0, ID, HID);
 }
 

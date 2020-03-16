@@ -208,7 +208,7 @@ public class HASH384 {
     /* test program: should produce digest */
 
 //09330c33f71147e8 3d192fc782cd1b47 53111b173b3b05d2 2fa08086e3b0f712 fcc7c71a557e2db9 66c3e9fa91746039
-
+/*
     public static void main(String[] args) {
 
         byte[] test = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu".getBytes();
@@ -226,6 +226,6 @@ public class HASH384 {
 
         System.out.println("");
 
-    }
+    } */
 }
 

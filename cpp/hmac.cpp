@@ -40,8 +40,9 @@
 using namespace core;
 
 #define ROUNDUP(a,b) ((a)-1)/(b)+1
+#define CEIL(a,b) (((a)-1)/(b)+1)
 
-/* General Purpose hash function, optional input octets p and x, optional integer n,hash to octet w of length hlen */
+/* General Purpose hash function, padding with zeros, optional input octets p and x, optional integer n,hash to octet w of length olen */
 /* hash is the Hash family, either MC_SHA2 or MC_SHA3 */
 /* hlen should be 32,48 or 64 for MC_SHA2 (that is SHA256/384/512) */
 /* hlen should be 24,32,48,64 for MC_SHA3 */
@@ -49,7 +50,7 @@ using namespace core;
 /* olen<=hlen -  output = olen bytes */
 /* olen>hlen  -  output is padded with leading zeros and then hlen bytes */
 
-void core::GPhash(int hash,int hlen,octet *w,int olen,octet *p,int n,octet *x)
+void core::GPhash(int hash,int hlen,octet *w,int olen,int pad,octet *p,int n,octet *x)
 {
     hash256 sh256;
     hash384 sh384;
@@ -73,6 +74,7 @@ void core::GPhash(int hash,int hlen,octet *w,int olen,octet *p,int n,octet *x)
         {
         case SHA256 :
             HASH256_init(&sh256);
+            for (i=0;i<pad;i++) HASH256_process(&sh256,0);
             if (p!=NULL)
                 for (i=0;i<p->len;i++) HASH256_process(&sh256,p->val[i]);
             if (n>=0)
@@ -83,6 +85,7 @@ void core::GPhash(int hash,int hlen,octet *w,int olen,octet *p,int n,octet *x)
             break;
         case SHA384 :
             HASH384_init(&sh384);
+            for (i=0;i<pad;i++) HASH256_process(&sh256,0);
             if (p!=NULL)
                 for (i=0;i<p->len;i++) HASH384_process(&sh384,p->val[i]);
             if (n>=0)
@@ -93,6 +96,7 @@ void core::GPhash(int hash,int hlen,octet *w,int olen,octet *p,int n,octet *x)
             break;
         case SHA512 :
             HASH512_init(&sh512);
+            for (i=0;i<pad;i++) HASH256_process(&sh256,0);
             if (p!=NULL)
                 for (i=0;i<p->len;i++) HASH512_process(&sh512,p->val[i]);
             if (n>=0)
@@ -105,6 +109,7 @@ void core::GPhash(int hash,int hlen,octet *w,int olen,octet *p,int n,octet *x)
         break;
     case MC_SHA3 :
         SHA3_init(&sh3,hlen);
+        for (i=0;i<pad;i++) HASH256_process(&sh256,0);
         if (p!=NULL)
             for (i=0;p->len;i++) SHA3_process(&sh3,p->val[i]);
         if (n>=0)
@@ -133,18 +138,12 @@ void core::GPhash(int hash,int hlen,octet *w,int olen,octet *p,int n,octet *x)
 /* Simple hash octet p to octet w of length hlen */
 void core::SPhash(int hash, int hlen,octet *w, octet *p)
 {
-    GPhash(hash, hlen, w, 0, p, -1, NULL);
+    GPhash(hash, hlen, w, 0, 0, p, -1, NULL);
 }
 
-/* RFC 2104 */
-
-void core::HMAC(int hash,int hlen,octet *TAG,int olen,octet *K,octet *M)
+static int blksize(int hash,int hlen)
 {
-    int blk;
-    char h[128],k0[200];   // assumes max block sizes
-    octet K0 = {0, sizeof(k0), k0};
-    octet H={0,sizeof(h),h};
-
+    int blk=0;
     switch (hash)
     {
     case MC_SHA2 :
@@ -154,18 +153,32 @@ void core::HMAC(int hash,int hlen,octet *TAG,int olen,octet *K,octet *M)
     case MC_SHA3 :
             blk=200-2*hlen;
             break;
-    default: return;
+    default: break;
     }
+    return blk;
+}
+
+
+/* RFC 2104 */
+void core::HMAC(int hash,int hlen,octet *TAG,int olen,octet *K,octet *M)
+{
+    int blk;
+    char h[128],k0[200];   // assumes max block sizes
+    octet K0 = {0, sizeof(k0), k0};
+    octet H={0,sizeof(h),h};
+
+    blk=blksize(hash,hlen);
+    if (blk==0) return;
 
     if (K->len > blk) SPhash(hash,hlen,&K0,K);
     else              OCT_copy(&K0,K);
     OCT_jbyte(&K0,0,blk-K0.len); 
     OCT_xorbyte(&K0,0x36);
 
-    GPhash(hash,hlen,&H,0,&K0,-1,M); 
+    GPhash(hash,hlen,&H,0,0,&K0,-1,M); 
 
     OCT_xorbyte(&K0,0x6a);   /* 0x6a = 0x36 ^ 0x5c */
-    GPhash(hash,hlen,&H,0,&K0,-1,&H);
+    GPhash(hash,hlen,&H,0,0,&K0,-1,&H);
 
     OCT_empty(TAG);
     OCT_jbytes(TAG,H.val,olen);
@@ -213,6 +226,64 @@ void core::HKDF_Expand(int hash,int hlen,octet *OKM,int olen,octet *PRK,octet *I
     }
 }
 
+/* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
+
+void core::XOF_Expand(int hlen,octet *OKM,int olen,octet *DST,octet *M)
+{
+    int i;
+    sha3 SHA3;
+    SHA3_init(&SHA3,hlen);
+    for (i=0;i<M->len;i++) SHA3_process(&SHA3,M->val[i]);
+    SHA3_process(&SHA3,olen/256);
+    SHA3_process(&SHA3,olen%256);
+    SHA3_process(&SHA3,DST->len);
+
+    for (i=0;i<DST->len;i++)
+        SHA3_process(&SHA3,DST->val[i]);
+
+    SHA3_shake(&SHA3,OKM->val,olen);
+    OKM->len=olen;
+}
+
+void core::XMD_Expand(int hash, int hlen,octet *OKM,int olen,octet *DST,octet *M)
+{
+    int i,blk;
+    int ell=CEIL(olen,hlen);
+    char tmp[260]; 
+    octet TMP={0,sizeof(tmp),tmp};
+    char h0[64];
+    octet H0 = {0, sizeof(h0), h0};
+    char h1[64];
+    octet H1 = {0, sizeof(h1), h1};
+
+    blk=blksize(hash,hlen);
+    OCT_jint(&TMP,olen,2);
+    OCT_jint(&TMP,0,1);
+    OCT_jint(&TMP,DST->len,1);
+    OCT_joctet(&TMP,DST);
+
+    GPhash(hash,hlen,&H0,0,blk,M,-1,&TMP);
+    OCT_empty(&TMP);
+    OCT_jint(&TMP,1,1);
+    OCT_jint(&TMP,DST->len,1);
+    OCT_joctet(&TMP,DST);
+
+    GPhash(hash,hlen,&H1,0,0,&H0,-1,&TMP);
+    OCT_empty(OKM);
+    OCT_joctet(OKM,&H1);
+    for (i=2;i<=ell;i++)
+    {
+        OCT_xor(&H1,&H0);
+        OCT_empty(&TMP);
+        OCT_jint(&TMP,i,1);
+        OCT_jint(&TMP,DST->len,1);
+        OCT_joctet(&TMP,DST);
+        GPhash(hash,hlen,&H1,0,0,&H1,-1,&TMP);
+        OCT_joctet(OKM,&H1);
+    }
+    OKM->len=olen; 
+}
+
 /* Key Derivation Function */
 
 void core::KDF2(int hash, int hlen, octet *key, int olen, octet *z, octet *p)
@@ -228,7 +299,7 @@ void core::KDF2(int hash, int hlen, octet *key, int olen, octet *z, octet *p)
 
     for (counter = 1; counter <= cthreshold; counter++)
     {
-        GPhash(hash,hlen, &H, 0, z, counter, p);
+        GPhash(hash,hlen, &H, 0, 0, z, counter, p);
         if (key->len + hlen > olen)  OCT_jbytes(key, H.val, olen % hlen);
         else                     OCT_joctet(key, &H);
     }
@@ -271,6 +342,18 @@ void core::PBKDF2(int hash, int hlen, octet *key, int olen, octet *p, octet *s, 
 
 int main()
 {
+    char dst[100],msg[100],okm[100];
+    octet DST={0,sizeof(dst),dst};
+    octet MSG={0,sizeof(msg),msg};
+    octet OKM={0,sizeof(okm),okm};
+
+    OCT_jstring(&MSG,(char *)"abc");
+    OCT_jstring(&DST,(char *)"P256_XMD:SHA-256_SSWU_RO_TESTGEN");
+//    XMD_Expand(MC_SHA2,32,&OKM,48,&DST,&MSG);
+    XOF_Expand(SHAKE128,&OKM,48,&DST,&MSG);
+
+    printf("OKM= %d ",OKM.len); OCT_output(&OKM);
+
     char ikm[22],salt[13],prk[32],info[10],okm[50];  
     octet IKM = {0, sizeof(ikm), ikm};
     octet SALT={0,sizeof(salt),salt};
@@ -295,9 +378,7 @@ int main()
 
     HKDF_Expand(MC_SHA2,32,&OKM,42,&PRK,&INFO);
 
-    printf("OKM= %d ",OKM.len); OCT_output(&OKM); 
+    printf("OKM= %d ",OKM.len); OCT_output(&OKM);  
 }
 
 */
-
-

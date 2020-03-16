@@ -98,7 +98,7 @@ fn hash(sha: usize, c: &mut FP4, U: &mut ECP, r: &mut [u8]) -> bool {
         t[i] = w[i - 5 * EFS]
     }
 
-    hmac::GPhashit(hmac::MC_SHA2,sha,r,ecp::AESKEY,None,-1,Some(&t));
+    hmac::GPhashit(hmac::MC_SHA2,sha,r,ecp::AESKEY,0,None,-1,Some(&t));
 
     return true;
 
@@ -153,7 +153,7 @@ fn unmap(u: &mut BIG, P: &mut ECP) -> isize {
 }
 
 pub fn hash_id(sha: usize, id: &[u8], w: &mut [u8]) -> bool {
-    hmac::GPhashit(hmac::MC_SHA2,sha,w,EFS,None,-1,Some(id));
+    hmac::GPhashit(hmac::MC_SHA2,sha,w,EFS,0,None,-1,Some(id));
     return true;
     //return hashit(sha, 0, id, w);
 }
@@ -358,7 +358,7 @@ pub fn extract_factor(
     if P.is_infinity() {
         return INVALID_POINT;
     }
-    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,None,-1,Some(cid));
+    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,0,None,-1,Some(cid));
     //hashit(sha, 0, cid, &mut h);
     let mut R = ECP::mapit(&h);
 
@@ -385,7 +385,7 @@ pub fn restore_factor(
     if P.is_infinity() {
         return INVALID_POINT;
     }
-    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,None,-1,Some(cid));
+    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,0,None,-1,Some(cid));
     //hashit(sha, 0, cid, &mut h);
     let mut R = ECP::mapit(&h);
 
@@ -425,7 +425,7 @@ pub fn precompute(token: &[u8], cid: &[u8], g1: &mut [u8], g2: &mut [u8]) -> isi
 pub fn get_client_permit(sha: usize, date: usize, s: &[u8], cid: &[u8], ctt: &mut [u8]) -> isize {
     const RM: usize = big::MODBYTES as usize;
     let mut h: [u8; RM] = [0; RM];
-    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,None,date as isize,Some(cid));
+    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,0,None,date as isize,Some(cid));
     //hashit(sha, date, cid, &mut h);
     let mut P = ECP::mapit(&h);
 
@@ -463,7 +463,7 @@ pub fn client_1(
     const RM: usize = big::MODBYTES as usize;
     let mut h: [u8; RM] = [0; RM];
 
-    hmac::GPhashit(hmac::MC_SHA2,sha, &mut h,EFS,None,-1,Some(client_id));
+    hmac::GPhashit(hmac::MC_SHA2,sha, &mut h,EFS,0,None,-1,Some(client_id));
     //hashit(sha, 0, &client_id, &mut h);
     let mut P = ECP::mapit(&h);
 
@@ -484,7 +484,7 @@ pub fn client_1(
         T.add(&mut W);
         let mut h2: [u8; RM] = [0; RM];
 
-        hmac::GPhashit(hmac::MC_SHA2,sha,&mut h2,EFS,None,date as isize,Some(&h));
+        hmac::GPhashit(hmac::MC_SHA2,sha,&mut h2,EFS,0,None,date as isize,Some(&h));
         //hashit(sha, date, &h, &mut h2);
         W = ECP::mapit(&h2);
         if let Some(mut rxid) = xid {
@@ -516,7 +516,7 @@ pub fn server_1(sha: usize, date: usize, cid: &[u8], hid: &mut [u8], htid: Optio
     const RM: usize = big::MODBYTES as usize;
     let mut h: [u8; RM] = [0; RM];
 
-    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,None,-1,Some(cid));
+    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,0,None,-1,Some(cid));
     //hashit(sha, 0, cid, &mut h);
 
     let mut P = ECP::mapit(&h);
@@ -524,7 +524,7 @@ pub fn server_1(sha: usize, date: usize, cid: &[u8], hid: &mut [u8], htid: Optio
     P.tobytes(hid, false);
     if date != 0 {
         let mut h2: [u8; RM] = [0; RM];
-        hmac::GPhashit(hmac::MC_SHA2,sha,&mut h2,EFS,None,date as isize,Some(&h));
+        hmac::GPhashit(hmac::MC_SHA2,sha,&mut h2,EFS,0,None,date as isize,Some(&h));
         //hashit(sha, date, &h, &mut h2);
         let mut R = ECP::mapit(&h2);
         P.add(&mut R);
@@ -568,7 +568,7 @@ pub fn get_y(sha: usize, timevalue: usize, xcid: &[u8], y: &mut [u8]) {
     const RM: usize = big::MODBYTES as usize;
     let mut h: [u8; RM] = [0; RM];
 
-    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,None,timevalue as isize,Some(xcid));
+    hmac::GPhashit(hmac::MC_SHA2,sha,&mut h,EFS,0,None,timevalue as isize,Some(xcid));
     //hashit(sha, timevalue, xcid, &mut h);
 
     let mut sy = BIG::frombytes(&h);
@@ -778,7 +778,7 @@ pub fn hash_all(
     if tlen != 10 * RM + 4 {
         return false;
     }
-    hmac::GPhashit(hmac::MC_SHA2,sha,h,EFS,None,-1,Some(&t));
+    hmac::GPhashit(hmac::MC_SHA2,sha,h,EFS,0,None,-1,Some(&t));
     //return hashit(sha, 0, &t, h);
     return true;
 }

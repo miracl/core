@@ -159,7 +159,7 @@ pub fn mgf1(sha: usize, z: &[u8], olen: usize, k: &mut [u8]) {
     }
     for counter in 0..cthreshold {
         let mut b: [u8; 64] = [0; 64];
-        hmac::GPhashit(hmac::MC_SHA2,sha,&mut b,0,Some(z),counter as isize,None);
+        hmac::GPhashit(hmac::MC_SHA2,sha,&mut b,0,0,Some(z),counter as isize,None);
         //hashit(sha, Some(z), counter as isize, &mut b);
 
         if j + hlen > olen {

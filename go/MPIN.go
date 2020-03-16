@@ -141,7 +141,7 @@ func unmap(u *BIG, P *ECP) int {
 }
 
 func MPIN_HASH_ID(sha int, ID []byte) []byte {
-	return core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,-1,ID)
+	return core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,-1,ID)
 	//return mhashit(sha, 0, ID)
 }
 
@@ -275,7 +275,7 @@ func MPIN_EXTRACT_FACTOR(sha int, CID []byte, factor int32, facbits int32, TOKEN
 	if P.Is_infinity() {
 		return INVALID_POINT
 	}
-	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,-1,CID)
+	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,-1,CID)
 	//h := mhashit(sha, 0, CID)
 	R := ECP_mapit(h)
 
@@ -293,7 +293,7 @@ func MPIN_RESTORE_FACTOR(sha int, CID []byte, factor int32, facbits int32, TOKEN
 	if P.Is_infinity() {
 		return INVALID_POINT
 	}
-	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,-1,CID)
+	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,-1,CID)
 	//h := mhashit(sha, 0, CID)
 	R := ECP_mapit(h)
 
@@ -337,7 +337,7 @@ func MPIN_CLIENT_1(sha int, date int, CLIENT_ID []byte, rng *core.RAND, X []byte
 		x = FromBytes(X)
 	}
 
-	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,-1,CLIENT_ID)
+	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,-1,CLIENT_ID)
 	P := ECP_mapit(h)
 
 	T := ECP_fromBytes(TOKEN)
@@ -353,7 +353,7 @@ func MPIN_CLIENT_1(sha int, date int, CLIENT_ID []byte, rng *core.RAND, X []byte
 			return INVALID_POINT
 		}
 		T.Add(W)
-		h = core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,int32(date),h)
+		h = core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,int32(date),h)
 		W = ECP_mapit(h)
 		if xID != nil {
 			P = G1mul(P, x)
@@ -425,7 +425,7 @@ func MPIN_GET_CLIENT_SECRET(S []byte, CID []byte, CST []byte) int {
 /* Time Permit CTT=S*(date|H(CID)) where S is master secret */
 func MPIN_GET_CLIENT_PERMIT(sha, date int, S []byte, CID []byte, CTT []byte) int {
 
-	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,int32(date),CID)
+	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,int32(date),CID)
 	//h := mhashit(sha, int32(date), CID)
 	P := ECP_mapit(h)
 
@@ -436,13 +436,13 @@ func MPIN_GET_CLIENT_PERMIT(sha, date int, S []byte, CID []byte, CTT []byte) int
 
 /* Outputs H(CID) and H(T|H(CID)) for time permits. If no time permits set HID=HTID */
 func MPIN_SERVER_1(sha int, date int, CID []byte, HID []byte, HTID []byte) {
-	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,-1,CID)
+	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,-1,CID)
 	//h := mhashit(sha, 0, CID)
 	P := ECP_mapit(h)
 
 	P.ToBytes(HID, false)
 	if date != 0 {
-		h = core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,int32(date),h)
+		h = core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,int32(date),h)
 		//h = mhashit(sha, int32(date), h)
 		R := ECP_mapit(h)
 		P.Add(R)
@@ -642,7 +642,7 @@ func MPIN_HASH_ALL(sha int, HID []byte, xID []byte, xCID []byte, SEC []byte, Y [
 	}
 	tlen += len(W)
 
-	return core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,-1,T[:])
+	return core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,-1,T[:])
 	//return mhashit(sha, 0, T[:])
 }
 
@@ -737,7 +737,7 @@ func MPIN_GET_TIME() int {
 
 /* Generate Y = H(epoch, xCID/xID) */
 func MPIN_GET_Y(sha int, TimeValue int, xCID []byte, Y []byte) {
-	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),nil,int32(TimeValue), xCID)
+	h := core.GPhashit(core.MC_SHA2,sha,int(MODBYTES),0,nil,int32(TimeValue), xCID)
 	//h := mhashit(sha, int32(TimeValue), xCID)
 	y := FromBytes(h)
 	q := NewBIGints(CURVE_Order)

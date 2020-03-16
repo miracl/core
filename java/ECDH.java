@@ -138,7 +138,7 @@ public final class ECDH {
         byte[] T = new byte[EFS];
         BIG r, s, f, c, d, u, vx, w;
         ECP G, V;
-        byte[] B = HMAC.GPhashit(HMAC.MC_SHA2, sha, CONFIG_BIG.MODBYTES, F, -1, null );
+        byte[] B = HMAC.GPhashit(HMAC.MC_SHA2, sha, CONFIG_BIG.MODBYTES, 0,F, -1, null );
 
         G = ECP.generator();
         r = new BIG(ROM.CURVE_Order);
@@ -186,7 +186,7 @@ public final class ECDH {
         ECP G, WP, P;
         int valid;
 
-        byte[] B = HMAC.GPhashit(HMAC.MC_SHA2, sha, CONFIG_BIG.MODBYTES, F, -1, null);
+        byte[] B = HMAC.GPhashit(HMAC.MC_SHA2, sha, CONFIG_BIG.MODBYTES, 0, F, -1, null);
 
         G = ECP.generator();
         r = new BIG(ROM.CURVE_Order);

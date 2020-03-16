@@ -58,7 +58,7 @@ var HMAC = function(ctx) {
         },
 
 
-        GPhashit: function(hash, sha, pad, A, n, B) {
+        GPhashit: function(hash, sha, pad, zpad, A, n, B) {
             var R = [],
                 H, W, i, len;
 
@@ -76,6 +76,9 @@ var HMAC = function(ctx) {
             {
                 H = new ctx.SHA3(sha);
             }
+
+            for (i=0;i<zpad;i++)
+                H.process(0);
 
             if (A != null) {
                 H.process_array(A);
@@ -119,7 +122,7 @@ var HMAC = function(ctx) {
         },
 
         SPhashit: function(hash, sha, A) {
-            return this.GPhashit(hash,sha, 0, A, -1 ,null);
+            return this.GPhashit(hash,sha, 0, 0, A, -1 ,null);
         },
 
         KDF2: function(hash,sha, Z, P, olen) {
@@ -140,7 +143,7 @@ var HMAC = function(ctx) {
             }
 
             for (counter = 1; counter <= cthreshold; counter++) {
-                B = this.GPhashit(hash, sha, 0, Z, counter, P);
+                B = this.GPhashit(hash, sha, 0, 0, Z, counter, P);
 
                 if (k + hlen > olen) {
                     for (i = 0; i < olen % hlen; i++) {
@@ -213,14 +216,8 @@ var HMAC = function(ctx) {
             return key;
         },
 
-        HMAC1: function(hash, sha, tag, olen, K, M) {
-            /* Input is from an octet m        *
-             * olen is requested output length in bytes. k is the key  *
-             * The output is the calculated tag */
-            var B = [],
-                b = 0,
-                K0, i;
-
+        blksize: function(hash,sha) {
+            var b=0;
             if (hash==this.MC_SHA2)
             {
                 b=64;
@@ -231,6 +228,18 @@ var HMAC = function(ctx) {
             {
                 b=200-2*sha;
             }
+            return b;
+        },
+
+        HMAC1: function(hash, sha, tag, olen, K, M) {
+            /* Input is from an octet m        *
+             * olen is requested output length in bytes. k is the key  *
+             * The output is the calculated tag */
+            var B = [],
+                b = 0,
+                K0, i;
+
+            b=this.blksize(hash,sha);
             if (b==0) return 0;
 
             K0 = new Array(b);
@@ -254,13 +263,13 @@ var HMAC = function(ctx) {
                 K0[i] ^= 0x36;
             }
 
-            B = this.GPhashit(hash, sha, 0, K0, -1, M);
+            B = this.GPhashit(hash, sha, 0, 0, K0, -1, M);
 
             for (i = 0; i < b; i++) {
                 K0[i] ^= 0x6a;
             }
 
-            B = this.GPhashit(hash, sha, olen, K0, -1, B);
+            B = this.GPhashit(hash, sha, olen, 0, K0, -1, B);
 
             for (i = 0; i < olen; i++) {
                 tag[i] = B[i];
@@ -315,6 +324,60 @@ var HMAC = function(ctx) {
                     OKM[m++] = K[j];
             }
             return OKM;
+        },
+
+        ceil: function(a,b) {
+            return Math.floor(((a)-1)/(b)+1);
+        },
+
+        XOF_Expand: function(hlen,olen,DST,MSG) {
+            var OKM = [];
+            var H = new ctx.SHA3(hlen);
+            for (var i=0;i<MSG.length;i++ )
+                H.process(MSG[i]);
+            H.process(((olen >> 8) & 0xff));
+            H.process((olen & 0xff));
+            H.process(DST.length);
+            for (var i=0;i<DST.length;i++ )
+                H.process(DST[i]);
+            H.shake(OKM,olen);
+            return OKM;
+        },
+
+        XMD_Expand(hash,hlen,olen,DST,MSG) {
+            var OKM = [];
+            var H1 = [];
+            var TMP = [];
+            var TMP2 = [];
+
+            var ell=this.ceil(olen,hlen);
+            var blk=this.blksize(hash,hlen);
+            TMP[0]=(olen >> 8) & 0xff;
+            TMP[1]=olen & 0xff
+            TMP[2]=0;
+            TMP[3]=DST.length;
+            for (var j=0;j<DST.length;j++)
+                TMP[4+j]=DST[j];
+            var H0=this.GPhashit(hash, hlen, 0, blk, MSG, -1, TMP);
+
+            var k=0;
+            for (var j=0;j<hlen;j++)
+               H1[j]=0;
+        
+            for (var i=1;i<=ell;i++)
+            {
+                for (var j=0;j<hlen;j++)
+                    H1[j]^=H0[j];
+                TMP2[0]=i;
+                TMP2[1]=DST.length;
+                for (var j=0;j<DST.length;j++)
+                    TMP2[2+j]=DST[j];
+                H1=this.GPhashit(hash, hlen, 0, 0, H1, -1, TMP2);
+                for (var j=0;j<hlen && k<olen;j++)
+                    OKM[k++]=H1[j];
+            }
+        
+            return OKM;
         }
     };
 
@@ -323,6 +386,15 @@ var HMAC = function(ctx) {
 
 
 /*
+	var MSG=ctx.ECDH.asciitobytes("abc");
+	var DST=ctx.ECDH.asciitobytes("P256_XMD:SHA-256_SSWU_RO_TESTGEN");
+
+	var OKM=ctx.HMAC.XOF_Expand(ctx.SHA3.SHAKE128,48,DST,MSG);
+	mywindow.document.write("OKM : 0x"+ctx.ECDH.bytestostring(OKM) + "<br>");
+
+	OKM=ctx.HMAC.XMD_Expand(ctx.HMAC.MC_SHA2,32,48,DST,MSG);
+	mywindow.document.write("OKM : 0x"+ctx.ECDH.bytestostring(OKM) + "<br>");
+
         ikm=[];
         salt=[];
         info=[];

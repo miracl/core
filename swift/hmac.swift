@@ -44,6 +44,10 @@ public struct HMAC
     static public let MC_SHA2=2
     static public let MC_SHA3=3
 
+    static func ceil(_ a: Int,_ b:Int) -> Int {
+        return (((a)-1)/(b)+1)
+    }
+
     /* Convert Integer to n-byte array */
     public static func inttoBytes(_ n: Int,_ len:Int) -> [UInt8]
     {
@@ -60,13 +64,16 @@ public struct HMAC
         return b;
     }
 
-    public static func GPhashit(_ hf: Int, _ sha: Int,_ pad:Int,_ A:[UInt8]?,_ n: Int32,_ B:[UInt8]?) -> [UInt8]
+    public static func GPhashit(_ hf: Int, _ sha: Int,_ pad:Int,_ zpad:Int,_ A:[UInt8]?,_ n: Int32,_ B:[UInt8]?) -> [UInt8]
     {
         var R=[UInt8]()
         if hf == MC_SHA2 {
             if sha==32
             {
                 var H=HASH256()
+                for _ in 0 ..< zpad {
+                    H.process(0)
+                }
                 if A != nil {H.process_array(A!)}
                 if n>=0 {H.process_num(n)}
                 if B != nil {H.process_array(B!)}
@@ -75,6 +82,9 @@ public struct HMAC
             if sha==48
             {
                 var H=HASH384()
+                for _ in 0 ..< zpad {
+                    H.process(0)
+                }
                 if A != nil {H.process_array(A!)}
                 if n>=0 {H.process_num(n)}
                 if B != nil {H.process_array(B!)}
@@ -83,6 +93,9 @@ public struct HMAC
             if sha==64
             {
                 var H=HASH512()
+                for _ in 0 ..< zpad {
+                    H.process(0)
+                }
                 if A != nil {H.process_array(A!)}
                 if n>=0 {H.process_num(n)}
                 if B != nil {H.process_array(B!)}
@@ -91,6 +104,9 @@ public struct HMAC
         }
         if hf == MC_SHA3 {
             var H=SHA3(sha)
+            for _ in 0 ..< zpad {
+                H.process(0)
+            }
             if A != nil {H.process_array(A!)}
             if n>=0 {H.process_num(n)}
             if B != nil {H.process_array(B!)}
@@ -113,7 +129,7 @@ public struct HMAC
 
     public static func SPhashit(_ hf: Int, _ sha: Int,_ A:[UInt8]?) -> [UInt8]
     {
-        return GPhashit(hf,sha,0,A!,-1,nil)
+        return GPhashit(hf,sha,0,0,A!,-1,nil)
     }
     /* Key Derivation Functions */
     /* Input octet Z */
@@ -130,7 +146,7 @@ public struct HMAC
 
         for counter in 1...cthreshold
         {
-            let B=HMAC.GPhashit(hf, sha, 0, Z,Int32(counter),P)
+            let B=HMAC.GPhashit(hf, sha, 0, 0, Z,Int32(counter),P)
             if k+hlen>olen {for i in 0 ..< olen%hlen {K[k]=B[i]; k+=1}}
             else {for i in 0 ..< hlen {K[k]=B[i]; k+=1}}
         }
@@ -173,13 +189,8 @@ public struct HMAC
         return key;
     }
 
-    /* Calculate HMAC of m using key k. HMAC is tag of length olen */
-    @discardableResult static public func HMAC1(_ hf: Int, _ sha: Int,_ tag:inout [UInt8],_ olen: Int, _ K:[UInt8],_ M:[UInt8]) -> Int
+    static func blksize(_ hf: Int, _ sha: Int) -> Int
     {
-    /* Input is from an octet m        *
-    * olen is requested output length in bytes. k is the key  *
-    * The output is the calculated tag */
-
         var b=0
         if hf == MC_SHA2 {
             b=64
@@ -188,6 +199,17 @@ public struct HMAC
         if hf == MC_SHA3 {
             b=200-2*sha
         }
+        return b
+    }
+
+    /* Calculate HMAC of m using key k. HMAC is tag of length olen */
+    @discardableResult static public func HMAC1(_ hf: Int, _ sha: Int,_ tag:inout [UInt8],_ olen: Int, _ K:[UInt8],_ M:[UInt8]) -> Int
+    {
+    /* Input is from an octet m        *
+    * olen is requested output length in bytes. k is the key  *
+    * The output is the calculated tag */
+
+        let b=HMAC.blksize(hf,sha)
         if b == 0 {
             return 0
         }
@@ -198,7 +220,7 @@ public struct HMAC
 
         if (K.count > b)
         {
-            B=HMAC.GPhashit(hf,sha,0 ,K,-1,nil)
+            B=HMAC.GPhashit(hf,sha,0 ,0,K,-1,nil)
             for i in 0 ..< sha {K0[i]=B[i]}
         }
         else
@@ -207,10 +229,10 @@ public struct HMAC
         }
         for i in 0 ..< b {K0[i]^=0x36}
 
-        B=HMAC.GPhashit(hf, sha, 0, K0,-1,M)
+        B=HMAC.GPhashit(hf, sha, 0, 0,K0,-1,M)
 
         for i in 0 ..< b {K0[i]^=0x6a}
-        B=HMAC.GPhashit(hf, sha, olen,K0,-1,B)
+        B=HMAC.GPhashit(hf, sha, olen,0,K0,-1,B)
 
         for i in 0 ..< olen {tag[i]=B[i]}
 
@@ -265,13 +287,82 @@ public struct HMAC
                 OKM[m]=k[j]; m=m+1;
             }
         }
-
         return OKM
     }
 
+    static public func XOF_Expand(_ hlen:Int, _ olen:Int, _ DST: [UInt8], _ MSG:[UInt8]) -> [UInt8]
+    {
+        var OKM=[UInt8](repeating: 0,count: olen)
+        var H=SHA3(hlen)
+	    for i in 0..<MSG.count {
+		    H.process(MSG[i])
+	    }
+        H.process(UInt8((olen>>8)&0xff))
+        H.process(UInt8(olen&0xff))
+        H.process(UInt8(DST.count & 0xff))
+        for i in 0..<DST.count {
+            H.process(DST[i])
+        }
+        H.shake(&OKM,olen)
+        return OKM
+    }
+
+    static public func XMD_Expand(_ hf: Int,_ hlen:Int, _ olen:Int, _ DST: [UInt8], _ MSG:[UInt8]) -> [UInt8]
+    {
+        var OKM=[UInt8](repeating: 0,count: olen)
+        var TMP=[UInt8](repeating: 0,count: DST.count+4)
+	    let ell=ceil(olen,hlen)
+	    let blk=blksize(hf,hlen)
+	    TMP[0]=UInt8((olen >> 8) & 0xff)
+	    TMP[1]=UInt8(olen & 0xff)
+	    TMP[2]=UInt8(0)
+	    TMP[3]=UInt8(DST.count & 0xff)
+	    for j in 0..<DST.count {
+		    TMP[4+j]=DST[j]
+	    }
+	    let H0=HMAC.GPhashit(hf, hlen, 0, blk, MSG, -1, TMP)
+        var H1=[UInt8](repeating: 0,count: hlen)
+        var TMP2=[UInt8](repeating: 0,count: DST.count+2)
+
+        var k=0
+        for i in 1...ell {
+            for j in 0..<hlen {
+                H1[j]^=H0[j]
+            }          
+            TMP2[0]=UInt8(i)
+            TMP2[1]=UInt8(DST.count & 0xff)
+            for j in 0..<DST.count {
+                TMP2[2+j]=DST[j]
+            }
+
+            H1=HMAC.GPhashit(hf, hlen, 0, 0, H1, -1, TMP2)
+            for j in 0..<hlen  {
+                OKM[k]=H1[j]
+                k+=1
+                if k==olen {
+                    break
+                }
+            }
+        }     
+        return OKM
+    }
 }
 
 /*
+
+
+    let msg=String("abc");
+    let MSG=[UInt8]( (msg).utf8 )
+    let dst=String("P256_XMD:SHA-256_SSWU_RO_TESTGEN");
+    let DST=[UInt8]( (dst).utf8 )
+
+    var OKM=HMAC.XOF_Expand(SHA3.SHAKE128,48,DST,MSG)
+    print("OKM= ",terminator:""); printBinary(OKM)
+    OKM=HMAC.XMD_Expand(HMAC.MC_SHA2,32,48,DST,MSG)
+    print("OKM= ",terminator:""); printBinary(OKM)
+
+
+
     var ikm=[UInt8] (repeating:0,count:22)
     var salt=[UInt8] (repeating:0,count:13)
     var info=[UInt8] (repeating:0,count:10)

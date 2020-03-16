@@ -340,7 +340,7 @@ var MPIN = function(ctx) {
         },
 
         HASH_ID: function(sha, ID) {
-            return ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,-1,ID);
+            return ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,-1,ID);
             //return this.hashit(sha, 0, ID);
         },
 
@@ -372,7 +372,7 @@ var MPIN = function(ctx) {
                 return this.INVALID_POINT;
             }
 
-            h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,-1,CID);
+            h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,-1,CID);
             //h = this.hashit(sha, 0, CID);
             R = ctx.ECP.mapit(h);
 
@@ -393,7 +393,7 @@ var MPIN = function(ctx) {
             if (P.is_infinity()) {
                 return this.INVALID_POINT;
             }
-            h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,-1,CID);
+            h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,-1,CID);
             //h = this.hashit(sha, 0, CID),
             R = ctx.ECP.mapit(h);
 
@@ -459,7 +459,7 @@ var MPIN = function(ctx) {
 
         /* Time Permit CTT=S*(date|H(CID)) where S is master secret */
         GET_CLIENT_PERMIT: function(sha, date, S, CID, CTT) {
-            var h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,date,CID),
+            var h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,date,CID),
             //var h = this.hashit(sha, date, CID),
                 P = ctx.ECP.mapit(h),
                 s = ctx.BIG.fromBytes(S);
@@ -482,7 +482,7 @@ var MPIN = function(ctx) {
             } else {
                 x = ctx.BIG.fromBytes(X);
             }
-            h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,-1,CLIENT_ID);
+            h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,-1,CLIENT_ID);
             //h = this.hashit(sha, 0, CLIENT_ID);
             P = ctx.ECP.mapit(h);
             T = ctx.ECP.fromBytes(TOKEN);
@@ -502,7 +502,7 @@ var MPIN = function(ctx) {
                 }
 
                 T.add(W);
-                h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,date,h);
+                h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,date,h);
                 //h = this.hashit(sha, date, h);
                 W = ctx.ECP.mapit(h);
 
@@ -556,14 +556,14 @@ var MPIN = function(ctx) {
 
         /* Outputs H(CID) and H(T|H(CID)) for time permits. If no time permits set HID=HTID */
         SERVER_1: function(sha, date, CID, HID, HTID) {
-            var h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,-1,CID),
+            var h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,-1,CID),
             //var h = this.hashit(sha, 0, CID),
                 P = ctx.ECP.mapit(h),
                 R;
 
             P.toBytes(HID, false);
             if (date !== 0) {
-                h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,date,h);
+                h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,date,h);
                 //h = this.hashit(sha, date, h);
                 R = ctx.ECP.mapit(h);
                 P.add(R);
@@ -720,7 +720,7 @@ var MPIN = function(ctx) {
         GET_Y: function(sha, TimeValue, xCID, Y) {
             var q = new ctx.BIG(0),
                 //h = this.hashit(sha, TimeValue, xCID),
-                h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,TimeValue,xCID),
+                h = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,TimeValue,xCID),
                 y = ctx.BIG.fromBytes(h);
 
             q.rcopy(ctx.ROM_CURVE.CURVE_Order);
@@ -865,7 +865,7 @@ var MPIN = function(ctx) {
                 T[i + tlen] = W[i];
             }
             tlen += W.length;
-            return ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,null,-1,T);
+            return ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2,sha,ctx.BIG.MODBYTES,0,null,-1,T);
             //return this.hashit(sha, 0, T);
         },
 

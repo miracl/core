@@ -42,7 +42,7 @@ fn decode_hex(s: &str) -> Vec<u8> {
     len/=2;
     let mut j=0;
     let cv: Vec<char> = s.chars().collect();
-    for i in 0..len {
+    for _ in 0..len {
         let n1=cv[j] as usize;
         let n2=cv[j+1] as usize;
 	    x.push(((n1 % 32 + 9) % 25 * 16 + (n2 % 32 + 9) % 25) as u8); j+=2;

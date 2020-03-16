@@ -61,11 +61,14 @@ func InttoBytes(n int, len int) []byte {
 }
 /* general purpose hashing of Byte array|integer|Byte array. Output of length olen, padded with leading zeros if required */
 
-func GPhashit(hash int,hlen int, olen int, A []byte, n int32, B []byte) []byte {
+func GPhashit(hash int,hlen int, olen int, zpad int,A []byte, n int32, B []byte) []byte {
 	var R []byte
 	if hash == MC_SHA2 {
 		if hlen == SHA256 {
 			H := NewHASH256()
+			for i := 0; i < zpad; i++ {
+				H.Process(0)
+			}
 			if A != nil {
 				H.Process_array(A)
 			}
@@ -79,6 +82,9 @@ func GPhashit(hash int,hlen int, olen int, A []byte, n int32, B []byte) []byte {
 		}
 		if hlen == SHA384 {
 			H := NewHASH384()
+			for i := 0; i < zpad; i++ {
+				H.Process(0)
+			}
 			if A != nil {
 				H.Process_array(A)
 			}
@@ -92,6 +98,9 @@ func GPhashit(hash int,hlen int, olen int, A []byte, n int32, B []byte) []byte {
 		}
 		if hlen == SHA512 {
 			H := NewHASH512()
+			for i := 0; i < zpad; i++ {
+				H.Process(0)
+			}
 			if A != nil {
 				H.Process_array(A)
 			}
@@ -106,6 +115,9 @@ func GPhashit(hash int,hlen int, olen int, A []byte, n int32, B []byte) []byte {
 	}
 	if hash == MC_SHA3 {
 		H := NewSHA3(hlen)
+		for i := 0; i < zpad; i++ {
+			H.Process(0)
+		}
 		if A != nil {
 			H.Process_array(A)
 		}
@@ -146,7 +158,7 @@ func GPhashit(hash int,hlen int, olen int, A []byte, n int32, B []byte) []byte {
 
 /* Simple hashing of byte array */
 func SPhashit(hash int,hlen int, A []byte) []byte {
-	return GPhashit(hash,hlen,0,A,-1,nil)
+	return GPhashit(hash,hlen,0,0,A,-1,nil)
 }
 
 /* Key Derivation Function */
@@ -169,7 +181,7 @@ func KDF2(hash int, sha int, Z []byte, P []byte, olen int) []byte {
 	}
 
 	for counter := 1; counter <= cthreshold; counter++ {
-		B := GPhashit(hash,sha, 0, Z, int32(counter), P)
+		B := GPhashit(hash,sha, 0, 0, Z, int32(counter), P)
 		if k+hlen > olen {
 			for i := 0; i < olen%hlen; i++ {
 				K[k] = B[i]
@@ -235,12 +247,7 @@ func PBKDF2(hash int, sha int, Pass []byte, Salt []byte, rep int, olen int) []by
 	return key
 }
 
-/* Calculate HMAC of m using key k. HMAC is tag of length olen (which is length of tag) */
-func HMAC(hash int, sha int, tag []byte, olen int, K []byte, M []byte) int {
-	/* Input is from an octet m        *
-	* olen is requested output length in bytes. k is the key  *
-	* The output is the calculated tag */
-	var B []byte
+func blksize(hash int,sha int) int {
 	b := 0
 	if hash == MC_SHA2 {
 		b = 64
@@ -251,6 +258,17 @@ func HMAC(hash int, sha int, tag []byte, olen int, K []byte, M []byte) int {
 	if hash == MC_SHA3 {
 		b=200-2*sha
 	}
+	return b
+}
+
+/* Calculate HMAC of m using key k. HMAC is tag of length olen (which is length of tag) */
+func HMAC(hash int, sha int, tag []byte, olen int, K []byte, M []byte) int {
+	/* Input is from an octet m        *
+	* olen is requested output length in bytes. k is the key  *
+	* The output is the calculated tag */
+	var B []byte
+
+	b := blksize(hash,sha)
 	if b == 0 {return 0}
 
 	var K0 [200]byte
@@ -274,12 +292,12 @@ func HMAC(hash int, sha int, tag []byte, olen int, K []byte, M []byte) int {
 	for i := 0; i < b; i++ {
 		K0[i] ^= 0x36
 	}
-	B = GPhashit(hash, sha, 0, K0[0:b], -1, M)
+	B = GPhashit(hash, sha, 0, 0, K0[0:b], -1, M)
 
 	for i := 0; i < b; i++ {
 		K0[i] ^= 0x6a
 	}
-	B = GPhashit(hash, sha, olen, K0[0:b], -1, B)
+	B = GPhashit(hash, sha, olen, 0, K0[0:b], -1, B)
 
 	for i := 0; i < olen; i++ {
 		tag[i] = B[i]
@@ -338,8 +356,80 @@ func HKDF_Expand(hash int, hlen int, olen int, PRK []byte, INFO []byte) []byte {
 	return OKM
 }
 
+func ceil(a int,b int) int {
+    return (((a)-1)/(b)+1)
+}
+
+func XOF_Expand(hlen int,olen int,DST []byte,MSG []byte) []byte {
+	var OKM =make([]byte,olen)
+	H := NewSHA3(hlen)
+	for i:=0;i<len(MSG);i++ {
+		H.Process(MSG[i])
+	}
+	H.Process(byte((olen >> 8) & 0xff));
+	H.Process(byte(olen & 0xff));
+	H.Process(byte(len(DST) & 0xff));
+	for i:=0;i<len(DST);i++ {
+		H.Process(DST[i])
+	}
+
+	H.Shake(OKM[:],olen)
+	return OKM
+}
+
+func XMD_Expand(hash int,hlen int,olen int,DST []byte,MSG []byte) []byte {
+	var OKM =make([]byte,olen)
+	var TMP =make([]byte,len(DST)+4)
+
+	ell:=ceil(olen,hlen)
+	blk:=blksize(hash,hlen)
+	TMP[0]=byte((olen >> 8) & 0xff)
+	TMP[1]=byte(olen & 0xff)
+	TMP[2]=byte(0)
+	TMP[3]=byte(len(DST) & 0xff)
+	for j:=0;j<len(DST);j++ {
+		TMP[4+j]=DST[j]
+	}
+	var H0=GPhashit(hash, hlen, 0, blk, MSG, -1, TMP)
+
+	var H1=make([]byte,hlen)
+	var TMP2=make([]byte,len(DST)+2)
+
+    k:=0
+	for i:=1;i<=ell;i++ {
+		for j:=0;j<hlen;j++ {
+			H1[j]^=H0[j]
+		}          
+		TMP2[0]=byte(i)
+		TMP2[1]=byte(len(DST) & 0xff)
+		for j:=0;j<len(DST);j++ {
+			TMP2[2+j]=DST[j]
+		}
+
+		H1=GPhashit(hash, hlen, 0, 0, H1, -1, TMP2);
+		for j:=0;j<hlen && k<olen;j++ {
+                OKM[k]=H1[j]
+				k++
+        }
+	}        
+    return OKM;
+}
+
 
 /*
+
+
+	MSG := []byte("abc")
+	DST := []byte("P256_XMD:SHA-256_SSWU_RO_TESTGEN")
+
+	OKM := core.XOF_Expand(core.SHA3_SHAKE128,48,DST,MSG)
+	fmt.Printf("OKM= "); printBinary(OKM[:])
+
+	OKM = core.XMD_Expand(core.MC_SHA2,32,48,DST,MSG)
+	fmt.Printf("OKM= "); printBinary(OKM[:])
+
+
+
 func main() {
 	var ikm []byte
 	var salt []byte

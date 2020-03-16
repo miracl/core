@@ -57,7 +57,7 @@ static void MGF1(int sha, octet *z, int olen, octet *mask)
     cthreshold = ROUNDUP(olen, hlen);
     for (counter = 0; counter < cthreshold; counter++)
     {
-        GPhash(MC_SHA2,sha,&H,0,z,counter,NULL);
+        GPhash(MC_SHA2,sha,&H,0,0,z,counter,NULL);
         //hashit(sha, z, counter, &H);
         if (mask->len + hlen > olen) OCT_jbytes(mask, H.val, olen % hlen);
         else                     OCT_joctet(mask, &H);
@@ -81,7 +81,7 @@ int WWW::PKCS15(int sha, octet *m, octet *w)
     octet H = {0, sizeof(h), h};
 
     if (olen < idlen + hlen + 10) return 0;
-    GPhash(MC_SHA2,sha,&H,0,m,-1,NULL);
+    GPhash(MC_SHA2,sha,&H,0,0,m,-1,NULL);
     //hashit(sha, m, -1, &H);
 
     OCT_empty(w);
@@ -114,7 +114,7 @@ int WWW::OAEP_ENCODE(int sha, octet *m, csprng *RNG, octet *p, octet *f)
     if (mlen > olen - hlen - seedlen - 1) return 0;
     if (m == f) return 0; /* must be distinct octets */
 
-    GPhash(MC_SHA2,sha,f,0,p,-1,NULL);
+    GPhash(MC_SHA2,sha,f,0,0,p,-1,NULL);
     //hashit(sha, p, -1, f);
 
     slen = olen - mlen - hlen - seedlen - 1;
@@ -157,7 +157,7 @@ int WWW::OAEP_DECODE(int sha, octet *p, octet *f)
     if (olen < seedlen + hlen + 1) return 0;
     if (!OCT_pad(f, olen + 1)) return 0;
 
-    GPhash(MC_SHA2,sha,&CHASH,0,p,-1,NULL);
+    GPhash(MC_SHA2,sha,&CHASH,0,0,p,-1,NULL);
     //hashit(sha, p, -1, &CHASH);
 
     x = f->val[0];

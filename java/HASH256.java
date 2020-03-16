@@ -200,7 +200,7 @@ public class HASH256 {
 
 //248d6a61 d20638b8 e5c02693 0c3e6039 a33ce459 64ff2167 f6ecedd4 19db06c1
 
-    public static void main(String[] args) {
+/*    public static void main(String[] args) {
         byte[] test = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".getBytes();
         byte[] digest;
         int i;
@@ -215,7 +215,7 @@ public class HASH256 {
         //	for (i=0;i<32;i++) System.out.format("%d ",digest[i]);
 
         System.out.println("");
-    }
+    }*/
 }
 
 

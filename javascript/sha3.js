@@ -155,6 +155,21 @@ var SHA3 = function(ctx) {
             }
         },
 
+        /* process an array of bytes */
+        process_array: function(b) {
+            for (var i = 0; i < b.length; i++) {
+                this.process(b[i]);
+            }
+        },
+
+        /* process a 32-bit integer */
+        process_num: function(n) {
+            this.process((n >> 24) & 0xff);
+            this.process((n >> 16) & 0xff);
+            this.process((n >> 8) & 0xff);
+            this.process(n & 0xff);
+        },
+
         /* squeeze the sponge */
         squeeze: function(buff, olen) {
             var done,

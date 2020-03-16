@@ -144,7 +144,7 @@ public struct ECDH
     static public func ECPSP_DSA(_ sha:Int,_ RNG: inout RAND,_ S:[UInt8],_ F:[UInt8],_ C:inout [UInt8],_ D:inout [UInt8]) -> Int
     {
         var T=[UInt8](repeating: 0,count: ECDH.EFS)
-        let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,Int(CONFIG_BIG.MODBYTES), F,-1,nil)
+        let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,Int(CONFIG_BIG.MODBYTES), 0,F,-1,nil)
 
         let G=ECP.generator();
         let r=BIG(ROM.CURVE_Order)
@@ -185,7 +185,7 @@ public struct ECDH
     static public func ECPVP_DSA(_ sha:Int,_ W:[UInt8],_ F:[UInt8],_ C:[UInt8],_ D:[UInt8]) -> Int
     {
         var res=0
-        let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,Int(CONFIG_BIG.MODBYTES),F,-1,nil)
+        let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,Int(CONFIG_BIG.MODBYTES),0,F,-1,nil)
 
         let G=ECP.generator();
         let r=BIG(ROM.CURVE_Order)

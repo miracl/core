@@ -138,7 +138,7 @@ public struct MPIN256
 
     static public func HASH_ID(_ sha:Int,_ ID:[UInt8]) -> [UInt8]
     {
-        return HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,-1,ID)
+        return HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,-1,ID)
     }
 
     // these next two functions implement elligator squared - http://eprint.iacr.org/2014/043
@@ -250,7 +250,7 @@ public struct MPIN256
     {
         var P=ECP.fromBytes(TOKEN)
         if P.is_infinity() {return INVALID_POINT}
-        let h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,-1,CID)
+        let h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,-1,CID)
         var R=ECP.mapit(h)
 
         R=R.pinmul(factor,facbits)
@@ -266,7 +266,7 @@ public struct MPIN256
     {
         var P=ECP.fromBytes(TOKEN)
         if P.is_infinity() {return INVALID_POINT}
-        let h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,-1,CID)
+        let h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,-1,CID)
         var R=ECP.mapit(h)
 
         R=R.pinmul(factor,facbits)
@@ -310,7 +310,7 @@ public struct MPIN256
             x=BIG.fromBytes(X);
         }
 
-        var h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,-1,CLIENT_ID)
+        var h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,-1,CLIENT_ID)
         var P=ECP.mapit(h);
 
         var T=ECP.fromBytes(TOKEN);
@@ -323,7 +323,7 @@ public struct MPIN256
             W=ECP.fromBytes(PERMIT!)
             if W.is_infinity() {return INVALID_POINT}
             T.add(W);
-            h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,date,h)
+            h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,date,h)
             W=ECP.mapit(h);
             if xID != nil
             {
@@ -404,7 +404,7 @@ public struct MPIN256
     // Time Permit CTT=S*(date|H(CID)) where S is master secret
     @discardableResult static public func GET_CLIENT_PERMIT(_ sha:Int,_ date:Int32,_ S:[UInt8],_ CID:[UInt8],_ CTT:inout [UInt8]) -> Int
     {
-        let h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,date,CID)
+        let h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,date,CID)
         let P=ECP.mapit(h)
 
         let s=BIG.fromBytes(S)
@@ -415,13 +415,13 @@ public struct MPIN256
     // Outputs H(CID) and H(T|H(CID)) for time permits. If no time permits set HID=HTID
     static public func SERVER_1(_ sha:Int,_ date:Int32,_ CID:[UInt8],_ HID:inout [UInt8],_ HTID:inout [UInt8]?)
     {
-        var h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,-1,CID)
+        var h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,-1,CID)
         var P=ECP.mapit(h)
 
         P.toBytes(&HID,false)
         if date != 0
         {
-            h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,date,h)
+            h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,date,h)
             let R=ECP.mapit(h)
             P.add(R)
             P.toBytes(&HTID!,false)
@@ -584,7 +584,7 @@ public struct MPIN256
         for i in 0 ..< W.count {T[i+tlen]=W[i]}
         tlen+=W.count;
 
-        return HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,-1,T)
+        return HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,-1,T)
     }
 
     // calculate common key on client side
@@ -668,7 +668,7 @@ public struct MPIN256
     // Generate Y = H(epoch, xCID/xID)
     static public func GET_Y(_ sha:Int,_ TimeValue:Int32,_ xCID:[UInt8],_ Y:inout [UInt8])
     {
-        let h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,nil,TimeValue,xCID)
+        let h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,nil,TimeValue,xCID)
         var y = BIG.fromBytes(h)
         let q=BIG(ROM.CURVE_Order)
         y.mod(q)

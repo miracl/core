@@ -151,7 +151,7 @@ func MGF1(sha int, Z []byte, olen int, K []byte) {
 		cthreshold++
 	}
 	for counter := 0; counter < cthreshold; counter++ {
-		B := core.GPhashit(core.MC_SHA2,sha,0,Z,int32(counter),nil)
+		B := core.GPhashit(core.MC_SHA2,sha,0,0,Z,int32(counter),nil)
 		//B := hashit(sha, Z, counter)
 
 		if k+hlen > olen {

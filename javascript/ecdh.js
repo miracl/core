@@ -183,7 +183,7 @@ var ECDH = function(ctx) {
                 i, r, s, f, c, d, u, vx, w,
                 G, V, B;
 
-            B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha, ctx.BIG.MODBYTES, F, -1, null);
+            B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha, ctx.BIG.MODBYTES, 0, F, -1, null);
 
             G = ctx.ECP.generator();
 
@@ -234,7 +234,7 @@ var ECDH = function(ctx) {
                 r, f, c, d, h2,
                 G, WP, P;
 
-            B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha, ctx.BIG.MODBYTES, F, -1, null);
+            B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha, ctx.BIG.MODBYTES, 0, F, -1, null);
 
             G = ctx.ECP.generator();
 

@@ -142,7 +142,7 @@ func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte) int {
 func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []byte) int {
 	var T [EFS]byte
 
-	B := core.GPhashit(core.MC_SHA2, sha, int(MODBYTES), F, -1, nil )
+	B := core.GPhashit(core.MC_SHA2, sha, int(MODBYTES), 0, F, -1, nil )
 	G := ECP_generator()
 
 	r := NewBIGints(CURVE_Order)
@@ -188,7 +188,7 @@ func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []b
 func ECDH_ECPVP_DSA(sha int, W []byte, F []byte, C []byte, D []byte) int {
 	res := 0
 
-	B := core.GPhashit(core.MC_SHA2, sha, int(MODBYTES), F, -1, nil )
+	B := core.GPhashit(core.MC_SHA2, sha, int(MODBYTES), 0, F, -1, nil )
 
 	G := ECP_generator()
 	r := NewBIGints(CURVE_Order)

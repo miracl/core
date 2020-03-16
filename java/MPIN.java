@@ -64,7 +64,7 @@ public class MPIN {
     }
 
     public static byte[] HASH_ID(int sha, byte[] ID, int len) {
-        return HMAC.GPhashit(HMAC.MC_SHA2,sha,len,null,-1,ID);
+        return HMAC.GPhashit(HMAC.MC_SHA2,sha,len,0,null,-1,ID);
         //return hashit(sha, 0, ID, len);
     }
 
@@ -97,7 +97,7 @@ public class MPIN {
         for (i = 0; i < W.length; i++) T[i + tlen] = W[i];
         tlen += W.length;
 
-        return HMAC.GPhashit(HMAC.MC_SHA2, sha, len, null, -1, T);
+        return HMAC.GPhashit(HMAC.MC_SHA2, sha, len, 0, null, -1, T);
         //return hashit(sha, 0, T, len);
     }
 
@@ -263,7 +263,7 @@ public class MPIN {
         ECP P = ECP.fromBytes(TOKEN);
         if (P.is_infinity()) return INVALID_POINT;
         //byte[] h = hashit(sha, 0, CID, EFS);
-        byte[] h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,null,-1,CID);
+        byte[] h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,null,-1,CID);
         ECP R = ECP.mapit(h);
 
 
@@ -308,7 +308,7 @@ public class MPIN {
         BIG px;
 
         //byte[] h = hashit(sha, 0, CLIENT_ID, EFS);
-        byte[] h= HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,null,-1,CLIENT_ID);
+        byte[] h= HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,null,-1,CLIENT_ID);
         P = ECP.mapit(h);
 
         T = ECP.fromBytes(TOKEN);
@@ -322,7 +322,7 @@ public class MPIN {
             if (W.is_infinity()) return INVALID_POINT;
             T.add(W);
             //h = hashit(sha, date, h, EFS);
-            h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,null,date,h);
+            h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,null,date,h);
             W = ECP.mapit(h);
             if (xID != null) {
                 P = PAIR.G1mul(P, x);
@@ -389,7 +389,7 @@ public class MPIN {
     /* Time Permit CTT=S*(date|H(CID)) where S is master secret */
     public static int GET_CLIENT_PERMIT(int sha, int date, byte[] S, byte[] CID, byte[] CTT) {
         //byte[] h = hashit(sha, date, CID, EFS);
-        byte[] h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,null,date,CID);
+        byte[] h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,null,date,CID);
         ECP P = ECP.mapit(h);
 
         BIG s = BIG.fromBytes(S);
@@ -402,13 +402,13 @@ public class MPIN {
     /* Outputs H(CID) and H(T|H(CID)) for time permits. If no time permits set HID=HTID */
     public static void SERVER_1(int sha, int date, byte[] CID, byte[] HID, byte[] HTID) {
         //byte[] h = hashit(sha, 0, CID, EFS);
-        byte[] h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,null,-1,CID);
+        byte[] h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,null,-1,CID);
         ECP R, P = ECP.mapit(h);
 
         P.toBytes(HID, false);  // new
         if (date != 0) {
             //h = hashit(sha, date, h, EFS);
-            h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,null,date,h);
+            h = HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,null,date,h);
             R = ECP.mapit(h);
             P.add(R); //P.affine();
             P.toBytes(HTID, false);
@@ -620,7 +620,7 @@ public class MPIN {
     /* Generate Y = H(epoch, xCID/xID) */
     public static void GET_Y(int sha, int TimeValue, byte[] xCID, byte[] Y) {
         //byte[] h = hashit(sha, TimeValue, xCID, EFS);
-        byte[] h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,null,TimeValue,xCID);
+        byte[] h=HMAC.GPhashit(HMAC.MC_SHA2,sha,EFS,0,null,TimeValue,xCID);
         BIG y = BIG.fromBytes(h);
         BIG q = new BIG(ROM.CURVE_Order);
         y.mod(q);

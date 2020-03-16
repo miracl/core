@@ -506,11 +506,12 @@ extern void  SHA3_squeeze(sha3 *H, char *h, int len);
 	@param hlen the hash function output length (32,48 or 64)
 	@param w an output octet
     @param olen the output length
+    @param pad zero padding
     @param p an input octet
     @param n an input 32-bit integer
     @param x an optional input octet
  */
-extern void GPhash(int hash,int hlen,octet *w,int olen,octet *p,int n,octet *x);
+extern void GPhash(int hash,int hlen,octet *w,int olen,int pad,octet *p,int n,octet *x);
 
 /**	@brief Simple purpose Hashing function
  *
@@ -554,6 +555,29 @@ extern void HKDF_Extract(int hash,int hlen,octet *K,octet *P,octet *S);
 
  */
 extern void HKDF_Expand(int hash,int hlen,octet *E,int olen,octet *K,octet *I);
+
+/**	@brief XOF_Expand function
+ *
+	@param hlen the SHA3 output length (16 or 32)
+	@param E an expanded messsage
+    @param olen is the desired length of the expanded key
+    @param P is Domain Separator
+    @param S input message
+
+ */
+extern void XOF_Expand(int hlen,octet *E,int olen,octet *P,octet *S);
+
+/**	@brief XOF_Expand function
+ *
+    @param hash the hash family (SHA2 or SHA3)
+	@param hlen the SHA3 output length (16 or 32)
+	@param E an expanded messsage
+    @param olen is the desired length of the expanded key
+    @param P is Domain Separator
+    @param S input message
+
+ */
+extern void XMD_Expand(int hash,int hlen,octet *E,int olen,octet *P,octet *S);
 
 /**	@brief Key Derivation Function - generates key K from inputs Z and P
  *

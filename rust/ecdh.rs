@@ -155,7 +155,7 @@ pub fn ecpsp_dsa(
     let mut t: [u8; EFS] = [0; EFS];
     let mut b: [u8; big::MODBYTES as usize] = [0; big::MODBYTES as usize];
 
-    hmac::GPhashit(hmac::MC_SHA2, sha, &mut b, big::MODBYTES as usize,Some(f), -1, None);
+    hmac::GPhashit(hmac::MC_SHA2, sha, &mut b, big::MODBYTES as usize,0,Some(f), -1, None);
 
     let G = ECP::generator();
 
@@ -214,7 +214,7 @@ pub fn ecpvp_dsa(sha: usize, w: &[u8], f: &[u8], c: &[u8], d: &[u8]) -> isize {
 
     let mut b: [u8; big::MODBYTES as usize] = [0; big::MODBYTES as usize];
 
-    hmac::GPhashit(hmac::MC_SHA2, sha, &mut b, big::MODBYTES as usize, Some(f), -1, None);
+    hmac::GPhashit(hmac::MC_SHA2, sha, &mut b, big::MODBYTES as usize, 0,Some(f), -1, None);
 
     let mut G = ECP::generator();
 

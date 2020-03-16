@@ -96,7 +96,7 @@ public func TestHPKE_c25519()
     var skE=decode_hex("7227b3fee6b8e01b293b826ec8671b69894a1142981bb1513afa42819f2a22ef")
     var pkR=decode_hex("186c394e175b7b161760b1bd5b822a0804bd066b170c695c0df123176fa7df6f")
 
-    var Z=c25519.HPKE.ENCAP(config_id,&NULLRNG,&skE,&pkE,&pkR)
+    var Z=c25519.HPKE.ENCAP(config_id,&NULLRNG,skE,&pkE,&pkR)
     print("pkE= ",terminator:""); printBinary(pkE)
     print("Encapsulated Z= ",terminator:""); printBinary(Z)
 
@@ -118,7 +118,7 @@ public func TestHPKE_c25519()
     skE=decode_hex("0dc7bf88c1849fd7800f8bd52eed75f26160a3cb9d634190c48ced1daa4c341a")
     pkR=decode_hex("696977f50e929c99287852ded3fc9b2709f8cd51c0d270c45c338dece959f437")
 
-    Z=c25519.HPKE.ENCAP(config_id,&NULLRNG,&skE,&pkE,&pkR)
+    Z=c25519.HPKE.ENCAP(config_id,&NULLRNG,skE,&pkE,&pkR)
     print("pkE= ",terminator:""); printBinary(pkE)
     print("Encapsulated Z= ",terminator:""); printBinary(Z)
 
@@ -205,7 +205,7 @@ public func TestHPKE_nist521()
     var skE=decode_hex("0099f6326effd78a5c54eeba93e911f35bdd418f2e1de3281ba2172aebf251ff73614598c81686775c20618721c8c84466f2f6ca7b33636a3edbc69697087f8b414a")
     var pkR=decode_hex("04015c0e75e50b266e5fb8e3a3f317608bbf64843c47cca29faa3b894a4f9b95ba533bd40d343e5747f9e85d9ffee5b4ed803a20a23ff0a246ca4d9d59eae9c38291d000c396eade14ed2d42fafe7c4be26da6f07af8b6902af5fbb39f8b0b15c7120d7f57f46ed24e711dda2469f418377d8cc8de7ec8b0594e155b8d6d6ca699f99a4189")
 
-    var Z=nist521.HPKE.ENCAP(config_id,&NULLRNG,&skE,&pkE,&pkR)
+    var Z=nist521.HPKE.ENCAP(config_id,&NULLRNG,skE,&pkE,&pkR)
     print("pkE= ",terminator:""); printBinary(pkE)
     print("Encapsulated Z= ",terminator:""); printBinary(Z)
 
@@ -227,7 +227,7 @@ public func TestHPKE_nist521()
     skE=decode_hex("00416c4a6236475f01a0cd0a9a7a0d7229be88a63281fca350ea98d4438de57a23bd5053572bf0f7bed8bc84aba6f7322cabc6b2540e789eb5823660eaad8e206fd9")
     pkR=decode_hex("040108f48ce8fcd71e7e07270fa566cfd66d9b7ab124df141d700b82141264a01306b94265afc3c361c0c0dc514864d4b12e687697d24ddce2f0c77f9c257b8a2f5a380109cb328c87f9833f729967a74675acc31bccdccf5016d442e7b33d2ecaf6f79d8a0e79d8259b07cd173e320ca25c68acf5aa4f3793e7fc6d076baa953060847a02")
 
-    Z=nist521.HPKE.ENCAP(config_id,&NULLRNG,&skE,&pkE,&pkR)
+    Z=nist521.HPKE.ENCAP(config_id,&NULLRNG,skE,&pkE,&pkR)
     print("pkE= ",terminator:""); printBinary(pkE)
     print("Encapsulated Z= ",terminator:""); printBinary(Z)
 

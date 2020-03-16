@@ -179,7 +179,7 @@ RSA = function(ctx) {
             }
 
             for (counter = 0; counter < cthreshold; counter++) {
-                B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha,0,Z,counter,null);
+                B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha,0,0,Z,counter,null);
                 //B = this.hashit(sha, Z, counter);
 
                 if (k + hlen > olen) {
