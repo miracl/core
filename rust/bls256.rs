@@ -56,6 +56,23 @@ fn ceil(a: usize,b: usize) -> usize {
 }
 
 /* output u \in F_p */
+fn hash_to_field(hash: usize,hlen: usize ,u: &mut [BIG], dst: &[u8],m: &[u8],ctr: usize) {
+    let q = BIG::new_ints(&rom::MODULUS);
+    let el = ceil(q.nbits()+ecp::AESKEY*8,8);
+
+    let mut okm: [u8;256]=[0;256];
+    let mut fd: [u8;128]=[0;128];
+
+    hmac::xmd_expand(hash,hlen,&mut okm,el*ctr,&dst,&m);
+    for i in 0..ctr {
+        for j in 0..el {
+            fd[j]=okm[el*i+j];
+        }
+        u[i]=DBIG::frombytes(&fd[0 .. el]).dmod(&q);
+    }
+}
+
+/* output u \in F_p 
 fn hash_to_base(hash: usize,hlen: usize ,dst: &[u8],m: &[u8],ctr: isize) -> BIG {
     let q = BIG::new_ints(&rom::MODULUS);
     let el = ceil(q.nbits()+ecp::AESKEY*8,8);
@@ -78,17 +95,20 @@ fn hash_to_base(hash: usize,hlen: usize ,dst: &[u8],m: &[u8],ctr: isize) -> BIG 
     let u=dx.dmod(&q);
 
     return u;
-}
+} */
 
 /* hash a message to an ECP point, using SHA2, random oracle method */
 #[allow(non_snake_case)]
 pub fn bls_hash_to_point(m: &[u8]) -> ECP {
-    let dst= String::from("BLS_SIG_ZZZG1-SHA512-SSWU-RO-_NUL_".to_ascii_uppercase());
-    let u=hash_to_base(hmac::MC_SHA2,ecp::HASH_TYPE,dst.as_bytes(),m,0);
-    let u1=hash_to_base(hmac::MC_SHA2,ecp::HASH_TYPE,dst.as_bytes(),m,1);
+    let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA512-SSWU-RO-_NUL_".to_ascii_uppercase());
+    let mut u: [BIG; 2] = [
+        BIG::new(),
+        BIG::new(),
+    ];
+    hash_to_field(hmac::MC_SHA2,ecp::HASH_TYPE,&mut u,dst.as_bytes(),m,2);
 
-    let mut P=ECP::map2point(&u);
-    let P1=ECP::map2point(&u1);
+    let mut P=ECP::map2point(&u[0]);
+    let P1=ECP::map2point(&u[1]);
     P.add(&P1);
     P.cfp();
     P.affine();

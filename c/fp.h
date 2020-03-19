@@ -68,6 +68,8 @@ extern const chunk MConst_YYY;		/**< Constant associated with Modulus - for Mont
 #define FEXCESS_YYY (((sign32)1<<MAXXES_YYY)-1)	     /**< 2^(BASEBITS*NLEN-MODBITS)-1 - normalised BIG can be multiplied by less than this before reduction */
 #define OMASK_YYY (-((chunk)(1)<<TBITS_YYY))         /**<  for masking out overflow bits */
 
+//#define BIG_ENDIAN_SIGN_YYY 
+
 //#define FUSED_MODMUL
 //#define DEBUG_REDUCE
 

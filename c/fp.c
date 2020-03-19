@@ -825,12 +825,28 @@ void FP_YYY_one(FP_YYY *n)
 
 int FP_YYY_sign(FP_YYY *x)
 {
+#ifdef BIG_ENDIAN_SIGN_YYY
+    int cp;
+    BIG_XXX m,pm1d2;
+    FP_YYY y;
+    BIG_XXX_rcopy(pm1d2, Modulus_YYY);
+    BIG_XXX_dec(pm1d2,1);
+    BIG_XXX_fshr(pm1d2,1); //(p-1)/2
+     
+    FP_YYY_copy(&y,x);
+    FP_YYY_reduce(&y);
+    FP_YYY_redc(m,&y);
+    cp=BIG_XXX_comp(m,pm1d2);
+    return ((cp+1)&2)>>1;
+
+#else
     BIG_XXX m;
     FP_YYY y;
     FP_YYY_copy(&y,x);
     FP_YYY_reduce(&y);
     FP_YYY_redc(m,&y);
     return BIG_XXX_parity(m);
+#endif
 }
 
 

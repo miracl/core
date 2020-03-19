@@ -246,9 +246,21 @@ public final class FP {
 /* get sign */ 
     public int sign()
     {
-        FP n = new FP(this);
-        n.reduce();
-        return n.redc().parity();
+        if (CONFIG_FIELD.BIG_ENDIAN_SIGN)
+        {
+            BIG m = new BIG(ROM.Modulus);
+            m.dec(1);
+            m.fshr(1);
+            FP n = new FP(this);
+            n.reduce();
+            BIG w=n.redc();
+            int cp=BIG.comp(w,m);
+            return ((cp+1)&2)>>1;
+        } else {
+            FP n = new FP(this);
+            n.reduce();
+            return n.redc().parity();
+        }
     }
 
     public boolean isunity()

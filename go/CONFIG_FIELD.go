@@ -55,3 +55,5 @@ const OMASK Chunk = ((Chunk(-1)) << (MODBITS % BASEBITS))
 const TBITS uint = MODBITS % BASEBITS // Number of active bits in top word
 const TMASK Chunk = (Chunk(1) << TBITS) - 1
 
+const BIG_ENDIAN_SIGN bool = false;
+

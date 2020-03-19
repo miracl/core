@@ -88,6 +88,8 @@ var FP = function(ctx) {
     FP.TBITS = FP.MODBITS % ctx.BIG.BASEBITS;
     FP.TMASK = (1 << FP.TBITS) - 1;
 
+    FP.BIG_ENDIAN_SIGN = false;
+
     FP.prototype = {
         /* set this=0 */
         zero: function() {
@@ -189,9 +191,22 @@ var FP = function(ctx) {
         },
 
         sign: function () {
-			var c=new FP(0); c.copy(this);
-            c.reduce();
-            return c.redc().parity();
+            if (FP.BIG_ENDIAN_SIGN)
+            {
+                var m = new ctx.BIG(0);
+                m.rcopy(ctx.ROM_FIELD.Modulus);
+                m.dec(1);
+                m.fshr(1);
+                var n = new FP(0); n.copy(this);
+                n.reduce();
+                var w=n.redc();
+                var cp=ctx.BIG.comp(w,m);
+                return ((cp+1)&2)>>1;
+            } else {
+			    var c=new FP(0); c.copy(this);
+                c.reduce();
+                return c.redc().parity();
+            }
         },
 
         /* reduce this mod Modulus */

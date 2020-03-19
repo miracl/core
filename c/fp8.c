@@ -119,8 +119,13 @@ int FP8_YYY_sign(FP8_YYY *w)
     int p1,p2;
     p1=FP4_YYY_sign(&(w->a));
     p2=FP4_YYY_sign(&(w->b));
+#ifdef BIG_ENDIAN_SIGN_YYY
+    p2 ^= (p1 ^ p2)&FP4_YYY_iszilch(&(w->b));
+    return p2;
+#else
     p1 ^= (p1 ^ p2)&FP4_YYY_iszilch(&(w->a));
     return p1;
+#endif
 }
 
 /* Set w=-x */

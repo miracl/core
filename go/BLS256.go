@@ -54,6 +54,23 @@ func ceil(a int,b int) int {
 }
 
 /* output u \in F_p */
+func hash_to_field(hash int,hlen int ,DST []byte,M []byte,ctr int) []*BIG {
+	q := NewBIGints(Modulus)
+	L := ceil(q.nbits()+AESKEY*8,8)
+	var u []*BIG
+	var fd =make([]byte,L)
+	OKM:=core.XMD_Expand(hash,hlen,L*ctr,DST,M)
+	
+	for i:=0;i<ctr;i++ {
+		for j:=0;j<L;j++ {
+			fd[j]=OKM[i*L+j];
+		}
+		u = append(u,DBIG_fromBytes(fd).mod(q))
+	}
+	return u
+}
+
+/* output u \in F_p 
 func hash_to_base(hash int,hlen int ,DST []byte,M []byte,ctr int) *BIG {
 	q := NewBIGints(Modulus)
 	L := ceil(q.nbits()+AESKEY*8,8)
@@ -66,16 +83,15 @@ func hash_to_base(hash int,hlen int ,DST []byte,M []byte,ctr int) *BIG {
 	dx:= DBIG_fromBytes(OKM[:])
 	u:= dx.mod(q)
 	return u
-}
+} */
 
 /* hash a message to an ECP point, using SHA2, random oracle method */
 func bls256_hash_to_point(M []byte) *ECP {
-	DST := []byte("BLS_SIG_ZZZG1-SHA512-SSWU-RO-_NUL_")
-	u := hash_to_base(core.MC_SHA2,HASH_TYPE,DST,M,0)
-	u1 := hash_to_base(core.MC_SHA2,HASH_TYPE,DST,M,1)
+	DST := []byte("BLS_SIG_ZZZG1_XMD:SHA512-SSWU-RO-_NUL_")
+	u := hash_to_field(core.MC_SHA2,HASH_TYPE,DST,M,2)
 
-	P:=ECP_map2point(u)
-	P1 := ECP_map2point(u1);
+	P:=ECP_map2point(u[0])
+	P1 := ECP_map2point(u[1]);
 	P.Add(P1)
 	P.Cfp()
 	P.Affine()

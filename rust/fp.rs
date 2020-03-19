@@ -62,6 +62,8 @@ pub const OMASK: Chunk = (-1) << (MODBITS % big::BASEBITS);
 pub const TBITS: usize = MODBITS % big::BASEBITS; // Number of active bits in top word
 pub const TMASK: Chunk = (1 << TBITS) - 1;
 
+pub const BIG_ENDIAN_SIGN: bool = false;
+
 impl FP {
     /* Constructors */
     pub const fn new() -> FP {
@@ -241,9 +243,20 @@ impl FP {
     }
 
     pub fn sign(&mut self) -> isize {
-        let mut a = FP::new_copy(self);
-        a.reduce();
-        return a.redc().parity();
+        if BIG_ENDIAN_SIGN {
+            let mut m = BIG::new_ints(&rom::MODULUS);
+            m.dec(1);
+            m.fshr(1);
+            let mut n = FP::new_copy(self);
+            n.reduce();
+            let w=n.redc();
+            let cp=BIG::comp(&w,&m);
+            return ((cp+1)&2)>>1;
+        } else {
+            let mut a = FP::new_copy(self);
+            a.reduce();
+            return a.redc().parity();
+        }
     }
 
     /* copy from FP b */

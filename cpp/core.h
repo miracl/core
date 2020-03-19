@@ -50,7 +50,6 @@ namespace core {
 #define MONTGOMERY_FRIENDLY 3  /**< Montgomery Friendly modulus of form $2^a(2^b-c)-1$  */
 #define GENERALISED_MERSENNE 2 /**< Generalised-mersenne modulus of form $2^n-2^m-1$, GOLDILOCKS only */
 
-
 /* Curve types */
 
 #define WEIERSTRASS 0 /**< Short Weierstrass form curve  */

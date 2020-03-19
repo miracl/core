@@ -251,9 +251,20 @@ func (F *FP) one() {
 
 /* return sign */
 func (F *FP) sign() int {
-	W:=NewFPcopy(F)
-	W.reduce()
-	return W.redc().parity()
+	if BIG_ENDIAN_SIGN {
+		m := NewBIGints(Modulus)
+		m.dec(1)
+		m.fshr(1)
+		n := NewFPcopy(F);
+		n.reduce()
+		w := n.redc()
+		cp:=Comp(w,m)
+		return ((cp+1)&2)>>1		
+	} else {
+		W:=NewFPcopy(F)
+		W.reduce()
+		return W.redc().parity()
+	}
 }
 
 /* normalise this */

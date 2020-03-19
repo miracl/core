@@ -92,6 +92,24 @@ var BLS256 = function(ctx) {
         },
 
 /* output u \in F_p */
+        hash_to_field: function(hash,hlen,DST,M,ctr) {
+            var q = new ctx.BIG(0);
+            q.rcopy(ctx.ROM_FIELD.Modulus);
+            var L = this.ceil(q.nbits()+ctx.ECP.AESKEY*8,8);
+            var u=[];
+            var fd=[];
+            var OKM=ctx.HMAC.XMD_Expand(hash,hlen,L*ctr,DST,M);
+
+            for (var i=0;i<ctr;i++)
+            {
+                for (var j=0;j<L;j++)
+                    fd[j]=OKM[i*L+j];
+                u[i]=ctx.DBIG.fromBytes(fd).mod(q);
+            }
+            return u;
+        },
+
+/* output u \in F_p 
         hash_to_base: function(hash,hlen,DST,M,ctr) {
             var q = new ctx.BIG(0);
             q.rcopy(ctx.ROM_FIELD.Modulus);
@@ -107,17 +125,16 @@ var BLS256 = function(ctx) {
             var dx=ctx.DBIG.fromBytes(OKM);
             var u=dx.mod(q);
             return u;
-        },
+        }, */
 
         /* hash a message to an ECP point, using SHA3 */
 
         bls_hash_to_point: function(M) {
-            var dst= "BLS_SIG_ZZZG1-SHA512-SSWU-RO-_NUL_";
-            var u=this.hash_to_base(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,0);
-            var u1=this.hash_to_base(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,1);
+            var dst= "BLS_SIG_ZZZG1_XMD:SHA512-SSWU-RO-_NUL_";
+            var u=this.hash_to_field(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,2);
 
-            var P=ctx.ECP.map2point(u);
-            var P1=ctx.ECP.map2point(u1);
+            var P=ctx.ECP.map2point(u[0]);
+            var P1=ctx.ECP.map2point(u[1]);
             P.add(P1);
             P.cfp();
             P.affine();

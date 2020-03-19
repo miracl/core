@@ -50,4 +50,6 @@ public struct CONFIG_FIELD{
     static let TBITS:UInt=CONFIG_FIELD.MODBITS%CONFIG_BIG.BASEBITS; // Number of active bits in top word
     static let TMASK:Chunk=(1<<Chunk(CONFIG_FIELD.TBITS))-1
 
+    static let BIG_ENDIAN_SIGN:Bool = false 
+
 }

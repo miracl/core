@@ -174,9 +174,16 @@ public final class FP2 {
     {
         int p1=a.sign();
         int p2=b.sign();
-        int u=a.iszilch()? 1:0;
-        p1^=(p1^p2)&u;
-        return p1;
+        if (CONFIG_FIELD.BIG_ENDIAN_SIGN)
+        {
+            int u=b.iszilch()? 1:0;
+            p2^=(p1^p2)&u;
+            return p2;
+        } else {
+            int u=a.iszilch()? 1:0;
+            p1^=(p1^p2)&u;
+            return p1;
+        }
     }
 
 /* negate this mod Modulus */

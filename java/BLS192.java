@@ -53,7 +53,24 @@ public class BLS192 {
         return (((a)-1)/(b)+1);
     }
 
-/* output u \in F_p */
+    static BIG[] hash_to_field(int hash,int hlen,byte[] DST,byte[] M,int ctr) {
+        BIG q = new BIG(ROM.Modulus);
+        int L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8);
+        BIG [] u = new BIG[ctr];
+        byte[] fd=new byte[L];
+
+        byte[] OKM=HMAC.XMD_Expand(hash,hlen,L*ctr,DST,M);
+        for (int i=0;i<ctr;i++)
+        {
+            for (int j=0;j<L;j++)
+                fd[j]=OKM[i*L+j];
+            u[i]=DBIG.fromBytes(fd).mod(q);
+        }
+    
+        return u;
+    }    
+
+/* output u \in F_p 
     static BIG hash_to_base(int hash,int hlen,byte[] DST,byte[] M,int ctr) {
         BIG q = new BIG(ROM.Modulus);
         int L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8);
@@ -71,16 +88,15 @@ public class BLS192 {
         DBIG dx=DBIG.fromBytes(OKM);
         BIG u=dx.mod(q);
         return u;
-    }
+    } */
 
     /* hash a message to an ECP point, using SHA2, random oracle method */
     public static ECP bls_hash_to_point(byte[] M) {
-        String dst= new String("BLS_SIG_ZZZG1-SHA384-SSWU-RO-_NUL_");
-        BIG u=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,0);
-        BIG u1=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,1);
+        String dst= new String("BLS_SIG_ZZZG1_XMD:SHA384-SSWU-RO-_NUL_");
+        BIG[] u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,2);
 
-        ECP P=ECP.map2point(u);
-        ECP P1=ECP.map2point(u1);
+        ECP P=ECP.map2point(u[0]);
+        ECP P1=ECP.map2point(u[1]);
         P.add(P1);
         P.cfp();
         P.affine();

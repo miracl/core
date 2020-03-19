@@ -158,8 +158,14 @@ int YYY::FP2_sign(FP2 *w)
     int p1,p2;
     p1=FP_sign(&(w->a));
     p2=FP_sign(&(w->b));
+#ifdef BIG_ENDIAN_SIGN_YYY
+    p2 ^= (p1 ^ p2)&FP_iszilch(&(w->b));
+    return p2;
+#else
     p1 ^= (p1 ^ p2)&FP_iszilch(&(w->a));
     return p1;
+#endif
+
 }
 
 /* Set w=-x */

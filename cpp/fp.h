@@ -44,6 +44,8 @@ using namespace core;
 #define FEXCESS_YYY (((sign32)1<<MAXXES_YYY)-1)		    /**< 2^(BASEBITS*NLEN-MODBITS) - normalised BIG can be multiplied by less than this before reduction */
 #define OMASK_YYY (-((chunk)(1)<<TBITS_YYY))            /**<  for masking out overflow bits */
 
+//#define BIG_ENDIAN_SIGN_YYY 
+
 namespace YYY {
 
 /**

@@ -179,12 +179,16 @@ impl FP2 {
 
     pub fn sign(&mut self) -> isize {
         let mut p1=self.a.sign();
-        let p2=self.b.sign();
-        let u=self.a.iszilch() as isize;
-	    p1^=(p1^p2)&u;
-	    return p1;
-
-        //return self.geta().parity();
+        let mut p2=self.b.sign();
+        if fp::BIG_ENDIAN_SIGN {
+            let u=self.b.iszilch() as isize;
+	        p2^=(p1^p2)&u;
+	        return p2;
+        } else {
+            let u=self.a.iszilch() as isize;
+	        p1^=(p1^p2)&u;
+	        return p1;
+        }
     }
 
     /* negate self mod Modulus */

@@ -854,10 +854,26 @@ void YYY::FP_one(FP *n)
 
 int YYY::FP_sign(FP *x)
 {
+#ifdef BIG_ENDIAN_SIGN_YYY
+    int cp;
+    BIG m,pm1d2;
+    FP y;
+    BIG_rcopy(pm1d2, Modulus);
+    BIG_dec(pm1d2,1);
+    BIG_fshr(pm1d2,1); //(p-1)/2
+     
+    FP_copy(&y,x);
+    FP_reduce(&y);
+    FP_redc(m,&y);
+    cp=BIG_comp(m,pm1d2);
+    return ((cp+1)&2)>>1;
+
+#else
     BIG m;
     FP y;
     FP_copy(&y,x);
     FP_reduce(&y);
     FP_redc(m,&y);
     return BIG_parity(m);
+#endif
 }

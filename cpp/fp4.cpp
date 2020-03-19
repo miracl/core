@@ -128,11 +128,14 @@ int YYY::FP4_sign(FP4 *w)
     int p1,p2;
     p1=FP2_sign(&(w->a));
     p2=FP2_sign(&(w->b));
+#ifdef BIG_ENDIAN_SIGN_YYY
+    p2 ^= (p1 ^ p2)&FP2_iszilch(&(w->b));
+    return p2;
+#else
     p1 ^= (p1 ^ p2)&FP2_iszilch(&(w->a));
     return p1;
-//    BIG m;
-//    FP_redc(m,&(w->a.a));
-//    return BIG_parity(m);
+#endif
+
 }
 
 /* Set w=-x */

@@ -177,10 +177,16 @@ public struct FP8 {
     func sign() -> Int
     {
         var p1=a.sign()
-        let p2=b.sign()
-        let u=a.iszilch() ? 1 : 0
-	    p1^=(p1^p2)&u
-	    return p1
+        var p2=b.sign()
+        if CONFIG_FIELD.BIG_ENDIAN_SIGN {
+            let u=b.iszilch() ? 1 : 0
+	        p2^=(p1^p2)&u
+	        return p2
+        } else {
+            let u=a.iszilch() ? 1 : 0
+	        p1^=(p1^p2)&u
+	        return p1
+        }
     }
 
     /* set self=-self */

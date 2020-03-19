@@ -165,15 +165,23 @@ func (F *FP2) sign() int {
 	p1 := F.a.sign();
 	p2 := F.b.sign();
 	var u int
-	if F.a.iszilch() {
-		u=1;
+	if BIG_ENDIAN_SIGN {
+		if F.b.iszilch() {
+			u=1;
+		} else {
+			u=0;
+		}
+		p2^=(p1^p2)&u;
+		return p2;
 	} else {
-		u=0;
+		if F.a.iszilch() {
+			u=1;
+		} else {
+			u=0;
+		}
+		p1^=(p1^p2)&u;
+		return p1;
 	}
-	p1^=(p1^p2)&u;
-	return p1;
-//	m := F.a.redc()
-//	return m.parity() 
 }
 
 /* negate this mod Modulus */

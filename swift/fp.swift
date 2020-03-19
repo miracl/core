@@ -233,9 +233,20 @@ public struct FP {
 
     func sign() -> Int
     {
-        var z=FP(self)
-        z.reduce()
-        return z.redc().parity()
+        if CONFIG_FIELD.BIG_ENDIAN_SIGN {
+            var m = BIG(ROM.Modulus)
+            m.dec(1)
+            m.fshr(1)
+            var n = FP(self)
+            n.reduce()
+            let w=n.redc()
+            let cp=BIG.comp(w,m)
+            return ((cp+1)&2)>>1
+        } else {
+            var z=FP(self)
+            z.reduce()
+            return z.redc().parity()
+        }
     }
 
 /* copy from FP b */

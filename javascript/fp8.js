@@ -135,9 +135,16 @@ var FP8 = function(ctx) {
         sign: function() {
             var p1=this.a.sign();
             var p2=this.b.sign();
-            var u=this.a.iszilch()? 1:0;
-            p1^=(p1^p2)&u;
-            return p1;
+            if (FP.BIG_ENDIAN_SIGN)
+            {
+                var u=this.b.iszilch()? 1:0;
+                p2^=(p1^p2)&u;
+                return p2;
+            } else {
+                var u=this.a.iszilch()? 1:0;
+                p1^=(p1^p2)&u;
+                return p1;
+            }
         },
 
         /* this=-this */

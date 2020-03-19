@@ -60,6 +60,26 @@ public struct BLS256
     }
 
 /* output u \in F_p */
+    static func hash_to_field(_ hf: Int,_ hlen: Int,_ DST: [UInt8],_ M: [UInt8],_ ctr:Int) -> [BIG] {
+        let q=BIG(ROM.Modulus)
+        let L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8)
+        var u=[BIG]()
+        var fd=[UInt8](repeating: 0,count: L)
+        var dx:DBIG
+
+        let OKM=HMAC.XMD_Expand(hf,hlen,L*ctr,DST,M)
+        for i in 0..<ctr {
+            for j in 0..<L {
+                fd[j]=OKM[i*L+j]
+            }
+            dx=DBIG.fromBytes(fd)
+            u.append(dx.mod(q))
+        }
+
+        return u
+    }
+
+/* output u \in F_p 
     static func hash_to_base(_ hf: Int,_ hlen: Int,_ DST: [UInt8],_ M: [UInt8],_ ctr:Int) -> BIG {
         let q=BIG(ROM.Modulus)
         let L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8)
@@ -79,17 +99,16 @@ public struct BLS256
         let u = dx.mod(q)
 
         return u
-    }
+    } */
 
 /* hash a message to an ECP point, using SHA2, random oracle method */
     static public func bls_hash_to_point(_ M: [UInt8]) -> ECP
     {
-        let dst = "BLS_SIG_ZZZG1-SHA512-SSWU-RO-_NUL_".uppercased()
-        let u=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](dst.utf8),M,0)
-        let u1=hash_to_base(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](dst.utf8),M,1)
+        let dst = "BLS_SIG_ZZZG1_XMD:SHA512-SSWU-RO-_NUL_".uppercased()
+        let u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](dst.utf8),M,2)
 
-        var P=ECP.map2point(u)
-        let P1=ECP.map2point(u1)
+        var P=ECP.map2point(u[0])
+        let P1=ECP.map2point(u[1])
         P.add(P1)
         P.cfp()
         P.affine()

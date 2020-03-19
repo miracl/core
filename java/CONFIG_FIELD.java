@@ -47,5 +47,7 @@ public class CONFIG_FIELD {
     public static final int QNRI = @QI@;
     public static final int TOWER = @TW@;
 
+    public static final boolean BIG_ENDIAN_SIGN = false;
+
     public static final int FEXCESS = (((int)1 << @SH@) - 1); // BASEBITS*NLEN-MODBITS or 2^30 max!
 }
