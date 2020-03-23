@@ -960,12 +960,11 @@ void ECP8_ZZZ_hap2point(ECP8_ZZZ *Q,BIG_XXX h)
 }
 
 /* Constant time Map to Point in G2 */
-void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,BIG_XXX h)
+void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,FP8_YYY *H)
 {
-
     int sgn,ne;
-    FP8_YYY X1,X2,X3,W,B,Y;
-    FP_YYY t,b,j,s,one;
+    FP8_YYY X1,X2,X3,W,B,Y,S,T;
+    FP_YYY b,j,s,one;
 
     FP_YYY_rcopy(&b,CURVE_B_ZZZ);
     FP8_YYY_from_FP(&B, &b);
@@ -979,24 +978,23 @@ void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,BIG_XXX h)
 
     FP8_YYY_one(&W);
     FP_YYY_one(&one);
-    FP_YYY_nres(&t,h);
-    sgn=FP_YYY_sign(&t);
+    FP8_YYY_copy(&T,H);
+    sgn=FP8_YYY_sign(&T);
         
     FP_YYY_from_int(&s,-3);
     FP_YYY_sqrt(&s,&s,NULL);         // s=sqrt(-3)
     FP_YYY_sub(&j,&s,&one);     FP_YYY_norm(&j);
     FP_YYY_div2(&j,&j);         // j=(s-1)/2
 
-    FP_YYY_mul(&s,&s,&t);       // s=s.t
-    FP_YYY_sqr(&b,&t);          // t^2
-    FP_YYY_add(&b,&b,&one);     // t^2+1
-    FP8_YYY_from_FP(&Y,&b);
+    FP8_YYY_tmul(&S,&T,&s);       // s=s.t
+    FP8_YYY_sqr(&Y,&T);          // t^2
+    FP8_YYY_add(&Y,&Y,&W);     // t^2+1
     FP8_YYY_add(&B,&B,&Y);      // t^2+B+1
     FP8_YYY_norm(&B);
     FP8_YYY_inv(&B,&B);
-    FP8_YYY_tmul(&B,&B,&s);      // w=s.t/(1+B+t*2)
+    FP8_YYY_mul(&B,&B,&S);      // w=s.t/(1+B+t*2)
 
-    FP8_YYY_tmul(&X1,&B,&t);       
+    FP8_YYY_mul(&X1,&B,&T);       
     FP8_YYY_from_FP(&Y,&j);     
     FP8_YYY_sub(&X2,&X1,&Y);    FP8_YYY_norm(&X2);// X2=t.w-j 
     FP8_YYY_neg(&X1,&X2);       FP8_YYY_norm(&X1);// X1=j-t.w

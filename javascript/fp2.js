@@ -418,5 +418,9 @@ var FP2 = function(ctx) {
 
     };
 
+    FP2.rand = function(rng) {
+        return new FP2(ctx.FP.rand(rng),ctx.FP.rand(rng));
+    };
+
     return FP2;
 };

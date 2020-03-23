@@ -1014,7 +1014,7 @@ public struct ECP {
     }
 
 /* Constant time Map to Point */
-    static public func map2point(_ h: BIG) -> ECP {
+    static public func map2point(_ h: FP) -> ECP {
         var P=ECP()
         var pNIL:FP?=nil
         if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.MONTGOMERY {

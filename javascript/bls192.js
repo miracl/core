@@ -104,7 +104,7 @@ var BLS192 = function(ctx) {
             {
                 for (var j=0;j<L;j++)
                     fd[j]=OKM[i*L+j];
-                u[i]=ctx.DBIG.fromBytes(fd).mod(q);
+                u[i]=new ctx.FP(ctx.DBIG.fromBytes(fd).mod(q));
             }
             return u;
         }, 

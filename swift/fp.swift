@@ -38,6 +38,8 @@
 //  CORE mod p functions
 //
 
+import core
+
 public struct FP {
     var x:BIG
     var xes:Int32
@@ -171,6 +173,14 @@ public struct FP {
         x=BIG(a.x)
         xes=a.xes
     }
+
+    public init(_ rng: inout RAND)
+    {
+       let m = BIG(ROM.Modulus) 
+       x = BIG.randomnum(m,&rng)
+       xes=1
+    }
+
     /* convert to string */
     func toString() -> String
     {

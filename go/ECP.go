@@ -1204,14 +1204,14 @@ func ECP_hap2point(h *BIG) *ECP {
 }
 
 /* Constant time Map to Point */
-func ECP_map2point(h *BIG) *ECP {
+func ECP_map2point(h *FP) *ECP {
 	P := NewECP()
 
 	if CURVETYPE == MONTGOMERY {
 // Elligator 2
 			one:=NewFPint(1)
 			A:=NewFPint(CURVE_A)
-			t:=NewFPbig(h)
+			t:=NewFPcopy(h)
 
             t.sqr();
 
@@ -1241,7 +1241,7 @@ func ECP_map2point(h *BIG) *ECP {
 	} 
 	if CURVETYPE == EDWARDS {
 // Elligator 2 - map to Montgomery, place point, map back
-            t:=NewFPbig(h)
+            t:=NewFPcopy(h)
             one:=NewFPint(1)
             B:=NewFPbig(NewBIGints(CURVE_B))
             A:=NewFPcopy(B)
@@ -1326,7 +1326,7 @@ func ECP_map2point(h *BIG) *ECP {
 	// swu method
             one:=NewFPint(1);
             B:=NewFPbig(NewBIGints(CURVE_B))
-            t:=NewFPbig(h)
+            t:=NewFPcopy(h)
             x:=NewBIG();
 			Y:=NewFP();
             sgn:=t.sign();

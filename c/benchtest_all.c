@@ -149,13 +149,14 @@
 
 #endif
 
-int ED_25519(csprng *RNG)
+int ed25519(csprng *RNG)
 {
     int i, iterations;
     clock_t start;
     double elapsed;
     ECP_ED25519 EP, EG;
     BIG_ED s, r, x, y;
+    FP_F25519 rw;
     printf("\nTesting/Timing ED25519 ECC\n");
 
 #if CURVETYPE_ED25519==WEIERSTRASS
@@ -197,6 +198,16 @@ int ED_25519(csprng *RNG)
 
     ECP_ED25519_generator(&EG);
 
+    FP_F25519_rand(&rw,RNG);
+    ECP_ED25519_map2point(&EP,&rw);
+    ECP_ED25519_cfp(&EP);
+
+    if (ECP_ED25519_isinf(&EP))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }    
+
     BIG_ED_rcopy(r, CURVE_Order_ED25519);
     BIG_ED_randtrunc(s, r, 2 * CURVE_SECURITY_ED25519, RNG);
     ECP_ED25519_copy(&EP, &EG);
@@ -226,12 +237,13 @@ int ED_25519(csprng *RNG)
 
 #if CHUNK==32 || CHUNK==64
 
-int NIST_256(csprng *RNG)
+int nist256(csprng *RNG)
 {
     int i, iterations;
     clock_t start;
     double elapsed;
     ECP_NIST256 EP, EG;
+    FP_NIST256 rw;
     BIG_NT s, r, x, y;
     printf("\nTesting/Timing NIST256 ECC\n");
 
@@ -273,6 +285,16 @@ int NIST_256(csprng *RNG)
 
     ECP_NIST256_generator(&EG);
 
+    FP_NIST256_rand(&rw,RNG);
+    ECP_NIST256_map2point(&EP,&rw);
+    ECP_NIST256_cfp(&EP);
+
+    if (ECP_NIST256_isinf(&EP))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }    
+
     BIG_NT_rcopy(r, CURVE_Order_NIST256);
     BIG_NT_randtrunc(s, r, 2 * CURVE_SECURITY_NIST256, RNG);
     ECP_NIST256_copy(&EP, &EG);
@@ -300,13 +322,14 @@ int NIST_256(csprng *RNG)
     return 0;
 }
 
-int GOLD_LOCKS(csprng *RNG)
+int goldilocks(csprng *RNG)
 {
     int i, iterations;
     clock_t start;
     double elapsed;
     ECP_GOLDILOCKS EP, EG;
     BIG_GL s, r, x, y;
+    FP_GOLDILOCKS rw;
     printf("\nTesting/Timing GOLDILOCKS ECC\n");
 
 #if CURVETYPE_GOLDILOCKS==WEIERSTRASS
@@ -343,6 +366,16 @@ int GOLD_LOCKS(csprng *RNG)
 
     ECP_GOLDILOCKS_generator(&EG);
 
+    FP_GOLDILOCKS_rand(&rw,RNG);
+    ECP_GOLDILOCKS_map2point(&EP,&rw);
+    ECP_GOLDILOCKS_cfp(&EP);
+
+    if (ECP_GOLDILOCKS_isinf(&EP))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }   
+
     BIG_GL_rcopy(r, CURVE_Order_GOLDILOCKS);
     BIG_GL_randtrunc(s, r, 2 * CURVE_SECURITY_GOLDILOCKS, RNG);
     ECP_GOLDILOCKS_copy(&EP, &EG);
@@ -371,7 +404,7 @@ int GOLD_LOCKS(csprng *RNG)
 }
 #endif
 
-int BN_254(csprng *RNG)
+int bn254(csprng *RNG)
 {
     int i, iterations;
     clock_t start;
@@ -381,12 +414,23 @@ int BN_254(csprng *RNG)
     ECP2_BN254 Q, W;
     FP12_BN254 g, w;
     FP4_BN254 cm;
+    FP2_BN254 rz2;
+    FP_BN254 rz;
 
     BIG_BN s, r, x, y;
     printf("\nTesting/Timing BN254 Pairings\n");
 
     ECP_BN254_generator(&G);
 
+    FP_BN254_rand(&rz,RNG);
+    ECP_BN254_map2point(&P,&rz);
+    ECP_BN254_cfp(&P);
+
+    if (ECP_BN254_isinf(&P))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }   
 
     BIG_BN_rcopy(r, CURVE_Order_BN254);
     BIG_BN_randtrunc(s, r, 2 * CURVE_SECURITY_BN254, RNG);
@@ -414,7 +458,8 @@ int BN_254(csprng *RNG)
 
     ECP2_BN254_generator(&W);
 
-    ECP2_BN254_map2point(&Q,s);
+    FP2_BN254_rand(&rz2,RNG);
+    ECP2_BN254_map2point(&Q,&rz2);
     ECP2_BN254_cfp(&Q);
 
     if (ECP2_BN254_isinf(&Q))
@@ -567,7 +612,7 @@ int BN_254(csprng *RNG)
 
 #if CHUNK==32 || CHUNK==64
 
-int BLS_383(csprng *RNG)
+int bls383(csprng *RNG)
 {
     int i, iterations;
     clock_t start;
@@ -577,12 +622,23 @@ int BLS_383(csprng *RNG)
     ECP2_BLS12383 Q, W;
     FP12_BLS12383 g, w;
     FP4_BLS12383 cm;
+    FP2_BLS12383 rz2;
+    FP_BLS12383 rz;
 
     BIG_BLS12 s, r, x, y;
     printf("\nTesting/Timing BLS12383 Pairings\n");
 
     ECP_BLS12383_generator(&G);
 
+    FP_BLS12383_rand(&rz,RNG);
+    ECP_BLS12383_map2point(&P,&rz);
+    ECP_BLS12383_cfp(&P);
+
+    if (ECP_BLS12383_isinf(&P))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }   
 
     BIG_BLS12_rcopy(r, CURVE_Order_BLS12383);
     BIG_BLS12_randtrunc(s, r, 2 * CURVE_SECURITY_BLS12383, RNG);
@@ -610,7 +666,8 @@ int BLS_383(csprng *RNG)
 
     ECP2_BLS12383_generator(&W);
 
-    ECP2_BLS12383_map2point(&Q,s);
+    FP2_BLS12383_rand(&rz2,RNG);
+    ECP2_BLS12383_map2point(&Q,&rz2);
     ECP2_BLS12383_cfp(&Q);
 
     if (ECP2_BLS12383_isinf(&Q))
@@ -760,7 +817,7 @@ int BLS_383(csprng *RNG)
     return 0;
 }
 
-int BLS_24(csprng *RNG)
+int bls24(csprng *RNG)
 {
     int i, iterations;
     clock_t start;
@@ -770,6 +827,8 @@ int BLS_24(csprng *RNG)
     ECP4_BLS24479 Q, W;
     FP24_BLS24479 g, w;
     FP8_BLS24479 cm;
+    FP4_BLS24479 rz4;
+    FP_BLS24479 rz;
 
     BIG_BLS24479 s, r, x, y;
 
@@ -777,6 +836,15 @@ int BLS_24(csprng *RNG)
 
     ECP_BLS24479_generator(&G);
 
+    FP_BLS24479_rand(&rz,RNG);
+    ECP_BLS24479_map2point(&P,&rz);
+    ECP_BLS24479_cfp(&P);
+
+    if (ECP_BLS24479_isinf(&P))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }   
 
     BIG_BLS24479_rcopy(r, CURVE_Order_BLS24479);
     BIG_BLS24479_randtrunc(s, r, 2 * CURVE_SECURITY_BLS24479, RNG);
@@ -804,7 +872,8 @@ int BLS_24(csprng *RNG)
 
     ECP4_BLS24479_generator(&W);
 
-    ECP4_BLS24479_map2point(&Q,s);
+    FP4_BLS24479_rand(&rz4,RNG);
+    ECP4_BLS24479_map2point(&Q,&rz4);
     ECP4_BLS24479_cfp(&Q);
 
     if (ECP4_BLS24479_isinf(&Q))
@@ -942,7 +1011,7 @@ int BLS_24(csprng *RNG)
 }
 
 
-int BLS_48(csprng *RNG)
+int bls48(csprng *RNG)
 {
     int i, iterations;
     clock_t start;
@@ -952,12 +1021,24 @@ int BLS_48(csprng *RNG)
     ECP8_BLS48556 Q, W;
     FP48_BLS48556 g, w;
     FP16_BLS48556 cm;
+    FP8_BLS48556 rz8;
+    FP_BLS48556 rz;
+
 
     BIG_BLS48556 s, r, x, y;
     printf("\nTesting/Timing BLS48556 Pairings\n");
 
     ECP_BLS48556_generator(&G);
 
+    FP_BLS48556_rand(&rz,RNG);
+    ECP_BLS48556_map2point(&P,&rz);
+    ECP_BLS48556_cfp(&P);
+
+    if (ECP_BLS48556_isinf(&P))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }  
 
     BIG_BLS48556_rcopy(r, CURVE_Order_BLS48556);
     BIG_BLS48556_randtrunc(s, r, 2 * CURVE_SECURITY_BLS48556, RNG);
@@ -985,7 +1066,8 @@ int BLS_48(csprng *RNG)
 
     ECP8_BLS48556_generator(&W);
 
-    ECP8_BLS48556_map2point(&Q,s);
+    FP8_BLS48556_rand(&rz8,RNG);
+    ECP8_BLS48556_map2point(&Q,&rz8);
     ECP8_BLS48556_cfp(&Q);
 
     if (ECP8_BLS48556_isinf(&Q))
@@ -1047,20 +1129,7 @@ int BLS_48(csprng *RNG)
     elapsed = 1000.0 * elapsed / iterations;
     printf("GT pow              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
-/*
-    FP48_BLS48556_copy(&g, &w);
 
-    iterations = 0;
-    start = clock();
-    do {
-        FP48_BLS48556_compow(&cm, &g, s, r);
-        iterations++;
-        elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
-    } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
-    elapsed = 1000.0 * elapsed / iterations;
-    printf("GT pow (compressed) - %8d iterations  ", iterations);
-    printf(" %8.2lf ms per iteration\n", elapsed);
-*/
     iterations = 0;
     start = clock();
     do {
@@ -1136,7 +1205,7 @@ int BLS_48(csprng *RNG)
 }
 #endif
 
-int RSA_2048(csprng *RNG)
+int rsa2048(csprng *RNG)
 {
     rsa_public_key_2048 pub;
     rsa_private_key_2048 priv;
@@ -1219,17 +1288,17 @@ int main()
     for (i = 4; i < 10; i++) pr[i] = i;
     RAND_seed(&RNG, 10, pr);
 
-    ED_25519(&RNG);
+    ed25519(&RNG);
 #if CHUNK==32 || CHUNK==64
-    NIST_256(&RNG);
-    GOLD_LOCKS(&RNG);
+    nist256(&RNG);
+    goldilocks(&RNG);
 #endif
-    BN_254(&RNG);
+    bn254(&RNG);
 #if CHUNK==32 || CHUNK==64
-    BLS_383(&RNG);
-    BLS_24(&RNG);
-    BLS_48(&RNG);
+    bls383(&RNG);
+    bls24(&RNG);
+    bls48(&RNG);
 #endif
-    RSA_2048(&RNG);
+    rsa2048(&RNG);
 
 }

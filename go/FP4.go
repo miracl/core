@@ -35,7 +35,7 @@
 /* FP4 elements are of the form a+ib, where i is sqrt(-1+sqrt(-1)) */
 
 package XXX
-
+import "github.com/miracl/core/go/core"
 //import "fmt"
 
 type FP4 struct {
@@ -83,6 +83,11 @@ func NewFP4fp(c *FP) *FP4 {
 	F := new(FP4)
 	F.a = NewFP2fp(c)
 	F.b = NewFP2()
+	return F
+}
+
+func NewFP4rand(rng *core.RAND) *FP4 {
+	F := NewFP4fp2s(NewFP2rand(rng),NewFP2rand(rng))
 	return F
 }
 

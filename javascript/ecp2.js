@@ -804,7 +804,7 @@ var ECP2 = function(ctx) {
     };
 
 /* Constant time Map to Point */
-    ECP2.map2point = function(h)
+    ECP2.map2point = function(H)
     { 
     // SWU method
         var sgn,ne;
@@ -814,26 +814,26 @@ var ECP2 = function(ctx) {
         c.rcopy(ctx.ROM_CURVE.CURVE_B);
         var B = new ctx.FP2(c);
 
-        var t=new ctx.FP(h);
+        var T=new ctx.FP2(H);
         var s=new ctx.FP(-3);
         var one=new ctx.FP(1);
 
         if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.D_TYPE) B.div_ip();
         if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) B.mul_ip();
         B.norm();
-        sgn=t.sign();
+        sgn=T.sign();
         var w=s.sqrt(null);
         var j=new ctx.FP(w); j.sub(one); j.norm(); j.div2();
 
-        w.mul(t);
-        var b=new ctx.FP(t);
-        b.sqr();
-        b.add(one);
-        var Y=new ctx.FP2(b);
+        var S=new ctx.FP2(T);
+        S.pmul(w);
+        var Y=new ctx.FP2(T);
+        Y.sqr();
+        Y.add(W);
         B.add(Y); B.norm(); B.inverse();
-        B.pmul(w);
+        B.mul(S);
 
-        var X1=new ctx.FP2(B); X1.pmul(t);
+        var X1=new ctx.FP2(B); X1.mul(T);
         Y.copy(new ctx.FP2(j));
         var X2=new ctx.FP2(X1); X2.sub(Y); X2.norm();
         X1.copy(X2); X1.neg(); X1.norm();

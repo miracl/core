@@ -308,12 +308,12 @@ extern void ECP_mul2(ECP *P, ECP *Q, XXX::BIG e, XXX::BIG f);
  */
 extern void ECP_cfp(ECP *Q);
 
-/**	@brief Maps random BIG to curve point in constant time
+/**	@brief Maps random FP to curve point in constant time
  *
 	@param Q ECP instance 
 	@param x Fp derived from hash
  */
-extern void ECP_map2point(ECP *Q, XXX::BIG  x);
+extern void ECP_map2point(ECP *Q, YYY::FP *x);
 
 /**	@brief Maps random BIG to curve point using hunt-and-peck
  *

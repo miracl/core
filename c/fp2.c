@@ -475,3 +475,9 @@ void FP2_YYY_times_i(FP2_YYY *w)
 //    Output NOT normed, so use with care
 }
 
+void FP2_YYY_rand(FP2_YYY *x,csprng *rng)
+{
+    FP_YYY_rand(&(x->a),rng);
+    FP_YYY_rand(&(x->b),rng);
+}
+

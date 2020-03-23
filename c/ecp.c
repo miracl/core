@@ -392,7 +392,7 @@ void ECP_ZZZ_hap2point(ECP_ZZZ *P,BIG_XXX h)
 }
 
 /* Constant time Map to Point */
-void ECP_ZZZ_map2point(ECP_ZZZ *P,BIG_XXX h)
+void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 {
 #if CURVETYPE_ZZZ==MONTGOMERY
 // Elligator 2
@@ -400,7 +400,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,BIG_XXX h)
     FP_YYY X1,X2,t,one,A;
     //BIG_XXX_zero(a); BIG_XXX_inc(a,CURVE_A_ZZZ); BIG_XXX_norm(a); FP_YYY_nres(&A,a);
     FP_YYY_from_int(&A,CURVE_A_ZZZ);
-    FP_YYY_nres(&t,h);
+    FP_YYY_copy(&t,h);
     FP_YYY_sqr(&t,&t);   // t^2
 
     if (PM1D2_YYY == 2)
@@ -451,7 +451,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,BIG_XXX h)
     FP_YYY_div2(&B,&B);    // (B-A)/4
     FP_YYY_sqr(&B,&B);     // (B-A)^2/16
 
-    FP_YYY_nres(&t,h); sgn=FP_YYY_sign(&t);
+    FP_YYY_copy(&t,h); sgn=FP_YYY_sign(&t);
     FP_YYY_sqr(&t,&t);   // t^2
 
     if (PM1D2_YYY == 2)
@@ -520,7 +520,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,BIG_XXX h)
     FP_YYY_rcopy(&B,CURVE_B_ZZZ);
     
     FP_YYY_one(&one);
-    FP_YYY_nres(&t,h);
+    FP_YYY_copy(&t,h);
     sgn=FP_YYY_sign(&t);
     if (CURVE_A_ZZZ!=0)
     {

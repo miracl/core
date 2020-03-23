@@ -476,4 +476,8 @@ void YYY::FP2_sqrt(FP2 *w, FP2 *u)
     FP_mul(&(w->b), &(w->b), &w2);
 }
 
-
+void YYY::FP2_rand(FP2 *x,csprng *rng)
+{
+    FP_rand(&(x->a),rng);
+    FP_rand(&(x->b),rng);
+}

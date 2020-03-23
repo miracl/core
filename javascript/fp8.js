@@ -691,5 +691,9 @@ var FP8 = function(ctx) {
 
     };
 
+    FP8.rand = function(rng) {
+        return new FP8(ctx.FP4.rand(rng),ctx.FP4.rand(rng));
+    };
+
     return FP8;
 };

@@ -83,10 +83,9 @@ fn ed25519(mut rng: &mut RAND) {
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
     
     let mut P = ecp::ECP::new();
-    let mut s = big::BIG::new();
+    let s = big::BIG::randomnum(&r, &mut rng);
     for _ in 0..10 {
-        s = big::BIG::randomnum(&r, &mut rng);
-        P.copy(&ecp::ECP::map2point(&s));
+        P.copy(&ecp::ECP::map2point(&fp::FP::new_rand(&mut rng)));
         if P.is_infinity() {
             println!("HASH FAILURE - P=O");
             fail = true;
@@ -156,10 +155,9 @@ fn nist256(mut rng: &mut RAND) {
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
 
     let mut P = ecp::ECP::new();
-    let mut s = big::BIG::new();
+    let s = big::BIG::randomnum(&r, &mut rng);
     for _ in 0..10 {
-        s = big::BIG::randomnum(&r, &mut rng);
-        P.copy(&ecp::ECP::map2point(&s));
+        P.copy(&ecp::ECP::map2point(&fp::FP::new_rand(&mut rng)));
         if P.is_infinity() {
             println!("HASH FAILURE - P=O");
             fail = true;
@@ -229,10 +227,9 @@ fn goldilocks(mut rng: &mut RAND) {
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
 
     let mut P = ecp::ECP::new();
-    let mut s = big::BIG::new();
+    let s = big::BIG::randomnum(&r, &mut rng);
     for _ in 0..10 {
-        s = big::BIG::randomnum(&r, &mut rng);
-        P.copy(&ecp::ECP::map2point(&s));
+        P.copy(&ecp::ECP::map2point(&fp::FP::new_rand(&mut rng)));
         if P.is_infinity() {
             println!("HASH FAILURE - P=O");
             fail = true;
@@ -268,6 +265,7 @@ fn bn254(mut rng: &mut RAND) {
     use core::bn254::ecp;
     use core::bn254::ecp2;
     use core::bn254::fp;
+    use core::bn254::fp2;
     use core::bn254::pair;
     use core::bn254::rom;
     let mut fail = false;
@@ -288,7 +286,7 @@ fn bn254(mut rng: &mut RAND) {
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let s = big::BIG::randomnum(&r, &mut rng);
 
-    let mut P = ecp::ECP::map2point(&s);
+    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(&mut rng));
     if P.is_infinity() {
         println!("HASH FAILURE - P=O");
         fail = true;
@@ -316,7 +314,7 @@ fn bn254(mut rng: &mut RAND) {
 
     let mut Q = ecp2::ECP2::generator();
 
-    let mut W = ecp2::ECP2::map2point(&s);
+    let mut W = ecp2::ECP2::map2point(&fp2::FP2::new_rand(&mut rng));
     W.cfp();
     if W.is_infinity() {
         println!("HASHING FAILURE - P=O");
@@ -463,6 +461,7 @@ fn bls12383(mut rng: &mut RAND) {
     use core::bls12383::ecp;
     use core::bls12383::ecp2;
     use core::bls12383::fp;
+    use core::bls12383::fp2;
     use core::bls12383::pair;
     use core::bls12383::rom;
     let mut fail = false;
@@ -483,7 +482,7 @@ fn bls12383(mut rng: &mut RAND) {
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let s = big::BIG::randomnum(&r, &mut rng);
 
-    let mut P = ecp::ECP::map2point(&s);
+    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(&mut rng));
     if P.is_infinity() {
         println!("HASH FAILURE - P=O");
         fail = true;
@@ -511,7 +510,7 @@ fn bls12383(mut rng: &mut RAND) {
 
     let mut Q = ecp2::ECP2::generator();
 
-    let mut W = ecp2::ECP2::map2point(&s);
+    let mut W = ecp2::ECP2::map2point(&fp2::FP2::new_rand(&mut rng));
     W.cfp();
     if W.is_infinity() {
         println!("HASHING FAILURE - P=O");
@@ -657,6 +656,7 @@ fn bls24479(mut rng: &mut RAND) {
     use core::bls24479::ecp;
     use core::bls24479::ecp4;
     use core::bls24479::fp;
+    use core::bls24479::fp4;
     use core::bls24479::pair192;
     use core::bls24479::rom;
     let mut fail = false;
@@ -677,7 +677,7 @@ fn bls24479(mut rng: &mut RAND) {
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let s = big::BIG::randomnum(&r, &mut rng);
 
-    let mut P = ecp::ECP::map2point(&s);
+    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(&mut rng));
     if P.is_infinity() {
         println!("HASH FAILURE - P=O");
         fail = true;
@@ -705,7 +705,7 @@ fn bls24479(mut rng: &mut RAND) {
 
     let mut Q = ecp4::ECP4::generator();
 
-    let mut W = ecp4::ECP4::map2point(&s);
+    let mut W = ecp4::ECP4::map2point(&fp4::FP4::new_rand(&mut rng));
     W.cfp();
     if W.is_infinity() {
         println!("HASHING FAILURE - P=O");
@@ -838,6 +838,7 @@ fn bls48556(mut rng: &mut RAND) {
     use core::bls48556::ecp;
     use core::bls48556::ecp8;
     use core::bls48556::fp;
+    use core::bls48556::fp8;
     use core::bls48556::pair256;
     use core::bls48556::rom;
     let mut fail = false;
@@ -858,7 +859,7 @@ fn bls48556(mut rng: &mut RAND) {
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let s = big::BIG::randomnum(&r, &mut rng);
 
-    let mut P = ecp::ECP::map2point(&s);
+    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(&mut rng));
     if P.is_infinity() {
         println!("HASH FAILURE - P=O");
         fail = true;
@@ -886,7 +887,7 @@ fn bls48556(mut rng: &mut RAND) {
 
     let mut Q = ecp8::ECP8::generator();
 
-    let mut W = ecp8::ECP8::map2point(&s);
+    let mut W = ecp8::ECP8::map2point(&fp8::FP8::new_rand(&mut rng));
     W.cfp();
     if W.is_infinity() {
         println!("HASHING FAILURE - P=O");

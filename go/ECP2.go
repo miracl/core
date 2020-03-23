@@ -748,11 +748,11 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 }
 
 /* Constant time Map to Point */
- func ECP2_map2point(h *BIG) *ECP2 {
+ func ECP2_map2point(H *FP2) *ECP2 {
     // SWU method
     W:=NewFP2int(1)
 	B := NewFP2big(NewBIGints(CURVE_B))
-    t:=NewFPbig(h)
+    T:=NewFP2copy(H) /**/
     s:=NewFPint(-3)
     one:=NewFPint(1)
 	if SEXTIC_TWIST == D_TYPE {
@@ -762,19 +762,19 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 		B.mul_ip()
 	}
     B.norm()
-    sgn:=t.sign()
+    sgn:=T.sign() /**/
     w:=s.sqrt(nil)
     j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
 
-    w.mul(t)
-    b:=NewFPcopy(t)
-    b.sqr()
-    b.add(one)
-    Y:=NewFP2fp(b)
+	S := NewFP2copy(T) /**/
+    S.pmul(w) /**/
+    Y := NewFP2copy(T) /**/
+    Y.sqr() /**/
+    Y.add(W) /**/
     B.add(Y); B.norm(); B.inverse()
-    B.pmul(w)
+    B.mul(S) /**/
 
-    X1:=NewFP2copy(B); X1.pmul(t)
+    X1:=NewFP2copy(B); X1.mul(T) /**/
     Y.copy(NewFP2fp(j))
     X2:=NewFP2copy(X1); X2.sub(Y); X2.norm()
     X1.copy(X2); X1.neg(); X1.norm()

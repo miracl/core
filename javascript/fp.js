@@ -652,6 +652,13 @@ var FP = function(ctx) {
 
     };
 
+    FP.rand = function(rng) {
+        var m = new ctx.BIG(0);
+        m.rcopy(ctx.ROM_FIELD.Modulus);    
+        var w=ctx.BIG.randomnum(m,rng);
+        return new FP(w);
+    };
+
     FP.logb2 = function(v) {
         var r;
 

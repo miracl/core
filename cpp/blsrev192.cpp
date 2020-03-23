@@ -48,25 +48,32 @@ using namespace YYY;
 
 /* output u[i] \in F_p */
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
-static void hash_to_field(int hash,int hlen,BIG *u,octet *DST,octet *M, int ctr)
+static void hash_to_field(int hash,int hlen,FP4 *u,octet *DST,octet *M, int ctr)
 {
-    int i,j,L;
-    BIG q;
+    int i,j,k,L;
+    BIG q,a[4];
+    FP2 c,d;
     DBIG dx;
-    char okm[256],fd[128];
+    char okm[1024],fd[128];
     octet OKM = {0,sizeof(okm),okm};
 
     BIG_rcopy(q, Modulus);
     L=CEIL(BIG_nbits(q)+CURVE_SECURITY_ZZZ,8);
 
-    XMD_Expand(hash,hlen,&OKM,L*ctr,DST,M);
+    XMD_Expand(hash,hlen,&OKM,L*ctr*4,DST,M);
     for (i=0;i<ctr;i++)
     {
-        for (j=0;j<L;j++)
-            fd[j]=OKM.val[i*L+j];
+        for (k=0;k<4;k++)
+        {
+            for (j=0;j<L;j++)
+                fd[j]=OKM.val[(4*i+k)*L+j];
         
-        BIG_dfromBytesLen(dx,fd,L);
-        BIG_dmod(u[i],dx,q);
+            BIG_dfromBytesLen(dx,fd,L);
+            BIG_dmod(a[k],dx,q);
+        }
+        FP2_from_BIGs(&c,a[0],a[1]);
+        FP2_from_BIGs(&d,a[2],a[3]);
+        FP4_from_FP2s(&u[i],&c,&d);
     }
 }
 
@@ -96,7 +103,7 @@ static void hash_to_base(int hash,int hlen,BIG u,octet *DST,octet *M, int ctr)
 /* hash a message to an ECP4 point, using SHA2, random oracle method */
 static void BLS_HASH_TO_POINT(ECP4 *P, octet *M)
 {
-    BIG u[2];
+    FP4 u[2];
     ECP4 P1;
     char dst[50];
     octet DST = {0,sizeof(dst),dst};
@@ -104,8 +111,9 @@ static void BLS_HASH_TO_POINT(ECP4 *P, octet *M)
     OCT_jstring(&DST,(char *)"BLS_SIG_ZZZG2_XMD:SHA384-SSWU-RO-_NUL_");
     hash_to_field(MC_SHA2,HASH_TYPE_ZZZ,u,&DST,M,2);
 
-    ECP4_map2point(P,u[0]);
-    ECP4_map2point(&P1,u[1]);
+    ECP4_map2point(P,&u[0]);
+    ECP4_map2point(&P1,&u[1]);
+
     ECP4_add(P,&P1);
     ECP4_cfp(P);
     ECP4_affine(P);

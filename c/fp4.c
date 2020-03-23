@@ -616,6 +616,12 @@ void FP4_YYY_div2(FP4_YYY *w, FP4_YYY *x)
     FP2_YYY_div2(&(w->b), &(x->b));
 }
 
+void FP4_YYY_rand(FP4_YYY *x,csprng *rng)
+{
+    FP2_YYY_rand(&(x->a),rng);
+    FP2_YYY_rand(&(x->b),rng);
+}
+
 #if CURVE_SECURITY_ZZZ >= 192
 
 /* test for x a QR */

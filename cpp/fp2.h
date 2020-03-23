@@ -273,6 +273,13 @@ extern void FP2_sqrt(FP2 *x, FP2 *y);
  */
 extern void FP2_times_i(FP2 *x);
 
+/**	@brief Generate random FP2
+ *
+	@param x random FP2 number
+	@param rng random number generator
+ */
+extern void FP2_rand(FP2 *x, core::csprng *rng);
+
 }
 
 #endif

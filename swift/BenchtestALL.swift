@@ -159,8 +159,7 @@ public func TimeECDH_ed25519(_ rng: inout RAND)
     let r=ed25519.BIG(ed25519.ROM.CURVE_Order)
     s=ed25519.BIG.randtrunc(r,16*ed25519.CONFIG_CURVE.AESKEY,&rng)
     for _ in 0..<10 {
-        s=ed25519.BIG.randtrunc(r,16*ed25519.CONFIG_CURVE.AESKEY,&rng)
-        W=ed25519.ECP.map2point(s);
+        W=ed25519.ECP.map2point(ed25519.FP(&rng));
         if W.is_infinity() {
             print("HASHING FAILURE - P=O")
             fail=true;
@@ -229,7 +228,7 @@ public func TimeECDH_nist256(_ rng: inout RAND)
     let r=nist256.BIG(nist256.ROM.CURVE_Order)
     s=nist256.BIG.randtrunc(r,16*nist256.CONFIG_CURVE.AESKEY,&rng)
 
-    var W=nist256.ECP.map2point(s);
+    var W=nist256.ECP.map2point(nist256.FP(&rng));
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
@@ -297,7 +296,7 @@ public func TimeECDH_goldilocks(_ rng: inout RAND)
     let r=goldilocks.BIG(goldilocks.ROM.CURVE_Order)
     s=goldilocks.BIG.randtrunc(r,16*goldilocks.CONFIG_CURVE.AESKEY,&rng)
 
-    var W=goldilocks.ECP.map2point(s);
+    var W=goldilocks.ECP.map2point(goldilocks.FP(&rng));
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
@@ -347,7 +346,7 @@ public func TimeMPIN_bn254(_ rng: inout RAND)
     let r=bn254.BIG(bn254.ROM.CURVE_Order)
     let s=bn254.BIG.randtrunc(r,16*bn254.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bn254.ECP.map2point(s);
+    var P=bn254.ECP.map2point(bn254.FP(&rng));
     if P.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
@@ -375,7 +374,7 @@ public func TimeMPIN_bn254(_ rng: inout RAND)
     var Q=bn254.ECP2.generator()
 
 
-    var W = bn254.ECP2.map2point(s)
+    var W = bn254.ECP2.map2point(bn254.FP2(&rng))
     W.cfp();
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")
@@ -523,7 +522,7 @@ public func TimeMPIN_bls12383(_ rng: inout RAND)
     let r=bls12383.BIG(bls12383.ROM.CURVE_Order)
     let s=bls12383.BIG.randtrunc(r,16*bls12383.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bls12383.ECP.map2point(s);
+    var P=bls12383.ECP.map2point(bls12383.FP(&rng));
     if P.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
@@ -550,7 +549,7 @@ public func TimeMPIN_bls12383(_ rng: inout RAND)
 
     var Q=bls12383.ECP2.generator();
 
-    var W = bls12383.ECP2.map2point(s)
+    var W = bls12383.ECP2.map2point(bls12383.FP2(&rng))
     W.cfp();
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")
@@ -701,7 +700,7 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
     let r=bls24479.BIG(bls24479.ROM.CURVE_Order)
     let s=bls24479.BIG.randtrunc(r,16*bls24479.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bls24479.ECP.map2point(s);
+    var P=bls24479.ECP.map2point(bls24479.FP(&rng));
     if P.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
@@ -728,7 +727,7 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
 
     var Q=bls24479.ECP4.generator();
 
-    var W = bls24479.ECP4.map2point(s)
+    var W = bls24479.ECP4.map2point(bls24479.FP4(&rng))
     W.cfp();
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")
@@ -864,7 +863,7 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
     let r=bls48556.BIG(bls48556.ROM.CURVE_Order)
     let s=bls48556.BIG.randtrunc(r,16*bls48556.CONFIG_CURVE.AESKEY,&rng)
 
-    var P=bls48556.ECP.map2point(s);
+    var P=bls48556.ECP.map2point(bls48556.FP(&rng));
     if P.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
@@ -891,7 +890,7 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
 
     var Q=ECP8.generator();
 
-    var W = bls48556.ECP8.map2point(s)
+    var W = bls48556.ECP8.map2point(bls48556.FP8(&rng))
     W.cfp();
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")

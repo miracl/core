@@ -36,6 +36,8 @@ use crate::xxx::fp;
 use crate::xxx::fp::FP;
 use crate::xxx::rom;
 
+use crate::rand::RAND;
+
 #[derive(Copy, Clone)]
 pub struct FP2 {
     a: FP,
@@ -97,6 +99,10 @@ impl FP2 {
         f.a.copy(&FP::new_big(c));
         f.b.zero();
         return f;
+    }
+
+    pub fn new_rand(rng: &mut RAND) -> FP2 {
+        return FP2::new_fps(&FP::new_rand(rng),&FP::new_rand(rng));
     }
 
     /* reduce components mod Modulus */
@@ -177,7 +183,7 @@ impl FP2 {
         self.b.zero();
     }
 
-    pub fn sign(&mut self) -> isize {
+    pub fn sign(&self) -> isize {
         let mut p1=self.a.sign();
         let mut p2=self.b.sign();
         if fp::BIG_ENDIAN_SIGN {

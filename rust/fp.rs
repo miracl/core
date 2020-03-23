@@ -37,6 +37,8 @@ use crate::xxx::big::BIG;
 use crate::xxx::dbig::DBIG;
 use crate::xxx::rom;
 
+use crate::rand::RAND;
+
 #[derive(Copy, Clone)]
 pub struct FP {
     pub x: BIG,
@@ -97,6 +99,13 @@ impl FP {
         let mut f = FP::new();
         f.x.copy(y);
         f.nres();
+        return f;
+    }
+
+    pub fn new_rand(rng: &mut RAND) -> FP {
+        let m = BIG::new_ints(&rom::MODULUS);
+        let w = BIG::randomnum(&m,rng);
+        let f = FP::new_big(&w);
         return f;
     }
 
@@ -242,7 +251,7 @@ impl FP {
         return a.redc().isunity();
     }
 
-    pub fn sign(&mut self) -> isize {
+    pub fn sign(&self) -> isize {
         if BIG_ENDIAN_SIGN {
             let mut m = BIG::new_ints(&rom::MODULUS);
             m.dec(1);

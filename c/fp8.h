@@ -349,6 +349,11 @@ extern void FP8_YYY_div_i2(FP8_YYY *x);
  */
 extern void FP8_YYY_div_2i(FP8_YYY *x);
 
-
+/**	@brief Generate random FP8
+ *
+	@param x random FP8 number
+	@param rng random number generator
+ */
+extern void FP8_YYY_rand(FP8_YYY *x, csprng *rng);
 #endif
 

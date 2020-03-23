@@ -296,6 +296,13 @@ extern void FP_inv(FP *x, FP *y);
  */
 extern void FP_fpow(FP *x, FP *y);
 
+/**	@brief Generate random FP
+ *
+	@param x random FP number
+	@param rng random number generator
+ */
+extern void FP_rand(FP *x, core::csprng *rng);
+
 }
 
 #endif

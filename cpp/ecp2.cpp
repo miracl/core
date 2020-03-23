@@ -673,13 +673,13 @@ void ZZZ::ECP2_hap2point(ECP2 *Q,BIG h)
     }
 }
 
-/* Constant time Map BIG to Point in G2 */
-void ZZZ::ECP2_map2point(ECP2 *Q,BIG h)
+/* Constant time Map FP2 to Point in G2 */
+void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
 {
 // SWU method. Assumes p=3 mod 4.
     int sgn,ne;
-    FP2 X1,X2,X3,W,B,Y;
-    FP t,b,j,s,one;
+    FP2 X1,X2,X3,W,B,Y,S,T;
+    FP b,j,s,one;
 
     FP_rcopy(&b,CURVE_B);
     FP2_from_FP(&B, &b);
@@ -693,24 +693,24 @@ void ZZZ::ECP2_map2point(ECP2 *Q,BIG h)
 
     FP2_one(&W);
     FP_one(&one);
-    FP_nres(&t,h);
-    sgn=FP_sign(&t);
+    FP2_copy(&T,H);
+    sgn=FP2_sign(&T);
         
     FP_from_int(&s,-3);
-    FP_sqrt(&s,&s,NULL);         // s=sqrt(-3)
+    FP_sqrt(&s,&s,NULL);    // s=sqrt(-3)
     FP_sub(&j,&s,&one);     FP_norm(&j);
     FP_div2(&j,&j);         // j=(s-1)/2
 
-    FP_mul(&s,&s,&t);       // s=s.t
-    FP_sqr(&b,&t);          // t^2
-    FP_add(&b,&b,&one);     // t^2+1
-    FP2_from_FP(&Y,&b);
-    FP2_add(&B,&B,&Y);      // t^2+B+1
+
+    FP2_pmul(&S,&T,&s);       // S=s.T
+    FP2_sqr(&Y,&T);           // Y=T^2
+    FP2_add(&Y,&Y,&W);        // Y=T^2+1
+    FP2_add(&B,&B,&Y);        // B= T^2+B+1
     FP2_norm(&B);
     FP2_inv(&B,&B);
-    FP2_pmul(&B,&B,&s);      // w=s.t/(1+B+t*2)
+    FP2_mul(&B,&B,&S);        // B=S.T/(1+B+T*2)
 
-    FP2_pmul(&X1,&B,&t);       
+    FP2_mul(&X1,&B,&T);       
     FP2_from_FP(&Y,&j);     
     FP2_sub(&X2,&X1,&Y);    FP2_norm(&X2);// X2=t.w-j 
     FP2_neg(&X1,&X2);       FP2_norm(&X1);// X1=j-t.w
@@ -720,6 +720,11 @@ void ZZZ::ECP2_map2point(ECP2 *Q,BIG h)
     FP2_inv(&B,&B);
     FP2_add(&X3,&B,&W);     FP2_norm(&X3);
     
+//printf("X1= ");FP2_output(&X1); printf("\n");
+//printf("X2= ");FP2_output(&X2); printf("\n");
+//printf("X3= ");FP2_output(&X3); printf("\n");
+
+
     ECP2_rhs(&W,&X2);
     FP2_cmove(&X1,&X2,FP2_qr(&W));
     ECP2_rhs(&W,&X3);

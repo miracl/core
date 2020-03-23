@@ -967,11 +967,11 @@ void ZZZ::ECP8_hap2point(ECP8 *Q,BIG h)
 }
 
 /* Constant time Map BIG to Point in G2 */
-void ZZZ::ECP8_map2point(ECP8 *Q,BIG h)
+void ZZZ::ECP8_map2point(ECP8 *Q,FP8 *H)
 {
     int sgn,ne;
-    FP8 X1,X2,X3,W,B,Y;
-    FP t,b,j,s,one;
+    FP8 X1,X2,X3,W,B,Y,S,T;
+    FP b,j,s,one;
 
     FP_rcopy(&b,CURVE_B);
     FP8_from_FP(&B, &b);
@@ -985,24 +985,23 @@ void ZZZ::ECP8_map2point(ECP8 *Q,BIG h)
 
     FP8_one(&W);
     FP_one(&one);
-    FP_nres(&t,h);
-    sgn=FP_sign(&t);
+    FP8_copy(&T,H);
+    sgn=FP8_sign(&T);
         
     FP_from_int(&s,-3);
     FP_sqrt(&s,&s,NULL);         // s=sqrt(-3)
     FP_sub(&j,&s,&one);     FP_norm(&j);
     FP_div2(&j,&j);         // j=(s-1)/2
 
-    FP_mul(&s,&s,&t);       // s=s.t
-    FP_sqr(&b,&t);          // t^2
-    FP_add(&b,&b,&one);     // t^2+1
-    FP8_from_FP(&Y,&b);
+    FP8_tmul(&S,&T,&s);       // s=s.t
+    FP8_sqr(&Y,&T);          // t^2
+    FP8_add(&Y,&Y,&W);     // t^2+1
     FP8_add(&B,&B,&Y);      // t^2+B+1
     FP8_norm(&B);
     FP8_inv(&B,&B);
-    FP8_tmul(&B,&B,&s);      // w=s.t/(1+B+t*2)
+    FP8_mul(&B,&B,&S);      // w=s.t/(1+B+t*2)
 
-    FP8_tmul(&X1,&B,&t);       
+    FP8_mul(&X1,&B,&T);       
     FP8_from_FP(&Y,&j);     
     FP8_sub(&X2,&X1,&Y);    FP8_norm(&X2);// X2=t.w-j 
     FP8_neg(&X1,&X2);       FP8_norm(&X1);// X1=j-t.w

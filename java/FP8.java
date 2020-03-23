@@ -35,6 +35,7 @@
 /* FP8 elements are of the form a+ib, where i is sqrt(sqrt(-1+sqrt(-1)))  */
 
 package org.miracl.core.XXX;
+import org.miracl.core.RAND;
 
 public final class FP8 {
 	private final FP4 a;
@@ -129,6 +130,12 @@ public final class FP8 {
 		a=new FP4(c);
 		b=new FP4();
 	}
+
+    public FP8(RAND rng)
+    {
+        a=new FP4(rng);
+        b=new FP4(rng);
+    }
 /* copy this=x */
 	public void copy(FP8 x)
 	{

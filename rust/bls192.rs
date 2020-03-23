@@ -37,6 +37,7 @@ use crate::xxx::fp8::FP8;
 
 use crate::xxx::big;
 use crate::xxx::big::BIG;
+use crate::xxx::fp::FP;
 use crate::xxx::pair192;
 use crate::xxx::rom;
 use crate::hmac;
@@ -57,7 +58,7 @@ fn ceil(a: usize,b: usize) -> usize {
 }
 
 /* output u \in F_p */
-fn hash_to_field(hash: usize,hlen: usize ,u: &mut [BIG], dst: &[u8],m: &[u8],ctr: usize) {
+fn hash_to_field(hash: usize,hlen: usize ,u: &mut [FP], dst: &[u8],m: &[u8],ctr: usize) {
     let q = BIG::new_ints(&rom::MODULUS);
     let el = ceil(q.nbits()+ecp::AESKEY*8,8);
 
@@ -69,7 +70,7 @@ fn hash_to_field(hash: usize,hlen: usize ,u: &mut [BIG], dst: &[u8],m: &[u8],ctr
         for j in 0..el {
             fd[j]=okm[el*i+j];
         }
-        u[i]=DBIG::frombytes(&fd[0 .. el]).dmod(&q);
+        u[i]=FP::new_big(&DBIG::frombytes(&fd[0 .. el]).dmod(&q));
     }
 }
 
@@ -102,9 +103,9 @@ fn hash_to_base(hash: usize,hlen: usize ,dst: &[u8],m: &[u8],ctr: isize) -> BIG 
 #[allow(non_snake_case)]
 pub fn bls_hash_to_point(m: &[u8]) -> ECP {
     let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA384-SSWU-RO-_NUL_".to_ascii_uppercase());
-    let mut u: [BIG; 2] = [
-        BIG::new(),
-        BIG::new(),
+    let mut u: [FP; 2] = [
+        FP::new(),
+        FP::new(),
     ];
     hash_to_field(hmac::MC_SHA2,ecp::HASH_TYPE,&mut u,dst.as_bytes(),m,2);
 

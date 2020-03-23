@@ -86,9 +86,7 @@ public class TesttimeECDH extends TestCase {
         r = new BIG(ROM.CURVE_Order);
         s = BIG.randtrunc(r, 16 * CONFIG_CURVE.AESKEY, rng);
 
-        
-
-        WP = ECP.map2point(s);
+        WP = ECP.map2point(new FP(rng));
         //System.out.print("WP= "+WP.toString()+"\n");
         WP.cfp();
         if (WP.is_infinity()) {
@@ -99,8 +97,6 @@ public class TesttimeECDH extends TestCase {
         if (!WP.is_infinity()) {
             fail("FAILURE - rG!=O");
         }
-
-
 
         start = System.currentTimeMillis();
         iterations = 0;

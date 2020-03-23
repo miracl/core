@@ -334,5 +334,12 @@ extern void FP4_YYY_div_2i(FP4_YYY *x);
  */
 extern void FP4_YYY_div2(FP4_YYY *x, FP4_YYY *y);
 
+/**	@brief Generate random FP4
+ *
+	@param x random FP4 number
+	@param rng random number generator
+ */
+extern void FP4_YYY_rand(FP4_YYY *x, csprng *rng);
+
 #endif
 

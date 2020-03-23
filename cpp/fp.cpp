@@ -877,3 +877,11 @@ int YYY::FP_sign(FP *x)
     return BIG_parity(m);
 #endif
 }
+
+void YYY::FP_rand(FP *x,csprng *rng)
+{
+    BIG w,m;
+    BIG_rcopy(m,Modulus);
+    BIG_randomnum(w,m,rng);
+    FP_nres(x,w);
+}

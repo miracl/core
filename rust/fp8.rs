@@ -35,6 +35,8 @@ use crate::xxx::fp::FP;
 use crate::xxx::fp2::FP2;
 use crate::xxx::fp4::FP4;
 
+use crate::rand::RAND;
+
 #[derive(Copy, Clone)]
 pub struct FP8 {
     a: FP4,
@@ -82,6 +84,10 @@ impl FP8 {
         f.a.set_fp(c);
         f.b.zero();
         return f;
+    }
+
+    pub fn new_rand(rng: &mut RAND) -> FP8 {
+        return FP8::new_fp4s(&FP4::new_rand(rng),&FP4::new_rand(rng));
     }
 
     pub fn set_fp4s(&mut self, c: &FP4, d: &FP4) {
@@ -169,7 +175,7 @@ impl FP8 {
         self.b.zero();
     }
 
-    pub fn sign(&mut self)  -> isize {
+    pub fn sign(&self)  -> isize {
         let mut p1=self.a.sign();
         let mut p2=self.b.sign();
         if fp::BIG_ENDIAN_SIGN {

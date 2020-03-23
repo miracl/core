@@ -94,8 +94,7 @@ public class TesttimeMPIN256 extends TestCase {
 
         ECP8 Q = ECP8.generator();
 
-
-        ECP8 W = ECP8.map2point(s);
+        ECP8 W = ECP8.map2point(new FP8(rng));
         W.cfp();
         if (W.is_infinity()) {
             fail("HASHING FAILURE - P=O");

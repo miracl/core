@@ -60,10 +60,10 @@ public struct BLS256
     }
 
 /* output u \in F_p */
-    static func hash_to_field(_ hf: Int,_ hlen: Int,_ DST: [UInt8],_ M: [UInt8],_ ctr:Int) -> [BIG] {
+    static func hash_to_field(_ hf: Int,_ hlen: Int,_ DST: [UInt8],_ M: [UInt8],_ ctr:Int) -> [FP] {
         let q=BIG(ROM.Modulus)
         let L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8)
-        var u=[BIG]()
+        var u=[FP]()
         var fd=[UInt8](repeating: 0,count: L)
         var dx:DBIG
 
@@ -73,7 +73,7 @@ public struct BLS256
                 fd[j]=OKM[i*L+j]
             }
             dx=DBIG.fromBytes(fd)
-            u.append(dx.mod(q))
+            u.append(FP(dx.mod(q)))
         }
 
         return u

@@ -675,6 +675,10 @@ var FP4 = function(ctx) {
         }
 
     };
+    
+    FP4.rand = function(rng) {
+        return new FP4(ctx.FP2.rand(rng),ctx.FP2.rand(rng));
+    };
 
     return FP4;
 };

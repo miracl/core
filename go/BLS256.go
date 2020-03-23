@@ -54,10 +54,10 @@ func ceil(a int,b int) int {
 }
 
 /* output u \in F_p */
-func hash_to_field(hash int,hlen int ,DST []byte,M []byte,ctr int) []*BIG {
+func hash_to_field(hash int,hlen int ,DST []byte,M []byte,ctr int) []*FP {
 	q := NewBIGints(Modulus)
 	L := ceil(q.nbits()+AESKEY*8,8)
-	var u []*BIG
+	var u []*FP
 	var fd =make([]byte,L)
 	OKM:=core.XMD_Expand(hash,hlen,L*ctr,DST,M)
 	
@@ -65,7 +65,7 @@ func hash_to_field(hash int,hlen int ,DST []byte,M []byte,ctr int) []*BIG {
 		for j:=0;j<L;j++ {
 			fd[j]=OKM[i*L+j];
 		}
-		u = append(u,DBIG_fromBytes(fd).mod(q))
+		u = append(u,NewFPbig(DBIG_fromBytes(fd).mod(q)))
 	}
 	return u
 }

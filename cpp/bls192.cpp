@@ -53,10 +53,10 @@ static FP8 G2_TAB[G2_TABLE_ZZZ];  // space for precomputation on fixed G2 parame
 
 /* output u[i] \in F_p */
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
-static void hash_to_field(int hash,int hlen,BIG *u,octet *DST,octet *M, int ctr)
+static void hash_to_field(int hash,int hlen,FP *u,octet *DST,octet *M, int ctr)
 {
     int i,j,L;
-    BIG q;
+    BIG q,w;
     DBIG dx;
     char okm[256],fd[128];
     octet OKM = {0,sizeof(okm),okm};
@@ -71,7 +71,8 @@ static void hash_to_field(int hash,int hlen,BIG *u,octet *DST,octet *M, int ctr)
             fd[j]=OKM.val[i*L+j];
         
         BIG_dfromBytesLen(dx,fd,L);
-        BIG_dmod(u[i],dx,q);
+        BIG_dmod(w,dx,q);
+        FP_nres(&u[i],w);
     }
 }
 
@@ -101,7 +102,7 @@ static void hash_to_base(int hash,int hlen,BIG u,octet *DST,octet *M, int ctr)
 /* hash a message to an ECP point, using SHA2, random oracle method */
 static void BLS_HASH_TO_POINT(ECP *P, octet *M)
 {
-    BIG u[2];
+    FP u[2];
     ECP P1;
     char dst[50];
     octet DST = {0,sizeof(dst),dst};
@@ -109,8 +110,8 @@ static void BLS_HASH_TO_POINT(ECP *P, octet *M)
     OCT_jstring(&DST,(char *)"BLS_SIG_ZZZG1_XMD:SHA384-SSWU-RO-_NUL_");
     hash_to_field(MC_SHA2,HASH_TYPE_ZZZ,u,&DST,M,2);
 
-    ECP_map2point(P,u[0]);
-    ECP_map2point(&P1,u[1]);
+    ECP_map2point(P,&u[0]);
+    ECP_map2point(&P1,&u[1]);
 
     ECP_add(P,&P1);
     ECP_cfp(P);

@@ -53,10 +53,10 @@ public class BLS256 {
         return (((a)-1)/(b)+1);
     }
 
-    static BIG[] hash_to_field(int hash,int hlen,byte[] DST,byte[] M,int ctr) {
+    static FP[] hash_to_field(int hash,int hlen,byte[] DST,byte[] M,int ctr) {
         BIG q = new BIG(ROM.Modulus);
         int L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8);
-        BIG [] u = new BIG[ctr];
+        FP [] u = new FP[ctr];
         byte[] fd=new byte[L];
 
         byte[] OKM=HMAC.XMD_Expand(hash,hlen,L*ctr,DST,M);
@@ -64,7 +64,7 @@ public class BLS256 {
         {
             for (int j=0;j<L;j++)
                 fd[j]=OKM[i*L+j];
-            u[i]=DBIG.fromBytes(fd).mod(q);
+            u[i]=new FP(DBIG.fromBytes(fd).mod(q));
         }
     
         return u;
@@ -93,7 +93,7 @@ public class BLS256 {
     /* hash a message to an ECP point, using SHA2, random oracle method */
     public static ECP bls_hash_to_point(byte[] M) {
         String dst= new String("BLS_SIG_ZZZG1_XMD:SHA512-SSWU-RO-_NUL_");
-        BIG[] u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,2);
+        FP[] u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,2);
 
         ECP P=ECP.map2point(u[0]);
         ECP P1=ECP.map2point(u[1]);

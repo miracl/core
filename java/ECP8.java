@@ -856,31 +856,31 @@ public final class ECP8 {
     }         
 
 /* Constant time Map to Point */
-    public static ECP8 map2point(BIG h)
+    public static ECP8 map2point(FP8 H)
     {   
         // SWU method
         int sgn,ne;
         FP8 W=new FP8(1);
         FP8 B=new FP8(new FP4(new FP2(new BIG(ROM.CURVE_B))));
-        FP t=new FP(h);
+        FP8 T=new FP8(H);
         FP s=new FP(-3);
         FP one=new FP(1);
         if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_i();
         if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
         B.norm();
-        sgn=t.sign();
+        sgn=T.sign();
         FP w=s.sqrt(null);
         FP j=new FP(w); j.sub(one); j.norm(); j.div2();
 
-        w.mul(t);
-        FP b=new FP(t);
-        b.sqr();
-        b.add(one);
-        FP8 Y=new FP8(b);
+        FP8 S=new FP8(T);
+        S.tmul(w);
+        FP8 Y=new FP8(T);
+        Y.sqr();
+        Y.add(W);
         B.add(Y); B.norm(); B.inverse();
-        B.tmul(w);
+        B.mul(S);
 
-        FP8 X1=new FP8(B); X1.tmul(t);
+        FP8 X1=new FP8(B); X1.mul(T);
         Y.copy(new FP8(j));
         FP8 X2=new FP8(X1); X2.sub(Y); X2.norm();
         X1.copy(X2); X1.neg(); X1.norm();

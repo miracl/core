@@ -794,11 +794,11 @@ void ZZZ::ECP4_hap2point(ECP4 *Q,BIG h)
 }
 
 /* Constant time Map BIG to Point in G2 */
-void ZZZ::ECP4_map2point(ECP4 *Q,BIG h)
+void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
 {
     int sgn,ne;
-    FP4 X1,X2,X3,W,B,Y;
-    FP t,b,j,s,one;
+    FP4 X1,X2,X3,W,B,Y,S,T;
+    FP b,j,s,one;
 
     FP_rcopy(&b,CURVE_B);
     FP4_from_FP(&B, &b);
@@ -812,24 +812,23 @@ void ZZZ::ECP4_map2point(ECP4 *Q,BIG h)
 
     FP4_one(&W);
     FP_one(&one);
-    FP_nres(&t,h);
-    sgn=FP_sign(&t);
+    FP4_copy(&T,H);
+    sgn=FP4_sign(&T);
         
     FP_from_int(&s,-3);
     FP_sqrt(&s,&s,NULL);         // s=sqrt(-3)
     FP_sub(&j,&s,&one);     FP_norm(&j);
     FP_div2(&j,&j);         // j=(s-1)/2
 
-    FP_mul(&s,&s,&t);       // s=s.t
-    FP_sqr(&b,&t);          // t^2
-    FP_add(&b,&b,&one);     // t^2+1
-    FP4_from_FP(&Y,&b);
+    FP4_qmul(&S,&T,&s);       // s=s.t
+    FP4_sqr(&Y,&T);          // t^2
+    FP4_add(&Y,&Y,&W);     // t^2+1
     FP4_add(&B,&B,&Y);      // t^2+B+1
     FP4_norm(&B);
     FP4_inv(&B,&B);
-    FP4_qmul(&B,&B,&s);      // w=s.t/(1+B+t*2)
+    FP4_mul(&B,&B,&S);      // w=s.t/(1+B+t*2)
 
-    FP4_qmul(&X1,&B,&t);       
+    FP4_mul(&X1,&B,&T);       
     FP4_from_FP(&Y,&j);     
     FP4_sub(&X2,&X1,&Y);    FP4_norm(&X2);// X2=t.w-j 
     FP4_neg(&X1,&X2);       FP4_norm(&X1);// X1=j-t.w

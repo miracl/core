@@ -605,33 +605,32 @@ public final class ECP2 {
         return Q;
     }
 
-
 /* Constant time Map to Point */
-    public static ECP2 map2point(BIG h)
+    public static ECP2 map2point(FP2 H)
     { 
     // SWU method
         int sgn,ne;
         FP2 W=new FP2(1);
         FP2 B=new FP2(new BIG(ROM.CURVE_B));
-        FP t=new FP(h);
+        FP2 T=new FP2(H);  /**/
         FP s=new FP(-3);
         FP one=new FP(1);
         if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_ip();
         if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.mul_ip();
         B.norm();
-        sgn=t.sign();
+        sgn=T.sign(); /**/
         FP w=s.sqrt(null);
         FP j=new FP(w); j.sub(one); j.norm(); j.div2();
     //System.out.print("s= "+w.toString()+"\n");
-        w.mul(t);
-        FP b=new FP(t);
-        b.sqr();
-        b.add(one);
-        FP2 Y=new FP2(b);
+        FP2 S=new FP2(T); /**/
+        S.pmul(w);        /**/
+        FP2 Y=new FP2(T);
+        Y.sqr();          /**/
+        Y.add(W);         /**/
         B.add(Y); B.norm(); B.inverse();
-        B.pmul(w);
+        B.mul(S);         /**/
 
-        FP2 X1=new FP2(B); X1.pmul(t);
+        FP2 X1=new FP2(B); X1.mul(T); /**/
         Y.copy(new FP2(j));
         FP2 X2=new FP2(X1); X2.sub(Y); X2.norm();
         X1.copy(X2); X1.neg(); X1.norm();

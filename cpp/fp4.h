@@ -325,7 +325,12 @@ extern void FP4_cmove(FP4 *x, FP4 *y, int s);
  */
 extern void FP4_div_i(FP4 *x);
 
-
+/**	@brief Generate random FP4
+ *
+	@param x random FP4 number
+	@param rng random number generator
+ */
+extern void FP4_rand(FP4 *x, core::csprng *rng);
 }
 
 #endif

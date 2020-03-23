@@ -1193,7 +1193,7 @@ void ZZZ::ECP_cfp(ECP *P)
 }
 
 /* Constant time Map to Point */
-void ZZZ::ECP_map2point(ECP *P,BIG h)
+void ZZZ::ECP_map2point(ECP *P,FP *h)
 {
 #if CURVETYPE_ZZZ==MONTGOMERY
 // Elligator 2
@@ -1201,7 +1201,7 @@ void ZZZ::ECP_map2point(ECP *P,BIG h)
     FP X1,X2,t,one,A;
     //BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
     FP_from_int(&A,CURVE_A);
-    FP_nres(&t,h);
+    FP_copy(&t,h);
     FP_sqr(&t,&t);   // t^2
 
     if (PM1D2_YYY == 2)
@@ -1252,7 +1252,7 @@ void ZZZ::ECP_map2point(ECP *P,BIG h)
     FP_div2(&B,&B);    // (B-A)/4
     FP_sqr(&B,&B);     // (B-A)^2/16
 
-    FP_nres(&t,h); sgn=FP_sign(&t);
+    FP_copy(&t,h); sgn=FP_sign(&t);
     FP_sqr(&t,&t);   // t^2
 
     if (PM1D2_YYY == 2)
@@ -1320,7 +1320,7 @@ void ZZZ::ECP_map2point(ECP *P,BIG h)
     FP X1,X2,X3,t,w,one,A,B,Y,NY,j;
     FP_rcopy(&B,CURVE_B);
     FP_one(&one);
-    FP_nres(&t,h);
+    FP_copy(&t,h);
     sgn=FP_sign(&t);
     if (CURVE_A!=0)
     {

@@ -34,7 +34,7 @@
 /* CLINT mod p functions */
 
 package XXX
-
+import "github.com/miracl/core/go/core"
 
 type FP struct {
 	x   *BIG
@@ -74,6 +74,13 @@ func NewFPcopy(a *FP) *FP {
 	F := new(FP)
 	F.x = NewBIGcopy(a.x)
 	F.XES = a.XES
+	return F
+}
+
+func NewFPrand(rng *core.RAND) *FP {
+	m := NewBIGints(Modulus)
+	w := Randomnum(m,rng)
+	F := NewFPbig(w)
 	return F
 }
 

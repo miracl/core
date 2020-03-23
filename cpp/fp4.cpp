@@ -624,6 +624,12 @@ void YYY::FP4_cmove(FP4 *f, FP4 *g, int d)
     FP2_cmove(&(f->b), &(g->b), d);
 }
 
+void YYY::FP4_rand(FP4 *x,csprng *rng)
+{
+    FP2_rand(&(x->a),rng);
+    FP2_rand(&(x->b),rng);
+}
+
 #if CURVE_SECURITY_ZZZ >= 192
 
 /* test for x a QR */

@@ -644,11 +644,11 @@ public struct ECP2 {
     }
 
 /* Constant time Map to Point */
-    static public func map2point(_ h:BIG) -> ECP2
+    static public func map2point(_ H:FP2) -> ECP2
     { // SWU method
         var W=FP2(1)
         var B=FP2(BIG(ROM.CURVE_B))
-        let t=FP(h)
+        let T=FP2(H) /**/
         var s=FP(-3)
         let one=FP(1)
 		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
@@ -658,19 +658,19 @@ public struct ECP2 {
             B.mul_ip();
         }
         B.norm()
-        let sgn=t.sign()
-        var w=s.sqrt(nil)
+        let sgn=T.sign() /**/
+        let w=s.sqrt(nil)
         var j=FP(w); j.sub(one); j.norm(); j.div2()
 
-        w.mul(t)
-        var b=FP(t)
-        b.sqr()
-        b.add(one)
-        var Y=FP2(b)
+        var S=FP2(T) /**/
+        S.pmul(w)    /**/
+        var Y=FP2(T) /**/
+        Y.sqr()      /**/
+        Y.add(W)     /**/
         B.add(Y); B.norm(); B.inverse()
-        B.pmul(w)
+        B.mul(S)     /**/
 
-        var X1=FP2(B); X1.pmul(t)
+        var X1=FP2(B); X1.mul(T) /**/
         Y.copy(FP2(j))
         var X2=FP2(X1); X2.sub(Y); X2.norm()
         X1.copy(X2); X1.neg(); X1.norm()

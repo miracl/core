@@ -1196,11 +1196,11 @@ impl ECP8 {
 
 /* Constant time Map to Point */
     #[allow(non_snake_case)]
-    pub fn map2point(h: &BIG) -> ECP8 {
+    pub fn map2point(H: &FP8) -> ECP8 {
     // SWU method
         let mut W=FP8::new_int(1);
         let mut B = FP8::new_fp4(&FP4::new_fp2(&FP2::new_big(&BIG::new_ints(&rom::CURVE_B))));
-        let mut t=FP::new_big(h);
+        let T=FP8::new_copy(H);
         let mut s=FP::new_int(-3);
         let one=FP::new_int(1);
 		if ecp::SEXTIC_TWIST == ecp::D_TYPE {
@@ -1210,19 +1210,19 @@ impl ECP8 {
             B.times_i();
         }
         B.norm();
-        let sgn=t.sign();
-        let mut w=s.sqrt(None);
+        let sgn=T.sign();
+        let w=s.sqrt(None);
         let mut j=FP::new_copy(&w); j.sub(&one); j.norm(); j.div2();
 
-        w.mul(&t);
-        let mut b=FP::new_copy(&t);
-        b.sqr();
-        b.add(&one);
-        let mut Y=FP8::new_fp(&b);
+        let mut S=FP8::new_copy(&T);
+        S.tmul(&w);
+        let mut Y=FP8::new_copy(&T);
+        Y.sqr();
+        Y.add(&W);
         B.add(&Y); B.norm(); B.inverse();
-        B.tmul(&w);
+        B.mul(&S);
 
-        let mut X1=FP8::new_copy(&B); X1.tmul(&t);
+        let mut X1=FP8::new_copy(&B); X1.mul(&T);
         Y.copy(&FP8::new_fp(&j));
         let mut X2=FP8::new_copy(&X1); X2.sub(&Y); X2.norm();
         X1.copy(&X2); X1.neg(); X1.norm();

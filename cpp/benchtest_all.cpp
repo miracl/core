@@ -57,16 +57,18 @@
 
 using namespace core;
 
-int ED_25519(csprng *RNG)
+int ed25519(csprng *RNG)
 {
     using namespace ED25519;
     using namespace ED25519_BIG;
+    using namespace ED25519_FP;
 
     int i, iterations;
     clock_t start;
     double elapsed;
     ECP EP, EG;
     BIG s, r, x, y;
+    FP rw;
     printf("\nTesting/Timing ED25519 ECC\n");
 
 #if CURVETYPE_ED25519==WEIERSTRASS
@@ -109,10 +111,8 @@ int ED_25519(csprng *RNG)
 
     ECP_generator(&EG);
 
-    BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_ED25519, RNG);
-
-    ECP_map2point(&EP,s);
+    FP_rand(&rw,RNG);
+    ECP_map2point(&EP,&rw);
     ECP_cfp(&EP);
 
     if (ECP_isinf(&EP))
@@ -121,6 +121,8 @@ int ED_25519(csprng *RNG)
         return 0;
     }
 
+    BIG_rcopy(r, CURVE_Order);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_ED25519, RNG);
 
     ECP_copy(&EP, &EG);
     ECP_mul(&EP, r);
@@ -148,16 +150,18 @@ int ED_25519(csprng *RNG)
 }
 
 #if CHUNK==32 || CHUNK==64
-int NIST_256(csprng *RNG)
+int nist256(csprng *RNG)
 {
     using namespace NIST256;
     using namespace NIST256_BIG;
+    using namespace NIST256_FP;
 
     int i, iterations;
     clock_t start;
     double elapsed;
     ECP EP, EG;
     BIG s, r, x, y;
+    FP rw;
     printf("\nTesting/Timing NIST256 ECC\n");
 
 #if CURVETYPE_NIST256==WEIERSTRASS
@@ -199,10 +203,8 @@ int NIST_256(csprng *RNG)
 
     ECP_generator(&EG);
 
-    BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_NIST256, RNG);
-
-    ECP_map2point(&EP,s);
+    FP_rand(&rw,RNG);
+    ECP_map2point(&EP,&rw);
     ECP_cfp(&EP);
 
     if (ECP_isinf(&EP))
@@ -210,6 +212,9 @@ int NIST_256(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
+    BIG_rcopy(r, CURVE_Order);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_NIST256, RNG);
 
     ECP_copy(&EP, &EG);
     ECP_mul(&EP, r);
@@ -236,16 +241,18 @@ int NIST_256(csprng *RNG)
     return 0;
 }
 
-int GOLDI_LOCKS(csprng *RNG)
+int goldilocks(csprng *RNG)
 {
     using namespace GOLDILOCKS;
     using namespace GOLDILOCKS_BIG;
+    using namespace GOLDILOCKS_FP;
 
     int i, iterations;
     clock_t start;
     double elapsed;
     ECP EP, EG;
     BIG s, r, x, y;
+    FP rw;
     printf("\nTesting/Timing GOLDILOCKS ECC\n");
 
 #if CURVETYPE_GOLDILOCKS==WEIERSTRASS
@@ -286,10 +293,8 @@ int GOLDI_LOCKS(csprng *RNG)
 
     ECP_generator(&EG);
 
-    BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_GOLDILOCKS, RNG);
-
-    ECP_map2point(&EP,s);
+    FP_rand(&rw,RNG);
+    ECP_map2point(&EP,&rw);
     ECP_cfp(&EP);
 
     if (ECP_isinf(&EP))
@@ -297,6 +302,9 @@ int GOLDI_LOCKS(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
+    BIG_rcopy(r, CURVE_Order);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_GOLDILOCKS, RNG);
 
     ECP_copy(&EP, &EG);
     ECP_mul(&EP, r);
@@ -324,7 +332,7 @@ int GOLDI_LOCKS(csprng *RNG)
 }
 #endif
 
-int BN_254(csprng *RNG)
+int bn254(csprng *RNG)
 {
     using namespace BN254;
     using namespace BN254_FP;
@@ -338,17 +346,16 @@ int BN_254(csprng *RNG)
     ECP2 Q, W;
     FP12 g, w;
     FP4 cm;
-    FP2 wx, wy;
+    FP2 rz2;
+    FP rz;
 
     BIG s, r, x, y;
     printf("\nTesting/Timing BN254 Pairings\n");
 
     ECP_generator(&G);
 
-    BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BN254, RNG);
-
-    ECP_map2point(&P,s);
+    FP_rand(&rz,RNG);
+    ECP_map2point(&P,&rz);
     ECP_cfp(&P);
 
     if (ECP_isinf(&P))
@@ -356,6 +363,9 @@ int BN_254(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
+    BIG_rcopy(r, CURVE_Order);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BN254, RNG);
 
     ECP_copy(&P, &G);
     PAIR_G1mul(&P, r);
@@ -381,7 +391,8 @@ int BN_254(csprng *RNG)
 
     ECP2_generator(&W);
 
-    ECP2_map2point(&Q,s);
+    FP2_rand(&rz2,RNG);
+    ECP2_map2point(&Q,&rz2);
     ECP2_cfp(&Q);
 
     if (ECP2_isinf(&Q))
@@ -418,15 +429,6 @@ int BN_254(csprng *RNG)
     elapsed = 1000.0 * elapsed / iterations;
     printf("G2 mul              - %8d iterations  ", iterations);
     printf(" %8.2lf ms per iteration\n", elapsed);
-
-
-
-
-//  ECP2_copy(&Q,&W);
-//  ECP_copy(&P,&G);
-
-//printf("Q= ");ECP2_output(&Q); printf("\n");
-//printf("P= ");ECP_output(&P); printf("\n");
 
     PAIR_ate(&w, &Q, &P);
     PAIR_fexp(&w);
@@ -571,7 +573,7 @@ int BN_254(csprng *RNG)
 }
 
 #if CHUNK==32 || CHUNK==64
-int BLS_383(csprng *RNG)
+int bls383(csprng *RNG)
 {
     using namespace BLS12383;
     using namespace BLS12383_FP;
@@ -585,17 +587,16 @@ int BLS_383(csprng *RNG)
     ECP2 Q, W;
     FP12 g, w;
     FP4 cm;
-    FP2 wx, wy;
+    FP2 rz2;
+    FP rz;
 
     BIG s, r, x, y;
     printf("\nTesting/Timing BLS12383 Pairings\n");
 
     ECP_generator(&G);
 
-    BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS12383, RNG);
-
-    ECP_map2point(&P,s);
+    FP_rand(&rz,RNG);
+    ECP_map2point(&P,&rz);
     ECP_cfp(&P);
 
     if (ECP_isinf(&P))
@@ -603,6 +604,10 @@ int BLS_383(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
+    BIG_rcopy(r, CURVE_Order);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS12383, RNG);
+
 
     ECP_copy(&P, &G);
     PAIR_G1mul(&P, r);
@@ -628,7 +633,8 @@ int BLS_383(csprng *RNG)
 
     ECP2_generator(&W);
 
-    ECP2_map2point(&Q,s);
+    FP2_rand(&rz2,RNG);
+    ECP2_map2point(&Q,&rz2);
     ECP2_cfp(&Q);
 
     if (ECP2_isinf(&Q))
@@ -812,7 +818,7 @@ int BLS_383(csprng *RNG)
     return 0;
 }
 
-int BLS_24(csprng *RNG)
+int bls24(csprng *RNG)
 {
     using namespace BLS24479;
     using namespace BLS24479_FP;
@@ -825,6 +831,8 @@ int BLS_24(csprng *RNG)
     ECP P, G;
     ECP4 Q, W;
     FP24 g, w;
+    FP rz;
+    FP4 rz4;
 
     FP8 cm;
     BIG a, b, s, r;
@@ -833,10 +841,8 @@ int BLS_24(csprng *RNG)
 
     ECP_generator(&G);
 
-    BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS24479, RNG);
-
-    ECP_map2point(&P,s);
+    FP_rand(&rz,RNG);
+    ECP_map2point(&P,&rz);
     ECP_cfp(&P);
 
     if (ECP_isinf(&P))
@@ -844,6 +850,9 @@ int BLS_24(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
+    BIG_rcopy(r, CURVE_Order);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS24479, RNG);
 
     ECP_copy(&P, &G);
     PAIR_G1mul(&P, r);
@@ -869,7 +878,8 @@ int BLS_24(csprng *RNG)
 
     ECP4_generator(&W);
 
-    ECP4_map2point(&Q,s);
+    FP4_rand(&rz4,RNG);
+    ECP4_map2point(&Q,&rz4);
     ECP4_cfp(&Q);
 
     if (ECP4_isinf(&Q))
@@ -1052,9 +1062,7 @@ int BLS_24(csprng *RNG)
     return 0;
 }
 
-
-
-int BLS_48(csprng *RNG)
+int bls48(csprng *RNG)
 {
     using namespace BLS48556;
     using namespace BLS48556_FP;
@@ -1067,6 +1075,8 @@ int BLS_48(csprng *RNG)
     ECP P, G;
     ECP8 Q, W;
     FP48 g, w;
+    FP rz;
+    FP8 rz8;
 
     FP16 cm;
     BIG a, b, s, r;
@@ -1075,10 +1085,8 @@ int BLS_48(csprng *RNG)
 
     ECP_generator(&G);
 
-    BIG_rcopy(r, CURVE_Order);
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS48556, RNG);
-
-    ECP_map2point(&P,s);
+    FP_rand(&rz,RNG);
+    ECP_map2point(&P,&rz);
     ECP_cfp(&P);
 
     if (ECP_isinf(&P))
@@ -1086,6 +1094,9 @@ int BLS_48(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
+    BIG_rcopy(r, CURVE_Order);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS48556, RNG);
 
     ECP_copy(&P, &G);
     PAIR_G1mul(&P, r);
@@ -1112,7 +1123,8 @@ int BLS_48(csprng *RNG)
 
     ECP8_generator(&W);
 
-    ECP8_map2point(&Q,s);
+    FP8_rand(&rz8,RNG);
+    ECP8_map2point(&Q,&rz8);
     ECP8_cfp(&Q);
 
     if (ECP8_isinf(&Q))
@@ -1300,8 +1312,7 @@ int BLS_48(csprng *RNG)
 }
 #endif
 
-
-int RSA_2048(csprng *RNG)
+int rsa2048(csprng *RNG)
 {
     using namespace RSA2048;
 
@@ -1386,17 +1397,17 @@ int main()
     for (i = 4; i < 10; i++) pr[i] = i; /*****4****/
     RAND_seed(&RNG, 10, pr);
 
-    ED_25519(&RNG);
+    ed25519(&RNG);
 #if CHUNK==32 || CHUNK==64
-    NIST_256(&RNG);
-    GOLDI_LOCKS(&RNG);
+    nist256(&RNG);
+    goldilocks(&RNG);
 #endif
-    BN_254(&RNG);
+    bn254(&RNG);
 #if CHUNK==32 || CHUNK==64
-    BLS_383(&RNG);
-    BLS_24(&RNG);
-    BLS_48(&RNG);
+    bls383(&RNG);
+    bls24(&RNG);
+    bls48(&RNG);
 #endif
-    RSA_2048(&RNG);
+    rsa2048(&RNG);
 
 }

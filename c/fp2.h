@@ -277,5 +277,10 @@ extern void FP2_YYY_sqrt(FP2_YYY *x, FP2_YYY *y);
 	@param x FP2 instance, on exit = x*sqrt(-1)
  */
 extern void FP2_YYY_times_i(FP2_YYY *x);
-
+/**	@brief Generate random FP2
+ *
+	@param x random FP2 number
+	@param rng random number generator
+ */
+extern void FP2_YYY_rand(FP2_YYY *x, csprng *rng);
 #endif

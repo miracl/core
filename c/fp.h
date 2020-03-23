@@ -290,6 +290,12 @@ extern int FP_YYY_qr(FP_YYY *x,FP_YYY *h);
  */
 extern void FP_YYY_inv(FP_YYY *x, FP_YYY *y);
 
+/**	@brief Generate random FP
+ *
+	@param x random FP number
+	@param rng random number generator
+ */
+extern void FP_YYY_rand(FP_YYY *x, csprng *rng);
 
 
 

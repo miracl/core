@@ -248,12 +248,12 @@ extern void ECP4_mul8(ECP4 *P, ECP4 *Q, XXX::BIG *b);
  */
 extern void ECP4_cfp(ECP4 *Q);
 
-/**	@brief Maps random BIG to curve point in constant time
+/**	@brief Maps random FP4 to curve point in constant time
  *
 	@param Q ECP4 instance 
-	@param x Fp derived from hash
+	@param x FP4 derived from hash
  */
-extern void ECP4_map2point(ECP4 *Q, XXX::BIG  x);
+extern void ECP4_map2point(ECP4 *Q, YYY::FP4 *x);
 
 /**	@brief Maps random BIG to curve point using hunt-and-peck
  *

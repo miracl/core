@@ -1251,14 +1251,14 @@ impl ECP {
 
 /* Constant time Map to Point */
     #[allow(non_snake_case)]
-    pub fn map2point(h: &BIG) -> ECP {
+    pub fn map2point(h: &FP) -> ECP {
         let mut P = ECP::new();
 
         if CURVETYPE == MONTGOMERY {
         // Elligator 2
             let mut X1=FP::new();
             let mut X2=FP::new();
-            let mut t =FP::new_big(h);
+            let mut t =FP::new_copy(h);
             let one=FP::new_int(1);
             let A=FP::new_int(rom::CURVE_A);
 
@@ -1293,7 +1293,7 @@ impl ECP {
 // Elligator 2 - map to Montgomery, place point, map back
             let mut X1=FP::new();
             let mut X2=FP::new();
-            let mut t=FP::new_big(h);
+            let mut t=FP::new_copy(h);
             let mut w1=FP::new();
             let mut w2=FP::new();
             let one=FP::new_int(1);
@@ -1384,7 +1384,7 @@ impl ECP {
             let one=FP::new_int(1);
             let mut B = FP::new_big(&BIG::new_ints(&rom::CURVE_B));
             let mut Y=FP::new();
-            let mut t=FP::new_big(h);
+            let mut t=FP::new_copy(h);
             let mut x=BIG::new_int(0);
             let sgn=t.sign();
             if rom::CURVE_A != 0

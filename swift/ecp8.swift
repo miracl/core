@@ -931,11 +931,11 @@ public struct ECP8 {
     }
 
 /* Constant time Map to Point */
-    static public func map2point(_ h:BIG) -> ECP8
+    static public func map2point(_ H:FP8) -> ECP8
     { // SWU method
         var W=FP8(1)
         var B=FP8(FP4(FP2(BIG(ROM.CURVE_B))))
-        let t=FP(h)
+        let T=FP8(H)
         var s=FP(-3)
         let one=FP(1)
 		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
@@ -945,19 +945,19 @@ public struct ECP8 {
             B.times_i();
         }
         B.norm()
-        let sgn=t.sign()
-        var w=s.sqrt(nil)
+        let sgn=T.sign()
+        let w=s.sqrt(nil)
         var j=FP(w); j.sub(one); j.norm(); j.div2()
 
-        w.mul(t)
-        var b=FP(t)
-        b.sqr()
-        b.add(one)
-        var Y=FP8(b)
+        var S=FP8(T)
+        S.tmul(w)
+        var Y=FP8(T)
+        Y.sqr()
+        Y.add(W)
         B.add(Y); B.norm(); B.inverse()
-        B.tmul(w)
+        B.mul(S)
 
-        var X1=FP8(B); X1.tmul(t)
+        var X1=FP8(B); X1.mul(T)
         Y.copy(FP8(j))
         var X2=FP8(X1); X2.sub(Y); X2.norm()
         X1.copy(X2); X1.neg(); X1.norm()

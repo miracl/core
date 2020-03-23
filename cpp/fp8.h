@@ -334,6 +334,12 @@ extern void FP8_cmove(FP8 *x, FP8 *y, int s);
  */
 extern void FP8_div_i(FP8 *x);
 
+/**	@brief Generate random FP8
+ *
+	@param x random FP8 number
+	@param rng random number generator
+ */
+extern void FP8_rand(FP8 *x, core::csprng *rng);
 }
 
 #endif

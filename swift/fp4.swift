@@ -41,6 +41,8 @@
 
 /* FP4 elements are of the form a+ib, where i is sqrt(-1+sqrt(-1))  */
 
+import core
+
 public struct FP4 {
     private var a:FP2
     private var b:FP2
@@ -82,6 +84,13 @@ public struct FP4 {
         a=FP2(c)
         b=FP2()
     }
+
+    public init(_ rng: inout RAND)
+    {
+        a=FP2(&rng)
+        b=FP2(&rng)
+    }
+
     /* reduce all components of this mod Modulus */
     mutating func reduce()
     {

@@ -94,8 +94,7 @@ public class TesttimeMPIN extends TestCase {
 
         ECP2 Q = ECP2.generator();
 
-
-        ECP2 W = ECP2.map2point(s);
+        ECP2 W = ECP2.map2point(new FP2(rng));
         //System.out.print("W= "+W.toString()+"\n");
         W.cfp();
         if (W.is_infinity()) {

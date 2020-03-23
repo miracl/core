@@ -1005,7 +1005,7 @@ public final class ECP {
     }
 
 /* Constant time Map to Point */
-    public static ECP map2point(BIG h)
+    public static ECP map2point(FP h)
     {
         ECP P;
         if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.MONTGOMERY)

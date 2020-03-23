@@ -35,7 +35,7 @@
 /* FP2 elements are of the form a+ib, where i is sqrt(-1) */
 
 package XXX
-
+import "github.com/miracl/core/go/core"
 //import "fmt"
 
 type FP2 struct {
@@ -97,6 +97,11 @@ func NewFP2big(c *BIG) *FP2 {
 	F := new(FP2)
 	F.a = NewFPbig(c)
 	F.b = NewFP()
+	return F
+}
+
+func NewFP2rand(rng *core.RAND) *FP2 {
+	F := NewFP2fps(NewFPrand(rng),NewFPrand(rng))
 	return F
 }
 

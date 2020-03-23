@@ -855,7 +855,7 @@ func ECP8_hap2point(h *BIG) *ECP8 {
 }
 
 /* Deterministic mapping of Fp to point on curve */
-func ECP8_map2point(h *BIG) *ECP8 {
+func ECP8_map2point(H *FP8) *ECP8 {
     // SWU method
     W:=NewFP8int(1)
 
@@ -863,7 +863,7 @@ func ECP8_map2point(h *BIG) *ECP8 {
 	b4 := NewFP4fp2(b2)
 	B := NewFP8fp4(b4)
 
-    t:=NewFPbig(h)
+    T:=NewFP8copy(H)
     s:=NewFPint(-3)
     one:=NewFPint(1)
 	if SEXTIC_TWIST == D_TYPE {
@@ -873,19 +873,19 @@ func ECP8_map2point(h *BIG) *ECP8 {
 		B.times_i()
 	}
     B.norm()
-    sgn:=t.sign()
+    sgn:=T.sign()
     w:=s.sqrt(nil)
     j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
 
-    w.mul(t)
-    b:=NewFPcopy(t)
-    b.sqr()
-    b.add(one)
-    Y:=NewFP8fp(b)
+	S := NewFP8copy(T)
+    S.tmul(w)
+    Y := NewFP8copy(T)
+    Y.sqr()
+    Y.add(W)
     B.add(Y); B.norm(); B.inverse()
-    B.tmul(w)
+    B.mul(S)
 
-    X1:=NewFP8copy(B); X1.tmul(t)
+    X1:=NewFP8copy(B); X1.mul(T)
     Y.copy(NewFP8fp(j))
     X2:=NewFP8copy(X1); X2.sub(Y); X2.norm()
     X1.copy(X2); X1.neg(); X1.norm()

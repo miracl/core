@@ -94,8 +94,7 @@ public class TesttimeMPIN192 extends TestCase {
 
         ECP4 Q = ECP4.generator();
 
-
-        ECP4 W = ECP4.map2point(s);
+        ECP4 W = ECP4.map2point(new FP4(rng));
         W.cfp();
         if (W.is_infinity()) {
             fail("HASHING FAILURE - P=O");

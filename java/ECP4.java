@@ -707,31 +707,31 @@ public final class ECP4 {
     }
 
 /* Constant time Map to Point */
-    public static ECP4 map2point(BIG h)
+    public static ECP4 map2point(FP4 H)
     {       
     // SWU method
         int sgn,ne;
         FP4 W=new FP4(1);
         FP4 B=new FP4(new FP2(new BIG(ROM.CURVE_B)));
-        FP t=new FP(h);
+        FP4 T=new FP4(H);
         FP s=new FP(-3);
         FP one=new FP(1);
         if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_i();
         if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
         B.norm();
-        sgn=t.sign();
+        sgn=T.sign();
         FP w=s.sqrt(null);
         FP j=new FP(w); j.sub(one); j.norm(); j.div2();
 
-        w.mul(t);
-        FP b=new FP(t);
-        b.sqr();
-        b.add(one);
-        FP4 Y=new FP4(b);
+        FP4 S=new FP4(T);
+        S.qmul(w);
+        FP4 Y=new FP4(T);
+        Y.sqr();
+        Y.add(W);
         B.add(Y); B.norm(); B.inverse();
-        B.qmul(w);
+        B.mul(S);
 
-        FP4 X1=new FP4(B); X1.qmul(t);
+        FP4 X1=new FP4(B); X1.mul(T);
         Y.copy(new FP4(j));
         FP4 X2=new FP4(X1); X2.sub(Y); X2.norm();
         X1.copy(X2); X1.neg(); X1.norm();

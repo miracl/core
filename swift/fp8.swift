@@ -41,6 +41,8 @@
 
 /* FP8 elements are of the form a+ib, where i is sqrt(sqrt(-1+sqrt(-1)))  */
 
+import core
+
 public struct FP8 {
     private var a:FP4
     private var b:FP4
@@ -80,6 +82,12 @@ public struct FP8 {
     {
         a=FP4(c)
         b=FP4()
+    }
+
+    public init(_ rng: inout RAND)
+    {
+        a=FP4(&rng)
+        b=FP4(&rng)
     }
 
     /* reduce all components of this mod Modulus */

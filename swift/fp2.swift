@@ -41,6 +41,7 @@
 
 /* FP2 elements are of the form a+ib, where i is sqrt(-1) */
 
+import core
 
 public struct FP2
 {
@@ -95,6 +96,12 @@ public struct FP2
     {
         a=FP(c)
         b=FP()
+    }
+
+    public init(_ rng: inout RAND)
+    {
+        a=FP(&rng)
+        b=FP(&rng)
     }
 
     /* test this=0 ? */

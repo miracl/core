@@ -849,5 +849,12 @@ int FP_YYY_sign(FP_YYY *x)
 #endif
 }
 
+void FP_YYY_rand(FP_YYY *x,csprng *rng)
+{
+    BIG_XXX w,m;
+    BIG_XXX_rcopy(m,Modulus_YYY);
+    BIG_XXX_randomnum(w,m,rng);
+    FP_YYY_nres(x,w);
+}
 
 
