@@ -1291,17 +1291,25 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_cmove(&w1,&w2,qres);
 
     FP_sqrt(&Y,&w1,NULL);
+
+
+
+//    FP_neg(&NY,&Y); FP_norm(&NY);  /* new */
+//    FP_cmove(&Y,&NY,sgn);
+
+
+
     FP_copy(&t,&X1); FP_add(&t,&t,&t); FP_add(&t,&t,&t); FP_norm(&t); // t=4*x
     
     FP_sub(&w1,&t,&KB); FP_norm(&w1);  // w1 = 4x+(a-b)
     FP_add(&w2,&t,&KB); FP_norm(&w2);  // w2 = 4x-(a-b)
-    FP_mul(&t,&w1,&Y);
+    FP_mul(&t,&w1,&Y);     // S
     FP_inv(&t,&t);         // t=1/(4x+(a-b))y    
   
-    FP_mul(&X1,&X1,&t);
+    FP_mul(&X1,&X1,&t);    // S
     FP_mul(&X1,&X1,&w1);   // x = w1.x/t
     FP_mul(&Y,&Y,&t);      
-    FP_mul(&Y,&Y,&w2);     // y=w2.y/t
+    FP_mul(&Y,&Y,&w2);     // y = w2.y/t
     FP_redc(x,&X1);
 
     ne=FP_sign(&Y)^sgn;
@@ -1330,10 +1338,10 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
             FP_add(&t,&t,&t);  // t2=2*t*t 2 is QNR
         else
             FP_neg(&t,&t);     // t2=-t^2 -1 is QNR
-        FP_norm(&t);
-        FP_add(&w,&t,&one);  
+        FP_norm(&t);           // t=Zt^2 
+        FP_add(&w,&t,&one);    // w=Zt^2+1
         FP_norm(&w);
-        FP_mul(&w,&w,&t);    // w=t2(t2+1)
+        FP_mul(&w,&w,&t);    // w=Z^2*t^4+Zt^2
         FP_mul(&A,&A,&w);     // A=Aw
         FP_inv(&A,&A);
         FP_add(&w,&w,&one); FP_norm(&w);

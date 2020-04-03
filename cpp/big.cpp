@@ -1476,8 +1476,90 @@ int XXX::BIG_jacobi(BIG a, BIG p)
     else return -1;
 }
 
+/* Set r=1/a mod p. Kaliski method - on entry a < p */
+/* From AMCL constant time implementation */
+void XXX::BIG_invmodp(BIG r,BIG a,BIG p)
+{
+    int k, p1, pu, pv, psw, pmv;
+    BIG u, v, s, w;
+
+    BIG_copy(u, p);
+    BIG_copy(v,a);
+    BIG_zero(r);
+    BIG_one(s);
+
+    // v = a2^BIGBITS mod p
+    for (k = 0; k < BIGBITS_XXX; k++)
+    {
+        BIG_sub(w, v, p);
+        BIG_norm(w);
+        BIG_cmove(v, w, (BIG_comp(v, p) > 0));
+        BIG_fshl(v, 1);
+    }
+
+    // CT Kaliski almost inverse
+    // The correction step is included
+    for (k = 0; k < 2 * BIGBITS_XXX; k++)
+    {
+        p1 = !BIG_iszilch(v);
+        
+        pu = BIG_parity(u);
+        pv = BIG_parity(v);
+        // Cases 2-4 of Kaliski
+        psw = p1 & ((!pu) | (pv & (BIG_comp(u,v)>0)));
+        // Cases 3-4 of Kaliski
+        pmv = p1 & pu & pv;
+
+        // Swap necessary for cases 2-4 of Kaliski
+        BIG_cswap(u, v, psw);
+        BIG_cswap(r, s, psw);
+
+        // Addition and subtraction for cases 3-4 of Kaliski
+        BIG_sub(w, v, u);
+        BIG_norm(w);
+        BIG_cmove(v, w, pmv);
+
+        BIG_add(w, r, s);
+        BIG_norm(w);
+        BIG_cmove(s, w, pmv);
+
+        // Subtraction for correction step
+        BIG_sub(w, r, p);
+        BIG_norm(w);
+        BIG_cmove(r, w, (!p1) & (BIG_comp(r, p) > 0));
+
+        // Shifts for all Kaliski cases and correction step
+        BIG_fshl(r, 1);
+        BIG_fshr(v, 1);
+
+        // Restore u,v,r,s to the original position
+        BIG_cswap(u, v, psw);
+        BIG_cswap(r, s, psw);        
+    }
+
+    // Last step of kaliski
+    // Moved after the correction step
+    BIG_sub(w, r, p);
+    BIG_norm(w);
+    BIG_cmove(r, w, (BIG_comp(r,p)>0));
+
+    BIG_sub(r, p, r);
+    BIG_norm(r);
+
+    // Restore inverse from Montgomery form
+    for (k = 0; k < BIGBITS_XXX; k++)
+    {
+        BIG_add(w, r, p);
+        BIG_norm(w);
+        BIG_cmove(r, w, BIG_parity(r));
+        BIG_fshr(r, 1);
+    }
+}
+
+
+
 /* Set r=1/a mod p. Binary method */
-/* SU= 240 */
+/* 
 void XXX::BIG_invmodp(BIG r, BIG a, BIG p)
 {
     BIG u, v, x1, x2, t, one;
@@ -1547,6 +1629,7 @@ void XXX::BIG_invmodp(BIG r, BIG a, BIG p)
     else
         BIG_copy(r, x2);
 }
+*/
 
 /* set x = x mod 2^m */
 void XXX::BIG_mod2m(BIG x, int m)
