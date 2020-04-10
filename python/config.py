@@ -8,7 +8,7 @@ org1text = "org"
 org2text = "apache"
 org3text = "milagro"
 
-if sys.platform.startswith("linux"):
+if sys.platform.startswith("linux") or sys.platform.startswith("darwin"):
     copytext = "cp "
     deltext = "rm "
     slashtext = "/"
