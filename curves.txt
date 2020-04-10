@@ -33,7 +33,7 @@ security and above.
 29. FP256BN - An ISO standard 256-bit BN curve, as recomended for use by FIDO - https://tools.ietf.org/pdf/draft-kasamatsu-bncurves-02.pdf
 30. FP512BN - An ISO standard 512-bit BN curve, as recomended for use by FIDO - https://tools.ietf.org/pdf/draft-kasamatsu-bncurves-02.pdf
 31. BLS12461 - A 461 bit BLS12 curve suggested by Barbulescu and Duquesne https://eprint.iacr.org/2017/334
-32. BN462 - a 462 bit BN curve suggested by Sakemi, Kobayashi and Saito https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/
+32. BN462 - A 462 bit BN curve suggested by Sakemi, Kobayashi and Saito https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/
 33. BLS24479 - An experimental (approx AES-192 bit security) BLS24 GT-Strong curve
 34. BLS48556 - An experimental (approx AES-256 bit security) BLS48 GT-Strong curve
 35. BLS48581 - A 581 bit BLS48 curve suggested by Sakemi, Kobayashi and Saito https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/

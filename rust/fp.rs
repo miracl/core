@@ -116,6 +116,8 @@ impl FP {
             self.x.copy(&FP::modulo(&mut d));
             self.xes = 2;
         } else {
+            let m = BIG::new_ints(&rom::MODULUS);
+            self.x.rmod(&m);
             self.xes = 1;
         }
     }

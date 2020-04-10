@@ -52,7 +52,10 @@ using namespace XXX;
 /* Converts from BIG integer to residue form mod Modulus */
 void YYY::FP_nres(FP *y, BIG x)
 {
+    BIG mdls;
+    BIG_rcopy(mdls, Modulus);
     BIG_copy(y->g, x);
+    BIG_mod(y->g,mdls);
     y->XES = 1;
 }
 
@@ -104,7 +107,10 @@ void YYY::FP_mod(BIG r, DBIG d)
 
 void YYY::FP_nres(FP *y, BIG x)
 {
+    BIG mdls;
+    BIG_rcopy(mdls, Modulus);
     BIG_copy(y->g, x);
+    BIG_mod(y->g,mdls);
     y->XES = 1;
 }
 

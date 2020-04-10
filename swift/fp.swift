@@ -54,7 +54,11 @@ public struct FP {
             var d=BIG.mul(x,FP.r2modp);
             x.copy(FP.mod(&d))
             xes=2
-        } else {xes=1}
+        } else {
+            let md=BIG(ROM.Modulus)
+            x.mod(md)
+            xes=1
+        }
     }
 /* convert back to regular form */
     func redc() -> BIG

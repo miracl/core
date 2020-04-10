@@ -418,6 +418,8 @@ void ZZZ::ECP_output(ECP *P)
     }
     ECP_affine(P);
 #if CURVETYPE_ZZZ!=MONTGOMERY
+    FP_reduce(&(P->x));
+    FP_reduce(&(P->y));
     FP_redc(x, &(P->x));
     FP_redc(y, &(P->y));
     printf("(");
@@ -426,6 +428,7 @@ void ZZZ::ECP_output(ECP *P)
     BIG_output(y);
     printf(")\n");
 #else
+    FP_reduce(&(P->x));
     FP_redc(x, &(P->x));
     printf("(");
     BIG_output(x);
@@ -1215,10 +1218,10 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_add(&t,&t,&one); FP_norm(&t);
     FP_inv(&t,&t);      // 1/(1+z.t^2)
     FP_mul(&X1,&t,&A);
-    FP_neg(&X1,&X1);
+    FP_neg(&X1,&X1);    // X1 = -A* [1/(1+z.t^2)]
     FP_copy(&X2,&X1);
     FP_add(&X2,&X2,&A); FP_norm(&X2);
-    FP_neg(&X2,&X2);
+    FP_neg(&X2,&X2);    // X2= -(X1+A)
 
     ECP_rhs(&t,&X2);
 
@@ -1233,6 +1236,9 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     int qres,sgn,ne;
     BIG x,y;
     FP X1,X2,t,one,A,w1,w2,B,Y,NY,KB;
+
+// Figure out the Montgomery curve parameters
+
     FP_rcopy(&B,CURVE_B);
     FP_one(&one);
     if (CURVE_A==1)
@@ -1245,12 +1251,14 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_add(&B,&B,&one);  // B=B+1
     }
     FP_norm(&A); FP_norm(&B);
-    FP_copy(&KB,&B);
+    FP_copy(&KB,&B);   // 
 
     FP_div2(&A,&A);    // (A+B)/2
     FP_div2(&B,&B);    // (B-A)/2
     FP_div2(&B,&B);    // (B-A)/4
     FP_sqr(&B,&B);     // (B-A)^2/16
+
+// Map to this Montgomery curve X^2=X^3+AX^2+BX
 
     FP_copy(&t,h); sgn=FP_sign(&t);
     FP_sqr(&t,&t);   // t^2
@@ -1272,6 +1280,8 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_add(&X2,&X2,&A); FP_norm(&X2);
     FP_neg(&X2,&X2);
 
+// Figure out RHS of Montgomery curve
+
     FP_norm(&X1);
     FP_sqr(&t,&X1); FP_mul(&w1,&t,&X1);  // t=X1^2, w1=X1^3
     FP_mul(&t,&t,&A); FP_add(&w1,&w1,&t);
@@ -1280,39 +1290,46 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_norm(&w1);
 
     FP_norm(&X2);
-    FP_sqr(&t,&X2); FP_mul(&w2,&t,&X2);  // t=X1^2, w2=X1^3
+    FP_sqr(&t,&X2); FP_mul(&w2,&t,&X2);  // t=X2^2, w2=X2^3
     FP_mul(&t,&t,&A); FP_add(&w2,&w2,&t);
     FP_mul(&t,&X2,&B);
-    FP_add(&w2,&w2,&t);   // w2=X1^3+AX1^2+BX1
+    FP_add(&w2,&w2,&t);   // w2=X2^3+AX2^2+BX2
     FP_norm(&w2);
 
     qres=FP_qr(&w2,NULL);
     FP_cmove(&X1,&X2,qres);
     FP_cmove(&w1,&w2,qres);
 
-    FP_sqrt(&Y,&w1,NULL);
+// Map back to Edwards curve - X1 is now the right X
 
+    FP_sqrt(&Y,&w1,NULL);   // This is only sign ambiguity
 
-
+//    ne=sgn;//(FP_sign(&Y));
 //    FP_neg(&NY,&Y); FP_norm(&NY);  /* new */
 //    FP_cmove(&Y,&NY,sgn);
-
-
 
     FP_copy(&t,&X1); FP_add(&t,&t,&t); FP_add(&t,&t,&t); FP_norm(&t); // t=4*x
     
     FP_sub(&w1,&t,&KB); FP_norm(&w1);  // w1 = 4x+(a-b)
     FP_add(&w2,&t,&KB); FP_norm(&w2);  // w2 = 4x-(a-b)
     FP_mul(&t,&w1,&Y);     // S
-    FP_inv(&t,&t);         // t=1/(4x+(a-b))y    
+    FP_inv(&t,&t);         // t=1/[(4x+(a-b))y]    
   
-    FP_mul(&X1,&X1,&t);    // S
-    FP_mul(&X1,&X1,&w1);   // x = w1.x/t
+    FP_mul(&X1,&X1,&t);    // x=x/[(4x+(a-b))y]
+    FP_mul(&X1,&X1,&w1);   // x = w1.x/t = x/y
     FP_mul(&Y,&Y,&t);      
-    FP_mul(&Y,&Y,&w2);     // y = w2.y/t
+    FP_mul(&Y,&Y,&w2);     // y = w2.y/t = (4x-(a-b))/(4x+(a-b)) = (xK-1)/(xK+1) K=4/(B-A)
+
+
+// idea?
+//ne=1;
+//    FP_neg(&NY,&X1); FP_norm(&NY);
+//    FP_cmove(&X1,&NY,ne);
+
     FP_redc(x,&X1);
 
-    ne=FP_sign(&Y)^sgn;
+/* Get rid of this to fix y for ed25519 */
+    ne=FP_sign(&Y)^ sgn;
     FP_neg(&NY,&Y); FP_norm(&NY);
     FP_cmove(&Y,&NY,ne);
     

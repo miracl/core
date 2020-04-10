@@ -50,7 +50,10 @@
 /* Converts from BIG integer to residue form mod Modulus */
 void FP_YYY_nres(FP_YYY *y, BIG_XXX x)
 {
+    BIG_XXX mdls;
+    BIG_XXX_rcopy(mdls, Modulus_YYY);
     BIG_XXX_copy(y->g, x);
+    BIG_XXX_mod(y->g,mdls);
     y->XES = 1;
 }
 
@@ -102,7 +105,10 @@ void FP_YYY_mod(BIG_XXX r, DBIG_XXX d)
 
 void FP_YYY_nres(FP_YYY *y, BIG_XXX x)
 {
+    BIG_XXX mdls;
+    BIG_XXX_rcopy(mdls, Modulus_YYY);
     BIG_XXX_copy(y->g, x);
+    BIG_XXX_mod(y->g,mdls);
     y->XES = 1;
 }
 

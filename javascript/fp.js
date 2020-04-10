@@ -147,6 +147,9 @@ var FP = function(ctx) {
                 this.f.copy(FP.mod(d));
                 this.XES = 2;
             } else {
+                var m = new ctx.BIG(0);
+                m.rcopy(ctx.ROM_FIELD.Modulus);
+                this.f.mod(m);
                 this.XES = 1;
             }
 

@@ -92,19 +92,20 @@ int htp_ED25519(char *mess)
     printf("u[0]= "); FP_output(&u[0]); printf("\n");
     printf("u[1]= "); FP_output(&u[1]); printf("\n");
     ECP_map2point(&P,&u[0]);
-    printf("Q[0]= "); ECP_output(&P); printf("\n");
+    printf("Q[0]= "); ECP_output(&P);
     ECP_map2point(&P1,&u[1]);
-    printf("Q[1]= "); ECP_output(&P1); printf("\n");
+    printf("Q[1]= "); ECP_output(&P1);
     ECP_add(&P,&P1);
 #else
     OCT_jstring(&DST,(char *)"edwards25519_XMD:SHA-256_ELL2_NU_TESTGEN");
     hash_to_field(MC_SHA2,HASH_TYPE_ED25519,u,&DST,&MSG,1);
     printf("u[0]= "); FP_output(&u[0]); printf("\n");
     ECP_map2point(&P,&u[0]);
+    printf("Q= "); ECP_output(&P);
 #endif
     ECP_cfp(&P);
     ECP_affine(&P);
-    printf("+P= "); ECP_output(&P); printf("\n\n");
+    printf("+P= "); ECP_output(&P); printf("\n");
 
     return res;
 }

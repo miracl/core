@@ -97,6 +97,8 @@ func (F *FP) nres() {
 		F.x.copy(mod(d))
 		F.XES = 2
 	} else {
+		md := NewBIGints(Modulus)
+		F.x.Mod(md)
 		F.XES = 1
 	}
 }

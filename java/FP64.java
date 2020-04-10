@@ -211,7 +211,11 @@ public final class FP {
             DBIG d = BIG.mul(x, new BIG(ROM.R2modp)); /*** Change ***/
             x.copy(mod(d));
             XES = 2;
-        } else XES = 1;
+        } else {
+            BIG m = new BIG(ROM.Modulus);
+            x.mod(m);
+            XES = 1;
+        }
     }
 
     /* convert back to regular form */
