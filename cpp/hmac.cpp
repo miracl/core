@@ -85,7 +85,7 @@ void core::GPhash(int hash,int hlen,octet *w,int olen,int pad,octet *p,int n,oct
             break;
         case SHA384 :
             HASH384_init(&sh384);
-            for (i=0;i<pad;i++) HASH256_process(&sh256,0);
+            for (i=0;i<pad;i++) HASH384_process(&sh384,0);
             if (p!=NULL)
                 for (i=0;i<p->len;i++) HASH384_process(&sh384,p->val[i]);
             if (n>=0)
@@ -96,7 +96,7 @@ void core::GPhash(int hash,int hlen,octet *w,int olen,int pad,octet *p,int n,oct
             break;
         case SHA512 :
             HASH512_init(&sh512);
-            for (i=0;i<pad;i++) HASH256_process(&sh256,0);
+            for (i=0;i<pad;i++) HASH512_process(&sh512,0);
             if (p!=NULL)
                 for (i=0;i<p->len;i++) HASH512_process(&sh512,p->val[i]);
             if (n>=0)
@@ -109,7 +109,7 @@ void core::GPhash(int hash,int hlen,octet *w,int olen,int pad,octet *p,int n,oct
         break;
     case MC_SHA3 :
         SHA3_init(&sh3,hlen);
-        for (i=0;i<pad;i++) HASH256_process(&sh256,0);
+        for (i=0;i<pad;i++) SHA3_process(&sh3,0);
         if (p!=NULL)
             for (i=0;p->len;i++) SHA3_process(&sh3,p->val[i]);
         if (n>=0)

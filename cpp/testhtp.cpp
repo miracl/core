@@ -53,15 +53,16 @@ using namespace ED25519_FP;
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
 static void hash_to_field(int hash,int hlen,FP *u,octet *DST,octet *M, int ctr)
 {
-    int i,j,L;
+    int i,j,L,k;
     BIG q,w;
     DBIG dx;
-    char okm[256],fd[128];
+    char okm[512],fd[256];
     octet OKM = {0,sizeof(okm),okm};
 
     BIG_rcopy(q, Modulus);
-    L=CEIL(BIG_nbits(q)+CURVE_SECURITY_ED25519,8);
-
+    k=BIG_nbits(q);
+    L=CEIL(k+CEIL(k,2),8);
+//    printf("L= %d\n",L);
     XMD_Expand(hash,hlen,&OKM,L*ctr,DST,M);
     for (i=0;i<ctr;i++)
     {
@@ -106,10 +107,8 @@ int htp_ED25519(char *mess)
     ECP_cfp(&P);
     ECP_affine(&P);
     printf("+P= "); ECP_output(&P); printf("\n");
-
     return res;
 }
-
 
 int main()
 {
