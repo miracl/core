@@ -1052,6 +1052,7 @@ public final class ECP {
             FP B=new FP(new BIG(ROM.CURVE_B));
             FP A=new FP(B);
             int sgn=t.sign();
+
             if (ROM.CURVE_A==1) {
                 A.add(one);
                 B.sub(one);
@@ -1060,15 +1061,28 @@ public final class ECP {
                 B.add(one);
             }
             A.norm(); B.norm();
-            FP KB=new FP(B);
-
+ 
             A.div2();
             B.div2();
             B.div2();
-            B.sqr();
+
+            FP K=new FP(B);
+            K.neg();
+            K.inverse();
+
+            boolean rfc=false;
+            if (K.qr(w1)==1)
+            { // RFC7748
+                A.mul(K);
+                K=K.sqrt(w1);
+                if (K.sign()==1)
+                    K.neg();
+                rfc=true;
+            } else {
+                B.sqr();
+            }
             
             t.sqr();
-
             if (CONFIG_FIELD.PM1D2 == 2) {
                 t.add(t);
             } 
@@ -1091,15 +1105,25 @@ public final class ECP {
             X1.norm();
             t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1);
             t.mul(A); w1.add(t);
-            t.copy(X1); t.mul(B);
-            w1.add(t);
+            if (!rfc)
+            {
+                t.copy(X1); t.mul(B);
+                w1.add(t);
+            } else {
+                w1.add(X1);
+            }
             w1.norm();
 
             X2.norm();
             t.copy(X2); t.sqr(); w2.copy(t); w2.mul(X2);
             t.mul(A); w2.add(t);
-            t.copy(X2); t.mul(B);
-            w2.add(t);
+            if (!rfc)
+            {
+                t.copy(X2); t.mul(B);
+                w2.add(t);
+            } else {
+                w2.add(X2);
+            }
             w2.norm();
 
             int qres=w2.qr(null);
@@ -1107,24 +1131,28 @@ public final class ECP {
             w1.cmove(w2,qres);
 
             FP Y=w1.sqrt(null);
-            t.copy(X1); t.add(t); t.add(t); t.norm();
 
-            w1.copy(t); w1.sub(KB); w1.norm();
-            w2.copy(t); w2.add(KB); w2.norm();
-            t.copy(w1); t.mul(Y);
-            t.inverse();
-
-            X1.mul(t);
-            X1.mul(w1);
-            Y.mul(t);
-            Y.mul(w2);
-
-            BIG x=X1.redc();
-
+            if (!rfc)
+            {
+                X1.mul(K);
+                Y.mul(K);
+            }    
             int ne=Y.sign()^sgn;
             FP NY=new FP(Y); NY.neg(); NY.norm();
             Y.cmove(NY,ne);
 
+            w1.copy(X1); w1.add(one); w1.norm();
+            w2.copy(X1); w2.sub(one); w2.norm();
+            t.copy(w1); t.mul(Y);
+            t.inverse();
+            X1.mul(w1);
+            X1.mul(t);
+            if (rfc)
+                X1.mul(K);
+
+            Y.mul(w2);
+            Y.mul(t);
+            BIG x=X1.redc();
             BIG y=Y.redc();
             P=new ECP(x,y);
         }

@@ -1071,15 +1071,30 @@ public struct ECP {
                 B.add(one)
             }
             A.norm(); B.norm()
-            let KB=FP(B)
 
             A.div2()
             B.div2()
             B.div2()
-            B.sqr()
+
+            var K=FP(B)
+            K.neg()
+            K.inverse()
+
+            var rfc=false
+            var hint:FP?=FP()
+
+            if K.qr(&hint)==1 { // RFC7748
+                A.mul(K)
+                K=K.sqrt(hint)
+                if K.sign()==1 {
+                    K.neg()
+				}
+                rfc=true
+            } else {
+                B.sqr()
+            }
 
             t.sqr()
-
             if CONFIG_FIELD.PM1D2 == 2 {
                 t.add(t)
             }
@@ -1102,15 +1117,23 @@ public struct ECP {
             X1.norm()
             t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1)
             t.mul(A); w1.add(t)
-            t.copy(X1); t.mul(B)
-            w1.add(t)
+            if !rfc {
+                t.copy(X1); t.mul(B)
+                w1.add(t)
+            } else {
+                w1.add(X1)
+            }
             w1.norm()
 
             X2.norm()
             t.copy(X2); t.sqr(); w2.copy(t); w2.mul(X2)
             t.mul(A); w2.add(t)
-            t.copy(X2); t.mul(B)
-            w2.add(t)
+            if !rfc {
+                t.copy(X2); t.mul(B)
+                w2.add(t)
+            } else {
+                w2.add(X2)
+            }
             w2.norm()
 
             let qres=w2.qr(&pNIL)
@@ -1118,24 +1141,27 @@ public struct ECP {
             w1.cmove(w2,qres)
 
             var Y=w1.sqrt(pNIL)
-            t.copy(X1); t.add(t); t.add(t); t.norm()
-
-            w1.copy(t); w1.sub(KB); w1.norm()
-            w2.copy(t); w2.add(KB); w2.norm()
-            t.copy(w1); t.mul(Y)
-            t.inverse()
-
-            X1.mul(t)
-            X1.mul(w1)
-            Y.mul(t)
-            Y.mul(w2)
-
-            let x=X1.redc()
-
+            if !rfc {
+                X1.mul(K)
+                Y.mul(K)
+            }
             let ne=Y.sign()^sgn
             var NY=FP(Y); NY.neg(); NY.norm()
             Y.cmove(NY,ne)
 
+            w1.copy(X1); w1.add(one); w1.norm()
+            w2.copy(X1); w2.sub(one); w2.norm()
+            t.copy(w1); t.mul(Y)
+            t.inverse()
+            X1.mul(w1)
+            X1.mul(t)
+            if rfc {
+                X1.mul(K)
+			}
+            Y.mul(w2)
+            Y.mul(t)
+
+            let x=X1.redc()
             let y=Y.redc();
             P.copy(ECP(x,y))
         }
