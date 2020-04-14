@@ -43,6 +43,7 @@
 #define MODTYPE_YYY @MT@
 #define MAXXES_YYY @SH@
 #define QNRI_YYY @QI@
+#define RIADZ_YYY @RZ@
 #define TOWER_YYY @TW@
 
 #endif

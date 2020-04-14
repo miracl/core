@@ -1386,37 +1386,45 @@ var ECP = function(ctx) {
             var one=new ctx.FP(1);
             var B = new ctx.FP(0);
             B.rcopy(ctx.ROM_CURVE.CURVE_B);
-            var A=new ctx.FP(B);
+            var A;
+            var K=new ctx.FP(0);
             var sgn=t.sign();
-            if (ctx.ROM_CURVE.CURVE_A==1) {
-                A.add(one);
-                B.sub(one);
+            var rfc=0;
+
+            if (ctx.FP.MODTYPE!=ctx.FP.GENERALISED_MERSENNE)
+            {
+                A=new ctx.FP(B);
+                if (ctx.ROM_CURVE.CURVE_A==1) {
+                    A.add(one);
+                    B.sub(one);
+                } else {
+                    A.sub(one);
+                    B.add(one);
+                }
+                A.norm(); B.norm();
+
+                A.div2();
+                B.div2();
+                B.div2();
+
+                K.copy(B);
+                K.neg();
+                K.inverse();
+
+                rfc=ctx.FP.RIADZ;
+                if (rfc==1)
+                { // RFC7748
+                    A.mul(K);
+                    K=K.sqrt(null);
+                    if (K.sign()==1)
+                        K.neg();
+                } else {
+                    B.sqr();
+                }
             } else {
-                A.sub(one);
-                B.add(one);
+                A=new ctx.FP(156326);
+                rfc=1;
             }
-            A.norm(); B.norm();
-
-            A.div2();
-            B.div2();
-            B.div2();
-
-            var K=new ctx.FP(B);
-            K.neg();
-            K.inverse();
-
-            var rfc=false;
-            if (K.qr(w1)==1)
-            { // RFC7748
-                A.mul(K);
-                K=K.sqrt(w1);
-                if (K.sign()==1)
-                    K.neg();
-                rfc=true;
-            } else {
-                B.sqr();
-            }
- 
             
             t.sqr();
             if (ctx.FP.PM1D2 == 2) {
@@ -1441,7 +1449,7 @@ var ECP = function(ctx) {
             X1.norm();
             t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1);
             t.mul(A); w1.add(t);
-            if (!rfc)
+            if (rfc==0)
             {
                 t.copy(X1); t.mul(B);
                 w1.add(t);
@@ -1453,7 +1461,7 @@ var ECP = function(ctx) {
             X2.norm();
             t.copy(X2); t.sqr(); w2.copy(t); w2.mul(X2);
             t.mul(A); w2.add(t);
-            if (!rfc)
+            if (rfc==0)
             {
                 t.copy(X2); t.mul(B);
                 w2.add(t);
@@ -1468,7 +1476,7 @@ var ECP = function(ctx) {
 
             var Y=w1.sqrt(null);
 
-            if (!rfc)
+            if (rfc==0)
             {
                 X1.mul(K);
                 Y.mul(K);
@@ -1476,18 +1484,41 @@ var ECP = function(ctx) {
             var ne=Y.sign()^sgn;
             var NY=new ctx.FP(Y); NY.neg(); NY.norm();
             Y.cmove(NY,ne);
+            if (ctx.FP.MODTYPE==ctx.FP.GENERALISED_MERSENNE)
+            {
+                t.copy(X1); t.sqr();
+                NY.copy(t); NY.add(one); NY.norm();
+                t.sub(one); t.norm();
+                w1.copy(t); w1.mul(Y);
+                w1.add(w1); w1.add(w1); w1.norm();
+                t.sqr();
+                Y.sqr(); Y.add(Y); Y.add(Y); Y.norm();
+                w2.copy(t); w2.add(Y); w2.norm();
+                w2.inverse();
+                w1.mul(w2);
 
-            w1.copy(X1); w1.add(one); w1.norm();
-            w2.copy(X1); w2.sub(one); w2.norm();
-            t.copy(w1); t.mul(Y);
-            t.inverse();
-            X1.mul(w1);
-            X1.mul(t);
-            if (rfc)
-                X1.mul(K);
+                w2.copy(Y); w2.sub(t); w2.norm();
+                w2.mul(X1);
+                t.mul(X1);
+                X1.copy(w1);
+                Y.div2();
+                w1.copy(Y); w1.mul(NY); 
+                w1.rsub(t); w1.norm();
+                w1.inverse();
+                Y.copy(w2); Y.mul(w1);
+            } else {
+                w1.copy(X1); w1.add(one); w1.norm();
+                w2.copy(X1); w2.sub(one); w2.norm();
+                t.copy(w1); t.mul(Y);
+                t.inverse();
+                X1.mul(w1);
+                X1.mul(t);
+                if (rfc==1)
+                    X1.mul(K);
 
-            Y.mul(w2);
-            Y.mul(t);
+                Y.mul(w2);
+                Y.mul(t);
+            }
             var x=X1.redc();
             var y=Y.redc();
             P.setxy(x,y);
@@ -1509,12 +1540,13 @@ var ECP = function(ctx) {
             {
                 var A=new ctx.FP(ctx.ROM_CURVE.CURVE_A);
                 t.sqr();
-                if (ctx.FP.PM1D2 == 2) {
-                    t.add(t);
-                } else {
-                    t.neg();
-                }
-                t.norm();
+             //   if (ctx.FP.PM1D2 == 2) {
+             //       t.add(t);
+             //   } else {
+             //       t.neg();
+             //   }
+             //   t.norm();
+                t.imul(ctx.FP.RIADZ);
                 var w=new ctx.FP(t); w.add(one); w.norm();
                 w.mul(t);
                 A.mul(w);

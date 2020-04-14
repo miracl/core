@@ -1061,37 +1061,44 @@ public struct ECP {
             var w2=FP()
             let one=FP(1)
             var B=FP(BIG(ROM.CURVE_B))
-            var A=FP(B)
+            var A:FP
+            var K=FP()
             let sgn=t.sign()
-            if ROM.CURVE_A==1 {
-                A.add(one)
-                B.sub(one)
+            var rfc=0
+
+            if CONFIG_FIELD.MODTYPE != CONFIG_FIELD.GENERALISED_MERSENNE {
+                A=FP(B)
+                if ROM.CURVE_A==1 {
+                    A.add(one)
+                    B.sub(one)
+                } else {
+                    A.sub(one)
+                    B.add(one)
+                }
+                A.norm(); B.norm()
+
+                A.div2()
+                B.div2()
+                B.div2()
+
+                K.copy(B)
+                K.neg()
+                K.inverse()
+
+                rfc=CONFIG_FIELD.RIADZ
+
+                if rfc==1 { // RFC7748
+                    A.mul(K)
+                    K=K.sqrt(pNIL)
+                    if K.sign()==1 {
+                        K.neg()
+				    }
+                } else {
+                    B.sqr()
+                }
             } else {
-                A.sub(one)
-                B.add(one)
-            }
-            A.norm(); B.norm()
-
-            A.div2()
-            B.div2()
-            B.div2()
-
-            var K=FP(B)
-            K.neg()
-            K.inverse()
-
-            var rfc=false
-            var hint:FP?=FP()
-
-            if K.qr(&hint)==1 { // RFC7748
-                A.mul(K)
-                K=K.sqrt(hint)
-                if K.sign()==1 {
-                    K.neg()
-				}
-                rfc=true
-            } else {
-                B.sqr()
+                rfc=1
+                A=FP(156326)
             }
 
             t.sqr()
@@ -1117,7 +1124,7 @@ public struct ECP {
             X1.norm()
             t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1)
             t.mul(A); w1.add(t)
-            if !rfc {
+            if rfc==0 {
                 t.copy(X1); t.mul(B)
                 w1.add(t)
             } else {
@@ -1128,7 +1135,7 @@ public struct ECP {
             X2.norm()
             t.copy(X2); t.sqr(); w2.copy(t); w2.mul(X2)
             t.mul(A); w2.add(t)
-            if !rfc {
+            if rfc==0 {
                 t.copy(X2); t.mul(B)
                 w2.add(t)
             } else {
@@ -1141,26 +1148,47 @@ public struct ECP {
             w1.cmove(w2,qres)
 
             var Y=w1.sqrt(pNIL)
-            if !rfc {
+            if rfc==0 {
                 X1.mul(K)
                 Y.mul(K)
             }
             let ne=Y.sign()^sgn
             var NY=FP(Y); NY.neg(); NY.norm()
             Y.cmove(NY,ne)
+            if CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE {
+                t.copy(X1); t.sqr()
+                NY.copy(t); NY.add(one); NY.norm()
+                t.sub(one); t.norm()
+                w1.copy(t); w1.mul(Y)
+                w1.add(w1); w1.add(w1); w1.norm()
+                t.sqr()
+                Y.sqr(); Y.add(Y); Y.add(Y); Y.norm()
+                w2.copy(t); w2.add(Y); w2.norm()
+                w2.inverse()
+                w1.mul(w2)
 
-            w1.copy(X1); w1.add(one); w1.norm()
-            w2.copy(X1); w2.sub(one); w2.norm()
-            t.copy(w1); t.mul(Y)
-            t.inverse()
-            X1.mul(w1)
-            X1.mul(t)
-            if rfc {
-                X1.mul(K)
-			}
-            Y.mul(w2)
-            Y.mul(t)
-
+                w2.copy(Y); w2.sub(t); w2.norm()
+                w2.mul(X1)
+                t.mul(X1)
+                X1.copy(w1)
+                Y.div2()
+                w1.copy(Y); w1.mul(NY)
+                w1.rsub(t); w1.norm()
+                w1.inverse()
+                Y.copy(w2); Y.mul(w1)
+            } else {
+                w1.copy(X1); w1.add(one); w1.norm()
+                w2.copy(X1); w2.sub(one); w2.norm()
+                t.copy(w1); t.mul(Y)
+                t.inverse()
+                X1.mul(w1)
+                X1.mul(t)
+                if rfc==1 {
+                    X1.mul(K)
+			    }
+                Y.mul(w2)
+                Y.mul(t)
+            }
             let x=X1.redc()
             let y=Y.redc();
             P.copy(ECP(x,y))
@@ -1181,12 +1209,13 @@ public struct ECP {
             {
                 var A=FP(ROM.CURVE_A)
                 t.sqr()
-                if CONFIG_FIELD.PM1D2 == 2 {
-                    t.add(t)
-                } else {
-                    t.neg()
-                }
-                t.norm()
+                //if CONFIG_FIELD.PM1D2 == 2 {
+                //    t.add(t)
+                //} else {
+                //    t.neg()
+                //}
+                //t.norm()
+                t.imul(CONFIG_FIELD.RIADZ)
                 var w=FP(t); w.add(one); w.norm()
                 w.mul(t)
                 A.mul(w)

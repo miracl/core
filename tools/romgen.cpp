@@ -24,6 +24,195 @@ Miracl precision(100, 0);
 char open, close, term, el = 0;
 int PS=25;  // start of pairing friendly curves
 
+//
+// Shanks method modified to find cube roots
+//
+
+ZZn2 shanks(ZZn2 n)
+{
+    int i,s;
+    Big q,p=get_modulus();
+    ZZn2 t,W,R,V;
+    BOOL inv;
+
+    if (pow(n,(p*p-1)/3)!=1)
+    {
+ //      cout << "Not a cubic residue" << endl;
+       return (ZZn2)0;
+    }
+
+    W=randn2();
+    while (pow(W,(p*p-1)/3)==1) W=randn2();
+ 
+    s=0;
+    q=p*p-1;
+    while (q%3==0)
+    {
+        q/=3;
+        s++;
+    }
+ 
+    if ((q+1)%3==0)
+    {
+        R=pow(n,(q+1)/3);
+        inv=FALSE;
+    }
+    else
+    {
+        R=pow(n,(q-1)/3);
+        inv=TRUE;
+    }
+
+    V=pow(W,q);
+
+    forever
+    {
+        if (!inv) t=(R*R*R)/n;
+        else      t=(R*R*R)*n;
+
+        for (i=0;;i++ )
+        {
+            if (t==1) break;
+            t=t*t*t;
+        }
+        if (i==0)
+        {
+            if (!inv) return R;
+            else      return (ZZn2)1/R;
+        }
+        R=R*pow(V,pow((Big)3,s-i-1));
+    }
+
+}
+
+int findZ(Big AA,Big AB,Big p)
+{
+    ZZn x,D,BB;
+    ZZn2 r,r3,r1,r2,CD,cu;
+    int Z,i,j,lt,gt;
+
+    modulo(p);
+    do
+    {
+        cu=pow((ZZn2)randn2(),(p*p-1)/3);
+    } while(cu==1);
+
+    ZZn A=(ZZn)AA;
+    ZZn B=(ZZn)AB;
+
+    if (AA==0 || AB==0)
+    {
+        i=0;
+        forever
+        {
+            if (i>0) i=-i;
+            else i=(-i)+1;
+            Z=i;
+            ZZn ZZ=Z;
+            ZZn GZ=ZZ*ZZ*ZZ+A*ZZ+B;
+            if (GZ==0) continue;
+            ZZn W=-(3*ZZ*ZZ+4*A)/(4*GZ);
+            if (W==0) continue;
+            if (!qr(W)) continue;
+            ZZ=-ZZ/2;
+            ZZn GNZ=ZZ*ZZ*ZZ+A*ZZ+B; 
+            if (!qr(GZ) && !qr(GNZ)) continue;
+            break;
+        }
+        return Z;
+    }
+
+    i=0;
+    forever
+    {
+        if (i>0) i=-i;
+        else i=(-i)+1;
+
+        //printf("i= %d\n",i);
+
+        Z=i;
+        if (Z==-1) continue;
+
+        if (qr((ZZn)Z)) continue;
+        x=B/(A*Z);
+        if (qnr(x*x*x+A*x+B)) continue;
+       
+
+        BB=B-Z;
+
+        D=(BB*BB)/4 + (A*A*A)/27;
+
+        CD=sqrt((ZZn2)D);  // Solution may be "complex"
+
+        r1=(ZZn2)-BB/2+CD; r2=(ZZn2)-BB/2-CD;
+
+        r1=shanks(r1);   // cube roots
+        r2=shanks(r2);
+
+        if (r1==0 || r2==0)
+        {
+            //cout << "Z= " << Z << endl;
+            //cout << "No roots exist" << endl;
+            return Z;
+            //return 0;
+        }
+
+// search for "right" r2
+
+        if (r1*r2!=-A/3)
+            r2*=cu;
+
+        if (r1*r2!=-A/3)
+            r2*=cu;   
+ 
+        r=r1+r2;
+
+//        cout << "root 1= " << r << endl;
+        if (r*r*r+A*r+BB!=0) cout << "Check failed" << endl;
+
+// try next value for r1
+
+        r1*=cu;
+
+        if (r1*r2!=-A/3)
+            r2*=cu;
+
+        if (r1*r2!=-A/3)
+            r2*=cu;
+
+ 
+        r=r1+r2;
+
+//        cout << "root 2= " << r << endl;
+        if (r*r*r+A*r+BB!=0) cout << "Check failed" << endl;
+
+        r1*=cu;
+
+        if (r1*r2!=-A/3)
+            r2*=cu;
+
+        if (r1*r2!=-A/3)
+            r2*=cu;
+
+        r=r1+r2;
+
+ //       cout << "root 3= " << r << endl;
+        if (r*r*r+A*r+BB!=0) cout << "Check failed" << endl;
+    }
+}
+
+int findR(Big AA,Big AB,Big p)
+{
+    modulo(p);
+
+    ZZn A=(ZZn)AA;
+    ZZn B=(ZZn)AB;
+
+    ZZn K=(ZZn)4/(A-B);
+    if (qr(K)) return 1;
+    return 0;
+}
+
 Big output(int chunk, int w, Big t, Big m)
 {
     Big last, y = t;
@@ -468,6 +657,7 @@ int main(int argc, char **argv)
         r = (char *)"200000000000000000000000000000000000000000071415FA9850C0BD6B87F93BAA7B2F95973E9FA805";
         mip->IOBASE = 10;
         curve_b = (char *)"11111";
+//cout << "Square= " << pow(curve_b,(p-1)/2,p) << endl;
         mip->IOBASE = 16;
         gx = (char *)"C";
         gy = (char *)"C0DC616B56502E18E1C161D007853D1B14B46C3811C7EF435B6DB5D5650CA0365DB12BEC68505FE8632";
@@ -568,6 +758,9 @@ int main(int argc, char **argv)
         p = pow((Big)2, mbits) - 5;
         cof = 4;
         curve_b = 5766;
+
+//cout << "Square= " << pow(curve_b,(p-1)/2,p) << endl;
+
         mip->IOBASE = 16;
         r=(char *)"FFFFFFFFFFFFFFFFFFFFD5EF0180FF0A99DBA8B27";
         //r=(char*)"1000000000000000000002A10FE7F00F56624574D7";
@@ -1424,6 +1617,9 @@ int main(int argc, char **argv)
     }
 
     if (curve == 0) {help(); return 0;}
+
+    if (curvetype == WEIERSTRASS) printf("Z= %d\n",findZ(curve_a,curve_b,p));
+    if (curvetype == EDWARDS) printf("Z= %d\n",findR(curve_a,curve_b,p));
 
     bytes = mbits / 8;
     if (mbits % 8 != 0) bytes++;

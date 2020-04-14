@@ -55,6 +55,7 @@ pub const POSITOWER: usize = 1;
 
 pub const MODBITS:usize = @NBT@; /* Number of bits in Modulus */
 pub const PM1D2: usize = @M8@;  /* Modulus mod 8 */
+pub const RIADZ: isize = @RZ@;  /* Z for hash-to-point */
 pub const MODTYPE:usize=@MT@;
 pub const QNRI:usize=@QI@; /* Fp2 QNR 2^i+sqrt(-1) */
 pub const TOWER:usize=@TW@; /* Tower type */

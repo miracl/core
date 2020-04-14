@@ -1298,38 +1298,44 @@ impl ECP {
             let mut w2=FP::new();
             let one=FP::new_int(1);
             let mut B = FP::new_big(&BIG::new_ints(&rom::CURVE_B));
-            let mut A=FP::new_copy(&B);
+            let mut A: FP;
+            let mut K=FP::new();
             let sgn=t.sign();
-            if rom::CURVE_A==1 {
-                A.add(&one);
-                B.sub(&one);
-            } else {
-                A.sub(&one);
-                B.add(&one);
-            }
-            A.norm(); B.norm();
+            let rfc: isize;
 
-            A.div2();
-            B.div2();
-            B.div2();
-
-            let mut K=FP::new_copy(&B);
-            K.neg();
-            K.inverse();
-
-            let mut rfc=false;
-            let mut hint = FP::new();
-            if K.qr(Some(&mut hint))==1 {
-                A.mul(&K);
-                K=K.sqrt(Some(&hint));
-                if K.sign()==1 {
-                    K.neg();
+            if fp::MODTYPE != fp::GENERALISED_MERSENNE {
+                A=FP::new_copy(&B);
+                if rom::CURVE_A==1 {
+                    A.add(&one);
+                    B.sub(&one);
+                } else {
+                    A.sub(&one);
+                    B.add(&one);
                 }
-                rfc=true;
-            } else {
-                B.sqr();
-            }
+                A.norm(); B.norm();
 
+                A.div2();
+                B.div2();
+                B.div2();
+
+                K.copy(&B);
+                K.neg();
+                K.inverse();
+
+                rfc=fp::RIADZ;
+                if rfc==1 {
+                    A.mul(&K);
+                    K=K.sqrt(None);
+                    if K.sign()==1 {
+                        K.neg();
+                    }
+                } else {
+                    B.sqr();
+                }
+            } else {
+                rfc=1;
+                A=FP::new_int(156326);
+            }
             t.sqr();
             if fp::PM1D2 == 2 {
                 t.dbl();
@@ -1352,7 +1358,7 @@ impl ECP {
             X1.norm();
             t.copy(&X1); t.sqr(); w1.copy(&t); w1.mul(&X1);
             t.mul(&A); w1.add(&t);
-            if !rfc {
+            if rfc==0 {
                 t.copy(&X1); t.mul(&B);
                 w1.add(&t);
             } else {
@@ -1363,7 +1369,7 @@ impl ECP {
             X2.norm();
             t.copy(&X2); t.sqr(); w2.copy(&t); w2.mul(&X2);
             t.mul(&A); w2.add(&t);
-            if !rfc {
+            if rfc==0 {
                 t.copy(&X2); t.mul(&B);
                 w2.add(&t);
             } else {
@@ -1376,7 +1382,7 @@ impl ECP {
             w1.cmove(&w2,qres);
 
             let mut Y=w1.sqrt(None);
-            if !rfc {
+            if rfc==0 {
                 X1.mul(&K);
                 Y.mul(&K);
             }
@@ -1384,18 +1390,40 @@ impl ECP {
             let mut NY=FP::new_copy(&Y); NY.neg(); NY.norm();
             Y.cmove(&NY,ne);
 
-            w1.copy(&X1); w1.add(&one); w1.norm();
-            w2.copy(&X1); w2.sub(&one); w2.norm();
-            t.copy(&w1); t.mul(&Y);
-            t.inverse();
-            X1.mul(&w1);
-            X1.mul(&t);
-            if rfc {
-                X1.mul(&K);
-            }
-            Y.mul(&w2);
-            Y.mul(&t);
+            if fp::MODTYPE == fp::GENERALISED_MERSENNE {
+                t.copy(&X1); t.sqr();
+                NY.copy(&t); NY.add(&one); NY.norm();
+                t.sub(&one); t.norm();
+                w1.copy(&t); w1.mul(&Y);
+                w1.dbl(); w1.dbl(); w1.norm();
+                t.sqr();
+                Y.sqr(); Y.dbl(); Y.dbl(); Y.norm();
+                w2.copy(&t); w2.add(&Y); w2.norm();
+                w2.inverse();
+                w1.mul(&w2);
 
+                w2.copy(&Y); w2.sub(&t); w2.norm();
+                w2.mul(&X1);
+                t.mul(&X1);
+                X1.copy(&w1);
+                Y.div2();
+                w1.copy(&Y); w1.mul(&NY);
+                w1.rsub(&t); w1.norm();
+                w1.inverse();
+                Y.copy(&w2); Y.mul(&w1);
+            } else {
+                w1.copy(&X1); w1.add(&one); w1.norm();
+                w2.copy(&X1); w2.sub(&one); w2.norm();
+                t.copy(&w1); t.mul(&Y);
+                t.inverse();
+                X1.mul(&w1);
+                X1.mul(&t);
+                if rfc==1 {
+                    X1.mul(&K);
+                }
+                Y.mul(&w2);
+                Y.mul(&t);
+            }
             let x=X1.redc();
             let y=Y.redc();
             P.copy(&ECP::new_bigs(&x,&y));
@@ -1417,12 +1445,13 @@ impl ECP {
             {
                 let mut A=FP::new_int(rom::CURVE_A);
                 t.sqr();
-                if fp::PM1D2 == 2 {
-                    t.dbl();
-                } else {
-                    t.neg();
-                }
-                t.norm();
+            //    if fp::PM1D2 == 2 {
+            //        t.dbl();
+            //    } else {
+            //        t.neg();
+            //    }
+            //    t.norm();
+                t.imul(fp::RIADZ);
                 let mut w=FP::new_copy(&t); w.add(&one); w.norm();
                 w.mul(&t);
                 A.mul(&w);

@@ -1049,43 +1049,51 @@ public final class ECP {
             FP w1=new FP();
             FP w2=new FP();
             FP one=new FP(1);
+            FP A;
             FP B=new FP(new BIG(ROM.CURVE_B));
-            FP A=new FP(B);
+            FP K=new FP();
+
             int sgn=t.sign();
+            int rfc=0;
 
-            if (ROM.CURVE_A==1) {
-                A.add(one);
-                B.sub(one);
-            } else {
-                A.sub(one);
-                B.add(one);
-            }
-            A.norm(); B.norm();
+            if (CONFIG_FIELD.MODTYPE != CONFIG_FIELD.GENERALISED_MERSENNE )
+            {
+                A=new FP(B);
+                if (ROM.CURVE_A==1) {
+                    A.add(one);
+                    B.sub(one);
+                } else {
+                    A.sub(one);
+                    B.add(one);
+                }
+                A.norm(); B.norm();
  
-            A.div2();
-            B.div2();
-            B.div2();
+                A.div2();
+                B.div2();
+                B.div2();
 
-            FP K=new FP(B);
-            K.neg();
-            K.inverse();
+                K.copy(B);
+                K.neg();
+                K.inverse();
 
-            boolean rfc=false;
-            if (K.qr(w1)==1)
-            { // RFC7748
-                A.mul(K);
-                K=K.sqrt(w1);
-                if (K.sign()==1)
-                    K.neg();
-                rfc=true;
+                rfc=CONFIG_FIELD.RIADZ;
+                if (rfc==1)
+                { // RFC7748
+                    A.mul(K);
+                    K=K.sqrt(null);
+                    if (K.sign()==1)
+                        K.neg();
+                } else {
+                    B.sqr();
+                }
             } else {
-                B.sqr();
+                A=new FP(156326);
+                rfc=1;
             }
-            
             t.sqr();
             if (CONFIG_FIELD.PM1D2 == 2) {
                 t.add(t);
-            } 
+            }    
             if (CONFIG_FIELD.PM1D2 == 1) {
                 t.neg();
             }
@@ -1105,7 +1113,7 @@ public final class ECP {
             X1.norm();
             t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1);
             t.mul(A); w1.add(t);
-            if (!rfc)
+            if (rfc==0)
             {
                 t.copy(X1); t.mul(B);
                 w1.add(t);
@@ -1117,7 +1125,7 @@ public final class ECP {
             X2.norm();
             t.copy(X2); t.sqr(); w2.copy(t); w2.mul(X2);
             t.mul(A); w2.add(t);
-            if (!rfc)
+            if (rfc==0)
             {
                 t.copy(X2); t.mul(B);
                 w2.add(t);
@@ -1132,7 +1140,7 @@ public final class ECP {
 
             FP Y=w1.sqrt(null);
 
-            if (!rfc)
+            if (rfc==0)
             {
                 X1.mul(K);
                 Y.mul(K);
@@ -1141,17 +1149,41 @@ public final class ECP {
             FP NY=new FP(Y); NY.neg(); NY.norm();
             Y.cmove(NY,ne);
 
-            w1.copy(X1); w1.add(one); w1.norm();
-            w2.copy(X1); w2.sub(one); w2.norm();
-            t.copy(w1); t.mul(Y);
-            t.inverse();
-            X1.mul(w1);
-            X1.mul(t);
-            if (rfc)
-                X1.mul(K);
+            if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE )
+            {
+                t.copy(X1); t.sqr();
+                NY.copy(t); NY.add(one); NY.norm();
+                t.sub(one); t.norm();
+                w1.copy(t); w1.mul(Y);
+                w1.add(w1); w1.add(w1); w1.norm();
+                t.sqr();
+                Y.sqr(); Y.add(Y); Y.add(Y); Y.norm();
+                w2.copy(t); w2.add(Y); w2.norm();
+                w2.inverse();
+                w1.mul(w2);
 
-            Y.mul(w2);
-            Y.mul(t);
+                w2.copy(Y); w2.sub(t); w2.norm();
+                w2.mul(X1);
+                t.mul(X1);
+                X1.copy(w1);
+                Y.div2();
+                w1.copy(Y); w1.mul(NY);
+                w1.rsub(t); w1.norm();
+                w1.inverse();
+                Y.copy(w2); Y.mul(w1);
+            } else {
+                w1.copy(X1); w1.add(one); w1.norm();
+                w2.copy(X1); w2.sub(one); w2.norm();
+                t.copy(w1); t.mul(Y);
+                t.inverse();
+                X1.mul(w1);
+                X1.mul(t);
+                if (rfc==1)
+                    X1.mul(K);
+
+                Y.mul(w2);
+                Y.mul(t);
+            }
             BIG x=X1.redc();
             BIG y=Y.redc();
             P=new ECP(x,y);
@@ -1172,12 +1204,13 @@ public final class ECP {
             {
                 FP A=new FP(ROM.CURVE_A);
                 t.sqr();
-                if (CONFIG_FIELD.PM1D2 == 2) {
-                    t.add(t);
-                } else {
-                    t.neg();
-                }
-                t.norm();
+                //if (CONFIG_FIELD.PM1D2 == 2) {
+                //    t.add(t);
+                //} else {
+                //    t.neg();
+                //}
+                t.imul(CONFIG_FIELD.RIADZ);
+                //t.norm();
                 FP w=new FP(t); w.add(one); w.norm();
                 w.mul(t);
                 A.mul(w);

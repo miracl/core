@@ -805,16 +805,7 @@ int bls383(csprng *RNG)
         printf("FAILURE - e(Q,O) !=1 \n");
         return 0;
     }
-    /*
-        PAIR_ate(&g,&N2,&N1);
-        PAIR_fexp(&g);
 
-        if (!FP12_isunity(&g))
-        {
-            printf("FAILURE - e(O,O) !=1 \n");
-            return 0;
-        }
-    */
     return 0;
 }
 

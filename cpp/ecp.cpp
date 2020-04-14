@@ -1236,11 +1236,14 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     int qres,sgn,ne,rfc;
     BIG x,y;
     FP X1,X2,t,one,A,w1,w2,B,Y,NY,K;
+    FP_one(&one);
 
+#if MODTYPE_YYY != GENERALISED_MERSENNE  
+// its NOT goldilocks!
 // Figure out the Montgomery curve parameters
 
     FP_rcopy(&B,CURVE_B);
-    FP_one(&one);
+
     if (CURVE_A==1)
     {
         FP_add(&A,&B,&one);  // A=B+1  // A = a+d
@@ -1259,19 +1262,20 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_neg(&K,&B);
     FP_inv(&K,&K);    // K
 
-    qres=FP_qr(&K,&t);
-    if (qres)
+    rfc=RIADZ_YYY;
+    if (rfc)
     { // RFC7748 method applies
         FP_mul(&A,&A,&K);   // = J
-        FP_sqrt(&K,&K,&t);
+        FP_sqrt(&K,&K,NULL);
         if (FP_sign(&K)==1)
             FP_neg(&K,&K);
-        rfc=1;
     } else { // generic method
         FP_sqr(&B,&B);
-        rfc=0;
     }
-
+#else
+    FP_from_int(&A,156326);
+    rfc=1;
+#endif
 // Map to this Montgomery curve X^2=X^3+AX^2+BX
 
     FP_copy(&t,h); sgn=FP_sign(&t);
@@ -1337,6 +1341,42 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_neg(&NY,&Y); FP_norm(&NY);
     FP_cmove(&Y,&NY,ne);
 
+
+#if MODTYPE_YYY == GENERALISED_MERSENNE  
+// GOLDILOCKS isogeny
+    FP_sqr(&t,&X1);  // t=u^2
+    FP_add(&NY,&t,&one); // NY=u^2+1
+    FP_norm(&NY);
+    FP_sub(&t,&t,&one); // t=u^2-1
+    FP_norm(&t);
+    FP_mul(&w1,&t,&Y);  // w1=v(u^2-1)
+    FP_add(&w1,&w1,&w1);
+    FP_add(&w1,&w1,&w1);
+    FP_norm(&w1);       // w1=4v(u^2-1)
+    FP_sqr(&t,&t);      // t=(u^2-1)^2
+    FP_sqr(&Y,&Y);      // v^2
+    FP_add(&Y,&Y,&Y);
+    FP_add(&Y,&Y,&Y);
+    FP_norm(&Y);        // 4v^2
+    FP_add(&w2,&t,&Y);  // w2=(u^2-1)^2+4v^2
+    FP_norm(&w2);
+    FP_inv(&w2,&w2);    
+    FP_mul(&w1,&w1,&w2); // w1=4v(u^2-1)/[(u^2-1)^2+4v^2]
+    
+    FP_sub(&w2,&Y,&t);   // w2=4v^2-(u^2-1)^2
+    FP_norm(&w2);
+    FP_mul(&w2,&w2,&X1); // w2=u(4v^2-(u^2-1)^2)
+    FP_mul(&t,&t,&X1);   // t=u(u^2-1)^2
+    FP_copy(&X1,&w1);    // X=4v(u^2-1)/[(u^2-1)^2+4v^2]
+    FP_div2(&Y,&Y);      // 2v^2
+    FP_mul(&w1,&Y,&NY);  // w1=2v^2(u^2+1)
+    FP_sub(&w1,&t,&w1);  // w1=u(u^2-1)^2 - 2v^2(u^2+1)
+    FP_norm(&w1);
+    FP_inv(&w1,&w1);
+    FP_mul(&Y,&w2,&w1);  // Y=u(4v^2-(u^2-1)*2) / u(u^2-1)^2 - 2v^2(u^2+1)
+
+#else
+
     FP_add(&w1,&X1,&one); FP_norm(&w1); // (s+1)
     FP_sub(&w2,&X1,&one); FP_norm(&w2); // (s-1)
     FP_mul(&t,&w1,&Y);
@@ -1349,6 +1389,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
     FP_mul(&Y,&Y,&w2);
     FP_mul(&Y,&Y,&t);
+#endif
     FP_redc(x,&X1);
     FP_redc(y,&Y);
     ECP_set(P,x,y);
@@ -1369,11 +1410,14 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     {
         FP_from_int(&A,CURVE_A);
         FP_sqr(&t,&t);
-        if (PM1D2_YYY == 2)
-            FP_add(&t,&t,&t);  // t2=2*t*t 2 is QNR
-        else
-            FP_neg(&t,&t);     // t2=-t^2 -1 is QNR
-        FP_norm(&t);           // t=Zt^2 
+    //    if (PM1D2_YYY == 2)
+    //        FP_add(&t,&t,&t);  // t2=2*t*t 2 is QNR
+    //    else
+    //        FP_neg(&t,&t);     // t2=-t^2 -1 is QNR
+
+        FP_imul(&t,&t,RIADZ_YYY);  // Z from hash-to-point draft standard
+
+    //    FP_norm(&t);           // t=Zt^2 
         FP_add(&w,&t,&one);    // w=Zt^2+1
         FP_norm(&w);
         FP_mul(&w,&w,&t);    // w=Z^2*t^4+Zt^2

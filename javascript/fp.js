@@ -79,6 +79,7 @@ var FP = function(ctx) {
 
     FP.MODBITS = ctx.config["@NBT"];
     FP.PM1D2 = ctx.config["@M8"];
+    FP.RIADZ = ctx.config["@RZ"];
     FP.MODTYPE = ctx.config["@MT"];
 	FP.QNRI = ctx.config["@QI"];
 	FP.TOWER = ctx.config["@TW"];
