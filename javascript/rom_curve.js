@@ -74,7 +74,7 @@ ROM_CURVE_ANSSI = function() {
 
         // ANSSI curve
 
-        Curve_Cof_I: 1,
+        CURVE_Cof_I: 1,
         CURVE_A: -3,
         CURVE_B_I: 0,
         CURVE_B: [0x7BB73F, 0xED967B, 0x803075, 0xE4B1A1, 0xEC0C9A, 0xC00FDF, 0x754A44, 0xD4ABA, 0x28A930, 0x3FCA54, 0xEE35],
@@ -537,7 +537,7 @@ ROM_CURVE_BLS12461 = function() {
         // BLS12461 Curve
         // Base Bits= 23
 
-        Curve_Cof_I : 0,
+        CURVE_Cof_I : 0,
         CURVE_A: 0,
         CURVE_B_I: 9,
         CURVE_B: [0x9, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -620,7 +620,7 @@ ROM_CURVE_FP256BN = function() {
         // FP256BN Curve
         // Base Bits= 24
 
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: 0,
         CURVE_B_I: 3,
         CURVE_B: [0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -706,7 +706,7 @@ ROM_CURVE_FP512BN = function() {
         // Base Bits= 23
 
 
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: 0,
         CURVE_B_I: 3,
         CURVE_B: [0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -789,7 +789,7 @@ ROM_CURVE_BN254 = function() {
 
         // Base Bits= 24
 
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: 0,
         CURVE_B_I: 2,
         CURVE_B: [0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -870,7 +870,7 @@ ROM_CURVE_BN254CX = function() {
         // BN254CX Curve
         // Base Bits= 24
 
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: 0,
         CURVE_B_I: 2,
         CURVE_B: [0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -958,7 +958,7 @@ ROM_CURVE_BRAINPOOL = function() {
         // Brainpool curve
         // Base Bits= 24
 
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: -3,
         CURVE_B_I: 0,
         CURVE_B: [0xE92B04, 0x8101FE, 0x256AE5, 0xAF2F49, 0x93EBC4, 0x76B7BF, 0x733D0B, 0xFE66A7, 0xD84EA4, 0x61C430, 0x662C],
@@ -976,7 +976,7 @@ ROM_CURVE_C25519 = function() {
 
         // C25519 Curve
 
-        Curve_Cof_I : 8,
+        CURVE_Cof_I : 8,
         CURVE_A: 486662,
         CURVE_B_I: 0,
         CURVE_B: [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -993,7 +993,7 @@ ROM_CURVE_C41417 = function() {
     var ROM_CURVE_C41417 = {
 
         // C41417 curve
-        Curve_Cof_I : 8,
+        CURVE_Cof_I : 8,
         CURVE_A: 1,
         CURVE_B_I: 3617,
         CURVE_B: [0xE21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -1052,7 +1052,7 @@ ROM_CURVE_ED25519 = function() {
 
         // ED25519 Curve
 
-        Curve_Cof_I : 8,
+        CURVE_Cof_I : 8,
         CURVE_A: -1,
         CURVE_B_I: 0,
         CURVE_B: [0x5978A3, 0x4DCA13, 0xAB75EB, 0x4141D8, 0x700A4D, 0xE89800, 0x797779, 0x8CC740, 0x6FFE73, 0x6CEE2B, 0x5203],
@@ -1071,7 +1071,7 @@ ROM_CURVE_GOLDILOCKS = function() {
     var ROM_CURVE_GOLDILOCKS = {
 
         // GOLDILOCKS curve
-        Curve_Cof_I : 4,
+        CURVE_Cof_I : 4,
         CURVE_A: 1,
         CURVE_B_I: -39081,
         CURVE_B: [0x7F6756, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7DFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FF],
@@ -1107,7 +1107,7 @@ ROM_CURVE_HIFIVE = function() {
 
         // HIFIVE curve
 
-        Curve_Cof_I : 8,
+        CURVE_Cof_I : 8,
         CURVE_A: 1,
         CURVE_B_I: 11111,
         CURVE_B: [0x2B67, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -1125,7 +1125,7 @@ ROM_CURVE_NIST256 = function() {
     var ROM_CURVE_NIST256 = {
 
         // NIST256 Curve
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: -3,
         CURVE_B_I: 0,
         CURVE_B: [0xD2604B, 0x3C3E27, 0xF63BCE, 0xCC53B0, 0x1D06B0, 0x86BC65, 0x557698, 0xB3EBBD, 0x3A93E7, 0x35D8AA, 0x5AC6],
@@ -1162,7 +1162,7 @@ ROM_CURVE_NIST384 = function() {
     var ROM_CURVE_NIST384 = {
 
         // NIST384 curve
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: -3,
         CURVE_B_I: 0,
         CURVE_B: [0x6C2AEF, 0x11DBA7, 0x74AA17, 0x51768C, 0x6398D8, 0x6B58CA, 0x5404E1, 0xA0447, 0x411203, 0x5DFD02, 0x607671, 0x4168C8, 0x56BE3F, 0x1311C0, 0xFB9F9, 0x17D3F1, 0xB331],
@@ -1180,7 +1180,7 @@ ROM_CURVE_NIST521 = function() {
 
         // NIST521 curve
 
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: -3,
         CURVE_B_I: 0,
         CURVE_B: [0x503F00, 0x3FA8D6, 0x47BD14, 0x6961A7, 0x3DF883, 0x60E6AE, 0x4EEC6F, 0x29605E, 0x137B16, 0x23D8FD, 0x5864E5, 0x84F0A, 0x1918EF, 0x771691, 0x6CC57C, 0x392DCC, 0x6EA2DA, 0x6D0A81, 0x688682, 0x50FC94, 0x18E1C9, 0x27D72C, 0x1465],
@@ -1197,7 +1197,7 @@ ROM_CURVE_NUMS256E = function() {
     var ROM_CURVE_NUMS256E = {
 
         // NUMS256E Curve
-        Curve_Cof_I : 4,
+        CURVE_Cof_I : 4,
         CURVE_A: 1,
         CURVE_B_I: -15342,
         CURVE_B: [0xFFC355, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFF],
@@ -1216,7 +1216,7 @@ ROM_CURVE_NUMS256W = function() {
     var ROM_CURVE_NUMS256W = {
 
         // NUMS256W Curve
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: -3,
         CURVE_B_I: 152961,
         CURVE_B: [0x25581, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -1235,7 +1235,7 @@ ROM_CURVE_NUMS384E = function() {
     var ROM_CURVE_NUMS384E = {
 
         // NUMS384E Curve
-        Curve_Cof_I : 4,
+        CURVE_Cof_I : 4,
         CURVE_A: 1,
         CURVE_B_I: -11556,
         CURVE_B: [0x7FD19F, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0xFFFF],
@@ -1253,7 +1253,7 @@ ROM_CURVE_NUMS384W = function() {
     var ROM_CURVE_NUMS384W = {
 
         // NUMS384W Curve
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: -3,
         CURVE_B_I: -34568,
         CURVE_B: [0x7F77BB, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0xFFFF],
@@ -1272,7 +1272,7 @@ ROM_CURVE_NUMS512E = function() {
     var ROM_CURVE_NUMS512E = {
 
         // NUMS512E Curve
-        Curve_Cof_I : 4,
+        CURVE_Cof_I : 4,
         CURVE_A: 1,
         CURVE_B_I: -78296,
         CURVE_B: [0x7ECBEF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x3F],
@@ -1290,7 +1290,7 @@ ROM_CURVE_NUMS512W = function() {
     var ROM_CURVE_NUMS512W = {
 
         // NUMS512W Curve
-        Curve_Cof_I : 1,
+        CURVE_Cof_I : 1,
         CURVE_A: -3,
         CURVE_B_I: 121243,
         CURVE_B: [0x1D99B, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],

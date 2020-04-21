@@ -355,6 +355,10 @@ public final class FP2 {
 		w2.inverse();
 		b.mul(w2);
 	
+        int sgn=this.sign();
+        FP2 nr=new FP2(this);
+        nr.neg(); nr.norm();
+        this.cmove(nr,sgn);
 	}
 
 /* output to hex string */

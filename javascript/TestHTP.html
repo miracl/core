@@ -1,0 +1,170 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>JavaScript Test Hash-To-Point</title>
+</head>
+<body>
+<h1>JavaScript Hash-To-Curve-Point Test Vectors</h1>
+<script type="text/javascript"src=./rand.js></script>
+<script type="text/javascript"src=./rom_curve.js></script>
+<script type="text/javascript"src=./rom_field.js></script>
+<script type="text/javascript"src=./uint64.js></script>
+<script type="text/javascript"src=./aes.js></script>
+<script type="text/javascript"src=./gcm.js></script>
+<script type="text/javascript"src=./big.js></script>
+<script type="text/javascript"src=./hmac.js></script>
+<script type="text/javascript"src=./hash256.js></script>
+<script type="text/javascript"src=./hash384.js></script>
+<script type="text/javascript"src=./hash512.js></script>
+<script type="text/javascript"src=./sha3.js></script>
+<script type="text/javascript"src=./fp.js></script>
+<script type="text/javascript"src=./ecp.js></script>
+<script type="text/javascript"src=./nhs.js></script>
+<script type="text/javascript"src=./ecdh.js></script>
+<script type="text/javascript"src=./hpke.js></script>
+<script type="text/javascript"src=./ctx.js></script>
+
+<script type="text/javascript"src=./fp2.js></script>
+<script type="text/javascript"src=./fp4.js></script>
+<script type="text/javascript"src=./fp12.js></script>
+<script type="text/javascript"src=./ecp2.js></script>
+<script type="text/javascript"src=./pair.js></script>
+<script type="text/javascript"src=./mpin.js></script>
+<script type="text/javascript"src=./bls.js></script>
+
+<p><a id="myLink4" href="#" onclick="location.reload(false);ED25519();">ED25519 Hash to Point</a></p>
+<p><a id="myLink5" href="#" onclick="location.reload(false);NIST256();">NIST256 Hash to Point</a></p>
+<p><a id="myLink5" href="#" onclick="location.reload(false);GOLDILOCKS();">GOLDILOCKS Hash to Point</a></p>
+<p><a id="myLink5" href="#" onclick="location.reload(false);SECP256K1();">SECP256K1 Hash to Point</a></p>
+<p><a id="myLink5" href="#" onclick="location.reload(false);BLS12381();">BLS12381 Hash to Point</a></p>
+
+<script>
+
+/* Test HTP */
+
+function ceil(a,b) {
+	return Math.floor(((a)-1)/(b)+1);
+}
+
+function asciitobytes(s) {
+    var b = [],i;
+    for (i = 0; i < s.length; i++) {
+        b.push(s.charCodeAt(i));
+    }
+    return b;
+}
+
+function hash_to_field(ctx,hash,hlen,DST,M,ctr) {
+	var u=[];
+    var q=new ctx.BIG(0);
+	q.rcopy(ctx.ROM_FIELD.Modulus);
+    var k=q.nbits();
+    var r=new ctx.BIG(0);
+	r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+    var m=r.nbits();
+    var L=ceil(k+ceil(m,2),8);
+    var OKM = ctx.HMAC.XMD_Expand(hash,hlen,L*ctr,DST,M);
+    var fd = []; 
+    for (var i=0;i<ctr;i++)
+    {
+        for (var j=0;j<L;j++)
+            fd[j]=OKM[i*L+j];
+        var dx=ctx.DBIG.fromBytes(fd);
+        var w=new ctx.FP(dx.mod(q));
+        u[i]=new ctx.FP(w);
+    }
+    return u;
+}
+
+function htp(mywindow,ctx,mess,ro,nu) {
+    mywindow.document.write("Random Access - message= "+mess+"<br>");
+    var DSTRO = asciitobytes(ro);
+    var DSTNU = asciitobytes(nu);
+    var M = asciitobytes(mess);
+
+    var u=hash_to_field(ctx,ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,DSTRO,M,2);
+    mywindow.document.write("u[0]= "+u[0].toString()+"<br>");
+    mywindow.document.write("u[1]= "+u[1].toString()+"<br>");
+
+    var P=ctx.ECP.map2point(u[0]);
+    mywindow.document.write("Q[0]= "+P.toString()+"<br>");
+    var P1=ctx.ECP.map2point(u[1]);
+    mywindow.document.write("Q[1]= "+P1.toString()+"<br>");
+    P.add(P1);
+    P.cfp();
+    P.affine();
+    mywindow.document.write("P= "+P.toString()+"<br>");
+
+    mywindow.document.write("\nNon-Uniform"+"<br>");
+    u=hash_to_field(ctx,ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,DSTNU,M,1);
+    mywindow.document.write("u[0]= "+u[0].toString()+"<br>");
+    P=ctx.ECP.map2point(u[0]);
+    mywindow.document.write("Q= "+P.toString()+"<br>");
+    P.cfp();
+    P.affine();
+    mywindow.document.write("P= "+P.toString()+"<br>");
+}
+
+// ED25519 context
+function ED25519() {
+	var ctx = new CTX('ED25519');
+	var ro="edwards25519_XMD:SHA-256_ELL2_RO_TESTGEN";
+	var nu="edwards25519_XMD:SHA-256_ELL2_NU_TESTGEN";
+	mywindow=window.open();
+    htp(mywindow,ctx,"",ro,nu);
+    htp(mywindow,ctx,"abc",ro,nu);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+}
+
+// NIST256 context
+function NIST256() {
+	var ctx = new CTX('NIST256');
+	var ro="P256_XMD:SHA-256_SSWU_RO_TESTGEN";
+	var nu="P256_XMD:SHA-256_SSWU_NU_TESTGEN";
+	mywindow=window.open();
+    htp(mywindow,ctx,"",ro,nu);
+    htp(mywindow,ctx,"abc",ro,nu);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+}
+
+// GOLDILOCKS context
+function GOLDILOCKS() {
+	var ctx = new CTX('GOLDILOCKS');
+	var ro="edwards448_XMD:SHA-512_ELL2_RO_TESTGEN";
+	var nu="edwards448_XMD:SHA-512_ELL2_NU_TESTGEN";
+	mywindow=window.open();
+    htp(mywindow,ctx,"",ro,nu);
+    htp(mywindow,ctx,"abc",ro,nu);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+}
+
+// SECP256K1 context
+function SECP256K1() {
+	var ctx = new CTX('SECP256K1');
+	var ro="secp256k1_XMD:SHA-256_SVDW_RO_TESTGEN";
+	var nu="secp256k1_XMD:SHA-256_SVDW_NU_TESTGEN";
+	mywindow=window.open();
+    htp(mywindow,ctx,"",ro,nu);
+    htp(mywindow,ctx,"abc",ro,nu);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+}
+
+// BLS12381 context
+function BLS12381() {
+	var ctx = new CTX('BLS12381');
+	var ro="BLS12381G1_XMD:SHA-256_SVDW_RO_TESTGEN";
+	var nu="BLS12381G1_XMD:SHA-256_SVDW_NU_TESTGEN";
+	mywindow=window.open();
+    htp(mywindow,ctx,"",ro,nu);
+    htp(mywindow,ctx,"abc",ro,nu);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+}
+
+</script>
+</body>
+</html>

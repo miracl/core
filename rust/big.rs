@@ -277,7 +277,7 @@ impl BIG {
     }
 
     /* Convert to Hex String */
-    pub fn tostring(&mut self) -> String {
+    pub fn tostring(&self) -> String {
         let mut s = String::new();
         let mut len = self.nbits();
 
@@ -298,6 +298,21 @@ impl BIG {
             s = s + &format!("{:X}", b.w[0] & 15);
         }
         return s;
+    }
+
+    pub fn fromstring(val: String) -> BIG {
+        let mut res = BIG::new();
+        let len = val.len();
+        let op = &val[0..1];
+        let n = u8::from_str_radix(op, 16).unwrap();
+        res.w[0] += n as Chunk;
+        for i in 1..len {
+            res.shl(4);
+            let op = &val[i..i+1];
+            let n = u8::from_str_radix(op, 16).unwrap();
+            res.w[0] += n as Chunk;
+        }
+        return res;
     }
 
     pub fn add(&mut self, r: &BIG) {

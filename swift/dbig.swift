@@ -38,7 +38,7 @@
 //  Copyright (c) 2015 Michael Scott. All rights reserved.
 //
 
-    struct DBIG{
+public struct DBIG{
     var w=[Chunk](repeating: 0,count: CONFIG_BIG.DNLEN)
     //var w=ContiguousArray<Chunk>(repeating: 0,count: CONFIG_BIG.DNLEN)
     init() {
@@ -153,7 +153,7 @@
 
 
 /* convert from byte array to DBIG */
-    static func fromBytes(_ b: [UInt8]) -> DBIG
+    static public func fromBytes(_ b: [UInt8]) -> DBIG
     {
         var m=DBIG();
 
@@ -179,7 +179,7 @@
         w[CONFIG_BIG.DNLEN-1]+=carry
     }
     /* reduces this DBIG mod a BIG, and returns the BIG */
-    mutating func mod(_ c: BIG) -> BIG
+    mutating public func mod(_ c: BIG) -> BIG
     {
         var k:Int=0
         norm()

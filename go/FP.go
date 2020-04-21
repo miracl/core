@@ -84,7 +84,7 @@ func NewFPrand(rng *core.RAND) *FP {
 	return F
 }
 
-func (F *FP) toString() string {
+func (F *FP) ToString() string {
 	F.reduce()
 	return F.redc().ToString()
 }
@@ -681,6 +681,10 @@ func (F *FP) sqrt(h *FP) *FP {
 		t.cmove(g,u)
 		b.copy(t)
 	}
+	sgn:=r.sign()
+	nr:=NewFPcopy(r)
+	nr.neg(); nr.norm()
+	r.cmove(nr,sgn)
 	return r
 }
 

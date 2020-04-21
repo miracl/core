@@ -283,7 +283,7 @@ impl DBIG {
     }
 
     /* Convert to Hex String */
-    pub fn to_string(&mut self) -> String {
+    pub fn tostring(&mut self) -> String {
         let mut s = String::new();
         let mut len = self.nbits();
 

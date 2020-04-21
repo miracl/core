@@ -463,8 +463,6 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     { // RFC7748 method applies
         FP_YYY_mul(&A,&A,&K);   // = J
         FP_YYY_sqrt(&K,&K,NULL);
-        if (FP_YYY_sign(&K)==1)
-            FP_YYY_neg(&K,&K);
     } else { // generic method
         FP_YYY_sqr(&B,&B);
     }
@@ -629,7 +627,49 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
         FP_YYY_redc(x,&X2);
 
     } else {
-        //BIG_XXX_zero(a); BIG_XXX_inc(a,-3); BIG_XXX_norm(a); FP_YYY_nres(&A,a);
+// Shallue and van de Woestijne
+        FP_YYY_from_int(&Y,RIADZ_YYY);
+        ECP_ZZZ_rhs(&A,&Y);  // A=g(Z)
+        FP_YYY_sqr(&t,&t);   
+        FP_YYY_mul(&Y,&A,&t);   // tv1=u^2*g(Z)
+        FP_YYY_add(&t,&one,&Y); FP_YYY_norm(&t); // tv2=1+tv1
+        FP_YYY_sub(&Y,&one,&Y); FP_YYY_norm(&Y); // tv1=1-tv1 
+        FP_YYY_mul(&NY,&t,&Y);
+        FP_YYY_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
+        FP_YYY_neg(&A,&A); FP_YYY_norm(&A);     // -g(Z)
+        FP_YYY_imul(&w,&A,3);    // -3*g(Z);
+        FP_YYY_sqrt(&w,&w,NULL);
+        FP_YYY_imul(&w,&w,RIADZ_YYY); // tv4=Z*sqrt(-3g(Z))
+        FP_YYY_mul(&w,&w,h);
+        FP_YYY_mul(&w,&w,&Y);
+        FP_YYY_mul(&w,&w,&NY);     // tv5=u*tv1*tv3*tv4
+        FP_YYY_from_int(&X1,RIADZ_YYY);
+        FP_YYY_copy(&X3,&X1);
+        FP_YYY_neg(&X1,&X1); FP_YYY_norm(&X1); FP_YYY_div2(&X1,&X1); // -Z/2
+        FP_YYY_copy(&X2,&X1);
+        FP_YYY_sub(&X1,&X1,&w); FP_YYY_norm(&X1);
+        FP_YYY_add(&X2,&X2,&w); FP_YYY_norm(&X2);
+        FP_YYY_add(&A,&A,&A);
+        FP_YYY_add(&A,&A,&A); 
+        FP_YYY_norm(&A);      // -4*g(Z)
+        FP_YYY_sqr(&t,&t);
+        FP_YYY_mul(&t,&t,&NY);
+        FP_YYY_sqr(&t,&t);    // (tv2^2*tv3)^2
+        FP_YYY_mul(&A,&A,&t); // -4*g(Z)*(tv2^2*tv3)^2
+        FP_YYY_from_int(&t,RIADZ_YYY*RIADZ_YYY*3);
+        FP_YYY_inv(&t,&t);
+        FP_YYY_mul(&A,&A,&t);
+        FP_YYY_add(&X3,&X3,&A); FP_YYY_norm(&X3);
+
+        ECP_ZZZ_rhs(&w,&X2);
+        FP_YYY_cmove(&X3,&X2,FP_YYY_qr(&w,NULL));
+        ECP_ZZZ_rhs(&w,&X1);
+        FP_YYY_cmove(&X3,&X1,FP_YYY_qr(&w,NULL));
+        ECP_ZZZ_rhs(&w,&X3);
+        FP_YYY_sqrt(&Y,&w,NULL);
+        FP_YYY_redc(x,&X3); 
+
+/*
         FP_YYY_from_int(&A,-3);
         FP_YYY_sqrt(&w,&A,NULL);      // w=sqrt(-3)
         FP_YYY_sub(&j,&w,&one);  FP_YYY_norm(&j);
@@ -655,7 +695,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
         FP_YYY_cmove(&X1,&X3,FP_YYY_qr(&w,NULL));
         ECP_ZZZ_rhs(&w,&X1);
         FP_YYY_sqrt(&Y,&w,NULL);
-        FP_YYY_redc(x,&X1);
+        FP_YYY_redc(x,&X1); */
     }
     ne=FP_YYY_sign(&Y)^sgn;
     FP_YYY_neg(&NY,&Y); FP_YYY_norm(&NY);

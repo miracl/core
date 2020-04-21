@@ -109,6 +109,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	os.system(copytext+"ROM_"+tc+"_64.java "+fpath+"ROM.java")
 	os.system(copytext+"TestECDH.java "+fpathTest+"TestECDH.java")	#ms
 	os.system(copytext+"TestHPKE.java "+fpathTest+"TestHPKE.java")	#ms
+	os.system(copytext+"TestHTP.java "+fpathTest+"TestHTP.java")	#ms
 	os.system(copytext+"TesttimeECDH.java "+fpathTest+"TesttimeECDH.java")	#ms
 
 	replace(fpath+"CONFIG_BIG.java","XXX",tc)
@@ -122,6 +123,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 	replace(fpath+"HPKE.java","XXX",tc)
 	replace(fpathTest+"TestECDH.java","XXX",tc)  #ms
 	replace(fpathTest+"TestHPKE.java","XXX",tc)  #ms
+	replace(fpathTest+"TestHTP.java","XXX",tc)  #ms
 	replace(fpathTest+"TesttimeECDH.java","XXX",tc)  #ms
 
 	replace(fpath+"CONFIG_BIG.java","@NB@",nb)

@@ -587,7 +587,7 @@ func (F *FF) nres(m *FF) {
 	if n == 1 {
 		d := NewDBIGscopy(F.v[0])
 		d.shl(uint(NLEN) * BASEBITS)
-		F.v[0].copy(d.mod(m.v[0]))
+		F.v[0].copy(d.Mod(m.v[0]))
 	} else {
 		d := NewFFint(2 * n)
 		d.dsucopy(F)

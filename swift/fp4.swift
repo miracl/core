@@ -691,5 +691,9 @@ public struct FP4 {
         a.copy(wa)
         b.copy(wt)
 
+        let sgn=self.sign()
+        var nr=FP4(self)
+        nr.neg(); nr.norm()
+        self.cmove(nr,sgn)  
     }
 }

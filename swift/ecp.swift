@@ -274,7 +274,7 @@ public struct ECP {
     }
 
     /* set to affine - from (x,y,z) to (x,y) */
-    mutating func affine()
+    mutating public func affine()
     {
         if is_infinity() {return}
         let one=FP(1)
@@ -391,7 +391,7 @@ public struct ECP {
 	    return ECP()
     }
     /* convert to hex string */
-    func toString() -> String
+    public func toString() -> String
     {
         var W=ECP(); W.copy(self)
         if W.is_infinity() {return "infinity"}
@@ -553,7 +553,7 @@ public struct ECP {
     }
 
     /* self+=Q */
-    mutating func add(_ Q:ECP)
+    mutating public func add(_ Q:ECP)
     {
 
         if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.WEIERSTRASS
@@ -979,7 +979,7 @@ public struct ECP {
         return S;
     }
 
-    mutating func cfp()
+    mutating public func cfp()
     {
 
 	    let cf=ROM.CURVE_Cof_I;
@@ -1090,9 +1090,6 @@ public struct ECP {
                 if rfc==1 { // RFC7748
                     A.mul(K)
                     K=K.sqrt(pNIL)
-                    if K.sign()==1 {
-                        K.neg()
-				    }
                 } else {
                     B.sqr()
                 }
@@ -1200,8 +1197,9 @@ public struct ECP {
             var X2=FP()
             var X3=FP()
             let one=FP(1)
-            var B=FP(BIG(ROM.CURVE_B))
+            let B=FP(BIG(ROM.CURVE_B))
             var Y=FP()
+            var NY=FP()
             var t=FP(h)
             var x=BIG(0)
             let sgn=t.sign();
@@ -1231,6 +1229,41 @@ public struct ECP {
                 Y.copy(rhs.sqrt(pNIL))
                 x.copy(X2.redc())
             } else {
+// Shallue and van de Woestijne
+                let Z=CONFIG_FIELD.RIADZ
+                X1.copy(FP(Z))
+                X3.copy(X1)
+                var A=RHS(X1)
+                t.sqr()
+                Y.copy(A); Y.mul(t)
+                t.copy(one); t.add(Y); t.norm()
+                Y.rsub(one); Y.norm()
+                NY.copy(t); NY.mul(Y); NY.inverse()
+                A.neg(); A.norm()
+                var w=FP(A); w.imul(3); w.copy(w.sqrt(pNIL))
+                w.imul(Z)
+                w.mul(h); w.mul(Y); w.mul(NY)
+
+                X1.neg(); X1.norm(); X1.div2()
+                X2.copy(X1)
+                X1.sub(w); X1.norm()
+                X2.add(w); X2.norm()
+                A.add(A); A.add(A); A.norm()
+                t.sqr(); t.mul(NY); t.sqr()
+                A.mul(t)
+                t.copy(FP(Z*Z*3))
+                t.inverse()
+                A.mul(t)
+                X3.add(A); X3.norm()
+
+                var rhs=ECP.RHS(X2)
+                X3.cmove(X2,rhs.qr(&pNIL))
+                rhs.copy(ECP.RHS(X1))
+                X3.cmove(X1,rhs.qr(&pNIL))
+                rhs.copy(ECP.RHS(X3))
+                Y.copy(rhs.sqrt(pNIL))
+                x.copy(X3.redc())
+/*
                 var A=FP(-3)
                 var w=A.sqrt(pNIL)
                 var j=FP(w); j.sub(one); j.norm(); j.div2()
@@ -1250,10 +1283,10 @@ public struct ECP {
                 X1.cmove(X3,rhs.qr(&pNIL))
                 rhs.copy(ECP.RHS(X1));
                 Y.copy(rhs.sqrt(pNIL))
-                x.copy(X1.redc())
+                x.copy(X1.redc()) */
             }
             let ne=Y.sign()^sgn
-            var NY=FP(Y); NY.neg(); NY.norm()
+            NY.copy(Y); NY.neg(); NY.norm()
             Y.cmove(NY,ne)
             let y=Y.redc();
             P.copy(ECP(x,y))

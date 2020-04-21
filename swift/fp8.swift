@@ -721,5 +721,10 @@ public struct FP8 {
         wt.mul(ws)
         a.copy(wa)
         b.copy(wt)
+
+        let sgn=self.sign()
+        var nr=FP8(self)
+        nr.neg(); nr.norm()
+        self.cmove(nr,sgn)  
     }
 }

@@ -448,6 +448,8 @@ int YYY::FP2_qr(FP2 *x)
 void YYY::FP2_sqrt(FP2 *w, FP2 *u)
 {
     FP w1, w2, w3;
+    FP2 nw;
+    int sgn;
     FP2_copy(w, u);
     if (FP2_iszilch(w)) return;
 
@@ -474,6 +476,10 @@ void YYY::FP2_sqrt(FP2 *w, FP2 *u)
     FP_inv(&w2, &w2);
 
     FP_mul(&(w->b), &(w->b), &w2);
+
+    sgn=FP2_sign(w);
+    FP2_neg(&nw,w); FP2_norm(&nw);
+    FP2_cmove(w,&nw,sgn);
 }
 
 void YYY::FP2_rand(FP2 *x,csprng *rng)

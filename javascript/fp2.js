@@ -345,6 +345,11 @@ var FP2 = function(ctx) {
             w2.add(w2); w2.norm();
             w2.inverse();
             this.b.mul(w2);
+
+            var sgn=this.sign();
+            var nr=new FP2(this);
+            nr.neg(); nr.norm();
+            this.cmove(nr,sgn);
         },
 
         /* convert this to hex string */

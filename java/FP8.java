@@ -699,5 +699,10 @@ public final class FP8 {
 		wt.mul(ws);
 		a.copy(wa);
 		b.copy(wt);
+
+        int sgn=this.sign();
+        FP8 nr=new FP8(this);
+        nr.neg(); nr.norm();
+        this.cmove(nr,sgn);
 	}
 }

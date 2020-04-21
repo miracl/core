@@ -672,6 +672,11 @@ var FP4 = function(ctx) {
             wt.mul(ws);
             this.a.copy(wa);
             this.b.copy(wt);
+
+            var sgn=this.sign();
+            var nr=new FP4(this);
+            nr.neg(); nr.norm();
+            this.cmove(nr,sgn);
         }
 
     };

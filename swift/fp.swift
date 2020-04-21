@@ -166,7 +166,7 @@ public struct FP {
         xes=1
         nres()
     }
-    init(_ a: BIG)
+    public init(_ a: BIG)
     {
         x=BIG(a)
         xes=1
@@ -186,7 +186,7 @@ public struct FP {
     }
 
     /* convert to string */
-    func toString() -> String
+    public func toString() -> String
     {
         let s=redc().toString()
         return s
@@ -697,7 +697,11 @@ public struct FP {
             b.copy(t)
         }
 
-        //print("root= "+r.toString()+"\n")
+        let sgn=r.sign()
+        var nr=FP(r)
+        nr.neg(); nr.norm()
+        r.cmove(nr,sgn)
+
         return r
 
     }

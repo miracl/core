@@ -1326,9 +1326,6 @@ impl ECP {
                 if rfc==1 {
                     A.mul(&K);
                     K=K.sqrt(None);
-                    if K.sign()==1 {
-                        K.neg();
-                    }
                 } else {
                     B.sqr();
                 }
@@ -1436,8 +1433,9 @@ impl ECP {
             let mut X2=FP::new();
             let mut X3=FP::new();
             let one=FP::new_int(1);
-            let mut B = FP::new_big(&BIG::new_ints(&rom::CURVE_B));
+            let B = FP::new_big(&BIG::new_ints(&rom::CURVE_B));
             let mut Y=FP::new();
+            let mut NY=FP::new();
             let mut t=FP::new_copy(h);
             let mut x=BIG::new_int(0);
             let sgn=t.sign();
@@ -1467,6 +1465,41 @@ impl ECP {
                 Y.copy(&rhs.sqrt(None));
                 x.copy(&X2.redc());
             } else {
+// Shallue and van de Woestijne
+                let Z=fp::RIADZ;
+                X1.copy(&FP::new_int(Z));
+                X3.copy(&X1);
+                let mut A=ECP::rhs(&X1);
+                t.sqr();
+                Y.copy(&A); Y.mul(&t);
+                t.copy(&one); t.add(&Y); t.norm();
+                Y.rsub(&one); Y.norm();
+                NY.copy(&t); NY.mul(&Y); NY.inverse();
+                A.neg(); A.norm();
+                let mut w=FP::new_copy(&A); w.imul(3); X2.copy(&w.sqrt(None)); w.copy(&X2);
+                w.imul(Z);
+                w.mul(&h); w.mul(&Y); w.mul(&NY);
+
+                X1.neg(); X1.norm(); X1.div2();
+                X2.copy(&X1);
+                X1.sub(&w); X1.norm();
+                X2.add(&w); X2.norm();
+                A.dbl(); A.dbl(); A.norm();
+                t.sqr(); t.mul(&NY); t.sqr();
+                A.mul(&t);
+                t.copy(&FP::new_int(Z*Z*3));
+                t.inverse();
+                A.mul(&t);
+                X3.add(&A); X3.norm();
+
+                let mut rhs=ECP::rhs(&X2);
+                X3.cmove(&X2,rhs.qr(None));
+                rhs.copy(&ECP::rhs(&X1));
+                X3.cmove(&X1,rhs.qr(None));
+                rhs.copy(&ECP::rhs(&X3));
+                Y.copy(&rhs.sqrt(None));
+                x.copy(&X3.redc());
+/*
                 let mut A=FP::new_int(-3);
                 let mut w=A.sqrt(None);
                 let mut j=FP::new_copy(&w); j.sub(&one); j.norm(); j.div2();
@@ -1486,10 +1519,10 @@ impl ECP {
                 X1.cmove(&X3,rhs.qr(None));
                 rhs.copy(&ECP::rhs(&X1));
                 Y.copy(&rhs.sqrt(None));
-                x.copy(&X1.redc());
+                x.copy(&X1.redc()); */
             }
             let ne=Y.sign()^sgn;
-            let mut NY=FP::new_copy(&Y); NY.neg(); NY.norm();
+            NY.copy(&Y); NY.neg(); NY.norm();
             Y.cmove(&NY,ne);
 
             let y=Y.redc();

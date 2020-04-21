@@ -847,6 +847,10 @@ void YYY::FP_sqrt(FP *r, FP *a, FP* h)
         FP_cmove(&t,&g,u);
         FP_copy(&b,&t);
     }
+// always return +ve square root
+    k=FP_sign(r);
+    FP_neg(&v,r); FP_norm(&v);
+    FP_cmove(r,&v,k);
 }
 
 /* SU=8 */

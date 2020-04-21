@@ -801,7 +801,7 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 func ECP2_mapit(h []byte) *ECP2 {
 	q := NewBIGints(Modulus)
 	dx:=DBIG_fromBytes(h);
-    x:=dx.mod(q);
+    x:=dx.Mod(q);
 		
 	Q:=ECP2_hap2point(x)
 	Q.Cfp()

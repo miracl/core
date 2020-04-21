@@ -722,4 +722,8 @@ func (F *FP8) sqrt()  {
 	F.a.copy(a)
 	F.b.copy(t)
 
+	sgn:=F.sign()
+	nr:=NewFP8copy(F)
+	nr.neg(); nr.norm()
+	F.cmove(nr,sgn)
 }

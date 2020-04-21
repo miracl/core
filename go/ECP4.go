@@ -780,7 +780,7 @@ func ECP4_map2point(H *FP4) *ECP4 {
 func ECP4_mapit(h []byte) *ECP4 {
 	q := NewBIGints(Modulus)
 	dx:=DBIG_fromBytes(h);
-    x:=dx.mod(q);
+    x:=dx.Mod(q);
 		
 	Q:=ECP4_hap2point(x)
 	Q.Cfp()

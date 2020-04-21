@@ -251,7 +251,7 @@ public struct BIG{
         for i in 0 ..< m {w[i]=0}
     }
 /* return number of bits */
-    func nbits() -> Int
+    public func nbits() -> Int
     {
         var k=(CONFIG_BIG.NLEN-1)
         var t=BIG(self)

@@ -50,6 +50,7 @@ fn ed25519(mut rng: &mut RAND) {
     use core::ed25519::fp;
     use core::ed25519::rom;
     let mut fail = false;
+
     println!("\nTesting/Timing ed25519 ECC");
 
     if ecp::CURVETYPE == ecp::WEIERSTRASS {
@@ -464,6 +465,7 @@ fn bls12383(mut rng: &mut RAND) {
     use core::bls12383::fp2;
     use core::bls12383::pair;
     use core::bls12383::rom;
+
     let mut fail = false;
     println!("\nTesting/Timing bls12383 Pairings");
 

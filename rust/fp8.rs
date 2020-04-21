@@ -341,7 +341,7 @@ impl FP8 {
     }
 
     /* output to hex string */
-    pub fn tostring(&mut self) -> String {
+    pub fn tostring(&self) -> String {
         return format!("[{},{}]", self.a.tostring(), self.b.tostring());
     }
 
@@ -742,5 +742,10 @@ impl FP8 {
         t.mul(&s);
         self.a.copy(&a);
         self.b.copy(&t);
+
+        let sgn=self.sign();
+        let mut nr=FP8::new_copy(&self);
+        nr.neg(); nr.norm();
+        self.cmove(&nr,sgn); 
     }
 }

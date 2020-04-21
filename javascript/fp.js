@@ -649,7 +649,10 @@ var FP = function(ctx) {
                 t.cmove(g,u);
                 b.copy(t);
             }
-
+            var sgn=r.sign();
+            var nr=new FP(r);
+            nr.neg(); nr.norm();
+            r.cmove(nr,sgn);
             return r;
         }
 

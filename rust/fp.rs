@@ -124,7 +124,7 @@ impl FP {
     }
 
     /* convert back to regular form */
-    pub fn redc(&mut self) -> BIG {
+    pub fn redc(&self) -> BIG {
         if MODTYPE != PSEUDO_MERSENNE && MODTYPE != GENERALISED_MERSENNE {
             let mut d = DBIG::new_scopy(&(self.x));
             return FP::modulo(&mut d);
@@ -208,7 +208,7 @@ impl FP {
     }
 
     /* convert to string */
-    pub fn tostring(&mut self) -> String {
+    pub fn tostring(&self) -> String {
         let s = self.redc().tostring();
         return s;
     }
@@ -781,6 +781,10 @@ impl FP {
             t.cmove(&g,u);
             b.copy(&t);
         }
+        let sgn=r.sign();
+        let mut nr=FP::new_copy(&r);
+        nr.neg(); nr.norm();
+        r.cmove(&nr,sgn);
         return r;
     }
 

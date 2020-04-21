@@ -687,6 +687,11 @@ var FP8 = function(ctx) {
 
             this.a.copy(wa);
             this.b.copy(wt);
+
+            var sgn=this.sign();
+            var nr=new FP8(this);
+            nr.neg(); nr.norm();
+            this.cmove(nr,sgn);
         }
 
     };

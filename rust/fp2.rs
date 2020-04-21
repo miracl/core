@@ -378,10 +378,15 @@ impl FP2 {
         w1.dbl(); w1.norm();
         w1.inverse();
         self.b.mul(&w1);
+
+        let sgn=self.sign();
+        let mut nr=FP2::new_copy(&self);
+        nr.neg(); nr.norm();
+        self.cmove(&nr,sgn);   
     }
 
     /* output to hex string */
-    pub fn tostring(&mut self) -> String {
+    pub fn tostring(&self) -> String {
         return format!("[{},{}]", self.a.tostring(), self.b.tostring());
     }
 

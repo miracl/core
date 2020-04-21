@@ -674,6 +674,10 @@ public final class FP4 {
 		a.copy(wa);
 		b.copy(wt);
 
+        int sgn=this.sign();
+        FP4 nr=new FP4(this);
+        nr.neg(); nr.norm();
+        this.cmove(nr,sgn);
 	}
 
 /* this*=s where s is FP */

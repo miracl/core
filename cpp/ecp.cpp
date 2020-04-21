@@ -1267,8 +1267,6 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     { // RFC7748 method applies
         FP_mul(&A,&A,&K);   // = J
         FP_sqrt(&K,&K,NULL);
-        if (FP_sign(&K)==1)
-            FP_neg(&K,&K);
     } else { // generic method
         FP_sqr(&B,&B);
     }
@@ -1398,7 +1396,6 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 #endif
 
 #if CURVETYPE_ZZZ==WEIERSTRASS
-// SWU method. 
     int sgn,ne;
     BIG a,x,y;
     FP X1,X2,X3,t,w,one,A,B,Y,NY,j;
@@ -1408,6 +1405,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     sgn=FP_sign(&t);
     if (CURVE_A!=0)
     {
+// SWU method.
         FP_from_int(&A,CURVE_A);
         FP_sqr(&t,&t);
     //    if (PM1D2_YYY == 2)
@@ -1436,6 +1434,48 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_redc(x,&X2);
 
     } else {
+// Shallue and van de Woestijne
+        FP_from_int(&Y,RIADZ_YYY);
+        ECP_rhs(&A,&Y);  // A=g(Z)
+        FP_sqr(&t,&t);   
+        FP_mul(&Y,&A,&t);   // tv1=u^2*g(Z)
+        FP_add(&t,&one,&Y); FP_norm(&t); // tv2=1+tv1
+        FP_sub(&Y,&one,&Y); FP_norm(&Y); // tv1=1-tv1 
+        FP_mul(&NY,&t,&Y);
+        FP_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
+        FP_neg(&A,&A); FP_norm(&A);     // -g(Z)
+        FP_imul(&w,&A,3);    // -3*g(Z);
+        FP_sqrt(&w,&w,NULL);
+        FP_imul(&w,&w,RIADZ_YYY); // tv4=Z*sqrt(-3g(Z))
+        FP_mul(&w,&w,h);
+        FP_mul(&w,&w,&Y);
+        FP_mul(&w,&w,&NY);     // tv5=u*tv1*tv3*tv4
+        FP_from_int(&X1,RIADZ_YYY);
+        FP_copy(&X3,&X1);
+        FP_neg(&X1,&X1); FP_norm(&X1); FP_div2(&X1,&X1); // -Z/2
+        FP_copy(&X2,&X1);
+        FP_sub(&X1,&X1,&w); FP_norm(&X1);
+        FP_add(&X2,&X2,&w); FP_norm(&X2);
+        FP_add(&A,&A,&A);
+        FP_add(&A,&A,&A); 
+        FP_norm(&A);      // -4*g(Z)
+        FP_sqr(&t,&t);
+        FP_mul(&t,&t,&NY);
+        FP_sqr(&t,&t);    // (tv2^2*tv3)^2
+        FP_mul(&A,&A,&t); // -4*g(Z)*(tv2^2*tv3)^2
+        FP_from_int(&t,RIADZ_YYY*RIADZ_YYY*3);
+        FP_inv(&t,&t);
+        FP_mul(&A,&A,&t);
+        FP_add(&X3,&X3,&A); FP_norm(&X3);
+
+        ECP_rhs(&w,&X2);
+        FP_cmove(&X3,&X2,FP_qr(&w,NULL));
+        ECP_rhs(&w,&X1);
+        FP_cmove(&X3,&X1,FP_qr(&w,NULL));
+        ECP_rhs(&w,&X3);
+        FP_sqrt(&Y,&w,NULL);
+        FP_redc(x,&X3); 
+/*
         FP_from_int(&A,-3);
         FP_sqrt(&w,&A,NULL);      // w=sqrt(-3)
         FP_sub(&j,&w,&one);  FP_norm(&j);
@@ -1461,7 +1501,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_cmove(&X1,&X3,FP_qr(&w,NULL));
         ECP_rhs(&w,&X1);
         FP_sqrt(&Y,&w,NULL);
-        FP_redc(x,&X1);
+        FP_redc(x,&X1); */
     }
     ne=FP_sign(&Y)^sgn;
     FP_neg(&NY,&Y); FP_norm(&NY);

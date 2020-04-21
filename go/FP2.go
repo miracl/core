@@ -360,16 +360,21 @@ func (F *FP2) sqrt() {
 	w2.add(w2); w2.norm()
 	w2.inverse()
 	F.b.mul(w2)
+
+	sgn:=F.sign()
+	nr:=NewFP2copy(F)
+	nr.neg(); nr.norm()
+	F.cmove(nr,sgn)
 }
 
 /* output to hex string */
 func (F *FP2) ToString() string {
-	return ("[" + F.a.toString() + "," + F.b.toString() + "]")
+	return ("[" + F.a.ToString() + "," + F.b.ToString() + "]")
 }
 
 /* output to hex string */
 func (F *FP2) toString() string {
-	return ("[" + F.a.toString() + "," + F.b.toString() + "]")
+	return ("[" + F.a.ToString() + "," + F.b.ToString() + "]")
 }
 
 /* this=1/this */

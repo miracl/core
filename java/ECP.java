@@ -1081,8 +1081,6 @@ public final class ECP {
                 { // RFC7748
                     A.mul(K);
                     K=K.sqrt(null);
-                    if (K.sign()==1)
-                        K.neg();
                 } else {
                     B.sqr();
                 }
@@ -1190,18 +1188,19 @@ public final class ECP {
         }
 
         if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.WEIERSTRASS)
-        { // swu method
+        { 
             FP X1=new FP();
             FP X2=new FP();
             FP X3=new FP();
             FP one=new FP(1);
             FP B=new FP(new BIG(ROM.CURVE_B));
             FP Y=new FP();
+            FP NY=new FP();
             FP t=new FP(h);
             BIG x=new BIG(0);
             int sgn=t.sign();
             if (ROM.CURVE_A!=0)
-            {
+            { // SWU Method
                 FP A=new FP(ROM.CURVE_A);
                 t.sqr();
                 //if (CONFIG_FIELD.PM1D2 == 2) {
@@ -1226,6 +1225,42 @@ public final class ECP {
                 Y.copy(rhs.sqrt(null));
                 x.copy(X2.redc());
             } else {
+// Shallue and van de Woestijne
+                int Z=CONFIG_FIELD.RIADZ;
+                X1.copy(new FP(Z));
+                X3.copy(X1);
+                FP A=RHS(X1);
+                t.sqr();
+                Y.copy(A); Y.mul(t);
+                t.copy(one); t.add(Y); t.norm();
+                Y.rsub(one); Y.norm();
+                NY.copy(t); NY.mul(Y); NY.inverse();
+                A.neg(); A.norm(); 
+                FP w=new FP(A); w.imul(3); w.copy(w.sqrt(null));
+                w.imul(Z);
+                w.mul(h); w.mul(Y); w.mul(NY);
+
+                X1.neg(); X1.norm(); X1.div2();
+                X2.copy(X1);
+                X1.sub(w); X1.norm();
+                X2.add(w); X2.norm();
+                A.add(A); A.add(A); A.norm();
+                t.sqr(); t.mul(NY); t.sqr();
+                A.mul(t);
+                t.copy(new FP(Z*Z*3));
+                t.inverse();
+                A.mul(t);
+                X3.add(A); X3.norm();
+
+                FP rhs=RHS(X2);
+                X3.cmove(X2,rhs.qr(null));
+                rhs.copy(RHS(X1));
+                X3.cmove(X1,rhs.qr(null));
+                rhs.copy(RHS(X3));
+                Y.copy(rhs.sqrt(null));
+                x.copy(X3.redc());
+
+/*
                 FP A=new FP(-3);
                 FP w=A.sqrt(null);
                 FP j=new FP(w); j.sub(one); j.norm(); j.div2();
@@ -1245,10 +1280,10 @@ public final class ECP {
                 X1.cmove(X3,rhs.qr(null));
                 rhs.copy(RHS(X1));
                 Y.copy(rhs.sqrt(null));
-                x.copy(X1.redc());
+                x.copy(X1.redc()); */
             }
             int ne=Y.sign()^sgn;
-            FP NY=new FP(Y); NY.neg(); NY.norm();
+            NY.copy(Y); NY.neg(); NY.norm();
             Y.cmove(NY,ne);
 
             BIG y=Y.redc();

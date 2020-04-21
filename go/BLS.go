@@ -65,7 +65,7 @@ func hash_to_field(hash int,hlen int ,DST []byte,M []byte,ctr int) []*FP {
 		for j:=0;j<L;j++ {
 			fd[j]=OKM[i*L+j];
 		}
-		u = append(u,NewFPbig(DBIG_fromBytes(fd).mod(q)))
+		u = append(u,NewFPbig(DBIG_fromBytes(fd).Mod(q)))
 	}
 	return u
 }
@@ -122,7 +122,7 @@ func KeyPairGenerate(IKM []byte, S []byte, W []byte) int {
 	OKM := core.HKDF_Expand(core.MC_SHA2,HASH_TYPE,L,PRK,INFO)
 
 	dx:= DBIG_fromBytes(OKM[:])
-	s:= dx.mod(r)
+	s:= dx.Mod(r)
 
 	s.ToBytes(S)
 	G = G2mul(G, s)

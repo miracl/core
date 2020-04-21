@@ -179,7 +179,7 @@ func (r *DBIG) shr(k uint) {
 }
 
 /* reduces this DBIG mod a BIG, and returns the BIG */
-func (r *DBIG) mod(c *BIG) *BIG {
+func (r *DBIG) Mod(c *BIG) *BIG {
 	r.norm()
 	m := NewDBIGscopy(c)
 	dr := NewDBIG()

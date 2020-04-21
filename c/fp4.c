@@ -639,6 +639,8 @@ int FP4_YYY_qr(FP4_YYY *x)
 void FP4_YYY_sqrt(FP4_YYY *r, FP4_YYY* x)
 {
     FP2_YYY a, b, s, t;
+    FP4_YYY nr;
+    int sgn;
 
     FP4_YYY_copy(r, x);
     if (FP4_YYY_iszilch(x)) return;
@@ -674,6 +676,10 @@ void FP4_YYY_sqrt(FP4_YYY *r, FP4_YYY* x)
 
     FP2_YYY_mul(&t, &t, &s);
     FP4_YYY_from_FP2s(r, &a, &t);
+
+    sgn=FP4_YYY_sign(r);
+    FP4_YYY_neg(&nr,r); FP4_YYY_norm(&nr);
+    FP4_YYY_cmove(r,&nr,sgn);
 }
 
 void FP4_YYY_div_i(FP4_YYY *f)

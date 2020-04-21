@@ -379,6 +379,10 @@ func (r *BIG) nbits() int {
 	return bts
 }
 
+func (r *BIG) Nbits() int {
+	return r.nbits()
+}
+
 /* Convert to Hex String */
 func (r *BIG) ToString() string {
 	s := ""
@@ -737,7 +741,7 @@ func Randomnum(q *BIG, rng *core.RAND) *BIG {
 		j++
 		j &= 7
 	}
-	m := d.mod(q)
+	m := d.Mod(q)
 	return m
 }
 
@@ -756,7 +760,7 @@ func Modmul(a1, b1, m *BIG) *BIG {
 	a.Mod(m)
 	b.Mod(m)
 	d := mul(a, b)
-	return d.mod(m)
+	return d.Mod(m)
 }
 
 /* return a^2 mod m */
@@ -764,7 +768,7 @@ func Modsqr(a1, m *BIG) *BIG {
 	a := NewBIGcopy(a1)
 	a.Mod(m)
 	d := sqr(a)
-	return d.mod(m)
+	return d.Mod(m)
 }
 
 /* return -a mod m */

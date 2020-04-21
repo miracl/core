@@ -365,7 +365,11 @@ public struct FP2
         w2.add(w2); w2.norm()
         w2.inverse()
         b.mul(w2)
-     
+   
+        let sgn=self.sign()
+        var nr=FP2(self)
+        nr.neg(); nr.norm()
+        self.cmove(nr,sgn)    
     }
     /* output to hex string */
     func toString() -> String

@@ -26,6 +26,7 @@ AMCL but not develop it further.
 
 MIRACL Core features:-
 
+- NEW example program to track test vectors from https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
 - New curves (SM2, BN462, BLS48581, C13318, JUBJUB, X448, SECP160R1, C1174)
 - Support for precomputation for pairings (see BLS API)
 - Performance and security improvements
@@ -37,6 +38,7 @@ MIRACL Core features:-
 - Demonstrated support for low-powered IoT processor nodes (ARM Cortex-M0/M4, MIPS32, RISC-V, ESP32)
 - Emerging-standards-compliant implementation of BLS signature
 - Emerging-standards-compliant implementation of HPKE (Hybrid Public Key Encryption) 
+- Emerging-standards-compliant implementation of deterministic Hash-To-Curve
 - An updated manual
 
 Read the user manual MIRACL_Core.pdf for more details

@@ -93,6 +93,18 @@ Alternatively building and testing can be combined via
 
 where XX can be 16, 32 or 64
 
+-------------------------------------------------
+
+NEW: support for emerging Hash To Curve standard.
+See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
+
+
+Create 32 or 64-bit library selecting curves 1, 3, 7, 17 and 28 (ED25519, NIST256, GOLDILOCKS, SECP256K1 and BLS12381)
+
+    gcc -O2 -std=c99 testhtp.c core.a -o testhtp
+
+Test program runs through test vectors from the draft standard.
+
 -----------------------------------------
 
 NEW: Experimental support for emerging HPKE (Hybrid Public Key Encryption) standard.

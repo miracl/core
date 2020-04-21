@@ -654,6 +654,11 @@ public final class FP {
             b.copy(t);
         }
 
+        int sgn=r.sign();
+        FP nr=new FP(r);
+        nr.neg(); nr.norm();
+        r.cmove(nr,sgn);
+
         return r;
     }
 

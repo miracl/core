@@ -817,6 +817,10 @@ void FP_YYY_sqrt(FP_YYY *r, FP_YYY *a, FP_YYY *h)
         FP_YYY_cmove(&t,&g,u);
         FP_YYY_copy(&b,&t);
     }
+// always return +ve square root
+    k=FP_YYY_sign(r);
+    FP_YYY_neg(&v,r); FP_YYY_norm(&v);
+    FP_YYY_cmove(r,&v,k);
 }
 
 

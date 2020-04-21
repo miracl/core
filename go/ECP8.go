@@ -912,7 +912,7 @@ func ECP8_map2point(H *FP8) *ECP8 {
 func ECP8_mapit(h []byte) *ECP8 {
 	q := NewBIGints(Modulus)
 	dx:=DBIG_fromBytes(h);
-    x:=dx.mod(q);
+    x:=dx.Mod(q);
 		
 	Q:=ECP8_hap2point(x)
 	Q.Cfp()

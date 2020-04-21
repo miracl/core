@@ -1134,7 +1134,7 @@ impl FP24 {
     }
 
     /* output to hex string */
-    pub fn tostring(&mut self) -> String {
+    pub fn tostring(&self) -> String {
         return format!(
             "[{},{},{}]",
             self.a.tostring(),

@@ -645,6 +645,8 @@ int FP8_YYY_qr(FP8_YYY *x)
 void FP8_YYY_sqrt(FP8_YYY *r, FP8_YYY* x)
 {
     FP4_YYY a, b, s, t;
+    FP8_YYY nr;
+    int sgn;
 
     FP8_YYY_copy(r, x);
     if (FP8_YYY_iszilch(x)) return;
@@ -679,6 +681,10 @@ void FP8_YYY_sqrt(FP8_YYY *r, FP8_YYY* x)
 
     FP4_YYY_mul(&t, &t, &s);
     FP8_YYY_from_FP4s(r, &a, &t);
+
+    sgn=FP8_YYY_sign(r);
+    FP8_YYY_neg(&nr,r); FP8_YYY_norm(&nr);
+    FP8_YYY_cmove(r,&nr,sgn);
 }
 
 

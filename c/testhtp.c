@@ -44,29 +44,118 @@
 #include "ecp_SECP256K1.h"
 #include "ecp_BLS12381.h"
 
-using namespace core;
+#define RO
 
 #define CEIL(a,b) (((a)-1)/(b)+1)
 
+/* WORK IN PROGRESS - PLEASE IGNORE */
 /* Select curves 1,3,7,17,28 */
 
+/* IMPORTANT - this must be edited if curve is changed */
+
+#if CHUNK==16
+
+#define BIG_ED BIG_256_13
+#define DBIG_ED DBIG_256_13
+#define BIG_ED_rcopy BIG_256_13_rcopy
+#define BIG_ED_nbits BIG_256_13_nbits
+#define BIG_ED_dmod BIG_256_13_dmod
+#define BIG_ED_dfromBytesLen BIG_256_13_dfromBytesLen
+
+#endif
+
+#if CHUNK==32
+
+#define BIG_ED BIG_256_29
+#define DBIG_ED DBIG_256_29
+#define BIG_ED_rcopy BIG_256_29_rcopy
+#define BIG_ED_nbits BIG_256_29_nbits
+#define BIG_ED_dmod BIG_256_29_dmod
+#define BIG_ED_dfromBytesLen BIG_256_29_dfromBytesLen
+
+#define BIG_NT BIG_256_28
+#define DBIG_NT DBIG_256_28
+#define BIG_NT_rcopy BIG_256_28_rcopy
+#define BIG_NT_nbits BIG_256_28_nbits
+#define BIG_NT_dmod BIG_256_28_dmod
+#define BIG_NT_dfromBytesLen BIG_256_28_dfromBytesLen
+
+#define BIG_SP BIG_256_28
+#define DBIG_SP DBIG_256_28
+#define BIG_SP_rcopy BIG_256_28_rcopy
+#define BIG_SP_nbits BIG_256_28_nbits
+#define BIG_SP_dmod BIG_256_28_dmod
+#define BIG_SP_dfromBytesLen BIG_256_28_dfromBytesLen
+
+#define BIG_GL BIG_448_29
+#define DBIG_GL DBIG_448_29
+#define BIG_GL_rcopy BIG_448_29_rcopy
+#define BIG_GL_nbits BIG_448_29_nbits
+#define BIG_GL_dmod BIG_448_29_dmod
+#define BIG_GL_dfromBytesLen BIG_448_29_dfromBytesLen
+
+#define BIG_BLS12 BIG_384_29
+#define DBIG_BLS12 DBIG_384_29
+#define BIG_BLS12_rcopy BIG_384_29_rcopy
+#define BIG_BLS12_nbits BIG_384_29_nbits
+#define BIG_BLS12_dmod BIG_384_29_dmod
+#define BIG_BLS12_dfromBytesLen BIG_384_29_dfromBytesLen
+
+#endif
+
+#if CHUNK==64
+
+#define BIG_ED BIG_256_56
+#define DBIG_ED DBIG_256_56
+#define BIG_ED_rcopy BIG_256_56_rcopy
+#define BIG_ED_nbits BIG_256_56_nbits
+#define BIG_ED_dmod BIG_256_56_dmod
+#define BIG_ED_dfromBytesLen BIG_256_56_dfromBytesLen
+
+#define BIG_NT BIG_256_56
+#define DBIG_NT DBIG_256_56
+#define BIG_NT_rcopy BIG_256_56_rcopy
+#define BIG_NT_nbits BIG_256_56_nbits
+#define BIG_NT_dmod BIG_256_56_dmod
+#define BIG_NT_dfromBytesLen BIG_256_56_dfromBytesLen
+
+#define BIG_SP BIG_256_56
+#define DBIG_SP DBIG_256_56
+#define BIG_SP_rcopy BIG_256_56_rcopy
+#define BIG_SP_nbits BIG_256_56_nbits
+#define BIG_SP_dmod BIG_256_56_dmod
+#define BIG_SP_dfromBytesLen BIG_256_56_dfromBytesLen
+
+#define BIG_GL BIG_448_58
+#define DBIG_GL DBIG_448_58
+#define BIG_GL_rcopy BIG_448_58_rcopy
+#define BIG_GL_nbits BIG_448_58_nbits
+#define BIG_GL_dmod BIG_448_58_dmod
+#define BIG_GL_dfromBytesLen BIG_448_58_dfromBytesLen
+
+#define BIG_BLS12 BIG_384_58
+#define DBIG_BLS12 DBIG_384_58
+#define BIG_BLS12_rcopy BIG_384_58_rcopy
+#define BIG_BLS12_dmod BIG_384_58_dmod
+#define BIG_BLS12_nbits BIG_384_58_nbits
+#define BIG_BLS12_dfromBytesLen BIG_384_58_dfromBytesLen
+
+#endif
+
+
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
-static void hash_to_field_ED25519(int hash,int hlen,F25519::FP *u,octet *DST,octet *M, int ctr)
+static void hash_to_field_ED25519(int hash,int hlen,FP_F25519 *u,octet *DST,octet *M, int ctr)
 {
-    using namespace ED25519;
-    using namespace ED25519_BIG;
-    using namespace ED25519_FP;
-    
     int i,j,L,k,m;
-    BIG q,w,r;
-    DBIG dx;
+    BIG_ED q,w,r;
+    DBIG_ED dx;
     char okm[512],fd[256];
     octet OKM = {0,sizeof(okm),okm};
 
-    BIG_rcopy(q, Modulus);
-    k=BIG_nbits(q);
-    BIG_rcopy(r, CURVE_Order);
-    m=BIG_nbits(r);
+    BIG_ED_rcopy(q, Modulus_F25519);
+    k=BIG_ED_nbits(q);
+    BIG_ED_rcopy(r, CURVE_Order_ED25519);
+    m=BIG_ED_nbits(r);
     L=CEIL(k+CEIL(m,2),8);
 
     XMD_Expand(hash,hlen,&OKM,L*ctr,DST,M);
@@ -75,21 +164,17 @@ static void hash_to_field_ED25519(int hash,int hlen,F25519::FP *u,octet *DST,oct
         for (j=0;j<L;j++)
             fd[j]=OKM.val[i*L+j];
         
-        BIG_dfromBytesLen(dx,fd,L);
-        BIG_dmod(w,dx,q);
-        FP_nres(&u[i],w);
+        BIG_ED_dfromBytesLen(dx,fd,L);
+        BIG_ED_dmod(w,dx,q);
+        FP_F25519_nres(&u[i],w);
     }
 }
 
 int htp_ED25519(char *mess)
 {
-    using namespace ED25519;
-    using namespace ED25519_BIG;
-    using namespace ED25519_FP;
- 
     int res=0;
-    FP u[2];
-    ECP P,P1;
+    FP_F25519 u[2];
+    ECP_ED25519 P,P1;
     char dst[50];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
@@ -97,73 +182,66 @@ int htp_ED25519(char *mess)
 
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
+
     OCT_jstring(&DST,(char *)"edwards25519_XMD:SHA-256_ELL2_RO_TESTGEN");
     hash_to_field_ED25519(MC_SHA2,HASH_TYPE_ED25519,u,&DST,&MSG,2);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    printf("u[1]= "); FP_output(&u[1]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q[0]= "); ECP_output(&P);
-    ECP_map2point(&P1,&u[1]);
-    printf("Q[1]= "); ECP_output(&P1);
-    ECP_add(&P,&P1);
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_F25519_output(&u[0]); printf("\n");
+    printf("u[1]= "); FP_F25519_output(&u[1]); printf("\n");
+    ECP_ED25519_map2point(&P,&u[0]);
+    printf("Q[0]= "); ECP_ED25519_output(&P);
+    ECP_ED25519_map2point(&P1,&u[1]);
+    printf("Q[1]= "); ECP_ED25519_output(&P1);
+    ECP_ED25519_add(&P,&P1);
+    ECP_ED25519_cfp(&P);
+    ECP_ED25519_affine(&P);
+    printf("P= "); ECP_ED25519_output(&P); printf("\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
     OCT_jstring(&DST,(char *)"edwards25519_XMD:SHA-256_ELL2_NU_TESTGEN");
     hash_to_field_ED25519(MC_SHA2,HASH_TYPE_ED25519,u,&DST,&MSG,1);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q= "); ECP_output(&P);
-
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_F25519_output(&u[0]); printf("\n");
+    ECP_ED25519_map2point(&P,&u[0]);
+    printf("Q= "); ECP_ED25519_output(&P);
+    ECP_ED25519_cfp(&P);
+    ECP_ED25519_affine(&P);
+    printf("P= "); ECP_ED25519_output(&P); printf("\n");
     return res;
 }
 
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
-static void hash_to_field_NIST256(int hash,int hlen,NIST256::FP *u,octet *DST,octet *M, int ctr)
+static void hash_to_field_NIST256(int hash,int hlen,FP_NIST256 *u,octet *DST,octet *M, int ctr)
 {
-    using namespace NIST256;
-    using namespace NIST256_BIG;
-    using namespace NIST256_FP;
     
     int i,j,L,k,m;
-    BIG q,w,r;
-    DBIG dx;
+    BIG_NT q,w,r;
+    DBIG_NT dx;
     char okm[512],fd[256];
     octet OKM = {0,sizeof(okm),okm};
 
-    BIG_rcopy(q, Modulus);
-    k=BIG_nbits(q);
-    BIG_rcopy(r, CURVE_Order);
-    m=BIG_nbits(r);
+    BIG_NT_rcopy(q, Modulus_NIST256);
+    k=BIG_NT_nbits(q);
+    BIG_NT_rcopy(r, CURVE_Order_NIST256);
+    m=BIG_NT_nbits(r);
     L=CEIL(k+CEIL(m,2),8);
-
     XMD_Expand(hash,hlen,&OKM,L*ctr,DST,M);
     for (i=0;i<ctr;i++)
     {
         for (j=0;j<L;j++)
             fd[j]=OKM.val[i*L+j];
         
-        BIG_dfromBytesLen(dx,fd,L);
-        BIG_dmod(w,dx,q);
-        FP_nres(&u[i],w);
+        BIG_NT_dfromBytesLen(dx,fd,L);
+        BIG_NT_dmod(w,dx,q);
+        FP_NIST256_nres(&u[i],w);
     }
 }
 
 int htp_NIST256(char *mess)
 {
-    using namespace NIST256;
-    using namespace NIST256_BIG;
-    using namespace NIST256_FP;
  
     int res=0;
-    FP u[2];
-    ECP P,P1;
+    FP_NIST256 u[2];
+    ECP_NIST256 P,P1;
     char dst[50];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
@@ -174,71 +252,64 @@ int htp_NIST256(char *mess)
 
     OCT_jstring(&DST,(char *)"P256_XMD:SHA-256_SSWU_RO_TESTGEN");
     hash_to_field_NIST256(MC_SHA2,HASH_TYPE_NIST256,u,&DST,&MSG,2);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    printf("u[1]= "); FP_output(&u[1]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q[0]= "); ECP_output(&P);
-    ECP_map2point(&P1,&u[1]);
-    printf("Q[1]= "); ECP_output(&P1);
-    ECP_add(&P,&P1);
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_NIST256_output(&u[0]); printf("\n");
+    printf("u[1]= "); FP_NIST256_output(&u[1]); printf("\n");
+    ECP_NIST256_map2point(&P,&u[0]);
+    printf("Q[0]= "); ECP_NIST256_output(&P);
+    ECP_NIST256_map2point(&P1,&u[1]);
+    printf("Q[1]= "); ECP_NIST256_output(&P1);
+    ECP_NIST256_add(&P,&P1);
+    ECP_NIST256_cfp(&P);
+    ECP_NIST256_affine(&P);
+    printf("P= "); ECP_NIST256_output(&P); printf("\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
     OCT_jstring(&DST,(char *)"P256_XMD:SHA-256_SSWU_NU_TESTGEN");
     hash_to_field_NIST256(MC_SHA2,HASH_TYPE_NIST256,u,&DST,&MSG,1);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q= "); ECP_output(&P);
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_NIST256_output(&u[0]); printf("\n");
+    ECP_NIST256_map2point(&P,&u[0]);
+    printf("Q= "); ECP_NIST256_output(&P);
+    ECP_NIST256_cfp(&P);
+    ECP_NIST256_affine(&P);
+    printf("P= "); ECP_NIST256_output(&P); printf("\n");
     return res;
 }
 
 
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
-static void hash_to_field_GOLDILOCKS(int hash,int hlen,GOLDILOCKS::FP *u,octet *DST,octet *M, int ctr)
+static void hash_to_field_GOLDILOCKS(int hash,int hlen,FP_GOLDILOCKS *u,octet *DST,octet *M, int ctr)
 {
-    using namespace GOLDILOCKS;
-    using namespace GOLDILOCKS_BIG;
-    using namespace GOLDILOCKS_FP;
-    
+
     int i,j,L,k,m;
-    BIG q,w,r;
-    DBIG dx;
+    BIG_GL q,w,r;
+    DBIG_GL dx;
     char okm[512],fd[256];
     octet OKM = {0,sizeof(okm),okm};
 
-    BIG_rcopy(q, Modulus);
-    k=BIG_nbits(q);
-    BIG_rcopy(r, CURVE_Order);
-    m=BIG_nbits(r);
+    BIG_GL_rcopy(q, Modulus_GOLDILOCKS);
+    k=BIG_GL_nbits(q);
+    BIG_GL_rcopy(r, CURVE_Order_GOLDILOCKS);
+    m=BIG_GL_nbits(r);
     L=CEIL(k+CEIL(m,2),8);
-
     XMD_Expand(hash,hlen,&OKM,L*ctr,DST,M);
     for (i=0;i<ctr;i++)
     {
         for (j=0;j<L;j++)
             fd[j]=OKM.val[i*L+j];
         
-        BIG_dfromBytesLen(dx,fd,L);
-        BIG_dmod(w,dx,q);
-        FP_nres(&u[i],w);
+        BIG_GL_dfromBytesLen(dx,fd,L);
+        BIG_GL_dmod(w,dx,q);
+        FP_GOLDILOCKS_nres(&u[i],w);
     }
 }
 
 int htp_GOLDILOCKS(char *mess)
 {
-    using namespace GOLDILOCKS;
-    using namespace GOLDILOCKS_BIG;
-    using namespace GOLDILOCKS_FP;
  
     int res=0;
-    FP u[2];
-    ECP P,P1;
+    FP_GOLDILOCKS u[2];
+    ECP_GOLDILOCKS P,P1;
     char dst[50];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
@@ -249,71 +320,62 @@ int htp_GOLDILOCKS(char *mess)
 
     OCT_jstring(&DST,(char *)"edwards448_XMD:SHA-512_ELL2_RO_TESTGEN");
     hash_to_field_GOLDILOCKS(MC_SHA2,HASH_TYPE_GOLDILOCKS,u,&DST,&MSG,2);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    printf("u[1]= "); FP_output(&u[1]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q[0]= "); ECP_output(&P);
-    ECP_map2point(&P1,&u[1]);
-    printf("Q[1]= "); ECP_output(&P1);
-    ECP_add(&P,&P1);
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_GOLDILOCKS_output(&u[0]); printf("\n");
+    printf("u[1]= "); FP_GOLDILOCKS_output(&u[1]); printf("\n");
+    ECP_GOLDILOCKS_map2point(&P,&u[0]);
+    printf("Q[0]= "); ECP_GOLDILOCKS_output(&P);
+    ECP_GOLDILOCKS_map2point(&P1,&u[1]);
+    printf("Q[1]= "); ECP_GOLDILOCKS_output(&P1);
+    ECP_GOLDILOCKS_add(&P,&P1);
+    ECP_GOLDILOCKS_cfp(&P);
+    ECP_GOLDILOCKS_affine(&P);
+    printf("+P= "); ECP_GOLDILOCKS_output(&P); printf("\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
     OCT_jstring(&DST,(char *)"edwards448_XMD:SHA-512_ELL2_NU_TESTGEN");
     hash_to_field_GOLDILOCKS(MC_SHA2,HASH_TYPE_GOLDILOCKS,u,&DST,&MSG,1);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q= "); ECP_output(&P);
-
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_GOLDILOCKS_output(&u[0]); printf("\n");
+    ECP_GOLDILOCKS_map2point(&P,&u[0]);
+    printf("Q= "); ECP_GOLDILOCKS_output(&P);
+    ECP_GOLDILOCKS_cfp(&P);
+    ECP_GOLDILOCKS_affine(&P);
+    printf("+P= "); ECP_GOLDILOCKS_output(&P); printf("\n");
     return res;
 }
 
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
-static void hash_to_field_SECP256K1(int hash,int hlen,SECP256K1::FP *u,octet *DST,octet *M, int ctr)
+static void hash_to_field_SECP256K1(int hash,int hlen,FP_SECP256K1 *u,octet *DST,octet *M, int ctr)
 {
-    using namespace SECP256K1;
-    using namespace SECP256K1_BIG;
-    using namespace SECP256K1_FP;
     
     int i,j,L,k,m;
-    BIG q,w,r;
-    DBIG dx;
+    BIG_SP q,w,r;
+    DBIG_SP dx;
     char okm[512],fd[256];
     octet OKM = {0,sizeof(okm),okm};
 
-    BIG_rcopy(q, Modulus);
-    k=BIG_nbits(q);
-    BIG_rcopy(r, CURVE_Order);
-    m=BIG_nbits(r);
+    BIG_SP_rcopy(q, Modulus_SECP256K1);
+    k=BIG_SP_nbits(q);
+    BIG_SP_rcopy(r, CURVE_Order_SECP256K1);
+    m=BIG_SP_nbits(r);
     L=CEIL(k+CEIL(m,2),8);
-
     XMD_Expand(hash,hlen,&OKM,L*ctr,DST,M);
     for (i=0;i<ctr;i++)
     {
         for (j=0;j<L;j++)
             fd[j]=OKM.val[i*L+j];
         
-        BIG_dfromBytesLen(dx,fd,L);
-        BIG_dmod(w,dx,q);
-        FP_nres(&u[i],w);
+        BIG_SP_dfromBytesLen(dx,fd,L);
+        BIG_SP_dmod(w,dx,q);
+        FP_SECP256K1_nres(&u[i],w);
     }
 }
 
 int htp_SECP256K1(char *mess)
 {
-    using namespace SECP256K1;
-    using namespace SECP256K1_BIG;
-    using namespace SECP256K1_FP;
- 
     int res=0;
-    FP u[2];
-    ECP P,P1;
+    FP_SECP256K1 u[2];
+    ECP_SECP256K1 P,P1;
     char dst[50];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
@@ -324,49 +386,44 @@ int htp_SECP256K1(char *mess)
 
     OCT_jstring(&DST,(char *)"secp256k1_XMD:SHA-256_SVDW_RO_TESTGEN");
     hash_to_field_SECP256K1(MC_SHA2,HASH_TYPE_SECP256K1,u,&DST,&MSG,2);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    printf("u[1]= "); FP_output(&u[1]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q[0]= "); ECP_output(&P);
-    ECP_map2point(&P1,&u[1]);
-    printf("Q[1]= "); ECP_output(&P1);
-    ECP_add(&P,&P1);
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_SECP256K1_output(&u[0]); printf("\n");
+    printf("u[1]= "); FP_SECP256K1_output(&u[1]); printf("\n");
+    ECP_SECP256K1_map2point(&P,&u[0]);
+    printf("Q[0]= "); ECP_SECP256K1_output(&P);
+    ECP_SECP256K1_map2point(&P1,&u[1]);
+    printf("Q[1]= "); ECP_SECP256K1_output(&P1);
+    ECP_SECP256K1_add(&P,&P1);
+    ECP_SECP256K1_cfp(&P);
+    ECP_SECP256K1_affine(&P);
+    printf("P= "); ECP_SECP256K1_output(&P); printf("\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
     OCT_jstring(&DST,(char *)"secp256k1_XMD:SHA-256_SVDW_NU_TESTGEN");
     hash_to_field_SECP256K1(MC_SHA2,HASH_TYPE_SECP256K1,u,&DST,&MSG,1);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q= "); ECP_output(&P);
-
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_SECP256K1_output(&u[0]); printf("\n");
+    ECP_SECP256K1_map2point(&P,&u[0]);
+    printf("Q= "); ECP_SECP256K1_output(&P);
+    ECP_SECP256K1_cfp(&P);
+    ECP_SECP256K1_affine(&P);
+    printf("P= "); ECP_SECP256K1_output(&P); printf("\n");
     return res;
 }
 
 
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
-static void hash_to_field_BLS12381(int hash,int hlen,BLS12381::FP *u,octet *DST,octet *M, int ctr)
+static void hash_to_field_BLS12381(int hash,int hlen,FP_BLS12381 *u,octet *DST,octet *M, int ctr)
 {
-    using namespace BLS12381;
-    using namespace BLS12381_BIG;
-    using namespace BLS12381_FP;
-    
     int i,j,L,k,m;
-    BIG q,w,r;
-    DBIG dx;
+    BIG_BLS12 q,w,r;
+    DBIG_BLS12 dx;
     char okm[512],fd[256];
     octet OKM = {0,sizeof(okm),okm};
 
-    BIG_rcopy(q, Modulus);
-    k=BIG_nbits(q);
-    BIG_rcopy(r, CURVE_Order);
-    m=BIG_nbits(r);
+    BIG_BLS12_rcopy(q, Modulus_BLS12381);
+    k=BIG_BLS12_nbits(q);
+    BIG_BLS12_rcopy(r, CURVE_Order_BLS12381);
+    m=BIG_BLS12_nbits(r);
     L=CEIL(k+CEIL(m,2),8);
 
     //printf("L= %d\n",L);
@@ -376,21 +433,18 @@ static void hash_to_field_BLS12381(int hash,int hlen,BLS12381::FP *u,octet *DST,
         for (j=0;j<L;j++)
             fd[j]=OKM.val[i*L+j];
         
-        BIG_dfromBytesLen(dx,fd,L);
-        BIG_dmod(w,dx,q);
-        FP_nres(&u[i],w);
+        BIG_BLS12_dfromBytesLen(dx,fd,L);
+        BIG_BLS12_dmod(w,dx,q);
+        FP_BLS12381_nres(&u[i],w);
     }
 }
 
 int htp_BLS12381(char *mess)
 {
-    using namespace BLS12381;
-    using namespace BLS12381_BIG;
-    using namespace BLS12381_FP;
  
     int res=0;
-    FP u[2];
-    ECP P,P1;
+    FP_BLS12381 u[2];
+    ECP_BLS12381 P,P1;
     char dst[50];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
@@ -399,31 +453,29 @@ int htp_BLS12381(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-
     OCT_jstring(&DST,(char *)"BLS12381G1_XMD:SHA-256_SVDW_RO_TESTGEN");
     hash_to_field_BLS12381(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,2);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    printf("u[1]= "); FP_output(&u[1]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q[0]= "); ECP_output(&P);
-    ECP_map2point(&P1,&u[1]);
-    printf("Q[1]= "); ECP_output(&P1);
-    ECP_add(&P,&P1);
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_BLS12381_output(&u[0]); printf("\n");
+    printf("u[1]= "); FP_BLS12381_output(&u[1]); printf("\n");
+    ECP_BLS12381_map2point(&P,&u[0]);
+    printf("Q[0]= "); ECP_BLS12381_output(&P);
+    ECP_BLS12381_map2point(&P1,&u[1]);
+    printf("Q[1]= "); ECP_BLS12381_output(&P1);
+    ECP_BLS12381_add(&P,&P1);
+    ECP_BLS12381_cfp(&P);
+    ECP_BLS12381_affine(&P);
+    printf("P= "); ECP_BLS12381_output(&P); printf("\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
     OCT_jstring(&DST,(char *)"BLS12381G1_XMD:SHA-256_SVDW_NU_TESTGEN");
     hash_to_field_BLS12381(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,1);
-    printf("u[0]= "); FP_output(&u[0]); printf("\n");
-    ECP_map2point(&P,&u[0]);
-    printf("Q= "); ECP_output(&P);
-
-    ECP_cfp(&P);
-    ECP_affine(&P);
-    printf("P= "); ECP_output(&P); printf("\n");
+    printf("u[0]= "); FP_BLS12381_output(&u[0]); printf("\n");
+    ECP_BLS12381_map2point(&P,&u[0]);
+    printf("Q= "); ECP_BLS12381_output(&P);
+    ECP_BLS12381_cfp(&P);
+    ECP_BLS12381_affine(&P);
+    printf("P= "); ECP_BLS12381_output(&P); printf("\n");
     return res;
 }
 

@@ -434,6 +434,9 @@ int FP2_YYY_qr(FP2_YYY *x)
 void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
 {
     FP_YYY w1, w2, w3;
+    FP2_YYY nw;
+    int sgn;
+
     FP2_YYY_copy(w, u);
     if (FP2_YYY_iszilch(w)) return;
 
@@ -460,6 +463,10 @@ void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
     FP_YYY_inv(&w2, &w2);
 
     FP_YYY_mul(&(w->b), &(w->b), &w2);
+
+    sgn=FP2_YYY_sign(w);
+    FP2_YYY_neg(&nw,w); FP2_YYY_norm(&nw);
+    FP2_YYY_cmove(w,&nw,sgn);
 }
 
 /* New stuff for ECp4 support */

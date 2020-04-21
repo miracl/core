@@ -979,6 +979,7 @@ var ECP = function(ctx) {
         cfp: function() {
             var cf=ctx.ROM_CURVE.CURVE_Cof_I,
                 c = new ctx.BIG(0);
+
             if (cf==1) {
                 return;
             }
@@ -1416,8 +1417,6 @@ var ECP = function(ctx) {
                 { // RFC7748
                     A.mul(K);
                     K=K.sqrt(null);
-                    if (K.sign()==1)
-                        K.neg();
                 } else {
                     B.sqr();
                 }
@@ -1533,6 +1532,7 @@ var ECP = function(ctx) {
             var B = new ctx.FP(0);
             B.rcopy(ctx.ROM_CURVE.CURVE_B);
             var Y=new ctx.FP(0);
+            var NY=new ctx.FP(0);
             var t=new ctx.FP(h);
             var x=new ctx.BIG(0);
             var sgn=t.sign();
@@ -1563,6 +1563,42 @@ var ECP = function(ctx) {
                 Y.copy(rhs.sqrt(null));
                 x.copy(X2.redc());
             } else {
+// Shallue and van de Woestijne
+                var Z=ctx.FP.RIADZ;
+                X1.copy(new ctx.FP(Z));
+                X3.copy(X1);
+                var A=ECP.RHS(X1);
+                t.sqr();
+                Y.copy(A); Y.mul(t);
+                t.copy(one); t.add(Y); t.norm();
+                Y.rsub(one); Y.norm();
+                NY.copy(t); NY.mul(Y); NY.inverse();
+                A.neg(); A.norm(); 
+                var w=new ctx.FP(A); w.imul(3); w.copy(w.sqrt(null));
+                w.imul(Z);
+                w.mul(h); w.mul(Y); w.mul(NY);
+
+                X1.neg(); X1.norm(); X1.div2();
+                X2.copy(X1);
+                X1.sub(w); X1.norm();
+                X2.add(w); X2.norm();
+                A.add(A); A.add(A); A.norm();
+                t.sqr(); t.mul(NY); t.sqr();
+                A.mul(t);
+                t.copy(new ctx.FP(Z*Z*3));
+                t.inverse();
+                A.mul(t);
+                X3.add(A); X3.norm();
+
+                var rhs=ECP.RHS(X2);
+                X3.cmove(X2,rhs.qr(null));
+                rhs.copy(ECP.RHS(X1));
+                X3.cmove(X1,rhs.qr(null));
+                rhs.copy(ECP.RHS(X3));
+                Y.copy(rhs.sqrt(null));
+                x.copy(X3.redc());
+
+/*
                 var A=new ctx.FP(-3);
                 var w=A.sqrt(null);
                 var j=new ctx.FP(w); j.sub(one); j.norm(); j.div2();
@@ -1582,10 +1618,10 @@ var ECP = function(ctx) {
                 X1.cmove(X3,rhs.qr(null));
                 rhs.copy(ECP.RHS(X1));
                 Y.copy(rhs.sqrt(null));
-                x.copy(X1.redc());
+                x.copy(X1.redc()); */
             }
             var ne=Y.sign()^sgn;
-            var NY=new ctx.FP(Y); NY.neg(); NY.norm();
+            NY.copy(Y); NY.neg(); NY.norm();
             Y.cmove(NY,ne);
 
             var y=Y.redc();

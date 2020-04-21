@@ -74,6 +74,18 @@ core={path="core", version="0.1.0"}
 
 -------------------------------------------------
 
+NEW: support for emerging Hash To Curve standard.
+See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
+
+
+Create 32 or 64-bit library selecting curves 1, 3, 7, 17 and 28 (ed25519, nist256, goldilocks, secp256k1 and bls12381)
+
+    rustc TestHTP.rs --extern core=libcore.rlib
+
+Test program runs through test vectors from the draft standard.
+
+-------------------------------------------------
+
 NEW: Experimental support for emerging HPKE (Hybrid Public Key Encryption) standard.
 See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hpke/
 
