@@ -41,13 +41,13 @@ use crate::xxx::dbig::DBIG;
 pub const MODBYTES: usize = @NB@;
 pub const BASEBITS: usize = @BASE@;
 
-pub const NLEN: usize = (1 + ((8 * MODBYTES - 1) / BASEBITS));
+pub const NLEN: usize = 1 + ((8 * MODBYTES - 1) / BASEBITS);
 pub const DNLEN: usize = 2 * NLEN;
-pub const BMASK: Chunk = ((1 << BASEBITS) - 1);
-pub const HBITS: usize = (BASEBITS / 2);
-pub const HMASK: Chunk = ((1 << HBITS) - 1);
-pub const NEXCESS: isize = (1 << ((arch::CHUNK) - BASEBITS - 1));
-pub const BIGBITS: usize = (MODBYTES * 8);
+pub const BMASK: Chunk = (1 << BASEBITS) - 1;
+pub const HBITS: usize = BASEBITS / 2;
+pub const HMASK: Chunk = (1 << HBITS) - 1;
+pub const NEXCESS: isize = 1 << ((arch::CHUNK) - BASEBITS - 1);
+pub const BIGBITS: usize = MODBYTES * 8;
 
 #[derive(Copy)]
 pub struct BIG {

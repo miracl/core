@@ -42,7 +42,7 @@ const ND: u32 = 0xF7002FFF; // 1/(R-q) mod R
 const ONE: i32 = 0x2AC8; // R mod q
 const R2MODP: u64 = 0x1620; // R^2 mod q
 
-const DEGREE: usize = (1 << LGN);
+const DEGREE: usize = 1 << LGN;
 const WL: usize = 32;
 
 const INV: i32 = 0xeab;

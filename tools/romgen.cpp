@@ -85,6 +85,114 @@ ZZn2 shanks(ZZn2 n)
 
 }
 
+ZZn8 findZ8(Big AB)
+{
+    ZZn8 Z,B;
+    if (get_mip()->TWIST==MR_SEXTIC_M)
+        B=tx((ZZn8)AB);
+    else
+        B=txd((ZZn8)AB);
+    int a,b;
+    a=1; b=-1;
+    forever {
+        if (b>0)
+        {
+            a=-a;
+            b=-b;
+        }
+        else
+        {    
+            b=1;
+            a=(-a)+1;
+        }
+        Z.set(a,b);
+  //      cout << "Z= " << Z << endl;
+        ZZn8 ZZ=Z;
+        ZZn8 GZ=ZZ*ZZ*ZZ+B;
+        if (GZ==0) continue;
+        ZZn8 W=-(3*ZZ*ZZ)/(4*GZ);
+        if (W==0) continue;
+        if (!qr(W)) continue;
+        ZZ=-ZZ/2;
+        ZZn8 GNZ=ZZ*ZZ*ZZ+B; 
+        if (!qr(GZ) && !qr(GNZ)) continue;
+        break;
+    }
+    return Z;
+}
+
+ZZn4 findZ4(Big AB)
+{
+    ZZn4 Z,B;
+    if (get_mip()->TWIST==MR_SEXTIC_M)
+        B=tx((ZZn4)AB);
+    else
+        B=txd((ZZn4)AB);
+    int a,b;
+    a=1; b=-1;
+    forever {
+        if (b>0)
+        {
+            a=-a;
+            b=-b;
+        }
+        else
+        {    
+            b=1;
+            a=(-a)+1;
+        }
+        Z.set(a,b);
+        //cout << "Z= " << Z << endl;
+        ZZn4 ZZ=Z;
+        ZZn4 GZ=ZZ*ZZ*ZZ+B;
+        if (GZ==0) continue;
+        ZZn4 W=-(3*ZZ*ZZ)/(4*GZ);
+        if (W==0) continue;
+        if (!qr(W)) continue;
+        ZZ=-ZZ/2;
+        ZZn4 GNZ=ZZ*ZZ*ZZ+B; 
+        if (!qr(GZ) && !qr(GNZ)) continue;
+        break;
+    }
+    return Z;
+}
+
+ZZn2 findZ2(Big AB)
+{
+    ZZn2 Z,B;
+    if (get_mip()->TWIST==MR_SEXTIC_M)
+        B=txx((ZZn2)AB);
+    else
+        B=txd((ZZn2)AB);
+    int a,b;
+    a=1; b=-1;
+    forever {
+        if (b>0)
+        {
+            a=-a;
+            b=-b;
+        }
+        else
+        {    
+            b=1;
+            a=(-a)+1;
+        }
+        Z.set(a,b);
+        //cout << "Z= " << Z << endl;
+        ZZn2 ZZ=Z;
+        ZZn2 GZ=ZZ*ZZ*ZZ+B;
+        if (GZ==0) continue;
+        ZZn2 W=-(3*ZZ*ZZ)/(4*GZ);
+        if (W==0) continue;
+        if (!qr(W)) continue;
+        ZZ=-ZZ/2;
+        ZZn2 GNZ=ZZ*ZZ*ZZ+B; 
+        if (!qr(GZ) && !qr(GNZ)) continue;
+        break;
+    }
+    return Z;
+}
+
 int findZ(Big AA,Big AB,Big p)
 {
     ZZn x,D,BB;
@@ -967,6 +1075,8 @@ int main(int argc, char **argv)
 
         Q = (p - 1 + t) * Q;           // generator point in G2
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2); // cube root of unity for GLV method
+
+        cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
 
@@ -1004,6 +1114,8 @@ int main(int argc, char **argv)
         Q = (p - 1 + t) * Q;
         //cofactor(Q,X,x);
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2);
+
+        cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS12383") == 0)
@@ -1059,6 +1171,7 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //	zcru*=zcru;   // right cube root of unity
         cru = (Big)zcru;
+        cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS12381") == 0)
@@ -1115,6 +1228,8 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity ?? if x>0 do this??
         cru = (Big)zcru;
+
+        cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
 
@@ -1162,7 +1277,7 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity
         cru = (Big)zcru;
-
+        cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BN462") == 0)
@@ -1220,6 +1335,7 @@ int main(int argc, char **argv)
         cru = (Big)zcru;
 
         cru = p - (18 * pow(x, 3) + 18 * x * x + 9 * x + 2);
+        cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "FP256BN") == 0)
@@ -1258,7 +1374,7 @@ int main(int argc, char **argv)
 
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2);
         //cout << pre1 << toupperit((char *)"CURVE_Cru",lang) << post1; output(chunk,words,cru,m); cout << term << endl;
-
+        cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "FP512BN") == 0)
@@ -1297,6 +1413,7 @@ int main(int argc, char **argv)
         Q = (p - 1 + t) * Q;
 
         cru = p - (18 * pow(x, 3) + 18 * x * x + 9 * x + 2);
+        cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS24479") == 0)
@@ -1367,6 +1484,7 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity -  not for M-TYPE
         cru = (Big)zcru;
+        cout << "Z for G2= " << findZ4(curve_b) << endl;
     }
 
 
@@ -1448,6 +1566,7 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity -  not for M-TYPE
         cru = (Big)zcru;
+        cout << "Z for G2= " << findZ8(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS48581") == 0)
@@ -1614,6 +1733,7 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         zcru *= zcru; // right cube root of unity -  not for M-TYPE
         cru = (Big)zcru;
+        cout << "Z for G2= " << findZ8(curve_b) << endl;
     }
 
     if (curve == 0) {help(); return 0;}

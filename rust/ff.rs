@@ -43,13 +43,13 @@ use crate::arch::DChunk;
 
 pub const FFLEN:usize=@ML@;
 
-pub const FF_BITS: usize = (big::BIGBITS * FFLEN); /* Finite Field Size in bits - must be 256.2^n */
-pub const HFLEN: usize = (FFLEN / 2); /* Useful for half-size RSA private key operations */
+pub const FF_BITS: usize = big::BIGBITS * FFLEN; /* Finite Field Size in bits - must be 256.2^n */
+pub const HFLEN: usize = FFLEN / 2; /* Useful for half-size RSA private key operations */
 
 pub const P_MBITS: usize = (big::MODBYTES as usize) * 8;
-pub const P_OMASK: Chunk = ((-1) << (P_MBITS % big::BASEBITS));
-pub const P_FEXCESS: Chunk = (1 << (big::BASEBITS * big::NLEN - P_MBITS - 1));
-pub const P_TBITS: usize = (P_MBITS % big::BASEBITS);
+pub const P_OMASK: Chunk = (-1) << (P_MBITS % big::BASEBITS);
+pub const P_FEXCESS: Chunk = 1 << (big::BASEBITS * big::NLEN - P_MBITS - 1);
+pub const P_TBITS: usize = P_MBITS % big::BASEBITS;
 
 pub struct FF {
     v: Vec<BIG>,
