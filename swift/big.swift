@@ -724,7 +724,7 @@ public struct BIG{
     mutating func invmodp(_ p: BIG)
     {
         mod(p)
-	if (iszilch()) {return}
+	    if (iszilch()) {return}
         var u=BIG(self)
         var v=BIG(p)
         var x1=BIG(1)
@@ -736,53 +736,45 @@ public struct BIG{
         {
             while (u.parity()==0)
             {
-				u.fshr(1);
-				if (x1.parity() != 0 )
-				{
-                    x1.add(p);
-                    x1.norm();
-				}
-				x1.fshr(1);
+                u.fshr(1)
+                t.copy(x1)
+                t.add(p)
+                x1.cmove(t,x1.parity())
+                x1.norm()
+                x1.fshr(1)
             }
             while (v.parity()==0)
             {
-				v.fshr(1);
-				if (x2.parity() != 0 )
-				{
-                    x2.add(p);
-                    x2.norm();
-				}
-				x2.fshr(1);
+                v.fshr(1)
+                t.copy(x2)
+                t.add(p)
+                x2.cmove(t,x2.parity())
+                x2.norm()
+                x2.fshr(1)
             }
             if (BIG.comp(u,v)>=0)
             {
-				u.sub(v);
-				u.norm();
-                if (BIG.comp(x1,x2)>=0) {x1.sub(x2)}
-				else
-				{
-                    t.copy(p);
-                    t.sub(x2);
-                    x1.add(t);
-				}
-				x1.norm();
+                u.sub(v)
+                u.norm()
+                t.copy(x1)
+                t.add(p)
+                x1.cmove(t,(BIG.comp(x1,x2)>>1)&1)
+                x1.sub(x2)
+                x1.norm()
             }
             else
             {
-				v.sub(u);
-				v.norm();
-                if (BIG.comp(x2,x1)>=0) {x2.sub(x1)}
-				else
-				{
-                    t.copy(p);
-                    t.sub(x1);
-                    x2.add(t);
-				}
-				x2.norm();
+                v.sub(u)
+                v.norm()
+                t.copy(x2)
+                t.add(p)
+                x2.cmove(t,(BIG.comp(x2,x1)>>1)&1)
+                x2.sub(x1)
+                x2.norm()
             }
         }
-        if (BIG.comp(u,one)==0) {copy(x1)}
-        else {copy(x2)}
+        copy(x1)
+        cmove(x2,BIG.comp(u,one)&1)
     }
     /* return a*b as DBIG */
 #if D32

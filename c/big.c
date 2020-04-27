@@ -1522,52 +1522,40 @@ void BIG_XXX_invmodp(BIG_XXX r, BIG_XXX a, BIG_XXX p)
         while (BIG_XXX_parity(u) == 0)
         {
             BIG_XXX_fshr(u, 1);
-            if (BIG_XXX_parity(x1) != 0)
-            {
-                BIG_XXX_add(x1, p, x1);
-                BIG_XXX_norm(x1);
-            }
-            BIG_XXX_fshr(x1, 1);
+            BIG_XXX_add(t,x1,p);
+            BIG_XXX_cmove(x1,t,BIG_XXX_parity(x1));
+            BIG_XXX_norm(x1);
+            BIG_XXX_fshr(x1,1);
         }
         while (BIG_XXX_parity(v) == 0)
         {
             BIG_XXX_fshr(v, 1);
-            if (BIG_XXX_parity(x2) != 0)
-            {
-                BIG_XXX_add(x2, p, x2);
-                BIG_XXX_norm(x2);
-            }
-            BIG_XXX_fshr(x2, 1);
+            BIG_XXX_add(t,x2,p);
+            BIG_XXX_cmove(x2,t,BIG_XXX_parity(x2));
+            BIG_XXX_norm(x2);
+            BIG_XXX_fshr(x2,1);
         }
         if (BIG_XXX_comp(u, v) >= 0)
         {
             BIG_XXX_sub(u, u, v);
             BIG_XXX_norm(u);
-            if (BIG_XXX_comp(x1, x2) >= 0) BIG_XXX_sub(x1, x1, x2);
-            else
-            {
-                BIG_XXX_sub(t, p, x2);
-                BIG_XXX_add(x1, x1, t);
-            }
+            BIG_XXX_add(t,x1,p);
+            BIG_XXX_cmove(x1,t,(BIG_XXX_comp(x1,x2)>>1)&1); /* move if x1<x2 */
+            BIG_XXX_sub(x1,x1,x2);
             BIG_XXX_norm(x1);
         }
         else
         {
             BIG_XXX_sub(v, v, u);
             BIG_XXX_norm(v);
-            if (BIG_XXX_comp(x2, x1) >= 0) BIG_XXX_sub(x2, x2, x1);
-            else
-            {
-                BIG_XXX_sub(t, p, x1);
-                BIG_XXX_add(x2, x2, t);
-            }
+            BIG_XXX_add(t,x2,p);
+            BIG_XXX_cmove(x2,t,(BIG_XXX_comp(x2,x1)>>1)&1); /* move if x2<x1 */
+            BIG_XXX_sub(x2,x2,x1);
             BIG_XXX_norm(x2);
         }
     }
-    if (BIG_XXX_comp(u, one) == 0)
-        BIG_XXX_copy(r, x1);
-    else
-        BIG_XXX_copy(r, x2);
+    BIG_XXX_copy(r,x1);
+    BIG_XXX_cmove(r,x2,BIG_XXX_comp(u,one)&1);
 }
 
 /* set x = x mod 2^m */

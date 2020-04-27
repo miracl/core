@@ -1478,6 +1478,7 @@ int XXX::BIG_jacobi(BIG a, BIG p)
 
 /* Set r=1/a mod p. Kaliski method - on entry a < p */
 /* From AMCL constant time implementation */
+/*
 void XXX::BIG_invmodp(BIG r,BIG a,BIG p)
 {
     int k, p1, pu, pv, psw, pmv;
@@ -1555,14 +1556,14 @@ void XXX::BIG_invmodp(BIG r,BIG a,BIG p)
         BIG_fshr(r, 1);
     }
 }
-
+*/
 
 
 /* Set r=1/a mod p. Binary method */
-/* 
 void XXX::BIG_invmodp(BIG r, BIG a, BIG p)
 {
     BIG u, v, x1, x2, t, one;
+    int par;
 
     BIG_mod(a, p);
     if (BIG_iszilch(a))
@@ -1582,54 +1583,77 @@ void XXX::BIG_invmodp(BIG r, BIG a, BIG p)
         while (BIG_parity(u) == 0)
         {
             BIG_fshr(u, 1);
-            if (BIG_parity(x1) != 0)
-            {
-                BIG_add(x1, p, x1);
-                BIG_norm(x1);
-            }
-            BIG_fshr(x1, 1);
+            BIG_add(t,x1,p);
+            BIG_cmove(x1,t,BIG_parity(x1));
+            BIG_norm(x1);
+            BIG_fshr(x1,1);
+
+         //   if (BIG_parity(x1) != 0)
+         //   {
+         //       BIG_add(x1, p, x1);
+         //       BIG_norm(x1);
+         //   }
+         //   BIG_fshr(x1, 1);
         }
         while (BIG_parity(v) == 0)
         {
             BIG_fshr(v, 1);
-            if (BIG_parity(x2) != 0)
-            {
-                BIG_add(x2, p, x2);
-                BIG_norm(x2);
-            }
-            BIG_fshr(x2, 1);
+            BIG_add(t,x2,p);
+            BIG_cmove(x2,t,BIG_parity(x2));
+            BIG_norm(x2);
+            BIG_fshr(x2,1);
+
+         //   if (BIG_parity(x2) != 0)
+         //   {
+         //       BIG_add(x2, p, x2);
+         //       BIG_norm(x2);
+         //   }
+         //   BIG_fshr(x2, 1);
         }
         if (BIG_comp(u, v) >= 0)
         {
             BIG_sub(u, u, v);
             BIG_norm(u);
-            if (BIG_comp(x1, x2) >= 0) BIG_sub(x1, x1, x2);
-            else
-            {
-                BIG_sub(t, p, x2);
-                BIG_add(x1, x1, t);
-            }
+            BIG_add(t,x1,p);
+            BIG_cmove(x1,t,(BIG_comp(x1,x2)>>1)&1); /* move if x1<x2 */
+            BIG_sub(x1,x1,x2);
             BIG_norm(x1);
+
+
+            //if (BIG_comp(x1, x2) >= 0) BIG_sub(x1, x1, x2);
+            //else
+            //{
+            //    BIG_sub(t, p, x2);
+            //    BIG_add(x1, x1, t);
+            //}
+            //BIG_norm(x1);
         }
         else
         {
             BIG_sub(v, v, u);
             BIG_norm(v);
-            if (BIG_comp(x2, x1) >= 0) BIG_sub(x2, x2, x1);
-            else
-            {
-                BIG_sub(t, p, x1);
-                BIG_add(x2, x2, t);
-            }
+            BIG_add(t,x2,p);
+            BIG_cmove(x2,t,(BIG_comp(x2,x1)>>1)&1); /* move if x2<x1 */
+            BIG_sub(x2,x2,x1);
             BIG_norm(x2);
+
+            //if (BIG_comp(x2, x1) >= 0) BIG_sub(x2, x2, x1);
+            //else
+            //{
+            //    BIG_sub(t, p, x1);
+            //    BIG_add(x2, x2, t);
+            //}
+            //BIG_norm(x2);
         }
     }
-    if (BIG_comp(u, one) == 0)
-        BIG_copy(r, x1);
-    else
-        BIG_copy(r, x2);
+    BIG_copy(r,x1);
+    BIG_cmove(r,x2,BIG_comp(u,one)&1);
+    //if (BIG_comp(u, one) == 0)
+    //    BIG_copy(r, x1);
+    //else
+    //    BIG_copy(r, x2);
 }
-*/
+
 
 /* set x = x mod 2^m */
 void XXX::BIG_mod2m(BIG x, int m)

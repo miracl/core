@@ -840,9 +840,7 @@ func (r *BIG) Invmodp(p *BIG) {
 	if r.iszilch() {
 		return
 	}
-
 	u := NewBIGcopy(r)
-
 	v := NewBIGcopy(p)
 	x1 := NewBIGint(1)
 	x2 := NewBIGint(0)
@@ -851,49 +849,40 @@ func (r *BIG) Invmodp(p *BIG) {
 	for Comp(u, one) != 0 && Comp(v, one) != 0 {
 		for u.parity() == 0 {
 			u.fshr(1)
-			if x1.parity() != 0 {
-				x1.add(p)
-				x1.norm()
-			}
+			t.copy(x1)
+			t.add(p)
+			x1.cmove(t,x1.parity())
+			x1.norm()
 			x1.fshr(1)
 		}
 		for v.parity() == 0 {
 			v.fshr(1)
-			if x2.parity() != 0 {
-				x2.add(p)
-				x2.norm()
-			}
+			t.copy(x2)
+			t.add(p)
+			x2.cmove(t,x2.parity())
+			x2.norm()
 			x2.fshr(1)
 		}
 		if Comp(u, v) >= 0 {
 			u.sub(v)
 			u.norm()
-			if Comp(x1, x2) >= 0 {
-				x1.sub(x2)
-			} else {
-				t.copy(p)
-				t.sub(x2)
-				x1.add(t)
-			}
+			t.copy(x1)
+			t.add(p)
+			x1.cmove(t,(Comp(x1,x2)>>1)&1)
+			x1.sub(x2)
 			x1.norm()
 		} else {
 			v.sub(u)
 			v.norm()
-			if Comp(x2, x1) >= 0 {
-				x2.sub(x1)
-			} else {
-				t.copy(p)
-				t.sub(x1)
-				x2.add(t)
-			}
+			t.copy(x2)
+			t.add(p)
+			x2.cmove(t,(Comp(x2,x1)>>1)&1)
+			x2.sub(x1)
 			x2.norm()
 		}
 	}
-	if Comp(u, one) == 0 {
-		r.copy(x1)
-	} else {
-		r.copy(x2)
-	}
+	r.copy(x1)
+	r.cmove(x2,Comp(u,one)&1)
 }
 
 /* return this^e mod m */

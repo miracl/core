@@ -852,43 +852,40 @@ public class BIG {
         while (comp(u, one) != 0 && comp(v, one) != 0) {
             while (u.parity() == 0) {
                 u.fshr(1);
-                if (x1.parity() != 0) {
-                    x1.add(p);
-                    x1.norm();
-                }
+                t.copy(x1);
+                t.add(p);
+                x1.cmove(t,x1.parity());
+                x1.norm();
                 x1.fshr(1);
             }
             while (v.parity() == 0) {
                 v.fshr(1);
-                if (x2.parity() != 0) {
-                    x2.add(p);
-                    x2.norm();
-                }
+                t.copy(x2);
+                t.add(p);
+                x2.cmove(t,x2.parity());
+                x2.norm();
                 x2.fshr(1);
             }
             if (comp(u, v) >= 0) {
                 u.sub(v);
                 u.norm();
-                if (comp(x1, x2) >= 0) x1.sub(x2);
-                else {
-                    t.copy(p);
-                    t.sub(x2);
-                    x1.add(t);
-                }
+                t.copy(x1);
+                t.add(p);
+                x1.cmove(t,(comp(x1,x2)>>1)&1);
+                x1.sub(x2);
                 x1.norm();
             } else {
                 v.sub(u);
                 v.norm();
-                if (comp(x2, x1) >= 0) x2.sub(x1);
-                else {
-                    t.copy(p);
-                    t.sub(x1);
-                    x2.add(t);
-                }
+                t.copy(x2);
+                t.add(p);
+                x2.cmove(t,(comp(x2,x1)>>1)&1);
+                x2.sub(x1);
                 x2.norm();
             }
         }
-        if (comp(u, one) == 0) copy(x1);
-        else copy(x2);
+        copy(x1);
+        cmove(x2,comp(u,one)&1);
     }
 }
+
