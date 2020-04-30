@@ -108,6 +108,12 @@ public final class FP4 {
 		b=new FP2();
 	}
 
+	public FP4(int c,int d)
+	{
+		a=new FP2(c);
+		b=new FP2(d);
+	}
+
 	public FP4(FP4 x)
 	{
 		a=new FP2(x.a);

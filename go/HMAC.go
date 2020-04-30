@@ -368,10 +368,11 @@ func XOF_Expand(hlen int,olen int,DST []byte,MSG []byte) []byte {
 	}
 	H.Process(byte((olen >> 8) & 0xff));
 	H.Process(byte(olen & 0xff));
-	H.Process(byte(len(DST) & 0xff));
+
 	for i:=0;i<len(DST);i++ {
 		H.Process(DST[i])
 	}
+	H.Process(byte(len(DST) & 0xff));
 
 	H.Shake(OKM[:],olen)
 	return OKM
@@ -386,10 +387,11 @@ func XMD_Expand(hash int,hlen int,olen int,DST []byte,MSG []byte) []byte {
 	TMP[0]=byte((olen >> 8) & 0xff)
 	TMP[1]=byte(olen & 0xff)
 	TMP[2]=byte(0)
-	TMP[3]=byte(len(DST) & 0xff)
+
 	for j:=0;j<len(DST);j++ {
-		TMP[4+j]=DST[j]
+		TMP[3+j]=DST[j]
 	}
+	TMP[3+len(DST)]=byte(len(DST) & 0xff)
 	var H0=GPhashit(hash, hlen, 0, blk, MSG, -1, TMP)
 
 	var H1=make([]byte,hlen)
@@ -401,10 +403,11 @@ func XMD_Expand(hash int,hlen int,olen int,DST []byte,MSG []byte) []byte {
 			H1[j]^=H0[j]
 		}          
 		TMP2[0]=byte(i)
-		TMP2[1]=byte(len(DST) & 0xff)
+
 		for j:=0;j<len(DST);j++ {
-			TMP2[2+j]=DST[j]
+			TMP2[1+j]=DST[j]
 		}
+		TMP2[1+len(DST)]=byte(len(DST) & 0xff)
 
 		H1=GPhashit(hash, hlen, 0, 0, H1, -1, TMP2);
 		for j:=0;j<hlen && k<olen;j++ {

@@ -43,6 +43,8 @@ public struct CONFIG_FIELD{
     static let PM1D2:UInt = @M8@
     static public let MODTYPE =  @MT@   
     static let RIADZ:Int = @RZ@ 
+    static let RIADZG2A:Int = @RZA@
+    static let RIADZG2B:Int = @RZB@     
     static public let QNRI =  @QI@   
     static public let TOWER = @TW@
 

@@ -107,6 +107,12 @@ public final class FP8 {
 		b=new FP4();
 	}
 
+	public FP8(int c,int d)
+	{
+		a=new FP4(c);
+		b=new FP4(d);
+	}
+
 	public FP8(FP8 x)
 	{
 		a=new FP4(x.a);

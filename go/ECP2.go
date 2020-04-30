@@ -749,32 +749,60 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 
 /* Constant time Map to Point */
  func ECP2_map2point(H *FP2) *ECP2 {
-    // SWU method
+    // Shallue and van de Woestijne
     W:=NewFP2int(1)
 	B := NewFP2big(NewBIGints(CURVE_B))
     T:=NewFP2copy(H) /**/
-    s:=NewFPint(-3)
-    one:=NewFPint(1)
+//    s:=NewFPint(-3)
+//    one:=NewFPint(1)
 	if SEXTIC_TWIST == D_TYPE {
 		B.div_ip()
 	}
 	if SEXTIC_TWIST == M_TYPE {
 		B.mul_ip()
 	}
-    B.norm()
-    sgn:=T.sign() /**/
+	B.norm()
+	sgn:=T.sign() /**/
+
+	Z:=NewFP2ints(RIADZG2A,RIADZG2B);
+	X1:=NewFP2copy(Z)
+	X3:=NewFP2copy(X1)
+	A:=RHS2(X1)
+	T.sqr()
+	Y:=NewFP2copy(A); Y.mul(T)
+	T.copy(W); T.add(Y); T.norm()
+	Y.rsub(W); Y.norm()
+	NY:=NewFP2copy(T); NY.mul(Y); NY.inverse()
+	A.neg(); A.norm()
+	W.copy(A); W.imul(3); W.sqrt()
+	W.mul(Z)
+	W.mul(H); W.mul(Y); W.mul(NY)
+
+	X1.neg(); X1.norm(); X1.div2()
+	X2:=NewFP2copy(X1)
+	X1.sub(W); X1.norm()
+	X2.add(W); X2.norm()
+	A.add(A); A.add(A); A.norm()
+	T.sqr(); T.mul(NY); T.sqr()
+	A.mul(T)
+	Z.sqr(); Z.imul(3); T.copy(Z)
+	T.inverse()
+	A.mul(T)
+	X3.add(A); X3.norm()	
+
+/*
     w:=s.sqrt(nil)
     j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
 
-	S := NewFP2copy(T) /**/
-    S.pmul(w) /**/
-    Y := NewFP2copy(T) /**/
-    Y.sqr() /**/
-    Y.add(W) /**/
+	S := NewFP2copy(T) //
+    S.pmul(w) //
+    Y := NewFP2copy(T) //
+    Y.sqr() //
+    Y.add(W) //
     B.add(Y); B.norm(); B.inverse()
-    B.mul(S) /**/
+    B.mul(S) //
 
-    X1:=NewFP2copy(B); X1.mul(T) /**/
+    X1:=NewFP2copy(B); X1.mul(T) //
     Y.copy(NewFP2fp(j))
     X2:=NewFP2copy(X1); X2.sub(Y); X2.norm()
     X1.copy(X2); X1.neg(); X1.norm()
@@ -782,19 +810,20 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 
     B.sqr(); B.inverse()
     X3:=NewFP2copy(B); X3.add(W); X3.norm()
+*/
 
     Y.copy(RHS2(X2))
-    X1.cmove(X2,Y.qr())
-    Y.copy(RHS2(X3))
-    X1.cmove(X3,Y.qr())
+    X3.cmove(X2,Y.qr())
     Y.copy(RHS2(X1))
+    X3.cmove(X1,Y.qr())
+    Y.copy(RHS2(X3))
     Y.sqrt()
 
     ne:=Y.sign()^sgn
     W.copy(Y); W.neg(); W.norm()
     Y.cmove(W,ne)
 
-    return NewECP2fp2s(X1,Y);
+    return NewECP2fp2s(X3,Y);
 }
 
 /* Map octet string to curve point */

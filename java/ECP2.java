@@ -608,29 +608,58 @@ public final class ECP2 {
 /* Constant time Map to Point */
     public static ECP2 map2point(FP2 H)
     { 
-    // SWU method
+    // Shallue and van de Woestijne method.
         int sgn,ne;
         FP2 W=new FP2(1);
         FP2 B=new FP2(new BIG(ROM.CURVE_B));
         FP2 T=new FP2(H);  /**/
-        FP s=new FP(-3);
-        FP one=new FP(1);
+
         if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_ip();
         if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.mul_ip();
         B.norm();
         sgn=T.sign(); /**/
+
+        FP2 Z=new FP2(CONFIG_FIELD.RIADZG2A,CONFIG_FIELD.RIADZG2B);
+        FP2 X1=new FP2(Z);
+        FP2 X3=new FP2(X1);
+        FP2 A=RHS(X1);
+        T.sqr();
+        FP2 Y=new FP2(A); Y.mul(T);
+        T.copy(W); T.add(Y); T.norm();
+        Y.rsub(W); Y.norm();
+        FP2 NY=new FP2(T); NY.mul(Y); NY.inverse();
+        A.neg(); A.norm(); 
+        W.copy(A); W.imul(3); W.sqrt();
+        W.mul(Z);
+        W.mul(H); W.mul(Y); W.mul(NY);
+
+        X1.neg(); X1.norm(); X1.div2();
+        FP2 X2=new FP2(X1);
+        X1.sub(W); X1.norm();
+        X2.add(W); X2.norm();
+        A.add(A); A.add(A); A.norm();
+        T.sqr(); T.mul(NY); T.sqr();
+        A.mul(T);
+        Z.sqr(); Z.imul(3);
+        T.copy(Z);
+        T.inverse();
+        A.mul(T);
+        X3.add(A); X3.norm();
+
+
+/*
         FP w=s.sqrt(null);
         FP j=new FP(w); j.sub(one); j.norm(); j.div2();
     //System.out.print("s= "+w.toString()+"\n");
-        FP2 S=new FP2(T); /**/
-        S.pmul(w);        /**/
+        FP2 S=new FP2(T); //
+        S.pmul(w);        //
         FP2 Y=new FP2(T);
-        Y.sqr();          /**/
-        Y.add(W);         /**/
+        Y.sqr();          //
+        Y.add(W);         //
         B.add(Y); B.norm(); B.inverse();
-        B.mul(S);         /**/
+        B.mul(S);         //
 
-        FP2 X1=new FP2(B); X1.mul(T); /**/
+        FP2 X1=new FP2(B); X1.mul(T); //
         Y.copy(new FP2(j));
         FP2 X2=new FP2(X1); X2.sub(Y); X2.norm();
         X1.copy(X2); X1.neg(); X1.norm();
@@ -638,19 +667,20 @@ public final class ECP2 {
 
         B.sqr(); B.inverse();
         FP2 X3=new FP2(B); X3.add(W); X3.norm();
+*/
 
         Y.copy(RHS(X2));
-        X1.cmove(X2,Y.qr());
-        Y.copy(RHS(X3));
-        X1.cmove(X3,Y.qr());
+        X3.cmove(X2,Y.qr());
         Y.copy(RHS(X1));
+        X3.cmove(X1,Y.qr());
+        Y.copy(RHS(X3));
         Y.sqrt();
 
         ne=Y.sign()^sgn;
         W.copy(Y); W.neg(); W.norm();
         Y.cmove(W,ne);
 
-        return new ECP2(X1,Y);
+        return new ECP2(X3,Y);
     }
 
 /* Map octet string to curve point */

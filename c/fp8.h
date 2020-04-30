@@ -224,6 +224,14 @@ extern void FP8_YYY_inv(FP8_YYY *x, FP8_YYY *y);
 	@param x FP8 instance to be printed
  */
 extern void FP8_YYY_output(FP8_YYY *x);
+
+/**	@brief Divide an FP8 by 2
+ *
+	@param x FP8 instance, on exit = y/2
+	@param y FP8 instance
+ */
+extern void FP8_YYY_div2(FP8_YYY *x, FP8_YYY *y);
+
 /**	@brief Formats and outputs an FP8 to the console in raw form (for debugging)
  *
 	@param x FP8 instance to be printed

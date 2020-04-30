@@ -37,7 +37,8 @@ use crate::xxx::fp2::FP2;
 use crate::xxx::fp4::FP4;
 use crate::xxx::fp8::FP8;
 use crate::xxx::rom;
-use crate::xxx::fp::FP;
+use crate::xxx::fp;
+//use crate::xxx::fp::FP;
 use crate::xxx::dbig::DBIG;
 
 pub struct ECP8 {
@@ -1197,12 +1198,12 @@ impl ECP8 {
 /* Constant time Map to Point */
     #[allow(non_snake_case)]
     pub fn map2point(H: &FP8) -> ECP8 {
-    // SWU method
+    // Shallue and van de Woestijne
         let mut W=FP8::new_int(1);
         let mut B = FP8::new_fp4(&FP4::new_fp2(&FP2::new_big(&BIG::new_ints(&rom::CURVE_B))));
-        let T=FP8::new_copy(H);
-        let mut s=FP::new_int(-3);
-        let one=FP::new_int(1);
+        let mut T=FP8::new_copy(H);
+        //let mut s=FP::new_int(-3);
+        //let one=FP::new_int(1);
 		if ecp::SEXTIC_TWIST == ecp::D_TYPE {
             B.div_i();
         }
@@ -1211,6 +1212,34 @@ impl ECP8 {
         }
         B.norm();
         let sgn=T.sign();
+
+        let mut Z=FP8::new_ints(fp::RIADZG2A,fp::RIADZG2B);
+        let mut X1=FP8::new_copy(&Z);
+        let mut X3=FP8::new_copy(&X1);
+        let mut A=ECP8::rhs(&X1);
+        T.sqr();
+        let mut Y=FP8::new_copy(&A); Y.mul(&T);
+        T.copy(&W); T.add(&Y); T.norm();
+        Y.rsub(&W); Y.norm();
+        let mut NY=FP8::new_copy(&T); NY.mul(&Y); NY.inverse();
+        A.neg(); A.norm();
+        W.copy(&A); W.imul(3); W.sqrt();
+        W.mul(&Z);
+        W.mul(&H); W.mul(&Y); W.mul(&NY);
+
+        X1.neg(); X1.norm(); X1.div2();
+        let mut X2=FP8::new_copy(&X1);
+        X1.sub(&W); X1.norm();
+        X2.add(&W); X2.norm();
+        A.dbl(); A.dbl(); A.norm();
+        T.sqr(); T.mul(&NY); T.sqr();
+        A.mul(&T);
+        Z.sqr(); Z.imul(3); T.copy(&Z);
+        T.inverse();
+        A.mul(&T);
+        X3.add(&A); X3.norm();
+
+/*
         let w=s.sqrt(None);
         let mut j=FP::new_copy(&w); j.sub(&one); j.norm(); j.div2();
 
@@ -1230,19 +1259,19 @@ impl ECP8 {
 
         B.sqr(); B.inverse();
         let mut X3=FP8::new_copy(&B); X3.add(&W); X3.norm();
-
+*/
         Y.copy(&ECP8::rhs(&X2));
-        X1.cmove(&X2,Y.qr());
-        Y.copy(&ECP8::rhs(&X3));
-        X1.cmove(&X3,Y.qr());
+        X3.cmove(&X2,Y.qr());
         Y.copy(&ECP8::rhs(&X1));
+        X3.cmove(&X1,Y.qr());
+        Y.copy(&ECP8::rhs(&X3));
         Y.sqrt();
 
         let ne=Y.sign()^sgn;
         W.copy(&Y); W.neg(); W.norm();
         Y.cmove(&W,ne);
 
-        return ECP8::new_fp8s(&X1,&Y);
+        return ECP8::new_fp8s(&X3,&Y);
     }
 
 /* Map byte string to curve point */

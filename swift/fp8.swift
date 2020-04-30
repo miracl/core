@@ -60,6 +60,12 @@ public struct FP8 {
         b=FP4()
     }
 
+    init(_ c:Int,_ d:Int)
+    {
+        a=FP4(c)
+        b=FP4(d)
+    }
+
     init(_ x:FP8)
     {
         a=FP4(x.a)

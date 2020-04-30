@@ -61,6 +61,12 @@ public struct FP4 {
         b=FP2()
     }
     
+    init(_ c:Int,_ d:Int)
+    {
+        a=FP2(c)
+        b=FP2(d)
+    }
+
     init(_ x:FP4)
     {
         a=FP2(x.a)

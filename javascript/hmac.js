@@ -337,9 +337,11 @@ var HMAC = function(ctx) {
                 H.process(MSG[i]);
             H.process(((olen >> 8) & 0xff));
             H.process((olen & 0xff));
-            H.process(DST.length);
+
             for (var i=0;i<DST.length;i++ )
                 H.process(DST[i]);
+            H.process(DST.length);
+
             H.shake(OKM,olen);
             return OKM;
         },
@@ -355,9 +357,10 @@ var HMAC = function(ctx) {
             TMP[0]=(olen >> 8) & 0xff;
             TMP[1]=olen & 0xff
             TMP[2]=0;
-            TMP[3]=DST.length;
             for (var j=0;j<DST.length;j++)
-                TMP[4+j]=DST[j];
+                TMP[3+j]=DST[j];
+            TMP[3+DST.length]=DST.length;
+
             var H0=this.GPhashit(hash, hlen, 0, blk, MSG, -1, TMP);
 
             var k=0;
@@ -369,9 +372,9 @@ var HMAC = function(ctx) {
                 for (var j=0;j<hlen;j++)
                     H1[j]^=H0[j];
                 TMP2[0]=i;
-                TMP2[1]=DST.length;
                 for (var j=0;j<DST.length;j++)
-                    TMP2[2+j]=DST[j];
+                    TMP2[1+j]=DST[j];
+                TMP2[1+DST.length]=DST.length;
                 H1=this.GPhashit(hash, hlen, 0, 0, H1, -1, TMP2);
                 for (var j=0;j<hlen && k<olen;j++)
                     OKM[k++]=H1[j];

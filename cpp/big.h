@@ -615,6 +615,10 @@ extern void BIG_mod2m(BIG x, int m);
 	@return top half of result
  */
 
+
+extern int step1(BIG,BIG,BIG);
+extern void step2(BIG,BIG,BIG);
+
 #ifdef dchunk
 
 /* Method required to calculate x*y+c+r, bottom half in r, top half returned */

@@ -43,6 +43,8 @@
 #include "ecp_GOLDILOCKS.h"
 #include "ecp_SECP256K1.h"
 #include "ecp_BLS12381.h"
+#include "ecp2_BLS12381.h"
+
 
 using namespace core;
 
@@ -427,6 +429,87 @@ int htp_BLS12381(char *mess)
     return res;
 }
 
+/* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
+static void hash_to_field_BLS12381_G2(int hash,int hlen,BLS12381::FP2 *u,octet *DST,octet *M, int ctr)
+{
+    using namespace BLS12381;
+    using namespace BLS12381_BIG;
+    
+    int i,j,L,k,m;
+    BIG q,w1,w2,r;
+    DBIG dx;
+    char okm[1024],fd[256];
+    octet OKM = {0,sizeof(okm),okm};
+
+    BIG_rcopy(q, Modulus);
+    k=BIG_nbits(q);
+    BIG_rcopy(r, CURVE_Order);
+    m=BIG_nbits(r);
+    L=CEIL(k+CEIL(m,2),8);
+
+    //printf("L= %d\n",L);
+    XMD_Expand(hash,hlen,&OKM,2*L*ctr,DST,M);
+    for (i=0;i<ctr;i++)
+    {
+        for (j=0;j<L;j++)
+            fd[j]=OKM.val[2*i*L+j];
+        
+        BIG_dfromBytesLen(dx,fd,L);
+        BIG_dmod(w1,dx,q);
+        
+        for (j=0;j<L;j++)
+            fd[j]=OKM.val[(2*i+1)*L+j];
+        
+        BIG_dfromBytesLen(dx,fd,L);
+        BIG_dmod(w2,dx,q);
+
+        FP2_from_BIGs(&u[i],w1,w2);
+    }
+}
+
+int htp_BLS12381_G2(char *mess)
+{
+    using namespace BLS12381;
+    using namespace BLS12381_BIG;
+
+    int res=0;
+    FP2 u[2];
+    ECP2 P,P1;
+    char dst[50];
+    char msg[2000];
+    octet MSG = {0,sizeof(msg),msg};
+    octet DST = {0,sizeof(dst),dst};
+
+    printf("Random Access - message= %s\n",mess);
+    OCT_jstring(&MSG,mess);
+
+
+    OCT_jstring(&DST,(char *)"BLS12381G2_XMD:SHA-256_SVDW_RO_TESTGEN");
+    hash_to_field_BLS12381_G2(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,2);
+    printf("u[0]= "); FP2_output(&u[0]); printf("\n");
+    printf("u[1]= "); FP2_output(&u[1]); printf("\n");
+    ECP2_map2point(&P,&u[0]);
+    printf("Q[0]= "); ECP2_output(&P);
+    ECP2_map2point(&P1,&u[1]);
+    printf("Q[1]= "); ECP2_output(&P1);
+    ECP2_add(&P,&P1);
+    ECP2_cfp(&P);
+    ECP2_affine(&P);
+    printf("P= "); ECP2_output(&P); printf("\n");
+
+    printf("Non-Uniform\n");
+    OCT_clear(&DST);
+    OCT_jstring(&DST,(char *)"BLS12381G2_XMD:SHA-256_SVDW_NU_TESTGEN");
+    hash_to_field_BLS12381_G2(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,1);
+    printf("u[0]= "); FP2_output(&u[0]); printf("\n");
+    ECP2_map2point(&P,&u[0]);
+    printf("Q= "); ECP2_output(&P);
+
+    ECP2_cfp(&P);
+    ECP2_affine(&P);
+    printf("P= "); ECP2_output(&P); printf("\n");
+    return res;
+}
 
 int main()
 {
@@ -456,7 +539,6 @@ int main()
     htp_ED25519((char *)"abcdef0123456789");
     htp_ED25519((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-
     printf("\nTesting HTP for curve NIST256\n");
     htp_NIST256((char *)"");
     htp_NIST256((char *)"abc");
@@ -475,12 +557,17 @@ int main()
     htp_SECP256K1((char *)"abcdef0123456789");
     htp_SECP256K1((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-    printf("\nTesting HTP for curve BLS12381\n");
+    printf("\nTesting HTP for curve BLS12381_G1\n");
     htp_BLS12381((char *)"");
     htp_BLS12381((char *)"abc");
     htp_BLS12381((char *)"abcdef0123456789");
     htp_BLS12381((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
+    printf("\nTesting HTP for curve BLS12381_G2\n");
+    htp_BLS12381_G2((char *)"");
+    htp_BLS12381_G2((char *)"abc");
+    htp_BLS12381_G2((char *)"abcdef0123456789");
+    htp_BLS12381_G2((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     KILL_CSPRNG(&RNG);
 }

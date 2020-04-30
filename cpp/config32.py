@@ -243,8 +243,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 # Get Z for G1 and G2
     if isinstance(rz,list) :
         replace(fnameh,"@RZ@",rz[0])
+        replace(fnameh,"@RZA@",rz[1])
+        replace(fnameh,"@RZB@",rz[2])
     else :
-	    replace(fnameh,"@RZ@",rz)
+        replace(fnameh,"@RZ@",rz)
+        replace(fnameh,"@RZA@","0")
+        replace(fnameh,"@RZB@","0")
 
     itw=int(qi)%10
     replace(fnameh,"@QI@",str(itw))

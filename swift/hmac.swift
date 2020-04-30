@@ -299,10 +299,12 @@ public struct HMAC
 	    }
         H.process(UInt8((olen>>8)&0xff))
         H.process(UInt8(olen&0xff))
-        H.process(UInt8(DST.count & 0xff))
+
         for i in 0..<DST.count {
             H.process(DST[i])
         }
+        H.process(UInt8(DST.count & 0xff))
+
         H.shake(&OKM,olen)
         return OKM
     }
@@ -316,10 +318,12 @@ public struct HMAC
 	    TMP[0]=UInt8((olen >> 8) & 0xff)
 	    TMP[1]=UInt8(olen & 0xff)
 	    TMP[2]=UInt8(0)
-	    TMP[3]=UInt8(DST.count & 0xff)
+
 	    for j in 0..<DST.count {
-		    TMP[4+j]=DST[j]
+		    TMP[3+j]=DST[j]
 	    }
+	    TMP[3+DST.count]=UInt8(DST.count & 0xff)
+
 	    let H0=HMAC.GPhashit(hf, hlen, 0, blk, MSG, -1, TMP)
         var H1=[UInt8](repeating: 0,count: hlen)
         var TMP2=[UInt8](repeating: 0,count: DST.count+2)
@@ -330,10 +334,11 @@ public struct HMAC
                 H1[j]^=H0[j]
             }          
             TMP2[0]=UInt8(i)
-            TMP2[1]=UInt8(DST.count & 0xff)
+
             for j in 0..<DST.count {
-                TMP2[2+j]=DST[j]
+                TMP2[1+j]=DST[j]
             }
+            TMP2[1+DST.count]=UInt8(DST.count & 0xff)
 
             H1=HMAC.GPhashit(hf, hlen, 0, 0, H1, -1, TMP2)
             for j in 0..<hlen  {

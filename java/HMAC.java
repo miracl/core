@@ -280,9 +280,11 @@ public class HMAC {
             H.process(MSG[i]);
         H.process(olen/256);
         H.process(olen%256);
-        H.process(DST.length);
+
         for (int i=0;i<DST.length;i++ )
             H.process(DST[i]);
+        H.process(DST.length);
+
         H.shake(OKM,olen);
         return OKM;
     }
@@ -298,9 +300,10 @@ public class HMAC {
         TMP[0]=(byte)(olen/256);
         TMP[1]=(byte)(olen%256);
         TMP[2]=(byte)0;
-        TMP[3]=(byte)DST.length;
         for (int j=0;j<DST.length;j++)
-            TMP[4+j]=DST[j];
+            TMP[3+j]=DST[j];
+        TMP[3+DST.length]=(byte)DST.length;
+
         byte[] H0=GPhashit(hash, hlen, 0, blk, MSG, -1, TMP);
 
         int k=0;
@@ -312,9 +315,9 @@ public class HMAC {
             for (int j=0;j<hlen;j++)
                 H1[j]^=H0[j];
             TMP2[0]=(byte)i;
-            TMP2[1]=(byte)DST.length;
             for (int j=0;j<DST.length;j++)
-                TMP2[2+j]=DST[j];
+                TMP2[1+j]=DST[j];
+            TMP2[1+DST.length]=(byte)DST.length;
             H1=GPhashit(hash, hlen, 0, 0, H1, -1, TMP2);
             for (int j=0;j<hlen && k<olen;j++)
                 OKM[k++]=H1[j];

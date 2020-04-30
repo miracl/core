@@ -970,8 +970,9 @@ void ZZZ::ECP8_hap2point(ECP8 *Q,BIG h)
 void ZZZ::ECP8_map2point(ECP8 *Q,FP8 *H)
 {
     int sgn,ne;
-    FP8 X1,X2,X3,W,B,Y,S,T;
-    FP b,j,s,one;
+    FP8 X1,X2,X3,W,B,Y,T,Z,A,NY;
+    FP4 F,S;
+    FP b;
 
     FP_rcopy(&b,CURVE_B);
     FP8_from_FP(&B, &b);
@@ -984,10 +985,47 @@ void ZZZ::ECP8_map2point(ECP8 *Q,FP8 *H)
 #endif
 
     FP8_one(&W);
-    FP_one(&one);
     FP8_copy(&T,H);
     sgn=FP8_sign(&T);
-        
+ 
+    FP_from_int(&b,RIADZG2A_YYY);
+    FP4_from_FP(&F,&b);
+    FP_from_int(&b,RIADZG2B_YYY);
+    FP4_from_FP(&S,&b);
+    FP8_from_FP4s(&Z,&F,&S);
+    ECP8_rhs(&A,&Z);  // A=g(Z)
+    FP8_sqr(&T,&T);   
+    FP8_mul(&Y,&A,&T);   // tv1=u^2*g(Z)
+    FP8_add(&T,&W,&Y); FP8_norm(&T); // tv2=1+tv1
+    FP8_sub(&Y,&W,&Y); FP8_norm(&Y); // tv1=1-tv1 
+    FP8_mul(&NY,&T,&Y);
+    FP8_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
+    FP8_neg(&A,&A); FP8_norm(&A);     // -g(Z)
+    FP8_imul(&W,&A,3);    // -3*g(Z);
+    FP8_sqrt(&W,&W);
+    FP8_mul(&W,&W,&Z); // tv4=Z*sqrt(-3g(Z))
+    FP8_mul(&W,&W,H);
+    FP8_mul(&W,&W,&Y);
+    FP8_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4
+    FP8_copy(&X1,&Z);
+    FP8_copy(&X3,&X1);
+    FP8_neg(&X1,&X1); FP8_norm(&X1); FP8_div2(&X1,&X1); // -Z/2
+    FP8_copy(&X2,&X1);
+    FP8_sub(&X1,&X1,&W); FP8_norm(&X1);
+    FP8_add(&X2,&X2,&W); FP8_norm(&X2);
+    FP8_add(&A,&A,&A);
+    FP8_add(&A,&A,&A); 
+    FP8_norm(&A);      // -4*g(Z)
+    FP8_sqr(&T,&T);
+    FP8_mul(&T,&T,&NY);
+    FP8_sqr(&T,&T);    // (tv2^2*tv3)^2
+    FP8_mul(&A,&A,&T); // -4*g(Z)*(tv2^2*tv3)^2
+    FP8_sqr(&Z,&Z); FP8_imul(&Z,&Z,3); //3Z^2
+    FP8_inv(&T,&Z);
+    FP8_mul(&A,&A,&T);
+    FP8_add(&X3,&X3,&A); FP8_norm(&X3);   
+
+/*        
     FP_from_int(&s,-3);
     FP_sqrt(&s,&s,NULL);         // s=sqrt(-3)
     FP_sub(&j,&s,&one);     FP_norm(&j);
@@ -1010,19 +1048,20 @@ void ZZZ::ECP8_map2point(ECP8 *Q,FP8 *H)
     FP8_sqr(&B,&B);
     FP8_inv(&B,&B);
     FP8_add(&X3,&B,&W);     FP8_norm(&X3);
-    
+*/    
+
     ECP8_rhs(&W,&X2);
-    FP8_cmove(&X1,&X2,FP8_qr(&W));
-    ECP8_rhs(&W,&X3);
-    FP8_cmove(&X1,&X3,FP8_qr(&W));
+    FP8_cmove(&X3,&X2,FP8_qr(&W));
     ECP8_rhs(&W,&X1);
+    FP8_cmove(&X3,&X1,FP8_qr(&W));
+    ECP8_rhs(&W,&X3);
     FP8_sqrt(&Y,&W);
     
     ne=FP8_sign(&Y)^sgn;
     FP8_neg(&W,&Y); FP8_norm(&W);
     FP8_cmove(&Y,&W,ne);
  
-    ECP8_set(Q,&X1,&Y);
+    ECP8_set(Q,&X3,&Y);
 }
 
 /* Map octet to point on G2 */

@@ -74,7 +74,7 @@ public struct FP2
         b=FP(x.b)
     }
 
-    init(_ c:FP,_ d:FP)
+    public init(_ c:FP,_ d:FP)
     {
         a=FP(c)
         b=FP(d)
@@ -372,7 +372,7 @@ public struct FP2
         self.cmove(nr,sgn)    
     }
     /* output to hex string */
-    func toString() -> String
+    public func toString() -> String
     {
         return ("["+a.toString()+","+b.toString()+"]")
     }

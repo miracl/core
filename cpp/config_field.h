@@ -44,6 +44,8 @@
 #define MAXXES_YYY @SH@
 #define QNRI_YYY @QI@
 #define RIADZ_YYY @RZ@
+#define RIADZG2A_YYY @RZA@
+#define RIADZG2B_YYY @RZB@
 #define TOWER_YYY @TW@
 
 #endif

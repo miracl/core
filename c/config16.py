@@ -237,7 +237,17 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"@NBT@",nbt)
     replace(fnameh,"@M8@",m8)
     replace(fnameh,"@MT@",mt)
-    replace(fnameh,"@RZ@",rz)
+#    replace(fnameh,"@RZ@",rz)
+
+# Get Z for G1 and G2
+    if isinstance(rz,list) :
+        replace(fnameh,"@RZ@",rz[0])
+        replace(fnameh,"@RZA@",rz[1])
+        replace(fnameh,"@RZB@",rz[2])
+    else :
+        replace(fnameh,"@RZ@",rz)
+        replace(fnameh,"@RZA@","0")
+        replace(fnameh,"@RZB@","0")
 
     itw=int(qi)%10
     replace(fnameh,"@QI@",str(itw))
@@ -468,9 +478,9 @@ while ptr<max:
 # Typically "field" describes the modulus, and "curve" is the common name for the elliptic curve
 # Next give the number base used for 32 bit architecture, as n where the base is 2^n (note that these must be fixed for the same "big" name, if is ever re-used for another curve)
 # m8 max m such that 2^m | modulus-1
-# rz Z value for hash_to_point
+# rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
 # modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
-# i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0)
+# i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
 # pairing_friendly is BN, BLS or NOT (if not pairing friendly)
 # if pairing friendly. M or D type twist, and sign of the family parameter x
@@ -491,10 +501,10 @@ while ptr<max:
 
 
     if x==4:
-        curveset("254","BN254","BN254","13","1","-1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
+        curveset("254","BN254","BN254","13","1",["-1","0","-1"],"NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
         pfcurve_selected=True
     if x==5:
-        curveset("254","BN254CX","BN254CX","13","-1","NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
+        curveset("254","BN254CX","BN254CX","13",["-1","0","-1"],"NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
         pfcurve_selected=True
 
 # rsaset(big,ring,bit_bits_in_base,multiplier)

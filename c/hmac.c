@@ -235,10 +235,11 @@ void XOF_Expand(int hlen,octet *OKM,int olen,octet *DST,octet *M)
     for (i=0;i<M->len;i++) SHA3_process(&SHA3,M->val[i]);
     SHA3_process(&SHA3,olen/256);
     SHA3_process(&SHA3,olen%256);
-    SHA3_process(&SHA3,DST->len);
 
     for (i=0;i<DST->len;i++)
         SHA3_process(&SHA3,DST->val[i]);
+    SHA3_process(&SHA3,DST->len);
+
 
     SHA3_shake(&SHA3,OKM->val,olen);
     OKM->len=olen;
@@ -258,14 +259,14 @@ void XMD_Expand(int hash, int hlen,octet *OKM,int olen,octet *DST,octet *M)
     blk=blksize(hash,hlen);
     OCT_jint(&TMP,olen,2);
     OCT_jint(&TMP,0,1);
-    OCT_jint(&TMP,DST->len,1);
     OCT_joctet(&TMP,DST);
+    OCT_jint(&TMP,DST->len,1);
 
     GPhash(hash,hlen,&H0,0,blk,M,-1,&TMP);
     OCT_empty(&TMP);
     OCT_jint(&TMP,1,1);
-    OCT_jint(&TMP,DST->len,1);
     OCT_joctet(&TMP,DST);
+    OCT_jint(&TMP,DST->len,1);
 
     GPhash(hash,hlen,&H1,0,0,&H0,-1,&TMP);
     OCT_empty(OKM);
@@ -275,8 +276,8 @@ void XMD_Expand(int hash, int hlen,octet *OKM,int olen,octet *DST,octet *M)
         OCT_xor(&H1,&H0);
         OCT_empty(&TMP);
         OCT_jint(&TMP,i,1);
-        OCT_jint(&TMP,DST->len,1);
         OCT_joctet(&TMP,DST);
+        OCT_jint(&TMP,DST->len,1);
         GPhash(hash,hlen,&H1,0,0,&H1,-1,&TMP);
         OCT_joctet(OKM,&H1);
     }

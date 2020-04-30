@@ -797,8 +797,9 @@ void ZZZ::ECP4_hap2point(ECP4 *Q,BIG h)
 void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
 {
     int sgn,ne;
-    FP4 X1,X2,X3,W,B,Y,S,T;
-    FP b,j,s,one;
+    FP4 X1,X2,X3,W,B,Y,T,Z,A,NY;
+    FP2 F,S;
+    FP b;
 
     FP_rcopy(&b,CURVE_B);
     FP4_from_FP(&B, &b);
@@ -811,10 +812,46 @@ void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
 #endif
 
     FP4_one(&W);
-    FP_one(&one);
     FP4_copy(&T,H);
     sgn=FP4_sign(&T);
-        
+     
+    FP2_from_ints(&F,RIADZG2A_YYY,0);
+    FP2_from_ints(&S,RIADZG2B_YYY,0);
+    FP4_from_FP2s(&Z,&F,&S);
+    ECP4_rhs(&A,&Z);  // A=g(Z)
+    FP4_sqr(&T,&T);   
+    FP4_mul(&Y,&A,&T);   // tv1=u^2*g(Z)
+    FP4_add(&T,&W,&Y); FP4_norm(&T); // tv2=1+tv1
+    FP4_sub(&Y,&W,&Y); FP4_norm(&Y); // tv1=1-tv1 
+    FP4_mul(&NY,&T,&Y);
+    FP4_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
+    FP4_neg(&A,&A); FP4_norm(&A);     // -g(Z)
+    FP4_imul(&W,&A,3);    // -3*g(Z);
+    FP4_sqrt(&W,&W);
+    FP4_mul(&W,&W,&Z); // tv4=Z*sqrt(-3g(Z))
+    FP4_mul(&W,&W,H);
+    FP4_mul(&W,&W,&Y);
+    FP4_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4
+    FP4_copy(&X1,&Z);
+    FP4_copy(&X3,&X1);
+    FP4_neg(&X1,&X1); FP4_norm(&X1); FP4_div2(&X1,&X1); // -Z/2
+    FP4_copy(&X2,&X1);
+    FP4_sub(&X1,&X1,&W); FP4_norm(&X1);
+    FP4_add(&X2,&X2,&W); FP4_norm(&X2);
+    FP4_add(&A,&A,&A);
+    FP4_add(&A,&A,&A); 
+    FP4_norm(&A);      // -4*g(Z)
+    FP4_sqr(&T,&T);
+    FP4_mul(&T,&T,&NY);
+    FP4_sqr(&T,&T);    // (tv2^2*tv3)^2
+    FP4_mul(&A,&A,&T); // -4*g(Z)*(tv2^2*tv3)^2
+    FP4_sqr(&Z,&Z); FP4_imul(&Z,&Z,3); //3Z^2
+    FP4_inv(&T,&Z);
+    FP4_mul(&A,&A,&T);
+    FP4_add(&X3,&X3,&A); FP4_norm(&X3);
+
+
+/*        
     FP_from_int(&s,-3);
     FP_sqrt(&s,&s,NULL);         // s=sqrt(-3)
     FP_sub(&j,&s,&one);     FP_norm(&j);
@@ -837,19 +874,20 @@ void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
     FP4_sqr(&B,&B);
     FP4_inv(&B,&B);
     FP4_add(&X3,&B,&W);     FP4_norm(&X3);
-    
+*/    
+
     ECP4_rhs(&W,&X2);
-    FP4_cmove(&X1,&X2,FP4_qr(&W));
-    ECP4_rhs(&W,&X3);
-    FP4_cmove(&X1,&X3,FP4_qr(&W));
+    FP4_cmove(&X3,&X2,FP4_qr(&W));
     ECP4_rhs(&W,&X1);
+    FP4_cmove(&X3,&X1,FP4_qr(&W));
+    ECP4_rhs(&W,&X3);
     FP4_sqrt(&Y,&W);
     
     ne=FP4_sign(&Y)^sgn;
     FP4_neg(&W,&Y); FP4_norm(&W);
     FP4_cmove(&Y,&W,ne);
  
-    ECP4_set(Q,&X1,&Y);
+    ECP4_set(Q,&X3,&Y);
 }
 
 /* Map octet to point on G2 */

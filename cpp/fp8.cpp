@@ -616,6 +616,13 @@ void YYY::FP8_xtr_pow2(FP8 *r, FP8 *ck, FP8 *cl, FP8 *ckml, FP8 *ckm2l, BIG a, B
 
 /* New stuff for ECp8 support */
 
+/* Set w=x/2 */
+void YYY::FP8_div2(FP8 *w, FP8 *x)
+{
+    FP4_div2(&(w->a), &(x->a));
+    FP4_div2(&(w->b), &(x->b));
+}
+
 /* Move b to a if d=1 */
 void YYY::FP8_cmove(FP8 *f, FP8 *g, int d)
 {

@@ -58,6 +58,13 @@ impl FP4 {
         return f;
     }
 
+    pub fn new_ints(a: isize,b: isize) -> FP4 {
+        let mut f = FP4::new();
+        f.a.copy(&FP2::new_int(a));
+        f.b.copy(&FP2::new_int(b));
+        return f;
+    }
+
     pub fn new_copy(x: &FP4) -> FP4 {
         let mut f = FP4::new();
         f.a.copy(&x.a);

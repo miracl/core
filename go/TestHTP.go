@@ -288,6 +288,61 @@ func htp_BLS12381(mess []byte) {
 
 }
 
+func hash_to_field2_BLS12381(hash int,hlen int,DST []byte,M []byte,ctr int) []*BLS12381.FP2 {
+	var u []*BLS12381.FP2
+	q := BLS12381.NewBIGints(BLS12381.Modulus)
+	k := q.Nbits()
+	r := BLS12381.NewBIGints(BLS12381.CURVE_Order)
+	m := r.Nbits();
+	L:= ceil(k+ceil(m,2),8)
+	var fd=make([]byte,L)
+	OKM:=core.XMD_Expand(hash,hlen,2*L*ctr,DST,M)
+    for i:=0;i<ctr;i++ {
+        for j:=0;j<L;j++ {
+            fd[j]=OKM[2*i*L+j];
+        }
+		dx:=BLS12381.DBIG_fromBytes(fd)
+		w1:=BLS12381.NewFPbig(dx.Mod(q))
+
+        for j:=0;j<L;j++ {
+            fd[j]=OKM[(2*i+1)*L+j];
+        }
+		dx=BLS12381.DBIG_fromBytes(fd)
+		w2:=BLS12381.NewFPbig(dx.Mod(q))
+		u=append(u,BLS12381.NewFP2fps(w1,w2))
+    }
+	return u;
+}
+
+func htp2_BLS12381(mess []byte) {
+	
+	fmt.Println("Random Access - message= "+string(mess))
+	DST := []byte("BLS12381G2_XMD:SHA-256_SVDW_RO_TESTGEN")
+	u:=hash_to_field2_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,2)
+	fmt.Printf("u[0]= %s\n",u[0].ToString())
+	fmt.Printf("u[1]= %s\n",u[1].ToString())
+	P:=BLS12381.ECP2_map2point(u[0])
+	fmt.Printf("Q[0]= %s\n",P.ToString())
+	P1:=BLS12381.ECP2_map2point(u[1])
+	fmt.Printf("Q[0]= %s\n",P1.ToString())
+	P.Add(P1)
+	P.Cfp()
+	P.Affine();
+	fmt.Printf("P= %s\n\n",P.ToString())
+
+	fmt.Printf("Non-Uniform\n")
+    DST=[]byte("BLS12381G2_XMD:SHA-256_SVDW_NU_TESTGEN");
+    u=hash_to_field2_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,1);
+	fmt.Printf("u= %s\n",u[0].ToString())
+	P=BLS12381.ECP2_map2point(u[0])
+	fmt.Printf("Q= %s\n",P.ToString())
+	P.Cfp()
+	P.Affine();
+	fmt.Printf("P= %s\n\n",P.ToString())
+
+}
+
+
 func main() {
     fmt.Printf("\nTesting HTP for curve ED25519\n");
 	htp_ED25519([]byte(""))
@@ -319,5 +374,10 @@ func main() {
 	htp_BLS12381([]byte("abcdef0123456789"))
 	htp_BLS12381([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
+    fmt.Printf("\nTesting HTP for curve BLS12381_G2\n");
+	htp2_BLS12381([]byte(""))
+	htp2_BLS12381([]byte("abc"))
+	htp2_BLS12381([]byte("abcdef0123456789"))
+	htp2_BLS12381([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
 }

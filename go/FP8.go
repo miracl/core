@@ -58,6 +58,14 @@ func NewFP8int(a int) *FP8 {
 	return F
 }
 
+/* Constructors */
+func NewFP8ints(a int,b int) *FP8 {
+	F := new(FP8)
+	F.a = NewFP4int(a)
+	F.b = NewFP4int(b)
+	return F
+}
+
 func NewFP8copy(x *FP8) *FP8 {
 	F := new(FP8)
 	F.a = NewFP4copy(x.a)

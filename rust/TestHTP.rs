@@ -330,6 +330,70 @@ fn htp_bls12381(mess: &str) {
     println!("P= {}",P.tostring());
 }
 
+fn hash_to_field2_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::bls12381::fp2::FP2;2] {
+
+    use core::bls12381::big::BIG;
+    use core::bls12381::dbig::DBIG;
+    use core::bls12381::fp::FP;
+    use core::bls12381::fp2::FP2;
+    use core::bls12381::rom;
+
+    let mut u: [FP2; 2] = [FP2::new(),FP2::new()];
+
+    let q = BIG::new_ints(&rom::MODULUS);
+    let k=q.nbits();
+    let r = BIG::new_ints(&rom::CURVE_ORDER);
+    let m=r.nbits();
+    let L=ceil(k+ceil(m,2),8);
+    let mut okm: [u8;512]=[0;512];
+    hmac::xmd_expand(hash,hlen,&mut okm,2*L*ctr,&dst,&msg);
+    let mut fd: [u8;256]=[0;256];
+    for i in 0..ctr {
+        for j in 0..L {
+            fd[j]=okm[2*i*L+j];
+        }
+		let mut dx=DBIG::frombytes(&fd[0..L]);
+		let w1=FP::new_big(&dx.dmod(&q));
+
+        for j in 0..L {
+            fd[j]=okm[(2*i+1)*L+j];
+        }
+		dx=DBIG::frombytes(&fd[0..L]);
+		let w2=FP::new_big(&dx.dmod(&q));
+		u[i].copy(&FP2::new_fps(&w1,&w2));
+    }
+
+    return u;
+}
+
+fn htp2_bls12381(mess: &str) {
+    use core::bls12381::ecp;
+    use core::bls12381::ecp2::ECP2;
+    println!("Random Access - message= {}",mess);
+    let m = mess.as_bytes();
+    let mut dst = "BLS12381G2_XMD:SHA-256_SVDW_RO_TESTGEN".as_bytes();
+    let mut u=hash_to_field2_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
+    println!("u[0]= {}",u[0].tostring());
+    println!("u[1]= {}",u[1].tostring());
+    let mut P=ECP2::map2point(&u[0]);
+    println!("Q[0]= {}",P.tostring());
+    let P1=ECP2::map2point(&u[1]);
+    println!("Q[1]= {}",P1.tostring());
+    P.add(&P1);
+    P.cfp();
+    P.affine();
+    println!("P= {}",P.tostring());
+
+    println!("\nNon-Uniform");
+    dst = "BLS12381G2_XMD:SHA-256_SVDW_NU_TESTGEN".as_bytes();
+    u=hash_to_field2_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
+    println!("u[0]= {}",u[0].tostring());
+    P=ECP2::map2point(&u[0]);
+    println!("Q= {}",P.tostring());
+    P.cfp();
+    P.affine();
+    println!("P= {}",P.tostring());
+}
 
 fn main() {
     println!("\nTesting HTP for curve ed25519\n");
@@ -356,10 +420,16 @@ fn main() {
     htp_secp256k1("abcdef0123456789");
     htp_secp256k1("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-    println!("\nTesting HTP for curve bls12381\n");
+    println!("\nTesting HTP for curve bls12381_G1\n");
     htp_bls12381("");
     htp_bls12381("abc");
     htp_bls12381("abcdef0123456789");
     htp_bls12381("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+    println!("\nTesting HTP for curve bls12381_G2\n");
+    htp2_bls12381("");
+    htp2_bls12381("abc");
+    htp2_bls12381("abcdef0123456789");
+    htp2_bls12381("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
 }

@@ -725,15 +725,15 @@ func ECP4_hap2point(h *BIG) *ECP4 {
 
 /* Constant time Map to Point */
 func ECP4_map2point(H *FP4) *ECP4 {
-    // SWU method
+    // Shallue and van de Woestijne
     W:=NewFP4int(1)
 
 	b2 := NewFP2big(NewBIGints(CURVE_B))
 	B := NewFP4fp2(b2)
 
     T:=NewFP4copy(H)
-    s:=NewFPint(-3)
-    one:=NewFPint(1)
+//    s:=NewFPint(-3)
+//    one:=NewFPint(1)
 	if SEXTIC_TWIST == D_TYPE {
 		B.div_i()
 	}
@@ -742,6 +742,33 @@ func ECP4_map2point(H *FP4) *ECP4 {
 	}
     B.norm()
     sgn:=T.sign()
+
+	Z:=NewFP4ints(RIADZG2A,RIADZG2B);
+	X1:=NewFP4copy(Z)
+	X3:=NewFP4copy(X1)
+	A:=RHS4(X1)
+	T.sqr()
+	Y:=NewFP4copy(A); Y.mul(T)
+	T.copy(W); T.add(Y); T.norm()
+	Y.rsub(W); Y.norm()
+	NY:=NewFP4copy(T); NY.mul(Y); NY.inverse()
+	A.neg(); A.norm()
+	W.copy(A); W.imul(3); W.sqrt()
+	W.mul(Z)
+	W.mul(H); W.mul(Y); W.mul(NY)
+
+	X1.neg(); X1.norm(); X1.div2()
+	X2:=NewFP4copy(X1)
+	X1.sub(W); X1.norm()
+	X2.add(W); X2.norm()
+	A.add(A); A.add(A); A.norm()
+	T.sqr(); T.mul(NY); T.sqr()
+	A.mul(T)
+	Z.sqr(); Z.imul(3); T.copy(Z)
+	T.inverse()
+	A.mul(T)
+	X3.add(A); X3.norm()	
+/*
     w:=s.sqrt(nil)
     j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
 
@@ -761,19 +788,20 @@ func ECP4_map2point(H *FP4) *ECP4 {
 
     B.sqr(); B.inverse()
     X3:=NewFP4copy(B); X3.add(W); X3.norm()
+*/
 
     Y.copy(RHS4(X2))
-    X1.cmove(X2,Y.qr())
-    Y.copy(RHS4(X3))
-    X1.cmove(X3,Y.qr())
+    X3.cmove(X2,Y.qr())
     Y.copy(RHS4(X1))
+    X3.cmove(X1,Y.qr())
+    Y.copy(RHS4(X3))
     Y.sqrt()
 
     ne:=Y.sign()^sgn
     W.copy(Y); W.neg(); W.norm()
     Y.cmove(W,ne)
 
-    return NewECP4fp4s(X1,Y);
+    return NewECP4fp4s(X3,Y);
 }
 
 /* Map octet string to curve point */

@@ -840,7 +840,7 @@ var ECP4 = function(ctx) {
 /* Constant time Map to Point */
     ECP4.map2point = function(H)
     {  
-        // SWU method
+        // Shallue and van de Woestijne method.
         var sgn,ne;
         var W=new ctx.FP4(1);
 
@@ -849,13 +849,40 @@ var ECP4 = function(ctx) {
         var B = new ctx.FP4(c);
 
         var T=new ctx.FP4(H);
-        var s=new ctx.FP(-3);
-        var one=new ctx.FP(1);
+ //       var s=new ctx.FP(-3);
+ //       var one=new ctx.FP(1);
 
         if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.D_TYPE) B.div_i();
         if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) B.times_i();
         B.norm();
         sgn=T.sign();
+
+        var Z=new ctx.FP4(ctx.FP.RIADZG2A,ctx.FP.RIADZG2B);
+        var X1=new ctx.FP4(Z);
+        var X3=new ctx.FP4(X1);
+        var A=ECP4.RHS(X1);
+        T.sqr();
+        var Y=new ctx.FP4(A); Y.mul(T);
+        T.copy(W); T.add(Y); T.norm();
+        Y.rsub(W); Y.norm();
+        var NY=new ctx.FP4(T); NY.mul(Y); NY.inverse();
+        A.neg(); A.norm(); 
+        W.copy(A); W.imul(3); W.sqrt();
+        W.mul(Z);
+        W.mul(H); W.mul(Y); W.mul(NY);
+
+        X1.neg(); X1.norm(); X1.div2();
+        var X2=new ctx.FP4(X1);
+        X1.sub(W); X1.norm();
+        X2.add(W); X2.norm();
+        A.add(A); A.add(A); A.norm();
+        T.sqr(); T.mul(NY); T.sqr();
+        A.mul(T);
+        Z.sqr(); Z.imul(3); T.copy(Z);
+        T.inverse();
+        A.mul(T);
+        X3.add(A); X3.norm();
+/*
         var w=s.sqrt(null);
         var j=new ctx.FP(w); j.sub(one); j.norm(); j.div2();
 
@@ -875,12 +902,12 @@ var ECP4 = function(ctx) {
 
         B.sqr(); B.inverse();
         var X3=new ctx.FP4(B); X3.add(W); X3.norm();
-
+*/
         Y.copy(ECP4.RHS(X2));
-        X1.cmove(X2,Y.qr());
-        Y.copy(ECP4.RHS(X3));
-        X1.cmove(X3,Y.qr());
+        X3.cmove(X2,Y.qr());
         Y.copy(ECP4.RHS(X1));
+        X3.cmove(X1,Y.qr());
+        Y.copy(ECP4.RHS(X3));
         Y.sqrt();
 
         ne=Y.sign()^sgn;
@@ -888,7 +915,7 @@ var ECP4 = function(ctx) {
         Y.cmove(W,ne);
 
         var P=new ECP4();
-        P.setxy(X1,Y);
+        P.setxy(X3,Y);
         return P;
     };
 

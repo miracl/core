@@ -342,10 +342,11 @@ pub fn xof_expand(hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],msg: &[u8]) 
     }
     h.process(((olen >> 8) & 0xff) as u8);
     h.process((olen & 0xff) as u8);
-    h.process((dst.len() & 0xff) as u8);
+
     for i in 0..dst.len() {
         h.process(dst[i]);
     }
+    h.process((dst.len() & 0xff) as u8);
 
     h.shake(okm,olen);
 }
@@ -361,10 +362,12 @@ pub fn xmd_expand(hash: usize,hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],
     tmp[0]=((olen >> 8) & 0xff) as u8;
     tmp[1]=(olen & 0xff) as u8;
     tmp[2]=0;
-    tmp[3]=(dst.len() & 0xff) as u8;
+
     for j in 0..dst.len() {
-    	tmp[4+j]=dst[j];
+    	tmp[3+j]=dst[j];
     }
+    tmp[3+dst.len()]=(dst.len() & 0xff) as u8;
+
     GPhashit(hash, hlen, &mut h0, 0, blk, Some(msg), -1, Some(&tmp[0..dst.len()+4]));
 
     let mut k=0;
@@ -374,10 +377,11 @@ pub fn xmd_expand(hash: usize,hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],
             h2[j]=h1[j];
 		}          
 		tmp[0]=i as u8;
-		tmp[1]=(dst.len() & 0xff) as u8;
+
 		for j in 0..dst.len() {
-			tmp[2+j]=dst[j];
+			tmp[1+j]=dst[j];
 		}
+		tmp[1+dst.len()]=(dst.len() & 0xff) as u8;
 
         GPhashit(hash, hlen, &mut h1, 0, 0, Some(&h2[0..hlen]), -1, Some(&tmp[0..dst.len()+2]));
         for j in 0..hlen {

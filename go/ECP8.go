@@ -856,7 +856,7 @@ func ECP8_hap2point(h *BIG) *ECP8 {
 
 /* Deterministic mapping of Fp to point on curve */
 func ECP8_map2point(H *FP8) *ECP8 {
-    // SWU method
+    // Shallue and van de Woestijne
     W:=NewFP8int(1)
 
 	b2 := NewFP2big(NewBIGints(CURVE_B))
@@ -864,8 +864,8 @@ func ECP8_map2point(H *FP8) *ECP8 {
 	B := NewFP8fp4(b4)
 
     T:=NewFP8copy(H)
-    s:=NewFPint(-3)
-    one:=NewFPint(1)
+//    s:=NewFPint(-3)
+//    one:=NewFPint(1)
 	if SEXTIC_TWIST == D_TYPE {
 		B.div_i()
 	}
@@ -874,6 +874,34 @@ func ECP8_map2point(H *FP8) *ECP8 {
 	}
     B.norm()
     sgn:=T.sign()
+
+	Z:=NewFP8ints(RIADZG2A,RIADZG2B);
+	X1:=NewFP8copy(Z)
+	X3:=NewFP8copy(X1)
+	A:=RHS8(X1)
+	T.sqr()
+	Y:=NewFP8copy(A); Y.mul(T)
+	T.copy(W); T.add(Y); T.norm()
+	Y.rsub(W); Y.norm()
+	NY:=NewFP8copy(T); NY.mul(Y); NY.inverse()
+	A.neg(); A.norm()
+	W.copy(A); W.imul(3); W.sqrt()
+	W.mul(Z)
+	W.mul(H); W.mul(Y); W.mul(NY)
+
+	X1.neg(); X1.norm(); X1.div2()
+	X2:=NewFP8copy(X1)
+	X1.sub(W); X1.norm()
+	X2.add(W); X2.norm()
+	A.add(A); A.add(A); A.norm()
+	T.sqr(); T.mul(NY); T.sqr()
+	A.mul(T)
+	Z.sqr(); Z.imul(3); T.copy(Z)
+	T.inverse()
+	A.mul(T)
+	X3.add(A); X3.norm()
+
+/*
     w:=s.sqrt(nil)
     j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
 
@@ -893,19 +921,19 @@ func ECP8_map2point(H *FP8) *ECP8 {
 
     B.sqr(); B.inverse()
     X3:=NewFP8copy(B); X3.add(W); X3.norm()
-
+*/
     Y.copy(RHS8(X2))
-    X1.cmove(X2,Y.qr())
-    Y.copy(RHS8(X3))
-    X1.cmove(X3,Y.qr())
+    X3.cmove(X2,Y.qr())
     Y.copy(RHS8(X1))
+    X3.cmove(X1,Y.qr())
+    Y.copy(RHS8(X3))
     Y.sqrt()
 
     ne:=Y.sign()^sgn
     W.copy(Y); W.neg(); W.norm()
     Y.cmove(W,ne)
 
-    return NewECP8fp8s(X1,Y);
+    return NewECP8fp8s(X3,Y);
 }
 
 /* Map octet string to curve point */

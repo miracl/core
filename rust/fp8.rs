@@ -58,6 +58,13 @@ impl FP8 {
         return f;
     }
 
+    pub fn new_ints(a: isize,b: isize) -> FP8 {
+        let mut f = FP8::new();
+        f.a.copy(&FP4::new_int(a));
+        f.b.copy(&FP4::new_int(b));
+        return f;
+    }
+
     pub fn new_copy(x: &FP8) -> FP8 {
         let mut f = FP8::new();
         f.a.copy(&x.a);

@@ -676,10 +676,11 @@ void ZZZ::ECP2_hap2point(ECP2 *Q,BIG h)
 /* Constant time Map FP2 to Point in G2 */
 void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
 {
-// SWU method. Assumes p=3 mod 4.
+// Shallue and van de Woestijne method. Assumes p=3 mod 4.
     int sgn,ne;
-    FP2 X1,X2,X3,W,B,Y,S,T;
-    FP b,j,s,one;
+    FP2 X1,X2,X3,W,B,Y,T,Z,A,NY;
+    FP b;
+//    FP b,j,s,one;
 
     FP_rcopy(&b,CURVE_B);
     FP2_from_FP(&B, &b);
@@ -690,12 +691,44 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_mul_ip(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
 #endif
     FP2_norm(&B);
-
     FP2_one(&W);
-    FP_one(&one);
     FP2_copy(&T,H);
     sgn=FP2_sign(&T);
-        
+
+    FP2_from_ints(&Z,RIADZG2A_YYY,RIADZG2B_YYY);
+    ECP2_rhs(&A,&Z);  // A=g(Z)
+    FP2_sqr(&T,&T);   
+    FP2_mul(&Y,&A,&T);   // tv1=u^2*g(Z)
+    FP2_add(&T,&W,&Y); FP2_norm(&T); // tv2=1+tv1
+    FP2_sub(&Y,&W,&Y); FP2_norm(&Y); // tv1=1-tv1 
+    FP2_mul(&NY,&T,&Y);
+    FP2_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
+    FP2_neg(&A,&A); FP2_norm(&A);     // -g(Z)
+    FP2_imul(&W,&A,3);    // -3*g(Z);
+    FP2_sqrt(&W,&W);
+    FP2_mul(&W,&W,&Z); // tv4=Z*sqrt(-3g(Z))
+    FP2_mul(&W,&W,H);
+    FP2_mul(&W,&W,&Y);
+    FP2_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4
+    FP2_copy(&X1,&Z);
+    FP2_copy(&X3,&X1);
+    FP2_neg(&X1,&X1); FP2_norm(&X1); FP2_div2(&X1,&X1); // -Z/2
+    FP2_copy(&X2,&X1);
+    FP2_sub(&X1,&X1,&W); FP2_norm(&X1);
+    FP2_add(&X2,&X2,&W); FP2_norm(&X2);
+    FP2_add(&A,&A,&A);
+    FP2_add(&A,&A,&A); 
+    FP2_norm(&A);      // -4*g(Z)
+    FP2_sqr(&T,&T);
+    FP2_mul(&T,&T,&NY);
+    FP2_sqr(&T,&T);    // (tv2^2*tv3)^2
+    FP2_mul(&A,&A,&T); // -4*g(Z)*(tv2^2*tv3)^2
+    FP2_sqr(&Z,&Z); FP2_imul(&Z,&Z,3); //3Z^2
+    FP2_inv(&T,&Z);
+    FP2_mul(&A,&A,&T);
+    FP2_add(&X3,&X3,&A); FP2_norm(&X3);
+
+/*
     FP_from_int(&s,-3);
     FP_sqrt(&s,&s,NULL);    // s=sqrt(-3)
     FP_sub(&j,&s,&one);     FP_norm(&j);
@@ -719,24 +752,21 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_sqr(&B,&B);
     FP2_inv(&B,&B);
     FP2_add(&X3,&B,&W);     FP2_norm(&X3);
-    
-//printf("X1= ");FP2_output(&X1); printf("\n");
-//printf("X2= ");FP2_output(&X2); printf("\n");
-//printf("X3= ");FP2_output(&X3); printf("\n");
 
+*/
 
     ECP2_rhs(&W,&X2);
-    FP2_cmove(&X1,&X2,FP2_qr(&W));
-    ECP2_rhs(&W,&X3);
-    FP2_cmove(&X1,&X3,FP2_qr(&W));
+    FP2_cmove(&X3,&X2,FP2_qr(&W));
     ECP2_rhs(&W,&X1);
+    FP2_cmove(&X3,&X1,FP2_qr(&W));
+    ECP2_rhs(&W,&X3);
     FP2_sqrt(&Y,&W);
     
     ne=FP2_sign(&Y)^sgn;
     FP2_neg(&W,&Y); FP2_norm(&W);
     FP2_cmove(&Y,&W,ne);
  
-    ECP2_set(Q,&X1,&Y);
+    ECP2_set(Q,&X3,&Y);
 }
 
 /* Map octet to point on G2 */
