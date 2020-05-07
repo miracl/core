@@ -974,7 +974,7 @@ public final class ECP {
 		copy(mul(c));
 	}
 
-/* Hunt and Peck a BIG to a curve point */
+/* Hunt and Peck a BIG to a curve point 
     public static ECP hap2point(BIG h)
     {
         ECP P;
@@ -989,7 +989,7 @@ public final class ECP {
 			if (!P.is_infinity()) break;
 		}
         return P;
-    }
+    } */
 
 /* Constant time Map to Point */
     public static ECP map2point(FP h)
@@ -1279,7 +1279,7 @@ public final class ECP {
         return P;
     }
 
-/* Map byte string to curve point */
+/* Map byte string to curve point 
 	public static ECP mapit(byte[] h)
 	{
 		BIG q=new BIG(ROM.Modulus);
@@ -1288,7 +1288,7 @@ public final class ECP {
 		ECP P=hap2point(x);
 		P.cfp();
 		return P;
-	}
+	} */
 
 	public static ECP generator()
 	{

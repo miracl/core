@@ -806,7 +806,7 @@ var ECP4 = function(ctx) {
         return ((x >> 31) & 1);
     };
 
-/* Hunt and Peck a BIG to a curve point */
+/* Hunt and Peck a BIG to a curve point 
     ECP4.hap2point = function(h)
     { 
         var one=new ctx.BIG(1);
@@ -822,7 +822,7 @@ var ECP4 = function(ctx) {
             x.norm();
         }
         return Q;
-    };      
+    };   */   
 
 /* Constant time Map to Point */
     ECP4.map2point = function(H)
@@ -906,7 +906,7 @@ var ECP4 = function(ctx) {
         return P;
     };
 
-/* Map octet string to curve point */
+/* Map octet string to curve point 
 	ECP4.mapit = function(h)
 	{
 		var q=new ctx.BIG(0);
@@ -917,7 +917,7 @@ var ECP4 = function(ctx) {
 		var Q=ECP4.hap2point(x);
 		Q.cfp();
         return Q;
-    };
+    }; */
 
     ECP4.frob_constants = function() {
         var fa = new ctx.BIG(0),

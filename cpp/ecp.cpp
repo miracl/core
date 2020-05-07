@@ -1500,6 +1500,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 }
 
 /* Hunt and Peck a BIG to a curve point */
+/*
 void ZZZ::ECP_hap2point(ECP *P,BIG h)
 {
     BIG x;
@@ -1515,8 +1516,9 @@ void ZZZ::ECP_hap2point(ECP *P,BIG h)
 		if (!ECP_isinf(P)) break;
 	}
 }
-
+*/
 /* Map octet to point */
+/*
 void ZZZ::ECP_mapit(ECP *P, octet *W)
 {
     BIG q, x;
@@ -1529,7 +1531,7 @@ void ZZZ::ECP_mapit(ECP *P, octet *W)
     ECP_hap2point(P,x);
     ECP_cfp(P);
 }
-
+*/
 int ZZZ::ECP_generator(ECP *G)
 {
     BIG x, y;

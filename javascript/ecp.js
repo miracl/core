@@ -1310,7 +1310,7 @@ var ECP = function(ctx) {
         return r;
     };
 
-/* Hunt and Peck a BIG to a curve point */
+/* Hunt and Peck a BIG to a curve point 
     ECP.hap2point = function(h) {
         var P = new ECP();
         var x=new ctx.BIG(h);
@@ -1325,7 +1325,7 @@ var ECP = function(ctx) {
             if (!P.is_infinity()) break;
         }
         return P;
-    };       
+    };       */
 
 /* Constant time Map to Point */
     ECP.map2point = function(h) {
@@ -1621,7 +1621,7 @@ var ECP = function(ctx) {
 
 
 
-
+/*
     ECP.mapit = function(h) {
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_FIELD.Modulus);
@@ -1631,6 +1631,6 @@ var ECP = function(ctx) {
         P.cfp();
         return P;
     };
-
+*/
     return ECP;
 };

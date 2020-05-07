@@ -926,6 +926,7 @@ void ECP8_ZZZ_mul16(ECP8_ZZZ *P, ECP8_ZZZ Q[16], BIG_XXX u[16])
 }
 
 /* Hunt and Peck a BIG to a curve point */
+/*
 void ECP8_ZZZ_hap2point(ECP8_ZZZ *Q,BIG_XXX h)
 {
     BIG_XXX one,hv;
@@ -937,7 +938,7 @@ void ECP8_ZZZ_hap2point(ECP8_ZZZ *Q,BIG_XXX h)
 
     for (;;)
     {
-        FP2_YYY_from_BIGs(&X2,one,hv);  /*******/
+        FP2_YYY_from_BIGs(&X2,one,hv); 
 		FP4_YYY_from_FP2(&X4,&X2);
 		FP8_YYY_from_FP4(&X8,&X4);
         if (ECP8_ZZZ_setx(Q,&X8,0)) break;
@@ -945,7 +946,7 @@ void ECP8_ZZZ_hap2point(ECP8_ZZZ *Q,BIG_XXX h)
         BIG_XXX_norm(hv);
     }
 }
-
+*/
 /* Constant time Map to Point in G2 */
 void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,FP8_YYY *H)
 {
@@ -1045,6 +1046,7 @@ void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,FP8_YYY *H)
 }
 
 /* Map octet to point */
+/*
 void ECP8_ZZZ_mapit(ECP8_ZZZ *Q, octet *W)
 {
     BIG_XXX q, x;
@@ -1057,7 +1059,7 @@ void ECP8_ZZZ_mapit(ECP8_ZZZ *Q, octet *W)
     ECP8_ZZZ_hap2point(Q,x);   
     ECP8_ZZZ_cfp(Q);
 }
-
+*/
 /* cofactor product */
 void ECP8_ZZZ_cfp(ECP8_ZZZ *Q)
 {

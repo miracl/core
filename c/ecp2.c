@@ -642,6 +642,7 @@ void ECP2_ZZZ_mul4(ECP2_ZZZ *P, ECP2_ZZZ Q[4], BIG_XXX u[4])
 }
 
 /* Hunt and Peck a BIG to a curve point */
+/*
 void ECP2_ZZZ_hap2point(ECP2_ZZZ *Q,BIG_XXX h)
 {
     BIG_XXX one,hv;
@@ -656,7 +657,7 @@ void ECP2_ZZZ_hap2point(ECP2_ZZZ *Q,BIG_XXX h)
         BIG_XXX_norm(hv);
     }
 }
-
+*/
 /* Constant time Map to Point in G2 */
 void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
 { // SWU method. Assumes p=3 mod 4.
@@ -751,6 +752,7 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
 }
 
 /* Map octet to point */
+/*
 void ECP2_ZZZ_mapit(ECP2_ZZZ *Q, octet *W)
 {
     BIG_XXX q, x;
@@ -764,7 +766,7 @@ void ECP2_ZZZ_mapit(ECP2_ZZZ *Q, octet *W)
     ECP2_ZZZ_hap2point(Q,x);
     ECP2_ZZZ_cfp(Q);
 }
-
+*/
 /* cofactor product */
 void ECP2_ZZZ_cfp(ECP2_ZZZ *Q)
 {

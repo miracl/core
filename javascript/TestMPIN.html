@@ -77,8 +77,7 @@
 function BN254() {
 	var ctx = new CTX('BN254');
 	mywindow=window.open();
-
-	mywindow.document.write("<br> BN254 Pairing-Friendly Curve "+  "<br>");
+	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BN254 <br>");
 
 	var i,res;
 	var result;
@@ -87,234 +86,95 @@ function BN254() {
 	var EFS=ctx.MPIN.EFS;
 	var EAS=ctx.ECP.AESKEY;
 
-	var sha=ctx.ECP.HASH_TYPE;
-
 	var G1S=2*EFS+1; /* Group 1 Size */
 	var G2S=4*EFS+1; /* Group 2 Size */
 
 	var S=[];
 	var SST=[];
 	var TOKEN = [];
-	var PERMIT = [];
 	var SEC = [];
-	var xID = [];
-	var xCID = [];
+	var U = [];
 	var X= [];
 	var Y= [];
-	var E=[];
-	var F=[];
 	var HCID=[];
-	var HID=[];
-	var HTID=[];
-
-	var G1=[];
-	var G2=[];
-	var R=[];
-	var Z=[];
-	var W=[];
-	var T=[];
-	var CK=[];
-	var SK=[];
-
 	var HSID=[];
 
-/* Set configuration */
-	var PERMITS=true;
-	var PINERROR=true;
-	var FULL=true;
-    var ONE_PASS=false;
-
 	var RAW=[];
-	var rng=new ctx.RAND();
 
+ 	var dst = "BN254G1_XMD:SHA-256_SVDW_NU_MPIN";
+	var DST = ctx.MPIN.asciitobytes(dst); 
+
+	var rng=new ctx.RAND();
 	rng.clean();
 	for (i=0;i<100;i++) RAW[i]=i;
-
 	rng.seed(100,RAW);
 
-/* Trusted Authority set-up */
+// Trusted Authority (TA) set-up 
 	ctx.MPIN.RANDOM_GENERATE(rng,S);
 	mywindow.document.write("M-Pin Master Secret s: 0x"+ctx.MPIN.bytestostring(S) + "<br>");
  
- /* Create Client Identity */
- 	var IDstr = "testUser@miracl.com";
-	var CLIENT_ID = ctx.MPIN.asciitobytes(IDstr);  
-	HCID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);  /* Either Client or TA calculates Hash(ID) - you decide! */
-		
-	mywindow.document.write("Client ID= "+ctx.MPIN.bytestostring(CLIENT_ID) + "<br>");
+ // Create Client Identity 
+ 		var IDstr = "testUser@miracl.com";
+		var CLIENT_ID = ctx.MPIN.asciitobytes(IDstr);  
+		ctx.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,HCID);
+		mywindow.document.write("Client ID Hashed to Curve= "+ctx.MPIN.bytestostring(HCID) + "<br>");
 
-/* Client and Server are issued secrets by DTA */
-	ctx.MPIN.GET_SERVER_SECRET(S,SST);
-	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN.bytestostring(SST) + "<br>");
+// Client approaches Trusted Authority and is issued secret
 
 	ctx.MPIN.GET_CLIENT_SECRET(S,HCID,TOKEN);
 	mywindow.document.write("Client Secret CS: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");     
+// TA sends Client secret to Client
+
+// Server is issued secret by TA
+	ctx.MPIN.GET_SERVER_SECRET(S,SST);
+//	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN.bytestostring(SST) + "<br>");
+
 	
-/* Client extracts PIN from secret to create Token */
-	var pin=1234;
-	mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
-	var rtn=ctx.MPIN.EXTRACT_PIN(sha,CLIENT_ID,pin,TOKEN);
-	if (rtn != 0)
-		mywindow.document.write("Failed to extract PIN " + "<br>");  
-
-	mywindow.document.write("Client Token TK: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");        
-
-	if (FULL)
-	{
-		ctx.MPIN.PRECOMPUTE(TOKEN,HCID,G1,G2);
-	}
-
-	var date;
-	if (PERMITS)
-	{
-		date=ctx.MPIN.today();
-/* Client gets "Time Token" permit from DTA */ 	
-		ctx.MPIN.GET_CLIENT_PERMIT(sha,date,S,HCID,PERMIT);
-		mywindow.document.write("Time Permit TP: 0x"+ctx.MPIN.bytestostring(PERMIT) + "<br>");   
-
-/* This encoding makes Time permit look random - Elligator squared */
-		ctx.MPIN.ENCODING(rng,PERMIT);
-		mywindow.document.write("Encoded Time Permit TP: 0x"+ctx.MPIN.bytestostring(PERMIT) + "<br>");   
-		ctx.MPIN.DECODING(PERMIT);
-		mywindow.document.write("Decoded Time Permit TP: 0x"+ctx.MPIN.bytestostring(PERMIT) + "<br>");   
-	}
-	else date=0;
-
-	pin=parseInt(mywindow.prompt("Enter PIN= "));
-
-/* Set date=0 and PERMIT=null if time permits not in use
-
-Client First pass: Inputs CLIENT_ID, optional RNG, pin, TOKEN and PERMIT. Output xID = x.H(CLIENT_ID) and re-combined secret SEC
-If PERMITS are is use, then date!=0 and PERMIT is added to secret and xCID = x.(H(CLIENT_ID)+H_T(date|H(CLIENT_ID)))
-Random value x is supplied externally if RNG=null, otherwise generated and passed out by RNG
-
-If Time Permits OFF set xCID = null, HTID=null and use xID and HID only
-If Time permits are ON, AND pin error detection is required then all of xID, xCID, HID and HTID are required
-If Time permits are ON, AND pin error detection is NOT required, set xID=null, HID=null and use xCID and HTID only.
-
-
-*/
-	var pxID=xID;
-	var pxCID=xCID;
-	var pHID=HID;
-	var pHTID=HTID;
-	var pE=E;
-	var pF=F;
-	var pPERMIT=PERMIT;
-	var prHID;
-
-	if (date!=0)
-	{
-		prHID=pHTID;
-		if (!PINERROR)
-		{
-			pxID=null;
-			//	pHID=null;
-		}
-	}
-	else
-	{
-		prHID=pHID;
-		pPERMIT=null;
-		pxCID=null;
-		pHTID=null;
-	}
-	if (!PINERROR)
-	{
-		pE=null;
-		pF=null;
-	}
-
-	if (ONE_PASS)
-	{
-		mywindow.document.write("MPIN Single Pass " + "<br>");   
-		timeValue = ctx.MPIN.GET_TIME();
-		mywindow.document.write("Epoch " + timeValue + "<br>");   
-
-		rtn=ctx.MPIN.CLIENT(sha,date,CLIENT_ID,rng,X,pin,TOKEN,SEC,pxID,pxCID,pPERMIT,timeValue,Y);
-
+// Client extracts PIN from secret to create Token 
+		var pin=1234;
+		mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
+		var rtn=ctx.MPIN.EXTRACT_PIN(HCID,pin,TOKEN);
 		if (rtn != 0)
-		mywindow.document.write("FAILURE: CLIENT rtn: " + rtn + "<br>");   
+			mywindow.document.write("Failed to extract PIN " + "<br>");  
+		mywindow.document.write("Client Token TK: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");        
 
-		if (FULL)
-		{
-			HCID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN.GET_G1_MULTIPLE(rng,1,R,HCID,Z);  /* Also Send Z=r.ID to Server, remember random r */
-		}
+// MPin Protocol
 
-		rtn=ctx.MPIN.SERVER(sha,date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,pE,pF,CLIENT_ID,timeValue);
-		if (rtn != 0)
-			mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+// Client enters ID and PIN
+		pin=parseInt(mywindow.prompt("Enter PIN= "));
 
-		if (FULL)
-		{
-			HSID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN.GET_G1_MULTIPLE(rng,0,W,prHID,T);  /* Also send T=w.ID to client, remember random w  */
-		}
-	}
-	else 
-	{
-		mywindow.document.write("MPIN Multi Pass " + "<br>");   
-		rtn=ctx.MPIN.CLIENT_1(sha,date,CLIENT_ID,rng,X,pin,TOKEN,SEC,pxID,pxCID,pPERMIT);
+		rtn=ctx.MPIN.CLIENT_1(HCID,rng,X,pin,TOKEN,SEC,U);
 		if (rtn != 0)
 			mywindow.document.write("FAILURE: CLIENT_1 rtn: " + rtn + "<br>");   
-  
-		if (FULL)
-		{
-			HCID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN.GET_G1_MULTIPLE(rng,1,R,HCID,Z);  /* Also Send Z=r.ID to Server, remember random r */
-		}
+
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.  
     
-  /* Server calculates H(ID) and H(T|H(ID)) (if time permits enabled), and maps them to points on the curve HID and HTID resp. */
-		ctx.MPIN.SERVER_1(sha,date,CLIENT_ID,pHID,pHTID);
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
+				ctx.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,HSID);	
     
-  /* Server generates Random number Y and sends it to Client */
-		ctx.MPIN.RANDOM_GENERATE(rng,Y);
+// Server generates Random number Y and sends it to Client
+				ctx.MPIN.RANDOM_GENERATE(rng,Y);
     
-		if (FULL)
-		{
-			HSID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN.GET_G1_MULTIPLE(rng,0,W,prHID,T);  /* Also send T=w.ID to client, remember random w  */
-		}
-    
-  /* Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC */
+// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
 		rtn=ctx.MPIN.CLIENT_2(X,Y,SEC);
 		if (rtn != 0)
 			mywindow.document.write("FAILURE: CLIENT_2 rtn: " + rtn + "<br>");  
-  /* Server Second pass. Inputs hashed client id, random Y, -(x+y)*SEC, xID and xCID and Server secret SST. E and F help kangaroos to find error. */
-  /* If PIN error not required, set E and F = NULL */
-		rtn=ctx.MPIN.SERVER_2(date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,pE,pF);
-    
-		if (rtn != 0)
-			mywindow.document.write("FAILURE: SERVER_2 rtn: " + rtn+ "<br>");  
-    
-	}
-    		  
 
-	if (rtn == ctx.MPIN.BAD_PIN)
-	{
-		mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
-		if (PINERROR)
-		{
-			var err=ctx.MPIN.KANGAROO(E,F);
-			if (err!=0) mywindow.document.write("(Client PIN is out by "+err + ")<br>");
-		}
-	}
-	else 
-	{
-		mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
-		if (FULL)
-		{
-			H=ctx.MPIN.HASH_ALL(sha,HCID,pxID,pxCID,SEC,Y,Z,T);
-			ctx.MPIN.CLIENT_KEY(sha,G1,G2,pin,R,X,H,T,CK);
-			
-			mywindow.document.write("Client Key =  0x"+ctx.MPIN.bytestostring(CK) + "<br>");    
-			H=ctx.MPIN.HASH_ALL(sha,HSID,pxID,pxCID,SEC,Y,Z,T);
-			ctx.MPIN.SERVER_KEY(sha,Z,SST,W,H,pHID,pxID,pxCID,SK);
-			mywindow.document.write("Server Key =  0x"+ctx.MPIN.bytestostring(SK) + "<br>");    
-		}
-	}
+// Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
+				rtn=ctx.MPIN.SERVER(HSID,Y,SST,U,SEC);
+    
+				if (rtn != 0)
+					mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+    
+				if (rtn == ctx.MPIN.BAD_PIN)
+				{
+					mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
 
+				}
+				else 
+				{
+					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
+				}
 }
 
 // BLS12383 context
@@ -322,7 +182,7 @@ function BLS12383() {
 	var ctx = new CTX('BLS12383');
 	mywindow=window.open();
 
-	mywindow.document.write("<br> BLS12 Pairing-Friendly Curve "+  "<br>");
+	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BLS12383 <br>");
 
 	var i,res;
 	var result;
@@ -331,235 +191,95 @@ function BLS12383() {
 	var EFS=ctx.MPIN.EFS;
 	var EAS=ctx.ECP.AESKEY;
 
-	var sha=ctx.ECP.HASH_TYPE;
-
 	var G1S=2*EFS+1; /* Group 1 Size */
 	var G2S=4*EFS+1; /* Group 2 Size */
 
 	var S=[];
 	var SST=[];
 	var TOKEN = [];
-	var PERMIT = [];
 	var SEC = [];
-	var xID = [];
-	var xCID = [];
+	var U = [];
 	var X= [];
 	var Y= [];
-	var E=[];
-	var F=[];
 	var HCID=[];
-	var HID=[];
-	var HTID=[];
-
-	var G1=[];
-	var G2=[];
-	var R=[];
-	var Z=[];
-	var W=[];
-	var T=[];
-	var CK=[];
-	var SK=[];
-
 	var HSID=[];
-
-/* Set configuration */
-	var PERMITS=true;
-	var PINERROR=true;
-	var FULL=true;
-    var ONE_PASS=false;
-
 	var RAW=[];
-	var rng=new ctx.RAND();
 
+ 	var dst = "BLS12383G1_XMD:SHA-256_SVDW_NU_MPIN";
+	var DST = ctx.MPIN.asciitobytes(dst); 
+
+	var rng=new ctx.RAND();
 	rng.clean();
 	for (i=0;i<100;i++) RAW[i]=i;
-
 	rng.seed(100,RAW);
 
 
-/* Trusted Authority set-up */
+// Trusted Authority (TA) set-up 
 	ctx.MPIN.RANDOM_GENERATE(rng,S);
 	mywindow.document.write("M-Pin Master Secret s: 0x"+ctx.MPIN.bytestostring(S) + "<br>");
  
- /* Create Client Identity */
- 	var IDstr = "testUser@miracl.com";
-	var CLIENT_ID = ctx.MPIN.asciitobytes(IDstr);  
-	HCID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);  /* Either Client or TA calculates Hash(ID) - you decide! */
-		
-	mywindow.document.write("Client ID= "+ctx.MPIN.bytestostring(CLIENT_ID) + "<br>");
+ // Create Client Identity 
+ 		var IDstr = "testUser@miracl.com";
+		var CLIENT_ID = ctx.MPIN.asciitobytes(IDstr);  
+		ctx.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,HCID);
+		mywindow.document.write("Client ID Hashed to Curve= "+ctx.MPIN.bytestostring(HCID) + "<br>");
 
-/* Client and Server are issued secrets by DTA */
-	ctx.MPIN.GET_SERVER_SECRET(S,SST);
-	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN.bytestostring(SST) + "<br>");
+// Client approaches Trusted Authority and is issued secret
 
 	ctx.MPIN.GET_CLIENT_SECRET(S,HCID,TOKEN);
 	mywindow.document.write("Client Secret CS: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");     
+// TA sends Client secret to Client
+
+// Server is issued secret by TA
+	ctx.MPIN.GET_SERVER_SECRET(S,SST);
+//	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN.bytestostring(SST) + "<br>");
+
 	
-/* Client extracts PIN from secret to create Token */
-	var pin=1234;
-	mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
-	var rtn=ctx.MPIN.EXTRACT_PIN(sha,CLIENT_ID,pin,TOKEN);
-	if (rtn != 0)
-		mywindow.document.write("Failed to extract PIN " + "<br>");  
-
-	mywindow.document.write("Client Token TK: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");        
-
-	if (FULL)
-	{
-		ctx.MPIN.PRECOMPUTE(TOKEN,HCID,G1,G2);
-	}
-
-	var date;
-	if (PERMITS)
-	{
-		date=ctx.MPIN.today();
-/* Client gets "Time Token" permit from DTA */ 	
-		ctx.MPIN.GET_CLIENT_PERMIT(sha,date,S,HCID,PERMIT);
-		mywindow.document.write("Time Permit TP: 0x"+ctx.MPIN.bytestostring(PERMIT) + "<br>");   
-
-/* This encoding makes Time permit look random - Elligator squared */
-		ctx.MPIN.ENCODING(rng,PERMIT);
-		mywindow.document.write("Encoded Time Permit TP: 0x"+ctx.MPIN.bytestostring(PERMIT) + "<br>");   
-		ctx.MPIN.DECODING(PERMIT);
-		mywindow.document.write("Decoded Time Permit TP: 0x"+ctx.MPIN.bytestostring(PERMIT) + "<br>");   
-	}
-	else date=0;
-
-	pin=parseInt(mywindow.prompt("Enter PIN= "));
-
-/* Set date=0 and PERMIT=null if time permits not in use
-
-Client First pass: Inputs CLIENT_ID, optional RNG, pin, TOKEN and PERMIT. Output xID = x.H(CLIENT_ID) and re-combined secret SEC
-If PERMITS are is use, then date!=0 and PERMIT is added to secret and xCID = x.(H(CLIENT_ID)+H_T(date|H(CLIENT_ID)))
-Random value x is supplied externally if RNG=null, otherwise generated and passed out by RNG
-
-If Time Permits OFF set xCID = null, HTID=null and use xID and HID only
-If Time permits are ON, AND pin error detection is required then all of xID, xCID, HID and HTID are required
-If Time permits are ON, AND pin error detection is NOT required, set xID=null, HID=null and use xCID and HTID only.
-
-
-*/
-	var pxID=xID;
-	var pxCID=xCID;
-	var pHID=HID;
-	var pHTID=HTID;
-	var pE=E;
-	var pF=F;
-	var pPERMIT=PERMIT;
-	var prHID;
-
-	if (date!=0)
-	{
-		prHID=pHTID;
-		if (!PINERROR)
-		{
-			pxID=null;
-			//	pHID=null;
-		}
-	}
-	else
-	{
-		prHID=pHID;
-		pPERMIT=null;
-		pxCID=null;
-		pHTID=null;
-	}
-	if (!PINERROR)
-	{
-		pE=null;
-		pF=null;
-	}
-
-	if (ONE_PASS)
-	{
-		mywindow.document.write("MPIN Single Pass " + "<br>");   
-		timeValue = ctx.MPIN.GET_TIME();
-		mywindow.document.write("Epoch " + timeValue + "<br>");   
-
-		rtn=ctx.MPIN.CLIENT(sha,date,CLIENT_ID,rng,X,pin,TOKEN,SEC,pxID,pxCID,pPERMIT,timeValue,Y);
-
+// Client extracts PIN from secret to create Token 
+		var pin=1234;
+		mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
+		var rtn=ctx.MPIN.EXTRACT_PIN(HCID,pin,TOKEN);
 		if (rtn != 0)
-		mywindow.document.write("FAILURE: CLIENT rtn: " + rtn + "<br>");   
+			mywindow.document.write("Failed to extract PIN " + "<br>");  
+		mywindow.document.write("Client Token TK: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");        
 
-		if (FULL)
-		{
-			HCID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN.GET_G1_MULTIPLE(rng,1,R,HCID,Z);  /* Also Send Z=r.ID to Server, remember random r */
-		}
+// MPin Protocol
 
-		rtn=ctx.MPIN.SERVER(sha,date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,pE,pF,CLIENT_ID,timeValue);
-		if (rtn != 0)
-			mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+// Client enters ID and PIN
+		pin=parseInt(mywindow.prompt("Enter PIN= "));
 
-		if (FULL)
-		{
-			HSID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN.GET_G1_MULTIPLE(rng,0,W,prHID,T);  /* Also send T=w.ID to client, remember random w  */
-		}
-	}
-	else 
-	{
-		mywindow.document.write("MPIN Multi Pass " + "<br>");   
-		rtn=ctx.MPIN.CLIENT_1(sha,date,CLIENT_ID,rng,X,pin,TOKEN,SEC,pxID,pxCID,pPERMIT);
+		rtn=ctx.MPIN.CLIENT_1(HCID,rng,X,pin,TOKEN,SEC,U);
 		if (rtn != 0)
 			mywindow.document.write("FAILURE: CLIENT_1 rtn: " + rtn + "<br>");   
-  
-		if (FULL)
-		{
-			HCID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN.GET_G1_MULTIPLE(rng,1,R,HCID,Z);  /* Also Send Z=r.ID to Server, remember random r */
-		}
+
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.  
     
-  /* Server calculates H(ID) and H(T|H(ID)) (if time permits enabled), and maps them to points on the curve HID and HTID resp. */
-		ctx.MPIN.SERVER_1(sha,date,CLIENT_ID,pHID,pHTID);
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
+				ctx.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,HSID);	
     
-  /* Server generates Random number Y and sends it to Client */
-		ctx.MPIN.RANDOM_GENERATE(rng,Y);
+// Server generates Random number Y and sends it to Client
+				ctx.MPIN.RANDOM_GENERATE(rng,Y);
     
-		if (FULL)
-		{
-			HSID=ctx.MPIN.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN.GET_G1_MULTIPLE(rng,0,W,prHID,T);  /* Also send T=w.ID to client, remember random w  */
-		}
-    
-  /* Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC */
+// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
 		rtn=ctx.MPIN.CLIENT_2(X,Y,SEC);
 		if (rtn != 0)
 			mywindow.document.write("FAILURE: CLIENT_2 rtn: " + rtn + "<br>");  
-  /* Server Second pass. Inputs hashed client id, random Y, -(x+y)*SEC, xID and xCID and Server secret SST. E and F help kangaroos to find error. */
-  /* If PIN error not required, set E and F = NULL */
-		rtn=ctx.MPIN.SERVER_2(date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,pE,pF);
-    
-		if (rtn != 0)
-			mywindow.document.write("FAILURE: SERVER_2 rtn: " + rtn+ "<br>");  
-    
-	}
-    		  
 
-	if (rtn == ctx.MPIN.BAD_PIN)
-	{
-		mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
-		if (PINERROR)
-		{
-			var err=ctx.MPIN.KANGAROO(E,F);
-			if (err!=0) mywindow.document.write("(Client PIN is out by "+err + ")<br>");
-		}
-	}
-	else 
-	{
-		mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
-		if (FULL)
-		{
-			H=ctx.MPIN.HASH_ALL(sha,HCID,pxID,pxCID,SEC,Y,Z,T);
-			ctx.MPIN.CLIENT_KEY(sha,G1,G2,pin,R,X,H,T,CK);
-			
-			mywindow.document.write("Client Key =  0x"+ctx.MPIN.bytestostring(CK) + "<br>");    
-			H=ctx.MPIN.HASH_ALL(sha,HSID,pxID,pxCID,SEC,Y,Z,T);
-			ctx.MPIN.SERVER_KEY(sha,Z,SST,W,H,pHID,pxID,pxCID,SK);
-			mywindow.document.write("Server Key =  0x"+ctx.MPIN.bytestostring(SK) + "<br>");    
-		}
-	}
+// Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
+				rtn=ctx.MPIN.SERVER(HSID,Y,SST,U,SEC);
+    
+				if (rtn != 0)
+					mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+    
+				if (rtn == ctx.MPIN.BAD_PIN)
+				{
+					mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
 
+				}
+				else 
+				{
+					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
+				}
 }
 
 
@@ -569,7 +289,7 @@ function BLS24479() {
 	var ctx = new CTX('BLS24479');
 	mywindow=window.open();
 
-	mywindow.document.write("<br> BLS24 Pairing-Friendly Curve "+  "<br>");
+	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BLS24479 <br>");
 
 	var i,res;
 	var result;
@@ -578,233 +298,94 @@ function BLS24479() {
 	var EFS=ctx.MPIN192.EFS;
 	var EAS=ctx.ECP.AESKEY;
 
-	var sha=ctx.ECP.HASH_TYPE;
-
 	var G1S=2*EFS+1; /* Group 1 Size */
 	var G2S=8*EFS+1; /* Group 2 Size */   /**/
 
 	var S=[];
 	var SST=[];
 	var TOKEN = [];
-	var PERMIT = [];
 	var SEC = [];
-	var xID = [];
-	var xCID = [];
+	var U = [];
 	var X= [];
 	var Y= [];
-	var E=[];
-	var F=[];
 	var HCID=[];
-	var HID=[];
-	var HTID=[];
-
-	var G1=[];
-	var G2=[];
-	var R=[];
-	var Z=[];
-	var W=[];
-	var T=[];
-	var CK=[];
-	var SK=[];
-
 	var HSID=[];
-
-/* Set configuration */
-	var PERMITS=true;
-	var PINERROR=true;
-	var FULL=true;
-    var ONE_PASS=false;
-
 	var RAW=[];
-	var rng=new ctx.RAND();
 
+ 	var dst = "BLS24479G1_XMD:SHA-256_SVDW_NU_MPIN";
+	var DST = ctx.MPIN192.asciitobytes(dst); 
+
+	var rng=new ctx.RAND();
 	rng.clean();
 	for (i=0;i<100;i++) RAW[i]=i;
-
 	rng.seed(100,RAW);
 
-/* Trusted Authority set-up */
+// Trusted Authority (TA) set-up 
 	ctx.MPIN192.RANDOM_GENERATE(rng,S);
 	mywindow.document.write("M-Pin Master Secret s: 0x"+ctx.MPIN192.bytestostring(S) + "<br>");
  
- /* Create Client Identity */
- 	var IDstr = "testUser@miracl.com";
-	var CLIENT_ID = ctx.MPIN192.asciitobytes(IDstr);  
-	HCID=ctx.MPIN192.HASH_ID(sha,CLIENT_ID);  /* Either Client or TA calculates Hash(ID) - you decide! */
-		
-	mywindow.document.write("Client ID= "+ctx.MPIN192.bytestostring(CLIENT_ID) + "<br>");
+ // Create Client Identity 
+ 		var IDstr = "testUser@miracl.com";
+		var CLIENT_ID = ctx.MPIN192.asciitobytes(IDstr);  
+		ctx.MPIN192.ENCODE_TO_CURVE(DST,CLIENT_ID,HCID);
+		mywindow.document.write("Client ID Hashed to Curve= "+ctx.MPIN192.bytestostring(HCID) + "<br>");
 
-/* Client and Server are issued secrets by DTA */
-	ctx.MPIN192.GET_SERVER_SECRET(S,SST);
-	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN192.bytestostring(SST) + "<br>");
+// Client approaches Trusted Authority and is issued secret
 
 	ctx.MPIN192.GET_CLIENT_SECRET(S,HCID,TOKEN);
 	mywindow.document.write("Client Secret CS: 0x"+ctx.MPIN192.bytestostring(TOKEN) + "<br>");     
+// TA sends Client secret to Client
+
+// Server is issued secret by TA
+	ctx.MPIN192.GET_SERVER_SECRET(S,SST);
+//	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN192.bytestostring(SST) + "<br>");
+
 	
-/* Client extracts PIN from secret to create Token */
-	var pin=1234;
-	mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
-	var rtn=ctx.MPIN192.EXTRACT_PIN(sha,CLIENT_ID,pin,TOKEN);
-	if (rtn != 0)
-		mywindow.document.write("Failed to extract PIN " + "<br>");  
-
-	mywindow.document.write("Client Token TK: 0x"+ctx.MPIN192.bytestostring(TOKEN) + "<br>");        
-
-	if (FULL)
-	{
-		ctx.MPIN192.PRECOMPUTE(TOKEN,HCID,G1,G2);
-	}
-
-	var date;
-	if (PERMITS)
-	{
-		date=ctx.MPIN192.today();
-/* Client gets "Time Token" permit from DTA */ 	
-		ctx.MPIN192.GET_CLIENT_PERMIT(sha,date,S,HCID,PERMIT);
-		mywindow.document.write("Time Permit TP: 0x"+ctx.MPIN192.bytestostring(PERMIT) + "<br>");   
-
-/* This encoding makes Time permit look random - Elligator squared */
-		ctx.MPIN192.ENCODING(rng,PERMIT);
-		mywindow.document.write("Encoded Time Permit TP: 0x"+ctx.MPIN192.bytestostring(PERMIT) + "<br>");   
-		ctx.MPIN192.DECODING(PERMIT);
-		mywindow.document.write("Decoded Time Permit TP: 0x"+ctx.MPIN192.bytestostring(PERMIT) + "<br>");   
-	}
-	else date=0;
-
-	pin=parseInt(mywindow.prompt("Enter PIN= "));
-
-/* Set date=0 and PERMIT=null if time permits not in use
-
-Client First pass: Inputs CLIENT_ID, optional RNG, pin, TOKEN and PERMIT. Output xID = x.H(CLIENT_ID) and re-combined secret SEC
-If PERMITS are is use, then date!=0 and PERMIT is added to secret and xCID = x.(H(CLIENT_ID)+H_T(date|H(CLIENT_ID)))
-Random value x is supplied externally if RNG=null, otherwise generated and passed out by RNG
-
-If Time Permits OFF set xCID = null, HTID=null and use xID and HID only
-If Time permits are ON, AND pin error detection is required then all of xID, xCID, HID and HTID are required
-If Time permits are ON, AND pin error detection is NOT required, set xID=null, HID=null and use xCID and HTID only.
-
-
-*/
-	var pxID=xID;
-	var pxCID=xCID;
-	var pHID=HID;
-	var pHTID=HTID;
-	var pE=E;
-	var pF=F;
-	var pPERMIT=PERMIT;
-	var prHID;
-
-	if (date!=0)
-	{
-		prHID=pHTID;
-		if (!PINERROR)
-		{
-			pxID=null;
-			//	pHID=null;
-		}
-	}
-	else
-	{
-		prHID=pHID;
-		pPERMIT=null;
-		pxCID=null;
-		pHTID=null;
-	}
-	if (!PINERROR)
-	{
-		pE=null;
-		pF=null;
-	}
-
-	if (ONE_PASS)
-	{
-		mywindow.document.write("MPIN Single Pass " + "<br>");   
-		timeValue = ctx.MPIN192.GET_TIME();
-		mywindow.document.write("Epoch " + timeValue + "<br>");   
-
-		rtn=ctx.MPIN192.CLIENT(sha,date,CLIENT_ID,rng,X,pin,TOKEN,SEC,pxID,pxCID,pPERMIT,timeValue,Y);
-
+// Client extracts PIN from secret to create Token 
+		var pin=1234;
+		mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
+		var rtn=ctx.MPIN192.EXTRACT_PIN(HCID,pin,TOKEN);
 		if (rtn != 0)
-		mywindow.document.write("FAILURE: CLIENT rtn: " + rtn + "<br>");   
+			mywindow.document.write("Failed to extract PIN " + "<br>");  
+		mywindow.document.write("Client Token TK: 0x"+ctx.MPIN192.bytestostring(TOKEN) + "<br>");        
 
-		if (FULL)
-		{
-			HCID=ctx.MPIN192.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN192.GET_G1_MULTIPLE(rng,1,R,HCID,Z);  /* Also Send Z=r.ID to Server, remember random r */
-		}
+// MPin Protocol
 
-		rtn=ctx.MPIN192.SERVER(sha,date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,pE,pF,CLIENT_ID,timeValue);
-		if (rtn != 0)
-			mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+// Client enters ID and PIN
+		pin=parseInt(mywindow.prompt("Enter PIN= "));
 
-		if (FULL)
-		{
-			HSID=ctx.MPIN192.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN192.GET_G1_MULTIPLE(rng,0,W,prHID,T);  /* Also send T=w.ID to client, remember random w  */
-		}
-	}
-	else 
-	{
-		mywindow.document.write("MPIN Multi Pass " + "<br>");   
-		rtn=ctx.MPIN192.CLIENT_1(sha,date,CLIENT_ID,rng,X,pin,TOKEN,SEC,pxID,pxCID,pPERMIT);
+		rtn=ctx.MPIN192.CLIENT_1(HCID,rng,X,pin,TOKEN,SEC,U);
 		if (rtn != 0)
 			mywindow.document.write("FAILURE: CLIENT_1 rtn: " + rtn + "<br>");   
-  
-		if (FULL)
-		{
-			HCID=ctx.MPIN192.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN192.GET_G1_MULTIPLE(rng,1,R,HCID,Z);  /* Also Send Z=r.ID to Server, remember random r */
-		}
+
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.  
     
-  /* Server calculates H(ID) and H(T|H(ID)) (if time permits enabled), and maps them to points on the curve HID and HTID resp. */
-		ctx.MPIN192.SERVER_1(sha,date,CLIENT_ID,pHID,pHTID);
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
+				ctx.MPIN192.ENCODE_TO_CURVE(DST,CLIENT_ID,HSID);	
     
-  /* Server generates Random number Y and sends it to Client */
-		ctx.MPIN192.RANDOM_GENERATE(rng,Y);
+// Server generates Random number Y and sends it to Client
+				ctx.MPIN192.RANDOM_GENERATE(rng,Y);
     
-		if (FULL)
-		{
-			HSID=ctx.MPIN192.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN192.GET_G1_MULTIPLE(rng,0,W,prHID,T);  /* Also send T=w.ID to client, remember random w  */
-		}
-    
-  /* Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC */
+// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
 		rtn=ctx.MPIN192.CLIENT_2(X,Y,SEC);
 		if (rtn != 0)
 			mywindow.document.write("FAILURE: CLIENT_2 rtn: " + rtn + "<br>");  
-  /* Server Second pass. Inputs hashed client id, random Y, -(x+y)*SEC, xID and xCID and Server secret SST. E and F help kangaroos to find error. */
-  /* If PIN error not required, set E and F = NULL */
-		rtn=ctx.MPIN192.SERVER_2(date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,pE,pF);
-    
-		if (rtn != 0)
-			mywindow.document.write("FAILURE: SERVER_2 rtn: " + rtn+ "<br>");  
-    
-	}
-    		  
 
-	if (rtn == ctx.MPIN192.BAD_PIN)
-	{
-		mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
-		if (PINERROR)
-		{
-			var err=ctx.MPIN192.KANGAROO(E,F);
-			if (err!=0) mywindow.document.write("(Client PIN is out by "+err + ")<br>");
-		}
-	}
-	else 
-	{
-		mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
-		if (FULL)
-		{
-			H=ctx.MPIN192.HASH_ALL(sha,HCID,pxID,pxCID,SEC,Y,Z,T);
-			ctx.MPIN192.CLIENT_KEY(sha,G1,G2,pin,R,X,H,T,CK);
-			
-			mywindow.document.write("Client Key =  0x"+ctx.MPIN192.bytestostring(CK) + "<br>");    
-			H=ctx.MPIN192.HASH_ALL(sha,HSID,pxID,pxCID,SEC,Y,Z,T);
-			ctx.MPIN192.SERVER_KEY(sha,Z,SST,W,H,pHID,pxID,pxCID,SK);
-			mywindow.document.write("Server Key =  0x"+ctx.MPIN192.bytestostring(SK) + "<br>");    
-		}
-	}
+// Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
+				rtn=ctx.MPIN192.SERVER(HSID,Y,SST,U,SEC);
+    
+				if (rtn != 0)
+					mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+    
+				if (rtn == ctx.MPIN192.BAD_PIN)
+				{
+					mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+
+				}
+				else 
+				{
+					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
+				}
 
 } 
 
@@ -813,7 +394,7 @@ function BLS48556() {
 	var ctx = new CTX('BLS48556');
 	mywindow=window.open();
 
-	mywindow.document.write("<br> BLS48 Pairing-Friendly Curve "+  "<br>");
+	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BLS48556 <br>");
 
 	var i,res;
 	var result;
@@ -822,232 +403,94 @@ function BLS48556() {
 	var EFS=ctx.MPIN256.EFS;
 	var EAS=ctx.ECP.AESKEY;
 
-	var sha=ctx.ECP.HASH_TYPE;
-
 	var G1S=2*EFS+1; // Group 1 Size 
 	var G2S=16*EFS+1; // Group 2 Size    **
 
 	var S=[];
 	var SST=[];
 	var TOKEN = [];
-	var PERMIT = [];
 	var SEC = [];
-	var xID = [];
-	var xCID = [];
+	var U = [];
 	var X= [];
 	var Y= [];
-	var E=[];
-	var F=[];
 	var HCID=[];
-	var HID=[];
-	var HTID=[];
-
-	var G1=[];
-	var G2=[];
-	var R=[];
-	var Z=[];
-	var W=[];
-	var T=[];
-	var CK=[];
-	var SK=[];
-
 	var HSID=[];
-
-// Set configuration 
-	var PERMITS=true;
-	var PINERROR=true;
-	var FULL=true;
-    var ONE_PASS=false;
-
 	var RAW=[];
-	var rng=new ctx.RAND();
 
+ 	var dst = "BLS48556G1_XMD:SHA-256_SVDW_NU_MPIN";
+	var DST = ctx.MPIN256.asciitobytes(dst); 
+
+	var rng=new ctx.RAND();
 	rng.clean();
 	for (i=0;i<100;i++) RAW[i]=i;
-
 	rng.seed(100,RAW);
 
-// Trusted Authority set-up 
+// Trusted Authority (TA) set-up 
 	ctx.MPIN256.RANDOM_GENERATE(rng,S);
-
 	mywindow.document.write("M-Pin Master Secret s: 0x"+ctx.MPIN256.bytestostring(S) + "<br>");
+ 
  // Create Client Identity 
- 	var IDstr = "testUser@miracl.com";
-	var CLIENT_ID = ctx.MPIN256.asciitobytes(IDstr);  
-	HCID=ctx.MPIN256.HASH_ID(sha,CLIENT_ID);  // Either Client or TA calculates Hash(ID) - you decide! 
-		
-	mywindow.document.write("Client ID= "+ctx.MPIN256.bytestostring(CLIENT_ID) + "<br>");
+ 		var IDstr = "testUser@miracl.com";
+		var CLIENT_ID = ctx.MPIN256.asciitobytes(IDstr);  
+		ctx.MPIN256.ENCODE_TO_CURVE(DST,CLIENT_ID,HCID);
+		mywindow.document.write("Client ID Hashed to Curve= "+ctx.MPIN256.bytestostring(HCID) + "<br>");
 
-// Client and Server are issued secrets by DTA 
-	ctx.MPIN256.GET_SERVER_SECRET(S,SST);
-	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN256.bytestostring(SST) + "<br>");
+// Client approaches Trusted Authority and is issued secret
 
 	ctx.MPIN256.GET_CLIENT_SECRET(S,HCID,TOKEN);
 	mywindow.document.write("Client Secret CS: 0x"+ctx.MPIN256.bytestostring(TOKEN) + "<br>");     
+// TA sends Client secret to Client
+
+// Server is issued secret by TA
+	ctx.MPIN256.GET_SERVER_SECRET(S,SST);
+//	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN256.bytestostring(SST) + "<br>");
+
 	
 // Client extracts PIN from secret to create Token 
-	var pin=1234;
-	mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
-	var rtn=ctx.MPIN256.EXTRACT_PIN(sha,CLIENT_ID,pin,TOKEN);
-	if (rtn != 0)
-		mywindow.document.write("Failed to extract PIN " + "<br>");  
-
-	mywindow.document.write("Client Token TK: 0x"+ctx.MPIN256.bytestostring(TOKEN) + "<br>");        
-
-	if (FULL)
-	{
-		ctx.MPIN256.PRECOMPUTE(TOKEN,HCID,G1,G2);
-	}
-
-	var date;
-	if (PERMITS)
-	{
-		date=ctx.MPIN256.today();
-// Client gets "Time Token" permit from DTA  	
-		ctx.MPIN256.GET_CLIENT_PERMIT(sha,date,S,HCID,PERMIT);
-		mywindow.document.write("Time Permit TP: 0x"+ctx.MPIN256.bytestostring(PERMIT) + "<br>");   
-
-// This encoding makes Time permit look random - Elligator squared 
-		ctx.MPIN256.ENCODING(rng,PERMIT);
-		mywindow.document.write("Encoded Time Permit TP: 0x"+ctx.MPIN256.bytestostring(PERMIT) + "<br>");   
-		ctx.MPIN256.DECODING(PERMIT);
-		mywindow.document.write("Decoded Time Permit TP: 0x"+ctx.MPIN256.bytestostring(PERMIT) + "<br>");   
-	}
-	else date=0;
-
-	pin=parseInt(mywindow.prompt("Enter PIN= "));
-
-// Set date=0 and PERMIT=null if time permits not in use
-
-//Client First pass: Inputs CLIENT_ID, optional RNG, pin, TOKEN and PERMIT. Output xID = x.H(CLIENT_ID) and re-combined secret SEC
-//If PERMITS are is use, then date!=0 and PERMIT is added to secret and xCID = x.(H(CLIENT_ID)+H_T(date|H(CLIENT_ID)))
-//Random value x is supplied externally if RNG=null, otherwise generated and passed out by RNG
-
-//If Time Permits OFF set xCID = null, HTID=null and use xID and HID only
-//If Time permits are ON, AND pin error detection is required then all of xID, xCID, HID and HTID are required
-//If Time permits are ON, AND pin error detection is NOT required, set xID=null, HID=null and use xCID and HTID only.
-
-
-	var pxID=xID;
-	var pxCID=xCID;
-	var pHID=HID;
-	var pHTID=HTID;
-	var pE=E;
-	var pF=F;
-	var pPERMIT=PERMIT;
-	var prHID;
-
-	if (date!=0)
-	{
-		prHID=pHTID;
-		if (!PINERROR)
-		{
-			pxID=null;
-			//	pHID=null;
-		}
-	}
-	else
-	{
-		prHID=pHID;
-		pPERMIT=null;
-		pxCID=null;
-		pHTID=null;
-	}
-	if (!PINERROR)
-	{
-		pE=null;
-		pF=null;
-	}
-
-	if (ONE_PASS)
-	{
-		mywindow.document.write("MPIN Single Pass " + "<br>");   
-		timeValue = ctx.MPIN256.GET_TIME();
-		mywindow.document.write("Epoch " + timeValue + "<br>");   
-
-		rtn=ctx.MPIN256.CLIENT(sha,date,CLIENT_ID,rng,X,pin,TOKEN,SEC,pxID,pxCID,pPERMIT,timeValue,Y);
-
+		var pin=1234;
+		mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
+		var rtn=ctx.MPIN256.EXTRACT_PIN(HCID,pin,TOKEN);
 		if (rtn != 0)
-		mywindow.document.write("FAILURE: CLIENT rtn: " + rtn + "<br>");   
+			mywindow.document.write("Failed to extract PIN " + "<br>");  
+		mywindow.document.write("Client Token TK: 0x"+ctx.MPIN256.bytestostring(TOKEN) + "<br>");        
 
-		if (FULL)
-		{
-			HCID=ctx.MPIN256.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN256.GET_G1_MULTIPLE(rng,1,R,HCID,Z);  // Also Send Z=r.ID to Server, remember random r 
-		}
+// MPin Protocol
 
-		rtn=ctx.MPIN256.SERVER(sha,date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,pE,pF,CLIENT_ID,timeValue);
-		if (rtn != 0)
-			mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+// Client enters ID and PIN
+		pin=parseInt(mywindow.prompt("Enter PIN= "));
 
-		if (FULL)
-		{
-			HSID=ctx.MPIN256.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN256.GET_G1_MULTIPLE(rng,0,W,prHID,T);  // Also send T=w.ID to client, remember random w  
-		}
-	}
-	else 
-	{
-		mywindow.document.write("MPIN Multi Pass " + "<br>");   
-		rtn=ctx.MPIN256.CLIENT_1(sha,date,CLIENT_ID,rng,X,pin,TOKEN,SEC,pxID,pxCID,pPERMIT);
+		rtn=ctx.MPIN256.CLIENT_1(HCID,rng,X,pin,TOKEN,SEC,U);
 		if (rtn != 0)
 			mywindow.document.write("FAILURE: CLIENT_1 rtn: " + rtn + "<br>");   
-  
-		if (FULL)
-		{
-			HCID=ctx.MPIN256.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN256.GET_G1_MULTIPLE(rng,1,R,HCID,Z);  // Also Send Z=r.ID to Server, remember random r 
-		}
+
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.  
     
-  // Server calculates H(ID) and H(T|H(ID)) (if time permits enabled), and maps them to points on the curve HID and HTID resp. 
-		ctx.MPIN256.SERVER_1(sha,date,CLIENT_ID,pHID,pHTID);
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
+				ctx.MPIN256.ENCODE_TO_CURVE(DST,CLIENT_ID,HSID);	
     
-  // Server generates Random number Y and sends it to Client 
-		ctx.MPIN256.RANDOM_GENERATE(rng,Y);
+// Server generates Random number Y and sends it to Client
+				ctx.MPIN256.RANDOM_GENERATE(rng,Y);
     
-		if (FULL)
-		{
-			HSID=ctx.MPIN256.HASH_ID(sha,CLIENT_ID);
-			ctx.MPIN256.GET_G1_MULTIPLE(rng,0,W,prHID,T);  // Also send T=w.ID to client, remember random w  
-		}
-    
-  // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
+// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
 		rtn=ctx.MPIN256.CLIENT_2(X,Y,SEC);
 		if (rtn != 0)
 			mywindow.document.write("FAILURE: CLIENT_2 rtn: " + rtn + "<br>");  
-  // Server Second pass. Inputs hashed client id, random Y, -(x+y)*SEC, xID and xCID and Server secret SST. E and F help kangaroos to find error. 
-  // If PIN error not required, set E and F = NULL 
-		rtn=ctx.MPIN256.SERVER_2(date,pHID,pHTID,Y,SST,pxID,pxCID,SEC,pE,pF);
-    
-		if (rtn != 0)
-			mywindow.document.write("FAILURE: SERVER_2 rtn: " + rtn+ "<br>");  
-    
-	}
-    		  
 
-	if (rtn == ctx.MPIN256.BAD_PIN)
-	{
-		mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
-		if (PINERROR)
-		{
-			var err=ctx.MPIN256.KANGAROO(E,F);
-			if (err!=0) mywindow.document.write("(Client PIN is out by "+err + ")<br>");
-		}
-	}
-	else 
-	{
-		mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
-		if (FULL)
-		{
-			H=ctx.MPIN256.HASH_ALL(sha,HCID,pxID,pxCID,SEC,Y,Z,T);
-			ctx.MPIN256.CLIENT_KEY(sha,G1,G2,pin,R,X,H,T,CK);
-			
-			mywindow.document.write("Client Key =  0x"+ctx.MPIN256.bytestostring(CK) + "<br>");    
-			H=ctx.MPIN256.HASH_ALL(sha,HSID,pxID,pxCID,SEC,Y,Z,T);
-			ctx.MPIN256.SERVER_KEY(sha,Z,SST,W,H,pHID,pxID,pxCID,SK);
-			mywindow.document.write("Server Key =  0x"+ctx.MPIN256.bytestostring(SK) + "<br>");    
-		}
-	}
+// Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
+				rtn=ctx.MPIN256.SERVER(HSID,Y,SST,U,SEC);
+    
+				if (rtn != 0)
+					mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+    
+				if (rtn == ctx.MPIN256.BAD_PIN)
+				{
+					mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+
+				}
+				else 
+				{
+					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
+				}
 
 }
 

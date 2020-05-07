@@ -674,7 +674,7 @@ public final class ECP4 {
 		return P;
 	}        
 
-/* Hunt and Peck a BIG to a curve point */
+/* Hunt and Peck a BIG to a curve point 
     public static ECP4 hap2point(BIG h)
     { 
         BIG x=new BIG(h);
@@ -691,7 +691,7 @@ public final class ECP4 {
             x.inc(1); x.norm();
         }
         return Q;
-    }
+    } */
 
 /* Constant time Map to Point */
     public static ECP4 map2point(FP4 H)
@@ -770,7 +770,7 @@ public final class ECP4 {
     }
  
 
-/* Map octet string to curve point */
+/* Map octet string to curve point 
 	public static ECP4 mapit(byte[] h)
 	{
 		BIG q=new BIG(ROM.Modulus);
@@ -780,7 +780,7 @@ public final class ECP4 {
 		ECP4 Q=hap2point(x);
 		Q.cfp();
         return Q;
-    }
+    } */
 
 
 /* clear cofactor */

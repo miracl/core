@@ -821,7 +821,7 @@ public final class ECP8 {
 		P.affine();
 		return P;
 	}        
-/* Hunt and Peck a BIG to a curve point */
+/* Hunt and Peck a BIG to a curve point 
     public static ECP8 hap2point(BIG h)
     { 
         BIG x=new BIG(h);
@@ -840,7 +840,7 @@ public final class ECP8 {
             x.inc(1); x.norm();
         }
         return Q;
-    }         
+    }       */  
 
 /* Constant time Map to Point */
     public static ECP8 map2point(FP8 H)
@@ -918,7 +918,7 @@ public final class ECP8 {
         return new ECP8(X3,Y);    
     }
 
-/* Map octet string to curve point */
+/* Map octet string to curve point 
 	public static ECP8 mapit(byte[] h)
 	{
 		BIG q=new BIG(ROM.Modulus);
@@ -928,7 +928,7 @@ public final class ECP8 {
 		ECP8 Q=hap2point(x);
 		Q.cfp();
         return Q;
-    }
+    } */
 
 /* clear cofactor */
 	public void cfp()

@@ -32,7 +32,6 @@
 #include "ecp_BLS12381.h"
 #include "ecp2_BLS12381.h"
 
-
 using namespace core;
 
 #define CEIL(a,b) (((a)-1)/(b)+1)

@@ -33,12 +33,6 @@ public class TestMPIN192 extends TestCase { //
         System.out.println();
     }
 
-
-    static boolean PERMITS = true;
-    static boolean PINERROR = true;
-    static boolean FULL = true;
-    static boolean SINGLE_PASS = false;
-
     public static void testMPIN() {
         RAND rng = new RAND();
         int EGS = MPIN192.EGS;
@@ -46,228 +40,93 @@ public class TestMPIN192 extends TestCase { //
         int G1S = 2 * EFS + 1; /* Group 1 Size */
         int G2S = 8 * EFS + 1; /* Group 2 Size */
 
-        int sha = CONFIG_CURVE.HASH_TYPE;
-
         byte[] S = new byte[EGS];
         byte[] SST = new byte[G2S];
         byte[] TOKEN = new byte[G1S];
-        byte[] PERMIT = new byte[G1S];
         byte[] SEC = new byte[G1S];
-        byte[] xID = new byte[G1S];
+        byte[]U = new byte[G1S];
         byte[] xCID = new byte[G1S];
         byte[] X = new byte[EGS];
         byte[] Y = new byte[EGS];
-        byte[] E = new byte[24 * EFS];
-        byte[] F = new byte[24 * EFS];
-        byte[] HID = new byte[G1S];
-        byte[] HTID = new byte[G1S];
-
-        byte[] G1 = new byte[24 * EFS];
-        byte[] G2 = new byte[24 * EFS];
-        byte[] R = new byte[EGS];
-        byte[] Z = new byte[G1S];
-        byte[] W = new byte[EGS];
-        byte[] T = new byte[G1S];
-        byte[] CK = new byte[CONFIG_CURVE.AESKEY];
-        byte[] SK = new byte[CONFIG_CURVE.AESKEY];
-
-        byte[] HSID = null;
+        byte[] HCID = new byte[G1S];
+        byte[] HSID = new byte[G1S];
         byte[] RAW = new byte[100];
+
+        String dst = "XXXG1_XMD:SHA-384_SVDW_NU_MPIN";
+        byte[] DST=dst.getBytes();
 
         rng.clean();
         for (int i = 0; i < 100; i++) RAW[i] = (byte)(i);
         rng.seed(100, RAW);
 
-        System.out.println("\nTesting MPIN code");
+        System.out.println("\nTesting MPIN 2-factor authentication protocol on curve XXX");
 
-        /* Trusted Authority set-up */
-
+// Trusted Authority (TA) set-up 
         MPIN192.RANDOM_GENERATE(rng, S);
         System.out.print("Master Secret s: 0x");  printBinary(S);
 
-        /* Create Client Identity */
-        String IDstr = "testUser@miracl.com";
-        byte[] CLIENT_ID = IDstr.getBytes();
+// Create Client Identity 
+            String IDstr = "testUser@miracl.com";
+            byte[] CLIENT_ID = IDstr.getBytes();
+            MPIN192.ENCODE_TO_CURVE(DST,CLIENT_ID,HCID);
+            System.out.print("Client ID Hashed to Curve= "); printBinary(HCID);
 
-        byte[] HCID = MPIN192.HASH_ID(sha, CLIENT_ID, EFS); /* Either Client or TA calculates Hash(ID) - you decide! */
-
-        System.out.print("Client ID Hash= "); printBinary(HCID);
-        System.out.print("Client ID= "); printBinary(CLIENT_ID);
-
-        /* Client and Server are issued secrets by DTA */
+// Client approaches Trusted Authority and is issued secret
 
         MPIN192.GET_CLIENT_SECRET(S, HCID, TOKEN);
         System.out.print("Client Secret CS: 0x");
         printBinary(TOKEN);
+// TA sends Client secret to Client
 
+// Server is issued secret by TA
         MPIN192.GET_SERVER_SECRET(S, SST);
-        System.out.print("Server Secret SS: 0x");  printBinary(SST);
+ //       System.out.print("Server Secret SS: 0x");  printBinary(SST);
 
 
         /* Client extracts PIN from secret to create Token */
-        int pin = 1234;
-        System.out.println("Client extracts PIN= " + pin);
-        int rtn = MPIN192.EXTRACT_PIN(sha, CLIENT_ID, pin, TOKEN);
-        if (rtn != 0)
-            fail("FAILURE: EXTRACT_PIN rtn: " + rtn);
+            int pin = 1234;
+            System.out.println("Client extracts PIN= " + pin);
+            int rtn = MPIN192.EXTRACT_PIN(HCID, pin, TOKEN);
+            if (rtn != 0)
+                fail("FAILURE: EXTRACT_PIN rtn: " + rtn);
+            System.out.print("Client Token TK: 0x"); printBinary(TOKEN);
 
-        System.out.print("Client Token TK: 0x"); printBinary(TOKEN);
+// MPin Protocol
 
-        if (FULL) {
-            MPIN192.PRECOMPUTE(TOKEN, HCID, G1, G2);
-        }
-        int date;
-        if (PERMITS) {
-            date = MPIN192.today();
-            /* Client gets "Time Token" permit from DTA */
-            MPIN192.GET_CLIENT_PERMIT(sha, date, S, HCID, PERMIT);
-            System.out.print("Time Permit TP: 0x");  printBinary(PERMIT);
-
-            /* This encoding makes Time permit look random - Elligator squared */
-            MPIN192.ENCODING(rng, PERMIT);
-            System.out.print("Encoded Time Permit TP: 0x");  printBinary(PERMIT);
-            MPIN192.DECODING(PERMIT);
-            System.out.print("Decoded Time Permit TP: 0x");  printBinary(PERMIT);
-        } else date = 0;
-
+// Client enters ID and PIN
 //		System.out.print("\nPIN= ");
 //		Scanner scan=new Scanner(System.in);
 //		pin=scan.nextInt();
 
-        pin = 1234;
-
-        /* Set date=0 and PERMIT=null if time permits not in use
-
-        Client First pass: Inputs CLIENT_ID, optional RNG, pin, TOKEN and PERMIT. Output xID =x .H(CLIENT_ID) and re-combined secret SEC
-        If PERMITS are is use, then date!=0 and PERMIT is added to secret and xCID = x.(H(CLIENT_ID)+H(date|H(CLIENT_ID)))
-        Random value x is supplied externally if RNG=null, otherwise generated and passed out by RNG
-
-        IMPORTANT: To save space and time..
-        If Time Permits OFF set xCID = null, HTID=null and use xID and HID only
-        If Time permits are ON, AND pin error detection is required then all of xID, xCID, HID and HTID are required
-        If Time permits are ON, AND pin error detection is NOT required, set xID=null, HID=null and use xCID and HTID only.
-
-
-        */
-
-        byte[] pxID = xID;
-        byte[] pxCID = xCID;
-        byte[] pHID = HID;
-        byte[] pHTID = HTID;
-        byte[] pE = E;
-        byte[] pF = F;
-        byte[] pPERMIT = PERMIT;
-        byte[] prHID;
-
-        if (date != 0) {
-
-            prHID = pHTID;
-            if (!PINERROR) {
-                pxID = null;
-                //		pHID=null;  // new
-            }
-        } else {
-            prHID = pHID;
-            pPERMIT = null;
-            pxCID = null;
-            pHTID = null;
-        }
-        if (!PINERROR) {
-            pE = null;
-            pF = null;
-        }
-
-        if (SINGLE_PASS) {
-            System.out.println("MPIN Single Pass");
-            int timeValue = MPIN192.GET_TIME();
-            rtn = MPIN192.CLIENT(sha, date, CLIENT_ID, rng, X, pin, TOKEN, SEC, pxID, pxCID, pPERMIT, timeValue, Y);
-            if (rtn != 0)
-                fail("FAILURE: CLIENT rtn: " + rtn);
-
-            if (FULL) {
-                HCID = MPIN192.HASH_ID(sha, CLIENT_ID, EFS);
-                MPIN192.GET_G1_MULTIPLE(rng, 1, R, HCID, Z); /* Also Send Z=r.ID to Server, remember random r */
-            }
-
-            rtn = MPIN192.SERVER(sha, date, pHID, pHTID, Y, SST, pxID, pxCID, SEC, pE, pF, CLIENT_ID, timeValue);
-            if (rtn != 0)
-                fail("FAILURE: SERVER rtn: " + rtn);
-
-            if (FULL) {
-                HSID = MPIN192.HASH_ID(sha, CLIENT_ID, EFS);
-                MPIN192.GET_G1_MULTIPLE(rng, 0, W, prHID, T); /* Also send T=w.ID to client, remember random w  */
-            }
-        } else {
-            System.out.println("MPIN Multi Pass");
-            /* Send U=x.ID to server, and recreate secret from token and pin */
-            rtn = MPIN192.CLIENT_1(sha, date, CLIENT_ID, rng, X, pin, TOKEN, SEC, pxID, pxCID, pPERMIT);
+            pin = 1234;
+        
+         
+// Client First pass: Inputs H(CLIENT_ID), RNG, pin, and TOKEN. Output x and U = x.H(CLIENT_ID) and re-combined secret SEC
+            rtn = MPIN192.CLIENT_1(HCID, rng, X, pin, TOKEN, SEC, U);
             if (rtn != 0)
                 fail("FAILURE: CLIENT_1 rtn: " + rtn);
 
-            if (FULL) {
-                HCID = MPIN192.HASH_ID(sha, CLIENT_ID, EFS);
-                MPIN192.GET_G1_MULTIPLE(rng, 1, R, HCID, Z); /* Also Send Z=r.ID to Server, remember random r */
-            }
+ // Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
+                    MPIN192.ENCODE_TO_CURVE(DST,CLIENT_ID,HSID);
 
-            /* Server calculates H(ID) and H(T|H(ID)) (if time permits enabled), and maps them to points on the curve HID and HTID resp. */
-            MPIN192.SERVER_1(sha, date, CLIENT_ID, pHID, pHTID);
+// Server generates Random number Y and sends it to Client
+                    MPIN192.RANDOM_GENERATE(rng, Y);
 
-            /* Server generates Random number Y and sends it to Client */
-            MPIN192.RANDOM_GENERATE(rng, Y);
-
-            if (FULL) {
-                HSID = MPIN192.HASH_ID(sha, CLIENT_ID, EFS);
-                MPIN192.GET_G1_MULTIPLE(rng, 0, W, prHID, T); /* Also send T=w.ID to client, remember random w  */
-            }
-
-            /* Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC */
+// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
             rtn = MPIN192.CLIENT_2(X, Y, SEC);
             if (rtn != 0)
                 fail("FAILURE: CLIENT_2 rtn: " + rtn);
 
-            /* Server Second pass. Inputs hashed client id, random Y, -(x+y)*SEC, xID and xCID and Server secret SST. E and F help kangaroos to find error. */
-            /* If PIN error not required, set E and F = null */
+   //Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST.
 
-            rtn = MPIN192.SERVER_2(date, pHID, pHTID, Y, SST, pxID, pxCID, SEC, pE, pF);
+                    rtn = MPIN192.SERVER(HSID, Y, SST, U, SEC);
 
-            if (rtn != 0)
-                fail("FAILURE: SERVER_2 rtn: " + rtn);
-        }
-
-        if (rtn == MPIN192.BAD_PIN) {
-            if (PINERROR) {
-                int err = MPIN192.KANGAROO(E, F);
-                if (err != 0) fail("Client PIN is out by " + err);
-                else fail("Server says - Bad Pin. I don't know you. Feck off");
-            } else fail("Server says - Bad Pin. I don't know you. Feck off");
-
-        } else System.out.println("Server says - PIN is good! You really are " + IDstr);
-
-
-        if (FULL) {
-            byte[] H = MPIN192.HASH_ALL(sha, HCID, pxID, pxCID, SEC, Y, Z, T, EFS);
-            MPIN192.CLIENT_KEY(sha, G1, G2, pin, R, X, H, T, CK);
-            System.out.print("Client Key =  0x");  printBinary(CK);
-
-            H = MPIN192.HASH_ALL(sha, HSID, pxID, pxCID, SEC, Y, Z, T, EFS);
-            MPIN192.SERVER_KEY(sha, Z, SST, W, H, pHID, pxID, pxCID, SK);
-            System.out.print("Server Key =  0x");  printBinary(SK);
-        }
-        System.out.println("");
+                    if (rtn != 0)
+                        fail("FAILURE: SERVER_2 rtn: " + rtn);
+        
+                    if (rtn == MPIN192.BAD_PIN) 
+                        fail("Server says - Bad Pin. I don't know you. Feck off\n");
+                    else 
+                        System.out.println("Server says - PIN is good! You really are " + IDstr + "\n");
     }
-    /*
-    	public static void main(String[] args)
-    	{
-
-    		byte[] RAW=new byte[100];
-    		RAND rng=new RAND();
-
-    		rng.clean();
-    		for (int i=0;i<100;i++) RAW[i]=(byte)(i);
-
-    		rng.seed(100,RAW);
-
-    		mpin(rng);
-
-    	} */
 }

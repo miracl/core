@@ -33,7 +33,7 @@ programs. (For a 16-bit build select 1, 4 and 6). Select 0 then to exit.
 
 Then compile
 
-    g++ -O2  testecc.cpp core.a -o testall
+    g++ -O2  testecc.cpp core.a -o testecc
 
 (if using MINGW-W64 in Windows change -o testall to -o testall.exe)
 
@@ -44,7 +44,7 @@ one binary
 
 Next compile
 
-    g++ -O2  testmpin.cpp core.a -o testall
+    g++ -O2  testmpin.cpp core.a -o testmpin
 
 This test program exercises 4 different pairing friendly curves using 
 the MPIN authentication protocol.

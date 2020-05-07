@@ -361,6 +361,7 @@ void ECP_ZZZ_cfp(ECP_ZZZ *P)
 }
 
 /* Hunt and Peck a BIG to a curve point */
+/*
 void ECP_ZZZ_hap2point(ECP_ZZZ *P,BIG_XXX h)
 {
     BIG_XXX x;
@@ -377,7 +378,7 @@ void ECP_ZZZ_hap2point(ECP_ZZZ *P,BIG_XXX h)
 		if (!ECP_ZZZ_isinf(P)) break;
 	}
 }
-
+*/
 /* Constant time Map to Point */
 void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 {
@@ -695,6 +696,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 
 
 /* Map octet to point */
+/*
 void ECP_ZZZ_mapit(ECP_ZZZ *P, octet *W)
 {
     BIG_XXX q, x;
@@ -705,7 +707,7 @@ void ECP_ZZZ_mapit(ECP_ZZZ *P, octet *W)
     ECP_ZZZ_hap2point(P,x);
     ECP_ZZZ_cfp(P);
 }
-
+*/
 /* Convert P to Affine, from (x,y,z) to (x,y) */
 /* SU=160 */
 void ECP_ZZZ_affine(ECP_ZZZ *P)

@@ -28,11 +28,6 @@ public class TesttimeMPIN192 extends TestCase {
     public static final int MIN_TIME = 10; /* seconds */
     public static final int MIN_ITERS = 10;
 
-    static boolean PERMITS = true;
-    static boolean PINERROR = true;
-    static boolean FULL = true;
-    static boolean SINGLE_PASS = false;
-
     public static void testtimeMPIN() {
         byte[] RAW = new byte[100];
         RAND rng = new RAND();

@@ -77,7 +77,7 @@ func htp_ED25519(mess []byte) {
 	P=ED25519.ECP_map2point(u[0])
 	fmt.Printf("Q= %s\n",P.ToString())
 	P.Cfp()
-	P.Affine();
+	P.Affine()
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 }
