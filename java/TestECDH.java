@@ -53,8 +53,16 @@ public class TestECDH extends TestCase { //
         int sha = CONFIG_CURVE.HASH_TYPE;
 
         byte[] S1 = new byte[EGS];
-        byte[] W0 = new byte[2 * EFS + 1];
-        byte[] W1 = new byte[2 * EFS + 1];
+        byte[] W0;
+        byte[] W1;
+        if (CONFIG_CURVE.CURVETYPE != CONFIG_CURVE.MONTGOMERY) {
+            W0 = new byte[2 * EFS + 1];
+            W1 = new byte[2 * EFS + 1];
+        } else {
+            W0 = new byte[EFS];
+            W1 = new byte[EFS];
+        }
+
         byte[] Z0 = new byte[EFS];
         byte[] Z1 = new byte[EFS];
 

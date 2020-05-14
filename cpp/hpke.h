@@ -46,17 +46,20 @@ using namespace core;
 
 namespace ZZZ {
 
+static void LabeledExtract(octet *PRK,octet *SALT,char *label,octet *IKM);
+static void LabeledExpand(octet *OKM,octet *PRK,char *label,octet *INFO,int L);
+static void ExtractAndExpand(octet *OKM,octet *DH,octet *CONTEXT);
+
 /* HPKE DHKEM primitives */
 /**	@brief Encapsulate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
-	@param R is a pointer to a cryptographically secure random number generator
-    @param SK is the input ephemeral secret if RNG==NULL, otherwise set to NULL
+    @param SK is the input ephemeral secret
     @param Z is a pointer to a shared secret DH(skE,pkR)
 	@param pkE the ephemeral public key, which is skE.G, where G is a fixed generator
 	@param pkR the respondents public key
  */
-extern void HPKE_Encap(int config_id,csprng *R,octet *SK,octet *Z,octet *pkE,octet *pkR);
+extern void HPKE_Encap(int config_id,octet *SK,octet *Z,octet *pkE,octet *pkR);
 
 /**	@brief Decapsulate function
  *
@@ -70,14 +73,13 @@ extern void HPKE_Decap(int config_id,octet *Z,octet *pkE,octet *skR);
 /**	@brief Encapsulate/Authenticate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
-	@param R is a pointer to a cryptographically secure random number generator
-    @param SK is the input ephemeral secret if RNG==NULL, otherwise set to NULL
+    @param SK is the input ephemeral secret 
     @param Z is a pointer to a shared secret DH(skE,pkR)
 	@param pkE the ephemeral public key, which is skE.G, where G is a fixed generator
 	@param pkR the Respondents public key
     @param skI the Initiators private key
  */
-extern void HPKE_AuthEncap(int config_id,csprng *R,octet *SK,octet *Z,octet *pkE,octet *pkR,octet *skI);
+extern void HPKE_AuthEncap(int config_id,octet *SK,octet *Z,octet *pkE,octet *pkR,octet *skI);
 
 /**	@brief Decapsulate function
  *
@@ -94,16 +96,14 @@ extern void HPKE_AuthDecap(int config_id,octet *Z,octet *pkE,octet *skR,octet *p
     @param config_id is the configuration KEM/KDF/AEAD
     @param key  the output key for aead encryption
     @param nonce  the output nonce for aead encryption
+    @param exp_secret the exporter secret
 	@param mode  the mode of operation
-	@param pkR the Respondents private key
     @param Z the shared key
-    @param pkE the Ephemeral public key
     @param info application dependent info
     @param psk pre-shared key
     @param pskID identifier for the psk
-    @param pkI Initiators public key
  */
-extern void HPKE_KeySchedule(int config_id,octet *key,octet *nonce,int mode,octet *pkR,octet *Z,octet *pkE,octet *info,octet *psk,octet *pskID,octet *pkI);
+extern void HPKE_KeySchedule(int config_id,octet *key,octet *nonce,octet *exp_secret,int mode,octet *Z,octet *info,octet *psk,octet *pskID);
 
 }
 #endif

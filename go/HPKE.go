@@ -35,50 +35,99 @@ func reverse(X []byte) {
 	}
 }
 
-func Encap(config_id int,RNG *core.RAND,SKE []byte,pkE []byte,pkR []byte) []byte {
-	var skE [EGS]byte
-	var Z [EFS]byte
-	kem := config_id&7
-	if RNG == nil {
-		for i:=0;i<EGS;i++ {
-			skE[i]=SKE[i]
-		}
-		if kem==2 || kem==4 {
-			reverse(skE[:])
-			if kem==2 {
-				skE[EGS-1]&=248
-				skE[0]&=127
-				skE[0]|=64
-			} else {
-				skE[EGS-1]&=252
-				skE[0]|=128
-			}
+
+func labeledExtract(SALT []byte,label string,IKM []byte) []byte {
+	rfc:="RFCXX"+"XX "
+	prefix:=[]byte(rfc+label)
+	var LIKM []byte
+	for i:=0;i<len(prefix);i++ {
+		LIKM=append(LIKM,prefix[i])
+	}
+	if (IKM!=nil) {
+		for i:=0;i<len(IKM);i++ {
+			LIKM=append(LIKM,IKM[i])
 		}
 	}
-	ECDH_KEY_PAIR_GENERATE(RNG, skE[:], pkE)
-	if kem==2 || kem==4 {
+	return core.HKDF_Extract(core.MC_SHA2,HASH_TYPE,SALT,LIKM);
+}
+
+func labeledExpand(PRK []byte,label string,INFO []byte,L int) []byte {
+	rfc:="RFCXX" +"XX "
+	prefix:=[]byte(rfc+label)
+	ar := core.InttoBytes(L,2)
+	var LINFO []byte
+	for i:=0;i<len(ar);i++ {
+		LINFO = append(LINFO, ar[i])
+	}
+	for i:=0;i<len(prefix);i++ {
+		LINFO=append(LINFO,prefix[i])
+	}	
+	for i:=0;i<len(INFO);i++ {
+		LINFO=append(LINFO,INFO[i])
+	}	
+
+	return core.HKDF_Expand(core.MC_SHA2,HASH_TYPE,L,PRK,LINFO)
+}
+
+func extractAndExpand(DH []byte,context []byte) []byte {
+	PRK:=labeledExtract(nil,"dh",DH);
+	return labeledExpand(PRK,"prk",context,HASH_TYPE);
+}
+
+func Encap(config_id int,SKE []byte,pkE []byte,pkR []byte) []byte {
+	var skE [EGS]byte
+	var DH [EFS]byte
+	var kemcontext [] byte
+	kem := config_id&255
+
+	for i:=0;i<EGS;i++ {
+		skE[i]=SKE[i]
+	}
+	if kem==32 || kem==33 {
+		reverse(skE[:])
+		if kem==32 {
+			skE[EGS-1]&=248
+			skE[0]&=127
+			skE[0]|=64
+		} else {
+			skE[EGS-1]&=252
+			skE[0]|=128
+		}
+	}
+	
+	ECDH_KEY_PAIR_GENERATE(nil, skE[:], pkE)
+	if kem==32 || kem==33 {
 		reverse(pkR)
 	}
-	ECDH_ECPSVDP_DH(skE[:], pkR, Z[:])
-	if kem==2 || kem==4 {
+	ECDH_ECPSVDP_DH(skE[:], pkR[:], DH[:])
+	if kem==32 || kem==33 {
 		reverse(pkR)
 		reverse(pkE)
-		reverse(Z[:])
+		reverse(DH[:])
 	}
-	return Z[:]
+	for i:=0;i<len(pkE);i++ {
+		kemcontext=append(kemcontext,pkE[i]);
+	}
+	for i:=0;i<len(pkR);i++ {
+		kemcontext=append(kemcontext,pkR[i]);
+	}
+
+	return extractAndExpand(DH[:],kemcontext)
 }
 		
 func Decap(config_id int,pkE []byte,SKR []byte) []byte {
 	var skR [EGS]byte
-	var Z [EFS]byte
-	kem := config_id&7
+	var DH [EFS]byte
+	pkR:=make([]byte,len(pkE)) 
+	var kemcontext [] byte
+	kem := config_id&255
 	for i:=0;i<EGS;i++ {
 		skR[i]=SKR[i]
 	}
-	if kem==2 || kem==4 {
+	if kem==32 || kem==33 {
 		reverse(skR[:])
 		reverse(pkE)
-		if kem==2 {
+		if kem==32 {
 			skR[EGS-1]&=248
 			skR[0]&=127
 			skR[0]|=64
@@ -87,79 +136,106 @@ func Decap(config_id int,pkE []byte,SKR []byte) []byte {
 			skR[0]|=128
 		}
 	}
-	ECDH_ECPSVDP_DH(skR[:], pkE, Z[:])
-	if kem==2 || kem==4 {
+	ECDH_ECPSVDP_DH(skR[:], pkE, DH[:])
+	if kem==32 || kem==33 {
 		reverse(pkE)
-		reverse(Z[:])
+		reverse(DH[:])
 	}
-	return Z[:]
+	ECDH_KEY_PAIR_GENERATE(nil,skR[:],pkR)
+	if kem==32 || kem==33 {
+		reverse(pkR[:])
+	}
+	for i:=0;i<len(pkE);i++ {
+		kemcontext=append(kemcontext,pkE[i]);
+	}
+	for i:=0;i<len(pkR);i++ {
+		kemcontext=append(kemcontext,pkR[i]);
+	}
+
+	return extractAndExpand(DH[:],kemcontext)
 }
 
-func AuthEncap(config_id int,RNG *core.RAND,SKE []byte,pkE []byte,pkR []byte,SKI []byte) []byte {
+func AuthEncap(config_id int,SKE []byte,pkE []byte,pkR []byte,SKS []byte) []byte {
 	var skE [EGS]byte	
-	var skI [EGS]byte
-	var Z [EFS]byte
-	var NZ [EFS]byte
-	kem := config_id&7
+	var skS [EGS]byte
+	var DH [EFS]byte
+	var DH1 [EFS]byte
+	pklen:=len(pkE)
+	pkS:=make([]byte,pklen) 
+	kemcontext:=make([] byte,3*pklen)
+	kem := config_id&255
 
-	if RNG == nil {
-		for i:=0;i<EGS;i++ {
-			skE[i]=SKE[i]
-			skI[i]=SKI[i]
-		}	
-		if kem==2 || kem==4 {
-			reverse(skE[:])
-			reverse(skI[:])
-			if kem==2 {
-				skE[EGS-1]&=248
-				skE[0]&=127
-				skE[0]|=64
-				skI[EGS-1]&=248
-				skI[0]&=127
-				skI[0]|=64	
-			} else {
-				skE[EGS-1]&=252
-				skE[0]|=128
-				skI[EGS-1]&=252
-				skI[0]|=128
-			}
+	for i:=0;i<EGS;i++ {
+		skE[i]=SKE[i]
+		skS[i]=SKS[i]
+	}	
+	if kem==32 || kem==33 {
+		reverse(skE[:])
+		reverse(skS[:])
+		if kem==32 {
+			skE[EGS-1]&=248
+			skE[0]&=127
+			skE[0]|=64
+			skS[EGS-1]&=248
+			skS[0]&=127
+			skS[0]|=64	
+		} else {
+			skE[EGS-1]&=252
+			skE[0]|=128
+			skS[EGS-1]&=252
+			skS[0]|=128
 		}
 	}
-	ECDH_KEY_PAIR_GENERATE(RNG, skE[:], pkE)
-	if kem==2 || kem==4 {
+	
+	ECDH_KEY_PAIR_GENERATE(nil, skE[:], pkE)
+	if kem==32 || kem==33 {
 		reverse(pkR)
 	}
-	ECDH_ECPSVDP_DH(skE[:], pkR, Z[:])
-	ECDH_ECPSVDP_DH(skI[:], pkR, NZ[:])
-	if kem==2 || kem==4 {
+	ECDH_ECPSVDP_DH(skE[:], pkR, DH[:])
+	ECDH_ECPSVDP_DH(skS[:], pkR, DH1[:])
+	if kem==32 || kem==33 {
+		reverse(DH[:])
+		reverse(DH1[:])
+	}
+	var ZZ [2*EFS]byte
+	for i:=0;i<EFS;i++ {
+		ZZ[i]=DH[i];
+		ZZ[EFS+i]=DH1[i];
+	}
+
+	ECDH_KEY_PAIR_GENERATE(nil, skS[:], pkS[:])
+	
+	if kem==32 || kem==33 {
 		reverse(pkR)
 		reverse(pkE)
-		reverse(Z[:])
-		reverse(NZ[:])
+		reverse(pkS[:])
 	}
-	var ZZ []byte
-	for i:=0;i<EFS;i++ {
-		ZZ = append(ZZ,Z[i])
+	for i:=0;i<pklen;i++ {
+		kemcontext[i] = pkE[i]
+        kemcontext[pklen+i]= pkR[i]
+        kemcontext[2*pklen+i]= pkS[i]
 	}
-	for i:=0;i<EFS;i++ {
-		ZZ = append(ZZ,NZ[i])
-	}
-	return ZZ
+	return extractAndExpand(ZZ[:],kemcontext)
 }
 
-func AuthDecap(config_id int,pkE []byte,SKR []byte,pkI []byte) []byte  {
+func AuthDecap(config_id int,pkE []byte,SKR []byte,pkS []byte) []byte  {
 	var skR [EGS]byte	
-	var Z [EFS]byte
-	var NZ [EFS]byte
-	kem := config_id&7
+	var DH [EFS]byte
+	var DH1 [EFS]byte
+	pklen:=len(pkE)
+	pkR:=make([]byte,pklen) 
+	kemcontext:=make([] byte,3*pklen)
+
+	kem := config_id&255
+
 	for i:=0;i<EGS;i++ {
 		skR[i]=SKR[i]
 	}
-	if kem==2 || kem==4 {
+	if kem==32 || kem==33 {
 		reverse(skR[:])
 		reverse(pkE)
-		reverse(pkI)
-		if kem==2 {
+		reverse(pkS)
+		if kem==32 {
 			skR[EGS-1]&=248
 			skR[0]&=127
 			skR[0]|=64
@@ -168,22 +244,31 @@ func AuthDecap(config_id int,pkE []byte,SKR []byte,pkI []byte) []byte  {
 			skR[0]|=128
 		}
 	}
-	ECDH_ECPSVDP_DH(skR[:], pkE, Z[:])
-	ECDH_ECPSVDP_DH(skR[:], pkI, NZ[:])
-	if kem==2 || kem==4 {
-		reverse(pkI)
+	ECDH_ECPSVDP_DH(skR[:], pkE, DH[:])
+	ECDH_ECPSVDP_DH(skR[:], pkS, DH1[:])
+	if kem==32 || kem==33 {
+		reverse(DH[:])
+		reverse(DH1[:])
+	}
+	var ZZ [2*EFS]byte
+	for i:=0;i<EFS;i++ {
+		ZZ[i]=DH[i];
+		ZZ[EFS+i]=DH1[i];
+	}
+
+	ECDH_KEY_PAIR_GENERATE(nil, skR[:], pkR[:])
+
+	if kem==32 || kem==33 {
+		reverse(pkR[:])
 		reverse(pkE)
-		reverse(Z[:])
-		reverse(NZ[:])
+		reverse(pkS)
 	}
-	var ZZ []byte
-	for i:=0;i<EFS;i++ {
-		ZZ=append(ZZ,Z[i])
+	for i:=0;i<pklen;i++ {
+		kemcontext[i] = pkE[i]
+        kemcontext[pklen+i]= pkR[i]
+        kemcontext[2*pklen+i]= pkS[i]
 	}
-	for i:=0;i<EFS;i++ {
-		ZZ=append(ZZ,NZ[i])
-	}
-	return ZZ
+	return extractAndExpand(ZZ[:],kemcontext)
 }
 
 /*
@@ -195,79 +280,55 @@ func printBinary(array []byte) {
 }
 */
 
-func KeySchedule(config_id int,mode int,pkR []byte,Z []byte,pkE []byte,info []byte,psk []byte,pskID []byte,pkI []byte) ([]byte,[]byte) {
-	var CONTEXT []byte
-	var FULL_CONTEXT[]byte
+func KeySchedule(config_id int,mode int,Z []byte,info []byte,psk []byte,pskID []byte) ([]byte,[]byte,[]byte) {
+	var context []byte
 
-	kem_id:=config_id&7
-	kdf_id:=(config_id>>3)&3
-	aead_id:=(config_id>>5)&3
+	kem_id:=config_id&255
+	kdf_id:=(config_id>>8)&3
+	aead_id:=(config_id>>10)&3
 
-	ar := core.InttoBytes(mode, 1)
+	ar:=core.InttoBytes(kem_id, 2)
 	for i:=0;i<len(ar);i++ {
-		CONTEXT = append(CONTEXT, ar[i])
-	}
-	ar=core.InttoBytes(kem_id, 2)
-	for i:=0;i<len(ar);i++ {
-		CONTEXT = append(CONTEXT, ar[i])
+		context = append(context, ar[i])
 	}
 	ar=core.InttoBytes(kdf_id, 2)
 	for i:=0;i<len(ar);i++ {
-		CONTEXT = append(CONTEXT, ar[i])
+		context = append(context, ar[i])
 	}
 	ar=core.InttoBytes(aead_id, 2)
 	for i:=0;i<len(ar);i++ {
-		CONTEXT = append(CONTEXT, ar[i])
+		context = append(context, ar[i])
 	}
-	for i:=0;i<len(pkE);i++ {
-		CONTEXT = append(CONTEXT, pkE[i])
+	ar = core.InttoBytes(mode, 1)
+	for i:=0;i<len(ar);i++ {
+		context = append(context, ar[i])
 	}
-	for i:=0;i<len(pkR);i++ {
-		CONTEXT = append(CONTEXT, pkR[i])
+
+	var ZEROS [HASH_TYPE]byte
+	for i:=0;i<HASH_TYPE;i++ {
+		ZEROS[i]=0
 	}
-	if pkI==nil {
-		for i:=0;i<len(pkR);i++ {
-			CONTEXT = append(CONTEXT, 0)
-		}
+
+	H:=labeledExtract(ZEROS[:],"pskID_hash",pskID);
+	for i:=0;i<HASH_TYPE;i++ {
+		context=append(context,H[i])
+	}
+	H=labeledExtract(ZEROS[:],"info",info)
+	for i:=0;i<HASH_TYPE;i++ {
+		context=append(context,H[i])
+	}
+
+	if psk==nil {
+		H=labeledExtract(ZEROS[:],"psk_hash",ZEROS[:])
 	} else {
-		for i:=0;i<len(pkI);i++ {
-			CONTEXT = append(CONTEXT, pkI[i])
-		}
+		H=labeledExtract(ZEROS[:],"psk_hash",psk)
 	}
-	H:=core.SPhashit(core.MC_SHA2,HASH_TYPE,pskID)
-	for i:=0;i<HASH_TYPE;i++ {
-		CONTEXT = append(CONTEXT, H[i])
-	}
-	H=core.SPhashit(core.MC_SHA2,HASH_TYPE,info)
-	for i:=0;i<HASH_TYPE;i++ {
-		CONTEXT = append(CONTEXT, H[i])
-	}
+	secret:=labeledExtract(H,"zz",Z)
 
-	//fmt.Printf("Context = "); printBinary(CONTEXT[:])	
-	SECRET:=core.HKDF_Extract(core.MC_SHA2,HASH_TYPE,psk,Z)
-	//fmt.Printf("Secret =  "); printBinary(SECRET[:])
-	
-	pp:="hpke key"
-	ar=[]byte(pp)
-	for i:=0;i<len(ar);i++ {
-		FULL_CONTEXT = append(FULL_CONTEXT, ar[i])
-	}
-	for i:=0;i<len(CONTEXT);i++ {
-		FULL_CONTEXT = append(FULL_CONTEXT, CONTEXT[i])
-	}
-	key:=core.HKDF_Expand(core.MC_SHA2,HASH_TYPE,AESKEY,SECRET[:],FULL_CONTEXT)
+	key:=labeledExpand(secret,"key",context,AESKEY)
+	nonce:=labeledExpand(secret,"nonce",context,12)
+	exp_secret:=labeledExpand(secret,"exp",context,HASH_TYPE)
 
-	FULL_CONTEXT=nil
-	pp="hpke nonce"
-	ar=[]byte(pp)
-	for i:=0;i<len(ar);i++ {
-		FULL_CONTEXT = append(FULL_CONTEXT, ar[i])
-	}
-	for i:=0;i<len(CONTEXT);i++ {
-		FULL_CONTEXT = append(FULL_CONTEXT, CONTEXT[i])
-	}
-	nonce:=core.HKDF_Expand(core.MC_SHA2,HASH_TYPE,12,SECRET[:],FULL_CONTEXT)
-
-	return key,nonce
+	return key,nonce,exp_secret
 }	
 

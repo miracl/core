@@ -51,50 +51,100 @@ public struct HPKE
             }
     }
 
-    static public func ENCAP(_ config_id: Int,_ RNG: inout RAND?,_ ske:[UInt8],_ pkE:inout [UInt8],_ pkR:inout [UInt8]) -> [UInt8] {
-        var skE=[UInt8](repeating: 0,count: ECDH.EGS)
-        var Z=[UInt8](repeating: 0,count: ECDH.EFS)
-        let kem = config_id&7
-        if RNG == nil {
-            for i in 0..<ECDH.EGS {
-                skE[i]=ske[i]
-            }
-            if kem==2 || kem==4 {
-                reverse(&skE)
-                if kem==2 {
-                    skE[ECDH.EGS-1]&=248
-                    skE[0]&=127
-                    skE[0]|=64
-                } else {
-                    skE[ECDH.EGS-1]&=252
-                    skE[0]|=128
-                }
+    static func LabeledExtract(_ salt:[UInt8]?,_ label:String,_ ikm:[UInt8]?) -> [UInt8] {
+        let rfc="RFCXX"+"XX "
+        let prefix=[UInt8]((rfc+label).utf8)
+        var likm=[UInt8]();
+        for i in 0..<prefix.count {
+            likm.append(prefix[i])
+        }
+        if ikm != nil {
+            for i in 0..<ikm!.count {
+                likm.append(ikm![i])
             }
         }
-        ECDH.KEY_PAIR_GENERATE(&RNG, &skE, &pkE)
-        if kem==2 || kem==4 {
+        return HMAC.HKDF_Extract(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,salt,likm)
+    }
+
+    static func LabeledExpand(_ prk:[UInt8],_ label:String,_ info:[UInt8],_ L:Int) -> [UInt8] {
+        let rfc="RFCXX"+"XX "
+        let prefix=[UInt8]((rfc+label).utf8)
+        let ar = HMAC.inttoBytes(L, 2)
+        var linfo=[UInt8]();
+        for i in 0..<ar.count {
+            linfo.append(ar[i])
+        }
+        for i in 0..<prefix.count {
+            linfo.append(prefix[i])
+        }
+        for i in 0..<info.count {
+            linfo.append(info[i])
+        }
+        return HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,prk,linfo)
+    }
+
+    static func ExtractAndExpand(_ dh:[UInt8],_ context:[UInt8]) -> [UInt8] {
+        let prk=LabeledExtract(nil,"dh",dh)
+        return LabeledExpand(prk,"prk",context,CONFIG_CURVE.HASH_TYPE)
+    }
+
+    static public func ENCAP(_ config_id: Int,_ ske:[UInt8],_ pkE:inout [UInt8],_ pkR:inout [UInt8]) -> [UInt8] {
+        var skE=[UInt8](repeating: 0,count: ECDH.EGS)
+        var dh=[UInt8](repeating: 0,count: ECDH.EFS)
+        var kemcontext=[UInt8]();
+
+        var NULLRNG : RAND? = nil
+        let kem = config_id&255
+  
+        for i in 0..<ECDH.EGS {
+            skE[i]=ske[i]
+        }
+        if kem==32 || kem==33 {
+            reverse(&skE)
+            if kem==32 {
+                skE[ECDH.EGS-1]&=248
+                skE[0]&=127
+                skE[0]|=64
+            } else {
+                skE[ECDH.EGS-1]&=252
+                skE[0]|=128
+            }
+        }
+        
+        ECDH.KEY_PAIR_GENERATE(&NULLRNG, &skE, &pkE)
+        if kem==32 || kem==33 {
             reverse(&pkR);
         }
-        ECDH.ECPSVDP_DH(skE, pkR, &Z)
-        if kem==2 || kem==4 {
+        ECDH.ECPSVDP_DH(skE, pkR, &dh)
+        if kem==32 || kem==33 {
             reverse(&pkR)
             reverse(&pkE)
-            reverse(&Z)
+            reverse(&dh)
         }
-        return Z
+
+        kemcontext.append(contentsOf: pkE)
+        kemcontext.append(contentsOf: pkR)
+
+        return ExtractAndExpand(dh,kemcontext)
     }
 
     static public func DECAP(_ config_id: Int,_ pkE:inout [UInt8],_ skr: [UInt8]) -> [UInt8] {
         var skR=[UInt8](repeating: 0,count: ECDH.EGS)
-        var Z=[UInt8](repeating: 0,count: ECDH.EFS)
-        let kem = config_id&7
+        var dh=[UInt8](repeating: 0,count: ECDH.EFS)
+        var pkR=[UInt8](); 
+        pkR.append(contentsOf: pkE)
+        var kemcontext=[UInt8]();
+
+        var NULLRNG : RAND? = nil
+
+        let kem = config_id&255
         for i in 0..<ECDH.EGS {
             skR[i]=skr[i]
         }
-        if kem==2 || kem==4 {
+        if kem==32 || kem==33 {
             reverse(&skR)
             reverse(&pkE)
-            if kem==2 {
+            if kem==32 {
                 skR[ECDH.EGS-1]&=248
                 skR[0]&=127
                 skR[0]|=64
@@ -103,76 +153,100 @@ public struct HPKE
                 skR[0]|=128
             }
         }
-        ECDH.ECPSVDP_DH(skR, pkE, &Z)
-        if kem==2 || kem==4 {
+        ECDH.ECPSVDP_DH(skR, pkE, &dh)
+        if kem==32 || kem==33 {
             reverse(&pkE)
-            reverse(&Z)
+            reverse(&dh)
         }
-        return Z
+        ECDH.KEY_PAIR_GENERATE(&NULLRNG,&skR,&pkR)
+        if kem==32 || kem==33 {
+            reverse(&pkR)
+        }
+
+        kemcontext.append(contentsOf: pkE)
+        kemcontext.append(contentsOf: pkR)
+
+        return ExtractAndExpand(dh,kemcontext)
     }
 
-    static public func AUTHENCAP(_ config_id: Int,_ RNG: inout RAND?,_ ske:[UInt8],_ pkE:inout [UInt8],_ pkR:inout [UInt8],_ ski:inout [UInt8]) -> [UInt8]{
+    static public func AUTHENCAP(_ config_id: Int,_ ske:[UInt8],_ pkE:inout [UInt8],_ pkR:inout [UInt8],_ ski:inout [UInt8]) -> [UInt8]{
         var skE=[UInt8](repeating: 0,count: ECDH.EGS)
-        var skI=[UInt8](repeating: 0,count: ECDH.EGS)
-        var Z=[UInt8](repeating: 0,count: ECDH.EFS)
-        var NZ=[UInt8](repeating: 0,count: ECDH.EFS)
-        let kem = config_id&7
+        var skS=[UInt8](repeating: 0,count: ECDH.EGS)
+        var dh=[UInt8](repeating: 0,count: ECDH.EFS)
+        var dh1=[UInt8](repeating: 0,count: ECDH.EFS)
+        var pkS=[UInt8]()
+        pkS.append(contentsOf: pkE)
+        var kemcontext=[UInt8]();
 
-        if RNG == nil {
-            for i in 0..<ECDH.EGS {
-                skE[i]=ske[i]
-                skI[i]=ski[i]
-            }
-            if kem==2 || kem==4 {
-                reverse(&skE)
-                reverse(&skI)
-                if kem==2 {
-                    skE[ECDH.EGS-1]&=248
-                    skE[0]&=127
-                    skE[0]|=64
-                    skI[ECDH.EGS-1]&=248
-                    skI[0]&=127
-                    skI[0]|=64
-                } else {
-                    skE[ECDH.EGS-1]&=252
-                    skE[0]|=128
-                    skI[ECDH.EGS-1]&=252
-                    skI[0]|=128
-                }
+        var NULLRNG : RAND? = nil
+        let kem = config_id&255
+
+        for i in 0..<ECDH.EGS {
+            skE[i]=ske[i]
+            skS[i]=ski[i]
+        }
+        if kem==32 || kem==33 {
+            reverse(&skE)
+            reverse(&skS)
+            if kem==32 {
+                skE[ECDH.EGS-1]&=248
+                skE[0]&=127
+                skE[0]|=64
+                skS[ECDH.EGS-1]&=248
+                skS[0]&=127
+                skS[0]|=64
+            } else {
+                skE[ECDH.EGS-1]&=252
+                skE[0]|=128
+                skS[ECDH.EGS-1]&=252
+                skS[0]|=128
             }
         }
-        ECDH.KEY_PAIR_GENERATE(&RNG, &skE, &pkE)
-        if kem==2 || kem==4 {
+        
+        ECDH.KEY_PAIR_GENERATE(&NULLRNG, &skE, &pkE)
+        if kem==32 || kem==33 {
             reverse(&pkR)
         }
-        ECDH.ECPSVDP_DH(skE, pkR, &Z)
-        ECDH.ECPSVDP_DH(skI, pkR, &NZ)
-        if kem==2 || kem==4 {
+        ECDH.ECPSVDP_DH(skE, pkR, &dh)
+        ECDH.ECPSVDP_DH(skS, pkR, &dh1)
+        if kem==32 || kem==33 {
+            reverse(&dh)
+            reverse(&dh1)
+        }
+        dh.append(contentsOf: dh1)
+
+       ECDH.KEY_PAIR_GENERATE(&NULLRNG, &skS, &pkS)    
+
+        if kem==32 || kem==33 {
             reverse(&pkR)
             reverse(&pkE)
-            reverse(&Z)
-            reverse(&NZ)
+            reverse(&pkS)
         }
 
-        for i in 0..<ECDH.EFS {
-            Z.append(NZ[i])
-        }
-        return Z
+        kemcontext.append(contentsOf: pkE)
+        kemcontext.append(contentsOf: pkR)
+        kemcontext.append(contentsOf: pkS)
+        return ExtractAndExpand(dh,kemcontext)
     }
 
-    static public func AUTHDECAP(_ config_id: Int,_ pkE: inout [UInt8],_ skr:[UInt8],_ pkI: inout [UInt8]) -> [UInt8]  {
+    static public func AUTHDECAP(_ config_id: Int,_ pkE: inout [UInt8],_ skr:[UInt8],_ pkS: inout [UInt8]) -> [UInt8]  {
         var skR=[UInt8](repeating: 0,count: ECDH.EGS)
-        var Z=[UInt8](repeating: 0,count: ECDH.EFS)
-        var NZ=[UInt8](repeating: 0,count: ECDH.EFS)
-        let kem = config_id&7
+        var dh=[UInt8](repeating: 0,count: ECDH.EFS)
+        var dh1=[UInt8](repeating: 0,count: ECDH.EFS)
+        var pkR=[UInt8]()
+        pkR.append(contentsOf: pkE)
+        var kemcontext=[UInt8]();
+
+        var NULLRNG : RAND? = nil
+        let kem = config_id&255
         for i in 0..<ECDH.EGS {
             skR[i]=skr[i]
         }
-        if kem==2 || kem==4 {
+        if kem==32 || kem==33 {
             reverse(&skR)
             reverse(&pkE)
-            reverse(&pkI)
-            if kem==2 {
+            reverse(&pkS)
+            if kem==32 {
                 skR[ECDH.EGS-1]&=248
                 skR[0]&=127
                 skR[0]|=64
@@ -181,97 +255,66 @@ public struct HPKE
                 skR[0]|=128
             }
         }
-        ECDH.ECPSVDP_DH(skR, pkE, &Z)
-        ECDH.ECPSVDP_DH(skR, pkI, &NZ)
-        if kem==2 || kem==4 {
-            reverse(&pkI)
+        ECDH.ECPSVDP_DH(skR, pkE, &dh)
+        ECDH.ECPSVDP_DH(skR, pkS, &dh1)
+
+        if kem==32 || kem==33 {
+            reverse(&dh)
+            reverse(&dh1)
+        }
+
+        dh.append(contentsOf: dh1)
+
+        ECDH.KEY_PAIR_GENERATE(&NULLRNG, &skR, &pkR)    
+
+        if kem==32 || kem==33 {
+            reverse(&pkR)
             reverse(&pkE)
-            reverse(&Z)
-            reverse(&NZ)
+            reverse(&pkS)
         }
-        for i in 0..<ECDH.EFS {
-            Z.append(NZ[i])
-        }
-        return Z
+        kemcontext.append(contentsOf: pkE)
+        kemcontext.append(contentsOf: pkR)
+        kemcontext.append(contentsOf: pkS)
+        return ExtractAndExpand(dh,kemcontext)
     }
 
-    static public func KEYSCHEDULE(_ config_id: Int,_ mode: Int,_ pkR: [UInt8],_ Z: [UInt8],_ pkE: [UInt8],_ info: [UInt8],_ psk: [UInt8]?,_ pskID: [UInt8]?,_ pkI: [UInt8]?) -> ([UInt8],[UInt8]) {
-        let ctxlen=7+3*pkR.count+2*CONFIG_CURVE.HASH_TYPE
-        var context=[UInt8](repeating: 0,count: ctxlen)
+    static public func KEYSCHEDULE(_ config_id: Int,_ mode: Int,_ Z: [UInt8],_ info: [UInt8],_ psk: [UInt8]?,_ pskID: [UInt8]?) -> ([UInt8],[UInt8],[UInt8]) {
+        var context=[UInt8]()
 
-        let kem_id=config_id&7
-        let kdf_id=(config_id>>3)&3
-        let aead_id=(config_id>>5)&3
-        var k=0
+        let kem_id=config_id&255
+        let kdf_id=(config_id>>8)&3
+        let aead_id=(config_id>>10)&3
 
-        var ar = HMAC.inttoBytes(mode, 1)
-        for i in 0..<ar.count {
-            context[k] = ar[i]; k+=1
-        }
-        ar=HMAC.inttoBytes(kem_id, 2)
-        for i in 0..<ar.count {
-            context[k] = ar[i]; k+=1
-        }
+        var ar=HMAC.inttoBytes(kem_id, 2)
+        context.append(contentsOf: ar)
+
         ar=HMAC.inttoBytes(kdf_id, 2)
-        for i in 0..<ar.count {
-            context[k] = ar[i]; k+=1
-        }
+        context.append(contentsOf: ar)
+
         ar=HMAC.inttoBytes(aead_id, 2)
-        for i in 0..<ar.count {
-            context[k] = ar[i]; k+=1
-        }
+        context.append(contentsOf: ar)
 
-        for i in 0..<pkE.count {
-            context[k] = pkE[i]; k+=1
-        }
-        for i in 0..<pkR.count {
-            context[k] = pkR[i]; k+=1
-        }
-        if pkI==nil {
-            for _ in 0..<pkR.count {
-                context[k] = 0; k+=1
-            }
+        ar = HMAC.inttoBytes(mode, 1)
+        context.append(contentsOf: ar)
+
+        let zeros=[UInt8](repeating: 0,count: CONFIG_CURVE.HASH_TYPE)
+
+        var H=LabeledExtract(zeros,"pskID_hash",pskID!)
+        context.append(contentsOf: H)
+        H=LabeledExtract(zeros,"info",info)
+        context.append(contentsOf: H)
+
+        if psk==nil {
+            H=LabeledExtract(zeros,"psk_hash",zeros);
         } else {
-            for i in 0..<pkI!.count {
-                context[k] = pkI![i]; k+=1
-            }
+            H=LabeledExtract(zeros,"psk_hash",psk!);
         }
-        var H=HMAC.SPhashit(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,pskID!)
-        for i in 0..<CONFIG_CURVE.HASH_TYPE {
-            context[k] = H[i]; k+=1
-        }
-        H=HMAC.SPhashit(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,info)
-        for i in 0..<CONFIG_CURVE.HASH_TYPE {
-            context[k] = H[i]; k+=1
-        }
+        let secret=LabeledExtract(H,"zz",Z)
 
-        //print("Context = ",terminator:""); printBinary(context)
-        let secret=HMAC.HKDF_Extract(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,psk!,Z)
-        //print("Secret = ",terminator:""); printBinary(secret)
+        let key=LabeledExpand(secret,"key",context,CONFIG_CURVE.AESKEY)
+        let nonce=LabeledExpand(secret,"nonce",context,12)
+        let exp_secret=LabeledExpand(secret,"exp",context,CONFIG_CURVE.HASH_TYPE)
 
-        var full_context=[UInt8]();
-
-        var pp=String("hpke key")
-        ar=[UInt8]( (pp).utf8 )
-
-        for i in 0..<ar.count {
-            full_context.append(ar[i])
-        }
-        for i in 0..<ctxlen {
-            full_context.append(context[i])
-        }
-        let key=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,CONFIG_CURVE.AESKEY,secret,full_context)
-        full_context=[UInt8]();
-        pp="hpke nonce"
-        ar=[UInt8]( (pp).utf8 )
-        for i in 0..<ar.count {
-            full_context.append(ar[i])
-        }
-        for i in 0..<ctxlen {
-            full_context.append(context[i])
-        }
-        let nonce=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,12,secret,full_context)
-
-        return (key,nonce)
+        return (key,nonce,exp_secret)
     }
 }

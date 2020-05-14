@@ -85,7 +85,7 @@ extern int  ECP_PUBLIC_KEY_VALIDATE(octet *W);
 	@param K the output shared key, in fact the x-coordinate of s.W
 	@return 0 or an error code
  */
-extern int ECP_SVDP_DH(octet *s, octet *W, octet *K);
+extern int ECP_SVDP_DH(octet *s, octet *W, octet *K/*, bool compress*/);
 /*extern int ECPSVDP_DHC(octet *,octet *,int,octet *);*/
 
 /*#if CURVETYPE!=MONTGOMERY */

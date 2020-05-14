@@ -99,7 +99,7 @@ int ZZZ::ECP_PUBLIC_KEY_VALIDATE(octet *W)
 }
 
 /* IEEE-1363 Diffie-Hellman online calculation Z=S.WD */
-int ZZZ::ECP_SVDP_DH(octet *S, octet *WD, octet *Z)
+int ZZZ::ECP_SVDP_DH(octet *S, octet *WD, octet *Z/*,bool compress*/)
 {
     BIG r, s, wx;
     int valid;
@@ -121,13 +121,19 @@ int ZZZ::ECP_SVDP_DH(octet *S, octet *WD, octet *Z)
         else
         {
 #if CURVETYPE_ZZZ!=MONTGOMERY
-            ECP_get(wx, wx, &W);
+//            if (!compress)
+//            {
+//                ECP_toOctet(Z,&W,false);
+//                return res;
+//            }
+//            else
+                ECP_get(wx, wx, &W);
 #else
             ECP_get(wx, &W);
 #endif
-            Z->len = MODBYTES_XXX;
-            BIG_toBytes(Z->val, wx);
         }
+        Z->len = MODBYTES_XXX;
+        BIG_toBytes(Z->val, wx);
     }
     return res;
 }
