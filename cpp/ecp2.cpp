@@ -537,7 +537,6 @@ void ZZZ::ECP2_mul(ECP2 *P, BIG e)
         ECP2_add(P, &Q);
     }
     ECP2_sub(P, &C); /* apply correction */
-    ECP2_affine(P);
 }
 
 /* Calculates q.P using Frobenius constant X */
@@ -640,14 +639,12 @@ void ZZZ::ECP2_mul4(ECP2 *P, ECP2 Q[4], BIG u[4])
     ECP2_copy(&W, P);
     ECP2_sub(&W, &Q[0]);
     ECP2_cmove(P, &W, pb);
-
-    ECP2_affine(P);
 }
 
 /* Hunt and Peck a BIG to G2 curve point */
 /*
 void ZZZ::ECP2_hap2point(ECP2 *Q,BIG h)
-{ 
+{
     BIG one,hv;
     FP2 X;
     BIG_one(one);
@@ -685,10 +682,10 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
 
     FP2_from_ints(&Z,RIADZG2A_YYY,RIADZG2B_YYY);
     ECP2_rhs(&A,&Z);  // A=g(Z)
-    FP2_sqr(&T,&T);   
+    FP2_sqr(&T,&T);
     FP2_mul(&Y,&A,&T);   // tv1=u^2*g(Z)
     FP2_add(&T,&W,&Y); FP2_norm(&T); // tv2=1+tv1
-    FP2_sub(&Y,&W,&Y); FP2_norm(&Y); // tv1=1-tv1 
+    FP2_sub(&Y,&W,&Y); FP2_norm(&Y); // tv1=1-tv1
     FP2_mul(&NY,&T,&Y);
     FP2_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
     FP2_neg(&A,&A); FP2_norm(&A);     // -g(Z)
@@ -705,7 +702,7 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_sub(&X1,&X1,&W); FP2_norm(&X1);
     FP2_add(&X2,&X2,&W); FP2_norm(&X2);
     FP2_add(&A,&A,&A);
-    FP2_add(&A,&A,&A); 
+    FP2_add(&A,&A,&A);
     FP2_norm(&A);      // -4*g(Z)
     FP2_sqr(&T,&T);
     FP2_mul(&T,&T,&NY);
@@ -731,9 +728,9 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_inv(&B,&B);
     FP2_mul(&B,&B,&S);        // B=S.T/(1+B+T*2)
 
-    FP2_mul(&X1,&B,&T);       
-    FP2_from_FP(&Y,&j);     
-    FP2_sub(&X2,&X1,&Y);    FP2_norm(&X2);// X2=t.w-j 
+    FP2_mul(&X1,&B,&T);
+    FP2_from_FP(&Y,&j);
+    FP2_sub(&X2,&X1,&Y);    FP2_norm(&X2);// X2=t.w-j
     FP2_neg(&X1,&X2);       FP2_norm(&X1);// X1=j-t.w
     FP2_sub(&X2,&X2,&W);    FP2_norm(&X2);
 
@@ -749,11 +746,11 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_cmove(&X3,&X1,FP2_qr(&W));
     ECP2_rhs(&W,&X3);
     FP2_sqrt(&Y,&W);
-    
+
     ne=FP2_sign(&Y)^sgn;
     FP2_neg(&W,&Y); FP2_norm(&W);
     FP2_cmove(&Y,&W,ne);
- 
+
     ECP2_set(Q,&X3,&Y);
 }
 
@@ -816,8 +813,6 @@ void ZZZ::ECP2_cfp(ECP2 *Q)
     ECP2_frob(&T, &X);
     ECP2_frob(&T, &X);
     ECP2_add(Q, &T);
-    ECP2_affine(Q);
-
 #elif (PAIRING_FRIENDLY_ZZZ == BLS_CURVE)
 
     // Efficient hash maps to G2 on BLS curves - Budroni, Pintore
@@ -844,8 +839,6 @@ void ZZZ::ECP2_cfp(ECP2 *Q)
 
     ECP2_add(Q, &x2Q);
     ECP2_add(Q, &xQ);
-
-    ECP2_affine(Q);
 
 #endif
 }

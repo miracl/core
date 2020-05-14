@@ -236,7 +236,7 @@ int ZZZ::ECP_set(ECP *P, BIG x)
     FP_nres(&rhs, x);
 
     ECP_rhs(&rhs, &rhs);
- 
+
     if (!FP_qr(&rhs,NULL))
     {
         ECP_inf(P);
@@ -958,7 +958,6 @@ void ZZZ::ECP_pinmul(ECP *P, int e, int bts)
         ECP_cswap(&R0, &R1, b);
     }
     ECP_copy(P, &R0);
-    ECP_affine(P);
 }
 #endif
 
@@ -981,7 +980,7 @@ void ZZZ::ECP_mul(ECP *P, BIG e)
     ECP_copy(&R1, P);
     ECP_dbl(&R1);
 
-    ECP_copy(&D, P); ECP_affine(&D);
+    ECP_copy(&D, P);
 
     nb = BIG_nbits(e);
     for (i = nb - 2; i >= 0; i--)
@@ -1062,7 +1061,6 @@ void ZZZ::ECP_mul(ECP *P, BIG e)
     }
     ECP_sub(P, &C); /* apply correction */
 #endif
-    ECP_affine(P);
 }
 
 #if CURVETYPE_ZZZ!=MONTGOMERY
@@ -1154,7 +1152,6 @@ void ZZZ::ECP_mul2(ECP *P, ECP *Q, BIG e, BIG f)
         ECP_add(P, &T);
     }
     ECP_sub(P, &C); /* apply correction */
-    ECP_affine(P);
 }
 
 #endif
@@ -1225,7 +1222,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP X1,X2,t,one,A,w1,w2,B,Y,NY,K;
     FP_one(&one);
 
-#if MODTYPE_YYY != GENERALISED_MERSENNE  
+#if MODTYPE_YYY != GENERALISED_MERSENNE
 // its NOT goldilocks!
 // Figure out the Montgomery curve parameters
 
@@ -1243,7 +1240,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_norm(&A); FP_norm(&B);
 
     FP_div2(&A,&A);    // (A+B)/2     // (a+d)/2  = J/K
-    FP_div2(&B,&B);    // (B-A)/2     // (-a+d)/2 
+    FP_div2(&B,&B);    // (B-A)/2     // (-a+d)/2
     FP_div2(&B,&B);    // (B-A)/4     // (-a+d)/4 = -1/K
 
     FP_neg(&K,&B);
@@ -1278,7 +1275,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
     FP_mul(&X1,&t,&A);
     FP_neg(&X1,&X1);    // -(J/K).inv(1+z.t^2)
-    
+
     FP_copy(&X2,&X1);
     FP_add(&X2,&X2,&A); FP_norm(&X2);
     FP_neg(&X2,&X2);    // -(X1+(J/K))
@@ -1319,15 +1316,15 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
     if (!rfc)
     {
-        FP_mul(&X1,&X1,&K);  
-        FP_mul(&Y,&Y,&K);    
+        FP_mul(&X1,&X1,&K);
+        FP_mul(&Y,&Y,&K);
     }
     ne=sgn^FP_sign(&Y);
     FP_neg(&NY,&Y); FP_norm(&NY);
     FP_cmove(&Y,&NY,ne);
 
 
-#if MODTYPE_YYY == GENERALISED_MERSENNE  
+#if MODTYPE_YYY == GENERALISED_MERSENNE
 // GOLDILOCKS isogeny
     FP_sqr(&t,&X1);  // t=u^2
     FP_add(&NY,&t,&one); // NY=u^2+1
@@ -1345,9 +1342,9 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_norm(&Y);        // 4v^2
     FP_add(&w2,&t,&Y);  // w2=(u^2-1)^2+4v^2
     FP_norm(&w2);
-    FP_inv(&w2,&w2);    
+    FP_inv(&w2,&w2);
     FP_mul(&w1,&w1,&w2); // w1=4v(u^2-1)/[(u^2-1)^2+4v^2]
-    
+
     FP_sub(&w2,&Y,&t);   // w2=4v^2-(u^2-1)^2
     FP_norm(&w2);
     FP_mul(&w2,&w2,&X1); // w2=u(4v^2-(u^2-1)^2)
@@ -1370,7 +1367,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_mul(&X1,&X1,&t);
 
     if (rfc)
-        FP_mul(&X1,&X1,&K);  
+        FP_mul(&X1,&X1,&K);
 
     FP_mul(&Y,&Y,&w2);
     FP_mul(&Y,&Y,&t);
@@ -1402,14 +1399,14 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
         FP_imul(&t,&t,RIADZ_YYY);  // Z from hash-to-point draft standard
 
-    //    FP_norm(&t);           // t=Zt^2 
+    //    FP_norm(&t);           // t=Zt^2
         FP_add(&w,&t,&one);    // w=Zt^2+1
         FP_norm(&w);
         FP_mul(&w,&w,&t);    // w=Z^2*t^4+Zt^2
         FP_mul(&A,&A,&w);     // A=Aw
         FP_inv(&A,&A);
         FP_add(&w,&w,&one); FP_norm(&w);
-        FP_mul(&w,&w,&B);     
+        FP_mul(&w,&w,&B);
         FP_neg(&w,&w);      // -B(w+1)
         FP_norm(&w);
         FP_mul(&X2,&w,&A);   // -B(w+1)/Aw
@@ -1424,10 +1421,10 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 // Shallue and van de Woestijne
         FP_from_int(&Y,RIADZ_YYY);
         ECP_rhs(&A,&Y);  // A=g(Z)
-        FP_sqr(&t,&t);   
+        FP_sqr(&t,&t);
         FP_mul(&Y,&A,&t);   // tv1=u^2*g(Z)
         FP_add(&t,&one,&Y); FP_norm(&t); // tv2=1+tv1
-        FP_sub(&Y,&one,&Y); FP_norm(&Y); // tv1=1-tv1 
+        FP_sub(&Y,&one,&Y); FP_norm(&Y); // tv1=1-tv1
         FP_mul(&NY,&t,&Y);
         FP_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
         FP_neg(&A,&A); FP_norm(&A);     // -g(Z)
@@ -1444,7 +1441,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_sub(&X1,&X1,&w); FP_norm(&X1);
         FP_add(&X2,&X2,&w); FP_norm(&X2);
         FP_add(&A,&A,&A);
-        FP_add(&A,&A,&A); 
+        FP_add(&A,&A,&A);
         FP_norm(&A);      // -4*g(Z)
         FP_sqr(&t,&t);
         FP_mul(&t,&t,&NY);
@@ -1461,14 +1458,14 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_cmove(&X3,&X1,FP_qr(&w,NULL));
         ECP_rhs(&w,&X3);
         FP_sqrt(&Y,&w,NULL);
-        FP_redc(x,&X3); 
+        FP_redc(x,&X3);
 /*
         FP_from_int(&A,-3);
         FP_sqrt(&w,&A,NULL);      // w=sqrt(-3)
         FP_sub(&j,&w,&one);  FP_norm(&j);
         FP_div2(&j,&j);        // j=(w-1)/2
         FP_mul(&w,&w,&t);     // w=s.t
-        FP_add(&B,&B,&one);   
+        FP_add(&B,&B,&one);
         FP_sqr(&Y,&t);
         FP_add(&B,&B,&Y);    // t^2+b+1
         FP_norm(&B);
@@ -1479,9 +1476,9 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_neg(&X2,&X1);
         FP_sub(&X2,&X2,&one);
         FP_norm(&X2);
-        FP_sqr(&w,&w); FP_inv(&w,&w); 
+        FP_sqr(&w,&w); FP_inv(&w,&w);
         FP_add(&X3,&w,&one); FP_norm(&X3);
-    
+
         ECP_rhs(&w,&X2);
         FP_cmove(&X1,&X2,FP_qr(&w,NULL));
         ECP_rhs(&w,&X3);
@@ -1493,7 +1490,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     ne=FP_sign(&Y)^sgn;
     FP_neg(&NY,&Y); FP_norm(&NY);
     FP_cmove(&Y,&NY,ne);
- 
+
     FP_redc(y,&Y);
     ECP_set(P,x,y);
 #endif
