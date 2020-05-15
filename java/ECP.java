@@ -322,7 +322,7 @@ public final class ECP {
 		if (compress)
 		{
 			b[0]=0x02;
-			if (y.redc().parity()==1) b[0]=0x03;
+			if (W.y.redc().parity()==1) b[0]=0x03;
 			return;
 		}
 
@@ -876,6 +876,7 @@ public final class ECP {
 			}
 			P.sub(C); /* apply correction */
 		}
+        //P.affine();
 		return P;
 	}
 
@@ -947,6 +948,7 @@ public final class ECP {
 			S.add(T);
 		}
 		S.sub(C); /* apply correction */
+//        S.affine();
 		return S;
 	}
 

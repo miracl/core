@@ -790,10 +790,11 @@ public final class PAIR {
             u[0].norm();
             u[1].norm();
             R = R.mul2(u[0], Q, u[1]);
-
+ //           R.affine();
         } else {
             R = P.mul(e);
         }
+
         return R;
     }
 
@@ -878,6 +879,7 @@ public final class PAIR {
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
         ECP W=G1mul(P,q);
+//        W.affine();
         if (!W.is_infinity()) return false;
         return true;
     }

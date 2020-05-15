@@ -122,6 +122,7 @@ public class BLS {
         ECP D = bls_hash_to_point(M);
         BIG s = BIG.fromBytes(S);
         D = PAIR.G1mul(D, s);
+ //       D.affine();
         D.toBytes(SIG, true);
         return BLS_OK;
     }
