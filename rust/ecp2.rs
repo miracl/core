@@ -26,7 +26,7 @@ use crate::xxx::fp;
 //use crate::xxx::fp::FP;
 use crate::xxx::dbig::DBIG;
 
-//#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct ECP2 {
     x: FP2,
     y: FP2,
@@ -567,7 +567,6 @@ impl ECP2 {
             P.add(&mut Q);
         }
         P.sub(&mut C);
-        P.affine();
         return P;
     }
 
@@ -620,8 +619,6 @@ impl ECP2 {
             self.add(&x2Q);
             self.add(&xQ);
         }
-
-        self.affine();
     }
 
 
@@ -731,7 +728,6 @@ impl ECP2 {
         W.copy(&P);
         W.sub(&mut Q[0]);
         P.cmove(&W, pb);
-        P.affine();
 
         return P;
     }

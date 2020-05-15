@@ -202,7 +202,7 @@ var ECP2 = function(ctx) {
                 b[0]=0x02;
                 if (W.y.sign() == 1)
                     b[0]=0x03;
-            }            
+            }
         },
 
         /* convert this to hex string */
@@ -226,7 +226,7 @@ var ECP2 = function(ctx) {
 
             rhs = ECP2.RHS(this.x);
 
-            y2 = new ctx.FP2(this.y); 
+            y2 = new ctx.FP2(this.y);
             y2.sqr();
 
             if (!y2.equals(rhs)) {
@@ -244,7 +244,7 @@ var ECP2 = function(ctx) {
 
             rhs = ECP2.RHS(this.x);
 //alert("Into setx= rhs= "+rhs.toString());
-		    if (rhs.qr()==1) 
+		    if (rhs.qr()==1)
 		    {
                 rhs.sqrt();
                 if (rhs.sign() != s)
@@ -276,20 +276,20 @@ var ECP2 = function(ctx) {
             var iy, t0, t1, t2, x3, y3;
 
             iy = new ctx.FP2(0);
-            iy.copy(this.y); 
+            iy.copy(this.y);
             if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.D_TYPE) {
                 iy.mul_ip();
                 iy.norm();
             }
 
             t0 = new ctx.FP2(0);
-            t0.copy(this.y); 
+            t0.copy(this.y);
             t0.sqr();
             if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.D_TYPE) {
                 t0.mul_ip();
             }
             t1 = new ctx.FP2(0);
-            t1.copy(iy); 
+            t1.copy(iy);
             t1.mul(this.z);
             t2 = new ctx.FP2(0);
             t2.copy(this.z);
@@ -309,11 +309,11 @@ var ECP2 = function(ctx) {
             }
 
             x3 = new ctx.FP2(0);
-            x3.copy(t2); 
+            x3.copy(t2);
             x3.mul(this.z);
 
             y3 = new ctx.FP2(0);
-            y3.copy(t0); 
+            y3.copy(t0);
 
             y3.add(t2);
             y3.norm();
@@ -347,21 +347,21 @@ var ECP2 = function(ctx) {
 
             b = 3 * ctx.ROM_CURVE.CURVE_B_I;
             t0 = new ctx.FP2(0);
-            t0.copy(this.x); 
+            t0.copy(this.x);
             t0.mul(Q.x); // x.Q.x
             t1 = new ctx.FP2(0);
-            t1.copy(this.y); 
+            t1.copy(this.y);
             t1.mul(Q.y); // y.Q.y
 
             t2 = new ctx.FP2(0);
-            t2.copy(this.z); 
+            t2.copy(this.z);
             t2.mul(Q.z);
             t3 = new ctx.FP2(0);
-            t3.copy(this.x); 
+            t3.copy(this.x);
             t3.add(this.y);
             t3.norm(); //t3=X1+Y1
             t4 = new ctx.FP2(0);
-            t4.copy(Q.x); 
+            t4.copy(Q.x);
             t4.add(Q.y);
             t4.norm(); //t4=X2+Y2
             t3.mul(t4); //t3=(X1+Y1)(X2+Y2)
@@ -379,7 +379,7 @@ var ECP2 = function(ctx) {
             t4.add(this.z);
             t4.norm(); //t4=Y1+Z1
             x3 = new ctx.FP2(0);
-            x3.copy(Q.y); 
+            x3.copy(Q.y);
             x3.add(Q.z);
             x3.norm(); //x3=Y2+Z2
 
@@ -398,7 +398,7 @@ var ECP2 = function(ctx) {
             x3.add(this.z);
             x3.norm(); // x3=X1+Z1
             y3 = new ctx.FP2(0);
-            y3.copy(Q.x); 
+            y3.copy(Q.x);
             y3.add(Q.z);
             y3.norm(); // y3=X2+Z2
             x3.mul(y3); // x3=(X1+Z1)(X2+Z2)
@@ -424,7 +424,7 @@ var ECP2 = function(ctx) {
             }
 
             z3 = new ctx.FP2(0);
-            z3.copy(t1); 
+            z3.copy(t1);
             z3.add(t2);
             z3.norm();
             t1.sub(t2);
@@ -528,7 +528,6 @@ var ECP2 = function(ctx) {
                 P.add(Q);
             }
             P.sub(C);
-            P.affine();
 
             return P;
         },
@@ -539,7 +538,7 @@ var ECP2 = function(ctx) {
                 fb = new ctx.BIG(0),
                 q, x, T, K, X, xQ, x2Q;
 
-        // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez 
+        // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
             fa.rcopy(ctx.ROM_FIELD.Fra);
             fb.rcopy(ctx.ROM_FIELD.Frb);
             X = new ctx.FP2(fa, fb);
@@ -596,8 +595,6 @@ var ECP2 = function(ctx) {
                 this.add(x2Q);
                 this.add(xQ);
             }
-
-            this.affine();
         }
 
     };
@@ -654,7 +651,7 @@ var ECP2 = function(ctx) {
             P.setxy(rx, ry);
         } else {
             P.setx(rx,typ&1);
-        }   
+        }
         return P;
     };
 
@@ -761,7 +758,6 @@ var ECP2 = function(ctx) {
         W.copy(P);
         W.sub(Q[0]);
         P.cmove(W,pb);
-        P.affine();
         return P;
     };
 
@@ -775,7 +771,7 @@ var ECP2 = function(ctx) {
 
 /* Hunt and Peck a BIG to a curve point
     ECP2.hap2point = function(h)
-    { 
+    {
         var one=new ctx.BIG(1);
         var x=new ctx.BIG(h);
         var Q,X2;
@@ -792,7 +788,7 @@ var ECP2 = function(ctx) {
 
 /* Constant time Map to Point */
     ECP2.map2point = function(H)
-    { 
+    {
     // Shallue and van de Woestijne method.
         var sgn,ne;
         var W=new ctx.FP2(1);
@@ -820,7 +816,7 @@ var ECP2 = function(ctx) {
         T.copy(W); T.add(Y); T.norm();
         Y.rsub(W); Y.norm();
         var NY=new ctx.FP2(T); NY.mul(Y); NY.inverse();
-        A.neg(); A.norm(); 
+        A.neg(); A.norm();
         W.copy(A); W.imul(3); W.sqrt();
         W.mul(Z);
         W.mul(H); W.mul(Y); W.mul(NY);
@@ -874,14 +870,14 @@ var ECP2 = function(ctx) {
         return P;
     };
 
-/* Map octet string to curve point 
+/* Map octet string to curve point
 	ECP2.mapit = function(h)
 	{
 		var q=new ctx.BIG(0);
         q.rcopy(ctx.ROM_FIELD.Modulus);
 		var dx=ctx.DBIG.fromBytes(h);
         var x=dx.mod(q);
-		
+
 		var Q=ECP2.hap2point(x);
 		Q.cfp();
         return Q;

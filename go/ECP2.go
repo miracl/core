@@ -551,7 +551,6 @@ func (E *ECP2) mul(e *BIG) *ECP2 {
 		P.Add(Q)
 	}
 	P.Sub(C)
-	P.Affine()
 	return P
 }
 
@@ -619,7 +618,6 @@ func (E *ECP2) Cfp() {
 		E.Add(x2Q)
 		E.Add(xQ)
 	}
-	E.Affine()
 }
 
 
@@ -712,7 +710,6 @@ func mul4(Q []*ECP2, u []*BIG) *ECP2 {
 	W.Sub(Q[0])
 	P.cmove(W, pb)
 
-	P.Affine()
 	return P
 }
 
@@ -775,7 +772,7 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 	Z.sqr(); Z.imul(3); T.copy(Z)
 	T.inverse()
 	A.mul(T)
-	X3.add(A); X3.norm()	
+	X3.add(A); X3.norm()
 
 /*
     w:=s.sqrt(nil)
@@ -818,7 +815,7 @@ func ECP2_mapit(h []byte) *ECP2 {
 	q := NewBIGints(Modulus)
 	dx:=DBIG_fromBytes(h);
     x:=dx.Mod(q);
-		
+
 	Q:=ECP2_hap2point(x)
 	Q.Cfp()
     return Q

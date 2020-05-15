@@ -197,9 +197,9 @@ void ECP2_ZZZ_toOctet(octet *W, ECP2_ZZZ *Q, bool compress)
         W->len = 4 * MODBYTES_XXX+1;
     } else {
         W->val[0]=0x02;
-        if (FP2_YYY_sign(&qy)==1) W->val[0] = 0x03; 
+        if (FP2_YYY_sign(&qy)==1) W->val[0] = 0x03;
         W->len = 2 * MODBYTES_XXX + 1;
-    }    
+    }
 
 }
 
@@ -225,7 +225,7 @@ int ECP2_ZZZ_fromOctet(ECP2_ZZZ *Q, octet *W)
         if (ECP2_ZZZ_set(Q, &qx, &qy)) return 1;
     } else {
         if (ECP2_ZZZ_setx(Q, &qx, typ&1)) return 1;
-    }    
+    }
     return 0;
 }
 
@@ -530,7 +530,6 @@ void ECP2_ZZZ_mul(ECP2_ZZZ *P, BIG_XXX e)
         ECP2_ZZZ_add(P, &Q);
     }
     ECP2_ZZZ_sub(P, &C); /* apply correction */
-    ECP2_ZZZ_affine(P);
 }
 
 /* Calculates q.P using Frobenius constant X */
@@ -637,8 +636,6 @@ void ECP2_ZZZ_mul4(ECP2_ZZZ *P, ECP2_ZZZ Q[4], BIG_XXX u[4])
     ECP2_ZZZ_copy(&W, P);
     ECP2_ZZZ_sub(&W, &Q[0]);
     ECP2_ZZZ_cmove(P, &W, pb);
-
-    ECP2_ZZZ_affine(P);
 }
 
 /* Hunt and Peck a BIG to a curve point */
@@ -681,10 +678,10 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
 
     FP2_YYY_from_ints(&Z,RIADZG2A_YYY,RIADZG2B_YYY);
     ECP2_ZZZ_rhs(&A,&Z);  // A=g(Z)
-    FP2_YYY_sqr(&T,&T);   
+    FP2_YYY_sqr(&T,&T);
     FP2_YYY_mul(&Y,&A,&T);   // tv1=u^2*g(Z)
     FP2_YYY_add(&T,&W,&Y); FP2_YYY_norm(&T); // tv2=1+tv1
-    FP2_YYY_sub(&Y,&W,&Y); FP2_YYY_norm(&Y); // tv1=1-tv1 
+    FP2_YYY_sub(&Y,&W,&Y); FP2_YYY_norm(&Y); // tv1=1-tv1
     FP2_YYY_mul(&NY,&T,&Y);
     FP2_YYY_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
     FP2_YYY_neg(&A,&A); FP2_YYY_norm(&A);     // -g(Z)
@@ -701,7 +698,7 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
     FP2_YYY_sub(&X1,&X1,&W); FP2_YYY_norm(&X1);
     FP2_YYY_add(&X2,&X2,&W); FP2_YYY_norm(&X2);
     FP2_YYY_add(&A,&A,&A);
-    FP2_YYY_add(&A,&A,&A); 
+    FP2_YYY_add(&A,&A,&A);
     FP2_YYY_norm(&A);      // -4*g(Z)
     FP2_YYY_sqr(&T,&T);
     FP2_YYY_mul(&T,&T,&NY);
@@ -712,7 +709,7 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
     FP2_YYY_mul(&A,&A,&T);
     FP2_YYY_add(&X3,&X3,&A); FP2_YYY_norm(&X3);
 
-/*        
+/*
     FP_YYY_from_int(&s,-3);
     FP_YYY_sqrt(&s,&s,NULL);         // s=sqrt(-3)
     FP_YYY_sub(&j,&s,&one);     FP_YYY_norm(&j);
@@ -726,16 +723,16 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
     FP2_YYY_inv(&B,&B);
     FP2_YYY_mul(&B,&B,&S);      // w=s.t/(1+B+t*2)
 
-    FP2_YYY_mul(&X1,&B,&T);       
-    FP2_YYY_from_FP(&Y,&j);     
-    FP2_YYY_sub(&X2,&X1,&Y);    FP2_YYY_norm(&X2);// X2=t.w-j 
+    FP2_YYY_mul(&X1,&B,&T);
+    FP2_YYY_from_FP(&Y,&j);
+    FP2_YYY_sub(&X2,&X1,&Y);    FP2_YYY_norm(&X2);// X2=t.w-j
     FP2_YYY_neg(&X1,&X2);       FP2_YYY_norm(&X1);// X1=j-t.w
     FP2_YYY_sub(&X2,&X2,&W);    FP2_YYY_norm(&X2);
 
     FP2_YYY_sqr(&B,&B);
     FP2_YYY_inv(&B,&B);
     FP2_YYY_add(&X3,&B,&W);     FP2_YYY_norm(&X3);
- */   
+ */
 
     ECP2_ZZZ_rhs(&W,&X2);
     FP2_YYY_cmove(&X3,&X2,FP2_YYY_qr(&W));
@@ -743,11 +740,11 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
     FP2_YYY_cmove(&X3,&X1,FP2_YYY_qr(&W));
     ECP2_ZZZ_rhs(&W,&X3);
     FP2_YYY_sqrt(&Y,&W);
-    
+
     ne=FP2_YYY_sign(&Y)^sgn;
     FP2_YYY_neg(&W,&Y); FP2_YYY_norm(&W);
     FP2_YYY_cmove(&Y,&W,ne);
- 
+
     ECP2_ZZZ_set(Q,&X3,&Y);
 }
 
@@ -811,7 +808,6 @@ void ECP2_ZZZ_cfp(ECP2_ZZZ *Q)
     ECP2_ZZZ_frob(&T, &X);
     ECP2_ZZZ_frob(&T, &X);
     ECP2_ZZZ_add(Q, &T);
-    ECP2_ZZZ_affine(Q);
 
 #elif (PAIRING_FRIENDLY_ZZZ == BLS_CURVE)
 
@@ -839,8 +835,6 @@ void ECP2_ZZZ_cfp(ECP2_ZZZ *Q)
 
     ECP2_ZZZ_add(Q, &x2Q);
     ECP2_ZZZ_add(Q, &xQ);
-
-    ECP2_ZZZ_affine(Q);
 
 #endif
 }

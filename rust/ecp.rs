@@ -24,6 +24,7 @@ use crate::xxx::fp::FP;
 use crate::xxx::fp;
 use crate::xxx::rom;
 
+#[derive(Clone)]
 pub struct ECP {
     x: FP,
     y: FP,
@@ -379,7 +380,7 @@ impl ECP {
             //b[0] = 0x06;
             return;
         }
-        
+
         for i in 0..mb {
             b[i + 1] = t[i]
         }
@@ -979,7 +980,6 @@ impl ECP {
                 R0.cswap(&mut R1, b);
             }
             P.copy(&R0);
-            P.affine();
             return P;
         }
     }
@@ -1000,7 +1000,6 @@ impl ECP {
             R1.copy(&self);
             R1.dbl();
             D.copy(&self);
-            D.affine();
             let nb = e.nbits();
 
             for i in (0..nb - 1).rev() {
@@ -1080,7 +1079,6 @@ impl ECP {
             }
             P.sub(&mut C); /* apply correction */
         }
-        P.affine();
         return P;
     }
 
@@ -1191,7 +1189,6 @@ impl ECP {
             S.add(&mut T);
         }
         S.sub(&mut C); /* apply correction */
-        S.affine();
         return S;
     }
 
@@ -1253,7 +1250,7 @@ impl ECP {
 
             if fp::PM1D2 == 2 {
                 t.dbl();
-            } 
+            }
             if fp::PM1D2 == 1 {
                 t.neg();
             }
@@ -1275,7 +1272,7 @@ impl ECP {
             let a=X1.redc();
             P.copy(&ECP::new_big(&a));
 
-        } 
+        }
         if CURVETYPE == EDWARDS {
 // Elligator 2 - map to Montgomery, place point, map back
             let mut X1=FP::new();
@@ -1323,7 +1320,7 @@ impl ECP {
             t.sqr();
             if fp::PM1D2 == 2 {
                 t.dbl();
-            } 
+            }
             if fp::PM1D2 == 1 {
                 t.neg();
             }
@@ -1513,8 +1510,8 @@ impl ECP {
             Y.cmove(&NY,ne);
 
             let y=Y.redc();
-            P.copy(&ECP::new_bigs(&x,&y));         
-        } 
+            P.copy(&ECP::new_bigs(&x,&y));
+        }
         return P;
     }
 

@@ -955,7 +955,6 @@ func (E *ECP) pinmul(e int32, bts int32) *ECP {
 			R0.cswap(R1, b)
 		}
 		P.Copy(R0)
-		P.Affine()
 		return P
 	}
 }
@@ -976,7 +975,6 @@ func (E *ECP) mul(e *BIG) *ECP {
 		R1.Copy(E)
 		R1.dbl()
 		D.Copy(E)
-		D.Affine()
 		nb := e.nbits()
 		for i := nb - 2; i >= 0; i-- {
 			b := int(e.bit(i))
@@ -1045,7 +1043,6 @@ func (E *ECP) mul(e *BIG) *ECP {
 		}
 		P.Sub(C) /* apply correction */
 	}
-	P.Affine()
 	return P
 }
 
@@ -1145,7 +1142,6 @@ func (E *ECP) Mul2(e *BIG, Q *ECP, f *BIG) *ECP {
 		S.Add(T)
 	}
 	S.Sub(C) /* apply correction */
-	S.Affine()
 	return S
 }
 
@@ -1204,7 +1200,7 @@ func ECP_map2point(h *FP) *ECP {
 
             if PM1D2 == 2 {
                 t.add(t)
-            } 
+            }
             if PM1D2 == 1 {
                 t.neg();
             }
@@ -1225,7 +1221,7 @@ func ECP_map2point(h *FP) *ECP {
 
             a:=X1.redc()
             P.Copy(NewECPbig(a))
-	} 
+	}
 	if CURVETYPE == EDWARDS {
 // Elligator 2 - map to Montgomery, place point, map back
             t:=NewFPcopy(h)
@@ -1238,7 +1234,7 @@ func ECP_map2point(h *FP) *ECP {
 
 			if MODTYPE !=  GENERALISED_MERSENNE {
 				A=NewFPcopy(B)
-				
+
 				if (CURVE_A==1) {
 					A.add(one)
 					B.sub(one)
@@ -1272,7 +1268,7 @@ func ECP_map2point(h *FP) *ECP {
             t.sqr()
             if PM1D2 == 2 {
                 t.add(t)
-            } 
+            }
             if PM1D2 == 1 {
                 t.neg();
             }
@@ -1457,7 +1453,7 @@ func ECP_map2point(h *FP) *ECP {
             Y.cmove(NY,ne)
 
             y:=Y.redc()
-            P.Copy(NewECPbigs(x,y))            
+            P.Copy(NewECPbigs(x,y))
 	}
 	return P
 }

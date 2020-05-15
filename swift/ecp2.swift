@@ -471,7 +471,6 @@ public struct ECP2 {
             P.add(Q)
         }
         P.sub(C);
-        P.affine()
         return P;
     }
 
@@ -524,7 +523,6 @@ public struct ECP2 {
             self.add(x2Q)
             self.add(xQ)
         }
-        self.affine()
     }
 
 
@@ -610,7 +608,6 @@ public struct ECP2 {
         W.copy(P)
         W.sub(Q[0])
         P.cmove(W,pb)
-        P.affine()
         return P
     }
 

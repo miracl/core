@@ -39,11 +39,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#   You can be released from the requirements of the license by purchasing     
+#   You can be released from the requirements of the license by purchasing
 #   a commercial license. Buying such a license is mandatory as soon as you
 #   develop commercial activities involving the MIRACL Core Crypto SDK
 #   without disclosing the source code of your own applications, or shipping
-#   the MIRACL Core Crypto SDK with a closed source product.     
+#   the MIRACL Core Crypto SDK with a closed source product.
 
 #
 # Elliptic Curve Points
@@ -531,7 +531,6 @@ class ECp:
             R1.dbl()
 
             D = self.copy()
-            D.affine()
             nb = e.bit_length()
             # nb=curve.r.bit_length()
             for i in range(nb - 2, -1, -1):
@@ -560,7 +559,6 @@ class ECp:
                     R.add(self)
                 if big.bit(b3, i) == 0 and big.bit(b, i) == 1:
                     R.add(mself)
-        R.affine()
         return R
 
     def mul(P, a, Q, b):  # double multiplication a*P+b*Q

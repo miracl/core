@@ -797,7 +797,6 @@ public struct ECP {
 				R0.cswap(&R1,b);
             }
             P.copy(R0);
-            P.affine();
             return P;
         }
     }
@@ -816,7 +815,7 @@ public struct ECP {
             var R0=ECP(); R0.copy(self)
             var R1=ECP(); R1.copy(self)
             R1.dbl();
-            D.copy(self); D.affine();
+            D.copy(self);
             let nb=e.nbits();
 
             for i in (0...nb-2).reversed()
@@ -889,7 +888,6 @@ public struct ECP {
             }
             P.sub(C); /* apply correction */
         }
-        P.affine();
         return P;
     }
 
@@ -962,7 +960,6 @@ public struct ECP {
             S.add(T);
         }
         S.sub(C); /* apply correction */
-        S.affine();
         return S;
     }
 
