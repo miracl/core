@@ -36,6 +36,7 @@ var ROM_CURVE_ANSSI,
     ROM_CURVE_C41417,
     ROM_CURVE_C1174,
     ROM_CURVE_C1665,
+    ROM_CURVE_MDC,
     ROM_CURVE_ED25519,
     ROM_CURVE_GOLDILOCKS,
     ROM_CURVE_X448,
@@ -1031,6 +1032,27 @@ ROM_CURVE_C1665 = function() {
 
     return ROM_CURVE_C1665;
 };
+
+
+ROM_CURVE_MDC = function() {
+    /* Fixed Data in ROM - Field and Curve parameters */
+
+    var ROM_CURVE_MDC = {
+
+        // Million Dollar curve
+        CURVE_A: 1,
+        CURVE_Cof_I: 4,
+        CURVE_Cof: [0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0],
+        CURVE_B_I: 0,
+        CURVE_B: [0xCF89,0x92503,0x41EE93,0x3F21F0,0x1270F6,0xB9625F,0xCCFB0C,0x7CDFBF,0x65B68A,0x45219,0x5713],
+        CURVE_Order: [0xB0F7FB,0x52F421,0xBB5885,0xFAF974,0xB38975,0x7F534F,0xBF75E9,0x14CBE4,0x15ABED,0xDA2E75,0x3C4E],
+        CURVE_Gx: [0x68363B,0x25BFEE,0xE2232C,0x8D2713,0xD72ABB,0xCF6350,0x1E03CB,0xD85B42,0x903B83,0x886A7F,0xB681],
+        CURVE_Gy: [0x2864B5,0xC355BD,0x3A7E73,0x81A93A,0xA8BC3D,0xDA421D,0xCF6563,0x59814D,0x9C0B03,0x34E1B5,0xCA67],
+    };
+
+    return ROM_CURVE_MDC;
+};
+
 
 ROM_CURVE_ED25519 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */

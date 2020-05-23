@@ -21,7 +21,7 @@ As a quick example execute from your root directory
 
     python3 config64.py
 
-Then select options 1, 3, 7, 25, 27, 33, 34 and 36 (these are fixed for 
+Then select options 1, 3, 7, 26, 28, 34, 35 and 37 (these are fixed for 
 the example program provided). Select 0 to exit.
 
 Then copy the library from core/target/release/libcore.rlib to the
@@ -78,7 +78,7 @@ NEW: support for emerging Hash To Curve standard.
 See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
 
 
-Create 32 or 64-bit library selecting curves 1, 3, 7, 17 and 28 (ed25519, nist256, goldilocks, secp256k1 and bls12381)
+Create 32 or 64-bit library selecting curves 1, 3, 7, 17 and 29 (ed25519, nist256, goldilocks, secp256k1 and bls12381)
 
     rustc TestHTP.rs --extern core=libcore.rlib
 

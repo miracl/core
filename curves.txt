@@ -19,6 +19,7 @@ Here we briefly describe the supported curves
 22. SECP160R1 - A NIST standard 160-bit curve http://www.secg.org/SEC2-Ver-1.0.pdf - for those that like to live dangerously!
 23. C1174 - A 251 bit Edwards curve suggested by Bernstein et al here - https://eprint.iacr.org/2013/325.pdf
 24. C1665 - A fast 166-bit Edwards curve for ~80-bit security
+25. Million Dollar Curve - A super-secure 256 bit Edwards curve, suggested here - https://eprint.iacr.org/2015/1249
 
 Pairing-friendly curves
 
@@ -26,17 +27,17 @@ Note that efforts to standardise these curves seem to have stalled, probably due
 into their true security. There seems to be a move from BN curves to BLS curves for 128-bit
 security and above.
 
-25. BN254 - The Nogami BN curve - https://eprint.iacr.org/2005/133
-26. BN254CX - The CertiVox standard BN curve
-27. BLS12383 - Our own suggested new standard curve, a 383-bit GT-Strong BLS12 curve - https://eprint.iacr.org/2002/088
-28. BLS12381 - The zk-SNARK BLS12 standard curve - https://blog.z.cash/new-snark-curve/
-29. FP256BN - An ISO standard 256-bit BN curve, as recomended for use by FIDO - https://tools.ietf.org/pdf/draft-kasamatsu-bncurves-02.pdf
-30. FP512BN - An ISO standard 512-bit BN curve, as recomended for use by FIDO - https://tools.ietf.org/pdf/draft-kasamatsu-bncurves-02.pdf
-31. BLS12461 - A 461 bit BLS12 curve suggested by Barbulescu and Duquesne https://eprint.iacr.org/2017/334
-32. BN462 - A 462 bit BN curve suggested by Sakemi, Kobayashi and Saito https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/
-33. BLS24479 - An experimental (approx AES-192 bit security) BLS24 GT-Strong curve
-34. BLS48556 - An experimental (approx AES-256 bit security) BLS48 GT-Strong curve
-35. BLS48581 - A 581 bit BLS48 curve suggested by Sakemi, Kobayashi and Saito https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/
+26. BN254 - The Nogami BN curve - https://eprint.iacr.org/2005/133
+27. BN254CX - The CertiVox standard BN curve
+28. BLS12383 - Our own suggested new standard curve, a 383-bit GT-Strong BLS12 curve - https://eprint.iacr.org/2002/088
+29. BLS12381 - The zk-SNARK BLS12 standard curve - https://blog.z.cash/new-snark-curve/
+30. FP256BN - An ISO standard 256-bit BN curve, as recomended for use by FIDO - https://tools.ietf.org/pdf/draft-kasamatsu-bncurves-02.pdf
+31. FP512BN - An ISO standard 512-bit BN curve, as recomended for use by FIDO - https://tools.ietf.org/pdf/draft-kasamatsu-bncurves-02.pdf
+32. BLS12461 - A 461 bit BLS12 curve suggested by Barbulescu and Duquesne https://eprint.iacr.org/2017/334
+33. BN462 - A 462 bit BN curve suggested by Sakemi, Kobayashi and Saito https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/
+34. BLS24479 - An experimental (approx AES-192 bit security) BLS24 GT-Strong curve
+35. BLS48556 - An experimental (approx AES-256 bit security) BLS48 GT-Strong curve
+36. BLS48581 - A 581 bit BLS48 curve suggested by Sakemi, Kobayashi and Saito https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/
 
 Note that it is quite possible to add new curves, and some programs are supplied to assist in the process.
 Let us know if you have a particular request - mike.scott@miracl.com

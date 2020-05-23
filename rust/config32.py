@@ -257,7 +257,7 @@ print("6. hifive")
 print("7. goldilocks")
 print("8. nist384")
 print("9. c41417")
-print("10. nist521\n")
+print("10. nist521")
 print("11. nums256w")
 print("12. nums256e")
 print("13. nums384w")
@@ -271,29 +271,30 @@ print("20. jubjub")
 print("21. x448")
 print("22. secp160r1")
 print("23. c1174")
-print("24. c1665\n")
+print("24. c1665")
+print("25. Million Dollar Curve\n")
 
 print("Pairing-Friendly Elliptic Curves")
-print("25. bn254")
-print("26. bn254CX")
-print("27. bls12383")
-print("28. bls12381")
-print("29. fp256BN")
-print("30. fp512BN")
-print("31. bls12461")
-print("32. bn462")
-print("33. bls24479")
-print("34. bls48556")
-print("35. bls48581\n")
+print("26. bn254")
+print("27. bn254CX")
+print("28. bls12383")
+print("29. bls12381")
+print("30. fp256BN")
+print("31. fp512BN")
+print("32. bls12461")
+print("33. bn462")
+print("34. bls24479")
+print("35. bls48556")
+print("36. bls48581\n")
 
 print("RSA")
-print("36. rsa2048")
-print("37. rsa3072")
-print("38. rsa4096")
+print("37. rsa2048")
+print("38. rsa3072")
+print("39. rsa4096")
 
 selection=[]
 ptr=0
-max=39
+max=40
 
 curve_selected=False
 pfcurve_selected=False
@@ -414,45 +415,49 @@ while ptr<max:
         curveset("c1665","29","166","1","0","PSEUDO_MERSENNE","0","EDWARDS","NOT","NOT","NOT","NOT","NOT","128")
         curve_selected=True
 
-
     if x==25:
+        curveset("mdc","28","256","1","0","NOT_SPECIAL","0","EDWARDS","NOT","NOT","NOT","NOT","NOT","128")
+        curve_selected=True
+
+
+    if x==26:
         curveset("bn254","28","254","1",["-1","0","-1"],"NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","71","66","128")
         pfcurve_selected=True
-    if x==26:
+    if x==27:
         curveset("bn254CX","28","254","1",["-1","0","-1"],"NOT_SPECIAL","0","WEIERSTRASS","BN","D_TYPE","NEGATIVEX","76","66","128")
         pfcurve_selected=True
-    if x==27:
+    if x==28:
         curveset("bls12383","29","383","1",["1","0","1"],"NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","68","65","128")
         pfcurve_selected=True
 
-    if x==28:
+    if x==29:
         curveset("bls12381","29","381","1",["-3","0","1"],"NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","69","65","128")
         pfcurve_selected=True
 
-    if x==29:
+    if x==30:
         curveset("fp256bn","28","256","1",["1","0","1"],"NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","NEGATIVEX","83","66","128")
         pfcurve_selected=True
-    if x==30:
+    if x==31:
         curveset("fp512bn","29","512","1",["1","0","-1"],"NOT_SPECIAL","0","WEIERSTRASS","BN","M_TYPE","POSITIVEX","172","130","128")
         pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
-    if x==31:
+    if x==32:
         curveset("bls12461","28","461","1",["1","4","1"],"NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","NEGATIVEX","79","78","128")
         pfcurve_selected=True
 
-    if x==32:
+    if x==33:
         curveset("bn462","28","462","1",["1","0","-1"],"NOT_SPECIAL","1","WEIERSTRASS","BN","D_TYPE","POSITIVEX","125","118","128")
         pfcurve_selected=True
 
-    if x==33:
+    if x==34:
         curveset("bls24479","29","479","1",["1","1","1"],"NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","52","49","192")
         pfcurve_selected=True
 
-    if x==34:
+    if x==35:
         curveset("bls48556","29","556","1",["-1","1","1"],"NOT_SPECIAL","0","WEIERSTRASS","BLS","M_TYPE","POSITIVEX","35","32","256")
         pfcurve_selected=True
 
-    if x==35:
+    if x==36:
         curveset("bls48581","29","581","1",["2","1","1"],"NOT_SPECIAL","10","WEIERSTRASS","BLS","D_TYPE","NEGATIVEX","36","33","256")
         pfcurve_selected=True
 
@@ -461,17 +466,17 @@ while ptr<max:
 # of the underlying big length
 
 # There are choices here, different ways of getting the same result, but some faster than others
-    if x==36:
+    if x==37:
         #256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
         #512 is faster.. but best is 1024
         rsaset("rsa2048","128","28","2")
         #rsaset("RSA2048","64","29","4")
         #rsaset("RSA2048","32","29","8")
         rsa_selected=True
-    if x==37:
+    if x==38:
         rsaset("rsa3072","48","28","8")
         rsa_selected=True
-    if x==38:
+    if x==39:
         #rsaset("RSA4096","32","29","16")
         rsaset("rsa4096","64","29","8")
         rsa_selected=True

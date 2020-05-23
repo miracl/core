@@ -49,6 +49,30 @@ var CTX = function(input_parameter) {
             "@AK": 16       /* AES key size */
         },
 
+        "MDC": {
+            "BITS": "256",
+            "FIELD": "MDC",
+            "CURVE": "MDC",
+            "@NB": 32,
+            "@BASE": 24,
+            "@NBT": 256,
+            "@M8": 1,
+            "@RZ": 0,
+            "@RZA": 0,    
+            "@RZB": 0,   
+            "@MT": 0,
+			"@QI": 0,
+			"@TW": 0,
+            "@CT": 1,
+            "@PF": 0,
+            "@ST": 0,
+            "@SX": 0,
+            "@AB": 0,
+            "@HT": 32,
+			"@SH": 8, 
+            "@AK": 16
+        },
+
         "X448": {
             "BITS": "448",
             "FIELD": "GOLDILOCKS",

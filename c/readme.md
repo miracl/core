@@ -44,7 +44,7 @@ To create a 32-bit library
     python3 config32.py
 
 
-Then select options 1, 3, 7, 25, 27, 33, 34 and 36, which are fixed for the example 
+Then select options 1, 3, 7, 26, 28, 34, 35 and 37, which are fixed for the example 
 program. (For a 16-bit build select 1,4 and 6). Select 0 then to exit.
 
 Then compile
@@ -99,7 +99,7 @@ NEW: support for emerging Hash To Curve standard.
 See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
 
 
-Create 32 or 64-bit library selecting curves 1, 3, 7, 17 and 28 (ED25519, NIST256, GOLDILOCKS, SECP256K1 and BLS12381)
+Create 32 or 64-bit library selecting curves 1, 3, 7, 17 and 29 (ED25519, NIST256, GOLDILOCKS, SECP256K1 and BLS12381)
 
     gcc -O2 -std=c99 testhtp.c core.a -o testhtp
 

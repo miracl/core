@@ -39,6 +39,7 @@ var ROM_FIELD_25519,
     ROM_FIELD_C41417,
     ROM_FIELD_C1174,
     ROM_FIELD_C1665,
+    ROM_FIELD_MDC,
     ROM_FIELD_GOLDILOCKS,
     ROM_FIELD_HIFIVE,
     ROM_FIELD_NIST256,
@@ -410,8 +411,6 @@ ROM_FIELD_C1174 = function() {
 ROM_FIELD_C1665 = function() {
     "use strict";
     /* Fixed Data in ROM - Field and Curve parameters */
-
-
     var ROM_FIELD_C1665 = {
 
         // C1665 modulus
@@ -423,6 +422,22 @@ ROM_FIELD_C1665 = function() {
     };
     return ROM_FIELD_C1665;
 };
+
+ROM_FIELD_MDC = function() {
+    "use strict";
+    /* Fixed Data in ROM - Field and Curve parameters */
+    var ROM_FIELD_MDC = {
+
+        // Million Dollar Curve modulus
+        // Base Bits= 24
+        Modulus: [0x79EC13,0x104057,0x9EC137,0xEF07AF,0x6A9037,0xFD4F08,0xFDD7A5,0x532F92,0x56AFB4,0x68B9D4,0xF13B],
+        R2modp: [0xFFF702,0x31619A,0xBA623E,0xC672C1,0xF5883F,0x39E4AB,0x4589,0x972C4A,0xD61255,0x6E22D,0x7C41],
+        ROI: [0x79EC12,0x104057,0x9EC137,0xEF07AF,0x6A9037,0xFD4F08,0xFDD7A5,0x532F92,0x56AFB4,0x68B9D4,0xF13B],
+        MConst: 0xE541E5,
+    };
+    return ROM_FIELD_MDC;
+};
+
 
 ROM_FIELD_GOLDILOCKS = function() {
     "use strict";

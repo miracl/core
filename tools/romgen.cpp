@@ -1,21 +1,3 @@
-/*
- * Copyright (c) 2012-2020 MIRACL UK Ltd.
- *
- * This file is part of MIRACL Core
- * (see https://github.com/miracl/core).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 /* ROMGEN - Helper MIRACL program to generate ROM constants for curves
 
@@ -40,7 +22,7 @@ using namespace std;
 Miracl precision(100, 0);
 
 char open, close, term, el = 0;
-int PS=25;  // start of pairing friendly curves
+int PS=26;  // start of pairing friendly curves
 
 //
 // Shanks method modified to find cube roots
@@ -457,19 +439,20 @@ void help()
     printf("22. SECP160R1\n");
     printf("23. C1174\n");
     printf("24. C1665\n");
+    printf("25. MDC (Million Dollar Curve)\n");
 
-    printf("25. BN254\n");
-    printf("26. BN254CX\n");
-    printf("27. BLS12383\n");
-    printf("28. BLS12381\n");
-    printf("29. FP256BN\n");
-    printf("30. FP512BN\n");
-    printf("31. BLS12461\n");
-    printf("32. BN462\n");
+    printf("26. BN254\n");
+    printf("27. BN254CX\n");
+    printf("28. BLS12383\n");
+    printf("29. BLS12381\n");
+    printf("30. FP256BN\n");
+    printf("31. FP512BN\n");
+    printf("32. BLS12461\n");
+    printf("33. BN462\n");
 
-    printf("33. BLS24479\n");
-    printf("34. BLS48556\n");
-    printf("35. BLS48581\n");
+    printf("34. BLS24479\n");
+    printf("35. BLS48556\n");
+    printf("36. BLS48581\n");
 
     printf("\nromgen curve wordlength basebits language\n");
     printf("where wordlength is 16, 32 or 64\n");
@@ -894,6 +877,27 @@ int main(int argc, char **argv)
         gy=(char *)"29414549BC0A13BFC7739D62DC2C7087B244920345";
 
     }
+
+    if (strcmp(curvename, "MDC") == 0)
+    {
+        curve = 25;
+        printf("Curve= Million Dollar Curve\n");
+        strcpy(fieldname, curvename);
+        mbits = 256;
+        words = (1 + ((mbits - 1) / bb));
+        curvetype = EDWARDS;
+        modtype = NOT_SPECIAL;
+        mip->IOBASE = 10;
+        curve_a = 1;
+        p = (char *)"109112363276961190442711090369149551676330307646118204517771511330536253156371";
+        cof = 4;
+        curve_b = (char *)"39384817741350628573161184301225915800358770588933756071948264625804612259721";
+        r=(char *)"27278090819240297610677772592287387918930509574048068887630978293185521973243";
+        gx=(char *)"82549803222202399340024462032964942512025856818700414254726364205096731424315";
+        gy=(char *)"91549545637415734422658288799119041756378259523097147807813396915125932811445";
+        mip->IOBASE = 16;
+    }
+
 
     if (strcmp(curvename, "NIST521") == 0)
     {
