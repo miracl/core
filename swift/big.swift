@@ -26,29 +26,7 @@
 
 import core
 
-//#if D32
-//public typealias Chunk = Int32
-//public typealias DChunk = Int64
-//#endif
-
-//#if D64
-//public typealias Chunk = Int64
-//#endif
-
-
 public struct BIG{
-//#if D32
-//    static public let CHUNK:Int=32
-//    static let BASEBITS:UInt = @BASE32@
-//#endif
-//#if D64
-//    static public let CHUNK:Int=64
-//    static let BASEBITS:UInt = @BASE64@
-//#endif
-
-//    static let MODBYTES:UInt = @NB@
-
-    //var w=ContiguousArray<Chunk>(repeating: 0,count: CONFIG_BIG.NLEN)
     var w=[Chunk](repeating: 0,count: CONFIG_BIG.NLEN)
 /* Constructors */
     init() {

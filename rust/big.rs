@@ -162,8 +162,10 @@ impl BIG {
 
     /* normalise BIG - force all digits < 2^BASEBITS */
     pub fn norm(&mut self) -> Chunk {
-        let mut carry = 0 as Chunk;
-        for i in 0..NLEN - 1 {
+        //let mut carry = 0 as Chunk;
+        let mut carry = self.w[0]>>BASEBITS;
+        self.w[0] &= BMASK;
+        for i in 1..NLEN - 1 {
             let d = self.w[i] + carry;
             self.w[i] = d & BMASK;
             carry = d >> BASEBITS;

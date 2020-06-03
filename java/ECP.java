@@ -1123,15 +1123,17 @@ public final class ECP {
             w1.cmove(w2,qres);
 
             FP Y=w1.sqrt(null);
+            FP NY=new FP(Y); NY.neg(); NY.norm();
+            Y.cmove(NY,1-qres);
 
             if (rfc==0)
             {
                 X1.mul(K);
                 Y.mul(K);
             }
-            int ne=Y.sign()^sgn;
-            FP NY=new FP(Y); NY.neg(); NY.norm();
-            Y.cmove(NY,ne);
+ //           int ne=Y.sign()^sgn;
+ //           FP NY=new FP(Y); NY.neg(); NY.norm();
+ //           Y.cmove(NY,ne);
 
             if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE )
             {

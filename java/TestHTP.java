@@ -50,13 +50,13 @@ public class TestHTP extends TestCase {
         return u;
     }
 
-    private static void htp(String mess,String ro,String nu) {
+    private static void htp(String mess,String ro,String nu,int hlen) {
         System.out.println("\nRandom Access - message= "+mess);
         byte[] DSTRO = ro.getBytes();
         byte[] DSTNU = nu.getBytes();
         byte[] M = mess.getBytes();
 
-        FP[] u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,DSTRO,M,2);
+        FP[] u=hash_to_field(HMAC.MC_SHA2,hlen,DSTRO,M,2);
         System.out.println("u[0]= "+u[0].toString());
         System.out.println("u[1]= "+u[1].toString());
 
@@ -74,7 +74,7 @@ public class TestHTP extends TestCase {
         System.out.println("P= "+P.toString());
 
         System.out.println("\nNon-Uniform");
-        u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,DSTNU,M,1);
+        u=hash_to_field(HMAC.MC_SHA2,hlen,DSTNU,M,1);
         System.out.println("u[0]= "+u[0].toString());
         P=ECP.map2point(u[0]);
         System.out.println("Q= "+P.toString());
@@ -90,32 +90,32 @@ public class TestHTP extends TestCase {
 
         boolean oneofmine=false;
         if (packageName == "org.miracl.core.ED25519") {
-            ro="edwards25519_XMD:SHA-256_ELL2_RO_TESTGEN";
-            nu="edwards25519_XMD:SHA-256_ELL2_NU_TESTGEN";
+            ro="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_";
+            nu="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_NU_";
             System.out.println("\nTesting HTP for curve ED25519");
             oneofmine=true;
         }
         if (packageName == "org.miracl.core.NIST256") {
-            ro="P256_XMD:SHA-256_SSWU_RO_TESTGEN";
-            nu="P256_XMD:SHA-256_SSWU_NU_TESTGEN";
+            ro="QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_";
+            nu="QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_NU_";
             System.out.println("\nTesting HTP for curve NIST256");
             oneofmine=true;
         }
         if (packageName == "org.miracl.core.GOLDILOCKS") {
-            ro="edwards448_XMD:SHA-512_ELL2_RO_TESTGEN";
-            nu="edwards448_XMD:SHA-512_ELL2_NU_TESTGEN";
+            ro="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_";
+            nu="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_";
             System.out.println("\nTesting HTP for curve GOLDILOCKS");
             oneofmine=true;
         }
         if (packageName == "org.miracl.core.SECP256K1") {
-            ro="secp256k1_XMD:SHA-256_SVDW_RO_TESTGEN";
-            nu="secp256k1_XMD:SHA-256_SVDW_NU_TESTGEN";
+            ro="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_";
+            nu="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_";
             System.out.println("\nTesting HTP for curve SECP256K1");
             oneofmine=true;
         }
         if (packageName == "org.miracl.core.BLS12381") {
-            ro="BLS12381G1_XMD:SHA-256_SVDW_RO_TESTGEN";
-            nu="BLS12381G1_XMD:SHA-256_SVDW_NU_TESTGEN";
+            ro="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_";
+            nu="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_";
             System.out.println("\nTesting HTP for curve BLS12381_G1");
             oneofmine=true;
         }
@@ -126,9 +126,14 @@ public class TestHTP extends TestCase {
             return;
         }
 
-        htp("",ro,nu);
-        htp("abc",ro,nu);
-        htp("abcdef0123456789",ro,nu);
-        htp("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+        int hlen=CONFIG_CURVE.HASH_TYPE;  // default
+        if (packageName == "org.miracl.core.ED25519") { // exception
+            hlen=CONFIG_CURVE.SHA512;
+        }
+        htp("",ro,nu,hlen);
+        htp("abc",ro,nu,hlen);
+        htp("abcdef0123456789",ro,nu,hlen);
+        htp("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",ro,nu,hlen);
+        htp("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
     }
 }

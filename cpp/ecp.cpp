@@ -1314,14 +1314,20 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
     FP_sqrt(&Y,&w1,NULL);   // This is only sign ambiguity
 
+// this is now in...
+    FP_neg(&NY,&Y); FP_norm(&NY);
+    FP_cmove(&Y,&NY,1-qres);
+
     if (!rfc)
     {
         FP_mul(&X1,&X1,&K);
         FP_mul(&Y,&Y,&K);
     }
-    ne=sgn^FP_sign(&Y);
-    FP_neg(&NY,&Y); FP_norm(&NY);
-    FP_cmove(&Y,&NY,ne);
+
+// this is now out
+//    ne=sgn^FP_sign(&Y);
+//    FP_neg(&NY,&Y); FP_norm(&NY);
+//    FP_cmove(&Y,&NY,ne);
 
 
 #if MODTYPE_YYY == GENERALISED_MERSENNE

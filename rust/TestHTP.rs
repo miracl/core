@@ -57,12 +57,12 @@ fn hash_to_field_ed25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usiz
 }
 
 fn htp_ed25519(mess: &str) {
-    use core::ed25519::ecp;
+//    use core::ed25519::ecp;
     use core::ed25519::ecp::ECP;
-    println!("Random Access - message= {}",mess);
+    println!("\nRandom Access - message= {}",mess);
     let m = mess.as_bytes();
-    let mut dst = "edwards25519_XMD:SHA-256_ELL2_RO_TESTGEN".as_bytes();
-    let mut u=hash_to_field_ed25519(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
+    let mut dst = "QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_".as_bytes();
+    let mut u=hash_to_field_ed25519(hmac::MC_SHA2,64,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
     let mut P=ECP::map2point(&u[0]);
@@ -75,8 +75,8 @@ fn htp_ed25519(mess: &str) {
     println!("P= {}",P.tostring());
 
     println!("\nNon-Uniform");
-    dst = "edwards25519_XMD:SHA-256_ELL2_NU_TESTGEN".as_bytes();
-    u=hash_to_field_ed25519(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
+    dst = "QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_NU_".as_bytes();
+    u=hash_to_field_ed25519(hmac::MC_SHA2,64,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP::map2point(&u[0]);
     println!("Q= {}",P.tostring());
@@ -117,9 +117,9 @@ fn hash_to_field_nist256(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usiz
 fn htp_nist256(mess: &str) {
     use core::nist256::ecp;
     use core::nist256::ecp::ECP;
-    println!("Random Access - message= {}",mess);
+    println!("\nRandom Access - message= {}",mess);
     let m = mess.as_bytes();
-    let mut dst = "P256_XMD:SHA-256_SSWU_RO_TESTGEN".as_bytes();
+    let mut dst = "QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_".as_bytes();
     let mut u=hash_to_field_nist256(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
@@ -133,7 +133,7 @@ fn htp_nist256(mess: &str) {
     println!("P= {}",P.tostring());
 
     println!("\nNon-Uniform");
-    dst = "P256_XMD:SHA-256_SSWU_NU_TESTGEN".as_bytes();
+    dst = "QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_NU_".as_bytes();
     u=hash_to_field_nist256(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP::map2point(&u[0]);
@@ -175,9 +175,9 @@ fn hash_to_field_goldilocks(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: u
 fn htp_goldilocks(mess: &str) {
     use core::goldilocks::ecp;
     use core::goldilocks::ecp::ECP;
-    println!("Random Access - message= {}",mess);
+    println!("\nRandom Access - message= {}",mess);
     let m = mess.as_bytes();
-    let mut dst = "edwards448_XMD:SHA-512_ELL2_RO_TESTGEN".as_bytes();
+    let mut dst = "QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_".as_bytes();
     let mut u=hash_to_field_goldilocks(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
@@ -191,7 +191,7 @@ fn htp_goldilocks(mess: &str) {
     println!("P= {}",P.tostring());
 
     println!("\nNon-Uniform");
-    dst = "edwards448_XMD:SHA-512_ELL2_NU_TESTGEN".as_bytes();
+    dst = "QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_".as_bytes();
     u=hash_to_field_goldilocks(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP::map2point(&u[0]);
@@ -233,9 +233,9 @@ fn hash_to_field_secp256k1(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: us
 fn htp_secp256k1(mess: &str) {
     use core::secp256k1::ecp;
     use core::secp256k1::ecp::ECP;
-    println!("Random Access - message= {}",mess);
+    println!("\nRandom Access - message= {}",mess);
     let m = mess.as_bytes();
-    let mut dst = "secp256k1_XMD:SHA-256_SVDW_RO_TESTGEN".as_bytes();
+    let mut dst = "QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_".as_bytes();
     let mut u=hash_to_field_secp256k1(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
@@ -249,7 +249,7 @@ fn htp_secp256k1(mess: &str) {
     println!("P= {}",P.tostring());
 
     println!("\nNon-Uniform");
-    dst = "secp256k1_XMD:SHA-256_SVDW_NU_TESTGEN".as_bytes();
+    dst = "QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_".as_bytes();
     u=hash_to_field_secp256k1(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP::map2point(&u[0]);
@@ -291,9 +291,9 @@ fn hash_to_field_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usi
 fn htp_bls12381(mess: &str) {
     use core::bls12381::ecp;
     use core::bls12381::ecp::ECP;
-    println!("Random Access - message= {}",mess);
+    println!("\nRandom Access - message= {}",mess);
     let m = mess.as_bytes();
-    let mut dst = "BLS12381G1_XMD:SHA-256_SVDW_RO_TESTGEN".as_bytes();
+    let mut dst = "QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_".as_bytes();
     let mut u=hash_to_field_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
@@ -307,7 +307,7 @@ fn htp_bls12381(mess: &str) {
     println!("P= {}",P.tostring());
 
     println!("\nNon-Uniform");
-    dst = "BLS12381G1_XMD:SHA-256_SVDW_NU_TESTGEN".as_bytes();
+    dst = "QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_".as_bytes();
     u=hash_to_field_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP::map2point(&u[0]);
@@ -356,9 +356,9 @@ fn hash_to_field2_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: us
 fn htp2_bls12381(mess: &str) {
     use core::bls12381::ecp;
     use core::bls12381::ecp2::ECP2;
-    println!("Random Access - message= {}",mess);
+    println!("\nRandom Access - message= {}",mess);
     let m = mess.as_bytes();
-    let mut dst = "BLS12381G2_XMD:SHA-256_SVDW_RO_TESTGEN".as_bytes();
+    let mut dst = "QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_".as_bytes();
     let mut u=hash_to_field2_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
@@ -372,7 +372,7 @@ fn htp2_bls12381(mess: &str) {
     println!("P= {}",P.tostring());
 
     println!("\nNon-Uniform");
-    dst = "BLS12381G2_XMD:SHA-256_SVDW_NU_TESTGEN".as_bytes();
+    dst = "QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_".as_bytes();
     u=hash_to_field2_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP2::map2point(&u[0]);
@@ -383,40 +383,46 @@ fn htp2_bls12381(mess: &str) {
 }
 
 fn main() {
-    println!("\nTesting HTP for curve ed25519\n");
+    println!("\nTesting HTP for curve ed25519");
     htp_ed25519("");
     htp_ed25519("abc");
     htp_ed25519("abcdef0123456789");
+    htp_ed25519("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_ed25519("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     println!("\nTesting HTP for curve nist256\n");
     htp_nist256("");
     htp_nist256("abc");
     htp_nist256("abcdef0123456789");
+    htp_nist256("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_nist256("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-    println!("\nTesting HTP for curve goldilocks\n");
+    println!("\nTesting HTP for curve goldilocks");
     htp_goldilocks("");
     htp_goldilocks("abc");
     htp_goldilocks("abcdef0123456789");
+    htp_goldilocks("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_goldilocks("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-    println!("\nTesting HTP for curve secp256k1\n");
+    println!("\nTesting HTP for curve secp256k1");
     htp_secp256k1("");
     htp_secp256k1("abc");
     htp_secp256k1("abcdef0123456789");
+    htp_secp256k1("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_secp256k1("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-    println!("\nTesting HTP for curve bls12381_G1\n");
+    println!("\nTesting HTP for curve bls12381_G1");
     htp_bls12381("");
     htp_bls12381("abc");
     htp_bls12381("abcdef0123456789");
+    htp_bls12381("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_bls12381("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-    println!("\nTesting HTP for curve bls12381_G2\n");
+    println!("\nTesting HTP for curve bls12381_G2");
     htp2_bls12381("");
     htp2_bls12381("abc");
     htp2_bls12381("abcdef0123456789");
+    htp2_bls12381("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp2_bls12381("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
 }

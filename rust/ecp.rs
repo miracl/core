@@ -1284,7 +1284,7 @@ impl ECP {
             let mut B = FP::new_big(&BIG::new_ints(&rom::CURVE_B));
             let mut A: FP;
             let mut K=FP::new();
-            let sgn=t.sign();
+ //           let sgn=t.sign();
             let rfc: isize;
 
             if fp::MODTYPE != fp::GENERALISED_MERSENNE {
@@ -1363,13 +1363,16 @@ impl ECP {
             w1.cmove(&w2,qres);
 
             let mut Y=w1.sqrt(None);
+            let mut NY=FP::new_copy(&Y); NY.neg(); NY.norm();
+            Y.cmove(&NY,1-qres);
+
             if rfc==0 {
                 X1.mul(&K);
                 Y.mul(&K);
             }
-            let ne=Y.sign()^sgn;
-            let mut NY=FP::new_copy(&Y); NY.neg(); NY.norm();
-            Y.cmove(&NY,ne);
+ //           let ne=Y.sign()^sgn;
+ //           let mut NY=FP::new_copy(&Y); NY.neg(); NY.norm();
+ //           Y.cmove(&NY,ne);
 
             if fp::MODTYPE == fp::GENERALISED_MERSENNE {
                 t.copy(&X1); t.sqr();

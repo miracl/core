@@ -55,13 +55,13 @@ public class TestHTP2 extends TestCase {
         return u;
     }
 
-    private static void htp2(String mess,String ro,String nu) {
+    private static void htp2(String mess,String ro,String nu,int hlen) {
         System.out.println("\nRandom Access - message= "+mess);
         byte[] DSTRO = ro.getBytes();
         byte[] DSTNU = nu.getBytes();
         byte[] M = mess.getBytes();
 
-        FP2[] u=hash_to_field2(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,DSTRO,M,2);
+        FP2[] u=hash_to_field2(HMAC.MC_SHA2,hlen,DSTRO,M,2);
         System.out.println("u[0]= "+u[0].toString());
         System.out.println("u[1]= "+u[1].toString());
 
@@ -79,7 +79,7 @@ public class TestHTP2 extends TestCase {
         System.out.println("P= "+P.toString());
 
         System.out.println("\nNon-Uniform");
-        u=hash_to_field2(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,DSTNU,M,1);
+        u=hash_to_field2(HMAC.MC_SHA2,hlen,DSTNU,M,1);
         System.out.println("u[0]= "+u[0].toString());
         P=ECP2.map2point(u[0]);
         System.out.println("Q= "+P.toString());
@@ -96,8 +96,8 @@ public class TestHTP2 extends TestCase {
         boolean oneofmine=false;
 
         if (packageName == "org.miracl.core.BLS12381") {
-            ro="BLS12381G2_XMD:SHA-256_SVDW_RO_TESTGEN";
-            nu="BLS12381G2_XMD:SHA-256_SVDW_NU_TESTGEN";
+            ro="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_";
+            nu="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_";
             System.out.println("\nTesting HTP for curve BLS12381_G2");
             oneofmine=true;
         }
@@ -108,10 +108,13 @@ public class TestHTP2 extends TestCase {
             return;
         }
 
-        htp2("",ro,nu);
-        htp2("abc",ro,nu);
-        htp2("abcdef0123456789",ro,nu);
-        htp2("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+        int hlen=CONFIG_CURVE.HASH_TYPE;  // default
+
+        htp2("",ro,nu,hlen);
+        htp2("abc",ro,nu,hlen);
+        htp2("abcdef0123456789",ro,nu,hlen);
+        htp2("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",ro,nu,hlen);
+        htp2("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
     
     }
 }

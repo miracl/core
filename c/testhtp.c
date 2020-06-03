@@ -37,7 +37,7 @@
 #define CEIL(a,b) (((a)-1)/(b)+1)
 
 /* WORK IN PROGRESS - PLEASE IGNORE */
-/* Select curves 1,3,7,17,28 */
+/* Select curves 1,3,7,17,29 */
 
 /* IMPORTANT - this must be edited if curve is changed */
 
@@ -163,7 +163,7 @@ int htp_ED25519(char *mess)
     int res=0;
     FP_F25519 u[2];
     ECP_ED25519 P,P1;
-    char dst[50];
+    char dst[100];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
@@ -171,8 +171,8 @@ int htp_ED25519(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-    OCT_jstring(&DST,(char *)"edwards25519_XMD:SHA-256_ELL2_RO_TESTGEN");
-    hash_to_field_ED25519(MC_SHA2,HASH_TYPE_ED25519,u,&DST,&MSG,2);
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_");
+    hash_to_field_ED25519(MC_SHA2,/*HASH_TYPE_ED25519*/ SHA512,u,&DST,&MSG,2);
     printf("u[0]= "); FP_F25519_output(&u[0]); printf("\n");
     printf("u[1]= "); FP_F25519_output(&u[1]); printf("\n");
     ECP_ED25519_map2point(&P,&u[0]);
@@ -186,8 +186,8 @@ int htp_ED25519(char *mess)
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
-    OCT_jstring(&DST,(char *)"edwards25519_XMD:SHA-256_ELL2_NU_TESTGEN");
-    hash_to_field_ED25519(MC_SHA2,HASH_TYPE_ED25519,u,&DST,&MSG,1);
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_NU_");
+    hash_to_field_ED25519(MC_SHA2,/*HASH_TYPE_ED25519*/ SHA512,u,&DST,&MSG,1);
     printf("u[0]= "); FP_F25519_output(&u[0]); printf("\n");
     ECP_ED25519_map2point(&P,&u[0]);
     printf("Q= "); ECP_ED25519_output(&P);
@@ -230,7 +230,7 @@ int htp_NIST256(char *mess)
     int res=0;
     FP_NIST256 u[2];
     ECP_NIST256 P,P1;
-    char dst[50];
+    char dst[100];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
@@ -238,7 +238,7 @@ int htp_NIST256(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-    OCT_jstring(&DST,(char *)"P256_XMD:SHA-256_SSWU_RO_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_");
     hash_to_field_NIST256(MC_SHA2,HASH_TYPE_NIST256,u,&DST,&MSG,2);
     printf("u[0]= "); FP_NIST256_output(&u[0]); printf("\n");
     printf("u[1]= "); FP_NIST256_output(&u[1]); printf("\n");
@@ -253,7 +253,7 @@ int htp_NIST256(char *mess)
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
-    OCT_jstring(&DST,(char *)"P256_XMD:SHA-256_SSWU_NU_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_NU_");
     hash_to_field_NIST256(MC_SHA2,HASH_TYPE_NIST256,u,&DST,&MSG,1);
     printf("u[0]= "); FP_NIST256_output(&u[0]); printf("\n");
     ECP_NIST256_map2point(&P,&u[0]);
@@ -298,7 +298,7 @@ int htp_GOLDILOCKS(char *mess)
     int res=0;
     FP_GOLDILOCKS u[2];
     ECP_GOLDILOCKS P,P1;
-    char dst[50];
+    char dst[100];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
@@ -306,7 +306,7 @@ int htp_GOLDILOCKS(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-    OCT_jstring(&DST,(char *)"edwards448_XMD:SHA-512_ELL2_RO_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_");
     hash_to_field_GOLDILOCKS(MC_SHA2,HASH_TYPE_GOLDILOCKS,u,&DST,&MSG,2);
     printf("u[0]= "); FP_GOLDILOCKS_output(&u[0]); printf("\n");
     printf("u[1]= "); FP_GOLDILOCKS_output(&u[1]); printf("\n");
@@ -321,7 +321,7 @@ int htp_GOLDILOCKS(char *mess)
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
-    OCT_jstring(&DST,(char *)"edwards448_XMD:SHA-512_ELL2_NU_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_");
     hash_to_field_GOLDILOCKS(MC_SHA2,HASH_TYPE_GOLDILOCKS,u,&DST,&MSG,1);
     printf("u[0]= "); FP_GOLDILOCKS_output(&u[0]); printf("\n");
     ECP_GOLDILOCKS_map2point(&P,&u[0]);
@@ -364,7 +364,7 @@ int htp_SECP256K1(char *mess)
     int res=0;
     FP_SECP256K1 u[2];
     ECP_SECP256K1 P,P1;
-    char dst[50];
+    char dst[100];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
@@ -372,7 +372,7 @@ int htp_SECP256K1(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-    OCT_jstring(&DST,(char *)"secp256k1_XMD:SHA-256_SVDW_RO_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_");
     hash_to_field_SECP256K1(MC_SHA2,HASH_TYPE_SECP256K1,u,&DST,&MSG,2);
     printf("u[0]= "); FP_SECP256K1_output(&u[0]); printf("\n");
     printf("u[1]= "); FP_SECP256K1_output(&u[1]); printf("\n");
@@ -387,7 +387,7 @@ int htp_SECP256K1(char *mess)
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
-    OCT_jstring(&DST,(char *)"secp256k1_XMD:SHA-256_SVDW_NU_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_");
     hash_to_field_SECP256K1(MC_SHA2,HASH_TYPE_SECP256K1,u,&DST,&MSG,1);
     printf("u[0]= "); FP_SECP256K1_output(&u[0]); printf("\n");
     ECP_SECP256K1_map2point(&P,&u[0]);
@@ -433,7 +433,7 @@ int htp_BLS12381(char *mess)
     int res=0;
     FP_BLS12381 u[2];
     ECP_BLS12381 P,P1;
-    char dst[50];
+    char dst[100];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
@@ -441,7 +441,7 @@ int htp_BLS12381(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-    OCT_jstring(&DST,(char *)"BLS12381G1_XMD:SHA-256_SVDW_RO_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_");
     hash_to_field_BLS12381(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,2);
     printf("u[0]= "); FP_BLS12381_output(&u[0]); printf("\n");
     printf("u[1]= "); FP_BLS12381_output(&u[1]); printf("\n");
@@ -456,7 +456,7 @@ int htp_BLS12381(char *mess)
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
-    OCT_jstring(&DST,(char *)"BLS12381G1_XMD:SHA-256_SVDW_NU_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_");
     hash_to_field_BLS12381(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,1);
     printf("u[0]= "); FP_BLS12381_output(&u[0]); printf("\n");
     ECP_BLS12381_map2point(&P,&u[0]);
@@ -509,7 +509,7 @@ int htp_BLS12381_G2(char *mess)
     int res=0;
     FP2_BLS12381 u[2];
     ECP2_BLS12381 P,P1;
-    char dst[50];
+    char dst[100];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
@@ -517,7 +517,7 @@ int htp_BLS12381_G2(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-    OCT_jstring(&DST,(char *)"BLS12381G2_XMD:SHA-256_SVDW_RO_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_");
     hash_to_field_BLS12381_G2(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,2);
     printf("u[0]= "); FP2_BLS12381_output(&u[0]); printf("\n");
     printf("u[1]= "); FP2_BLS12381_output(&u[1]); printf("\n");
@@ -532,7 +532,7 @@ int htp_BLS12381_G2(char *mess)
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
-    OCT_jstring(&DST,(char *)"BLS12381G2_XMD:SHA-256_SVDW_NU_TESTGEN");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_");
     hash_to_field_BLS12381_G2(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,1);
     printf("u[0]= "); FP2_BLS12381_output(&u[0]); printf("\n");
     ECP2_BLS12381_map2point(&P,&u[0]);
@@ -569,6 +569,7 @@ int main()
     htp_ED25519((char *)"");
     htp_ED25519((char *)"abc");
     htp_ED25519((char *)"abcdef0123456789");
+    htp_ED25519((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_ED25519((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
 
@@ -576,30 +577,35 @@ int main()
     htp_NIST256((char *)"");
     htp_NIST256((char *)"abc");
     htp_NIST256((char *)"abcdef0123456789");
+    htp_NIST256((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_NIST256((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     printf("\nTesting HTP for curve GOLDILOCKS\n");
     htp_GOLDILOCKS((char *)"");
     htp_GOLDILOCKS((char *)"abc");
     htp_GOLDILOCKS((char *)"abcdef0123456789");
+    htp_GOLDILOCKS((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_GOLDILOCKS((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     printf("\nTesting HTP for curve SECP256K1\n");
     htp_SECP256K1((char *)"");
     htp_SECP256K1((char *)"abc");
     htp_SECP256K1((char *)"abcdef0123456789");
+    htp_SECP256K1((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_SECP256K1((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     printf("\nTesting HTP for curve BLS12381_G1\n");
     htp_BLS12381((char *)"");
     htp_BLS12381((char *)"abc");
     htp_BLS12381((char *)"abcdef0123456789");
+    htp_BLS12381((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_BLS12381((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     printf("\nTesting HTP for curve BLS12381_G2\n");
     htp_BLS12381_G2((char *)"");
     htp_BLS12381_G2((char *)"abc");
     htp_BLS12381_G2((char *)"abcdef0123456789");
+    htp_BLS12381_G2((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_BLS12381_G2((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     KILL_CSPRNG(&RNG);

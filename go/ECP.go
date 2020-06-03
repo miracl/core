@@ -1230,7 +1230,7 @@ func ECP_map2point(h *FP) *ECP {
 			var A *FP
             K:=NewFP()
 			rfc:=0
-            sgn:=t.sign()
+            //sgn:=t.sign()
 
 			if MODTYPE !=  GENERALISED_MERSENNE {
 				A=NewFPcopy(B)
@@ -1312,14 +1312,16 @@ func ECP_map2point(h *FP) *ECP {
             w1.cmove(w2,qres)
 
             Y:=w1.sqrt(nil)
+            NY:=NewFPcopy(Y); NY.neg(); NY.norm()
+            Y.cmove(NY,1-qres)
 
 			if rfc==0 {
 				X1.mul(K);
 				Y.mul(K);
 			}
-            ne:=Y.sign()^sgn
-            NY:=NewFPcopy(Y); NY.neg(); NY.norm()
-            Y.cmove(NY,ne)
+//            ne:=Y.sign()^sgn
+//            NY:=NewFPcopy(Y); NY.neg(); NY.norm()
+//            Y.cmove(NY,ne)
 			if MODTYPE ==  GENERALISED_MERSENNE {
                 t.copy(X1); t.sqr()
                 NY.copy(t); NY.add(one); NY.norm()

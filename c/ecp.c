@@ -512,14 +512,18 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 
     FP_YYY_sqrt(&Y,&w1,NULL);
 
+    FP_YYY_neg(&NY,&Y); FP_YYY_norm(&NY);
+    FP_YYY_cmove(&Y,&NY,1-qres);
+
     if (!rfc)
     {
         FP_YYY_mul(&X1,&X1,&K);
         FP_YYY_mul(&Y,&Y,&K);
     }
-    ne=sgn^FP_YYY_sign(&Y);
-    FP_YYY_neg(&NY,&Y); FP_YYY_norm(&NY);
-    FP_YYY_cmove(&Y,&NY,ne);
+
+//    ne=sgn^FP_YYY_sign(&Y);
+//    FP_YYY_neg(&NY,&Y); FP_YYY_norm(&NY);
+//    FP_YYY_cmove(&Y,&NY,ne);
 
 #if MODTYPE_YYY == GENERALISED_MERSENNE
 // GOLDILOCKS isogeny

@@ -183,7 +183,6 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
 
             BIG_modmul(u, u, w, r);
 
-
             BIG_invmodp(u, u, r);
             BIG_modmul(d, s, c, r);
 

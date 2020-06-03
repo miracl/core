@@ -95,13 +95,13 @@ function hash_to_field(ctx,hash,hlen,DST,M,ctr) {
     return u;
 }
 
-function htp(mywindow,ctx,mess,ro,nu) {
+function htp(mywindow,ctx,mess,ro,nu,hlen) {
     mywindow.document.write("Random Access - message= "+mess+"<br>");
     var DSTRO = asciitobytes(ro);
     var DSTNU = asciitobytes(nu);
     var M = asciitobytes(mess);
 
-    var u=hash_to_field(ctx,ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,DSTRO,M,2);
+    var u=hash_to_field(ctx,ctx.HMAC.MC_SHA2,hlen,DSTRO,M,2);
     mywindow.document.write("u[0]= "+u[0].toString()+"<br>");
     mywindow.document.write("u[1]= "+u[1].toString()+"<br>");
 
@@ -115,7 +115,7 @@ function htp(mywindow,ctx,mess,ro,nu) {
     mywindow.document.write("P= "+P.toString()+"<br>");
 
     mywindow.document.write("\nNon-Uniform"+"<br>");
-    u=hash_to_field(ctx,ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,DSTNU,M,1);
+    u=hash_to_field(ctx,ctx.HMAC.MC_SHA2,hlen,DSTNU,M,1);
     mywindow.document.write("u[0]= "+u[0].toString()+"<br>");
     P=ctx.ECP.map2point(u[0]);
     mywindow.document.write("Q= "+P.toString()+"<br>");
@@ -153,13 +153,13 @@ function hash_to_field2(ctx,hash,hlen,DST,M,ctr) {
     return u;
 }
 
-function htp2(mywindow,ctx,mess,ro,nu) {
+function htp2(mywindow,ctx,mess,ro,nu,hlen) {
     mywindow.document.write("Random Access - message= "+mess+"<br>");
     var DSTRO = asciitobytes(ro);
     var DSTNU = asciitobytes(nu);
     var M = asciitobytes(mess);
 
-    var u=hash_to_field2(ctx,ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,DSTRO,M,2);
+    var u=hash_to_field2(ctx,ctx.HMAC.MC_SHA2,hlen,DSTRO,M,2);
     mywindow.document.write("u[0]= "+u[0].toString()+"<br>");
     mywindow.document.write("u[1]= "+u[1].toString()+"<br>");
 
@@ -173,7 +173,7 @@ function htp2(mywindow,ctx,mess,ro,nu) {
     mywindow.document.write("P= "+P.toString()+"<br>");
 
     mywindow.document.write("\nNon-Uniform"+"<br>");
-    u=hash_to_field2(ctx,ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,DSTNU,M,1);
+    u=hash_to_field2(ctx,ctx.HMAC.MC_SHA2,hlen,DSTNU,M,1);
     mywindow.document.write("u[0]= "+u[0].toString()+"<br>");
     P=ctx.ECP2.map2point(u[0]);
     mywindow.document.write("Q= "+P.toString()+"<br>");
@@ -186,73 +186,85 @@ function htp2(mywindow,ctx,mess,ro,nu) {
 // ED25519 context
 function ED25519() {
 	var ctx = new CTX('ED25519');
-	var ro="edwards25519_XMD:SHA-256_ELL2_RO_TESTGEN";
-	var nu="edwards25519_XMD:SHA-256_ELL2_NU_TESTGEN";
+	var ro="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_";
+	var nu="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_NU_";
+	var hlen=64;//SHA512
 	mywindow=window.open();
-    htp(mywindow,ctx,"",ro,nu);
-    htp(mywindow,ctx,"abc",ro,nu);
-    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
-    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+    htp(mywindow,ctx,"",ro,nu,hlen);
+    htp(mywindow,ctx,"abc",ro,nu,hlen);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
+    htp(mywindow,ctx,"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",ro,nu,hlen);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
 }
 
 // NIST256 context
 function NIST256() {
 	var ctx = new CTX('NIST256');
-	var ro="P256_XMD:SHA-256_SSWU_RO_TESTGEN";
-	var nu="P256_XMD:SHA-256_SSWU_NU_TESTGEN";
+	var ro="QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_";
+	var nu="QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_NU_";
+	var hlen=ctx.ECP.HASH_TYPE;
 	mywindow=window.open();
-    htp(mywindow,ctx,"",ro,nu);
-    htp(mywindow,ctx,"abc",ro,nu);
-    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
-    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+    htp(mywindow,ctx,"",ro,nu,hlen);
+    htp(mywindow,ctx,"abc",ro,nu,hlen);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
+    htp(mywindow,ctx,"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",ro,nu,hlen);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
 }
 
 // GOLDILOCKS context
 function GOLDILOCKS() {
 	var ctx = new CTX('GOLDILOCKS');
-	var ro="edwards448_XMD:SHA-512_ELL2_RO_TESTGEN";
-	var nu="edwards448_XMD:SHA-512_ELL2_NU_TESTGEN";
+	var ro="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_";
+	var nu="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_";
+	var hlen=ctx.ECP.HASH_TYPE;
 	mywindow=window.open();
-    htp(mywindow,ctx,"",ro,nu);
-    htp(mywindow,ctx,"abc",ro,nu);
-    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
-    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+    htp(mywindow,ctx,"",ro,nu,hlen);
+    htp(mywindow,ctx,"abc",ro,nu,hlen);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
+    htp(mywindow,ctx,"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",ro,nu,hlen);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
 }
 
 // SECP256K1 context
 function SECP256K1() {
 	var ctx = new CTX('SECP256K1');
-	var ro="secp256k1_XMD:SHA-256_SVDW_RO_TESTGEN";
-	var nu="secp256k1_XMD:SHA-256_SVDW_NU_TESTGEN";
+	var ro="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_";
+	var nu="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_";
+	var hlen=ctx.ECP.HASH_TYPE;
 	mywindow=window.open();
-    htp(mywindow,ctx,"",ro,nu);
-    htp(mywindow,ctx,"abc",ro,nu);
-    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
-    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+    htp(mywindow,ctx,"",ro,nu,hlen);
+    htp(mywindow,ctx,"abc",ro,nu,hlen);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
+    htp(mywindow,ctx,"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",ro,nu,hlen);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
 }
 
 // BLS12381 context
 function BLS12381() {
 	var ctx = new CTX('BLS12381');
-	var ro="BLS12381G1_XMD:SHA-256_SVDW_RO_TESTGEN";
-	var nu="BLS12381G1_XMD:SHA-256_SVDW_NU_TESTGEN";
+	var ro="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_";
+	var nu="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_";
+	var hlen=ctx.ECP.HASH_TYPE;
 	mywindow=window.open();
-    htp(mywindow,ctx,"",ro,nu);
-    htp(mywindow,ctx,"abc",ro,nu);
-    htp(mywindow,ctx,"abcdef0123456789",ro,nu);
-    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+    htp(mywindow,ctx,"",ro,nu,hlen);
+    htp(mywindow,ctx,"abc",ro,nu,hlen);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
+    htp(mywindow,ctx,"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",ro,nu,hlen);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
 }
 
 // BLS12381 context
 function BLS12381_G2() {
 	var ctx = new CTX('BLS12381');
-	var ro="BLS12381G2_XMD:SHA-256_SVDW_RO_TESTGEN";
-	var nu="BLS12381G2_XMD:SHA-256_SVDW_NU_TESTGEN";
+	var ro="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_";
+	var nu="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_";
+	var hlen=ctx.ECP.HASH_TYPE;
 	mywindow=window.open();
-    htp2(mywindow,ctx,"",ro,nu);
-    htp2(mywindow,ctx,"abc",ro,nu);
-    htp2(mywindow,ctx,"abcdef0123456789",ro,nu);
-    htp2(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu);
+    htp2(mywindow,ctx,"",ro,nu,hlen);
+    htp2(mywindow,ctx,"abc",ro,nu,hlen);
+    htp2(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
+    htp2(mywindow,ctx,"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",ro,nu,hlen);
+    htp2(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
 }
 
 </script>

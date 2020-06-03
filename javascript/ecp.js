@@ -1456,15 +1456,17 @@ var ECP = function(ctx) {
             w1.cmove(w2,qres);
 
             var Y=w1.sqrt(null);
+            var NY=new ctx.FP(Y); NY.neg(); NY.norm();
+            Y.cmove(NY,1-qres);
 
             if (rfc==0)
             {
                 X1.mul(K);
                 Y.mul(K);
             }
-            var ne=Y.sign()^sgn;
-            var NY=new ctx.FP(Y); NY.neg(); NY.norm();
-            Y.cmove(NY,ne);
+//            var ne=Y.sign()^sgn;
+//            var NY=new ctx.FP(Y); NY.neg(); NY.norm();
+//            Y.cmove(NY,ne);
             if (ctx.FP.MODTYPE==ctx.FP.GENERALISED_MERSENNE)
             {
                 t.copy(X1); t.sqr();

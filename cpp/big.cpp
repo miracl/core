@@ -1034,8 +1034,12 @@ chunk XXX::BIG_split(BIG t, BIG b, DBIG d, int n)
 chunk XXX::BIG_norm(BIG a)
 {
     int i;
-    chunk d, carry = 0;
-    for (i = 0; i < NLEN_XXX - 1; i++)
+    chunk d, carry;
+
+    carry=a[0]>>BASEBITS_XXX;
+    a[0]&=BMASK_XXX;
+
+    for (i = 1; i < NLEN_XXX - 1; i++)
     {
         d = a[i] + carry;
         a[i] = d & BMASK_XXX;
@@ -1052,8 +1056,12 @@ chunk XXX::BIG_norm(BIG a)
 void XXX::BIG_dnorm(DBIG a)
 {
     int i;
-    chunk d, carry = 0;
-    for (i = 0; i < DNLEN_XXX - 1; i++)
+    chunk d, carry;
+
+    carry=a[0]>>BASEBITS_XXX;
+    a[0]&=BMASK_XXX;
+
+    for (i = 1; i < DNLEN_XXX - 1; i++)
     {
         d = a[i] + carry;
         a[i] = d & BMASK_XXX;

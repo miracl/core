@@ -541,6 +541,7 @@ void BIG_XXX_smul(BIG_XXX c, BIG_XXX a, BIG_XXX b)
 
 /* Set c=a*b */
 /* SU= 72 */
+//void BIG_XXX_mul(chunk c[restrict DNLEN_XXX],chunk a[restrict NLEN_XXX],chunk b[restrict NLEN_XXX])
 void BIG_XXX_mul(DBIG_XXX c, BIG_XXX a, BIG_XXX b)
 {
     int i;
@@ -653,6 +654,8 @@ void BIG_XXX_mul(DBIG_XXX c, BIG_XXX a, BIG_XXX b)
 
 /* Set c=a*a */
 /* SU= 80 */
+
+//void BIG_XXX_sqr(chunk c[restrict DNLEN_XXX],chunk a[restrict NLEN_XXX])
 void BIG_XXX_sqr(DBIG_XXX c, BIG_XXX a)
 {
     int i, j;
@@ -770,6 +773,7 @@ void BIG_XXX_sqr(DBIG_XXX c, BIG_XXX a)
 }
 
 /* Montgomery reduction */
+//void BIG_XXX_monty(chunk a[restrict NLEN_XXX], chunk md[restrict NLEN_XXX], chunk MC, chunk d[restrict DNLEN_XXX])
 void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d)
 {
     int i, k;
@@ -1050,8 +1054,12 @@ chunk BIG_XXX_split(BIG_XXX t, BIG_XXX b, DBIG_XXX d, int n)
 chunk BIG_XXX_norm(BIG_XXX a)
 {
     int i;
-    chunk d, carry = 0;
-    for (i = 0; i < NLEN_XXX - 1; i++)
+    chunk d, carry;
+
+    carry=a[0]>>BASEBITS_XXX;
+    a[0]&=BMASK_XXX;
+
+    for (i = 1; i < NLEN_XXX - 1; i++)
     {
         d = a[i] + carry;
         a[i] = d & BMASK_XXX;
@@ -1069,8 +1077,12 @@ chunk BIG_XXX_norm(BIG_XXX a)
 void BIG_XXX_dnorm(DBIG_XXX a)
 {
     int i;
-    chunk d, carry = 0;
-    for (i = 0; i < DNLEN_XXX - 1; i++)
+    chunk d, carry;
+
+    carry=a[0]>>BASEBITS_XXX;
+    a[0]&=BMASK_XXX;
+
+    for (i = 1; i < DNLEN_XXX - 1; i++)
     {
         d = a[i] + carry;
         a[i] = d & BMASK_XXX;

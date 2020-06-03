@@ -1047,7 +1047,7 @@ public struct ECP {
             var B=FP(BIG(ROM.CURVE_B))
             var A:FP
             var K=FP()
-            let sgn=t.sign()
+         //   let sgn=t.sign()
             var rfc=0
 
             if CONFIG_FIELD.MODTYPE != CONFIG_FIELD.GENERALISED_MERSENNE {
@@ -1129,13 +1129,16 @@ public struct ECP {
             w1.cmove(w2,qres)
 
             var Y=w1.sqrt(pNIL)
+            var NY=FP(Y); NY.neg(); NY.norm()
+            Y.cmove(NY,1-qres)
+
             if rfc==0 {
                 X1.mul(K)
                 Y.mul(K)
             }
-            let ne=Y.sign()^sgn
-            var NY=FP(Y); NY.neg(); NY.norm()
-            Y.cmove(NY,ne)
+//            let ne=Y.sign()^sgn
+//            var NY=FP(Y); NY.neg(); NY.norm()
+//            Y.cmove(NY,ne)
             if CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE {
                 t.copy(X1); t.sqr()
                 NY.copy(t); NY.add(one); NY.norm()

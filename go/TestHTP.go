@@ -57,8 +57,8 @@ func hash_to_field_ED25519(hash int,hlen int,DST []byte,M []byte,ctr int) []*ED2
 func htp_ED25519(mess []byte) {
 	
 	fmt.Println("Random Access - message= "+string(mess))
-	DST := []byte("edwards25519_XMD:SHA-256_ELL2_RO_TESTGEN")
-	u:=hash_to_field_ED25519(core.MC_SHA2,ED25519.HASH_TYPE,DST,mess,2)
+	DST := []byte("QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_")
+	u:=hash_to_field_ED25519(core.MC_SHA2,64,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
 	fmt.Printf("u[1]= %s\n",u[1].ToString())
 	P:=ED25519.ECP_map2point(u[0])
@@ -71,8 +71,8 @@ func htp_ED25519(mess []byte) {
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 	fmt.Printf("Non-Uniform\n")
-    DST=[]byte("edwards25519_XMD:SHA-256_ELL2_NU_TESTGEN");
-    u=hash_to_field_ED25519(core.MC_SHA2,ED25519.HASH_TYPE,DST,mess,1);
+    DST=[]byte("QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_NU_");
+    u=hash_to_field_ED25519(core.MC_SHA2,64,DST,mess,1);
 	fmt.Printf("u= %s\n",u[0].ToString())
 	P=ED25519.ECP_map2point(u[0])
 	fmt.Printf("Q= %s\n",P.ToString())
@@ -106,7 +106,7 @@ func hash_to_field_NIST256(hash int,hlen int,DST []byte,M []byte,ctr int) []*NIS
 func htp_NIST256(mess []byte) {
 	
 	fmt.Println("Random Access - message= "+string(mess))
-	DST := []byte("P256_XMD:SHA-256_SSWU_RO_TESTGEN")
+	DST := []byte("QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_")
 	u:=hash_to_field_NIST256(core.MC_SHA2,NIST256.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
 	fmt.Printf("u[1]= %s\n",u[1].ToString())
@@ -120,7 +120,7 @@ func htp_NIST256(mess []byte) {
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 	fmt.Printf("Non-Uniform\n")
-    DST=[]byte("P256_XMD:SHA-256_SSWU_NU_TESTGEN");
+    DST=[]byte("QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_NU_");
     u=hash_to_field_NIST256(core.MC_SHA2,NIST256.HASH_TYPE,DST,mess,1);
 	fmt.Printf("u= %s\n",u[0].ToString())
 	P=NIST256.ECP_map2point(u[0])
@@ -154,7 +154,7 @@ func hash_to_field_GOLDILOCKS(hash int,hlen int,DST []byte,M []byte,ctr int) []*
 func htp_GOLDILOCKS(mess []byte) {
 	
 	fmt.Println("Random Access - message= "+string(mess))
-	DST := []byte("edwards448_XMD:SHA-512_ELL2_RO_TESTGEN")
+	DST := []byte("QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_")
 	u:=hash_to_field_GOLDILOCKS(core.MC_SHA2,GOLDILOCKS.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
 	fmt.Printf("u[1]= %s\n",u[1].ToString())
@@ -168,7 +168,7 @@ func htp_GOLDILOCKS(mess []byte) {
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 	fmt.Printf("Non-Uniform\n")
-    DST=[]byte("edwards448_XMD:SHA-512_ELL2_NU_TESTGEN");
+    DST=[]byte("QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_");
     u=hash_to_field_GOLDILOCKS(core.MC_SHA2,GOLDILOCKS.HASH_TYPE,DST,mess,1);
 	fmt.Printf("u= %s\n",u[0].ToString())
 	P=GOLDILOCKS.ECP_map2point(u[0])
@@ -202,7 +202,7 @@ func hash_to_field_SECP256K1(hash int,hlen int,DST []byte,M []byte,ctr int) []*S
 func htp_SECP256K1(mess []byte) {
 	
 	fmt.Println("Random Access - message= "+string(mess))
-	DST := []byte("secp256k1_XMD:SHA-256_SVDW_RO_TESTGEN")
+	DST := []byte("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_")
 	u:=hash_to_field_SECP256K1(core.MC_SHA2,SECP256K1.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
 	fmt.Printf("u[1]= %s\n",u[1].ToString())
@@ -216,7 +216,7 @@ func htp_SECP256K1(mess []byte) {
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 	fmt.Printf("Non-Uniform\n")
-    DST=[]byte("secp256k1_XMD:SHA-256_SVDW_NU_TESTGEN");
+    DST=[]byte("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_");
     u=hash_to_field_SECP256K1(core.MC_SHA2,SECP256K1.HASH_TYPE,DST,mess,1);
 	fmt.Printf("u= %s\n",u[0].ToString())
 	P=SECP256K1.ECP_map2point(u[0])
@@ -250,7 +250,7 @@ func hash_to_field_BLS12381(hash int,hlen int,DST []byte,M []byte,ctr int) []*BL
 func htp_BLS12381(mess []byte) {
 	
 	fmt.Println("Random Access - message= "+string(mess))
-	DST := []byte("BLS12381G1_XMD:SHA-256_SVDW_RO_TESTGEN")
+	DST := []byte("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_")
 	u:=hash_to_field_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
 	fmt.Printf("u[1]= %s\n",u[1].ToString())
@@ -264,7 +264,7 @@ func htp_BLS12381(mess []byte) {
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 	fmt.Printf("Non-Uniform\n")
-    DST=[]byte("BLS12381G1_XMD:SHA-256_SVDW_NU_TESTGEN");
+    DST=[]byte("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_");
     u=hash_to_field_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,1);
 	fmt.Printf("u= %s\n",u[0].ToString())
 	P=BLS12381.ECP_map2point(u[0])
@@ -304,7 +304,7 @@ func hash_to_field2_BLS12381(hash int,hlen int,DST []byte,M []byte,ctr int) []*B
 func htp2_BLS12381(mess []byte) {
 	
 	fmt.Println("Random Access - message= "+string(mess))
-	DST := []byte("BLS12381G2_XMD:SHA-256_SVDW_RO_TESTGEN")
+	DST := []byte("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_")
 	u:=hash_to_field2_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
 	fmt.Printf("u[1]= %s\n",u[1].ToString())
@@ -318,7 +318,7 @@ func htp2_BLS12381(mess []byte) {
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 	fmt.Printf("Non-Uniform\n")
-    DST=[]byte("BLS12381G2_XMD:SHA-256_SVDW_NU_TESTGEN");
+    DST=[]byte("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_");
     u=hash_to_field2_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,1);
 	fmt.Printf("u= %s\n",u[0].ToString())
 	P=BLS12381.ECP2_map2point(u[0])
@@ -335,36 +335,42 @@ func main() {
 	htp_ED25519([]byte(""))
 	htp_ED25519([]byte("abc"))
 	htp_ED25519([]byte("abcdef0123456789"))
+    htp_ED25519([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
 	htp_ED25519([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
     fmt.Printf("\nTesting HTP for curve NIST256\n");
 	htp_NIST256([]byte(""))
 	htp_NIST256([]byte("abc"))
 	htp_NIST256([]byte("abcdef0123456789"))
+    htp_NIST256([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
 	htp_NIST256([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
     fmt.Printf("\nTesting HTP for curve GOLDILOCKS\n");
 	htp_GOLDILOCKS([]byte(""))
 	htp_GOLDILOCKS([]byte("abc"))
 	htp_GOLDILOCKS([]byte("abcdef0123456789"))
+    htp_GOLDILOCKS([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
 	htp_GOLDILOCKS([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
     fmt.Printf("\nTesting HTP for curve SECP256K1\n");
 	htp_SECP256K1([]byte(""))
 	htp_SECP256K1([]byte("abc"))
 	htp_SECP256K1([]byte("abcdef0123456789"))
+    htp_SECP256K1([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
 	htp_SECP256K1([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
     fmt.Printf("\nTesting HTP for curve BLS12381\n");
 	htp_BLS12381([]byte(""))
 	htp_BLS12381([]byte("abc"))
 	htp_BLS12381([]byte("abcdef0123456789"))
+    htp_BLS12381([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
 	htp_BLS12381([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
     fmt.Printf("\nTesting HTP for curve BLS12381_G2\n");
 	htp2_BLS12381([]byte(""))
 	htp2_BLS12381([]byte("abc"))
 	htp2_BLS12381([]byte("abcdef0123456789"))
+    htp2_BLS12381([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
 	htp2_BLS12381([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
 }

@@ -26,19 +26,6 @@ import "math/bits"
 import "github.com/miracl/core/go/core"
 
 //import "fmt"
-//import "os"
-
-//const MODBYTES uint = @NB@
-//const BASEBITS uint = @BASE@
-
-//const NLEN int = int((1 + ((8*MODBYTES - 1) / BASEBITS)))
-//const DNLEN int = 2 * NLEN
-//const BMASK Chunk = ((Chunk(1) << BASEBITS) - 1)
-//const HBITS uint = (BASEBITS / 2)
-//const HMASK Chunk = ((Chunk(1) << HBITS) - 1)
-//const NEXCESS int = (1 << (uint(CHUNK) - BASEBITS - 1))
-
-//const BIGBITS int = int(MODBYTES * 8)
 
 type BIG struct {
 	w [NLEN]Chunk
@@ -137,27 +124,6 @@ func muladd(a Chunk, b Chunk, c Chunk, r Chunk) (Chunk, Chunk) {
 	bot &= BMASK
 	top+=carry
 	return top, bot
-
-/*
-	x0 := a & HMASK
-	x1 := (a >> HBITS)
-	y0 := b & HMASK
-	y1 := (b >> HBITS)
-	botx := x0 * y0
-	topx := x1 * y1
-	mid := x0*y1 + x1*y0
-	x0 = mid & HMASK
-	x1 = (mid >> HBITS)
-	botx += x0 << HBITS
-	botx += c
-	botx += r
-	topx += x1
-	carryx := botx >> BASEBITS
-	botx &= BMASK
-	topx += carryx
-
-	return topx, botx  
-*/
 
 }
 

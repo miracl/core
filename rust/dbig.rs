@@ -168,8 +168,9 @@ impl DBIG {
 
     /* normalise BIG - force all digits < 2^big::BASEBITS */
     pub fn norm(&mut self) {
-        let mut carry = 0 as Chunk;
-        for i in 0..big::DNLEN - 1 {
+        let mut carry  = self.w[0]>>big::BASEBITS;
+        self.w[0] &= big::BMASK;
+        for i in 1..big::DNLEN - 1 {
             let d = self.w[i] + carry;
             self.w[i] = d & big::BMASK;
             carry = d >> big::BASEBITS;
