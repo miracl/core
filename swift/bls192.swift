@@ -26,7 +26,7 @@
 
 /* Boneh-Lynn-Shacham Signature API Functions */
 
-/* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-00 */
+/* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-02 */
 
 // Minimal-signature-size variant
 
@@ -66,32 +66,10 @@ public struct BLS192
         return u
     }
 
-/* output u \in F_p 
-    static func hash_to_base(_ hf: Int,_ hlen: Int,_ DST: [UInt8],_ M: [UInt8],_ ctr:Int) -> BIG {
-        let q=BIG(ROM.Modulus)
-        let L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8)
-
-        let tag = "H2C"
-        let T=[UInt8](tag.utf8)
-        var INFO=[UInt8](repeating: 0,count: T.count+1)
-        for i in 0..<T.count {
-            INFO[i]=T[i]
-        }
-        INFO[T.count]=UInt8(ctr)
-
-        let PRK=HMAC.HKDF_Extract(hf,hlen,DST,M)
-        let OKM=HMAC.HKDF_Expand(hf,hlen,L,PRK,INFO)
-
-        var dx = DBIG.fromBytes(OKM)
-        let u = dx.mod(q)
-
-        return u
-    } */
-
 /* hash a message to an ECP point, using SHA2, random oracle method */
     static public func bls_hash_to_point(_ M: [UInt8]) -> ECP
     {
-        let dst = "BLS_SIG_ZZZG1_XMD:SHA384-SSWU-RO-_NUL_".uppercased()
+        let dst = "BLS_SIG_ZZZG1_XMD:SHA384-SVDW-RO-_NUL_".uppercased()
         let u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](dst.utf8),M,2)
 
         var P=ECP.map2point(u[0])
@@ -115,18 +93,22 @@ public struct BLS192
     {
         let r = BIG(ROM.CURVE_Order)
         let L = ceil(3*ceil(r.nbits(),8),2)
+        let LEN=HMAC.inttoBytes(L, 2)
+        var AIKM=[UInt8]()
+        AIKM.append(contentsOf: IKM)
+        AIKM.append(0)
+
         var G = ECP4.generator()
         if G.is_infinity() {return BLS_FAIL}
         let salt = "BLS-SIG-KEYGEN-SALT-"
-        let info = ""
 
-        let PRK=HMAC.HKDF_Extract(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](salt.utf8),IKM)
-        let OKM=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,PRK,[UInt8](info.utf8))
+        let PRK=HMAC.HKDF_Extract(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](salt.utf8),AIKM)
+        let OKM=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,PRK,LEN)
 
         var dx = DBIG.fromBytes(OKM)
         let s = dx.mod(r)
-
         s.toBytes(&S)
+// SkToPk
         G=PAIR192.G2mul(G,s)
         G.toBytes(&W,true)
         return BLS_OK
@@ -153,6 +135,7 @@ public struct BLS192
         D.neg()
 
         let PK=ECP4.fromBytes(W)
+        if !PAIR192.G2member(PK) {return BLS_FAIL}
 
 // Use new multi-pairing mechanism
         var r=PAIR192.initmp()

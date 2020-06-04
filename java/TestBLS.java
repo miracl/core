@@ -67,7 +67,7 @@ public class TestBLS extends TestCase //
 		for (int i=0;i<100;i++) RAW[i]=(byte)(i);
 		rng.seed(100,RAW);
 
-        for (int i=0;i<32;i++)
+        for (int i=0;i<IKM.length;i++)
             //IKM[i]=(byte)(i+1);
             IKM[i]=(byte)rng.getByte();
 

@@ -62,7 +62,7 @@ func bls_BN254(rng *core.RAND) {
 	var SIG [G1S]byte
 	var IKM [32]byte
 
-    for i:=0;i<32;i++ {
+    for i:=0;i<len(IKM);i++ {
 		//IKM[i] = byte(i+1)
         IKM[i]=byte(rng.GetByte())
 	}
@@ -111,7 +111,7 @@ func bls_BLS12383(rng *core.RAND) {
 	var SIG [G1S]byte
 	var IKM [32]byte
 
-    for i:=0;i<32;i++ {
+    for i:=0;i<len(IKM);i++ {
 		//IKM[i] = byte(i+1)
         IKM[i]=byte(rng.GetByte())
 	}
@@ -160,7 +160,7 @@ func bls_BLS24479(rng *core.RAND) {
 	var SIG [G1S]byte
 	var IKM [48]byte
 
-    for i:=0;i<48;i++ {
+    for i:=0;i<len(IKM);i++ {
 		//IKM[i] = byte(i+1)
         IKM[i]=byte(rng.GetByte())
 	}
@@ -209,7 +209,7 @@ func bls_BLS48556(rng *core.RAND) {
 	var SIG [G1S]byte
 	var IKM [64]byte
 
-    for i:=0;i<64;i++ {
+    for i:=0;i<len(IKM);i++ {
 		//IKM[i] = byte(i+1)
         IKM[i]=byte(rng.GetByte())
 	}

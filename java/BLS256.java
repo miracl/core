@@ -19,7 +19,7 @@
 
 /* Boneh-Lynn-Shacham signature API Functions */
 
-/* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-00 */
+/* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-02 */
 
 // Minimal-signature-size variant
 
@@ -57,29 +57,9 @@ public class BLS256 {
         return u;
     }    
 
-/* output u \in F_p 
-    static BIG hash_to_base(int hash,int hlen,byte[] DST,byte[] M,int ctr) {
-        BIG q = new BIG(ROM.Modulus);
-        int L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8);
-
-        String tag= new String("H2C");
-        byte[] TAG=tag.getBytes();
-        byte[] INFO=new byte[TAG.length+1];
-        for (int i=0;i<TAG.length;i++)
-            INFO[i]=TAG[i];
-        INFO[TAG.length]=(byte)ctr;
-
-        byte[] PRK=HMAC.HKDF_Extract(hash,hlen,DST,M);
-        byte[] OKM=HMAC.HKDF_Expand(hash,hlen,L,PRK,INFO);
-
-        DBIG dx=DBIG.fromBytes(OKM);
-        BIG u=dx.mod(q);
-        return u;
-    } */
-
     /* hash a message to an ECP point, using SHA2, random oracle method */
     public static ECP bls_hash_to_point(byte[] M) {
-        String dst= new String("BLS_SIG_ZZZG1_XMD:SHA512-SSWU-RO-_NUL_");
+        String dst= new String("BLS_SIG_ZZZG1_XMD:SHA512-SVDW-RO-_NUL_");
         FP[] u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,2);
 
         ECP P=ECP.map2point(u[0]);
@@ -98,21 +78,25 @@ public class BLS256 {
     }
 
     /* generate key pair, private key S, public key W */
-
-    /* generate key pair, private key S, public key W */
     public static int KeyPairGenerate(byte[] IKM, byte[] S, byte[] W) {
         BIG r = new BIG(ROM.CURVE_Order);     
         int L = ceil(3*ceil(r.nbits(),8),2);
         ECP8 G = ECP8.generator();
+        byte[] LEN = HMAC.inttoBytes(L, 2);
+        byte[] AIKM = new byte[IKM.length+1];
+        for (int i=0;i<IKM.length;i++)
+            AIKM[i]=IKM[i];
+        AIKM[IKM.length]=0;
+
         String salt=new String("BLS-SIG-KEYGEN-SALT-");
         String info=new String("");
-        byte[] PRK=HMAC.HKDF_Extract(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,salt.getBytes(),IKM);
-        byte[] OKM=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,PRK,info.getBytes());
+        byte[] PRK=HMAC.HKDF_Extract(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,salt.getBytes(),AIKM);
+        byte[] OKM=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,PRK,LEN);
 
         DBIG dx=DBIG.fromBytes(OKM);
         BIG s=dx.mod(r);
-
         s.toBytes(S);
+// SkToPk
         G = PAIR256.G2mul(G, s);
         G.toBytes(W,true);
         return BLS_OK;
@@ -138,6 +122,7 @@ public class BLS256 {
         D.neg();
         
         ECP8 PK = ECP8.fromBytes(W);
+        if (!PAIR256.G2member(PK)) return BLS_FAIL;
 
 // Use new multi-pairing mechanism
         FP48[] r = PAIR256.initmp();

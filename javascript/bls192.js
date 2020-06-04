@@ -96,30 +96,10 @@ var BLS192 = function(ctx) {
             return u;
         }, 
 
-/* output u \in F_p 
-        hash_to_base: function(hash,hlen,DST,M,ctr) {
-            var q = new ctx.BIG(0);
-            q.rcopy(ctx.ROM_FIELD.Modulus);
-            var L = this.ceil(q.nbits()+ctx.ECP.AESKEY*8,8);
-
-            var tag= "H2C";
-            var INFO=this.asciitobytes(tag);
-            INFO[INFO.length]=ctr;
-
-            var PRK=ctx.HMAC.HKDF_Extract(hash,hlen,DST,M);
-            var OKM=ctx.HMAC.HKDF_Expand(hash,hlen,L,PRK,INFO);
-
-            var dx=ctx.DBIG.fromBytes(OKM);
-            var u=dx.mod(q);
-            return u;
-        },*/
-
-        /* hash a message to an ECP point, using SHA3 */
-
+        /* hash a message to an ECP point, using SHA2 */
         bls_hash_to_point: function(M) {
-            var dst= "BLS_SIG_ZZZG1_XMD:SHA384-SSWU-RO-_NUL_";
+            var dst= "BLS_SIG_ZZZG1_XMD:SHA384-SVDW-RO-_NUL_";
             var u=this.hash_to_field(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,2);
-
 
             var P=ctx.ECP.map2point(u[0]);
             var P1=ctx.ECP.map2point(u[1]);
@@ -130,21 +110,25 @@ var BLS192 = function(ctx) {
         },
 
         /* generate key pair, private key S, public key W */
-
         KeyPairGenerate: function(IKM, S, W) {
             var r = new ctx.BIG(0);
             r.rcopy(ctx.ROM_CURVE.CURVE_Order); 
             var L = this.ceil(3*this.ceil(r.nbits(),8),2);
             var G = ctx.ECP4.generator();
+	        var LEN=ctx.HMAC.inttobytes(L, 2);
+            var AIKM = [];
+            for (var i=0;i<IKM.length;i++)
+                AIKM[i]=IKM[i];
+            AIKM[IKM.length]=0;
+
             var salt="BLS-SIG-KEYGEN-SALT-";
-            var info="";
-            var PRK=ctx.HMAC.HKDF_Extract(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(salt),IKM);
-            var OKM=ctx.HMAC.HKDF_Expand(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,L,PRK,this.asciitobytes(info));
+            var PRK=ctx.HMAC.HKDF_Extract(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(salt),AIKM);
+            var OKM=ctx.HMAC.HKDF_Expand(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,L,PRK,LEN);
 
             var dx=ctx.DBIG.fromBytes(OKM);
             var s=dx.mod(r);
-
             s.toBytes(S);
+// SkToPk
             G = ctx.PAIR192.G2mul(G, s);
             G.toBytes(W,true);
             return this.BLS_OK;
@@ -170,6 +154,7 @@ var BLS192 = function(ctx) {
             D.neg();
 
             var PK = ctx.ECP4.fromBytes(W);
+            if (!ctx.PAIR192.G2member(PK)) return this.BLS_FAIL;
 
             // Use new multi-pairing mechanism 
             var r = ctx.PAIR192.initmp();

@@ -30,7 +30,7 @@ use crate::hmac;
 
 /* BLS API Functions */
 
-/* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-00 */
+/* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-02 */
 
 // Minimal-signature-size variant
 
@@ -64,35 +64,10 @@ fn hash_to_field(hash: usize,hlen: usize ,u: &mut [FP], dst: &[u8],m: &[u8],ctr:
     }
 }
 
-/* output u \in F_p 
-fn hash_to_base(hash: usize,hlen: usize ,dst: &[u8],m: &[u8],ctr: isize) -> BIG {
-    let q = BIG::new_ints(&rom::MODULUS);
-    let el = ceil(q.nbits()+ecp::AESKEY*8,8);
-    let tag = String::from("H2C");
-    let tl = tag.len();
-    let t=tag.as_bytes();
-    let mut info:[u8; 16] = [0; 16];
-    for i in 0..tl {
-        info[i]=t[i];
-    }
-    info[tl]=ctr as u8;
-
-    let mut prk: [u8;64]=[0;64];
-    let mut okm: [u8;128]=[0;128];
-
-    hmac::hkdf_extract(hash,hlen,&mut prk,Some(&dst),m);
-    hmac::hkdf_expand(hash,hlen,&mut okm,el,&prk[0 .. hlen],&info[0 .. tl+1]);
-
-    let mut dx = DBIG::frombytes(&okm[0 .. el]);
-    let u=dx.dmod(&q);
-
-    return u;
-} */
-
 /* hash a message to an ECP point, using SHA2, random oracle method */
 #[allow(non_snake_case)]
 pub fn bls_hash_to_point(m: &[u8]) -> ECP {
-    let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA256-SSWU-RO-_NUL_".to_ascii_uppercase());
+    let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA256-SVDW-RO-_NUL_".to_ascii_uppercase());
 
     let mut u: [FP; 2] = [
         FP::new(),
@@ -125,22 +100,29 @@ pub fn key_pair_generate(ikm: &[u8], s: &mut [u8], w: &mut [u8]) -> isize {
     let r = BIG::new_ints(&rom::CURVE_ORDER);   
     let el = ceil(3*ceil(r.nbits(),8),2);
     let g = ECP2::generator();
+    let mut len: [u8; 2] = [0; 2];
+    hmac::inttobytes(el,&mut len);
     
     let salt=String::from("BLS-SIG-KEYGEN-SALT-");
-    let info=String::from("");
 
     let mut prk: [u8;64]=[0;64];
     let mut okm: [u8;128]=[0;128];
+    let mut aikm: [u8;65]=[0;65];
+    let likm=ikm.len();
+    for i in 0..likm {
+        aikm[i]=ikm[i];
+    }
+    aikm[likm]=0;
 
     let hlen=ecp::HASH_TYPE;
 
-    hmac::hkdf_extract(hmac::MC_SHA2,hlen,&mut prk,Some(&salt.as_bytes()),ikm);
-    hmac::hkdf_expand(hmac::MC_SHA2,hlen,&mut okm,el,&prk[0 .. hlen],&info.as_bytes());
+    hmac::hkdf_extract(hmac::MC_SHA2,hlen,&mut prk,Some(&salt.as_bytes()),&aikm[0 .. likm+1]);
+    hmac::hkdf_expand(hmac::MC_SHA2,hlen,&mut okm,el,&prk[0 .. hlen],&len);
 
     let mut dx = DBIG::frombytes(&okm[0 .. el]);
     let mut sc = dx.dmod(&r);
     sc.tobytes(s);
-
+// SkToPk
     pair::g2mul(&g, &sc).tobytes(w,true);  // true for public key compression
     return BLS_OK;
 }
@@ -166,6 +148,9 @@ pub fn core_verify(sig: &[u8], m: &[u8], w: &[u8]) -> isize {
     d.neg();
 
     let pk = ECP2::frombytes(&w);
+    if !pair::g2member(&pk) {
+        return BLS_FAIL;
+    }
 
     // Use new multi-pairing mechanism
     let mut r = pair::initmp();
