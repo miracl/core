@@ -191,6 +191,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"mpin.rs","xxx",tc)
             replace(fpath+"bls.rs","xxx",tc)
 
+            if pf == "BN" :
+                replace(fpath+"pair.rs","PFBNS","*/")
+                replace(fpath+"pair.rs","PFBNF","/*")
+
             os.system(copytext+"modpf.rs "+fpath+"mod.rs")
 
 

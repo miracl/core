@@ -680,6 +680,7 @@ public final class PAIR {
     public static BIG[] glv(BIG e) {
         BIG[] u = new BIG[2];
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
+/* PFBNS
             int i, j;
             BIG t = new BIG(0);
             BIG q = new BIG(ROM.CURVE_Order);
@@ -700,6 +701,7 @@ public final class PAIR {
                     u[i].sub(t);
                     u[i].mod(q);
                 }
+PFBNF */
         } else {
             // -(x^2).P = (Beta.x,y)
             BIG q = new BIG(ROM.CURVE_Order);
@@ -718,6 +720,7 @@ public final class PAIR {
     public static BIG[] gs(BIG e) {
         BIG[] u = new BIG[4];
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
+/* PFBNS
             int i, j;
             BIG t = new BIG(0);
             BIG q = new BIG(ROM.CURVE_Order);
@@ -738,6 +741,7 @@ public final class PAIR {
                     u[i].sub(t);
                     u[i].mod(q);
                 }
+PFBNF */
         } else {
             BIG q = new BIG(ROM.CURVE_Order);
             BIG x = new BIG(ROM.CURVE_Bnx);

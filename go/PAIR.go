@@ -735,6 +735,7 @@ func Fexp(m *FP12) *FP12 {
 func glv(e *BIG) []*BIG {
 	var u []*BIG
 	if CURVE_PAIRING_TYPE == BN {
+/* PFBNS
 		t := NewBIGint(0)
 		q := NewBIGints(CURVE_Order)
 		var v []*BIG
@@ -755,6 +756,7 @@ func glv(e *BIG) []*BIG {
 				u[i].Mod(q)
 			}
 		}
+PFBNF */
 	} else {
 		q := NewBIGints(CURVE_Order)
 		x := NewBIGints(CURVE_Bnx)
@@ -772,6 +774,7 @@ func glv(e *BIG) []*BIG {
 func gs(e *BIG) []*BIG {
 	var u []*BIG
 	if CURVE_PAIRING_TYPE == BN {
+/* PFBNS
 		t := NewBIGint(0)
 		q := NewBIGints(CURVE_Order)
 
@@ -792,6 +795,7 @@ func gs(e *BIG) []*BIG {
 				u[i].Mod(q)
 			}
 		}
+PFBNF */
 	} else {
 		q := NewBIGints(CURVE_Order)
 		x := NewBIGints(CURVE_Bnx)

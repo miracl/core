@@ -194,6 +194,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"MPIN.go","XXX",tc)
             replace(fpath+"BLS.go","XXX",tc)
 
+            if pf == "BN" :
+                replace(fpath+"PAIR.go","PFBNS","*/")
+                replace(fpath+"PAIR.go","PFBNF","/*")
+
         if cs == "192" :
             os.system(copytext+"FP24.go "+fpath+"FP24.go")
             os.system(copytext+"FP8.go "+fpath+"FP8.go")

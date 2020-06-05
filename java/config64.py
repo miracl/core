@@ -225,6 +225,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
             replace(fpathTest+"TestBLS.java","XXX",tc)  #ms
             replace(fpathTest+"TesttimeMPIN.java","XXX",tc)  #ms
 
+            if pf == "BN" :
+                replace(fpath+"PAIR.java","PFBNS","*/")
+                replace(fpath+"PAIR.java","PFBNF","/*")
+
         if cs == "192" :
             os.system(copytext+"ECP4.java "+fpath+"ECP4.java")
             os.system(copytext+"FP8.java "+fpath+"FP8.java")

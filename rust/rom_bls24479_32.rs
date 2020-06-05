@@ -131,6 +131,7 @@ pub const CURVE_W: [[Chunk; NLEN]; 2] = [
         0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
     ],
 ];
+/*
 pub const CURVE_SB: [[[Chunk; NLEN]; 2]; 2] = [
     [
         [
@@ -221,7 +222,7 @@ pub const CURVE_BB: [[[Chunk; NLEN]; 4]; 4] = [
         ],
     ],
 ];
-
+*/
 pub const USE_GLV: bool = true;
 pub const USE_GS_G2: bool = true;
 pub const USE_GS_GT: bool = true;

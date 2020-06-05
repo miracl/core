@@ -17,6 +17,10 @@ g++ -O3 romgen.cpp big.cpp zzn.cpp ecn.cpp zzn2.cpp ecn2.cpp zzn4.cpp ecn4.cpp z
 #include "ecn4.h"
 #include "ecn8.h"
 
+#define NOT 0
+#define BN 1
+#define BLS 2
+
 using namespace std;
 
 Miracl precision(100, 0);
@@ -2206,7 +2210,7 @@ int main(int argc, char **argv)
             cout << "**** Failed ****" << endl;
             cout << "\nQ= " << Q << endl << endl;
         }
-
+/*
         cout << pre3 << "CURVE_W" << post3 << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close << term << endl;
         cout << pre4 << "CURVE_SB" << post4 << open; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << ","; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << close << term << endl;
 
@@ -2236,6 +2240,7 @@ int main(int argc, char **argv)
         cout << ","; output(chunk, words, (Big)0, m);
         cout << ","; output(chunk, words, (Big)0, m);
         cout << ","; output(chunk, words, (Big)0, m);
+*/
         cout << close;
         cout << close << term << endl;
 
@@ -2274,7 +2279,7 @@ int main(int argc, char **argv)
             cout << "**** Failed ****" << endl;
             cout << "\nQQ= " << QQ << endl << endl;
         }
-
+/*
         cout << pre3 << "CURVE_W" << post3 << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close << term << endl;
         cout << pre4 << "CURVE_SB" << post4 << open; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << ","; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << close << term << endl;
 
@@ -2304,6 +2309,7 @@ int main(int argc, char **argv)
         cout << ","; output(chunk, words, (Big)0, m);
         cout << ","; output(chunk, words, (Big)0, m);
         cout << ","; output(chunk, words, (Big)0, m);
+*/
         cout << close;
         cout << close << term << endl;
 
@@ -2363,6 +2369,7 @@ int main(int argc, char **argv)
                 cout << "\nQQ= " << QQ << endl << endl;
             }
         }
+/*
         cout << pre3 << "CURVE_W" << post3 << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close << term << endl;
         cout << pre4 << "CURVE_SB" << post4 << open; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << ","; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << close << term << endl;
 
@@ -2392,6 +2399,7 @@ int main(int argc, char **argv)
         cout << ","; output(chunk, words, (Big)0, m);
         cout << ","; output(chunk, words, (Big)0, m);
         cout << ","; output(chunk, words, (Big)0, m);
+*/
         cout << close;
         cout << close << term << endl;
     }

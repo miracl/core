@@ -165,6 +165,11 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,pf,stw,sx,ab,cs) :
             os.system(copytext+"pair.swift "+fpath+"pair.swift")
             os.system(copytext+"mpin.swift "+fpath+"mpin.swift")
             os.system(copytext+"bls.swift "+fpath+"bls.swift")
+
+            if pf == "BN" :
+                replace(fpath+"pair.swift","PFBNS","*/")
+                replace(fpath+"pair.swift","PFBNF","/*")
+
         if cs == "192" :
             os.system(copytext+"fp8.swift "+fpath+"fp8.swift")
             os.system(copytext+"ecp4.swift "+fpath+"ecp4.swift")

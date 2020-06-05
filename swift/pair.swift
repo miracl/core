@@ -704,6 +704,7 @@ public struct PAIR {
     {
 	var u=[BIG]();
 	if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
+/* PFBNS
 		var t=BIG(0)
 		let q=BIG(ROM.CURVE_Order)
 		var v=[BIG]();
@@ -731,6 +732,7 @@ public struct PAIR {
 				u[i].mod(q)
 			}
 		}
+PFBNF */
 	} else { // -(x^2).P = (Beta.x,y)
 		let q=BIG(ROM.CURVE_Order)
 		let x=BIG(ROM.CURVE_Bnx)
@@ -749,6 +751,7 @@ public struct PAIR {
     {
         var u=[BIG]();
         if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
+/* PFBNS
 		  var t=BIG(0)
 		  let q=BIG(ROM.CURVE_Order)
 		  var v=[BIG]();
@@ -777,6 +780,7 @@ public struct PAIR {
 			}
 
 		  }
+PFBNF */
 	} else {
             let q=BIG(ROM.CURVE_Order)        
             let x=BIG(ROM.CURVE_Bnx)

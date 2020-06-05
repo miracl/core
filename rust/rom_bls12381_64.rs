@@ -150,6 +150,7 @@ pub const CURVE_PYB: [Chunk; NLEN] = [
     0x3A9CD330CAB34AC,
     0x606C4A02,
 ];
+/*
 pub const CURVE_W: [[Chunk; NLEN]; 2] = [
     [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
     [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -196,7 +197,7 @@ pub const CURVE_BB: [[[Chunk; NLEN]; 4]; 4] = [
         [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
     ],
 ];
-
+*/
 pub const USE_GLV: bool = true;
 pub const USE_GS_G2: bool = true;
 pub const USE_GS_GT: bool = true;

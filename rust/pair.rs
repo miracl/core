@@ -18,7 +18,6 @@
  */
 
 use crate::xxx::big::BIG;
-use crate::xxx::dbig::DBIG;
 use crate::xxx::ecp;
 use crate::xxx::ecp::ECP;
 use crate::xxx::ecp2::ECP2;
@@ -28,6 +27,9 @@ use crate::xxx::fp12::FP12;
 use crate::xxx::fp2::FP2;
 use crate::xxx::fp4::FP4;
 use crate::xxx::rom;
+
+#[allow(unused_imports)]
+use crate::xxx::dbig::DBIG;
 
 #[allow(non_snake_case)]
 fn dbl(A: &mut ECP2, aa: &mut FP2, bb: &mut FP2, cc: &mut FP2)  {
@@ -719,6 +721,7 @@ pub fn fexp(m: &FP12) -> FP12 {
 fn glv(e: &BIG) -> [BIG; 2] {
     let mut u: [BIG; 2] = [BIG::new(), BIG::new()];
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
+/* PFBNS
         let mut t = BIG::new();
         let q = BIG::new_ints(&rom::CURVE_ORDER);
         let mut v: [BIG; 2] = [BIG::new(), BIG::new()];
@@ -738,6 +741,7 @@ fn glv(e: &BIG) -> [BIG; 2] {
                 u[i].rmod(&q);
             }
         }
+PFBNF */
     } else {
         let q = BIG::new_ints(&rom::CURVE_ORDER);
         let x = BIG::new_ints(&rom::CURVE_BNX);
@@ -756,6 +760,7 @@ fn glv(e: &BIG) -> [BIG; 2] {
 pub fn gs(e: &BIG) -> [BIG; 4] {
     let mut u: [BIG; 4] = [BIG::new(), BIG::new(), BIG::new(), BIG::new()];
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
+/* PFBNS
         let mut t = BIG::new();
         let q = BIG::new_ints(&rom::CURVE_ORDER);
 
@@ -775,6 +780,7 @@ pub fn gs(e: &BIG) -> [BIG; 4] {
                 u[i].rmod(&q);
             }
         }
+PFBNF */
     } else {
         let q = BIG::new_ints(&rom::CURVE_ORDER);
         let x = BIG::new_ints(&rom::CURVE_BNX);
