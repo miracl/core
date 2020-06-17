@@ -28,7 +28,7 @@
 // Suggestions:-
 // For AES-128 security: bestpair BLS12 64 3
 // For AES-192 security: bestpair BLS24 48 4
-// FOr AES-256 security: bestpair BLS48 32 4
+// For AES-256 security: bestpair BLS48 32 4
 
 // Some possible rational points on y^2=x^3+b (x^3+b is a perfect square)
 // b=1, x=0, -1 or 2

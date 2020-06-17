@@ -33,7 +33,6 @@ namespace C1174 {
 
 using namespace B256_29;
 
-const int CURVE_A= 1;
 const int CURVE_Cof_I= 4;
 const BIG CURVE_Cof= {0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I= -1174;
@@ -47,7 +46,6 @@ const BIG CURVE_Gy= {0x1B46360E,0x6658DFC,0xFE5DAE9,0x5BDC55E,0xE0C4FE,0x208B4C2
 
 using namespace B256_56;
 
-const int CURVE_A= 1;
 const int CURVE_Cof_I= 4;
 const BIG CURVE_Cof= {0x4L,0x0L,0x0L,0x0L,0x0L};
 const int CURVE_B_I= -1174;

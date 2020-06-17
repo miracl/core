@@ -30,7 +30,6 @@
 
 #if CHUNK==32
 
-const int CURVE_A_C13318= -3;
 const int CURVE_Cof_I_C13318= 1;
 const BIG_256_29 CURVE_Cof_C13318= {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I_C13318= 13318;
@@ -43,7 +42,6 @@ const BIG_256_29 CURVE_Gy_C13318= {0xB6EAD0B,0x6469AA3,0x5B6D6E,0x1996099E,0x166
 
 #if CHUNK==64
 
-const int CURVE_A_C13318= -3;
 const int CURVE_Cof_I_C13318= 1;
 const BIG_256_56 CURVE_Cof_C13318= {0x1L,0x0L,0x0L,0x0L,0x0L};
 const int CURVE_B_I_C13318= 13318;

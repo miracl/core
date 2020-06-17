@@ -758,7 +758,7 @@ void ZZZ::PAIR_G1mul(ECP *P, BIG e)
     glv(u, e);
 
     ECP_copy(&Q, P); ECP_affine(&Q);
-    FP_rcopy(&cru, CURVE_Cru);
+    FP_rcopy(&cru, CRu);
     FP_mul(&(Q.x), &(Q.x), &cru);
 
     /* note that -a.B = a.(-B). Use a or -a depending on which is smaller */

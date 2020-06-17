@@ -33,7 +33,6 @@ namespace C1665 {
 
 using namespace B168_29;
 
-const int CURVE_A= 1;
 const int CURVE_Cof_I= 4;
 const BIG CURVE_Cof= {0x4,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I= 5766;
@@ -47,7 +46,6 @@ const BIG CURVE_Gy= {0x4920345,0x3843D92,0x758B70B,0x77F8EE7,0x149BC0A1,0x14A0A2
 
 using namespace B168_60;
 
-const int CURVE_A= 1;
 const int CURVE_Cof_I= 4;
 const BIG CURVE_Cof= {0x4L,0x0L,0x0L};
 const int CURVE_B_I= 5766;

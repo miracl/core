@@ -40,9 +40,9 @@ pub const ROI: [Chunk; NLEN] = [
 ];
 pub const R2MODP: [Chunk; NLEN] = [0xA1000000000000, 0x7A2000E90, 0x1, 0x0, 0x0];
 pub const MCONST: Chunk = 0x38091DD2253531;
+pub const SQRTM3:[Chunk;NLEN]=[0x8D27AE1CD5F852,0x6D15DA14ECD47D,0xC2A797962CC61F,0x3507F1DF233770,0xA2D2BA9];
 
 // secp256k1 curve
-pub const CURVE_A: isize = 0;
 pub const CURVE_COF_I: isize = 1;
 pub const CURVE_COF: [Chunk; NLEN] = [0x1, 0x0, 0x0, 0x0, 0x0];
 pub const CURVE_B_I: isize = 7;

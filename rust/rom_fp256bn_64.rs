@@ -44,9 +44,8 @@ pub const R2MODP: [Chunk; NLEN] = [
     0x8E559B2A,
 ];
 pub const MCONST: Chunk = 0x6C964E0537E5E5;
-
+pub const SQRTM3:[Chunk;NLEN]=[0xF11992678FC004,0xB6BF2F71B0451C,0xDDCA5173D3D540,0xFFFCF0CAD3D42F,0xFFFFFFFF];
 pub const CURVE_COF_I: isize = 1;
-pub const CURVE_A: isize = 0;
 pub const CURVE_B_I: isize = 3;
 pub const CURVE_B: [Chunk; NLEN] = [0x3, 0x0, 0x0, 0x0, 0x0];
 pub const CURVE_ORDER: [Chunk; NLEN] = [
@@ -75,7 +74,7 @@ pub const FRB: [Chunk; NLEN] = [
 ];
 pub const CURVE_BNX: [Chunk; NLEN] = [0x82F5C030B0A801, 0x68, 0x0, 0x0, 0x0];
 pub const CURVE_COF: [Chunk; NLEN] = [0x1, 0x0, 0x0, 0x0, 0x0];
-pub const CURVE_CRU: [Chunk; NLEN] = [
+pub const CRU: [Chunk; NLEN] = [
     0x1C0A24A3A1B807,
     0xD79DF1932D1EDB,
     0x40921018659BCD,

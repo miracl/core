@@ -39,7 +39,6 @@ public struct ROM{
 // ED25519 Curve
 	static let CURVE_Cof_I:Int = 8
 	static let CURVE_Cof:[Chunk] = [0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0]
-	static let CURVE_A:Int = -1
 	static let CURVE_B_I:Int = 0
 	static let CURVE_B:[Chunk] = [0x135978A3,0xF5A6E50,0x10762ADD,0x149A82,0x1E898007,0x3CBBBC,0x19CE331D,0x1DC56DFF,0x52036C]
 	static public let CURVE_Order:[Chunk] = [0x1CF5D3ED,0x9318D2,0x1DE73596,0x1DF3BD45,0x14D,0x0,0x0,0x0,0x100000]
@@ -61,7 +60,6 @@ public struct ROM{
 // ED25519 Curve
 	static let CURVE_Cof_I:Int = 8
 	static let CURVE_Cof:[Chunk] = [0x8,0x0,0x0,0x0,0x0]
-	static let CURVE_A:Int = -1
 	static let CURVE_B_I:Int = 0
 	static let CURVE_B:[Chunk] = [0xEB4DCA135978A3,0xA4D4141D8AB75,0x797779E8980070,0x2B6FFE738CC740,0x52036CEE]
 	static public let CURVE_Order:[Chunk] = [0x12631A5CF5D3ED,0xF9DEA2F79CD658,0x14DE,0x0,0x10000000]

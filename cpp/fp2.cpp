@@ -314,7 +314,7 @@ void YYY::FP2_inv(FP2 *w, FP2 *x)
     FP_sqr(&w1, &(x->a));
     FP_sqr(&w2, &(x->b));
     FP_add(&w1, &w1, &w2);
-    FP_inv(&w1, &w1);
+    FP_inv(&w1, &w1, NULL);
     FP_mul(&(w->a), &(x->a), &w1);
     FP_neg(&w1, &w1);
     FP_norm(&w1);
@@ -456,12 +456,16 @@ void YYY::FP2_sqrt(FP2 *w, FP2 *u)
 
     FP_cmove(&w2,&w3,FP_qr(&w3,NULL)); // one or the other will be a QR
 
+    FP_invsqrt(&w3,&(w->a),&w2);
+    FP_mul(&w3,&w3,&(w->a));
+    FP_div2(&w2,&w3);
+/*
     FP_sqrt(&w2, &w2, NULL);
     FP_copy(&(w->a), &w2);
     FP_add(&w2, &w2, &w2);
     FP_norm(&w2);
-    FP_inv(&w2, &w2);
-
+    FP_inv(&w2, &w2, NULL);
+*/
     FP_mul(&(w->b), &(w->b), &w2);
 
     sgn=FP2_sign(w);

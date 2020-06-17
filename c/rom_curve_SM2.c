@@ -31,7 +31,6 @@
 
 // Base Bits= 28
 
-const int CURVE_A_SM2= -3;
 const int CURVE_Cof_I_SM2= 1;
 const BIG_256_28 CURVE_Cof_SM2= {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I_SM2= 0;
@@ -45,7 +44,6 @@ const BIG_256_28 CURVE_Gy_SM2= {0x139F0A0,0xDF32E52,0xA474002,0x877CC62,0x153D0A
 
 // Base Bits= 56
 
-const int CURVE_A_SM2= -3;
 const int CURVE_Cof_I_SM2= 1;
 const BIG_256_56 CURVE_Cof_SM2= {0x1L,0x0L,0x0L,0x0L,0x0L};
 const int CURVE_B_I_SM2= 0;

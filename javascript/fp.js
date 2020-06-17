@@ -67,8 +67,7 @@ var FP = function(ctx) {
     FP.MODBITS = ctx.config["@NBT"];
     FP.PM1D2 = ctx.config["@M8"];
     FP.RIADZ = ctx.config["@RZ"];
-    FP.RIADZG2A = ctx.config["@RZA"];
-    FP.RIADZG2B = ctx.config["@RZB"];
+    FP.RIADZG2 = ctx.config["@RZ2"];
     FP.MODTYPE = ctx.config["@MT"];
 	FP.QNRI = ctx.config["@QI"];
 	FP.TOWER = ctx.config["@TW"];
@@ -545,7 +544,7 @@ var FP = function(ctx) {
 		},
 
 // calculates r=x^(p-1-2^e)/2^{e+1) where 2^e|p-1
-        invsqrt: function() {
+        progen: function() {
             if (FP.MODTYPE == FP.PSEUDO_MERSENNE || FP.MODTYPE == FP.GENERALISED_MERSENNE) 
             {
                 this.copy(this.fpow());
@@ -564,7 +563,7 @@ var FP = function(ctx) {
 
 
     /* this=1/this mod Modulus */
-        inverse: function() {
+        inverse: function(h) {
             var e=FP.PM1D2;
             this.norm();
             var s=new FP(this);
@@ -573,7 +572,11 @@ var FP = function(ctx) {
                 s.sqr();
                 s.mul(this);
             }
-            this.invsqrt();
+            if (h==null)
+                this.progen();
+            else
+                this.copy(h);
+           
             for (var i=0;i<=e;i++)
                 this.sqr();
             this.mul(s);
@@ -581,12 +584,21 @@ var FP = function(ctx) {
             return this;
         }, 
 
+// Calculate both inverse and square root of x, return QR
+        invsqrt: function(i,s) {
+            var h=new FP(0);
+            var qr=this.qr(h);
+            s.copy(this.sqrt(h));
+            i.copy(this);
+            i.inverse(h);
+            return qr;
+        },
 
     /* test for Quadratic residue */
         qr: function (h)  {
             var r=new FP(this);
             var e=FP.PM1D2;
-            r.invsqrt();
+            r.progen();
             if (h!=null)
                 h.copy(r);
 
@@ -595,12 +607,6 @@ var FP = function(ctx) {
             for (var i=0;i<e-1;i++)
                 r.sqr();
 
-            //for (var i=0;i<e;i++ )
-            //    r.sqr();
-            //var s=new FP(this);
-            //for (var i=0;i<e-1;i++ )
-            //    s.sqr();
-            //r.mul(s);
             return r.isunity()?1:0;
         },
 
@@ -609,7 +615,7 @@ var FP = function(ctx) {
             var e=FP.PM1D2;
             var g=new FP(this);
             if (h==null)
-                g.invsqrt();
+                g.progen();
             else
                 g.copy(h);
 
@@ -646,6 +652,17 @@ var FP = function(ctx) {
         }
 
 
+    };
+
+    FP.tpo = function(i,s) {
+        var w = new FP(s);
+        var t = new FP(i);
+        w.mul(i);
+        t.mul(w);
+        var qr=t.invsqrt(i,s);
+        i.mul(w);
+        s.mul(i);
+        return qr;
     };
 
     FP.rand = function(rng) {

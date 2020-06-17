@@ -645,7 +645,7 @@ public final class PAIR256 {
             ECP Q = new ECP();
             Q.copy(P); Q.affine();
             BIG q = new BIG(ROM.CURVE_Order);
-            FP cru = new FP(new BIG(ROM.CURVE_Cru));
+            FP cru = new FP(new BIG(ROM.CRu));
             BIG t = new BIG(0);
             BIG[] u = glv(e);
             Q.getx().mul(cru);

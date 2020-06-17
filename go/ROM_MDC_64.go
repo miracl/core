@@ -30,7 +30,6 @@ const MConst Chunk=0xF10FDDAAE541E5
 //*** rom curve parameters *****
 // Base Bits= 56
 
-const CURVE_A int= 1
 const CURVE_Cof_I int= 4
 var CURVE_Cof= [...]Chunk {0x4,0x0,0x0,0x0,0x0}
 const CURVE_B_I int= 0

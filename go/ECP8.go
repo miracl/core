@@ -844,36 +844,35 @@ func ECP8_hap2point(h *BIG) *ECP8 {
 /* Deterministic mapping of Fp to point on curve */
 func ECP8_map2point(H *FP8) *ECP8 {
     // Shallue and van de Woestijne
-    W:=NewFP8int(1)
-
-	b2 := NewFP2big(NewBIGints(CURVE_B))
-	b4 := NewFP4fp2(b2)
-	B := NewFP8fp4(b4)
-
+    NY:=NewFP8int(1)
     T:=NewFP8copy(H)
-//    s:=NewFPint(-3)
-//    one:=NewFPint(1)
-	if SEXTIC_TWIST == D_TYPE {
-		B.div_i()
-	}
-	if SEXTIC_TWIST == M_TYPE {
-		B.times_i()
-	}
-    B.norm()
     sgn:=T.sign()
 
-	Z:=NewFP8ints(RIADZG2A,RIADZG2B);
-	X1:=NewFP8copy(Z)
+	Z:=NewFPint(RIADZG2);
+	X1:=NewFP8fp(Z)
 	X3:=NewFP8copy(X1)
 	A:=RHS8(X1)
+	W:=NewFP8copy(A)
+	W.sqrt();
+
+	s:=NewFPbig(NewBIGints(SQRTm3))
+	Z.mul(s)
+
 	T.sqr()
 	Y:=NewFP8copy(A); Y.mul(T)
-	T.copy(W); T.add(Y); T.norm()
-	Y.rsub(W); Y.norm()
-	NY:=NewFP8copy(T); NY.mul(Y); NY.inverse()
-	A.neg(); A.norm()
-	W.copy(A); W.imul(3); W.sqrt()
-	W.mul(Z)
+	T.copy(NY); T.add(Y); T.norm()
+	Y.rsub(NY); Y.norm()
+	NY.copy(T); NY.mul(Y)
+	
+	NY.tmul(Z)
+	NY.inverse()
+
+	W.tmul(Z)
+    if (W.sign()==1) {
+        W.neg()
+        W.norm()
+    }
+    W.tmul(Z)
 	W.mul(H); W.mul(Y); W.mul(NY)
 
 	X1.neg(); X1.norm(); X1.div2()
@@ -883,32 +882,8 @@ func ECP8_map2point(H *FP8) *ECP8 {
 	A.add(A); A.add(A); A.norm()
 	T.sqr(); T.mul(NY); T.sqr()
 	A.mul(T)
-	Z.sqr(); Z.imul(3); T.copy(Z)
-	T.inverse()
-	A.mul(T)
 	X3.add(A); X3.norm()
 
-/*
-    w:=s.sqrt(nil)
-    j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
-
-	S := NewFP8copy(T)
-    S.tmul(w)
-    Y := NewFP8copy(T)
-    Y.sqr()
-    Y.add(W)
-    B.add(Y); B.norm(); B.inverse()
-    B.mul(S)
-
-    X1:=NewFP8copy(B); X1.mul(T)
-    Y.copy(NewFP8fp(j))
-    X2:=NewFP8copy(X1); X2.sub(Y); X2.norm()
-    X1.copy(X2); X1.neg(); X1.norm()
-    X2.sub(W); X2.norm()
-
-    B.sqr(); B.inverse()
-    X3:=NewFP8copy(B); X3.add(W); X3.norm()
-*/
     Y.copy(RHS8(X2))
     X3.cmove(X2,Y.qr())
     Y.copy(RHS8(X1))

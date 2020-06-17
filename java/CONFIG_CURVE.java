@@ -32,6 +32,7 @@ public class CONFIG_CURVE {
     public static final int NEGATIVEX = 1;
 
     public static final int CURVETYPE = @CT@;
+    public static final int CURVE_A = @CA@;
     public static final int CURVE_PAIRING_TYPE = @PF@;
     public static final int SEXTIC_TWIST = @ST@;
     public static final int SIGN_OF_X = @SX@;

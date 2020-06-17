@@ -50,6 +50,8 @@ extern const XXX::BIG Modulus;	/**< Actual Modulus set in rom_field*.c */
 extern const XXX::BIG ROI;	    /**< Root of Unity  set in rom_field*.c */
 extern const XXX::BIG R2modp;	/**< Montgomery constant */
 extern const chunk MConst;		/**< Constant associated with Modulus - for Montgomery = 1/p mod 2^BASEBITS */
+extern const XXX::BIG SQRTm3; /**< Square root of -3 */
+extern const XXX::BIG CRu;    /**< Cube Root of Unity */
 //extern const int BTset;			/**< Set Bit in Generalised Mersenne */
 extern const XXX::BIG Fra; /**< real part of Pairing-friendly curve Frobenius Constant */
 extern const XXX::BIG Frb; /**< imaginary part of Pairing-friendly curve Frobenius Constant */
@@ -222,13 +224,13 @@ extern void FP_pow(FP *x, FP *y, XXX::BIG z);
 	@param r FP number, on exit  = x^(p-2*e-1)/2^(e+1) mod Modulus
 	@param x FP number
  */
-extern void FP_invsqrt(FP *r,FP *x);
+extern void FP_progen(FP *r,FP *x);
 
 /**	@brief Fast Modular square root of a an FP, mod Modulus
  *
 	@param x FP number, on exit  = sqrt(y) mod Modulus
 	@param y FP number, the number whose square root is calculated
-    @param h an optional precalculation
+    @param h an optional input precalculation
  */
 extern void FP_sqrt(FP *x, FP *y, FP *h);
 
@@ -263,18 +265,37 @@ extern void FP_norm(FP *x);
 /**	@brief Tests for FP a quadratic residue mod Modulus
  *
 	@param x FP number to be tested
-    @param h an optional precalculation
+    @param h an optional output precalculation
 	@return 1 if quadratic residue, else returns 0 if quadratic non-residue
  */
 extern int FP_qr(FP *x,FP *h);
+
+
+/**	@brief Simultaneous Inverse and Square root
+ *
+	@param i FP number, on exit = 1/x mod Modulus
+	@param s FP number, on exit = sqrt(x) mod Modulus
+	@param x FP number
+	@return 1 if quadratic residue, else returns 0 if quadratic non-residue
+ */
+extern int FP_invsqrt(FP *i,FP *s,FP *x);
+
+/**	@brief Simultaneous Inverse and Square root of different numbers
+ *
+	@param i FP number, on exit = 1/i mod Modulus
+	@param s FP number, on exit = sqrt(s) mod Modulus
+	@return 1 if quadratic residue, else returns 0 if quadratic non-residue
+ */
+extern int FP_tpo(FP* i, FP* s);
 
 
 /**	@brief Modular inverse of a an FP, mod Modulus
  *
 	@param x FP number, on exit = 1/y mod Modulus
 	@param y FP number
+    @param h an optional input precalculation
  */
-extern void FP_inv(FP *x, FP *y);
+extern void FP_inv(FP *x, FP *y, FP *h);
 
 /**	@brief Special exponent of an FP, mod Modulus
  *

@@ -327,10 +327,15 @@ var FP2 = function(ctx) {
 
             w2.cmove(w3,w3.qr(null))
 
-            w2 = w2.sqrt(null);
-            this.a.copy(w2);
-            w2.add(w2); w2.norm();
-            w2.inverse();
+            w2.invsqrt(w2,this.a);
+            w2.mul(this.a);
+            w2.div2();
+
+            //w2 = w2.sqrt(null);
+            //this.a.copy(w2);
+            //w2.add(w2); w2.norm();
+            //w2.inverse(null);
+
             this.b.mul(w2);
 
             var sgn=this.sign();
@@ -356,7 +361,7 @@ var FP2 = function(ctx) {
             w1.sqr();
             w2.sqr();
             w1.add(w2);
-            w1.inverse();
+            w1.inverse(null);
             this.a.mul(w1);
             w1.neg();
             w1.norm();

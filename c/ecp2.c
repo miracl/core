@@ -660,38 +660,51 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
 { // SWU method. Assumes p=3 mod 4.
 
     int sgn,ne;
-    FP2_YYY X1,X2,X3,W,B,Y,T,Z,A,NY;
-    FP_YYY b;
+    FP2_YYY X1,X2,X3,W,Y,T,A,NY;
+    FP_YYY Z,s;
 
-    FP_YYY_rcopy(&b,CURVE_B_ZZZ);
-    FP2_YYY_from_FP(&B, &b);
-#if SEXTIC_TWIST_ZZZ == D_TYPE
-    FP2_YYY_div_ip(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
-#endif
-#if SEXTIC_TWIST_ZZZ == M_TYPE
-    FP2_YYY_mul_ip(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
-#endif
-    FP2_YYY_norm(&B);
-    FP2_YYY_one(&W);
+    FP2_YYY_one(&NY);
     FP2_YYY_copy(&T,H);
     sgn=FP2_YYY_sign(&T);
 
-    FP2_YYY_from_ints(&Z,RIADZG2A_YYY,RIADZG2B_YYY);
-    ECP2_ZZZ_rhs(&A,&Z);  // A=g(Z)
+    FP_YYY_from_int(&Z,RIADZG2_YYY);
+    FP2_YYY_from_FP(&A,&Z);
+    ECP2_ZZZ_rhs(&A,&A);  // A=g(Z)
+
+   if (CURVE_B_I_ZZZ==4 && SEXTIC_TWIST_ZZZ==M_TYPE && RIADZG2_YYY==-1)
+    { // special case for BLS12381
+        FP2_YYY_from_ints(&W,2,1);
+    } else {
+        FP2_YYY_sqrt(&W,&A);   // sqrt(g(Z))
+    }
+    FP2_YYY_sqrt(&W,&A);   // sqrt(g(Z))
+
+    FP_YYY_rcopy(&s,SQRTm3_YYY);
+
+    FP_YYY_mul(&Z,&Z,&s);     // Z.sqrt(-3)
+
     FP2_YYY_sqr(&T,&T);
     FP2_YYY_mul(&Y,&A,&T);   // tv1=u^2*g(Z)
-    FP2_YYY_add(&T,&W,&Y); FP2_YYY_norm(&T); // tv2=1+tv1
-    FP2_YYY_sub(&Y,&W,&Y); FP2_YYY_norm(&Y); // tv1=1-tv1
+    FP2_YYY_add(&T,&NY,&Y); FP2_YYY_norm(&T); // tv2=1+tv1
+    FP2_YYY_sub(&Y,&NY,&Y); FP2_YYY_norm(&Y); // tv1=1-tv1
     FP2_YYY_mul(&NY,&T,&Y);
+
+    FP2_YYY_pmul(&NY,&NY,&Z);
+
     FP2_YYY_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
-    FP2_YYY_neg(&A,&A); FP2_YYY_norm(&A);     // -g(Z)
-    FP2_YYY_imul(&W,&A,3);    // -3*g(Z);
-    FP2_YYY_sqrt(&W,&W);
-    FP2_YYY_mul(&W,&W,&Z); // tv4=Z*sqrt(-3g(Z))
+
+    FP2_YYY_pmul(&W,&W,&Z); // tv4=Z*sqrt(-3).sqrt(g(Z))
+    if (FP2_YYY_sign(&W)==1)
+    {
+        FP2_YYY_neg(&W,&W);
+        FP2_YYY_norm(&W);
+    }
+    FP2_YYY_pmul(&W,&W,&Z);
     FP2_YYY_mul(&W,&W,H);
     FP2_YYY_mul(&W,&W,&Y);
-    FP2_YYY_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4
-    FP2_YYY_copy(&X1,&Z);
+    FP2_YYY_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4*Z*sqrt(-3)
+
+    FP2_YYY_from_ints(&X1,RIADZG2_YYY,0);
     FP2_YYY_copy(&X3,&X1);
     FP2_YYY_neg(&X1,&X1); FP2_YYY_norm(&X1); FP2_YYY_div2(&X1,&X1); // -Z/2
     FP2_YYY_copy(&X2,&X1);
@@ -699,40 +712,13 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
     FP2_YYY_add(&X2,&X2,&W); FP2_YYY_norm(&X2);
     FP2_YYY_add(&A,&A,&A);
     FP2_YYY_add(&A,&A,&A);
-    FP2_YYY_norm(&A);      // -4*g(Z)
+    FP2_YYY_norm(&A);      // 4*g(Z)
     FP2_YYY_sqr(&T,&T);
     FP2_YYY_mul(&T,&T,&NY);
     FP2_YYY_sqr(&T,&T);    // (tv2^2*tv3)^2
-    FP2_YYY_mul(&A,&A,&T); // -4*g(Z)*(tv2^2*tv3)^2
-    FP2_YYY_sqr(&Z,&Z); FP2_YYY_imul(&Z,&Z,3); //3Z^2
-    FP2_YYY_inv(&T,&Z);
-    FP2_YYY_mul(&A,&A,&T);
+    FP2_YYY_mul(&A,&A,&T); // 4*g(Z)*(tv2^2*tv3)^2
     FP2_YYY_add(&X3,&X3,&A); FP2_YYY_norm(&X3);
 
-/*
-    FP_YYY_from_int(&s,-3);
-    FP_YYY_sqrt(&s,&s,NULL);         // s=sqrt(-3)
-    FP_YYY_sub(&j,&s,&one);     FP_YYY_norm(&j);
-    FP_YYY_div2(&j,&j);         // j=(s-1)/2
-
-    FP2_YYY_pmul(&S,&T,&s);       // s=s.t
-    FP2_YYY_sqr(&Y,&T);          // t^2
-    FP2_YYY_add(&Y,&Y,&W);     // t^2+1
-    FP2_YYY_add(&B,&B,&Y);      // t^2+B+1
-    FP2_YYY_norm(&B);
-    FP2_YYY_inv(&B,&B);
-    FP2_YYY_mul(&B,&B,&S);      // w=s.t/(1+B+t*2)
-
-    FP2_YYY_mul(&X1,&B,&T);
-    FP2_YYY_from_FP(&Y,&j);
-    FP2_YYY_sub(&X2,&X1,&Y);    FP2_YYY_norm(&X2);// X2=t.w-j
-    FP2_YYY_neg(&X1,&X2);       FP2_YYY_norm(&X1);// X1=j-t.w
-    FP2_YYY_sub(&X2,&X2,&W);    FP2_YYY_norm(&X2);
-
-    FP2_YYY_sqr(&B,&B);
-    FP2_YYY_inv(&B,&B);
-    FP2_YYY_add(&X3,&B,&W);     FP2_YYY_norm(&X3);
- */
 
     ECP2_ZZZ_rhs(&W,&X2);
     FP2_YYY_cmove(&X3,&X2,FP2_YYY_qr(&W));

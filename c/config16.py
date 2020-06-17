@@ -234,7 +234,7 @@ def rsaset(tb,tff,base,ml) :
     replace(fnameh,"XXX",bd)
     os.system("gcc -O3 -std=c99 -c "+fnamec)
 
-def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
+def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     inbt=int(nbt)
     itb=int(inbt+(8-inbt%8)%8)
     inb=int(itb/8)
@@ -260,12 +260,10 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
 # Get Z for G1 and G2
     if isinstance(rz,list) :
         replace(fnameh,"@RZ@",rz[0])
-        replace(fnameh,"@RZA@",rz[1])
-        replace(fnameh,"@RZB@",rz[2])
+        replace(fnameh,"@RZ2@",rz[1])
     else :
         replace(fnameh,"@RZ@",rz)
-        replace(fnameh,"@RZA@","0")
-        replace(fnameh,"@RZB@","0")
+        replace(fnameh,"@RZ2@","0")
 
     itw=int(qi)%10
     replace(fnameh,"@QI@",str(itw))
@@ -290,6 +288,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"YYY",tf)
     replace(fnameh,"ZZZ",tc)
     replace(fnameh,"@CT@",ct)
+    replace(fnameh,"@CA@",ca)
     replace(fnameh,"@PF@",pf)
 
     replace(fnameh,"@ST@",stw)
@@ -500,6 +499,7 @@ while ptr<max:
 # modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
 # i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
+# Curve A parameter
 # pairing_friendly is BN, BLS or NOT (if not pairing friendly)
 # if pairing friendly. M or D type twist, and sign of the family parameter x
 # ate bits is number of bits in Ate parameter (from romgen program)
@@ -507,22 +507,22 @@ while ptr<max:
 # curve security is AES equivalent, rounded up.
 
     if x==1:
-        curveset("255","F25519","ED25519","13","2","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
+        curveset("255","F25519","ED25519","13","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT_PF","","","","","128")
         curve_selected=True
     if x==2:
-        curveset("256","F256PME","NUMS256E","13","1","1","PSEUDO_MERSENNE","0","EDWARDS","NOT_PF","","","","","128")
+        curveset("256","F256PME","NUMS256E","13","1","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","128")
         curve_selected=True
 
     if x==3:
-        curveset("160","SECP160R1","SECP160R1","13","1","3","NOT_SPECIAL","0","WEIERSTRASS","NOT_PF","","","","","128")
+        curveset("160","SECP160R1","SECP160R1","13","1","3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT_PF","","","","","128")
         curve_selected=True
 
 
     if x==4:
-        curveset("254","BN254","BN254","13","1",["-1","0","-1"],"NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
+        curveset("254","BN254","BN254","13","1",["-1","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
         pfcurve_selected=True
     if x==5:
-        curveset("254","BN254CX","BN254CX","13",["-1","0","-1"],"NOT_SPECIAL","0","WEIERSTRASS","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
+        curveset("254","BN254CX","BN254CX","13",["-1","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
         pfcurve_selected=True
 
 # rsaset(big,ring,bit_bits_in_base,multiplier)

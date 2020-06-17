@@ -748,7 +748,7 @@ void YYY::FP_fpow(FP *r, FP *x)
 #endif
 
 // calculates r=x^(p-1-2^e)/2^{e+1) where 2^e|p-1
-void YYY::FP_invsqrt(FP *r,FP *x)
+void YYY::FP_progen(FP *r,FP *x)
 {
 #if MODTYPE_YYY==PSEUDO_MERSENNE  || MODTYPE_YYY==GENERALISED_MERSENNE
     FP_fpow(r, x);  
@@ -769,7 +769,7 @@ int YYY::FP_qr(FP *x,FP *h)
 {
     FP r;
     int i,e=PM1D2_YYY;
-    FP_invsqrt(&r,x);
+    FP_progen(&r,x);
     if (h!=NULL)
         FP_copy(h,&r);
 
@@ -782,19 +782,23 @@ int YYY::FP_qr(FP *x,FP *h)
 }
 
 /* Modular inversion */
-void YYY::FP_inv(FP *r,FP *x)
+void YYY::FP_inv(FP *r,FP *x,FP *h)
 {
     int i,e=PM1D2_YYY;
     FP s,t;
     FP_norm(x);
     FP_copy(&s,x);
 
+    if (h==NULL)
+        FP_progen(&t,x);
+    else
+        FP_copy(&t,h);
+
     for (i=0;i<e-1;i++)
     {  
         FP_sqr(&s,&s);
         FP_mul(&s,&s,x);
     }
-    FP_invsqrt(&t,x);
     for (i=0;i<=e;i++)
         FP_sqr(&t,&t);
 
@@ -810,7 +814,7 @@ void YYY::FP_sqrt(FP *r, FP *a, FP* h)
     BIG m;
 
     if (h==NULL)
-        FP_invsqrt(&g,a);
+        FP_progen(&g,a);
     else
         FP_copy(&g,h);
 
@@ -838,6 +842,30 @@ void YYY::FP_sqrt(FP *r, FP *a, FP* h)
     k=FP_sign(r);
     FP_neg(&v,r); FP_norm(&v);
     FP_cmove(r,&v,k);
+}
+
+// Calculate both inverse and square root of x, return QR
+int YYY::FP_invsqrt(FP *i, FP *s, FP *x)
+{
+    FP h;
+    int qr=FP_qr(x,&h);
+    FP_sqrt(s,x,&h);
+    FP_inv(i,x,&h);
+    return qr;
+}
+
+// Two for Price of One
+// Calculate inverse of i and square root of s, return QR
+int YYY::FP_tpo(FP* i, FP* s)
+{
+    int qr;
+    FP w,t;
+    FP_mul(&w,s,i);
+    FP_mul(&t,&w,i);
+    qr=FP_invsqrt(i,s,&t);
+    FP_mul(i,i,&w);
+    FP_mul(s,s,i);
+    return qr;
 }
 
 /* SU=8 */

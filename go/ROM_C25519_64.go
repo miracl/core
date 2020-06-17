@@ -30,8 +30,6 @@ const MConst Chunk = 0x13
 const CURVE_Cof_I int = 8
 
 var CURVE_Cof = [...]Chunk{0x8, 0x0, 0x0, 0x0, 0x0}
-
-const CURVE_A int = 486662
 const CURVE_B_I int = 0
 
 var CURVE_B = [...]Chunk{0x0, 0x0, 0x0, 0x0, 0x0}

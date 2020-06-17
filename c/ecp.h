@@ -31,7 +31,6 @@
 #include "config_curve_ZZZ.h"
 
 /* Curve Params - see rom_zzz.c */
-extern const int CURVE_A_ZZZ;         /**< Elliptic curve A parameter */
 extern const int CURVE_Cof_I_ZZZ;     /**< Elliptic curve cofactor */
 extern const int CURVE_B_I_ZZZ;       /**< Elliptic curve B_i parameter */
 extern const BIG_XXX CURVE_B_ZZZ;     /**< Elliptic curve B parameter */
@@ -86,7 +85,7 @@ extern const BIG_XXX CURVE_Pybbb_ZZZ; /**< imaginary part of y-coordinate of gen
 
 extern const BIG_XXX CURVE_Bnx_ZZZ; /**< BN curve x parameter */
 
-extern const BIG_XXX CURVE_Cru_ZZZ; /**< BN curve Cube Root of Unity */
+
 
 extern const BIG_XXX Fra_YYY; /**< real part of BN curve Frobenius Constant */
 extern const BIG_XXX Frb_YYY; /**< imaginary part of BN curve Frobenius Constant */

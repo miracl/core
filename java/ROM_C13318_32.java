@@ -35,7 +35,6 @@ public static final int MConst= 0x13;
 //*** rom curve parameters *****
 // Base Bits= 29
 
-public static final int CURVE_A= -3;
 public static final int CURVE_Cof_I= 1;
 public static final int[] CURVE_Cof= {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 public static final int CURVE_B_I= 13318;

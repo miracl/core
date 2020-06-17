@@ -32,7 +32,6 @@ public static final int[] R2modp= {0x10000000,0x0,0x4,0x8,0x0,0x0};
 public static final int[] ROI= {0x1FFFFFFE,0x1FFFFFFB,0x1FFFFFFF,0x1FFFFFFF,0x1FFFFFFF,0x7FFF};
 public static final int MConst= 0x1;
 
-public static final int CURVE_A= -3;
 public static final int CURVE_Cof_I= 1;
 public static final int[] CURVE_Cof= {0x1,0x0,0x0,0x0,0x0,0x0};
 public static final int CURVE_B_I= 0;

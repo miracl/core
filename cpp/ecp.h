@@ -28,12 +28,15 @@ using namespace core;
 namespace ZZZ {
 
 /* Curve Params - see rom.c */
-extern const int CURVE_A;     /**< Elliptic curve A parameter */
 extern const int CURVE_B_I;
 extern const int CURVE_Cof_I;
 extern const XXX::BIG CURVE_B;     /**< Elliptic curve B parameter */
 extern const XXX::BIG CURVE_Order; /**< Elliptic curve group order */
 extern const XXX::BIG CURVE_Cof;   /**< Elliptic curve cofactor */
+
+//extern const XXX::BIG CURVE_Ad;
+//extern const XXX::BIG CURVE_Bd;
+//extern const XXX::BIG PC[];
 
 /* Generator point on G1 */
 extern const XXX::BIG CURVE_Gx; /**< x-coordinate of generator point in group G1  */
@@ -83,7 +86,7 @@ extern const XXX::BIG CURVE_Pybbb; /**< imaginary part of y-coordinate of genera
 
 extern const XXX::BIG CURVE_Bnx; /**< BN curve x parameter */
 
-extern const XXX::BIG CURVE_Cru; /**< BN curve Cube Root of Unity */
+
 
 extern const XXX::BIG Fra; /**< real part of BN curve Frobenius Constant */
 extern const XXX::BIG Frb; /**< imaginary part of BN curve Frobenius Constant */

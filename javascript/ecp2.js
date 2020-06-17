@@ -791,36 +791,42 @@ var ECP2 = function(ctx) {
     {
     // Shallue and van de Woestijne method.
         var sgn,ne;
-        var W=new ctx.FP2(1);
-
-        var c = new ctx.BIG(0);
-        c.rcopy(ctx.ROM_CURVE.CURVE_B);
-        var B = new ctx.FP2(c);
-
+        var NY=new ctx.FP2(1);
         var T=new ctx.FP2(H);
-//        var s=new ctx.FP(-3);
-//        var one=new ctx.FP(1);
-
-        if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.D_TYPE) B.div_ip();
-        if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) B.mul_ip();
-        B.norm();
         sgn=T.sign();
 
-        //var Z=new ctx.FP2(new ctx.FP(ctx.FP.RIADZG2A),new ctx.FP(ctx.FP.RIADZG2B));
-        var Z=new ctx.FP2(ctx.FP.RIADZG2A,ctx.FP.RIADZG2B);
+        var Z=new ctx.FP(ctx.FP.RIADZG2);
         var X1=new ctx.FP2(Z);
-        var X3=new ctx.FP2(X1);
         var A=ECP2.RHS(X1);
+        var W=new ctx.FP2(A);
+        if (ctx.FP.RIADZG2==-1 && ctx.ECP.SEXTIC_TWIST==ctx.ECP.M_TYPE && ctx.ROM_CURVE.CURVE_B_I==4)
+        { // special case for BLS12381
+            W.copy(new ctx.FP2(2,1));
+        } else {
+            W.sqrt();
+        }
+        var s=new ctx.FP(0); s.rcopy(ctx.ROM_FIELD.SQRTm3);
+        Z.mul(s);
+
         T.sqr();
         var Y=new ctx.FP2(A); Y.mul(T);
-        T.copy(W); T.add(Y); T.norm();
-        Y.rsub(W); Y.norm();
-        var NY=new ctx.FP2(T); NY.mul(Y); NY.inverse();
-        A.neg(); A.norm();
-        W.copy(A); W.imul(3); W.sqrt();
-        W.mul(Z);
+        T.copy(NY); T.add(Y); T.norm();
+        Y.rsub(NY); Y.norm();
+        NY.copy(T); NY.mul(Y); 
+
+        NY.pmul(Z);
+        NY.inverse();
+
+        W.pmul(Z);
+        if (W.sign()==1)
+        {
+            W.neg();
+            W.norm();
+        }
+        W.pmul(Z);
         W.mul(H); W.mul(Y); W.mul(NY);
 
+        var X3=new ctx.FP2(X1);
         X1.neg(); X1.norm(); X1.div2();
         var X2=new ctx.FP2(X1);
         X1.sub(W); X1.norm();
@@ -828,31 +834,7 @@ var ECP2 = function(ctx) {
         A.add(A); A.add(A); A.norm();
         T.sqr(); T.mul(NY); T.sqr();
         A.mul(T);
-        Z.sqr(); Z.imul(3); T.copy(Z);
-        T.inverse();
-        A.mul(T);
         X3.add(A); X3.norm();
-/*
-        var w=s.sqrt(null);
-        var j=new ctx.FP(w); j.sub(one); j.norm(); j.div2();
-
-        var S=new ctx.FP2(T);
-        S.pmul(w);
-        var Y=new ctx.FP2(T);
-        Y.sqr();
-        Y.add(W);
-        B.add(Y); B.norm(); B.inverse();
-        B.mul(S);
-
-        var X1=new ctx.FP2(B); X1.mul(T);
-        Y.copy(new ctx.FP2(j));
-        var X2=new ctx.FP2(X1); X2.sub(Y); X2.norm();
-        X1.copy(X2); X1.neg(); X1.norm();
-        X2.sub(W); X2.norm();
-
-        B.sqr(); B.inverse();
-        var X3=new ctx.FP2(B); X3.add(W); X3.norm();
-*/
 
         Y.copy(ECP2.RHS(X2));
         X3.cmove(X2,Y.qr());

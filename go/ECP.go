@@ -259,7 +259,7 @@ func RHS(x *FP) *FP {
 		}
 		r.sub(one)
 		r.norm()
-		b.inverse()
+		b.inverse(nil)
 		r.mul(b)
 	}
 	if CURVETYPE == MONTGOMERY { // x^3+Ax^2+x
@@ -283,7 +283,7 @@ func (E *ECP) Affine() {
 	if E.z.Equals(one) {
 		return
 	}
-	E.z.inverse()
+	E.z.inverse(nil)
 	E.x.mul(E.z)
 	E.x.reduce()
 
@@ -1210,7 +1210,7 @@ func ECP_map2point(h *FP) *ECP {
 
             t.add(one)
             t.norm()
-            t.inverse()
+            t.inverse(nil)
 			X1:=NewFPcopy(t); X1.mul(A)
             X1.neg();
 			X2:=NewFPcopy(X1)
@@ -1251,7 +1251,7 @@ func ECP_map2point(h *FP) *ECP {
 
 				K.copy(B);
 				K.neg()
-				K.inverse()
+				K.inverse(nil)
 
 				rfc=RIADZ
 				if rfc==1 { // RFC7748
@@ -1277,7 +1277,7 @@ func ECP_map2point(h *FP) *ECP {
             }
 
             t.add(one); t.norm()
-            t.inverse()
+            t.inverse(nil)
 			X1:=NewFPcopy(t); X1.mul(A)
             X1.neg()
 
@@ -1331,7 +1331,7 @@ func ECP_map2point(h *FP) *ECP {
                 t.sqr()
                 Y.sqr(); Y.add(Y); Y.add(Y); Y.norm()
                 w2.copy(t); w2.add(Y); w2.norm()
-                w2.inverse()
+                w2.inverse(nil)
                 w1.mul(w2)
 
                 w2.copy(Y); w2.sub(t); w2.norm()
@@ -1341,13 +1341,13 @@ func ECP_map2point(h *FP) *ECP {
                 Y.div2()
                 w1.copy(Y); w1.mul(NY)
                 w1.rsub(t); w1.norm()
-                w1.inverse()
+                w1.inverse(nil)
                 Y.copy(w2); Y.mul(w1)
 			} else {
 				w1.copy(X1); w1.add(one); w1.norm()
 				w2.copy(X1); w2.sub(one); w2.norm()
 				t.copy(w1); t.mul(Y)
-				t.inverse()
+				t.inverse(nil)
 				X1.mul(w1)
 				X1.mul(t)
 				if rfc==1 {
@@ -1362,27 +1362,22 @@ func ECP_map2point(h *FP) *ECP {
 	}
 	if CURVETYPE == WEIERSTRASS {
 	// swu method
-            one:=NewFPint(1);
-            B:=NewFPbig(NewBIGints(CURVE_B))
+            one:=NewFPint(1)
             t:=NewFPcopy(h)
-            x:=NewBIG();
-			Y:=NewFP();
-			NY:=NewFP();
-            sgn:=t.sign();
+            x:=NewBIG()
+			Y:=NewFP()
+			NY:=NewFP()
+            sgn:=t.sign()
             if CURVE_A!=0 {
                 A:=NewFPint(CURVE_A)
+				B:=NewFPbig(NewBIGints(CURVE_B))
+
 				t.sqr();
-				//if (PM1D2 == 2) {
-				//	t.add(t)
-				//} else {
-				//	t.neg()
-				//}
-                //t.norm()
 				t.imul(RIADZ)
                 w:=NewFPcopy(t); w.add(one); w.norm()
                 w.mul(t)
                 A.mul(w)
-                A.inverse()
+                A.inverse(nil)
                 w.add(one); w.norm()
                 w.mul(B)
                 w.neg(); w.norm()
@@ -1395,18 +1390,32 @@ func ECP_map2point(h *FP) *ECP {
                 x.copy(X2.redc())
             } else {
 // Shallue and van de Woestijne
+// SQRTm3 not available, so preprocess this out
+/* CAISZS
                 Z:=RIADZ
                 X1:=NewFPint(Z)
                 X3:=NewFPcopy(X1)
                 A:=RHS(X1)
+				B:=NewFPbig(NewBIGints(SQRTm3))
+				B.imul(Z)
+
                 t.sqr()
                 Y.copy(A); Y.mul(t)
                 t.copy(one); t.add(Y); t.norm()
                 Y.rsub(one); Y.norm()
-                NY.copy(t); NY.mul(Y); NY.inverse()
-                A.neg(); A.norm()
-                w:=NewFPcopy(A); w.imul(3); w.copy(w.sqrt(nil))
-                w.imul(Z)
+                NY.copy(t); NY.mul(Y); 
+				NY.mul(B)
+				
+                w:=NewFPcopy(A);
+				FP_tpo(NY,w)
+
+                w.mul(B)
+                if (w.sign()==1) {
+                    w.neg()
+                    w.norm()
+                }
+
+                w.mul(B)				
                 w.mul(h); w.mul(Y); w.mul(NY)
 
                 X1.neg(); X1.norm(); X1.div2()
@@ -1415,9 +1424,6 @@ func ECP_map2point(h *FP) *ECP {
                 X2.add(w); X2.norm()
                 A.add(A); A.add(A); A.norm()
                 t.sqr(); t.mul(NY); t.sqr()
-                A.mul(t)
-                t.copy(NewFPint(Z*Z*3))
-                t.inverse()
                 A.mul(t)
                 X3.add(A); X3.norm()
 
@@ -1428,27 +1434,7 @@ func ECP_map2point(h *FP) *ECP {
                 rhs.copy(RHS(X3))
                 Y.copy(rhs.sqrt(nil))
                 x.copy(X3.redc())
-/*
-                A:=NewFPint(-3)
-                w:=A.sqrt(nil)
-                j:=NewFPcopy(w); j.sub(one); j.norm(); j.div2()
-                w.mul(t)
-                B.add(one)
-                Y.copy(t); Y.sqr()
-                B.add(Y); B.norm(); B.inverse()
-                w.mul(B)
-                t.mul(w)
-                X1:=NewFPcopy(j); X1.sub(t); X1.norm()
-                X2:=NewFPcopy(X1); X2.neg(); X2.sub(one); X2.norm()
-                w.sqr(); w.inverse()
-                X3:=NewFPcopy(w); X3.add(one); X3.norm()
-                rhs:=RHS(X2)
-                X1.cmove(X2,rhs.qr(nil))
-                rhs.copy(RHS(X3))
-                X1.cmove(X3,rhs.qr(nil))
-                rhs.copy(RHS(X1))
-                Y.copy(rhs.sqrt(nil))
-                x.copy(X1.redc()) */
+CAISZF */
             }
             ne:=Y.sign()^sgn
             NY.copy(Y); NY.neg(); NY.norm()

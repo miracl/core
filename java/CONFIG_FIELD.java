@@ -33,8 +33,7 @@ public class CONFIG_FIELD {
     public static final int MODTYPE = @MT@;
     public static final int QNRI = @QI@;
     public static final int RIADZ = @RZ@;
-    public static final int RIADZG2A = @RZA@;
-    public static final int RIADZG2B = @RZB@;
+    public static final int RIADZG2 = @RZ2@;
     public static final int TOWER = @TW@;
 
     public static final boolean BIG_ENDIAN_SIGN = false;

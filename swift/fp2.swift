@@ -347,10 +347,15 @@ public struct FP2
 
         w2.cmove(w3,w3.qr(&pNIL))
 
-        w2=w2.sqrt(pNIL)
-        a.copy(w2)
-        w2.add(w2); w2.norm()
-        w2.inverse()
+        w2.invsqrt(&w2,&a)
+        w2.mul(a)
+        w2.div2()
+
+ //       w2=w2.sqrt(pNIL)
+ //       a.copy(w2)
+ //       w2.add(w2); w2.norm()
+ //       w2.inverse(pNIL)
+
         b.mul(w2)
    
         let sgn=self.sign()
@@ -372,6 +377,7 @@ public struct FP2
     /* self=1/self */
     mutating func inverse()
     {
+        let pNIL:FP?=nil
         norm();
         var w1=FP(a)
         var w2=FP(b)
@@ -379,7 +385,7 @@ public struct FP2
         w1.sqr()
         w2.sqr()
         w1.add(w2)
-        w1.inverse()
+        w1.inverse(pNIL)
         a.mul(w1)
         w1.neg(); w1.norm()
         b.mul(w1)

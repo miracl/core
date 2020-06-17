@@ -404,6 +404,9 @@ int htp_BLS12381(char *mess)
     printf("u[1]= "); FP_output(&u[1]); printf("\n");
     ECP_map2point(&P,&u[0]);
     printf("Q[0]= "); ECP_output(&P);
+
+//exit(0);
+
     ECP_map2point(&P1,&u[1]);
     printf("Q[1]= "); ECP_output(&P1);
     ECP_add(&P,&P1);

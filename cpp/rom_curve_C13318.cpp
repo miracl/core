@@ -33,7 +33,6 @@ namespace C13318 {
 
 using namespace B256_29;
 
-const int CURVE_A= -3;
 const int CURVE_Cof_I= 1;
 const BIG CURVE_Cof= {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I= 13318;
@@ -48,7 +47,6 @@ const BIG CURVE_Gy= {0xB6EAD0B,0x6469AA3,0x5B6D6E,0x1996099E,0x166369D4,0x18728B
 
 using namespace B256_56;
 
-const int CURVE_A= -3;
 const int CURVE_Cof_I= 1;
 const BIG CURVE_Cof= {0x1L,0x0L,0x0L,0x0L,0x0L};
 const int CURVE_B_I= 13318;

@@ -28,7 +28,6 @@ pub const R2MODP:[Chunk;NLEN]=[0x1000000010000,0x400000,0x0];
 pub const ROI:[Chunk;NLEN]=[0xFFFFFF7FFFFFFE,0xFFFFFFFFFFFFFF,0xFFFFFFFFFFFF];
 pub const MCONST:Chunk=0xFFFFFF80000001;
 
-pub const CURVE_A:isize = -3;
 pub const CURVE_COF_I:isize = 1;
 pub const CURVE_COF:[Chunk;NLEN]=[0x1,0x0,0x0];
 pub const CURVE_B_I:isize = 0;

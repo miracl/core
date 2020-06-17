@@ -25,7 +25,6 @@
 
 // Base Bits= 13
 
-const int CURVE_A_SECP160R1= -3;
 const int CURVE_Cof_I_SECP160R1= 1;
 const BIG_160_13 CURVE_Cof_SECP160R1= {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I_SECP160R1= 0;
@@ -40,7 +39,6 @@ const BIG_160_13 CURVE_Gy_SECP160R1= {0x1B32,0x162F,0xDDE,0x6A2,0x42,0x489,0x773
 
 // Base Bits= 29
 
-const int CURVE_A_SECP160R1= -3;
 const int CURVE_Cof_I_SECP160R1= 1;
 const BIG_160_29 CURVE_Cof_SECP160R1= {0x1,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I_SECP160R1= 0;

@@ -569,7 +569,7 @@ func (F *FP) fpow() *FP {
 }
 
 // calculates r=x^(p-1-2^e)/2^{e+1) where 2^e|p-1
-func (F *FP) invsqrt() {
+func (F *FP) progen() {
 	if (MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE) {
 		F.copy(F.fpow())
 		return
@@ -584,7 +584,7 @@ func (F *FP) invsqrt() {
 }
 
 /* this=1/this mod Modulus */
-func (F *FP) inverse() {
+func (F *FP) inverse(h *FP) {
         e:=int(PM1D2)
 		F.norm()
         s:=NewFPcopy(F)
@@ -592,7 +592,11 @@ func (F *FP) inverse() {
             s.sqr()
             s.mul(F)
         }
-        F.invsqrt()
+		if h==nil {
+			F.progen()
+		} else {
+			F.copy(h)
+		}
         for i:=0;i<=e;i++ {
             F.sqr()
 		}
@@ -604,7 +608,7 @@ func (F *FP) inverse() {
 func (F *FP) qr(h *FP) int {
 	r:=NewFPcopy(F)
 	e:=int(PM1D2)
-	r.invsqrt()
+	r.progen()
 	if h!=nil {
 		h.copy(r)
 	}
@@ -615,14 +619,6 @@ func (F *FP) qr(h *FP) int {
             r.sqr()
 	}
 
-//	for i:=0;i<e;i++ { 
-//		r.sqr()
-//	}
-//	s:=NewFPcopy(F)
-//	for i:=0;i<e-1;i++ {
-//		s.sqr()
-//	}
-//	r.mul(s)
 	if r.isunity() {
 		return 1
 	} else {
@@ -635,7 +631,7 @@ func (F *FP) sqrt(h *FP) *FP {
 	e:=int(PM1D2)
 	g:=NewFPcopy(F)
 	if h==nil {
-		g.invsqrt()
+		g.progen()
 	} else {
 		g.copy(h)
 	}
@@ -673,6 +669,26 @@ func (F *FP) sqrt(h *FP) *FP {
 	nr.neg(); nr.norm()
 	r.cmove(nr,sgn)
 	return r
+}
+
+func (F *FP) invsqrt(i *FP,s *FP) int {
+	h:=NewFP()
+	qr:=F.qr(h)
+	s.copy(F.sqrt(h))
+	i.copy(F)
+	i.inverse(h)
+	return qr
+}
+
+func FP_tpo(i *FP,s *FP) int {
+	w:=NewFPcopy(s)
+	t:=NewFPcopy(i)
+	w.mul(i)
+	t.mul(w)
+	qr:=t.invsqrt(i,s)
+	i.mul(w)
+	s.mul(i)
+	return qr
 }
 
 /* return sqrt(this) mod Modulus 

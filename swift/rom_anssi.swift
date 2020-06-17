@@ -38,7 +38,6 @@ static let MConst:Chunk = 0x64E1155
 //  anssi Curve
 static let CURVE_Cof_I:Int = 1
 static let CURVE_Cof:[Chunk] = [0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0]
-static let CURVE_A:Int = -3
 static let CURVE_B_I:Int = 0
 static let CURVE_B:[Chunk] = [0xB7BB73F,0x75ED967,0x1A18030,0xC9AE4B,0xFDFEC,0x754A44C,0xD4ABA,0x5428A93,0xE353FCA,0xE]
 static public let CURVE_Order:[Chunk] = [0x6D655E1,0xFDD459C,0x2BF941F,0x67E140D,0x35B53DC,0xE8CE424,0xF10126D,0xB3AD58,0x1FD178C,0xF]
@@ -60,7 +59,6 @@ static let MConst:Chunk = 0x97483A164E1155
 //  anssi Curve
 static let CURVE_Cof_I:Int = 1
 static let CURVE_Cof:[Chunk] = [0x1,0x0,0x0,0x0,0x0]
-static let CURVE_A:Int = -3
 static let CURVE_B_I:Int = 0
 static let CURVE_B:[Chunk] = [0x75ED967B7BB73F,0xC9AE4B1A18030,0x754A44C00FDFEC,0x5428A9300D4ABA,0xEE353FCA]
 static public let CURVE_Order:[Chunk] = [0xFDD459C6D655E1,0x67E140D2BF941F,0xE8CE42435B53DC,0xB3AD58F10126D,0xF1FD178C]

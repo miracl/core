@@ -37,7 +37,6 @@ static let MConst:Chunk = 0x13
 //*** rom curve parameters *****
 // Base Bits= 29
 
-static let CURVE_A:Int = -3
 static let CURVE_Cof_I:Int = 1
 static public let CURVE_Cof:[Chunk] = [0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0]
 static let CURVE_B_I:Int = 13318
@@ -60,7 +59,6 @@ static let MConst:Chunk = 0x13
 //*** rom curve parameters *****
 // Base Bits= 56
 
-static let CURVE_A:Int = -3
 static let CURVE_Cof_I:Int = 1
 static public let CURVE_Cof:[Chunk] = [0x1,0x0,0x0,0x0,0x0]
 static let CURVE_B_I:Int = 13318

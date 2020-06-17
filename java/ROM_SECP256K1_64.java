@@ -30,10 +30,10 @@ public static final long[] Modulus= {0xFFFFFEFFFFFC2FL,0xFFFFFFFFFFFFFFL,0xFFFFF
 public static final long[] ROI= {0xFFFFFEFFFFFC2EL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFL};
 public static final long[] R2modp= {0xA1000000000000L,0x7A2000E90L,0x1L,0x0L,0x0L};
 public static final long MConst= 0x38091DD2253531L;
+public static final long[] SQRTm3= {0x8D27AE1CD5F852L,0x6D15DA14ECD47DL,0xC2A797962CC61FL,0x3507F1DF233770L,0xA2D2BA9L};
 
 public static final int CURVE_Cof_I= 1;
 public static final long[] CURVE_Cof= {0x1L,0x0L,0x0L,0x0L,0x0L};
-public static final int CURVE_A= 0;
 public static final int CURVE_B_I= 7;
 public static final long[] CURVE_B= {0x7L,0x0L,0x0L,0x0L,0x0L};
 public static final long[] CURVE_Order= {0xD25E8CD0364141L,0xDCE6AF48A03BBFL,0xFFFFFFFFFEBAAEL,0xFFFFFFFFFFFFFFL,0xFFFFFFFFL};

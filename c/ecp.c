@@ -166,15 +166,16 @@ void ECP_ZZZ_rhs(FP_YYY *v, FP_YYY *x)
     FP_YYY_sqr(&t, x);
     FP_YYY_mul(&t, &t, x);
 
-    if (CURVE_A_ZZZ == -3)
-    {
+#if CURVE_A_ZZZ == -3
+
         FP_YYY_neg(v, x);
         FP_YYY_norm(v);
         FP_YYY_imul(v, v, -CURVE_A_ZZZ);
         FP_YYY_norm(v);
         FP_YYY_add(v, &t, v);
-    }
-    else FP_YYY_copy(v, &t);
+#else 
+        FP_YYY_copy(v, &t);
+#endif
 
     FP_YYY_rcopy(&t, CURVE_B_ZZZ);
 
@@ -192,16 +193,17 @@ void ECP_ZZZ_rhs(FP_YYY *v, FP_YYY *x)
     FP_YYY_mul(&t, v, &t);
     FP_YYY_sub(&t, &t, &one);
     FP_YYY_norm(&t);
-    if (CURVE_A_ZZZ == 1) FP_YYY_sub(v, v, &one);
+#if CURVE_A_ZZZ == 1
+        FP_YYY_sub(v, v, &one);
+#endif
 
-    if (CURVE_A_ZZZ == -1)
-    {
+#if CURVE_A_ZZZ == -1
         FP_YYY_add(v, v, &one);
         FP_YYY_norm(v);
         FP_YYY_neg(v, v);
-    }
+#endif
     FP_YYY_norm(v);
-    FP_YYY_inv(&t, &t);
+    FP_YYY_inv(&t, &t, NULL);
     FP_YYY_mul(v, v, &t);
     FP_YYY_reduce(v);
 #endif
@@ -400,7 +402,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 
     FP_YYY_one(&one);
     FP_YYY_add(&t,&t,&one); FP_YYY_norm(&t);
-    FP_YYY_inv(&t,&t);      // 1/(1+z.t^2)
+    FP_YYY_inv(&t,&t,NULL);      // 1/(1+z.t^2)
     FP_YYY_mul(&X1,&t,&A);
     FP_YYY_neg(&X1,&X1);
     FP_YYY_copy(&X2,&X1);
@@ -428,15 +430,13 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 // Figure out the Montgomery curve parameters
 
     FP_YYY_rcopy(&B,CURVE_B_ZZZ);
-    if (CURVE_A_ZZZ==1)
-    {
+#if CURVE_A_ZZZ ==  1
         FP_YYY_add(&A,&B,&one);  // A=B+1
         FP_YYY_sub(&B,&B,&one);   // B=B-1
-
-    } else {
+#else
         FP_YYY_sub(&A,&B,&one);  // A=B-1
         FP_YYY_add(&B,&B,&one);  // B=B+1
-    }
+#endif
     FP_YYY_norm(&A); FP_YYY_norm(&B);
 
     FP_YYY_div2(&A,&A);    // (A+B)/2
@@ -444,7 +444,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     FP_YYY_div2(&B,&B);    // (B-A)/4
 
     FP_YYY_neg(&K,&B);
-    FP_YYY_inv(&K,&K);    // K
+    FP_YYY_inv(&K,&K,NULL);    // K
 
     rfc=RIADZ_YYY;
     if (rfc)
@@ -472,7 +472,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 
 
     FP_YYY_add(&t,&t,&one); FP_YYY_norm(&t);
-    FP_YYY_inv(&t,&t);      // 1/(1+z.t^2)
+    FP_YYY_inv(&t,&t,NULL);      // 1/(1+z.t^2)
 
     FP_YYY_mul(&X1,&t,&A);
     FP_YYY_neg(&X1,&X1);
@@ -543,7 +543,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     FP_YYY_norm(&Y);        // 4v^2
     FP_YYY_add(&w2,&t,&Y);  // w2=(u^2-1)^2+4v^2
     FP_YYY_norm(&w2);
-    FP_YYY_inv(&w2,&w2);
+    FP_YYY_inv(&w2,&w2,NULL);
     FP_YYY_mul(&w1,&w1,&w2); // w1=4v(u^2-1)/[(u^2-1)^2+4v^2]
 
     FP_YYY_sub(&w2,&Y,&t);   // w2=4v^2-(u^2-1)^2
@@ -555,7 +555,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     FP_YYY_mul(&w1,&Y,&NY);  // w1=2v^2(u^2+1)
     FP_YYY_sub(&w1,&t,&w1);  // w1=u(u^2-1)^2 - 2v^2(u^2+1)
     FP_YYY_norm(&w1);
-    FP_YYY_inv(&w1,&w1);
+    FP_YYY_inv(&w1,&w1,NULL);
     FP_YYY_mul(&Y,&w2,&w1);  // Y=u(4v^2-(u^2-1)*2) / u(u^2-1)^2 - 2v^2(u^2+1)
 
 #else
@@ -563,7 +563,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     FP_YYY_add(&w1,&X1,&one); FP_YYY_norm(&w1); // (s+1)
     FP_YYY_sub(&w2,&X1,&one); FP_YYY_norm(&w2); // (s-1)
     FP_YYY_mul(&t,&w1,&Y);
-    FP_YYY_inv(&t,&t);
+    FP_YYY_inv(&t,&t,NULL);
     FP_YYY_mul(&X1,&X1,&w1);
     FP_YYY_mul(&X1,&X1,&t);
 
@@ -578,63 +578,72 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     ECP_ZZZ_set(P,x,y);
     return;
 #endif
+
 #if CURVETYPE_ZZZ==WEIERSTRASS
 // SWU method.
     int sgn,ne;
     BIG_XXX a,x,y;
-    FP_YYY X1,X2,X3,t,w,one,A,B,Y,j,NY;
-    FP_YYY_rcopy(&B,CURVE_B_ZZZ);
-
+    FP_YYY X1,X2,X3,t,w,one,A,B,Y,NY;
     FP_YYY_one(&one);
     FP_YYY_copy(&t,h);
     sgn=FP_YYY_sign(&t);
-    if (CURVE_A_ZZZ!=0)
-    {
-        //BIG_XXX_zero(a); BIG_XXX_inc(a,CURVE_A_ZZZ); BIG_XXX_norm(a); FP_YYY_nres(&A,a);
+
+#if CURVE_A_ZZZ != 0
+
         FP_YYY_from_int(&A,CURVE_A_ZZZ);
+        FP_YYY_rcopy(&B,CURVE_B_ZZZ);
+
         FP_YYY_sqr(&t,&t);
-    //    if (PM1D2_YYY == 2)
-    //        FP_YYY_add(&t,&t,&t);
-    //    else
-    //        FP_YYY_neg(&t,&t);   // t2=-t^2
-
         FP_YYY_imul(&t,&t,RIADZ_YYY);
-
-    //    FP_YYY_norm(&t);
         FP_YYY_add(&w,&t,&one);
         FP_YYY_norm(&w);
+
         FP_YYY_mul(&w,&w,&t);    // w=t2(t2+1)
-        FP_YYY_mul(&A,&A,&w);     // A=Aw
-        FP_YYY_inv(&A,&A);
+        FP_YYY_mul(&NY,&A,&w);     // A=Aw
+        FP_YYY_inv(&NY,&NY,NULL);
         FP_YYY_add(&w,&w,&one); FP_YYY_norm(&w);
         FP_YYY_mul(&w,&w,&B);
         FP_YYY_neg(&w,&w);      // -B(w+1)
         FP_YYY_norm(&w);
-        FP_YYY_mul(&X2,&w,&A);   // -B(w+1)/Aw
+
+        FP_YYY_mul(&X2,&w,&NY);   // -B(w+1)/Aw
         FP_YYY_mul(&X3,&t,&X2);
+
         ECP_ZZZ_rhs(&w,&X3);
         FP_YYY_cmove(&X2,&X3,FP_YYY_qr(&w,NULL));
         ECP_ZZZ_rhs(&w,&X2);
         FP_YYY_sqrt(&Y,&w,NULL);
         FP_YYY_redc(x,&X2);
 
-    } else {
+#else
+
 // Shallue and van de Woestijne
         FP_YYY_from_int(&Y,RIADZ_YYY);
         ECP_ZZZ_rhs(&A,&Y);  // A=g(Z)
+        FP_YYY_rcopy(&B,SQRTm3_YYY); 
+        FP_YYY_imul(&B,&B,RIADZ_YYY); // Z*sqrt(-3)
+
         FP_YYY_sqr(&t,&t);
         FP_YYY_mul(&Y,&A,&t);   // tv1=u^2*g(Z)
         FP_YYY_add(&t,&one,&Y); FP_YYY_norm(&t); // tv2=1+tv1
         FP_YYY_sub(&Y,&one,&Y); FP_YYY_norm(&Y); // tv1=1-tv1
         FP_YYY_mul(&NY,&t,&Y);
-        FP_YYY_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
-        FP_YYY_neg(&A,&A); FP_YYY_norm(&A);     // -g(Z)
-        FP_YYY_imul(&w,&A,3);    // -3*g(Z);
-        FP_YYY_sqrt(&w,&w,NULL);
-        FP_YYY_imul(&w,&w,RIADZ_YYY); // tv4=Z*sqrt(-3g(Z))
+        FP_YYY_mul(&NY,&NY,&B);
+
+        FP_YYY_copy(&w,&A);
+        FP_YYY_tpo(&NY,&w);   // tv3=inv0(tv1*tv2*z*sqrt(-3)) and sqrt(g(Z)) 
+
+        FP_YYY_mul(&w,&w,&B);  // tv4=Z.sqrt(-3).sqrt(g(Z))
+        if (FP_YYY_sign(&w)==1)
+        { // depends only on sign of constant RIADZ
+            FP_YYY_neg(&w,&w);
+            FP_YYY_norm(&w);
+        }
+        FP_YYY_mul(&w,&w,&B);  // Z.sqrt(-3)
         FP_YYY_mul(&w,&w,h);
         FP_YYY_mul(&w,&w,&Y);
-        FP_YYY_mul(&w,&w,&NY);     // tv5=u*tv1*tv3*tv4
+        FP_YYY_mul(&w,&w,&NY);     // tv5=u*tv1*tv3*tv4*Z*sqrt(-3)
+
         FP_YYY_from_int(&X1,RIADZ_YYY);
         FP_YYY_copy(&X3,&X1);
         FP_YYY_neg(&X1,&X1); FP_YYY_norm(&X1); FP_YYY_div2(&X1,&X1); // -Z/2
@@ -648,9 +657,6 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
         FP_YYY_mul(&t,&t,&NY);
         FP_YYY_sqr(&t,&t);    // (tv2^2*tv3)^2
         FP_YYY_mul(&A,&A,&t); // -4*g(Z)*(tv2^2*tv3)^2
-        FP_YYY_from_int(&t,RIADZ_YYY*RIADZ_YYY*3);
-        FP_YYY_inv(&t,&t);
-        FP_YYY_mul(&A,&A,&t);
         FP_YYY_add(&X3,&X3,&A); FP_YYY_norm(&X3);
 
         ECP_ZZZ_rhs(&w,&X2);
@@ -660,35 +666,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
         ECP_ZZZ_rhs(&w,&X3);
         FP_YYY_sqrt(&Y,&w,NULL);
         FP_YYY_redc(x,&X3);
-
-/*
-        FP_YYY_from_int(&A,-3);
-        FP_YYY_sqrt(&w,&A,NULL);      // w=sqrt(-3)
-        FP_YYY_sub(&j,&w,&one);  FP_YYY_norm(&j);
-        FP_YYY_div2(&j,&j);        // j=(w-1)/2
-        FP_YYY_mul(&w,&w,&t);     // w=s.t
-        FP_YYY_add(&B,&B,&one);
-        FP_YYY_sqr(&Y,&t);
-        FP_YYY_add(&B,&B,&Y);    // t^2+b+1
-        FP_YYY_norm(&B);
-        FP_YYY_inv(&B,&B);
-        FP_YYY_mul(&w,&w,&B);
-        FP_YYY_mul(&t,&t,&w);
-        FP_YYY_sub(&X1,&j,&t); FP_YYY_norm(&X1);
-        FP_YYY_neg(&X2,&X1);
-        FP_YYY_sub(&X2,&X2,&one);
-        FP_YYY_norm(&X2);
-        FP_YYY_sqr(&w,&w); FP_YYY_inv(&w,&w);
-        FP_YYY_add(&X3,&w,&one); FP_YYY_norm(&X3);
-
-        ECP_ZZZ_rhs(&w,&X2);
-        FP_YYY_cmove(&X1,&X2,FP_YYY_qr(&w,NULL));
-        ECP_ZZZ_rhs(&w,&X3);
-        FP_YYY_cmove(&X1,&X3,FP_YYY_qr(&w,NULL));
-        ECP_ZZZ_rhs(&w,&X1);
-        FP_YYY_sqrt(&Y,&w,NULL);
-        FP_YYY_redc(x,&X1); */
-    }
+#endif    
     ne=FP_YYY_sign(&Y)^sgn;
     FP_YYY_neg(&NY,&Y); FP_YYY_norm(&NY);
     FP_YYY_cmove(&Y,&NY,ne);
@@ -721,7 +699,7 @@ void ECP_ZZZ_affine(ECP_ZZZ *P)
     FP_YYY_one(&one);
     if (FP_YYY_equals(&(P->z), &one)) return;
 
-    FP_YYY_inv(&iz, &(P->z));
+    FP_YYY_inv(&iz, &(P->z),NULL);
     FP_YYY_mul(&(P->x), &(P->x), &iz);
 
 #if CURVETYPE_ZZZ==EDWARDS || CURVETYPE_ZZZ==WEIERSTRASS
@@ -891,8 +869,7 @@ void ECP_ZZZ_dbl(ECP_ZZZ *P)
 #if CURVETYPE_ZZZ==WEIERSTRASS
     FP_YYY t0, t1, t2, t3, x3, y3, z3, b;
 
-    if (CURVE_A_ZZZ == 0)
-    {
+#if CURVE_A_ZZZ == 0
         FP_YYY_sqr(&t0, &(P->y));                   //t0.sqr();
         FP_YYY_mul(&t1, &(P->y), &(P->z));          //t1.mul(z);
 
@@ -924,9 +901,7 @@ void ECP_ZZZ_dbl(ECP_ZZZ *P)
         FP_YYY_norm(&(P->x));                   //x.norm();
         FP_YYY_copy(&(P->y), &y3);              //y.copy(y3);
         FP_YYY_norm(&(P->y));                   //y.norm();
-    }
-    else // its -3
-    {
+#else
 
         if (CURVE_B_I_ZZZ == 0)                 //if (ROM.CURVE_B_I==0)
             FP_YYY_rcopy(&b, CURVE_B_ZZZ);      //b.copy(new FP(new BIG(ROM.CURVE_B)));
@@ -996,7 +971,7 @@ void ECP_ZZZ_dbl(ECP_ZZZ *P)
         FP_YYY_copy(&(P->y), &y3);              //y.copy(y3);
         FP_YYY_norm(&(P->y));                   //y.norm();
         FP_YYY_norm(&(P->z));                   //z.norm();
-    }
+#endif
 #endif
 
 #if CURVETYPE_ZZZ==EDWARDS
@@ -1012,9 +987,9 @@ void ECP_ZZZ_dbl(ECP_ZZZ *P)
 
     FP_YYY_sqr(&D, &(P->y));                        //D.sqr();
 
-    if (CURVE_A_ZZZ == -1)              //if (ROM.CURVE_A==-1)
+#if CURVE_A_ZZZ == -1
         FP_YYY_neg(&C, &C);             //  C.neg();
-
+#endif
     FP_YYY_add(&(P->y), &C, &D);    //y.add(D);
     FP_YYY_norm(&(P->y));               //y.norm();
     FP_YYY_sqr(&H, &(P->z));            //H.sqr();
@@ -1098,8 +1073,8 @@ void ECP_ZZZ_add(ECP_ZZZ *P, ECP_ZZZ *Q)
     int b3;
     FP_YYY t0, t1, t2, t3, t4, x3, y3, z3, b;
 
-    if (CURVE_A_ZZZ == 0)
-    {
+#if CURVE_A_ZZZ == 0
+
         b3 = 3 * CURVE_B_I_ZZZ;             //int b=3*ROM.CURVE_B_I;
         FP_YYY_mul(&t0, &(P->x), &(Q->x));      //t0.mul(Q.x);
         FP_YYY_mul(&t1, &(P->y), &(Q->y));      //t1.mul(Q.y);
@@ -1157,9 +1132,7 @@ void ECP_ZZZ_add(ECP_ZZZ *P, ECP_ZZZ *Q)
         FP_YYY_norm(&(P->x));               //x.norm();
         FP_YYY_norm(&(P->y));               //y.norm();
         FP_YYY_norm(&(P->z));               //z.norm();
-    }
-    else
-    {
+#else
 
         if (CURVE_B_I_ZZZ == 0)             //if (ROM.CURVE_B_I==0)
             FP_YYY_rcopy(&b, CURVE_B_ZZZ);  //b.copy(new FP(new BIG(ROM.CURVE_B)));
@@ -1247,7 +1220,7 @@ void ECP_ZZZ_add(ECP_ZZZ *P, ECP_ZZZ *Q)
 
         FP_YYY_norm(&(P->y));               //y.norm();
         FP_YYY_norm(&(P->z));               //z.norm();
-    }
+#endif
 
 #else
     FP_YYY A, B, C, D, E, F, G, b;
@@ -1269,10 +1242,9 @@ void ECP_ZZZ_add(ECP_ZZZ *P, ECP_ZZZ *Q)
     FP_YYY_sub(&F, &B, &E);         //F.sub(E);
     FP_YYY_add(&G, &B, &E);         //G.add(E);
 
-    if (CURVE_A_ZZZ == 1)           //if (ROM.CURVE_A==1)
-    {
+#if CURVE_A_ZZZ == 1
         FP_YYY_sub(&E, &D, &C);     //E.sub(C);
-    }
+#endif
     FP_YYY_add(&C, &C, &D);         //C.add(D);
     FP_YYY_add(&B, &(P->x), &(P->y));   //B.add(y);
 
@@ -1287,16 +1259,14 @@ void ECP_ZZZ_add(ECP_ZZZ *P, ECP_ZZZ *Q)
     FP_YYY_mul(&(P->x), &A, &B); //x.mul(B);
     FP_YYY_norm(&G);                //G.norm();
 
-    if (CURVE_A_ZZZ == 1)           //if (ROM.CURVE_A==1)
-    {
+#if CURVE_A_ZZZ == 1
         FP_YYY_norm(&E);            //E.norm();
         FP_YYY_mul(&C, &E, &G);     //C.mul(G);
-    }
-    if (CURVE_A_ZZZ == -1)          //if (ROM.CURVE_A==-1)
-    {
+#endif
+#if CURVE_A_ZZZ == -1
         FP_YYY_norm(&C);            //C.norm();
         FP_YYY_mul(&C, &C, &G);     //C.mul(G);
-    }
+#endif
     FP_YYY_mul(&(P->y), &A, &C); //y.mul(C);
     FP_YYY_mul(&(P->z), &F, &G); //z.mul(G);
 

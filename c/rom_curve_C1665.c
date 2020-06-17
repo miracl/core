@@ -29,7 +29,6 @@
 
 #if CHUNK==32
 
-const int CURVE_A_C1665= 1;
 const int CURVE_Cof_I_C1665= 4;
 const BIG_168_29 CURVE_Cof_C1665= {0x4,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I_C1665= 5766;
@@ -41,7 +40,6 @@ const BIG_168_29 CURVE_Gy_C1665= {0x4920345,0x3843D92,0x758B70B,0x77F8EE7,0x149B
 
 #if CHUNK==64
 
-const int CURVE_A_C1665= 1;
 const int CURVE_Cof_I_C1665= 4;
 const BIG_168_60 CURVE_Cof_C1665= {0x4L,0x0L,0x0L};
 const int CURVE_B_I_C1665= 5766;

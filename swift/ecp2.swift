@@ -630,33 +630,41 @@ public struct ECP2 {
 /* Constant time Map to Point */
     static public func map2point(_ H:FP2) -> ECP2
     { // Shallue and van de Woestijne
-        var W=FP2(1)
-        var B=FP2(BIG(ROM.CURVE_B))
+        var NY=FP2(1)
         var T=FP2(H) /**/
-    //    var s=FP(-3)
-    //    let one=FP(1)
-		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.D_TYPE {
-            B.div_ip();
-        }
-		if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
-            B.mul_ip();
-        }
-        B.norm()
         let sgn=T.sign() /**/
 
-        var Z=FP2(CONFIG_FIELD.RIADZG2A,CONFIG_FIELD.RIADZG2B);
+        var Z=FP(CONFIG_FIELD.RIADZG2)
         var X1=FP2(Z)
         var X3=FP2(X1)
         var A=ECP2.RHS(X1)
+        var W=FP2(A)
+        if (CONFIG_FIELD.RIADZG2 == -1 && CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE && ROM.CURVE_B_I == 4)
+        { // special case for BLS12381
+            W.copy(FP2(2,1))
+        } else {
+            W.sqrt()
+        }
+        let s=FP(BIG(ROM.SQRTm3))
+        Z.mul(s)
+
         T.sqr()
         var Y=FP2(A); Y.mul(T)
-        T.copy(W); T.add(Y); T.norm()
-        Y.rsub(W); Y.norm()
-        var NY=FP2(T); NY.mul(Y); NY.inverse()
-        A.neg(); A.norm()
-        W.copy(A); W.imul(3); W.sqrt()
-        W.mul(Z)
+        T.copy(NY); T.add(Y); T.norm()
+        Y.rsub(NY); Y.norm()
+        NY.copy(T); NY.mul(Y)
+        
+        NY.pmul(Z)
+        NY.inverse()
+
+        W.pmul(Z)
+        if W.sign()==1 {
+            W.neg()
+            W.norm()
+        }
+        W.pmul(Z)
         W.mul(H); W.mul(Y); W.mul(NY)
+
         X1.neg(); X1.norm(); X1.div2()
         var X2=FP2(X1)
         X1.sub(W); X1.norm()
@@ -664,33 +672,7 @@ public struct ECP2 {
         A.add(A); A.add(A); A.norm()
         T.sqr(); T.mul(NY); T.sqr()
         A.mul(T)
-        Z.sqr(); Z.imul(3); T.copy(Z)
-        T.inverse()
-        A.mul(T)
         X3.add(A); X3.norm()
-
-/*
-        let w=s.sqrt(nil)
-        var j=FP(w); j.sub(one); j.norm(); j.div2()
-
-        var S=FP2(T) //
-        S.pmul(w)    //
-        var Y=FP2(T) //
-        Y.sqr()      //
-        Y.add(W)     //
-        B.add(Y); B.norm(); B.inverse()
-        B.mul(S)     //
-
-        var X1=FP2(B); X1.mul(T) //
-        Y.copy(FP2(j))
-        var X2=FP2(X1); X2.sub(Y); X2.norm()
-        X1.copy(X2); X1.neg(); X1.norm()
-        X2.sub(W); X2.norm()
-
-        B.sqr(); B.inverse()
-        var X3=FP2(B); X3.add(W); X3.norm()
-*/
-
 
         Y.copy(ECP2.RHS(X2))
         X3.cmove(X2,Y.qr())

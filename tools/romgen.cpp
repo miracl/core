@@ -133,6 +133,8 @@ ZZn4 findZ4(Big AB)
     else
         B=txd((ZZn4)AB);
     int a,b;
+
+
     a=1; b=-1;
     forever {
         if (b>0)
@@ -146,7 +148,6 @@ ZZn4 findZ4(Big AB)
             a=(-a)+1;
         }
         Z.set(a,b);
-        //cout << "Z= " << Z << endl;
         ZZn4 ZZ=Z;
         ZZn4 GZ=ZZ*ZZ*ZZ+B;
         if (GZ==0) continue;
@@ -224,6 +225,7 @@ int findZ(Big AA,Big AB,Big p)
             ZZn GZ=ZZ*ZZ*ZZ+A*ZZ+B;
             if (GZ==0) continue;
             ZZn W=-(3*ZZ*ZZ+4*A)/(4*GZ);
+
             if (W==0) continue;
             if (!qr(W)) continue;
             ZZ=-ZZ/2;
@@ -497,9 +499,11 @@ int hamming(Big x)
 int main(int argc, char **argv)
 {
     miracl *mip = &precision;
-    Big p, R, B, mc, curve_b, cru, cof, tau[9];
+    Big p, R, B, mc, curve_b, cru, cof, tau[9];//,ad,bd;
     Big m, x, y, w, t, c, n, r, a, b, gx, gy, r2modp,roi;
-    Big np, PP, TT, FF;
+    Big np, PP, TT, FF,sqrtm3;
+//    Big pc[60];
+//    int xt, yt, ncs;
     int i, A, curve, bb, chunk, words, mbits, bytes, ip = 0;
     int modtype, curvetype, curve_a, curve_b_i, cof_i, lang = 0;
     int atebits, hw;
@@ -512,10 +516,15 @@ int main(int argc, char **argv)
     ZZn8 X8, Y8;
     ZZn2 Aa, Ab, Ba, Bb;
     ZZn2 Xa, Ya;
-    ZZn zcru;
+    ZZn zcru,zsqrtm3;
+    ZZn CA, CB;
+    ZZn2 CA2, CB2;
+    ZZn4 CA4, CB4;
+    ZZn8 CA8, CB8;
     char pre0[50], pre1[50], pre2[50], pre3[50], pre4[50], pre5[50], pre6[50];
     char post0[50], post1[50], post2[50], post3[50], post4[50], post5[50], post6[50];
     char pre7[50], post7[50], lg[50];
+//    char pre8[50], post8[50];
 
     char xxx[20], yyy[20], zzz[20];
 
@@ -548,6 +557,9 @@ int main(int argc, char **argv)
 
     if (chunk != 16 && chunk != 32 && chunk != 64) {help(); return 0;}
     if (bb < 0 || bb >= chunk) {help(); return 0;}
+
+    sqrtm3=(Big)0;
+    cru=(Big)0;
 
 // Specify curve constants
 
@@ -1065,6 +1077,45 @@ int main(int argc, char **argv)
         curve_b = (char *)"7"; // curve B parameter
         gx = (char *)"79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798";     // generator point
         gy = (char *)"483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8";
+
+        modulo(p);
+
+        zsqrtm3=sqrt((ZZn)-3);
+        sqrtm3=(Big)zsqrtm3;
+        if (sqrtm3%2==1)
+            sqrtm3=p-sqrtm3;
+
+
+/*
+        ZZn Z=1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+*/
+/*
+        ad = (char *)"3f8731abdd661adca08a5558f0f5d272e953d363cb6f0e5d405447c01a444533";
+
+        bd=1771;
+        xt=4; yt=4; ncs=xt+xt-2+yt+yt-1;
+
+        pc[0]=(char *)"8e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38daaaaa88c";
+        pc[1]=(char *)"534c328d23f234e6e2a413deca25caece4506144037c40314ecbd0b53d9dd262";
+        pc[2]=(char *)"07d3d4c80bc321d5b9f315cea7fd44c5d595d2fc0bf63b92dfff1044f17c6581";
+        pc[3]=(char *)"8e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38e38daaaaa8c7";
+        pc[4]=(char *)"edadc6f64383dc1df7c4b2d51b54225406d36b641f5e41bbc52a56612a8c6d14";
+        pc[5]=(char *)"d35771193d94918a9ca34ccbb7b640dd86cd409542f8487d9fe6b745781eb49b";
+        pc[6]=(char *)"2f684bda12f684bda12f684bda12f684bda12f684bda12f684bda12f38e38d84";
+        pc[7]=(char *)"29a6194691f91a73715209ef6512e576722830a201be2018a765e85a9ecee931";
+        pc[8]=(char *)"c75e0c32d5cb7c0fa9d0a54b12a0a6d5647ab046d686da6fdffc90fc201d71a3";
+        pc[9]=(char *)"4bda12f684bda12f684bda12f684bda12f684bda12f684bda12f684b8e38e23c";
+        pc[10]=(char *)"6484aa716545ca2cf3a70c3fa8fe337e0a3d21162f0d6299a7bf8192bfd2a76f";
+        pc[11]=(char *)"7a06534bb8bdb49fd5e9e6632722c2989467c1bfc8e8d978dfb425d2685c2573";
+        pc[12]=(char *)"fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffff93b";
+*/
     }
 
 
@@ -1102,6 +1153,37 @@ int main(int argc, char **argv)
         Q = (p - 1 + t) * Q;           // generator point in G2
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2); // cube root of unity for GLV method
 
+        sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
+//        cout << "sign= " << sqrtm3%2 << endl;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
+//        cout << "p=           " << p << endl;
+//        cout << "sqrt(-3)=    " << -sqrt((ZZn)-3) << endl;
+//        cout << "sqrt(-3)=    " << 36*pow(x,3) - 36*x*x + 18*x -3 << endl;
+//exit(0);
+/*
+        ZZn Z=-1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn2 Z2(0,-1);
+        ZZn2 B=txd((ZZn2)curve_b);
+        CA2=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(CA2)!=0)
+            sgn=((Big)real(CA2))%2;
+        else
+            sgn=((Big)imaginary(CA2))%2;
+
+        if (sgn==1) CA2=-CA2;
+        CB2=(ZZn2)1/(3*Z2*Z2);
+
+        cout << "CA2= " << CA2 << endl;
+        cout << "CB2= " << CB2 << endl;
+*/
         cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1140,7 +1222,32 @@ int main(int argc, char **argv)
         Q = (p - 1 + t) * Q;
         //cofactor(Q,X,x);
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2);
+        sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
+//        cout << "sign= " << sqrtm3%2 << endl;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
+/*
+        ZZn Z=-1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
 
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn2 Z2(0,-1);
+        ZZn2 B=txd((ZZn2)curve_b);
+        CA2=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(CA2)!=0)
+            sgn=((Big)real(CA2))%2;
+        else
+            sgn=((Big)imaginary(CA2))%2;
+        if (sgn==1) CA2=-CA2;
+        CB2=(ZZn2)1/(3*Z2*Z2);
+
+        cout << "CA2= " << CA2 << endl;
+        cout << "CB2= " << CB2 << endl;
+*/
         cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1197,6 +1304,33 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //	zcru*=zcru;   // right cube root of unity
         cru = (Big)zcru;
+
+        sqrtm3=p-(2 * pow(x, 5) - 6*pow(x,4) + 6*pow(x,3) - 2*x + 3);
+//        cout << "sign= " << sqrtm3%2 << endl;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
+/*
+        ZZn Z=1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn2 Z2(0,1);
+        ZZn2 B=txx((ZZn2)curve_b);
+        CA2=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(CA2)!=0)
+            sgn=((Big)real(CA2))%2;
+        else
+            sgn=((Big)imaginary(CA2))%2;
+        if (sgn==1) CA2=-CA2;
+        CB2=(ZZn2)1/(3*Z2*Z2);
+
+        cout << "CA2= " << CA2 << endl;
+        cout << "CB2= " << CB2 << endl;
+*/
         cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1254,7 +1388,94 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity ?? if x>0 do this??
         cru = (Big)zcru;
+        sqrtm3=  p+(-2 * pow(x, 5) - 6*pow(x,4) - 6*pow(x,3) + 2*x + 3);
+//        cout << "sign= " << sqrtm3%2 << endl;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
+/*    
+        ZZn Z=-3;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
 
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn2 Z2(0,1);
+        ZZn2 B=txx((ZZn2)curve_b);
+        CA2=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(CA2)!=0)
+            sgn=((Big)real(CA2))%2;
+        else
+            sgn=((Big)imaginary(CA2))%2;
+        if (sgn==1) CA2=-CA2;
+        CB2=(ZZn2)1/(3*Z2*Z2);
+
+        cout << "CA2= " << CA2 << endl;
+        cout << "CB2= " << CB2 << endl;
+*/
+/*
+        ad = (char *)"144698a3b8e9433d693a02c96d4982b0ea985383ee66a8d8e8981aefd881ac98936f8da0e0f97f5cf428082d584c1d";
+        bd = (char *)"12e2908d11688030018b12e8753eee3b2016c1f0f24f4070a0b9c14fcef35ef55a23215a316ceaa5d1cc48e98e172be0";
+        xt=12; yt=16; ncs=xt+xt-2+yt+yt-1;
+
+        pc[0]=(char *)"6e08c248e260e70bd1e962381edee3d31d79d7e22c837bc23c0bf1bc24c6b68c24b1b80b64d391fa9c8ba2e8ba2d229";
+        pc[1]=(char *)"10321da079ce07e272d8ec09d2565b0dfa7dccdde6787f96d50af36003b14866f69b771f8c285decca67df3f1605fb7b";
+        pc[2]=(char *)"169b1f8e1bcfa7c42e0c37515d138f22dd2ecb803a0c5c99676314baf4bb1b7fa3190b2edc0327797f241067be390c9e";
+        pc[3]=(char *)"80d3cf1f9a78fc47b90b33563be990dc43b756ce79f5574a2c596c928c5d1de4fa295f296b74e956d71986a8497e317";
+        pc[4]=(char *)"17b81e7701abdbe2e8743884d1117e53356de5ab275b4db1a682c62ef0f2753339b7c8f8c8f475af9ccb5618e3f0c88e";
+        pc[5]=(char *)"d6ed6553fe44d296a3726c38ae652bfb11586264f0f8ce19008e218f9c86b2a8da25128c1052ecaddd7f225a139ed84";
+        pc[6]=(char *)"1630c3250d7313ff01d1201bf7a74ab5db3cb17dd952799b9ed3ab9097e68f90a0870d2dcae73d19cd13c1c66f652983";
+        pc[7]=(char *)"e99726a3199f4436642b4b3e4118e5499db995a1257fb3f086eeb65982fac18985a286f301e77c451154ce9ac8895d9";
+        pc[8]=(char *)"1778e7166fcc6db74e0609d307e55412d7f5e4656a8dbf25f1b33289f1b330835336e25ce3107193c5b388641d9b6861";
+        pc[9]=(char *)"d54005db97678ec1d1048c5d10a9a1bce032473295983e56878e501ec68e25c958c3e3d2a09729fe0179f9dac9edcb0";
+        pc[10]=(char *)"17294ed3e943ab2f0588bab22147a81c7c17e75b2f6a8417f565e33c70d1e86b4838f2a6f318c356e834eef1b3cb83bb";
+        pc[11]=(char *)"11a05f2b1e833340b809101dd99815856b303e88a2d7005ff2627b56cdb4e2c85610c2d5f2e62d6eaeac1662734649b7";
+
+        pc[12]=(char *)"95fc13ab9e92ad4476d6e3eb3a56680f682b4ee96f7d03776df533978f31c1593174e4b4b7865002d6384d168ecdd0a";        
+        pc[13]=(char *)"a10ecf6ada54f825e920b3dafc7a3cce07f8d1d7161366b74100da67f39883503826692abba43704776ec3a79a1d641";
+        pc[14]=(char *)"14a7ac2a9d64a8b230b3f5b074cf01996e7f63c21bca68a81996e1cdf9822c580fa5b9489d11e2d311f7d99bbdcc5a5e";
+        pc[15]=(char *)"772caacf16936190f3e0c63e0596721570f5799af53a1894e2e073062aede9cea73b3538f0de06cec2574496ee84a3a";
+        pc[16]=(char *)"e7355f8e4e667b955390f7f0506c6e9395735e9ce9cad4d0a43bcef24b8982f7400d24bc4228f11c02df9a29f6304a5";
+        pc[17]=(char *)"13a8e162022914a80a6f1d5f43e7a07dffdfc759a12062bb8d6b44e833b306da9bd29ba81f35781d539d395b3532a21e";
+        pc[18]=(char *)"3425581a58ae2fec83aafef7c40eb545b08243f16b1655154cca8abc28d6fd04976d5243eecf5c4130de8938dc62cd8";
+        pc[19]=(char *)"b2962fe57a3225e8137e629bff2991f6f89416f5a718cd1fca64e00b11aceacd6a3d0967c94fedcfcc239ba5cb83e19";
+        pc[20]=(char *)"12561a5deb559c4348b4711298e536367041e8ca0cf0800c0126c2588c48bf5713daa8846cb026e9e5c8276ec82b3bff";
+        pc[21]=(char *)"8ca8d548cff19ae18b2e62f4bd3fa6f01d5ef4ba35b48ba9c9588617fc8ac62b558d681be343df8993cf9fa40d21b1c";
+
+        pc[22]=(char *)"15e6be4e990f03ce4ea50b3b42df2eb5cb181d8f84965a3957add4fa95af01b2b665027efec01c7704b456be69c8b604";
+        pc[23]=(char *)"5c129645e44cf1102a159f748c4a3fc5e673d81d7e86568d9ab0f5d396a7ce46ba1049b6579afb7866b1e715475224b";
+        pc[24]=(char *)"245a394ad1eca9b72fc00ae7be315dc757b3b080d4c158013e6632d3c40659cc6cf90ad1c232a6442d9d3f5db980133";
+        pc[25]=(char *)"b182cac101b9399d155096004f53f447aa7b12a3426b08ec02710e807b4633f06c851c1919211f20d4c04f00b971ef8";
+        pc[26]=(char *)"18b46a908f36f6deb918c143fed2edcc523559b8aaf0c2462e6bfe7f911f643249d9cdf41b44d606ce07c8a4d0074d8e";
+        pc[27]=(char *)"19713e47937cd1be0dfd0b8f1d43fb93cd2fcbcb6caf493fd1183e416389e61031bf3a5cce3fbafce813711ad011c132";
+        pc[28]=(char *)"e1bba7a1186bdb5223abde7ada14a23c42a0ca7915af6fe06985e7ed1e4d43b9b3f7055dd4eba6f2bafaaebca731c30";
+        pc[29]=(char *)"9fc4018bd96684be88c9e221e4da1bb8f3abd16679dc26c1e8b6e6a1f20cabe69d65201c78607a360370e577bdba587";
+        pc[30]=(char *)"987c8d5333ab86fde9926bd2ca6c674170a05bfe3bdd81ffd038da6c26c842642f64550fedfe935a15e4ca31870fb29";
+        pc[31]=(char *)"4ab0b9bcfac1bbcb2c977d027796b3ce75bb8ca2be184cb5231413c4d634f3747a87ac2460f415ec961f8855fe9d6f2";
+        pc[32]=(char *)"16603fca40634b6a2211e11db8f0a6a074a7d0d4afadb7bd76505c3d3ad5544e203f6326c95a807299b23ab13633a5f0";
+        pc[33]=(char *)"8cc03fdefe0ff135caf4fe2a21529c4195536fbe3ce50b879833fd221351adc2ee7f8dc099040a841b6daecf2e8fedb";
+        pc[34]=(char *)"1f86376e8981c217898751ad8746757d42aa7b90eeb791c09e4a3ec03251cf9de405aba9ec61deca6355c77b0e5f4cb";
+        pc[35]=(char *)"cc786baa966e66f4a384c86a3b49942552e2d658a31ce2c344be4b91400da7d26d521628b00523b8dfe240c72de1f6";
+        pc[36]=(char *)"134996a104ee5811d51036d776fb46831223e96c254f383d0f906343eb67ad34d6c56711962fa8bfe097e75a2e41c696";
+        pc[37]=(char *)"90d97c81ba24ee0259d1f094980dcfa11ad138e48a869522b52af6c956543d3cd0c7aee9b3ba3c2be9845719707bb33";
+
+        pc[38]=(char *)"e0fa1d816ddc03e6b24255e0d7819c171c40f65e273b853324efcd6356caa205ca2f570f13497804415473a1d634b8f";
+        pc[39]=(char *)"2660400eb2e4f3b628bdd0d53cd76f2bf565b94e72927c1cb748df27942480e420517bd8714cc80d1fadc1326ed06f7";        
+        pc[40]=(char *)"ad6b9514c767fe3c3613144b45f1496543346d98adf02267d5ceef9a00d9b8693000763e3b90ac11e99b138573345cc";
+        pc[41]=(char *)"accbb67481d033ff5852c1e48c50c477f94ff8aefce42d28c0f9a88cea7913516f968986f7ebbea9684b529e2561092";
+        pc[42]=(char *)"4d2f259eea405bd48f010a01ad2911d9c6dd039bb61a6290e591b36e636a5c871a5c29f4f83060400f8b49cba8f6aa8";
+        pc[43]=(char *)"167a55cda70a6e1cea820597d94a84903216f763e13d87bb5308592e7ea7d4fbc7385ea3d529b35e346ef48bb8913f55";
+        pc[44]=(char *)"1866c8ed336c61231a1be54fd1d74cc4f9fb0ce4c6af5920abc5750c4bf39b4852cfe2f7bb9248836b233d9d55535d4a";
+        pc[45]=(char *)"16a3ef08be3ea7ea03bcddfabba6ff6ee5a4375efa1f4fd7feb34fd206357132b920f5b00801dee460ee415a15812ed9";
+        pc[46]=(char *)"166007c08a99db2fc3ba8734ace9824b5eecfdfa8d0cf8ef5dd365bc400a0051d5fa9c01a58b1fb93d1a1399126a775c";
+        pc[47]=(char *)"8d9e5297186db2d9fb266eaac783182b70152c65550d881c5ecd87b6f0f5a6449f38db9dfa9cce202c6477faaf9b7ac";
+        pc[48]=(char *)"be0e079545f43e4b00cc912f8228ddcc6d19c9f0f69bbb0542eda0fc9dec916a20b15dc0fd2ededda39142311a5001d";
+        pc[49]=(char *)"16b7d288798e5395f20d23bf89edb4d1d115c5dbddbcd30e123da489e726af41727364f2c28297ada8d26d98445f5416";
+        pc[50]=(char *)"58df3306640da276faaae7d6e8eb15778c4855551ae7f310c35a5dd279cd2eca6757cd636f96f891e2538b53dbf67f2";
+        pc[51]=(char *)"1962d75c2381201e1a0cbd6c43c348b885c84ff731c4d59ca4a10356f453e01f78a4260763529e3532f6102c2e49a03d";
+        pc[52]=(char *)"16112c4c3a9c98b252181140fad0eae9601a6de578980be6eec3232b5be72e7a07f3688ef60c206d01479253b03663c1";
+*/
         cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1303,6 +1524,32 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity
         cru = (Big)zcru;
+        sqrtm3=  p+(-2 * pow(x, 5) - 6*pow(x,4) - 6*pow(x,3) + 2*x + 3);
+//        cout << "sign= " << sqrtm3%2 << endl;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
+/*
+        ZZn Z=1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn2 Z2(4,1);
+        ZZn2 B=txx((ZZn2)curve_b);
+        CA2=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(CA2)!=0)
+            sgn=((Big)real(CA2))%2;
+        else
+            sgn=((Big)imaginary(CA2))%2;
+        if (sgn==1) CA2=-CA2;
+        CB2=(ZZn2)1/(3*Z2*Z2);
+
+        cout << "CA2= " << CA2 << endl;
+        cout << "CB2= " << CB2 << endl;
+*/
         cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1361,6 +1608,33 @@ int main(int argc, char **argv)
         cru = (Big)zcru;
 
         cru = p - (18 * pow(x, 3) + 18 * x * x + 9 * x + 2);
+
+        sqrtm3=p+(-36*pow(x,3) - 36*x*x - 18*x - 3);
+//        cout << "sign= " << sqrtm3%2 << endl;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
+/*
+        ZZn Z=1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn2 Z2(0,-1);
+        ZZn2 B=txd((ZZn2)curve_b);
+        CA2=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(CA2)!=0)
+            sgn=((Big)real(CA2))%2;
+        else
+            sgn=((Big)imaginary(CA2))%2;
+        if (sgn==1) CA2=-CA2;
+        CB2=(ZZn2)1/(3*Z2*Z2);
+
+        cout << "CA2= " << CA2 << endl;
+        cout << "CB2= " << CB2 << endl;
+*/
         cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1399,7 +1673,33 @@ int main(int argc, char **argv)
         Q = (p - 1 + t) * Q;
 
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2);
-        //cout << pre1 << toupperit((char *)"CURVE_Cru",lang) << post1; output(chunk,words,cru,m); cout << term << endl;
+
+        sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
+//        cout << "sign= " << sqrtm3%2 << endl;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
+/*        
+        ZZn Z=1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn2 Z2(0,1);
+        ZZn2 B=txx((ZZn2)curve_b);
+        CA2=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(CA2)!=0)
+            sgn=((Big)real(CA2))%2;
+        else
+            sgn=((Big)imaginary(CA2))%2;
+        if (sgn==1) CA2=-CA2;
+        CB2=(ZZn2)1/(3*Z2*Z2);
+
+        cout << "CA2= " << CA2 << endl;
+        cout << "CB2= " << CB2 << endl;
+*/
         cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1439,6 +1739,33 @@ int main(int argc, char **argv)
         Q = (p - 1 + t) * Q;
 
         cru = p - (18 * pow(x, 3) + 18 * x * x + 9 * x + 2);
+
+        sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
+//        cout << "sign= " << sqrtm3%2 << endl;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
+/*
+        ZZn Z=1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn2 Z2(0,-1);
+        ZZn2 B=txx((ZZn2)curve_b);
+        CA2=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(CA2)!=0)
+            sgn=((Big)real(CA2))%2;
+        else
+            sgn=((Big)imaginary(CA2))%2;
+        if (sgn==1) CA2=-CA2;
+        CB2=(ZZn2)1/(3*Z2*Z2);
+
+        cout << "CA2= " << CA2 << endl;
+        cout << "CB2= " << CB2 << endl;
+*/
         cout << "Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1510,6 +1837,37 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity -  not for M-TYPE
         cru = (Big)zcru;
+
+        zsqrtm3=sqrt((ZZn)-3);
+        sqrtm3=(Big)zsqrtm3;
+        if (sqrtm3%2==1)
+            sqrtm3=p-sqrtm3;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;        
+/*
+        ZZn Z=1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn4 Z2((ZZn2)1,(ZZn2)1);
+        ZZn4 B=tx((ZZn4)curve_b);
+        CA4=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(real(CA4))!=0)
+            sgn=((Big)real(real(CA4)))%2;
+        else
+            sgn=((Big)imaginary(real(CA4)))%2;
+        if (sgn==1) CA4=-CA4;
+        CB4=(ZZn4)1/(3*Z2*Z2);
+
+        cout << "CA4= " << CA4 << endl;
+        cout << "CB4= " << CB4 << endl;
+*/
+//ZZn4 fz=findZ4(curve_b);
+//exit(0);
         cout << "Z for G2= " << findZ4(curve_b) << endl;
     }
 
@@ -1592,6 +1950,36 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity -  not for M-TYPE
         cru = (Big)zcru;
+
+        zsqrtm3=sqrt((ZZn)-3);
+        sqrtm3=(Big)zsqrtm3;
+        if (sqrtm3%2==1)
+            sqrtm3=p-sqrtm3;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl; 
+
+/*
+        ZZn Z=-1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn8 Z2((ZZn4)1,(ZZn4)1);
+        ZZn8 B=tx((ZZn8)curve_b);
+        CA8=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(real(real(CA8)))!=0)
+            sgn=((Big)real(real(real(CA8))))%2;
+        else
+            sgn=((Big)imaginary(real(real(CA8))))%2;
+        if (sgn==1) CA8=-CA8;
+        CB8=(ZZn8)1/(3*Z2*Z2);
+
+        cout << "CA8= " << CA8 << endl;
+        cout << "CB8= " << CB8 << endl;
+*/
         cout << "Z for G2= " << findZ8(curve_b) << endl;
     }
 
@@ -1759,6 +2147,35 @@ int main(int argc, char **argv)
         zcru = pow((ZZn)2, (p - 1) / 3);
         zcru *= zcru; // right cube root of unity -  not for M-TYPE
         cru = (Big)zcru;
+
+        zsqrtm3=sqrt((ZZn)-3);
+        sqrtm3=(Big)zsqrtm3;
+        if (sqrtm3%2==1)
+            sqrtm3=p-sqrtm3;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl; 
+/*
+        ZZn Z=2;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn8 Z2((ZZn4)1,(ZZn4)1);
+        ZZn8 B2=txd((ZZn8)curve_b);
+        CA8=sqrt(-3*(Z2*Z2*Z2+B2));
+        if ((Big)real(real(real(CA8)))!=0)
+            sgn=((Big)real(real(real(CA8))))%2;
+        else
+            sgn=((Big)imaginary(real(real(CA8))))%2;
+        if (sgn==1) CA8=-CA8;
+        CB8=(ZZn8)1/(3*Z2*Z2);
+
+        cout << "CA8= " << CA8 << endl;
+        cout << "CB8= " << CB8 << endl;
+*/
         cout << "Z for G2= " << findZ8(curve_b) << endl;
     }
 
@@ -1791,6 +2208,7 @@ int main(int argc, char **argv)
         sprintf(pre5, "const BIG%s", xxx);
         sprintf(pre6, "const BIG%s", xxx);
         sprintf(pre7, "const BIG%s", xxx);
+//        sprintf(pre8, "const BIG%s", xxx);
 
         sprintf(zzz, "_%s", curvename);
         sprintf(yyy, "_%s", fieldname);
@@ -1803,6 +2221,7 @@ int main(int argc, char **argv)
         sprintf(post5, "%s[4]= ", zzz);
         sprintf(post6, "%s[4][4]= ", zzz);
         sprintf(post7, "%s= ", yyy);
+//        sprintf(post8, "%s[%d]= ", zzz, ncs);
 
     }
 
@@ -1822,6 +2241,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "const BIG ");
         strcpy(pre6, "const BIG ");
         strcpy(pre7, "const BIG ");
+//        strcpy(pre8, "const BIG ");
 
         strcpy(post0, "= ");
         strcpy(post1, "= ");
@@ -1831,7 +2251,7 @@ int main(int argc, char **argv)
         strcpy(post5, "[4]= ");
         strcpy(post6, "[4][4]= ");
         strcpy(post7, "= ");
-
+//        sprintf(post8, "[%d]= ",ncs);
     }
 
     if (strcmp(lg, "java") == 0)
@@ -1851,6 +2271,8 @@ int main(int argc, char **argv)
             strcpy(pre5, "public static final long[][] ");
             strcpy(pre6, "public static final long[][][] ");
             strcpy(pre7, "public static final long[] ");
+ //           strcpy(pre8, "public static final long[][] ");
+
         }
         else
         {
@@ -1862,6 +2284,7 @@ int main(int argc, char **argv)
             strcpy(pre5, "public static final int[][] ");
             strcpy(pre6, "public static final int[][][] ");
             strcpy(pre7, "public static final int[] ");
+//            strcpy(pre8, "public static final int[][] ");
 
         }
         strcpy(post0, "= ");
@@ -1872,7 +2295,7 @@ int main(int argc, char **argv)
         strcpy(post5, "= ");
         strcpy(post6, "= ");
         strcpy(post7, "= ");
-
+//        strcpy(post8, "= ");
     }
 
     if (strcmp(lg, "javascript") == 0)
@@ -1889,6 +2312,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "");
         strcpy(pre6, "");
         strcpy(pre7, "");
+//        strcpy(pre8, "");
         strcpy(post0, ": ");
         strcpy(post1, ": ");
         strcpy(post2, ": ");
@@ -1897,6 +2321,7 @@ int main(int argc, char **argv)
         strcpy(post5, ": ");
         strcpy(post6, ": ");
         strcpy(post7, ": ");
+//        strcpy(post8, ": ");
     }
 
     if (strcmp(lg, "go") == 0)
@@ -1913,6 +2338,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "var ");
         strcpy(pre6, "var ");
         strcpy(pre7, "var ");
+//        strcpy(pre8, "var ");
         strcpy(post0, " int= ");
         strcpy(post1, "= [...]Chunk ");
         strcpy(post2, " Chunk=");
@@ -1921,6 +2347,7 @@ int main(int argc, char **argv)
         sprintf(post5, "=[4][%d]Chunk ", words);
         sprintf(post6, "=[4][4][%d]Chunk ", words);
         strcpy(post7, "= [...]Chunk ");
+//        sprintf(post8, "=[%d][%d]Chunk ", ncs, words);
     }
 
     if (strcmp(lg, "rust") == 0)
@@ -1937,6 +2364,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "pub const ");
         strcpy(pre6, "pub const ");
         strcpy(pre7, "pub const ");
+//        strcpy(pre8, "pub const ");
         strcpy(post0, ":isize = ");
         strcpy(post1, ":[Chunk;NLEN]=");
         strcpy(post2, ":Chunk=");
@@ -1945,6 +2373,7 @@ int main(int argc, char **argv)
         strcpy(post5, ":[[Chunk;NLEN];4]=");
         strcpy(post6, ":[[[Chunk;NLEN];4];4]=");
         strcpy(post7, ":[Chunk;NLEN]=");
+//        sprintf(post8, ":[[Chunk;NLEN];%d]=",ncs);
 
     }
 
@@ -1962,6 +2391,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "static let ");
         strcpy(pre6, "static let ");
         strcpy(pre7, "static let ");
+ //       strcpy(pre8, "static let ");
         strcpy(post0, ":Int = ");
         strcpy(post1, ":[Chunk] = ");
         strcpy(post2, ":Chunk = ");
@@ -1970,6 +2400,7 @@ int main(int argc, char **argv)
         strcpy(post5, ":[[Chunk]] = ");
         strcpy(post6, ":[[[Chunk]]] = ");
         strcpy(post7, ":[Chunk] = ");
+//        strcpy(post8, ":[[Chunk]] = ");
     }
 
 
@@ -1979,6 +2410,7 @@ int main(int argc, char **argv)
 
     m = pow((Big)2, bb);
 
+    cout << "p mod 3= " << p%3 << endl;
     cout << "//*** rom field parameters*****" << endl;
     cout << "// Base Bits= " << bb << endl;
 
@@ -2010,7 +2442,14 @@ int main(int argc, char **argv)
 
     cout << pre7 << toupperit((char *)"R2modp", lang) << post7; output(chunk, words, r2modp, m); cout << term << endl;
     cout << pre7 << toupperit((char *)"ROI", lang) << post7; output(chunk, words, roi, m); cout << term << endl;
-
+    if (sqrtm3!=0)
+    {
+        cout << pre7 << toupperit((char *)"SQRTm3", lang) << post7; output(chunk, words, sqrtm3, m); cout << term << endl;
+    }
+    if (cru!=0)
+    {
+        cout << pre1 << toupperit((char *)"CRu", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
+    }
 
     if (modtype == NOT_SPECIAL)
         cout << pre2 << toupperit((char *)"MConst", lang)  << post2 << "0x" << inverse(m - p % m, m);
@@ -2061,7 +2500,7 @@ int main(int argc, char **argv)
         cout << "// Ate Bits= " << atebits << endl;
         cout << "// G2 Table size= " << atebits + hw - 1 << endl;
     }
-    cout << "\n" << pre0 << "CURVE_A"  << post0 << curve_a << term << endl;
+//    cout << "\n" << pre0 << "CURVE_A"  << post0 << curve_a << term << endl;
 
     curve_b_i = toint(curve_b);
     if (curve_b_i == MR_TOOBIG)
@@ -2084,14 +2523,27 @@ int main(int argc, char **argv)
     cout << pre1 << toupperit((char *)"CURVE_Order", lang) << post1; output(chunk, words, r, m); cout << term << endl;
     cout << pre1 << toupperit((char *)"CURVE_Gx", lang) << post1; output(chunk, words, gx, m); cout << term << endl;
     cout << pre1 << toupperit((char *)"CURVE_Gy", lang) << post1; output(chunk, words, gy, m); cout << term << endl;
-
+/*
+    if (curve == 17)   // secp256k1
+    {
+        cout << pre1 << toupperit((char *)"CURVE_Ad", lang) << post1; output(chunk, words, ad, m); cout << term << endl;
+        cout << pre1 << toupperit((char *)"CURVE_Bd", lang) << post1; output(chunk, words, bd, m); cout << term << endl;
+        cout << pre8 << "PC" << post8 << open;
+        for (i=0;i<ncs-1;i++)
+        {
+            output(chunk, words, pc[i], m); cout << ",";
+        }
+        output(chunk, words, pc[ncs-1], m);  
+        cout << close << term << endl;
+    }
+*/
 // BN curves, negative x
     if (curve == PS || curve == PS+1 || curve == PS+4)
     {
         cout << endl;
 
         cout << pre1 << toupperit((char *)"CURVE_Bnx", lang) << post1; output(chunk, words, x, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
+
 //cout << "Q= " << Q << endl;
         Q.get(Xa, Ya);
         Xa.get(a, b);
@@ -2141,7 +2593,7 @@ int main(int argc, char **argv)
         cout << endl;
 
         cout << pre1 << toupperit((char *)"CURVE_Bnx", lang) << post1; output(chunk, words, x, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
+//        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
 //cout << "Q= " << Q << endl;
         Q.get(Xa, Ya);
         Xa.get(a, b);
@@ -2194,7 +2646,7 @@ int main(int argc, char **argv)
         cout << endl;
 
         cout << pre1 << toupperit((char *)"CURVE_Bnx", lang) << post1 ; output(chunk, words, x, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
+//        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
 
         Q.get(Xa, Ya);
         Xa.get(a, b);
@@ -2245,15 +2697,26 @@ int main(int argc, char **argv)
         cout << close << term << endl;
 
     }
-
-
-
+/*
+    if (curve == PS+3)   // bls12381
+    {
+        cout << pre1 << toupperit((char *)"CURVE_Ad", lang) << post1; output(chunk, words, ad, m); cout << term << endl;
+        cout << pre1 << toupperit((char *)"CURVE_Bd", lang) << post1; output(chunk, words, bd, m); cout << term << endl;
+        cout << pre8 << "PC" << post8 << open;
+        for (i=0;i<ncs-1;i++)
+        {
+            output(chunk, words, pc[i], m); cout << ",";
+        }
+        output(chunk, words, pc[ncs-1], m);  
+        cout << close << term << endl;
+    }
+*/
     if (curve == PS+8)
     {
         cout << endl;
 
         cout << pre1 << toupperit((char *)"CURVE_Bnx", lang) << post1 ; output(chunk, words, x, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
+//        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
 
         QQ.get(XA, YA);
         XA.get(Aa, Bb);
@@ -2320,7 +2783,7 @@ int main(int argc, char **argv)
         cout << endl;
 
         cout << pre1 << toupperit((char *)"CURVE_Bnx", lang) << post1 ; output(chunk, words, x, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
+//        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
 
         if (curve == PS+9)
             Q8.get(X8, Y8);

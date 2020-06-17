@@ -33,7 +33,6 @@ namespace JUBJUB {
 
 using namespace B256_29;
 
-const int CURVE_A= -1;
 const int CURVE_Cof_I= 8;
 const BIG CURVE_Cof= {0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I= 0;
@@ -46,7 +45,6 @@ const BIG CURVE_Gy= {0x1349702E,0x35D6B84,0x9A0CEC5,0x190E0FFF,0x1C308096,0x62D5
 #if CHUNK==64
 
 using namespace B256_56;
-const int CURVE_A= -1;
 const int CURVE_Cof_I= 8;
 const BIG CURVE_Cof= {0x8L,0x0L,0x0L,0x0L,0x0L};
 const int CURVE_B_I= 0;

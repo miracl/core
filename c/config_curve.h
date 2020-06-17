@@ -33,6 +33,7 @@
 // ECP stuff
 
 #define CURVETYPE_ZZZ @CT@
+#define CURVE_A_ZZZ @CA@
 #define PAIRING_FRIENDLY_ZZZ @PF@
 #define CURVE_SECURITY_ZZZ @CS@
 

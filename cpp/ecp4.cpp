@@ -785,42 +785,45 @@ void ZZZ::ECP4_hap2point(ECP4 *Q,BIG h)
 void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
 {
     int sgn,ne;
-    FP4 X1,X2,X3,W,B,Y,T,Z,A,NY;
-    FP2 F,S;
-    FP b;
+    FP4 X1,X2,X3,W,Y,T,A,NY;
+    FP Z,s;
 
-    FP_rcopy(&b,CURVE_B);
-    FP4_from_FP(&B, &b);
-#if SEXTIC_TWIST_ZZZ == D_TYPE
-    FP4_div_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
-#endif
-
-#if SEXTIC_TWIST_ZZZ == M_TYPE
-    FP4_times_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
-#endif
-
-    FP4_one(&W);
+    FP4_one(&NY);
     FP4_copy(&T,H);
     sgn=FP4_sign(&T);
      
-    FP2_from_ints(&F,RIADZG2A_YYY,0);
-    FP2_from_ints(&S,RIADZG2B_YYY,0);
-    FP4_from_FP2s(&Z,&F,&S);
-    ECP4_rhs(&A,&Z);  // A=g(Z)
+    FP_from_int(&Z,RIADZG2_YYY);
+    FP4_from_FP(&A,&Z);
+    ECP4_rhs(&A,&A);  // A=g(Z)
+
+    FP4_sqrt(&W,&A);
+    FP_rcopy(&s,SQRTm3);
+
+    FP_mul(&Z,&Z,&s);
+
     FP4_sqr(&T,&T);   
     FP4_mul(&Y,&A,&T);   // tv1=u^2*g(Z)
-    FP4_add(&T,&W,&Y); FP4_norm(&T); // tv2=1+tv1
-    FP4_sub(&Y,&W,&Y); FP4_norm(&Y); // tv1=1-tv1 
+    FP4_add(&T,&NY,&Y); FP4_norm(&T); // tv2=1+tv1
+    FP4_sub(&Y,&NY,&Y); FP4_norm(&Y); // tv1=1-tv1 
     FP4_mul(&NY,&T,&Y);
-    FP4_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
-    FP4_neg(&A,&A); FP4_norm(&A);     // -g(Z)
-    FP4_imul(&W,&A,3);    // -3*g(Z);
-    FP4_sqrt(&W,&W);
-    FP4_mul(&W,&W,&Z); // tv4=Z*sqrt(-3g(Z))
+
+    FP4_qmul(&NY,&NY,&Z);
+
+    FP4_inv(&NY,&NY);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
+    FP4_qmul(&W,&W,&Z); // tv4=Z*sqrt(-3).sqrt(g(Z))
+    if (FP4_sign(&W)==1)
+    {
+        FP4_neg(&W,&W);
+        FP4_norm(&W);
+    }
+    FP4_qmul(&W,&W,&Z);
     FP4_mul(&W,&W,H);
     FP4_mul(&W,&W,&Y);
-    FP4_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4
-    FP4_copy(&X1,&Z);
+    FP4_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4*Z*sqrt(-3)
+   
+    FP_from_int(&s,RIADZG2_YYY);
+    FP4_from_FP(&X1,&s);
+
     FP4_copy(&X3,&X1);
     FP4_neg(&X1,&X1); FP4_norm(&X1); FP4_div2(&X1,&X1); // -Z/2
     FP4_copy(&X2,&X1);
@@ -828,41 +831,13 @@ void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
     FP4_add(&X2,&X2,&W); FP4_norm(&X2);
     FP4_add(&A,&A,&A);
     FP4_add(&A,&A,&A); 
-    FP4_norm(&A);      // -4*g(Z)
+    FP4_norm(&A);      // 4*g(Z)
     FP4_sqr(&T,&T);
     FP4_mul(&T,&T,&NY);
     FP4_sqr(&T,&T);    // (tv2^2*tv3)^2
     FP4_mul(&A,&A,&T); // -4*g(Z)*(tv2^2*tv3)^2
-    FP4_sqr(&Z,&Z); FP4_imul(&Z,&Z,3); //3Z^2
-    FP4_inv(&T,&Z);
-    FP4_mul(&A,&A,&T);
+
     FP4_add(&X3,&X3,&A); FP4_norm(&X3);
-
-
-/*        
-    FP_from_int(&s,-3);
-    FP_sqrt(&s,&s,NULL);         // s=sqrt(-3)
-    FP_sub(&j,&s,&one);     FP_norm(&j);
-    FP_div2(&j,&j);         // j=(s-1)/2
-
-    FP4_qmul(&S,&T,&s);       // s=s.t
-    FP4_sqr(&Y,&T);          // t^2
-    FP4_add(&Y,&Y,&W);     // t^2+1
-    FP4_add(&B,&B,&Y);      // t^2+B+1
-    FP4_norm(&B);
-    FP4_inv(&B,&B);
-    FP4_mul(&B,&B,&S);      // w=s.t/(1+B+t*2)
-
-    FP4_mul(&X1,&B,&T);       
-    FP4_from_FP(&Y,&j);     
-    FP4_sub(&X2,&X1,&Y);    FP4_norm(&X2);// X2=t.w-j 
-    FP4_neg(&X1,&X2);       FP4_norm(&X1);// X1=j-t.w
-    FP4_sub(&X2,&X2,&W);    FP4_norm(&X2);
-
-    FP4_sqr(&B,&B);
-    FP4_inv(&B,&B);
-    FP4_add(&X3,&B,&W);     FP4_norm(&X3);
-*/    
 
     ECP4_rhs(&W,&X2);
     FP4_cmove(&X3,&X2,FP4_qr(&W));

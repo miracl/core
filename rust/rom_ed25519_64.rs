@@ -35,7 +35,6 @@ pub const MCONST: Chunk = 0x13;
 
 // Ed25519 Curve
 pub const CURVE_COF_I: isize = 8;
-pub const CURVE_A: isize = -1;
 pub const CURVE_B_I: isize = 0;
 pub const CURVE_COF: [Chunk; NLEN] = [0x8, 0x0, 0x0, 0x0, 0x0];
 pub const CURVE_B: [Chunk; NLEN] = [

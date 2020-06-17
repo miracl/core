@@ -28,7 +28,6 @@
 #endif
 
 #if CHUNK==32
-const int CURVE_A_MDC= 1;
 const int CURVE_Cof_I_MDC= 4;
 const BIG_256_28 CURVE_Cof_MDC= {0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I_MDC= 0;
@@ -39,7 +38,6 @@ const BIG_256_28 CURVE_Gy_MDC= {0xD2864B5,0x73C355B,0x93A3A7E,0xBC3D81A,0xA421DA
 #endif
 
 #if CHUNK==64
-const int CURVE_A_MDC= 1;
 const int CURVE_Cof_I_MDC= 4;
 const BIG_256_56 CURVE_Cof_MDC= {0x4L,0x0L,0x0L,0x0L,0x0L};
 const int CURVE_B_I_MDC= 0;

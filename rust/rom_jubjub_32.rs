@@ -31,7 +31,6 @@ pub const MCONST:Chunk=0x1FFFFFFF;
 //*** rom curve parameters *****
 // Base Bits= 29
 
-pub const CURVE_A:isize = -1;
 pub const CURVE_COF_I:isize = 8;
 pub const CURVE_COF:[Chunk;NLEN]=[0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0];
 pub const CURVE_B_I:isize = 0;

@@ -617,7 +617,7 @@ pub fn g1mul(P: &ECP, e: &BIG) -> ECP {
         Q.copy(P);
         Q.affine();
         let q = BIG::new_ints(&rom::CURVE_ORDER);
-        let mut cru = FP::new_big(&BIG::new_ints(&rom::CURVE_CRU));
+        let mut cru = FP::new_big(&BIG::new_ints(&rom::CRU));
         let mut u = glv(e);
         Q.mulx(&mut cru);
 

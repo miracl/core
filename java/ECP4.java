@@ -698,29 +698,37 @@ public final class ECP4 {
     {       
     // Shallue and van de Woestijne method.
         int sgn,ne;
-        FP4 W=new FP4(1);
-        FP4 B=new FP4(new FP2(new BIG(ROM.CURVE_B)));
+        FP4 NY=new FP4(1);
         FP4 T=new FP4(H);
-
-        if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.D_TYPE) B.div_i();
-        if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE) B.times_i();
-        B.norm();
         sgn=T.sign();
 
-        FP4 Z=new FP4(CONFIG_FIELD.RIADZG2A,CONFIG_FIELD.RIADZG2B);
+        FP Z=new FP(CONFIG_FIELD.RIADZG2);
         FP4 X1=new FP4(Z);
-        FP4 X3=new FP4(X1);
         FP4 A=RHS(X1);
+        FP4 W=new FP4(A);
+        W.sqrt();
+        FP s=new FP(new BIG(ROM.SQRTm3));
+        Z.mul(s);
+
         T.sqr();
         FP4 Y=new FP4(A); Y.mul(T);
-        T.copy(W); T.add(Y); T.norm();
-        Y.rsub(W); Y.norm();
-        FP4 NY=new FP4(T); NY.mul(Y); NY.inverse();
-        A.neg(); A.norm(); 
-        W.copy(A); W.imul(3); W.sqrt();
-        W.mul(Z);
+        T.copy(NY); T.add(Y); T.norm();
+        Y.rsub(NY); Y.norm();
+        NY.copy(T); NY.mul(Y); 
+
+        NY.qmul(Z);
+        NY.inverse();
+
+        W.qmul(Z);
+        if (W.sign()==1)
+        {
+            W.neg();
+            W.norm();
+        }
+        W.qmul(Z);
         W.mul(H); W.mul(Y); W.mul(NY);
 
+        FP4 X3=new FP4(X1);
         X1.neg(); X1.norm(); X1.div2();
         FP4 X2=new FP4(X1);
         X1.sub(W); X1.norm();
@@ -728,33 +736,8 @@ public final class ECP4 {
         A.add(A); A.add(A); A.norm();
         T.sqr(); T.mul(NY); T.sqr();
         A.mul(T);
-        Z.sqr(); Z.imul(3);
-        T.copy(Z);
-        T.inverse();
-        A.mul(T);
         X3.add(A); X3.norm();
 
-/*
-        FP w=s.sqrt(null);
-        FP j=new FP(w); j.sub(one); j.norm(); j.div2();
-
-        FP4 S=new FP4(T);
-        S.qmul(w);
-        FP4 Y=new FP4(T);
-        Y.sqr();
-        Y.add(W);
-        B.add(Y); B.norm(); B.inverse();
-        B.mul(S);
-
-        FP4 X1=new FP4(B); X1.mul(T);
-        Y.copy(new FP4(j));
-        FP4 X2=new FP4(X1); X2.sub(Y); X2.norm();
-        X1.copy(X2); X1.neg(); X1.norm();
-        X2.sub(W); X2.norm();
-
-        B.sqr(); B.inverse();
-        FP4 X3=new FP4(B); X3.add(W); X3.norm();
-*/
         Y.copy(RHS(X2));
         X3.cmove(X2,Y.qr());
         Y.copy(RHS(X1));

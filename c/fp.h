@@ -46,6 +46,8 @@ typedef struct
 extern const BIG_XXX Modulus_YYY;	/**< Actual Modulus set in rom_field_yyy.c */
 extern const BIG_XXX ROI_YYY;	    /**< Root of unity set in rom_field_yyy.c */
 extern const BIG_XXX R2modp_YYY;	/**< Montgomery constant */
+extern const BIG_XXX CRu_YYY;       /**< Cube Root of Unity */
+extern const BIG_XXX SQRTm3_YYY; /**< Square root of -3 */
 extern const chunk MConst_YYY;		/**< Constant associated with Modulus - for Montgomery = 1/p mod 2^BASEBITS */
 
 
@@ -226,7 +228,7 @@ extern void FP_YYY_pow(FP_YYY *x, FP_YYY *y, BIG_XXX z);
 	@param r FP number, on exit  = x^(p-2*e-1)/2^(e+1) mod Modulus
 	@param x FP number
  */
-extern void FP_YYY_invsqrt(FP_YYY *r,FP_YYY *x);
+extern void FP_YYY_progen(FP_YYY *r,FP_YYY *x);
 
 /**	@brief Fast Modular square root of a an FP, mod Modulus
  *
@@ -270,12 +272,33 @@ extern void FP_YYY_norm(FP_YYY *x);
 	@return 1 if quadratic residue, else returns 0 if quadratic non-residue
  */
 extern int FP_YYY_qr(FP_YYY *x,FP_YYY *h);
+
+/**	@brief Simultaneous Inverse and Square root
+ *
+	@param i FP number, on exit = 1/x mod Modulus
+	@param s FP number, on exit = sqrt(x) mod Modulus
+	@param x FP number
+	@return 1 if quadratic residue, else returns 0 if quadratic non-residue
+ */
+extern int FP_YYY_invsqrt(FP_YYY *i,FP_YYY *s,FP_YYY *x);
+
+/**	@brief Simultaneous Inverse and Square root of different numbers
+ *
+	@param i FP number, on exit = 1/i mod Modulus
+	@param s FP number, on exit = sqrt(s) mod Modulus
+	@return 1 if quadratic residue, else returns 0 if quadratic non-residue
+ */
+extern int FP_YYY_tpo(FP_YYY *i, FP_YYY *s);
+
+
+
 /**	@brief Modular inverse of a an FP, mod Modulus
  *
 	@param x FP number, on exit = 1/y mod Modulus
 	@param y FP number
+    @param h an optional input precalculation
  */
-extern void FP_YYY_inv(FP_YYY *x, FP_YYY *y);
+extern void FP_YYY_inv(FP_YYY *x, FP_YYY *y, FP_YYY *h);
 
 /**	@brief Generate random FP
  *

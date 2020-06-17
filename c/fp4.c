@@ -309,7 +309,7 @@ void FP4_YYY_inv(FP4_YYY *w, FP4_YYY *x)
     FP2_YYY_mul(&(w->b), &t1, &(x->b));
 }
 
-/* w*=i where i = sqrt(-1+sqrt(-1)) */
+/* w*=i where i = sqrt(1+sqrt(-1)) */
 /* SU= 200 */
 void FP4_YYY_times_i(FP4_YYY *w)
 {

@@ -584,7 +584,7 @@ var PAIR192 = function(ctx) {
             q = new ctx.BIG(0);
             q.rcopy(ctx.ROM_CURVE.CURVE_Order);
             bcru = new ctx.BIG(0);
-            bcru.rcopy(ctx.ROM_CURVE.CURVE_Cru);
+            bcru.rcopy(ctx.ROM_FIELD.CRu);
             cru = new ctx.FP(bcru);
             t = new ctx.BIG(0);
             u = PAIR192.glv(e);

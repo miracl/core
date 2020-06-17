@@ -33,7 +33,6 @@ namespace SM2 {
 
 using namespace B256_28;
 
-const int CURVE_A= -3;
 const int CURVE_Cof_I= 1;
 const BIG CURVE_Cof= {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I= 0;
@@ -49,7 +48,6 @@ const BIG CURVE_Gy= {0x139F0A0,0xDF32E52,0xA474002,0x877CC62,0x153D0A9,0xE36B692
 
 using namespace B256_56;
 
-const int CURVE_A= -3;
 const int CURVE_Cof_I= 1;
 const BIG CURVE_Cof= {0x1L,0x0L,0x0L,0x0L,0x0L};
 const int CURVE_B_I= 0;

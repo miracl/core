@@ -31,8 +31,6 @@ const MConst Chunk = 0x97483A164E1155
 const CURVE_Cof_I int = 1
 
 var CURVE_Cof = [...]Chunk{0x1, 0x0, 0x0, 0x0, 0x0}
-
-const CURVE_A int = -3
 const CURVE_B_I int = 0
 
 var CURVE_B = [...]Chunk{0x75ED967B7BB73F, 0xC9AE4B1A18030, 0x754A44C00FDFEC, 0x5428A9300D4ABA, 0xEE353FCA}

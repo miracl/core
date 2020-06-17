@@ -30,6 +30,7 @@ public struct CONFIG_CURVE{
     static public let NEGATIVEX=1
 
     static public let CURVETYPE = @CT@
+    static public let CURVE_A = @CA@
     static public let CURVE_PAIRING_TYPE = @PF@
     static public let SEXTIC_TWIST = @ST@
     static public let SIGN_OF_X = @SX@

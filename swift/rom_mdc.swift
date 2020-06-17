@@ -35,7 +35,6 @@ static let R2modp:[Chunk] = [0xDA5D1FE,0xDE5B77F,0x2985975,0x3228385,0x95FA423,0
 static let ROI:[Chunk] = [0x779EC12,0x3710405,0x7AF9EC1,0x9037EF0,0xD4F086A,0xFDD7A5F,0x4532F92,0xD456AFB,0x13B68B9,0xF]
 static let MConst:Chunk = 0xAE541E5
 
-static let CURVE_A:Int = 1
 static let CURVE_Cof_I:Int = 4
 static let CURVE_Cof:[Chunk] = [0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0]
 static let CURVE_B_I:Int = 0
@@ -59,7 +58,6 @@ static let MConst:Chunk = 0xF10FDDAAE541E5
 //*** rom curve parameters *****
 // Base Bits= 56
 
-static let CURVE_A:Int = 1
 static let CURVE_Cof_I:Int = 4
 static let CURVE_Cof:[Chunk] = [0x4,0x0,0x0,0x0,0x0]
 static let CURVE_B_I:Int = 0

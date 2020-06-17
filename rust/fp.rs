@@ -43,8 +43,7 @@ pub const POSITOWER: usize = 1;
 pub const MODBITS:usize = @NBT@; /* Number of bits in Modulus */
 pub const PM1D2: usize = @M8@;  /* Modulus mod 8 */
 pub const RIADZ: isize = @RZ@;  /* Z for hash-to-point */
-pub const RIADZG2A: isize = @RZA@;  /* G2 Z for hash-to-point */
-pub const RIADZG2B: isize = @RZB@;  /* G2 Z for hash-to-point */
+pub const RIADZG2: isize = @RZ2@;  /* G2 Z for hash-to-point */
 pub const MODTYPE:usize=@MT@;
 pub const QNRI:usize=@QI@; /* Fp2 QNR 2^i+sqrt(-1) */
 pub const TOWER:usize=@TW@; /* Tower type */
@@ -679,7 +678,7 @@ impl FP {
     }
 
     /* Pseudo_inverse square root */
-    pub fn invsqrt(&mut self) {
+    pub fn progen(&mut self) {
         if MODTYPE == PSEUDO_MERSENNE || MODTYPE == GENERALISED_MERSENNE {
             self.copy(&self.fpow());
             return;
@@ -695,7 +694,7 @@ impl FP {
     }
 
     /* self=1/self mod Modulus */
-    pub fn inverse(&mut self) {
+    pub fn inverse(&mut self,take_hint: Option<&FP>) {
         let e=PM1D2 as isize;
         self.norm();
         let mut s=FP::new_copy(self);
@@ -703,7 +702,11 @@ impl FP {
             s.sqr();
             s.mul(self);
         }
-        self.invsqrt();
+        if let Some(hint) = take_hint {
+            self.copy(&hint);
+        } else {
+            self.progen();
+        }
         for _ in 0..=e {
             self.sqr();
         }
@@ -715,7 +718,7 @@ impl FP {
     pub fn qr(&self,give_hint: Option<&mut FP>) -> isize {
         let e=PM1D2 as isize;
         let mut r=FP::new_copy(self);
-        r.invsqrt();
+        r.progen();
         if let Some(hint) = give_hint {
             hint.copy(&r);
         }
@@ -726,26 +729,38 @@ impl FP {
             r.sqr();
         }
 
-        //for _ in 0..e {
-        //    r.sqr();
-        //}
-        //let mut s=FP::new_copy(self);
-        //for _ in 0..e-1 {
-        //    s.sqr();
-        //}
-        //r.mul(&s);
         return r.isunity() as isize;
     }
 
+    pub fn invsqrt(&self,i: &mut FP,s: &mut FP) -> isize {
+        let mut h=FP::new();
+        let qr=self.qr(Some(&mut h));
+        s.copy(&self.sqrt(Some(&h)));
+        i.copy(self);
+        i.inverse(Some(&h));
+        return qr;
+    }
+
+    pub fn tpo(mut i: &mut FP,mut s: &mut FP) -> isize {
+        let mut w = FP::new_copy(s);
+        let mut t = FP::new_copy(i);
+        w.mul(&i);
+        t.mul(&w);
+        let qr=t.invsqrt(&mut i,&mut s);
+        i.mul(&w);
+        s.mul(&i);
+        return qr;
+    }
+
     /* return sqrt(this) mod Modulus */
-    pub fn sqrt(&mut self,take_hint: Option<&FP>) -> FP {
+    pub fn sqrt(&self,take_hint: Option<&FP>) -> FP {
         let e=PM1D2 as isize;
         let mut g=FP::new_copy(self);
 
         if let Some(hint) = take_hint {
             g.copy(&hint);
         } else {
-            g.invsqrt();
+            g.progen();
         }
         let m = BIG::new_ints(&rom::ROI);
         let mut v=FP::new_big(&m);

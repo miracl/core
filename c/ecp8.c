@@ -951,44 +951,45 @@ void ECP8_ZZZ_hap2point(ECP8_ZZZ *Q,BIG_XXX h)
 void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,FP8_YYY *H)
 {
     int sgn,ne;
-    FP8_YYY X1,X2,X3,W,B,Y,T,Z,A,NY;
-    FP4_YYY F,S;
-    FP_YYY b;
+    FP8_YYY X1,X2,X3,W,Y,T,A,NY;
+    FP_YYY Z,s;
 
-    FP_YYY_rcopy(&b,CURVE_B_ZZZ);
-    FP8_YYY_from_FP(&B, &b);
-#if SEXTIC_TWIST_ZZZ == D_TYPE
-    FP8_YYY_div_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
-#endif
-
-#if SEXTIC_TWIST_ZZZ == M_TYPE
-    FP8_YYY_times_i(&B);   /* IMPORTANT - here we use the correct SEXTIC twist of the curve */
-#endif
-
-    FP8_YYY_one(&W);
+    FP8_YYY_one(&NY);
     FP8_YYY_copy(&T,H);
     sgn=FP8_YYY_sign(&T);
 
-    FP_YYY_from_int(&b,RIADZG2A_YYY);
-    FP4_YYY_from_FP(&F,&b);
-    FP_YYY_from_int(&b,RIADZG2B_YYY);
-    FP4_YYY_from_FP(&S,&b);
-    FP8_YYY_from_FP4s(&Z,&F,&S);
-    ECP8_ZZZ_rhs(&A,&Z);  // A=g(Z)
+    FP_YYY_from_int(&Z,RIADZG2_YYY);
+    FP8_YYY_from_FP(&A,&Z);
+    ECP8_ZZZ_rhs(&A,&A);  // A=g(Z)
+
+    FP8_YYY_sqrt(&W,&A);
+    FP_YYY_rcopy(&s,SQRTm3_YYY);
+
+    FP_YYY_mul(&Z,&Z,&s);
+
     FP8_YYY_sqr(&T,&T);   
     FP8_YYY_mul(&Y,&A,&T);   // tv1=u^2*g(Z)
-    FP8_YYY_add(&T,&W,&Y); FP8_YYY_norm(&T); // tv2=1+tv1
-    FP8_YYY_sub(&Y,&W,&Y); FP8_YYY_norm(&Y); // tv1=1-tv1 
+    FP8_YYY_add(&T,&NY,&Y); FP8_YYY_norm(&T); // tv2=1+tv1
+    FP8_YYY_sub(&Y,&NY,&Y); FP8_YYY_norm(&Y); // tv1=1-tv1 
     FP8_YYY_mul(&NY,&T,&Y);
-    FP8_YYY_inv(&NY,&NY);     // tv3=inv0(tv1*tv2)
-    FP8_YYY_neg(&A,&A); FP8_YYY_norm(&A);     // -g(Z)
-    FP8_YYY_imul(&W,&A,3);    // -3*g(Z);
-    FP8_YYY_sqrt(&W,&W);
-    FP8_YYY_mul(&W,&W,&Z); // tv4=Z*sqrt(-3g(Z))
+
+    FP8_YYY_tmul(&NY,&NY,&Z);
+
+    FP8_YYY_inv(&NY,&NY);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
+    FP8_YYY_tmul(&W,&W,&Z); // tv4=Z*sqrt(-3).sqrt(g(Z))
+    if (FP8_YYY_sign(&W)==1)
+    {
+        FP8_YYY_neg(&W,&W);
+        FP8_YYY_norm(&W);
+    }
+    FP8_YYY_tmul(&W,&W,&Z); // tv4=Z*sqrt(-3g(Z))
     FP8_YYY_mul(&W,&W,H);
     FP8_YYY_mul(&W,&W,&Y);
     FP8_YYY_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4
-    FP8_YYY_copy(&X1,&Z);
+
+    FP_YYY_from_int(&s,RIADZG2_YYY);
+    FP8_YYY_from_FP(&X1,&s);
+
     FP8_YYY_copy(&X3,&X1);
     FP8_YYY_neg(&X1,&X1); FP8_YYY_norm(&X1); FP8_YYY_div2(&X1,&X1); // -Z/2
     FP8_YYY_copy(&X2,&X1);
@@ -996,40 +997,13 @@ void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,FP8_YYY *H)
     FP8_YYY_add(&X2,&X2,&W); FP8_YYY_norm(&X2);
     FP8_YYY_add(&A,&A,&A);
     FP8_YYY_add(&A,&A,&A); 
-    FP8_YYY_norm(&A);      // -4*g(Z)
+    FP8_YYY_norm(&A);      // 4*g(Z)
     FP8_YYY_sqr(&T,&T);
     FP8_YYY_mul(&T,&T,&NY);
     FP8_YYY_sqr(&T,&T);    // (tv2^2*tv3)^2
-    FP8_YYY_mul(&A,&A,&T); // -4*g(Z)*(tv2^2*tv3)^2
-    FP8_YYY_sqr(&Z,&Z); FP8_YYY_imul(&Z,&Z,3); //3Z^2
-    FP8_YYY_inv(&T,&Z);
-    FP8_YYY_mul(&A,&A,&T);
+    FP8_YYY_mul(&A,&A,&T); // 4*g(Z)*(tv2^2*tv3)^2
+
     FP8_YYY_add(&X3,&X3,&A); FP8_YYY_norm(&X3);   
-
-/*        
-    FP_YYY_from_int(&s,-3);
-    FP_YYY_sqrt(&s,&s,NULL);         // s=sqrt(-3)
-    FP_YYY_sub(&j,&s,&one);     FP_YYY_norm(&j);
-    FP_YYY_div2(&j,&j);         // j=(s-1)/2
-
-    FP8_YYY_tmul(&S,&T,&s);       // s=s.t
-    FP8_YYY_sqr(&Y,&T);          // t^2
-    FP8_YYY_add(&Y,&Y,&W);     // t^2+1
-    FP8_YYY_add(&B,&B,&Y);      // t^2+B+1
-    FP8_YYY_norm(&B);
-    FP8_YYY_inv(&B,&B);
-    FP8_YYY_mul(&B,&B,&S);      // w=s.t/(1+B+t*2)
-
-    FP8_YYY_mul(&X1,&B,&T);       
-    FP8_YYY_from_FP(&Y,&j);     
-    FP8_YYY_sub(&X2,&X1,&Y);    FP8_YYY_norm(&X2);// X2=t.w-j 
-    FP8_YYY_neg(&X1,&X2);       FP8_YYY_norm(&X1);// X1=j-t.w
-    FP8_YYY_sub(&X2,&X2,&W);    FP8_YYY_norm(&X2);
-
-    FP8_YYY_sqr(&B,&B);
-    FP8_YYY_inv(&B,&B);
-    FP8_YYY_add(&X3,&B,&W);     FP8_YYY_norm(&X3);
-*/
 
     ECP8_ZZZ_rhs(&W,&X2);
     FP8_YYY_cmove(&X3,&X2,FP8_YYY_qr(&W));

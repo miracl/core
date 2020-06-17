@@ -29,8 +29,8 @@ public class ROM
 	public static final long[] ROI= {0x6623EF5C1B55B2L,0xD6EE18093EE1BEL,0x647A6366D3243FL,0x8702A0DB0BDDFL,0x24000000L};
 	public static final long[] R2modp= {0x466A0618A0800AL,0x2B3A22543056A3L,0x148515B09C6600L,0xEC9EA5606BDF50L,0x1C992E66L};
 	public static final long MConst= 0x4E205BF9789E85L;
+    public static final long[] SQRTm3= {0xA4FDC033D49C84L,0x1825342A30355AL,0x646112E8AAA2C4L,0x8702A0D20BDDFL,0x24000000L};
 
-	public static final int CURVE_A= 0;
 	public static final int CURVE_B_I= 2;
 	public static final int CURVE_Cof_I= 1;
 	public static final long[] CURVE_B= {0x2L,0x0L,0x0L,0x0L,0x0L};
@@ -40,7 +40,7 @@ public class ROM
 
 	public static final long[] CURVE_Bnx= {0x3C012B1L,0x40L,0x0L,0x0L,0x0L};
 	public static final long[] CURVE_Cof= {0x1L,0x0L,0x0L,0x0L,0x0L};
-	public static final long[] CURVE_Cru= {0xE0931794235C97L,0xDF6471EF875631L,0xCA83F1440BDL,0x480000L,0x0L};
+	public static final long[] CRu= {0xE0931794235C97L,0xDF6471EF875631L,0xCA83F1440BDL,0x480000L,0x0L};
 	public static final long[] Fra= {0xD9083355C80EA3L,0x7326F173F8215BL,0x8AACA718986867L,0xA63A0164AFE18BL,0x1359082FL};
 	public static final long[] Frb= {0x8D1BBC06534710L,0x63C7269546C062L,0xD9CDBC4E3ABBD8L,0x623628A900DC53L,0x10A6F7D0L};
 

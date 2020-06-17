@@ -581,7 +581,7 @@ public struct PAIR192 {
             var Q=ECP()
             Q.copy(P); Q.affine()
             let q=BIG(ROM.CURVE_Order)
-            let cru=FP(BIG(ROM.CURVE_Cru))
+            let cru=FP(BIG(ROM.CRu))
             var t=BIG(0)
             var u=PAIR192.glv(e)
             Q.mulx(cru);            

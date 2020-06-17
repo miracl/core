@@ -49,7 +49,7 @@ typedef struct
 
 
 /* Curve Params - see rom.c */
-extern const int CURVE_A;		/**< Elliptic curve A parameter */
+
 extern const int CURVE_B_I;		/**< Elliptic curve B parameter */
 extern const XXX::BIG CURVE_B;     /**< Elliptic curve B parameter */
 extern const XXX::BIG CURVE_Order; /**< Elliptic curve group order */

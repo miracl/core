@@ -31,7 +31,6 @@ public static final long[] R2modp= {0xDE5B77FDA5D1FEL,0x32283852985975L,0xA24A9F
 public static final long[] ROI= {0x3710405779EC12L,0x9037EF07AF9EC1L,0xFDD7A5FD4F086AL,0xD456AFB4532F92L,0xF13B68B9L};
 public static final long MConst= 0xF10FDDAAE541E5L;
 
-public static final int CURVE_A= 1;
 public static final int CURVE_Cof_I= 4;
 public static final long[] CURVE_Cof= {0x4L,0x0L,0x0L,0x0L,0x0L};
 public static final int CURVE_B_I= 0;

@@ -724,7 +724,7 @@ void PAIR_ZZZ_G1mul(ECP_ZZZ *P, BIG_XXX e)
     glv(u, e);
 
     ECP_ZZZ_copy(&Q, P); ECP_ZZZ_affine(&Q);
-    FP_YYY_rcopy(&cru, CURVE_Cru_ZZZ);
+    FP_YYY_rcopy(&cru, CRu_YYY);
     FP_YYY_mul(&(Q.x), &(Q.x), &cru);
 
     /* note that -a.B = a.(-B). Use a or -a depending on which is smaller */

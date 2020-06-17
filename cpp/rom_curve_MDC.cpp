@@ -34,7 +34,6 @@ namespace MDC {
 
 using namespace B256_28;
 
-const int CURVE_A= 1;
 const int CURVE_Cof_I= 4;
 const BIG CURVE_Cof= {0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I= 0;
@@ -49,7 +48,6 @@ const BIG CURVE_Gy= {0xD2864B5,0x73C355B,0x93A3A7E,0xBC3D81A,0xA421DA8,0xCF6563D
 
 using namespace B256_56;
 
-const int CURVE_A= 1;
 const int CURVE_Cof_I= 4;
 const BIG CURVE_Cof= {0x4L,0x0L,0x0L,0x0L,0x0L};
 const int CURVE_B_I= 0;

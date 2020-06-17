@@ -587,7 +587,7 @@ public struct FP {
     }
 
     /* Pseudo_inverse square root */
-    mutating func invsqrt()
+    mutating func progen()
     {
         if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.PSEUDO_MERSENNE || CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {
             copy(fpow())
@@ -604,7 +604,7 @@ public struct FP {
     }
 
 /* this=1/this mod Modulus */
-    mutating func inverse()
+    mutating func inverse(_ hint: FP?)
     {
         let e=CONFIG_FIELD.PM1D2
         norm()
@@ -613,7 +613,11 @@ public struct FP {
             s.sqr()
             s.mul(self)
         }
-        invsqrt()
+        if hint != nil {
+            copy(hint!)
+        } else {
+            progen()
+        }
         for _ in 0...e {
             sqr();
         }
@@ -625,7 +629,7 @@ public struct FP {
     {
         let e=CONFIG_FIELD.PM1D2
         var r=FP(self);
-        r.invsqrt()
+        r.progen()
         if hint != nil {
             hint!.copy(r)
         }
@@ -636,20 +640,34 @@ public struct FP {
             r.sqr()
         }
 
-        //for _ in 0..<e {
-        //    r.sqr()
-        //}
-        //var s=FP(self);
-        //for _ in 0..<(e-1) {
-        //    s.sqr()
-        //}
-        //r.mul(s)
         return r.isunity() ? 1:0
     }
 
+// Calculate both inverse and square root of x, return QR
+    @discardableResult func invsqrt(_ i:inout FP,_ s:inout FP) -> Int
+    {
+        var h:FP?=FP()
+        let qres=qr(&h)
+        s.copy(sqrt(h))
+        i.copy(self)
+        i.inverse(h)
+        return qres
+    }
+
+    @discardableResult static func tpo(_ i:inout FP,_ s:inout FP) -> Int
+    {
+        var w = FP(s)
+        var t = FP(i)
+        w.mul(i)
+        t.mul(w)
+        let qres=t.invsqrt(&i,&s)
+        i.mul(w)
+        s.mul(i)
+        return qres
+    }
 
 /* return sqrt(this) mod Modulus */
-    mutating func sqrt(_ hint: FP?) -> FP
+    func sqrt(_ hint: FP?) -> FP
     {
         let e=CONFIG_FIELD.PM1D2
         var g=FP(self);
@@ -657,7 +675,7 @@ public struct FP {
         if hint != nil {
             g.copy(hint!)
         } else {
-            g.invsqrt()
+            g.progen()
         }
         let m=BIG(ROM.ROI)
 

@@ -360,11 +360,12 @@ impl FP2 {
         let d=w3.qr(None);
         w2.cmove(&w3,d);
 
-        w1.copy(&w2.sqrt(None));
-        self.a.copy(&w1);
-        w1.dbl(); w1.norm();
-        w1.inverse();
-        self.b.mul(&w1);
+        w3.copy(&w2);
+        w3.invsqrt(&mut w2,&mut self.a);
+        w2.mul(&self.a);
+        w2.div2();
+
+        self.b.mul(&w2);
 
         let sgn=self.sign();
         let mut nr=FP2::new_copy(&self);
@@ -386,7 +387,7 @@ impl FP2 {
         w1.sqr();
         w2.sqr();
         w1.add(&w2);
-        w1.inverse();
+        w1.inverse(None);
         self.a.mul(&w1);
         w1.neg();
         w1.norm();

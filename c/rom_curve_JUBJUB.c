@@ -29,7 +29,6 @@
 
 #if CHUNK==32
 
-const int CURVE_A_JUBJUB= -1;
 const int CURVE_Cof_I_JUBJUB= 8;
 const BIG_256_29 CURVE_Cof_JUBJUB= {0x8,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
 const int CURVE_B_I_JUBJUB= 0;
@@ -41,7 +40,6 @@ const BIG_256_29 CURVE_Gy_JUBJUB= {0x1349702E,0x35D6B84,0x9A0CEC5,0x190E0FFF,0x1
 
 #if CHUNK==64
 
-const int CURVE_A_JUBJUB= -1;
 const int CURVE_Cof_I_JUBJUB= 8;
 const BIG_256_56 CURVE_Cof_JUBJUB= {0x8L,0x0L,0x0L,0x0L,0x0L};
 const int CURVE_B_I_JUBJUB= 0;

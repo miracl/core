@@ -34,7 +34,6 @@ public class ROM
 
 	public static final int CURVE_Cof_I= 1;
 	public static final long[] CURVE_Cof= {0x1L,0x0L,0x0L,0x0L,0x0L};
-	public static final int CURVE_A= -3;
 	public static final int CURVE_B_I= 0;
 	public static final long[] CURVE_B= {0xE58101FEE92B04L,0xEBC4AF2F49256AL,0x733D0B76B7BF93L,0x30D84EA4FE66A7L,0x662C61C4L};
 	public static final long[] CURVE_Order= {0x1E0E82974856A7L,0x7AA3B561A6F790L,0x909D838D718C39L,0xA1EEA9BC3E660AL,0xA9FB57DBL};

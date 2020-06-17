@@ -27,7 +27,6 @@ var R2modp= [...]Chunk {0x1000000010000,0x400000,0x0}
 var ROI= [...]Chunk {0xFFFFFF7FFFFFFE,0xFFFFFFFFFFFFFF,0xFFFFFFFFFFFF}
 const MConst Chunk=0xFFFFFF80000001
 
-const CURVE_A int= -3
 const CURVE_Cof_I int= 1
 var CURVE_Cof= [...]Chunk {0x1,0x0,0x0}
 const CURVE_B_I int= 0

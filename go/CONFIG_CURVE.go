@@ -48,6 +48,7 @@ const NEGATIVEX int = 1
 // Curve type
 
 const CURVETYPE int = @CT@
+const CURVE_A int = @CA@
 const CURVE_PAIRING_TYPE int = @PF@
 
 // Pairings only

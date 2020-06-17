@@ -46,7 +46,6 @@ pub const R2MODP: [Chunk; NLEN] = [0x200000000, 0x0, 0x0, 0x0, 0x3000000, 0x0, 0
 pub const MCONST: Chunk = 0x1;
 
 // x448 curve
-pub const CURVE_A:isize = 156326;
 pub const CURVE_COF_I:isize = 4;
 pub const CURVE_COF:[Chunk;NLEN]=[0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0];
 pub const CURVE_B_I:isize = 0;

@@ -342,12 +342,16 @@ func (F *FP2) sqrt() {
 	
 	w2.cmove(w3,w3.qr(nil))
 
-	w2 = w2.sqrt(nil)
-	F.a.copy(w2)
-	w2.add(w2); w2.norm()
-	w2.inverse()
-	F.b.mul(w2)
+	w2.invsqrt(w2,F.a)
+	w2.mul(F.a)
+	w2.div2()
 
+//	w2 = w2.sqrt(nil)
+//	F.a.copy(w2)
+//	w2.add(w2); w2.norm()
+//	w2.inverse(nil)
+
+	F.b.mul(w2)
 	sgn:=F.sign()
 	nr:=NewFP2copy(F)
 	nr.neg(); nr.norm()
@@ -373,7 +377,7 @@ func (F *FP2) inverse() {
 	w1.sqr()
 	w2.sqr()
 	w1.add(w2)
-	w1.inverse()
+	w1.inverse(nil)
 	F.a.mul(w1)
 	w1.neg()
 	w1.norm()

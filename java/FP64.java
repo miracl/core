@@ -555,7 +555,7 @@ public final class FP {
     }
 
 // calculates r=x^(p-1-2^e)/2^{e+1) where 2^e|p-1
-    private void invsqrt() {
+    private void progen() {
         if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.PSEUDO_MERSENNE || CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE) 
         {
             copy(fpow());
@@ -571,16 +571,20 @@ public final class FP {
     }
 
     /* this=1/this mod Modulus */
-    public void inverse() {
+    public void inverse(FP h) {
         int e=CONFIG_FIELD.PM1D2;
         norm();
         FP s=new FP(this);
+
         for (int i=0;i<e-1;i++)
         {
             s.sqr();
             s.mul(this);
         }
-        invsqrt();
+        if (h==null)
+            progen();
+        else
+            copy(h);
         for (int i=0;i<=e;i++)
             sqr();
         mul(s);
@@ -591,7 +595,7 @@ public final class FP {
     public int qr(FP h) {
         FP r=new FP(this);
         int e=CONFIG_FIELD.PM1D2;
-        r.invsqrt();
+        r.progen();
         if (h!=null)
             h.copy(r);
 
@@ -615,7 +619,7 @@ public final class FP {
         int u,e=CONFIG_FIELD.PM1D2;
         FP g=new FP(this);
         if (h==null)
-            g.invsqrt();
+            g.progen();
         else
             g.copy(h);
 
@@ -649,5 +653,28 @@ public final class FP {
 
         return r;
     }
+// Calculate both inverse and square root of this, return QR
+    public int invsqrt(FP i, FP s)
+    {
+        FP h=new FP(0);
+        int qr=qr(h);
+        s.copy(sqrt(h));
+        i.copy(this);
+        i.inverse(h);
+        return qr;
+    }
 
+// Two for Price of One
+// Calculate inverse of i and square root of s, return QR
+    public static int tpo(FP i, FP s)
+    {
+        FP w = new FP(s);
+        FP t = new FP(i);
+        w.mul(i);
+        t.mul(w);
+        int qr=t.invsqrt(i,s);
+        i.mul(w);
+        s.mul(i);
+        return qr;
+    }
 }

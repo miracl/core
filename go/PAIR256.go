@@ -665,7 +665,7 @@ func G1mul(P *ECP, e *BIG) *ECP {
 		Q.Copy(P)
 		Q.Affine()
 		q := NewBIGints(CURVE_Order)
-		cru := NewFPbig(NewBIGints(CURVE_Cru))
+		cru := NewFPbig(NewBIGints(CRu))
 		t := NewBIGint(0)
 		u := glv(e)
 		Q.getx().mul(cru)

@@ -41,7 +41,6 @@ static let MConst:Chunk = 0xEFD89B9
 //  Brainpool Curve
 static let CURVE_Cof_I:Int=1
 static let CURVE_Cof:[Chunk] = [0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0]
-static let CURVE_A:Int = -3
 static let CURVE_B_I:Int = 0
 static let CURVE_B:[Chunk] = [0xEE92B04,0xE58101F,0xF49256A,0xEBC4AF2,0x6B7BF93,0x733D0B7,0x4FE66A7,0x30D84EA,0x62C61C4,0x6]
 static public let CURVE_Order:[Chunk] = [0x74856A7,0x1E0E829,0x1A6F790,0x7AA3B56,0xD718C39,0x909D838,0xC3E660A,0xA1EEA9B,0x9FB57DB,0xA]
@@ -62,7 +61,6 @@ static let MConst:Chunk = 0xA75590CEFD89B9
 //  Brainpool Curve
 static let CURVE_Cof_I:Int=1
 static let CURVE_Cof:[Chunk] = [0x1,0x0,0x0,0x0,0x0]
-static let CURVE_A:Int = -3
 static let CURVE_B_I:Int = 0
 static let CURVE_B:[Chunk] = [0xE58101FEE92B04,0xEBC4AF2F49256A,0x733D0B76B7BF93,0x30D84EA4FE66A7,0x662C61C4]
 static public let CURVE_Order:[Chunk] = [0x1E0E82974856A7,0x7AA3B561A6F790,0x909D838D718C39,0xA1EEA9BC3E660A,0xA9FB57DB]
