@@ -89,27 +89,21 @@ ZZn2 shanks(ZZn2 n)
 
 }
 
-ZZn8 findZ8(Big AB)
+int findZ8(Big AB)
 {
     ZZn8 Z,B;
     if (get_mip()->TWIST==MR_SEXTIC_M)
         B=tx((ZZn8)AB);
     else
         B=txd((ZZn8)AB);
-    int a,b;
-    a=1; b=-1;
+    int a=0;
     forever {
-        if (b>0)
-        {
+        if (a>0)
             a=-a;
-            b=-b;
-        }
         else
-        {    
-            b=1;
             a=(-a)+1;
-        }
-        Z.set(a,b);
+    
+        Z.set(a,(ZZn4)0);
   //      cout << "Z= " << Z << endl;
         ZZn8 ZZ=Z;
         ZZn8 GZ=ZZ*ZZ*ZZ+B;
@@ -122,32 +116,24 @@ ZZn8 findZ8(Big AB)
         if (!qr(GZ) && !qr(GNZ)) continue;
         break;
     }
-    return Z;
+    return a;
 }
 
-ZZn4 findZ4(Big AB)
+int findZ4(Big AB)
 {
     ZZn4 Z,B;
     if (get_mip()->TWIST==MR_SEXTIC_M)
         B=tx((ZZn4)AB);
     else
         B=txd((ZZn4)AB);
-    int a,b;
-
-
-    a=1; b=-1;
+    int a=0;
     forever {
-        if (b>0)
-        {
+        if (a>0)
             a=-a;
-            b=-b;
-        }
         else
-        {    
-            b=1;
             a=(-a)+1;
-        }
-        Z.set(a,b);
+    
+        Z.set(a,(ZZn2)0);
         ZZn4 ZZ=Z;
         ZZn4 GZ=ZZ*ZZ*ZZ+B;
         if (GZ==0) continue;
@@ -159,30 +145,24 @@ ZZn4 findZ4(Big AB)
         if (!qr(GZ) && !qr(GNZ)) continue;
         break;
     }
-    return Z;
+    return a;
 }
 
-ZZn2 findZ2(Big AB)
+int findZ2(Big AB)
 {
     ZZn2 Z,B;
     if (get_mip()->TWIST==MR_SEXTIC_M)
         B=txx((ZZn2)AB);
     else
         B=txd((ZZn2)AB);
-    int a,b;
-    a=1; b=-1;
+    int a=0;
     forever {
-        if (b>0)
-        {
+        if (a>0)
             a=-a;
-            b=-b;
-        }
         else
-        {    
-            b=1;
             a=(-a)+1;
-        }
-        Z.set(a,b);
+        
+        Z.set(a,(ZZn)0);
         //cout << "Z= " << Z << endl;
         ZZn2 ZZ=Z;
         ZZn2 GZ=ZZ*ZZ*ZZ+B;
@@ -195,7 +175,7 @@ ZZn2 findZ2(Big AB)
         if (!qr(GZ) && !qr(GNZ)) continue;
         break;
     }
-    return Z;
+    return a;
 }
 
 int findZ(Big AA,Big AB,Big p)
@@ -315,6 +295,7 @@ int findZ(Big AA,Big AB,Big p)
     }
 }
 
+// Decide on RFC7748 or Generic method
 int findR(Big AA,Big AB,Big p)
 {
     modulo(p);
@@ -526,7 +507,7 @@ int main(int argc, char **argv)
     char pre7[50], post7[50], lg[50];
 //    char pre8[50], post8[50];
 
-    char xxx[20], yyy[20], zzz[20];
+    char xxx[50], yyy[50], zzz[50];
 
     char curvename[50], fieldname[50];
 
@@ -1184,7 +1165,7 @@ int main(int argc, char **argv)
         cout << "CA2= " << CA2 << endl;
         cout << "CB2= " << CB2 << endl;
 */
-        cout << "Z for G2= " << findZ2(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
 
@@ -1248,7 +1229,7 @@ int main(int argc, char **argv)
         cout << "CA2= " << CA2 << endl;
         cout << "CB2= " << CB2 << endl;
 */
-        cout << "Z for G2= " << findZ2(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS12383") == 0)
@@ -1331,7 +1312,7 @@ int main(int argc, char **argv)
         cout << "CA2= " << CA2 << endl;
         cout << "CB2= " << CB2 << endl;
 */
-        cout << "Z for G2= " << findZ2(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS12381") == 0)
@@ -1476,7 +1457,7 @@ int main(int argc, char **argv)
         pc[51]=(char *)"1962d75c2381201e1a0cbd6c43c348b885c84ff731c4d59ca4a10356f453e01f78a4260763529e3532f6102c2e49a03d";
         pc[52]=(char *)"16112c4c3a9c98b252181140fad0eae9601a6de578980be6eec3232b5be72e7a07f3688ef60c206d01479253b03663c1";
 */
-        cout << "Z for G2= " << findZ2(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
 
@@ -1550,7 +1531,7 @@ int main(int argc, char **argv)
         cout << "CA2= " << CA2 << endl;
         cout << "CB2= " << CB2 << endl;
 */
-        cout << "Z for G2= " << findZ2(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BN462") == 0)
@@ -1635,7 +1616,7 @@ int main(int argc, char **argv)
         cout << "CA2= " << CA2 << endl;
         cout << "CB2= " << CB2 << endl;
 */
-        cout << "Z for G2= " << findZ2(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "FP256BN") == 0)
@@ -1700,7 +1681,7 @@ int main(int argc, char **argv)
         cout << "CA2= " << CA2 << endl;
         cout << "CB2= " << CB2 << endl;
 */
-        cout << "Z for G2= " << findZ2(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "FP512BN") == 0)
@@ -1766,7 +1747,7 @@ int main(int argc, char **argv)
         cout << "CA2= " << CA2 << endl;
         cout << "CB2= " << CB2 << endl;
 */
-        cout << "Z for G2= " << findZ2(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS24479") == 0)
@@ -1868,7 +1849,7 @@ int main(int argc, char **argv)
 */
 //ZZn4 fz=findZ4(curve_b);
 //exit(0);
-        cout << "Z for G2= " << findZ4(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ4(curve_b) << endl;
     }
 
 
@@ -1980,7 +1961,7 @@ int main(int argc, char **argv)
         cout << "CA8= " << CA8 << endl;
         cout << "CB8= " << CB8 << endl;
 */
-        cout << "Z for G2= " << findZ8(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS48581") == 0)
@@ -2176,13 +2157,13 @@ int main(int argc, char **argv)
         cout << "CA8= " << CA8 << endl;
         cout << "CB8= " << CB8 << endl;
 */
-        cout << "Z for G2= " << findZ8(curve_b) << endl;
+        cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
     }
 
     if (curve == 0) {help(); return 0;}
 
-    if (curvetype == WEIERSTRASS) printf("Z= %d\n",findZ(curve_a,curve_b,p));
-    if (curvetype == EDWARDS) printf("Z= %d\n",findR(curve_a,curve_b,p));
+    if (curvetype == WEIERSTRASS) printf("Hash to Curve Z= %d\n",findZ(curve_a,curve_b,p));
+    if (curvetype == EDWARDS) printf("Hash to Curve Z= %d\n",findR(curve_a,curve_b,p));
 
     bytes = mbits / 8;
     if (mbits % 8 != 0) bytes++;
@@ -2410,7 +2391,7 @@ int main(int argc, char **argv)
 
     m = pow((Big)2, bb);
 
-    cout << "p mod 3= " << p%3 << endl;
+//    cout << "p mod 3= " << p%3 << endl;
     cout << "//*** rom field parameters*****" << endl;
     cout << "// Base Bits= " << bb << endl;
 
@@ -2494,7 +2475,7 @@ int main(int argc, char **argv)
     //cout << "Q= " << Q << endl;
 
     cout << "//*** rom curve parameters *****" << endl;
-    cout << "// Base Bits= " << bb << endl;
+//    cout << "// Base Bits= " << bb << endl;
     if (curve >= PS)
     {
         cout << "// Ate Bits= " << atebits << endl;

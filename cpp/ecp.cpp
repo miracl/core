@@ -1233,13 +1233,15 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_div2(&B,&B);    // (B-A)/4     // (-a+d)/4 = -1/K
 
     FP_neg(&K,&B);
-    FP_inv(&K,&K,NULL);    // K
+    //FP_inv(&K,&K,NULL);    // K
+    FP_invsqrt(&K,&w1,&K);
 
     rfc=RIADZ_YYY;
     if (rfc)
     { // RFC7748 method applies
         FP_mul(&A,&A,&K);   // = J
-        FP_sqrt(&K,&K,NULL);
+        FP_mul(&K,&K,&w1);
+//        FP_sqrt(&K,&K,NULL);
     } else { // generic method
         FP_sqr(&B,&B);
     }

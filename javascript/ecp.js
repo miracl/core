@@ -1393,13 +1393,15 @@ var ECP = function(ctx) {
 
                 K.copy(B);
                 K.neg();
-                K.inverse(null);
+                //K.inverse(null);
+                K.invsqrt(K,w1);
 
                 rfc=ctx.FP.RIADZ;
                 if (rfc==1)
                 { // RFC7748
                     A.mul(K);
-                    K=K.sqrt(null);
+                    K.mul(w1);
+                    //K=K.sqrt(null);
                 } else {
                     B.sqr();
                 }

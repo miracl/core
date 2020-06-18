@@ -1230,6 +1230,7 @@ func ECP_map2point(h *FP) *ECP {
 			var A *FP
             K:=NewFP()
 			rfc:=0
+			w1:=NewFP();
             //sgn:=t.sign()
 
 			if MODTYPE !=  GENERALISED_MERSENNE {
@@ -1244,19 +1245,20 @@ func ECP_map2point(h *FP) *ECP {
 				}
 				A.norm(); B.norm()
 
-
 				A.div2()
 				B.div2()
 				B.div2()
 
 				K.copy(B);
 				K.neg()
-				K.inverse(nil)
+				//K.inverse(nil)
+				K.invsqrt(K,w1);
 
 				rfc=RIADZ
 				if rfc==1 { // RFC7748
 					A.mul(K)
-					K=K.sqrt(nil)
+					K.mul(w1);
+					//K=K.sqrt(nil)
 				} else {
 				 B.sqr()
 				}
@@ -1286,7 +1288,7 @@ func ECP_map2point(h *FP) *ECP {
             X2.neg()
 
             X1.norm()
-            t.copy(X1); t.sqr(); w1:=NewFPcopy(t); w1.mul(X1)
+            t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1)
             t.mul(A); w1.add(t)
             if rfc==0 {
                 t.copy(X1); t.mul(B)

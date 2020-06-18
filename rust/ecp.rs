@@ -1305,12 +1305,14 @@ impl ECP {
 
                 K.copy(&B);
                 K.neg();
-                K.inverse(None);
-
+                //K.inverse(None);
+                K.invsqrt(&mut w2,&mut w1);
+                K.copy(&w2);
                 rfc=fp::RIADZ;
                 if rfc==1 {
                     A.mul(&K);
-                    K=K.sqrt(None);
+                    K.mul(&w1);
+                    //K=K.sqrt(None);
                 } else {
                     B.sqr();
                 }

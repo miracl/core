@@ -1069,13 +1069,15 @@ public struct ECP {
 
                 K.copy(B)
                 K.neg()
-                K.inverse(pNIL)
+                //K.inverse(pNIL)
+                K.invsqrt(&K,&w1);
 
                 rfc=CONFIG_FIELD.RIADZ
 
                 if rfc==1 { // RFC7748
                     A.mul(K)
-                    K=K.sqrt(pNIL)
+                    K.mul(w1)
+                    //K=K.sqrt(pNIL)
                 } else {
                     B.sqr()
                 }
@@ -1138,9 +1140,7 @@ public struct ECP {
                 X1.mul(K)
                 Y.mul(K)
             }
-//            let ne=Y.sign()^sgn
-//            var NY=FP(Y); NY.neg(); NY.norm()
-//            Y.cmove(NY,ne)
+
             if CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE {
                 t.copy(X1); t.sqr()
                 NY.copy(t); NY.add(one); NY.norm()

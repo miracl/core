@@ -444,13 +444,15 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     FP_YYY_div2(&B,&B);    // (B-A)/4
 
     FP_YYY_neg(&K,&B);
-    FP_YYY_inv(&K,&K,NULL);    // K
+    //FP_YYY_inv(&K,&K,NULL);    // K
+    FP_YYY_invsqrt(&K,&w1,&K);
 
     rfc=RIADZ_YYY;
     if (rfc)
     { // RFC7748 method applies
         FP_YYY_mul(&A,&A,&K);   // = J
-        FP_YYY_sqrt(&K,&K,NULL);
+        FP_YYY_mul(&K,&K,&w1);
+        //FP_YYY_sqrt(&K,&K,NULL);
     } else { // generic method
         FP_YYY_sqr(&B,&B);
     }

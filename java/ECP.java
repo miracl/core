@@ -1060,13 +1060,15 @@ public final class ECP {
 
                 K.copy(B);
                 K.neg();
-                K.inverse(null);
+                //K.inverse(null);
+                K.invsqrt(K,w1);
 
                 rfc=CONFIG_FIELD.RIADZ;
                 if (rfc==1)
                 { // RFC7748
                     A.mul(K);
-                    K=K.sqrt(null);
+                    K.mul(w1);
+                    //K=K.sqrt(null);
                 } else {
                     B.sqr();
                 }
