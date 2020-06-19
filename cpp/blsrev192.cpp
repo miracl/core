@@ -64,29 +64,6 @@ static void hash_to_field(int hash,int hlen,FP4 *u,octet *DST,octet *M, int ctr)
     }
 }
 
-/* output u \in F_p 
-static void hash_to_base(int hash,int hlen,BIG u,octet *DST,octet *M, int ctr)
-{
-    int L;
-    BIG q;
-    DBIG dx;
-    char prk[64],okm[128],info[16];
-    octet PRK = {0,sizeof(prk),prk};
-    octet OKM = {0,sizeof(okm),okm};
-    octet INFO = {0,sizeof(info),info};
-
-    BIG_rcopy(q, Modulus);
-    L=CEIL(BIG_nbits(q)+CURVE_SECURITY_ZZZ,8);
-
-    OCT_jstring(&INFO,(char *)"H2C");
-    OCT_jint(&INFO,ctr,1);
-    HKDF_Extract(hash,hlen,&PRK,DST,M);
-    HKDF_Expand(hash,hlen,&OKM,L,&PRK,&INFO);
-
-    BIG_dfromBytesLen(dx,OKM.val,L);
-    BIG_dmod(u,dx,q);
-} */
-
 /* hash a message to an ECP4 point, using SHA2, random oracle method */
 static void BLS_HASH_TO_POINT(ECP4 *P, octet *M)
 {
@@ -95,7 +72,7 @@ static void BLS_HASH_TO_POINT(ECP4 *P, octet *M)
     char dst[50];
     octet DST = {0,sizeof(dst),dst};
 
-    OCT_jstring(&DST,(char *)"BLS_SIG_ZZZG2_XMD:SHA384-SSWU-RO-_NUL_");
+    OCT_jstring(&DST,(char *)"BLS_SIG_ZZZG2_XMD:SHA384-SVDW-RO-_NUL_");
     hash_to_field(MC_SHA2,HASH_TYPE_ZZZ,u,&DST,M,2);
 
     ECP4_map2point(P,&u[0]);
@@ -118,23 +95,33 @@ int ZZZ::BLS_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W)
     BIG r,s;
     DBIG dx;
     ECP G;
-    char salt[20],prk[HASH_TYPE_ZZZ],okm[128];
+    char salt[20],prk[HASH_TYPE_ZZZ],okm[128],aikm[65],len[2];
     octet SALT = {0,sizeof(salt),salt};
     octet PRK = {0,sizeof(prk),prk};
     octet OKM = {0,sizeof(okm),okm};
+    octet AIKM = {0,sizeof(aikm),aikm};
+    octet LEN = {0,sizeof(len),len};
+
+    OCT_copy(&AIKM,IKM);
+    OCT_jbyte(&AIKM,0,1);
 
     BIG_rcopy(r, CURVE_Order);
     L=CEIL(3*CEIL(BIG_nbits(r),8),2);
+    OCT_jint(&LEN,L,2);
 
     if (!ECP_generator(&G)) return BLS_FAIL;
 
     OCT_jstring(&SALT,(char *)"BLS-SIG-KEYGEN-SALT-");
-    HKDF_Extract(MC_SHA2,HASH_TYPE_ZZZ,&PRK,&SALT,IKM);
-    HKDF_Expand(MC_SHA2,HASH_TYPE_ZZZ,&OKM,L,&PRK,NULL);
+    HKDF_Extract(MC_SHA2,HASH_TYPE_ZZZ,&PRK,&SALT,&AIKM);
+    HKDF_Expand(MC_SHA2,HASH_TYPE_ZZZ,&OKM,L,&PRK,&LEN);
+
     BIG_dfromBytesLen(dx,OKM.val,L);
     BIG_dmod(s,dx,r);
     BIG_toBytes(S->val, s);
     S->len = MODBYTES_XXX;
+
+// SkToPk
+
     PAIR_G1mul(&G, s);
     ECP_toOctet(W, &G, true);
     return BLS_OK;

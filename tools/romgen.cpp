@@ -547,7 +547,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "ED25519") == 0)
     {   // ED25519
         curve = 1;
-        printf("Curve= ED25519\n");
+        printf("Curve is ED25519\n");
         strcpy(fieldname, "F25519");
         mbits = 255;               // bits in modulus
         words = (1 + ((mbits - 1) / bb)); // words per Big
@@ -566,7 +566,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "C25519") == 0)
     {
         curve = 2;
-        printf("Curve= C25519\n");
+        printf("Curve is C25519\n");
         strcpy(fieldname, "F25519");
         mbits = 255;
         words = (1 + ((mbits - 1) / bb));
@@ -586,7 +586,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "X448") == 0)
     {
         curve = 21;
-        printf("Curve= X448\n");
+        printf("Curve is X448\n");
         strcpy(fieldname, "GOLDILOCKS");
         mbits = 448;
         words = (1 + ((mbits - 1) / bb));
@@ -605,7 +605,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "SECP160R1") == 0)
     {
         curve = 22;
-        printf("Curve= SECP160R1\n");
+        printf("Curve is SECP160R1\n");
         strcpy(fieldname, curvename);
         mbits = 160;
         words = (1 + ((mbits - 1) / bb));
@@ -626,7 +626,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "NIST256") == 0)
     {
         curve = 3;
-        printf("Curve= NIST256\n");
+        printf("Curve is NIST256\n");
         strcpy(fieldname, curvename);
         mbits = 256;
         words = (1 + ((mbits - 1) / bb));
@@ -647,7 +647,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "SM2") == 0)
     {
         curve = 18;
-        printf("Curve= SM2\n");
+        printf("Curve is SM2\n");
         strcpy(fieldname, curvename);
         mbits = 256;
         words = (1 + ((mbits - 1) / bb));
@@ -668,7 +668,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "C13318") == 0)
     {
         curve = 19;
-        printf("Curve= C13318\n");
+        printf("Curve is C13318\n");
         strcpy(fieldname, "F25519");
         mbits = 255;
         words = (1 + ((mbits - 1) / bb));
@@ -688,7 +688,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "JUBJUB") == 0)
     {
         curve = 20;
-        printf("Curve= JUBJUB\n");
+        printf("Curve is JUBJUB\n");
         strcpy(fieldname, curvename);
         mbits=255;
         words = (1 + ((mbits - 1) / bb));
@@ -708,7 +708,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BRAINPOOL") == 0)
     {
         curve = 4;
-        printf("Curve= BRAINPOOL\n");
+        printf("Curve is BRAINPOOL\n");
         strcpy(fieldname, curvename);
         mbits = 256;
         words = (1 + ((mbits - 1) / bb));
@@ -729,7 +729,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "ANSSI") == 0)
     {
         curve = 5;
-        printf("Curve= ANSSI\n");
+        printf("Curve is ANSSI\n");
         strcpy(fieldname, curvename);
         mbits = 256;
         words = (1 + ((mbits - 1) / bb));
@@ -750,7 +750,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "HIFIVE") == 0)
     {
         curve = 6;
-        printf("Curve= HIFIVE\n");
+        printf("Curve is HIFIVE\n");
         strcpy(fieldname, curvename);
         mbits = 336;
         words = (1 + ((mbits - 1) / bb));
@@ -772,7 +772,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "GOLDILOCKS") == 0)
     {
         curve = 7;
-        printf("Curve= GOLDILOCKS\n");
+        printf("Curve is GOLDILOCKS\n");
         strcpy(fieldname, curvename);
         mbits = 448;
         words = (1 + ((mbits - 1) / bb));
@@ -793,7 +793,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "NIST384") == 0)
     {
         curve = 8;
-        printf("Curve= NIST384\n");
+        printf("Curve is NIST384\n");
         strcpy(fieldname, curvename);
         mbits = 384;
         words = (1 + ((mbits - 1) / bb));
@@ -813,7 +813,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "C41417") == 0)
     {
         curve = 9;
-        printf("Curve= C41417\n");
+        printf("Curve is C41417\n");
         strcpy(fieldname, curvename);
         mbits = 414;
         words = (1 + ((mbits - 1) / bb));
@@ -833,7 +833,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "C1174") == 0)
     {
         curve = 23;
-        printf("Curve= C1174\n");
+        printf("Curve is C1174\n");
         strcpy(fieldname, curvename);
         mbits = 251;
         words = (1 + ((mbits - 1) / bb));
@@ -854,7 +854,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "C1665") == 0)
     {
         curve = 24;
-        printf("Curve= C1665\n");
+        printf("Curve is C1665\n");
         strcpy(fieldname, curvename);
         mbits = 166;
         words = (1 + ((mbits - 1) / bb));
@@ -878,7 +878,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "MDC") == 0)
     {
         curve = 25;
-        printf("Curve= Million Dollar Curve\n");
+        printf("Curve is Million Dollar Curve\n");
         strcpy(fieldname, curvename);
         mbits = 256;
         words = (1 + ((mbits - 1) / bb));
@@ -899,7 +899,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "NIST521") == 0)
     {
         curve = 10;
-        printf("Curve= NIST521\n");
+        printf("Curve is NIST521\n");
         strcpy(fieldname, curvename);
         mbits = 521;
         words = (1 + ((mbits - 1) / bb));
@@ -920,7 +920,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "NUMS256W") == 0)
     {
         curve = 11;
-        printf("Curve= NUMS256W\n");
+        printf("Curve is NUMS256W\n");
         strcpy(fieldname, "256PMW");
         mbits = 256;
         words = (1 + ((mbits - 1) / bb));
@@ -940,7 +940,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "NUMS256E") == 0)
     {
         curve = 12;
-        printf("Curve= NUMS256E\n");
+        printf("Curve is NUMS256E\n");
         strcpy(fieldname, "256PME");
         mbits = 256;
         words = (1 + ((mbits - 1) / bb));
@@ -961,7 +961,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "NUMS384W") == 0)
     {
         curve = 13;
-        printf("Curve= NUMS384W\n");
+        printf("Curve is NUMS384W\n");
         strcpy(fieldname, "384PM");
         mbits = 384;
         words = (1 + ((mbits - 1) / bb));
@@ -981,7 +981,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "NUMS384E") == 0)
     {
         curve = 14;
-        printf("Curve= NUMS384E\n");
+        printf("Curve is NUMS384E\n");
         strcpy(fieldname, "384PM");
         mbits = 384;
         words = (1 + ((mbits - 1) / bb));
@@ -1001,7 +1001,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "NUMS512W") == 0)
     {
         curve = 15;
-        printf("Curve= NUMS512W\n");
+        printf("Curve is NUMS512W\n");
         strcpy(fieldname, "512PM");
         mbits = 512;
         words = (1 + ((mbits - 1) / bb));
@@ -1021,7 +1021,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "NUMS512E") == 0)
     {
         curve = 16;
-        printf("Curve= NUMS512E\n");
+        printf("Curve is NUMS512E\n");
         strcpy(fieldname, "512PM");
         mbits = 512;
         words = (1 + ((mbits - 1) / bb));
@@ -1042,7 +1042,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "SECP256K1") == 0)
     {   // SECP256K1
         curve = 17;
-        printf("Curve= SECP256K1\n");
+        printf("Curve is SECP256K1\n");
         strcpy(fieldname, "SECP256K1");
         mbits = 256;               // bits in modulus
         words = (1 + ((mbits - 1) / bb)); // words per Big
@@ -1103,7 +1103,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BN254") == 0)
     {
         curve = PS+0;
-        printf("Curve= BN254\n");
+        printf("Curve is BN254\n");
         strcpy(fieldname, curvename);
         mbits = 254;
         words = (1 + ((mbits - 1) / bb));
@@ -1172,7 +1172,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BN254CX") == 0)
     {
         curve = PS+1;
-        printf("Curve= BN254CX\n");
+        printf("Curve is BN254CX\n");
         strcpy(fieldname, curvename);
         mbits = 254;
         words = (1 + ((mbits - 1) / bb));
@@ -1235,7 +1235,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BLS12383") == 0)
     {
         curve = PS+2;
-        printf("Curve= BLS12383\n");
+        printf("Curve is BLS12383\n");
         strcpy(fieldname, curvename);
         mbits = 383;
         words = (1 + ((mbits - 1) / bb));
@@ -1318,7 +1318,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BLS12381") == 0)
     {
         curve = PS+3;
-        printf("Curve= BLS12381\n");
+        printf("Curve is BLS12381\n");
         strcpy(fieldname, curvename);
         mbits = 381;
         words = (1 + ((mbits - 1) / bb));
@@ -1464,7 +1464,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BLS12461") == 0)
     {
         curve = PS+6;
-        printf("Curve= BLS12461\n");
+        printf("Curve is BLS12461\n");
         strcpy(fieldname, curvename);
         mbits = 461;
         words = (1 + ((mbits - 1) / bb));
@@ -1537,7 +1537,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BN462") == 0)
     {
         curve = PS+7;
-        printf("Curve= BN462\n");
+        printf("Curve is BN462\n");
         strcpy(fieldname, curvename);
         mbits = 462;
         words = (1 + ((mbits - 1) / bb));
@@ -1622,7 +1622,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "FP256BN") == 0)
     {
         curve = PS+4;
-        printf("Curve= FP256BN\n");
+        printf("Curve is FP256BN\n");
         strcpy(fieldname, curvename);
         mbits = 256;
         words = (1 + ((mbits - 1) / bb));
@@ -1687,7 +1687,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "FP512BN") == 0)
     {
         curve = PS+5;
-        printf("Curve= FP512BN\n");
+        printf("Curve is FP512BN\n");
         strcpy(fieldname, curvename);
         mbits = 512;
         words = (1 + ((mbits - 1) / bb));
@@ -1753,7 +1753,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BLS24479") == 0)
     {
         curve = PS+8;
-        printf("Curve= BLS24479\n");
+        printf("Curve is BLS24479\n");
         strcpy(fieldname, curvename);
 
         mbits = 479;
@@ -1856,7 +1856,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BLS48556") == 0)
     {
         curve = PS+9;
-        printf("Curve= BLS48556\n");
+        printf("Curve is BLS48556\n");
         strcpy(fieldname, curvename);
 
         mbits = 556;
@@ -1967,7 +1967,7 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BLS48581") == 0)
     {
         curve = PS+10;
-        printf("Curve= BLS48581\n");
+        printf("Curve is BLS48581\n");
         strcpy(fieldname, curvename);
 
         mbits = 581;
@@ -2392,8 +2392,9 @@ int main(int argc, char **argv)
     m = pow((Big)2, bb);
 
 //    cout << "p mod 3= " << p%3 << endl;
-    cout << "//*** rom field parameters*****" << endl;
-    cout << "// Base Bits= " << bb << endl;
+    cout << "//*** rom field parameters *****" << endl;
+    cout << "// Chunk bits= " << chunk << endl;
+    cout << "// Base  bits= " << bb << endl;
 
     cout << pre7 << toupperit((char *)"Modulus", lang) << post7; mc = output(chunk, words, p, m); cout << term << endl;
     r2modp = pow((Big)2, 2 * words * bb) % p;
