@@ -1042,8 +1042,6 @@ public final class ECP {
             int sgn=t.sign();
             int rfc=0;
 
-        System.out.print("t= "+t.toString()+"\n");
-
             if (CONFIG_FIELD.MODTYPE != CONFIG_FIELD.GENERALISED_MERSENNE )
             {
                 A=new FP(B);

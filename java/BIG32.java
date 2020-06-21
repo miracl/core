@@ -229,6 +229,25 @@ public class BIG {
         long t, co;
         DBIG c = new DBIG(0);
 
+/*
+        boolean chekit=false;
+        for (int i=0;i<NLEN-1;i++ )
+        {
+            int carry=(a.w[i]>>CONFIG_BIG.BASEBITS);
+            if (carry!=0)
+            {
+                chekit=true;
+                break;
+            }
+            carry=(b.w[i]>>CONFIG_BIG.BASEBITS);
+            if (carry!=0)
+            {
+                chekit=true;
+                break;
+            }
+        }
+        if (chekit) System.out.println("Overflow in mul ********************** ");
+*/
 //BIGMULS++;
 
         long[] d = new long[NLEN];
@@ -258,7 +277,19 @@ public class BIG {
         int i, j, last;
         long t, co;
         DBIG c = new DBIG(0);
-
+/*
+        boolean chekit=false;
+        for (i=0;i<NLEN-1;i++ )
+        {
+            int carry=(a.w[i]>>CONFIG_BIG.BASEBITS);
+            if (carry!=0)
+            {
+                chekit=true;
+                break;
+            }
+        }
+        if (chekit) System.out.println("Overflow in sqr ********************** ");
+*/
         t = (long)a.w[0] * a.w[0];
         c.w[0] = (int)t & BMASK; co = t >> CONFIG_BIG.BASEBITS;
 
