@@ -443,7 +443,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     FP_YYY_div2(&B,&B);    // (B-A)/2
     FP_YYY_div2(&B,&B);    // (B-A)/4
 
-    FP_YYY_neg(&K,&B);
+    FP_YYY_neg(&K,&B); FP_YYY_norm(&K);
     //FP_YYY_inv(&K,&K,NULL);    // K
     FP_YYY_invsqrt(&K,&w1,&K);
 

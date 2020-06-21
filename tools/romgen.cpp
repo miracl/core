@@ -1721,9 +1721,10 @@ int main(int argc, char **argv)
 
         cru = p - (18 * pow(x, 3) + 18 * x * x + 9 * x + 2);
 
-        sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
+        sqrtm3=p - (36*pow(x,3) + 36*x*x + 18*x + 3);
 //        cout << "sign= " << sqrtm3%2 << endl;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
+//        cout << "p=   " << p << endl;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p << endl;
 /*
         ZZn Z=1;
         CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));

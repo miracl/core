@@ -1068,7 +1068,7 @@ public struct ECP {
                 B.div2()
 
                 K.copy(B)
-                K.neg()
+                K.neg(); K.norm()
                 //K.inverse(pNIL)
                 K.invsqrt(&K,&w1);
 

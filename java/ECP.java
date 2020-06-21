@@ -1042,6 +1042,8 @@ public final class ECP {
             int sgn=t.sign();
             int rfc=0;
 
+        System.out.print("t= "+t.toString()+"\n");
+
             if (CONFIG_FIELD.MODTYPE != CONFIG_FIELD.GENERALISED_MERSENNE )
             {
                 A=new FP(B);
@@ -1059,7 +1061,8 @@ public final class ECP {
                 B.div2();
 
                 K.copy(B);
-                K.neg();
+                K.neg(); K.norm();
+ 
                 //K.inverse(null);
                 K.invsqrt(K,w1);
 
@@ -1072,6 +1075,7 @@ public final class ECP {
                 } else {
                     B.sqr();
                 }
+
             } else {
                 A=new FP(156326);
                 rfc=1;

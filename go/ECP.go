@@ -1249,8 +1249,8 @@ func ECP_map2point(h *FP) *ECP {
 				B.div2()
 				B.div2()
 
-				K.copy(B);
-				K.neg()
+				K.copy(B)
+				K.neg(); K.norm()
 				//K.inverse(nil)
 				K.invsqrt(K,w1);
 

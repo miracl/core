@@ -1392,7 +1392,7 @@ var ECP = function(ctx) {
                 B.div2();
 
                 K.copy(B);
-                K.neg();
+                K.neg(); K.norm();
                 //K.inverse(null);
                 K.invsqrt(K,w1);
 

@@ -74,7 +74,7 @@ public class TesttimeECDH extends TestCase {
         s = BIG.randtrunc(r, 16 * CONFIG_CURVE.AESKEY, rng);
 
         WP = ECP.map2point(new FP(rng));
-        //System.out.print("WP= "+WP.toString()+"\n");
+//        System.out.print("WP= "+WP.toString()+"\n");
         WP.cfp();
         if (WP.is_infinity()) {
             fail("HASHING FAILURE - P=O");

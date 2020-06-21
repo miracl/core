@@ -1232,7 +1232,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_div2(&B,&B);    // (B-A)/2     // (-a+d)/2
     FP_div2(&B,&B);    // (B-A)/4     // (-a+d)/4 = -1/K
 
-    FP_neg(&K,&B);
+    FP_neg(&K,&B); FP_norm(&K);
     //FP_inv(&K,&K,NULL);    // K
     FP_invsqrt(&K,&w1,&K);
 

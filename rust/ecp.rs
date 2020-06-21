@@ -1304,7 +1304,7 @@ impl ECP {
                 B.div2();
 
                 K.copy(&B);
-                K.neg();
+                K.neg(); K.norm();
                 //K.inverse(None);
                 K.invsqrt(&mut w2,&mut w1);
                 K.copy(&w2);
