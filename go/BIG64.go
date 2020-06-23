@@ -467,9 +467,14 @@ func (r *BIG) tobytearray(b []byte, n int) {
 /* convert from byte array to BIG */
 func frombytearray(b []byte, n int) *BIG {
 	m := NewBIG()
+	l := len(b)
 	for i := 0; i < int(MODBYTES); i++ {
 		m.fshl(8)
-		m.w[0] += Chunk(int(b[i+n] & 0xff))
+		if i < l {
+			m.w[0] += Chunk(int(b[i+n] & 0xff))
+		} else {
+			m.w[0] += Chunk(int(0 & 0xff))
+		}
 	}
 	return m
 }
