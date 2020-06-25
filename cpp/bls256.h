@@ -32,7 +32,7 @@
 #ifndef BLS256_ZZZ_H
 #define BLS256_ZZZ_H
 
-#include "pair256_ZZZ.h"
+#include "pair8_ZZZ.h"
 
 using namespace core;
 

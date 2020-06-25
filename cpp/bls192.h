@@ -32,7 +32,7 @@
 #ifndef BLS192_ZZZ_H
 #define BLS192_ZZZ_H
 
-#include "pair192_ZZZ.h"
+#include "pair4_ZZZ.h"
 
 using namespace core;
 

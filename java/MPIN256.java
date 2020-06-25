@@ -93,7 +93,7 @@ public class MPIN256 {
         px.add(py);
         px.mod(r);
 
-        P = PAIR256.G1mul(P, px);
+        P = PAIR8.G1mul(P, px);
         P.neg();
         P.toBytes(SEC, false);
         return 0;
@@ -105,7 +105,7 @@ public class MPIN256 {
         BIG s = BIG.fromBytes(S);
         ECP P = ECP.fromBytes(IDHTC);
         if (P.is_infinity()) return INVALID_POINT;
-        PAIR256.G1mul(P, s).toBytes(CST, false);
+        PAIR8.G1mul(P, s).toBytes(CST, false);
         return 0;
     }
 
@@ -132,7 +132,7 @@ public class MPIN256 {
         W = P.pinmul(pin, PBLEN);
         T.add(W);
  
-        P = PAIR256.G1mul(P, x);
+        P = PAIR8.G1mul(P, x);
         P.toBytes(xID, false);
        
         T.toBytes(SEC, false);
@@ -143,7 +143,7 @@ public class MPIN256 {
     public static int GET_SERVER_SECRET(byte[] S, byte[] SST) {
         ECP8 Q = ECP8.generator();
         BIG s = BIG.fromBytes(S);
-        Q = PAIR256.G2mul(Q, s);
+        Q = PAIR8.G2mul(Q, s);
         Q.toBytes(SST, false);
         return 0;
     }
@@ -167,14 +167,14 @@ public class MPIN256 {
 
         if (P.is_infinity()) return INVALID_POINT;
 
-        P = PAIR256.G1mul(P, y);
+        P = PAIR8.G1mul(P, y);
         P.add(R);
         R = ECP.fromBytes(mSEC);
         if (R.is_infinity()) return INVALID_POINT;
 
         FP48 g;
-        g = PAIR256.ate2(Q, R, sQ, P);
-        g = PAIR256.fexp(g);
+        g = PAIR8.ate2(Q, R, sQ, P);
+        g = PAIR8.fexp(g);
         if (!g.isunity()) {
             return BAD_PIN;
         }

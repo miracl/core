@@ -100,7 +100,7 @@ public struct MPIN192
         px.add(py)
         px.mod(r)
 
-        P=PAIR192.G1mul(P,px)
+        P=PAIR4.G1mul(P,px)
         P.neg()
         P.toBytes(&SEC,false);
         return 0
@@ -111,7 +111,7 @@ public struct MPIN192
         let s=BIG.fromBytes(S)
         let P=ECP.fromBytes(IDHTC);
         if P.is_infinity() {return INVALID_POINT}
-        PAIR192.G1mul(P,s).toBytes(&CST,false)
+        PAIR4.G1mul(P,s).toBytes(&CST,false)
         return 0
     }
 
@@ -139,7 +139,7 @@ public struct MPIN192
         let W=P.pinmul(pin%MPIN192.MAXPIN,MPIN192.PBLEN)
         T.add(W)
 
-		P=PAIR192.G1mul(P,x)
+		P=PAIR4.G1mul(P,x)
 		P.toBytes(&xID,false)
           
         T.toBytes(&SEC,false);
@@ -150,7 +150,7 @@ public struct MPIN192
     {
         var Q=ECP4.generator();
         let s=BIG.fromBytes(S)
-        Q=PAIR192.G2mul(Q,s)
+        Q=PAIR4.G2mul(Q,s)
         Q.toBytes(&SST, false)
         return 0
     }
@@ -173,13 +173,13 @@ public struct MPIN192
         
         if P.is_infinity() {return INVALID_POINT}
 
-        P=PAIR192.G1mul(P,y)
+        P=PAIR4.G1mul(P,y)
         P.add(R);
         R=ECP.fromBytes(mSEC)
         if R.is_infinity() {return MPIN192.INVALID_POINT}
 
-        var g=PAIR192.ate2(Q,R,sQ,P)
-        g=PAIR192.fexp(g)
+        var g=PAIR4.ate2(Q,R,sQ,P)
+        g=PAIR4.fexp(g)
 
         if !g.isunity()
         {

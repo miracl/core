@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef PAIR192_ZZZ_H
-#define PAIR192_ZZZ_H
+#ifndef PAIR4_ZZZ_H
+#define PAIR4_ZZZ_H
 
 #include "fp24_YYY.h"
 #include "ecp4_ZZZ.h"

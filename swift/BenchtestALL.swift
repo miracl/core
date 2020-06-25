@@ -322,7 +322,7 @@ public func TimeMPIN_bn254(_ rng: inout RAND)
     if bn254.CONFIG_CURVE.CURVE_PAIRING_TYPE==bn254.CONFIG_CURVE.BN {
         print("BN Pairing-Friendly Curve")
     }
-    if bn254.CONFIG_CURVE.CURVE_PAIRING_TYPE==bn254.CONFIG_CURVE.BLS {
+    if bn254.CONFIG_CURVE.CURVE_PAIRING_TYPE > bn254.CONFIG_CURVE.BN {
         print("BLS Pairing-Friendly Curve")
     }
     print("Modulus size \(bn254.CONFIG_FIELD.MODBITS) bits")
@@ -498,7 +498,7 @@ public func TimeMPIN_bls12383(_ rng: inout RAND)
     if bls12383.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls12383.CONFIG_CURVE.BN {
         print("BN Pairing-Friendly Curve")
     }
-    if bls12383.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls12383.CONFIG_CURVE.BLS {
+    if bls12383.CONFIG_CURVE.CURVE_PAIRING_TYPE > bls12383.CONFIG_CURVE.BN {
         print("BLS Pairing-Friendly Curve")
     }
     print("Modulus size \(bls12383.CONFIG_FIELD.MODBITS) bits")
@@ -676,7 +676,7 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
     if bls24479.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls24479.CONFIG_CURVE.BN {
         print("BN Pairing-Friendly Curve")
     }
-    if bls24479.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls24479.CONFIG_CURVE.BLS {
+    if bls24479.CONFIG_CURVE.CURVE_PAIRING_TYPE > bls24479.CONFIG_CURVE.BN {
         print("bls24479 Pairing-Friendly Curve")
     }
     print("Modulus size \(bls24479.CONFIG_FIELD.MODBITS) bits")
@@ -693,7 +693,7 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
         fail=true;
     }
 
-    P=bls24479.PAIR192.G1mul(G,r);
+    P=bls24479.PAIR4.G1mul(G,r);
 
     if !P.is_infinity() {
         print("FAILURE - rP!=O")
@@ -704,7 +704,7 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
     var iterations=0
     var elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        P=bls24479.PAIR192.G1mul(G,s)
+        P=bls24479.PAIR4.G1mul(G,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -720,13 +720,13 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
         print("HASHING FAILURE - P=O")
         fail=true
     }
-    W = bls24479.PAIR192.G2mul(W, r);
+    W = bls24479.PAIR4.G2mul(W, r);
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
         fail=true
     }
 
-    W=PAIR192.G2mul(Q,r)
+    W=PAIR4.G2mul(Q,r)
 
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
@@ -737,7 +737,7 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        W=PAIR192.G2mul(Q,s)
+        W=PAIR4.G2mul(Q,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -745,10 +745,10 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
     print(String(format: "G2  mul              - %d iterations",iterations),terminator: "");
     print(String(format: " %.2f ms per iteration",elapsed))
 
-    var w=PAIR192.ate(Q,P)
-    w=PAIR192.fexp(w)
+    var w=PAIR4.ate(Q,P)
+    w=PAIR4.fexp(w)
 
-    var g=PAIR192.GTpow(w,r)
+    var g=PAIR4.GTpow(w,r)
 
     if !g.isunity() {
         print("FAILURE - g^r!=1")
@@ -759,7 +759,7 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        g=PAIR192.GTpow(w,s)
+        g=PAIR4.GTpow(w,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -771,7 +771,7 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        w=PAIR192.ate(Q,P)
+        w=PAIR4.ate(Q,P)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -783,7 +783,7 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        g=PAIR192.fexp(w)
+        g=PAIR4.fexp(w)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -794,26 +794,26 @@ public func TimeMPIN_bls24479(_ rng: inout RAND)
     P.copy(G)
     Q.copy(W)
 
-    P=PAIR192.G1mul(P,s)
-    g=PAIR192.ate(Q,P)
-    g=PAIR192.fexp(g)
+    P=PAIR4.G1mul(P,s)
+    g=PAIR4.ate(Q,P)
+    g=PAIR4.fexp(g)
 
     P.copy(G)
-    Q=PAIR192.G2mul(Q,s)
-    w=PAIR192.ate(Q,P)
-    w=PAIR192.fexp(w)
+    Q=PAIR4.G2mul(Q,s)
+    w=PAIR4.ate(Q,P)
+    w=PAIR4.fexp(w)
 
-    if !PAIR192.G1member(P) {
+    if !PAIR4.G1member(P) {
         print("FAILURE - P is not in G1")
         fail=true
     }
 
-    if !PAIR192.G2member(Q) {
+    if !PAIR4.G2member(Q) {
         print("FAILURE - Q is not in G2")
         fail=true
     }
 
-    if !PAIR192.GTmember(w) {
+    if !PAIR4.GTmember(w) {
         print("FAILURE - e(Q,P) is not in GT")
         fail=true
     }
@@ -839,7 +839,7 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
     if bls48556.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls48556.CONFIG_CURVE.BN {
         print("BN Pairing-Friendly Curve")
     }
-    if bls48556.CONFIG_CURVE.CURVE_PAIRING_TYPE==bls48556.CONFIG_CURVE.BLS {
+    if bls48556.CONFIG_CURVE.CURVE_PAIRING_TYPE > bls48556.CONFIG_CURVE.BN {
         print("bls48556 Pairing-Friendly Curve")
     }
     print("Modulus size \(bls48556.CONFIG_FIELD.MODBITS) bits")
@@ -856,7 +856,7 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
         fail=true;
     }
 
-    P=PAIR256.G1mul(G,r);
+    P=PAIR8.G1mul(G,r);
 
     if !P.is_infinity() {
         print("FAILURE - rP!=O")
@@ -867,7 +867,7 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
     var iterations=0
     var elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        P=PAIR256.G1mul(G,s)
+        P=PAIR8.G1mul(G,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -883,13 +883,13 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
         print("HASHING FAILURE - P=O")
         fail=true
     }
-    W = bls48556.PAIR256.G2mul(W, r);
+    W = bls48556.PAIR8.G2mul(W, r);
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
         fail=true
     }
 
-    W=PAIR256.G2mul(Q,r)
+    W=PAIR8.G2mul(Q,r)
 
     if !W.is_infinity() {
         print("FAILURE - rQ!=O")
@@ -900,7 +900,7 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        W=PAIR256.G2mul(Q,s)
+        W=PAIR8.G2mul(Q,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -908,10 +908,10 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
     print(String(format: "G2  mul              - %d iterations",iterations),terminator: "");
     print(String(format: " %.2f ms per iteration",elapsed))
 
-    var w=PAIR256.ate(Q,P)
-    w=PAIR256.fexp(w)
+    var w=PAIR8.ate(Q,P)
+    w=PAIR8.fexp(w)
 
-    var g=PAIR256.GTpow(w,r)
+    var g=PAIR8.GTpow(w,r)
 
     if !g.isunity() {
         print("FAILURE - g^r!=1")
@@ -922,7 +922,7 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        g=PAIR256.GTpow(w,s)
+        g=PAIR8.GTpow(w,s)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -934,7 +934,7 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        w=PAIR256.ate(Q,P)
+        w=PAIR8.ate(Q,P)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -946,7 +946,7 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
     iterations=0
     elapsed=0.0
     while elapsed<MIN_TIME || iterations<MIN_ITERS {
-        g=PAIR256.fexp(w)
+        g=PAIR8.fexp(w)
         iterations+=1
         elapsed = -start.timeIntervalSinceNow
     }
@@ -957,26 +957,26 @@ public func TimeMPIN_bls48556(_ rng: inout RAND)
     P.copy(G)
     Q.copy(W)
 
-    P=PAIR256.G1mul(P,s)
-    g=PAIR256.ate(Q,P)
-    g=PAIR256.fexp(g)
+    P=PAIR8.G1mul(P,s)
+    g=PAIR8.ate(Q,P)
+    g=PAIR8.fexp(g)
 
     P.copy(G)
-    Q=PAIR256.G2mul(Q,s)
-    w=PAIR256.ate(Q,P)
-    w=PAIR256.fexp(w)
+    Q=PAIR8.G2mul(Q,s)
+    w=PAIR8.ate(Q,P)
+    w=PAIR8.fexp(w)
 
-    if !PAIR256.G1member(P) {
+    if !PAIR8.G1member(P) {
         print("FAILURE - P is not in G1")
         fail=true
     }
 
-    if !PAIR256.G2member(Q) {
+    if !PAIR8.G2member(Q) {
         print("FAILURE - Q is not in G2")
         fail=true
     }
 
-    if !PAIR256.GTmember(w) {
+    if !PAIR8.GTmember(w) {
         print("FAILURE - e(Q,P) is not in GT")
         fail=true
     }

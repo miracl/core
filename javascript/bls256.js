@@ -70,7 +70,7 @@ var BLS256 = function(ctx) {
         init: function() {
             var G = ctx.ECP8.generator();
 			if (G.is_infinity()) return this.BLS_FAIL;
-            this.G2_TAB = ctx.PAIR256.precomp(G);
+            this.G2_TAB = ctx.PAIR8.precomp(G);
 			return this.BLS_OK;
         },
 
@@ -129,7 +129,7 @@ var BLS256 = function(ctx) {
             var s=dx.mod(r);
             s.toBytes(S);
 // SkToPk
-            G = ctx.PAIR256.G2mul(G, s);
+            G = ctx.PAIR8.G2mul(G, s);
             G.toBytes(W,true);
             return this.BLS_OK;
         },
@@ -139,7 +139,7 @@ var BLS256 = function(ctx) {
         core_sign: function(SIG, M, S) {
             var D = this.bls_hash_to_point(M);
             var s = ctx.BIG.fromBytes(S);
-            D = ctx.PAIR256.G1mul(D, s);
+            D = ctx.PAIR8.G1mul(D, s);
             D.toBytes(SIG, true);
             return this.BLS_OK;
         },
@@ -150,27 +150,27 @@ var BLS256 = function(ctx) {
             var HM = this.bls_hash_to_point(M);
 
             var D = ctx.ECP.fromBytes(SIG);
-            if (!ctx.PAIR256.G1member(D)) return this.BLS_FAIL;
+            if (!ctx.PAIR8.G1member(D)) return this.BLS_FAIL;
             D.neg();
 
             var PK = ctx.ECP8.fromBytes(W);
-            if (!ctx.PAIR256.G2member(PK)) return this.BLS_FAIL;
+            if (!ctx.PAIR8.G2member(PK)) return this.BLS_FAIL;
            
-            //if (!ctx.PAIR256.G2member(PK)) alert("Not a member");
+            //if (!ctx.PAIR8.G2member(PK)) alert("Not a member");
     //alert("PK= "+PK.toString());
 
             // Use new multi-pairing mechanism 
-            var r = ctx.PAIR256.initmp();
-            //			ctx.PAIR256.another(r,G,D);
-            ctx.PAIR256.another_pc(r, this.G2_TAB, D);
-            ctx.PAIR256.another(r, PK, HM);
-            var v = ctx.PAIR256.miller(r);
+            var r = ctx.PAIR8.initmp();
+            //			ctx.PAIR8.another(r,G,D);
+            ctx.PAIR8.another_pc(r, this.G2_TAB, D);
+            ctx.PAIR8.another(r, PK, HM);
+            var v = ctx.PAIR8.miller(r);
 
             //.. or alternatively
             //var G = ctx.ECP8.generator();
-            //var v=ctx.PAIR256.ate2(G,D,PK,HM);
+            //var v=ctx.PAIR8.ate2(G,D,PK,HM);
 
-            v = ctx.PAIR256.fexp(v);
+            v = ctx.PAIR8.fexp(v);
             if (v.isunity())
                 return this.BLS_OK;
             return this.BLS_FAIL;

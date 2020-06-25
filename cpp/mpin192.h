@@ -32,7 +32,7 @@
 #ifndef MPIN_ZZZ_H
 #define MPIN_ZZZ_H
 
-#include "pair192_ZZZ.h"
+#include "pair4_ZZZ.h"
 //#include "pbc_support.h"
 
 using namespace core;

@@ -45,7 +45,7 @@ public class TesttimeMPIN extends TestCase {
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
             System.out.print("BN Pairing-Friendly Curve\n");
         }
-        if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BLS) {
+        if (CONFIG_CURVE.CURVE_PAIRING_TYPE > CONFIG_CURVE.BN) {
             System.out.print("BLS Pairing-Friendly Curve\n");
         }
 

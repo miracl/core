@@ -609,7 +609,7 @@ void FP4_YYY_rand(FP4_YYY *x,csprng *rng)
     FP2_YYY_rand(&(x->b),rng);
 }
 
-#if CURVE_SECURITY_ZZZ >= 192
+#if PAIRING_FRIENDLY_ZZZ >= BLS24_CURVE
 
 /* test for x a QR */
 int FP4_YYY_qr(FP4_YYY *x)

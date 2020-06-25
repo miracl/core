@@ -84,7 +84,7 @@ public struct BLS192
     {
         let G=ECP4.generator()
         if G.is_infinity() {return BLS_FAIL}
-        G2_TAB=PAIR192.precomp(G)
+        G2_TAB=PAIR4.precomp(G)
         return BLS_OK
     }
 
@@ -109,7 +109,7 @@ public struct BLS192
         let s = dx.mod(r)
         s.toBytes(&S)
 // SkToPk
-        G=PAIR192.G2mul(G,s)
+        G=PAIR4.G2mul(G,s)
         G.toBytes(&W,true)
         return BLS_OK
     }
@@ -119,7 +119,7 @@ public struct BLS192
     {
         var D=bls_hash_to_point(M)
         let s=BIG.fromBytes(S)
-        D=PAIR192.G1mul(D,s)
+        D=PAIR4.G1mul(D,s)
         D.toBytes(&SIG,true)
         return BLS_OK
     }
@@ -131,23 +131,23 @@ public struct BLS192
         let HM=bls_hash_to_point(M)
 
         var D=ECP.fromBytes(SIG)
-        if !PAIR192.G1member(D) {return BLS_FAIL}
+        if !PAIR4.G1member(D) {return BLS_FAIL}
         D.neg()
 
         let PK=ECP4.fromBytes(W)
-        if !PAIR192.G2member(PK) {return BLS_FAIL}
+        if !PAIR4.G2member(PK) {return BLS_FAIL}
 
 // Use new multi-pairing mechanism
-        var r=PAIR192.initmp()
-        //PAIR192.another(&r,G,D)
-        PAIR192.another_pc(&r,G2_TAB,D)
-        PAIR192.another(&r,PK,HM)
-        var v=PAIR192.miller(&r)
+        var r=PAIR4.initmp()
+        //PAIR4.another(&r,G,D)
+        PAIR4.another_pc(&r,G2_TAB,D)
+        PAIR4.another(&r,PK,HM)
+        var v=PAIR4.miller(&r)
 
 //.. or alternatively
-//        var v=PAIR192.ate2(G,D,PK,HM)
+//        var v=PAIR4.ate2(G,D,PK,HM)
 
-        v=PAIR192.fexp(v)
+        v=PAIR4.fexp(v)
 
         if v.isunity() {
             return BLS_OK

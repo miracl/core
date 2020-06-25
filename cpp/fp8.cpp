@@ -623,7 +623,7 @@ void YYY::FP8_rand(FP8 *x,csprng *rng)
     FP4_rand(&(x->b),rng);
 }
 
-#if CURVE_SECURITY_ZZZ == 256
+#if PAIRING_FRIENDLY_ZZZ == BLS48_CURVE
 
 /* test for x a QR */
 int YYY::FP8_qr(FP8 *x)

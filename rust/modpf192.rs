@@ -27,5 +27,5 @@ pub mod fp24;
 pub mod fp4;
 pub mod fp8;
 pub mod mpin192;
-pub mod pair192;
+pub mod pair4;
 pub mod rom;

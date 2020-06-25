@@ -597,7 +597,7 @@ func (E *ECP2) Cfp() {
 		T.frob(X)
 		E.Add(T)
 	}
-	if CURVE_PAIRING_TYPE == BLS {
+	if CURVE_PAIRING_TYPE > BN {
 		xQ = E.mul(x)
 		x2Q = xQ.mul(x)
 

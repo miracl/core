@@ -73,7 +73,7 @@ public class BLS192 {
     public static int init() {
         ECP4 G = ECP4.generator();
         if (G.is_infinity()) return BLS_FAIL;
-        G2_TAB = PAIR192.precomp(G);
+        G2_TAB = PAIR4.precomp(G);
         return BLS_OK;
     }
 
@@ -96,7 +96,7 @@ public class BLS192 {
         BIG s=dx.mod(r);
         s.toBytes(S);
 // SkToPk
-        G = PAIR192.G2mul(G, s);
+        G = PAIR4.G2mul(G, s);
         G.toBytes(W,true);
         return BLS_OK;
     }
@@ -105,7 +105,7 @@ public class BLS192 {
     public static int core_sign(byte[] SIG, byte[] M, byte[] S) {
         ECP D = bls_hash_to_point(M);
         BIG s = BIG.fromBytes(S);
-        D = PAIR192.G1mul(D, s);
+        D = PAIR4.G1mul(D, s);
         D.toBytes(SIG, true);
         return BLS_OK;
     }
@@ -116,24 +116,24 @@ public class BLS192 {
         ECP HM = bls_hash_to_point(M);
 
         ECP D = ECP.fromBytes(SIG);
-        if (!PAIR192.G1member(D)) return BLS_FAIL;
+        if (!PAIR4.G1member(D)) return BLS_FAIL;
         D.neg();
 
         ECP4 PK = ECP4.fromBytes(W);
-        if (!PAIR192.G2member(PK)) return BLS_FAIL;
+        if (!PAIR4.G2member(PK)) return BLS_FAIL;
 
 // Use new multi-pairing mechanism
-        FP24[] r = PAIR192.initmp();
-        PAIR192.another_pc(r, G2_TAB, D);
-        PAIR192.another(r, PK, HM);
-        FP24 v = PAIR192.miller(r);
+        FP24[] r = PAIR4.initmp();
+        PAIR4.another_pc(r, G2_TAB, D);
+        PAIR4.another(r, PK, HM);
+        FP24 v = PAIR4.miller(r);
 
 //.. or alternatively
 //		ECP4 G=ECP4.generator();
 //		if (G.is_infinity()) return BLS_FAIL;
-//		FP24 v=PAIR192.ate2(G,D,PK,HM);
+//		FP24 v=PAIR4.ate2(G,D,PK,HM);
 
-        v = PAIR192.fexp(v);
+        v = PAIR4.fexp(v);
         if (v.isunity())
             return BLS_OK;
         return BLS_FAIL;

@@ -21,7 +21,7 @@
 
 package org.miracl.core.XXX;
 
-public final class PAIR192 {
+public final class PAIR4 {
 
 //	public static final boolean GT_STRONG=false;
 

@@ -756,7 +756,7 @@ void ZZZ::ECP2_cfp(ECP2 *Q)
     BIG x;
 #if (PAIRING_FRIENDLY_ZZZ == BN_CURVE)
     ECP2 T, K;
-#elif (PAIRING_FRIENDLY_ZZZ == BLS_CURVE)
+#elif (PAIRING_FRIENDLY_ZZZ > BN_CURVE)
     ECP2 xQ, x2Q;
 #endif
     FP_rcopy(&Fx, Fra);
@@ -792,7 +792,7 @@ void ZZZ::ECP2_cfp(ECP2 *Q)
     ECP2_frob(&T, &X);
     ECP2_frob(&T, &X);
     ECP2_add(Q, &T);
-#elif (PAIRING_FRIENDLY_ZZZ == BLS_CURVE)
+#elif (PAIRING_FRIENDLY_ZZZ > BN_CURVE)
 
     // Efficient hash maps to G2 on BLS curves - Budroni, Pintore
     // Q -> x2Q -xQ -Q +F(xQ -Q) +F(F(2Q))

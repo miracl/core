@@ -32,7 +32,7 @@
 #ifndef BLS_ZZZ_H
 #define BLS_ZZZ_H
 
-#include "pair192_ZZZ.h"
+#include "pair4_ZZZ.h"
 
 /* Field size is assumed to be greater than or equal to group size */
 

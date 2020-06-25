@@ -28,5 +28,5 @@ pub mod fp4;
 pub mod fp48;
 pub mod fp8;
 pub mod mpin256;
-pub mod pair256;
+pub mod pair8;
 pub mod rom;

@@ -23,7 +23,9 @@ public struct CONFIG_CURVE{
     static public let MONTGOMERY=2
     static public let NOT=0
     static public let BN=1
-    static public let BLS=2
+    static public let BLS12=2
+    static public let BLS24=3
+    static public let BLS48=4
     static public let D_TYPE=0
     static public let M_TYPE=1
     static public let POSITIVEX=0

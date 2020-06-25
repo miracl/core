@@ -25,7 +25,9 @@ public class CONFIG_CURVE {
     public static final int MONTGOMERY = 2;
     public static final int NOT = 0;
     public static final int BN = 1;
-    public static final int BLS = 2;
+    public static final int BLS12 = 2;
+    public static final int BLS24 = 3;
+    public static final int BLS48 = 4;
     public static final int D_TYPE = 0;
     public static final int M_TYPE = 1;
     public static final int POSITIVEX = 0;

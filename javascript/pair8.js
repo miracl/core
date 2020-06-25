@@ -17,10 +17,10 @@
  * limitations under the License.
  */
 
-var PAIR256 = function(ctx) {
+var PAIR8 = function(ctx) {
     "use strict";
 
-    var PAIR256 = {
+    var PAIR8 = {
 		dbl: function(A,AA,BB,CC) {
             CC.copy(A.getx());
             var YY = new ctx.FP8(A.gety());
@@ -98,9 +98,9 @@ var PAIR256 = function(ctx) {
 			var BB=new ctx.FP8(0);
 			var CC=new ctx.FP8(0);
             if (A == B) 
-				PAIR256.dbl(A,AA,BB,CC);
+				PAIR8.dbl(A,AA,BB,CC);
 			else
-				PAIR256.add(A,B,AA,BB,CC);
+				PAIR8.add(A,B,AA,BB,CC);
 
 			CC.tmul(Qx);
 			AA.tmul(Qy);
@@ -181,7 +181,7 @@ var PAIR256 = function(ctx) {
 		precomp : function(QV) {
 			var n=new ctx.BIG(0);
 			var n3=new ctx.BIG(0);
-			var nb=PAIR256.lbits(n3,n);
+			var nb=PAIR8.lbits(n3,n);
 			var P=new ctx.ECP8(); P.copy(QV);
 			var AA=new ctx.FP8(0);
 			var BB=new ctx.FP8(0);
@@ -197,19 +197,19 @@ var PAIR256 = function(ctx) {
 			var T=[];
 			for (var i=nb-2;i>=1;i--)
 			{
-				PAIR256.dbl(A,AA,BB,CC);
-				T[j++]=PAIR256.pack(AA,BB,CC);
+				PAIR8.dbl(A,AA,BB,CC);
+				T[j++]=PAIR8.pack(AA,BB,CC);
 
 				bt=n3.bit(i)-n.bit(i); 
 				if (bt==1)
 				{
-					PAIR256.add(A,P,AA,BB,CC);
-					T[j++]=PAIR256.pack(AA,BB,CC);
+					PAIR8.add(A,P,AA,BB,CC);
+					T[j++]=PAIR8.pack(AA,BB,CC);
 				}
 				if (bt==-1)
 				{
-					PAIR256.add(A,MP,AA,BB,CC);
-					T[j++]=PAIR256.pack(AA,BB,CC);
+					PAIR8.add(A,MP,AA,BB,CC);
+					T[j++]=PAIR8.pack(AA,BB,CC);
 				}
 			}
 			return T;
@@ -219,7 +219,7 @@ var PAIR256 = function(ctx) {
 		another_pc(r,T,QV) {
 			var n=new ctx.BIG(0);
 			var n3=new ctx.BIG(0);
-			var nb=PAIR256.lbits(n3,n);
+			var nb=PAIR8.lbits(n3,n);
 			var lv,lv2;
 			var j,bt;
 
@@ -232,16 +232,16 @@ var PAIR256 = function(ctx) {
 			j=0;
 			for (var i=nb-2;i>=1;i--)
 			{
-				lv=PAIR256.unpack(T[j++],Qx,Qy);
+				lv=PAIR8.unpack(T[j++],Qx,Qy);
 				bt=n3.bit(i)-n.bit(i); 
 				if (bt==1)
 				{
-					lv2=PAIR256.unpack(T[j++],Qx,Qy);
+					lv2=PAIR8.unpack(T[j++],Qx,Qy);
 					lv.smul(lv2);
 				}
 				if (bt==-1)
 				{
-					lv2=PAIR256.unpack(T[j++],Qx,Qy);
+					lv2=PAIR8.unpack(T[j++],Qx,Qy);
 					lv.smul(lv2);
 				}
 				r[i].ssmul(lv);
@@ -274,21 +274,21 @@ var PAIR256 = function(ctx) {
 			var MP=new ctx.ECP8();
 			MP.copy(P); MP.neg();
 
-			var nb=PAIR256.lbits(n3,n);
+			var nb=PAIR8.lbits(n3,n);
 
 			for (var i=nb-2;i>=1;i--)
 			{
-				lv=PAIR256.line(A,A,Qx,Qy);
+				lv=PAIR8.line(A,A,Qx,Qy);
 
 				bt=n3.bit(i)-n.bit(i); 
 				if (bt==1)
 				{
-					lv2=PAIR256.line(A,P,Qx,Qy);
+					lv2=PAIR8.line(A,P,Qx,Qy);
 					lv.smul(lv2);
 				}
 				if (bt==-1)
 				{
-					lv2=PAIR256.line(A,MP,Qx,Qy);
+					lv2=PAIR8.line(A,MP,Qx,Qy);
 					lv.smul(lv2);
 				}
 				r[i].ssmul(lv);
@@ -321,19 +321,19 @@ var PAIR256 = function(ctx) {
 			NP.neg();
 
 
-            nb = PAIR256.lbits(n3,n);
+            nb = PAIR8.lbits(n3,n);
 
             for (i = nb - 2; i >= 1; i--) {
                 r.sqr();
-                lv = PAIR256.line(A, A, Qx, Qy);
+                lv = PAIR8.line(A, A, Qx, Qy);
                 bt=n3.bit(i)-n.bit(i);
 
                 if (bt == 1) {
-                    lv2 = PAIR256.line(A, P, Qx, Qy);
+                    lv2 = PAIR8.line(A, P, Qx, Qy);
                     lv.smul(lv2);
                 }
                 if (bt == -1) {
-                    lv2 = PAIR256.line(A, NP, Qx, Qy);
+                    lv2 = PAIR8.line(A, NP, Qx, Qy);
                     lv.smul(lv2);
                 }
                 r.ssmul(lv);
@@ -352,8 +352,8 @@ var PAIR256 = function(ctx) {
                 Qx, Qy, Sx, Sy, A, B, NP, NR, r, nb, bt,
                 i;
 
-			if (Q1.is_infinity()) return PAIR256.ate(R1,S1);
-			if (S1.is_infinity()) return PAIR256.ate(P1,Q1);
+			if (Q1.is_infinity()) return PAIR8.ate(R1,S1);
+			if (S1.is_infinity()) return PAIR8.ate(P1,Q1);
 
             n = new ctx.BIG(0);
 			n3 = new ctx.BIG(0);
@@ -384,26 +384,26 @@ var PAIR256 = function(ctx) {
 			NR.neg();
 
 
-            nb = PAIR256.lbits(n3,n);
+            nb = PAIR8.lbits(n3,n);
 
             for (i = nb - 2; i >= 1; i--) {
                 r.sqr();
-                lv = PAIR256.line(A, A, Qx, Qy);
-                lv2 = PAIR256.line(B, B, Sx, Sy);
+                lv = PAIR8.line(A, A, Qx, Qy);
+                lv2 = PAIR8.line(B, B, Sx, Sy);
 				lv.smul(lv2);
                 r.ssmul(lv);
 
                 bt=n3.bit(i)-n.bit(i);
 
                 if (bt == 1) {
-                    lv = PAIR256.line(A, P, Qx, Qy);
-                    lv2 = PAIR256.line(B, R, Sx, Sy);
+                    lv = PAIR8.line(A, P, Qx, Qy);
+                    lv2 = PAIR8.line(B, R, Sx, Sy);
 					lv.smul(lv2);
                     r.ssmul(lv);
                 }
                 if (bt == -1) {
-                    lv = PAIR256.line(A, NP, Qx, Qy);
-                    lv2 = PAIR256.line(B, NR, Sx, Sy);
+                    lv = PAIR8.line(A, NP, Qx, Qy);
+                    lv2 = PAIR8.line(B, NR, Sx, Sy);
 					lv.smul(lv2);
                     r.ssmul(lv);
                 }
@@ -593,7 +593,7 @@ var PAIR256 = function(ctx) {
     };
 
 /* prepare ate parameter, n=6u+2 (BN) or n=u (BLS), n3=3*n */
-	PAIR256.lbits = function(n3,n)
+	PAIR8.lbits = function(n3,n)
 	{
 		n.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
 		n3.copy(n);
@@ -603,7 +603,7 @@ var PAIR256 = function(ctx) {
 	};
 
     /* GLV method */
-    PAIR256.glv = function(e) {
+    PAIR8.glv = function(e) {
         var u = [],
             q, x, x2;
 
@@ -625,7 +625,7 @@ var PAIR256 = function(ctx) {
     };
 
     /* Galbraith & Scott Method */
-    PAIR256.gs = function(e) {
+    PAIR8.gs = function(e) {
         var u = [],
             i, q, x, w;
 
@@ -658,7 +658,7 @@ var PAIR256 = function(ctx) {
     };
 
     /* Multiply P by e in group G1 */
-    PAIR256.G1mul = function(P, e) {
+    PAIR8.G1mul = function(P, e) {
         var R, Q, q, bcru, cru, t, u, np, nn;
 
         if (ctx.ROM_CURVE.USE_GLV) {
@@ -672,7 +672,7 @@ var PAIR256 = function(ctx) {
             bcru.rcopy(ctx.ROM_FIELD.CRu);
             cru = new ctx.FP(bcru);
             t = new ctx.BIG(0);
-            u = PAIR256.glv(e);
+            u = PAIR8.glv(e);
 
             Q.getx().mul(cru);
 
@@ -702,7 +702,7 @@ var PAIR256 = function(ctx) {
     };
 
     /* Multiply P by e in group G2 */
-    PAIR256.G2mul = function(P, e) {
+    PAIR8.G2mul = function(P, e) {
         var R, Q, F, q, u, t, i, np, nn;
 
         if (ctx.ROM_CURVE.USE_GS_G2) {
@@ -712,7 +712,7 @@ var PAIR256 = function(ctx) {
             q = new ctx.BIG(0);
             q.rcopy(ctx.ROM_CURVE.CURVE_Order);
 
-            u = PAIR256.gs(e);
+            u = PAIR8.gs(e);
             t = new ctx.BIG(0);
           
             Q[0] = new ctx.ECP8();
@@ -744,7 +744,7 @@ var PAIR256 = function(ctx) {
     };
 
     /* Note that this method requires a lot of RAM!  */
-    PAIR256.GTpow = function(d, e) {
+    PAIR8.GTpow = function(d, e) {
         var r, g, fa, fb, f, q, t, u, i, np, nn;
 
         if (ctx.ROM_CURVE.USE_GS_GT) {
@@ -757,7 +757,7 @@ var PAIR256 = function(ctx) {
             q = new ctx.BIG(0);
             q.rcopy(ctx.ROM_CURVE.CURVE_Order);
             t = new ctx.BIG(0);
-            u = PAIR256.gs(e);
+            u = PAIR8.gs(e);
 
             g[0] = new ctx.FP48(d);
 
@@ -788,29 +788,29 @@ var PAIR256 = function(ctx) {
     };
 
 /* test G1 group membership */
-    PAIR256.G1member=function(P)
+    PAIR8.G1member=function(P)
     {
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         if (P.is_infinity()) return false;
-        var W=PAIR256.G1mul(P,q);
+        var W=PAIR8.G1mul(P,q);
         if (!W.is_infinity()) return false;
         return true;
     }
 /* test G2 group membership */
-    PAIR256.G2member=function(P)
+    PAIR8.G2member=function(P)
     {
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         if (P.is_infinity()) return false;
-        var W=PAIR256.G2mul(P,q);
+        var W=PAIR8.G2mul(P,q);
         if (!W.is_infinity()) return false;
         return true;
     }
 /* test group membership - no longer needed */
 /* Check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
 
-    PAIR256.GTmember= function(m)
+    PAIR8.GTmember= function(m)
     {
         if (m.isunity()) return false;
         var r=new ctx.FP48(m);
@@ -831,11 +831,11 @@ var PAIR256 = function(ctx) {
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
 
         w.copy(m); 
-        r.copy(PAIR256.GTpow(w,q));
+        r.copy(PAIR8.GTpow(w,q));
         if (!r.isunity()) return false;
         return true;
     };
 
 
-    return PAIR256;
+    return PAIR8;
 };

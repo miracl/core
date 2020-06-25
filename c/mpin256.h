@@ -32,7 +32,7 @@
 #ifndef MPIN_ZZZ_H
 #define MPIN_ZZZ_H
 
-#include "pair256_ZZZ.h"
+#include "pair8_ZZZ.h"
 
 /* Field size is assumed to be greater than or equal to group size */
 

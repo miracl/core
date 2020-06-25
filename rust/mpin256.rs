@@ -23,7 +23,7 @@ use crate::xxx::ecp;
 use crate::xxx::ecp::ECP;
 use crate::xxx::ecp8::ECP8;
 use crate::xxx::fp48::FP48;
-use crate::xxx::pair256;
+use crate::xxx::pair8;
 use crate::xxx::rom;
 use crate::xxx::fp::FP;
 use crate::xxx::dbig::DBIG;
@@ -115,7 +115,7 @@ pub fn client_2(x: &[u8], y: &[u8], sec: &mut [u8]) -> isize {
     px.add(&py);
     px.rmod(&mut r);
 
-    P = pair256::g1mul(&P, &px);
+    P = pair8::g1mul(&P, &px);
     P.neg();
     P.tobytes(sec, false);
     return 0;
@@ -129,7 +129,7 @@ pub fn get_client_secret(s: &mut [u8], idhtc: &[u8], cst: &mut [u8]) -> isize {
     if P.is_infinity() {
         return INVALID_POINT;
     }
-    pair256::g1mul(&P, &sx).tobytes(cst, false);
+    pair8::g1mul(&P, &sx).tobytes(cst, false);
     return 0;
 }
 
@@ -166,7 +166,7 @@ pub fn client_1(
     let mut W = P.pinmul((pin as i32) % MAXPIN, PBLEN);
     T.add(&mut W);
 
-    P = pair256::g1mul(&P, &sx);
+    P = pair8::g1mul(&P, &sx);
     P.tobytes(xid, false);
 
     T.tobytes(sec, false);
@@ -179,7 +179,7 @@ pub fn client_1(
 pub fn get_server_secret(s: &[u8], sst: &mut [u8]) -> isize {
     let mut Q = ECP8::generator();
     let sc = BIG::frombytes(s);
-    Q = pair256::g2mul(&Q, &sc);
+    Q = pair8::g2mul(&Q, &sc);
     Q.tobytes(sst,false);
     return 0;
 }
@@ -209,7 +209,7 @@ pub fn server(
         return INVALID_POINT;
     }
 
-    P = pair256::g1mul(&P, &sy);
+    P = pair8::g1mul(&P, &sy);
     P.add(&mut R);
     R = ECP::frombytes(&msec);
     if R.is_infinity() {
@@ -217,8 +217,8 @@ pub fn server(
     }
 
     let mut g: FP48;
-    g = pair256::ate2(&Q, &R, &sQ, &P);
-    g = pair256::fexp(&g);
+    g = pair8::ate2(&Q, &R, &sQ, &P);
+    g = pair8::fexp(&g);
 
     if !g.isunity() {
         return BAD_PIN;

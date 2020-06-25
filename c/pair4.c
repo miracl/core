@@ -21,7 +21,7 @@
 
 //#define HAS_MAIN
 
-#include "pair192_ZZZ.h"
+#include "pair4_ZZZ.h"
 
 // Point doubling for pairings
 static void PAIR_ZZZ_double(ECP4_ZZZ *A, FP4_YYY *AA, FP4_YYY *BB, FP4_YYY *CC)
@@ -825,7 +825,7 @@ using namespace std;
 using namespace ZZZ;
 
 
-// g++ -O2 pair192_BLS24.cpp ecp4_BLS24.cpp fp24_BLS24.cpp fp8_BLS24.cpp fp4_BLS24.cpp fp2_BLS24.cpp ecp_BLS24.cpp fp_BLS24.cpp big_XXX.cpp rom_curve_BLS24.cpp rom_field_BLS24.cpp rand.cpp hash.cpp oct.cpp -o pair192_BLS24.exe
+// g++ -O2 pair4_BLS24.cpp ecp4_BLS24.cpp fp24_BLS24.cpp fp8_BLS24.cpp fp4_BLS24.cpp fp2_BLS24.cpp ecp_BLS24.cpp fp_BLS24.cpp big_XXX.cpp rom_curve_BLS24.cpp rom_field_BLS24.cpp rand.cpp hash.cpp oct.cpp -o pair4_BLS24.exe
 
 int main()
 {

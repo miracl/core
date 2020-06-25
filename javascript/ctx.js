@@ -818,6 +818,33 @@ var CTX = function(input_parameter) {
             "@AK": 32
         },
 
+
+        "BLS48286": {
+            "BITS": "288",
+            "FIELD": "BLS48286",
+            "CURVE": "BLS48286",
+            "@NB": 36,
+            "@BASE": 23,
+            "@NBT": 286,
+            "@M8": 1,
+            "@RZ": 1,
+            "@RZ2": 1,     
+            "@MT": 0,
+			"@QI": 0,
+			"@TW": 0,
+            "@CT": 0,
+            "@CA": 0, 
+            "@PF": 4,
+            "@ST": 1,
+            "@SX": 0,
+            "@AB": 17,
+            "@HT": 32,
+			"@SH": 11, 
+            "@AK": 16
+        },
+
+
+
         "BLS48581": {
             "BITS": "584",
             "FIELD": "BLS48581",
@@ -989,7 +1016,7 @@ var CTX = function(input_parameter) {
             prepareModule("FP8");
             prepareModule("FP24");
             prepareModule("ECP4");
-            prepareModule("PAIR192");
+            prepareModule("PAIR4");
             prepareModule("MPIN192");
             prepareModule("BLS192");
         }
@@ -1001,7 +1028,7 @@ var CTX = function(input_parameter) {
             prepareModule("FP16");
             prepareModule("FP48");
             prepareModule("ECP8");
-            prepareModule("PAIR256");
+            prepareModule("PAIR8");
             prepareModule("MPIN256");
             prepareModule("BLS256");
         }

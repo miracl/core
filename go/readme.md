@@ -38,7 +38,7 @@ To create a 64-bit library
 
     python3 config64.py
 
-Then select options 1, 3, 7, 26, 28, 34, 35 and 37 (these are fixed for the example 
+Then select options 1, 3, 7, 26, 28, 34, 35 and 38 (these are fixed for the example 
 program provided). Select 0 to exit.
 
 Run the ECC test program by executing

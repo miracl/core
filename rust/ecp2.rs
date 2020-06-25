@@ -599,7 +599,7 @@ impl ECP2 {
             T.frob(&X);
             self.add(&T);
         }
-        if ecp::CURVE_PAIRING_TYPE == ecp::BLS {
+        if ecp::CURVE_PAIRING_TYPE > ecp::BN {
             let mut xQ = self.mul(&mut x);
             let mut x2Q = xQ.mul(&mut x);
 

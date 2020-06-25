@@ -45,7 +45,7 @@ public class TesttimeMPIN192 extends TestCase {
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
             System.out.print("BN Pairing-Friendly Curve\n");
         }
-        if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BLS) {
+        if (CONFIG_CURVE.CURVE_PAIRING_TYPE > CONFIG_CURVE.BN) {
             System.out.print("BLS24 Pairing-Friendly Curve\n");
         }
 
@@ -57,7 +57,7 @@ public class TesttimeMPIN192 extends TestCase {
         BIG r = new BIG(ROM.CURVE_Order);
         BIG s = BIG.randtrunc(r, 16 * CONFIG_CURVE.AESKEY, rng);
 
-        ECP P = PAIR192.G1mul(G, r);
+        ECP P = PAIR4.G1mul(G, r);
 
         if (!P.is_infinity()) {
             fail("FAILURE - rP!=O");
@@ -66,7 +66,7 @@ public class TesttimeMPIN192 extends TestCase {
         iterations = 0;
         start = System.currentTimeMillis();
         do {
-            P = PAIR192.G1mul(G, s);
+            P = PAIR4.G1mul(G, s);
             iterations++;
             elapsed = (System.currentTimeMillis() - start);
         } while (elapsed < MIN_TIME * 1000 || iterations < MIN_ITERS);
@@ -81,14 +81,14 @@ public class TesttimeMPIN192 extends TestCase {
         if (W.is_infinity()) {
             fail("HASHING FAILURE - P=O");
         }
-        W = PAIR192.G2mul(W, r);
+        W = PAIR4.G2mul(W, r);
         if (!W.is_infinity()) {
             fail("FAILURE - rQ!=O");
         }
 
 
 
-        W = PAIR192.G2mul(Q, r);
+        W = PAIR4.G2mul(Q, r);
 
         if (!W.is_infinity()) {
             fail("FAILURE - rQ!=O");
@@ -97,7 +97,7 @@ public class TesttimeMPIN192 extends TestCase {
         iterations = 0;
         start = System.currentTimeMillis();
         do {
-            W = PAIR192.G2mul(Q, s);
+            W = PAIR4.G2mul(Q, s);
             iterations++;
             elapsed = (System.currentTimeMillis() - start);
         } while (elapsed < MIN_TIME * 1000 || iterations < MIN_ITERS);
@@ -105,10 +105,10 @@ public class TesttimeMPIN192 extends TestCase {
         System.out.format("G2 mul              - %8d iterations  ", iterations);
         System.out.format(" %8.2f ms per iteration\n", dur);
 
-        FP24 w = PAIR192.ate(Q, P);
-        w = PAIR192.fexp(w);
+        FP24 w = PAIR4.ate(Q, P);
+        w = PAIR4.fexp(w);
 
-        FP24 g = PAIR192.GTpow(w, r);
+        FP24 g = PAIR4.GTpow(w, r);
 
         if (!g.isunity()) {
             fail("FAILURE - g^r!=1");
@@ -117,7 +117,7 @@ public class TesttimeMPIN192 extends TestCase {
         iterations = 0;
         start = System.currentTimeMillis();
         do {
-            g = PAIR192.GTpow(w, s);
+            g = PAIR4.GTpow(w, s);
             iterations++;
             elapsed = (System.currentTimeMillis() - start);
         } while (elapsed < MIN_TIME * 1000 || iterations < MIN_ITERS);
@@ -142,7 +142,7 @@ public class TesttimeMPIN192 extends TestCase {
         iterations = 0;
         start = System.currentTimeMillis();
         do {
-            w = PAIR192.ate(Q, P);
+            w = PAIR4.ate(Q, P);
             iterations++;
             elapsed = (System.currentTimeMillis() - start);
         } while (elapsed < MIN_TIME * 1000 || iterations < MIN_ITERS);
@@ -153,7 +153,7 @@ public class TesttimeMPIN192 extends TestCase {
         iterations = 0;
         start = System.currentTimeMillis();
         do {
-            g = PAIR192.fexp(w);
+            g = PAIR4.fexp(w);
             iterations++;
             elapsed = (System.currentTimeMillis() - start);
         } while (elapsed < MIN_TIME * 1000 || iterations < MIN_ITERS);
@@ -164,28 +164,28 @@ public class TesttimeMPIN192 extends TestCase {
         P.copy(G);
         Q.copy(W);
 
-        P = PAIR192.G1mul(P, s);
+        P = PAIR4.G1mul(P, s);
 
-        g = PAIR192.ate(Q, P);
-        g = PAIR192.fexp(g);
+        g = PAIR4.ate(Q, P);
+        g = PAIR4.fexp(g);
 
         P.copy(G);
-        Q = PAIR192.G2mul(Q, s);
+        Q = PAIR4.G2mul(Q, s);
 
-        w = PAIR192.ate(Q, P);
-        w = PAIR192.fexp(w);
+        w = PAIR4.ate(Q, P);
+        w = PAIR4.fexp(w);
 
-        if (!PAIR192.G1member(P))
+        if (!PAIR4.G1member(P))
         {
             fail("FAILURE - P not in G1 ");
         }
 
-        if (!PAIR192.G2member(Q))
+        if (!PAIR4.G2member(Q))
         {
             fail("FAILURE - Q not in G2 ");
         }
 
-        if (!PAIR192.GTmember(w))
+        if (!PAIR4.GTmember(w))
         {
             fail("FAILURE - e(Q,P) not in GT ");
         }
@@ -195,9 +195,9 @@ public class TesttimeMPIN192 extends TestCase {
         }
 
         Q.copy(W);
-        g = PAIR192.ate(Q, P);
-        g = PAIR192.fexp(g);
-        g = PAIR192.GTpow(g, s);
+        g = PAIR4.ate(Q, P);
+        g = PAIR4.fexp(g);
+        g = PAIR4.GTpow(g, s);
 
         if (!g.equals(w)) {
             fail("FAILURE - e(sQ,p)!=e(Q,P)^s ");

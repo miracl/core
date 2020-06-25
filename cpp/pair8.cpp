@@ -21,7 +21,7 @@
 
 //#define HAS_MAIN
 
-#include "pair256_ZZZ.h"
+#include "pair8_ZZZ.h"
 
 using namespace XXX;
 using namespace YYY;
@@ -946,7 +946,7 @@ using namespace std;
 using namespace ZZZ;
 
 
-// g++ -O2 pair256_BLS48.cpp ecp8_BLS48.cpp fp48_BLS48.cpp fp16_BLS48.cpp fp8_BLS48.cpp fp4_BLS48.cpp fp2_BLS48.cpp ecp_BLS48.cpp fp_BLS48.cpp big_B560_29.cpp rom_curve_BLS48.cpp rom_field_BLS48.cpp rand.cpp hash.cpp oct.cpp -o pair256_BLS48.exe
+// g++ -O2 pair8_BLS48.cpp ecp8_BLS48.cpp fp48_BLS48.cpp fp16_BLS48.cpp fp8_BLS48.cpp fp4_BLS48.cpp fp2_BLS48.cpp ecp_BLS48.cpp fp_BLS48.cpp big_B560_29.cpp rom_curve_BLS48.cpp rom_field_BLS48.cpp rand.cpp hash.cpp oct.cpp -o pair8_BLS48.exe
 
 int main()
 {

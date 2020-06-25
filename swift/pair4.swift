@@ -18,7 +18,7 @@
  */
 
 //
-//  pair192.swift
+//  pair4.swift
 //
 //  Created by Michael Scott on 07/07/2015.
 //  Copyright (c) 2015 Michael Scott. All rights reserved.
@@ -26,7 +26,7 @@
 
 /* CORE BLS Curve Pairing functions */
 
-public struct PAIR192 {
+public struct PAIR4 {
     
    // Point doubling for pairings
     static private func dbl(_ A: inout ECP4,_ AA: inout FP4,_ BB: inout FP4,_ CC: inout FP4)
@@ -375,10 +375,10 @@ public struct PAIR192 {
         var lv:FP24
     
 	if Q1.is_infinity() {
-		return PAIR192.ate(R1,S1);
+		return PAIR4.ate(R1,S1);
 	}
 	if S1.is_infinity() {
-		return PAIR192.ate(P1,Q1);
+		return PAIR4.ate(P1,Q1);
 	}
 
         var P=ECP4(); P.copy(P1); P.affine()
@@ -583,7 +583,7 @@ public struct PAIR192 {
             let q=BIG(ROM.CURVE_Order)
             let cru=FP(BIG(ROM.CRu))
             var t=BIG(0)
-            var u=PAIR192.glv(e)
+            var u=PAIR4.glv(e)
             Q.mulx(cru);            
     
             var np=u[0].nbits()
@@ -623,7 +623,7 @@ public struct PAIR192 {
             var Q=[ECP4]()
             let F=ECP4.frob_constants()
             let q=BIG(ROM.CURVE_Order);
-            var u=PAIR192.gs(e);
+            var u=PAIR4.gs(e);
     
             var t=BIG(0)
             Q.append(ECP4())

@@ -162,7 +162,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
 
         os.system(copytext+"fp2.swift "+fpath+"fp2.swift")
         os.system(copytext+"fp4.swift "+fpath+"fp4.swift")
-        if cs == "128" :
+        if pf == "BN" or pf == "BLS12" :
             os.system(copytext+"ecp2.swift "+fpath+"ecp2.swift")
             os.system(copytext+"fp12.swift "+fpath+"fp12.swift")
             os.system(copytext+"pair.swift "+fpath+"pair.swift")
@@ -173,19 +173,19 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
                 replace(fpath+"pair.swift","PFBNS","*/")
                 replace(fpath+"pair.swift","PFBNF","/*")
 
-        if cs == "192" :
+        if pf == "BLS24" :
             os.system(copytext+"fp8.swift "+fpath+"fp8.swift")
             os.system(copytext+"ecp4.swift "+fpath+"ecp4.swift")
             os.system(copytext+"fp24.swift "+fpath+"fp24.swift")
-            os.system(copytext+"pair192.swift "+fpath+"pair192.swift")
+            os.system(copytext+"pair4.swift "+fpath+"pair4.swift")
             os.system(copytext+"mpin192.swift "+fpath+"mpin192.swift")
             os.system(copytext+"bls192.swift "+fpath+"bls192.swift")
-        if cs == "256" :
+        if pf == "BLS48" :
             os.system(copytext+"fp8.swift "+fpath+"fp8.swift")
             os.system(copytext+"fp16.swift "+fpath+"fp16.swift")
             os.system(copytext+"ecp8.swift "+fpath+"ecp8.swift")
             os.system(copytext+"fp48.swift "+fpath+"fp48.swift")
-            os.system(copytext+"pair256.swift "+fpath+"pair256.swift")
+            os.system(copytext+"pair8.swift "+fpath+"pair8.swift")
             os.system(copytext+"mpin256.swift "+fpath+"mpin256.swift")
             os.system(copytext+"bls256.swift "+fpath+"bls256.swift")
     else :
@@ -250,16 +250,17 @@ print("32. bls12461")
 print("33. bn462")
 print("34. bls24479")
 print("35. bls48556")
-print("36. bls48581\n")
+print("36. bls48581")
+print("37. bls48286\n")
 
 print("RSA")
-print("37. rsa2048")
-print("38. rsa3072")
-print("39. rsa4096")
+print("38. rsa2048")
+print("39. rsa3072")
+print("40. rsa4096")
 
 selection=[]
 ptr=0
-max=40
+max=41
 
 curve_selected=False
 pfcurve_selected=False
@@ -394,11 +395,11 @@ while ptr<max:
         curveset("bn254CX","28","254","1",["-1","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","66","128")
         pfcurve_selected=True
     if x==28:
-        curveset("bls12383","29","383","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","POSITIVEX","65","128")
+        curveset("bls12383","29","383","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","65","128")
         pfcurve_selected=True
 
     if x==29:
-        curveset("bls12381","29","381","1",["-3","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","NEGATIVEX","65","128")
+        curveset("bls12381","29","381","1",["-3","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","65","128")
         pfcurve_selected=True
 
     if x==30:
@@ -409,7 +410,7 @@ while ptr<max:
         pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
     if x==32:
-        curveset("bls12461","28","461","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","NEGATIVEX","78","128")
+        curveset("bls12461","28","461","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","78","128")
         pfcurve_selected=True
 
     if x==33:
@@ -417,32 +418,37 @@ while ptr<max:
         pfcurve_selected=True
 
     if x==34:
-        curveset("bls24479","29","479","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","POSITIVEX","49","192")
+        curveset("bls24479","29","479","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24","M_TYPE","POSITIVEX","49","192")
         pfcurve_selected=True
 
     if x==35:
-        curveset("bls48556","29","556","1",["-1","2"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","POSITIVEX","32","256")
+        curveset("bls48556","29","556","1",["-1","2"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","32","256")
         pfcurve_selected=True
 
     if x==36:
-        curveset("bls48581","29","581","1",["2","2"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS","D_TYPE","NEGATIVEX","33","256")
+        curveset("bls48581","29","581","1",["2","2"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48","D_TYPE","NEGATIVEX","33","256")
         pfcurve_selected=True
+
+    if x==37:
+        curveset("bls48286","29","286","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX""17","128")
+        pfcurve_selected=True
+
 # rsaset(rsaname,big_length_bytes,bits_in_base,multiplier)
 # The RSA name reflects the modulus size, which is a 2^m multiplier
 # of the underlying big length
 
 # There are choices here, different ways of getting the same result, but some faster than others
-    if x==37:
+    if x==38:
         #256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
         #512 is faster.. but best is 1024
         rsaset("rsa2048","128","28","2")
         #rsaset("rsa2048","64","29","60",4")
         #rsaset("rsa2048","32","29","56","8")
         rsa_selected=True
-    if x==38:
+    if x==39:
         rsaset("rsa3072","48","28","8")
         rsa_selected=True
-    if x==39:
+    if x==40:
         #rsaset("rsa4096","32","29","56",16")
         rsaset("rsa4096","64","29","8")
         rsa_selected=True

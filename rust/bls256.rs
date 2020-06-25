@@ -24,7 +24,7 @@ use crate::xxx::ecp::ECP;
 use crate::xxx::dbig::DBIG;
 use crate::xxx::ecp8::ECP8;
 use crate::xxx::fp16::FP16;
-use crate::xxx::pair256;
+use crate::xxx::pair8;
 use crate::xxx::rom;
 use crate::hmac;
 
@@ -84,7 +84,7 @@ pub fn init() -> isize {
         return BLS_FAIL;
     }
     unsafe {
-        pair256::precomp(&mut G2_TAB, &g);
+        pair8::precomp(&mut G2_TAB, &g);
     }
     return BLS_OK;
 }
@@ -117,7 +117,7 @@ pub fn key_pair_generate(ikm: &[u8], s: &mut [u8], w: &mut [u8]) -> isize {
     let mut sc = dx.dmod(&r);
     sc.tobytes(s);
 // SkToPk
-    pair256::g2mul(&g, &sc).tobytes(w,true);  // true for public key compression
+    pair8::g2mul(&g, &sc).tobytes(w,true);  // true for public key compression
     return BLS_OK;
 }
 
@@ -126,7 +126,7 @@ pub fn key_pair_generate(ikm: &[u8], s: &mut [u8], w: &mut [u8]) -> isize {
 pub fn core_sign(sig: &mut [u8], m: &[u8], s: &[u8]) -> isize {
     let d = bls_hash_to_point(m);
     let sc = BIG::frombytes(&s);
-    pair256::g1mul(&d, &sc).tobytes(sig, true);
+    pair8::g1mul(&d, &sc).tobytes(sig, true);
     return BLS_OK;
 }
 
@@ -136,29 +136,29 @@ pub fn core_verify(sig: &[u8], m: &[u8], w: &[u8]) -> isize {
     let hm = bls_hash_to_point(m);
 
     let mut d = ECP::frombytes(&sig);
-    if !pair256::g1member(&d) {
+    if !pair8::g1member(&d) {
         return BLS_FAIL;
     }
     d.neg();
 
     let pk = ECP8::frombytes(&w);
-    if !pair256::g2member(&pk) {
+    if !pair8::g2member(&pk) {
         return BLS_FAIL;
     }
 
     // Use new multi-pairing mechanism
-    let mut r = pair256::initmp();
-    //    pair256::another(&mut r,&g,&d);
+    let mut r = pair8::initmp();
+    //    pair8::another(&mut r,&g,&d);
     unsafe {
-        pair256::another_pc(&mut r, &G2_TAB, &d);
+        pair8::another_pc(&mut r, &G2_TAB, &d);
     }
-    pair256::another(&mut r, &pk, &hm);
-    let mut v = pair256::miller(&mut r);
+    pair8::another(&mut r, &pk, &hm);
+    let mut v = pair8::miller(&mut r);
 
     //.. or alternatively
-    //    let mut v = pair256::ate2(&g, &d, &pk, &hm);
+    //    let mut v = pair8::ate2(&g, &d, &pk, &hm);
 
-    v = pair256::fexp(&v);
+    v = pair8::fexp(&v);
     if v.isunity() {
         return BLS_OK;
     }

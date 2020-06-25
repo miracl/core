@@ -20,7 +20,7 @@
 #include "ecp_BLS48556.h"
 
 namespace BLS48556 {
-/* Curve BLS55648 - Pairing friendly BLS curve */
+/* Curve BLS48556 - Pairing friendly BLS curve */
 
 #if CHUNK==16
 

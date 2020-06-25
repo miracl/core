@@ -148,7 +148,7 @@ var MPIN192 = function(ctx) {
             var s, Q;
             Q = ctx.ECP4.generator();
             s = ctx.BIG.fromBytes(S);
-            Q = ctx.PAIR192.G2mul(Q, s);
+            Q = ctx.PAIR4.G2mul(Q, s);
             Q.toBytes(SST, false);
             return 0;
         },
@@ -160,7 +160,7 @@ var MPIN192 = function(ctx) {
             if (P.is_infinity()) {
                 return this.INVALID_POINT;
             }
-            ctx.PAIR192.G1mul(P, s).toBytes(CST, false);
+            ctx.PAIR4.G1mul(P, s).toBytes(CST, false);
             return 0;
         },
 
@@ -189,7 +189,7 @@ var MPIN192 = function(ctx) {
             W = P.pinmul(pin, this.PBLEN);
             T.add(W);
 
-            P = ctx.PAIR192.G1mul(P, x);
+            P = ctx.PAIR4.G1mul(P, x);
             P.toBytes(xID, false);
  
             T.toBytes(SEC, false);
@@ -212,7 +212,7 @@ var MPIN192 = function(ctx) {
             px.add(py);
             px.mod(r);
 
-            P = ctx.PAIR192.G1mul(P, px);
+            P = ctx.PAIR4.G1mul(P, px);
             P.neg();
             P.toBytes(SEC, false);
             return 0;
@@ -243,15 +243,15 @@ var MPIN192 = function(ctx) {
                 return this.INVALID_POINT;
             }
 
-            P = ctx.PAIR192.G1mul(P, y);
+            P = ctx.PAIR4.G1mul(P, y);
             P.add(R);
             R = ctx.ECP.fromBytes(mSEC);
             if (R.is_infinity()) {
                 return this.INVALID_POINT;
             }
 
-            g = ctx.PAIR192.ate2(Q, R, sQ, P);
-            g = ctx.PAIR192.fexp(g);
+            g = ctx.PAIR4.ate2(Q, R, sQ, P);
+            g = ctx.PAIR4.fexp(g);
 
             if (!g.isunity()) {
                 return this.BAD_PIN;

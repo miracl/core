@@ -152,7 +152,7 @@ var MPIN256 = function(ctx) {
             var s, Q;
             Q = ctx.ECP8.generator();
             s = ctx.BIG.fromBytes(S);
-            Q = ctx.PAIR256.G2mul(Q, s);
+            Q = ctx.PAIR8.G2mul(Q, s);
             Q.toBytes(SST, false);
             return 0;
         },
@@ -164,7 +164,7 @@ var MPIN256 = function(ctx) {
             if (P.is_infinity()) {
                 return this.INVALID_POINT;
             }
-            ctx.PAIR256.G1mul(P, s).toBytes(CST, false);
+            ctx.PAIR8.G1mul(P, s).toBytes(CST, false);
             return 0;
         },
 
@@ -193,7 +193,7 @@ var MPIN256 = function(ctx) {
             W = P.pinmul(pin, this.PBLEN);
             T.add(W);
 
-            P = ctx.PAIR256.G1mul(P, x);
+            P = ctx.PAIR8.G1mul(P, x);
             P.toBytes(xID, false);
 
             T.toBytes(SEC, false);
@@ -216,7 +216,7 @@ var MPIN256 = function(ctx) {
             px.add(py);
             px.mod(r);
 
-            P = ctx.PAIR256.G1mul(P, px);
+            P = ctx.PAIR8.G1mul(P, px);
             P.neg();
             P.toBytes(SEC, false);
             return 0;
@@ -246,15 +246,15 @@ var MPIN256 = function(ctx) {
                 return this.INVALID_POINT;
             }
 
-            P = ctx.PAIR256.G1mul(P, y);
+            P = ctx.PAIR8.G1mul(P, y);
             P.add(R);
             R = ctx.ECP.fromBytes(mSEC);
             if (R.is_infinity()) {
                 return this.INVALID_POINT;
             }
 
-            g = ctx.PAIR256.ate2(Q, R, sQ, P);
-            g = ctx.PAIR256.fexp(g);
+            g = ctx.PAIR8.ate2(Q, R, sQ, P);
+            g = ctx.PAIR8.fexp(g);
 
             if (!g.isunity()) {
                 return this.BAD_PIN;

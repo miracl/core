@@ -262,7 +262,7 @@ fn bn254(mut rng: &mut RAND) {
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
         println!("BN Pairing-Friendly Curve");
     }
-    if ecp::CURVE_PAIRING_TYPE == ecp::BLS {
+    if ecp::CURVE_PAIRING_TYPE > ecp::BN {
         println!("BLS Pairing-Friendly Curve");
     }
 
@@ -459,7 +459,7 @@ fn bls12383(mut rng: &mut RAND) {
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
         println!("BN Pairing-Friendly Curve");
     }
-    if ecp::CURVE_PAIRING_TYPE == ecp::BLS {
+    if ecp::CURVE_PAIRING_TYPE > ecp::BN {
         println!("BLS Pairing-Friendly Curve");
     }
 
@@ -646,7 +646,7 @@ fn bls24479(mut rng: &mut RAND) {
     use core::bls24479::ecp4;
     use core::bls24479::fp;
     use core::bls24479::fp4;
-    use core::bls24479::pair192;
+    use core::bls24479::pair4;
     use core::bls24479::rom;
     let mut fail = false;
     println!("\nTesting/Timing bls24479 Pairings");
@@ -654,7 +654,7 @@ fn bls24479(mut rng: &mut RAND) {
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
         println!("BN Pairing-Friendly Curve");
     }
-    if ecp::CURVE_PAIRING_TYPE == ecp::BLS {
+    if ecp::CURVE_PAIRING_TYPE > ecp::BN {
         println!("BLS24 Pairing-Friendly Curve");
     }
 
@@ -672,7 +672,7 @@ fn bls24479(mut rng: &mut RAND) {
         fail = true;
     }
     
-    P = pair192::g1mul(&G, &r);
+    P = pair4::g1mul(&G, &r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -683,7 +683,7 @@ fn bls24479(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        P = pair192::g1mul(&G, &s);
+        P = pair4::g1mul(&G, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -700,13 +700,13 @@ fn bls24479(mut rng: &mut RAND) {
         println!("HASHING FAILURE - P=O");
 		fail=true;
     }
-    W = pair192::g2mul(&W, &r);
+    W = pair4::g2mul(&W, &r);
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
 		fail=true;
     }
 
-    W = pair192::g2mul(&Q, &r);
+    W = pair4::g2mul(&Q, &r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
@@ -717,7 +717,7 @@ fn bls24479(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        W = pair192::g2mul(&Q, &s);
+        W = pair4::g2mul(&Q, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -726,10 +726,10 @@ fn bls24479(mut rng: &mut RAND) {
     print!("G2  mul              - {:} iterations  ", iterations);
     println!(" {:0.2} ms per iteration", duration);
 
-    let mut w = pair192::ate(&Q, &P);
-    w = pair192::fexp(&w);
+    let mut w = pair4::ate(&Q, &P);
+    w = pair4::fexp(&w);
 
-    let mut g = pair192::gtpow(&w, &r);
+    let mut g = pair4::gtpow(&w, &r);
 
     if !g.isunity() {
         println!("FAILURE - g^r!=1");
@@ -740,7 +740,7 @@ fn bls24479(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = pair192::gtpow(&w, &s);
+        let _ = pair4::gtpow(&w, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -753,7 +753,7 @@ fn bls24479(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        w = pair192::ate(&Q, &P);
+        w = pair4::ate(&Q, &P);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -766,7 +766,7 @@ fn bls24479(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = pair192::fexp(&w);
+        let _ = pair4::fexp(&w);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -778,26 +778,26 @@ fn bls24479(mut rng: &mut RAND) {
     P.copy(&G);
     Q.copy(&W);
 
-    P = pair192::g1mul(&P, &s);
-    g = pair192::ate(&Q, &P);
-    g = pair192::fexp(&g);
+    P = pair4::g1mul(&P, &s);
+    g = pair4::ate(&Q, &P);
+    g = pair4::fexp(&g);
 
     P.copy(&G);
-    Q = pair192::g2mul(&Q, &s);
-    w = pair192::ate(&Q, &P);
-    w = pair192::fexp(&w);
+    Q = pair4::g2mul(&Q, &s);
+    w = pair4::ate(&Q, &P);
+    w = pair4::fexp(&w);
 
-    if !pair192::g1member(&P) {
+    if !pair4::g1member(&P) {
         println!("FAILURE - P is not in G1 ");
         fail=true;
     }
 
-    if !pair192::g2member(&Q) {
+    if !pair4::g2member(&Q) {
         println!("FAILURE - Q is not in G2 ");
         fail=true;
     }
 
-    if !pair192::gtmember(&w) {
+    if !pair4::gtmember(&w) {
         println!("FAILURE - e(Q,P) is not in GT ");
         fail=true;
     }
@@ -808,9 +808,9 @@ fn bls24479(mut rng: &mut RAND) {
     }
 
     Q.copy(&W);
-    g = pair192::ate(&Q, &P);
-    g = pair192::fexp(&g);
-    g = pair192::gtpow(&g, &s);
+    g = pair4::ate(&Q, &P);
+    g = pair4::fexp(&g);
+    g = pair4::gtpow(&g, &s);
 
     if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,P)^s ");
@@ -828,7 +828,7 @@ fn bls48556(mut rng: &mut RAND) {
     use core::bls48556::ecp8;
     use core::bls48556::fp;
     use core::bls48556::fp8;
-    use core::bls48556::pair256;
+    use core::bls48556::pair8;
     use core::bls48556::rom;
     let mut fail = false;
     println!("\nTesting/Timing bls48556 Pairings");
@@ -836,7 +836,7 @@ fn bls48556(mut rng: &mut RAND) {
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
         println!("BN Pairing-Friendly Curve");
     }
-    if ecp::CURVE_PAIRING_TYPE == ecp::BLS {
+    if ecp::CURVE_PAIRING_TYPE > ecp::BN {
         println!("bls48 Pairing-Friendly Curve");
     }
 
@@ -854,7 +854,7 @@ fn bls48556(mut rng: &mut RAND) {
         fail = true;
     }
     
-    P = pair256::g1mul(&G, &r);
+    P = pair8::g1mul(&G, &r);
 
     if !P.is_infinity() {
         println!("FAILURE - rP!=O");
@@ -865,7 +865,7 @@ fn bls48556(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        P = pair256::g1mul(&G, &s);
+        P = pair8::g1mul(&G, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -882,13 +882,13 @@ fn bls48556(mut rng: &mut RAND) {
         println!("HASHING FAILURE - P=O");
 		fail=true;
     }
-    W = pair256::g2mul(&W, &r);
+    W = pair8::g2mul(&W, &r);
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
 		fail=true;
     }
 
-    W = pair256::g2mul(&Q, &r);
+    W = pair8::g2mul(&Q, &r);
 
     if !W.is_infinity() {
         println!("FAILURE - rQ!=O");
@@ -899,7 +899,7 @@ fn bls48556(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        W = pair256::g2mul(&Q, &s);
+        W = pair8::g2mul(&Q, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -908,10 +908,10 @@ fn bls48556(mut rng: &mut RAND) {
     print!("G2  mul              - {:} iterations  ", iterations);
     println!(" {:0.2} ms per iteration", duration);
 
-    let mut w = pair256::ate(&Q, &P);
-    w = pair256::fexp(&w);
+    let mut w = pair8::ate(&Q, &P);
+    w = pair8::fexp(&w);
 
-    let mut g = pair256::gtpow(&w, &r);
+    let mut g = pair8::gtpow(&w, &r);
 
     if !g.isunity() {
         println!("FAILURE - g^r!=1");
@@ -922,7 +922,7 @@ fn bls48556(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = pair256::gtpow(&w, &s);
+        let _ = pair8::gtpow(&w, &s);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -935,7 +935,7 @@ fn bls48556(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        w = pair256::ate(&Q, &P);
+        w = pair8::ate(&Q, &P);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -948,7 +948,7 @@ fn bls48556(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        let _ = pair256::fexp(&w);
+        let _ = pair8::fexp(&w);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -960,26 +960,26 @@ fn bls48556(mut rng: &mut RAND) {
     P.copy(&G);
     Q.copy(&W);
 
-    P = pair256::g1mul(&P, &s);
-    g = pair256::ate(&Q, &P);
-    g = pair256::fexp(&g);
+    P = pair8::g1mul(&P, &s);
+    g = pair8::ate(&Q, &P);
+    g = pair8::fexp(&g);
 
     P.copy(&G);
-    Q = pair256::g2mul(&Q, &s);
-    w = pair256::ate(&Q, &P);
-    w = pair256::fexp(&w);
+    Q = pair8::g2mul(&Q, &s);
+    w = pair8::ate(&Q, &P);
+    w = pair8::fexp(&w);
 
-    if !pair256::g1member(&P) {
+    if !pair8::g1member(&P) {
         println!("FAILURE - P is not in G1 ");
         fail=true;
     }
 
-    if !pair256::g2member(&Q) {
+    if !pair8::g2member(&Q) {
         println!("FAILURE - Q is not in G2 ");
         fail=true;
     }
 
-    if !pair256::gtmember(&w) {
+    if !pair8::gtmember(&w) {
         println!("FAILURE - e(Q,P) is not in GT ");
         fail=true;
     }
@@ -990,9 +990,9 @@ fn bls48556(mut rng: &mut RAND) {
     }
 
     Q.copy(&W);
-    g = pair256::ate(&Q, &P);
-    g = pair256::fexp(&g);
-    g = pair256::gtpow(&g, &s);
+    g = pair8::ate(&Q, &P);
+    g = pair8::fexp(&g);
+    g = pair8::gtpow(&g, &s);
 
     if !g.equals(&w) {
         println!("FAILURE - e(sQ,p)!=e(Q,P)^s ");

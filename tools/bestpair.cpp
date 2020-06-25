@@ -1,21 +1,3 @@
-/*
- * Copyright (c) 2012-2020 MIRACL UK Ltd.
- *
- * This file is part of MIRACL Core
- * (see https://github.com/miracl/core).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 //
 // Program to generate "best" BN, BLS12, BLS24 and BLS48 curves (with modulus p=3 mod 8)
 //
@@ -140,7 +122,7 @@ int main(int argc, char *argv[])
         cout << "Program to find best pairing-friendly curves" << endl;
         cout << "bestpair type bits Hamming-weight" << endl;
         cout << "where type is the curve (BN, BLS12, BLS24, BLS48)" << endl;
-        cout << "where bits is number of bits in curve x parameter (>30 and <200)" << endl;
+        cout << "where bits is number of bits in curve x parameter (>15 and <200)" << endl;
         cout << "and hamming-weight is the number of non-zero bits (>1 and <10)" << endl;
         cout << "e.g. bestpair BLS12 77 3" << endl;
         cout << "Use flag /GT for GT-Strong curves" << endl;
@@ -215,7 +197,7 @@ int main(int argc, char *argv[])
         return 0;
 
     }
-    if (!gotH || !gotB || !gotT || HW > 9 || HW < 2 || BITS >= 200 || BITS < 30)
+    if (!gotH || !gotB || !gotT || HW > 9 || HW < 2 || BITS >= 200 || BITS < 16)
     {
         cout << "Error in command line" << endl;
         return 0;
@@ -272,7 +254,7 @@ int main(int argc, char *argv[])
     odds /= 8; // frig factor
     cout << "one in " << odds << " expected to be OK" << endl;
 
-//  gprime(1000);
+//	gprime(1000);
     percent = -1;
     cnt = 0;
     for (;;)
@@ -480,7 +462,7 @@ int main(int argc, char *argv[])
             pb = 0;
             b = 0;
             m = 0;
-            while (pb <= 20 || b == 0)
+            while (pb <= 40 || b == 0)
             {
                 pb += 1;
                 ecurve(0, pb, p, MR_AFFINE);
@@ -494,7 +476,7 @@ int main(int argc, char *argv[])
 
             }
             nb = 0;
-            while (nb >= -20)
+            while (nb >= -40)
             {
                 nb -= 1;
                 ecurve(0, nb, p, MR_AFFINE);
@@ -615,11 +597,12 @@ int main(int argc, char *argv[])
             }
             else cout << endl;
             cout << "\np= " << p << " (" << bits(p) << " bits)";
+            cout << "\nq= " << q << " (" << bits(q) << " bits)";
             if (twist == MR_SEXTIC_D) cout << " D-Type" << endl;
             if (twist == MR_SEXTIC_M) cout << " M-Type" << endl;
             if (progress) cout << endl;
             mip->IOBASE = 10;
-            //  cout << "twist= " << p+1+t << endl;
+            //	cout << "twist= " << p+1+t << endl;
         }
     }
 

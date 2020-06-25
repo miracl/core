@@ -502,7 +502,7 @@ public struct ECP2 {
             T.frob(X); T.frob(X)
             self.add(T)
         }
-        if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BLS {
+        if CONFIG_CURVE.CURVE_PAIRING_TYPE > CONFIG_CURVE.BN {
             var xQ=self.mul(x);
             var x2Q=xQ.mul(x);
 

@@ -708,7 +708,7 @@ public final class ECP2 {
 /* Efficient hash maps to G2 on BLS curves - Budroni, Pintore */
 /* Q -> x2Q -xQ -Q +F(xQ -Q) +F(F(2Q)) */
 
-		if (CONFIG_CURVE.CURVE_PAIRING_TYPE==CONFIG_CURVE.BLS)
+		if (CONFIG_CURVE.CURVE_PAIRING_TYPE>CONFIG_CURVE.BN)
 		{
 			ECP2 xQ=this.mul(x);
 			ECP2 x2Q=xQ.mul(x);

@@ -73,7 +73,7 @@ public class BLS256 {
     public static int init() {
         ECP8 G = ECP8.generator();
         if (G.is_infinity()) return BLS_FAIL;
-        G2_TAB = PAIR256.precomp(G);
+        G2_TAB = PAIR8.precomp(G);
         return BLS_OK;
     }
 
@@ -97,7 +97,7 @@ public class BLS256 {
         BIG s=dx.mod(r);
         s.toBytes(S);
 // SkToPk
-        G = PAIR256.G2mul(G, s);
+        G = PAIR8.G2mul(G, s);
         G.toBytes(W,true);
         return BLS_OK;
     }
@@ -107,7 +107,7 @@ public class BLS256 {
     public static int core_sign(byte[] SIG, byte[] M, byte[] S) {
         ECP D = bls_hash_to_point(M);
         BIG s = BIG.fromBytes(S);
-        D = PAIR256.G1mul(D, s);
+        D = PAIR8.G1mul(D, s);
         D.toBytes(SIG, true);
         return BLS_OK;
     }
@@ -118,24 +118,24 @@ public class BLS256 {
         ECP HM = bls_hash_to_point(M);
 
         ECP D = ECP.fromBytes(SIG);
-        if (!PAIR256.G1member(D)) return BLS_FAIL;
+        if (!PAIR8.G1member(D)) return BLS_FAIL;
         D.neg();
         
         ECP8 PK = ECP8.fromBytes(W);
-        if (!PAIR256.G2member(PK)) return BLS_FAIL;
+        if (!PAIR8.G2member(PK)) return BLS_FAIL;
 
 // Use new multi-pairing mechanism
-        FP48[] r = PAIR256.initmp();
-        PAIR256.another_pc(r, G2_TAB, D);
-        PAIR256.another(r, PK, HM);
-        FP48 v = PAIR256.miller(r);
+        FP48[] r = PAIR8.initmp();
+        PAIR8.another_pc(r, G2_TAB, D);
+        PAIR8.another(r, PK, HM);
+        FP48 v = PAIR8.miller(r);
 
 //.. or alternatively
 //		ECP8 G=ECP8.generator();
 //		if (G.is_infinity()) return BLS_FAIL;
-//		FP48 v=PAIR256.ate2(G,D,PK,HM);
+//		FP48 v=PAIR8.ate2(G,D,PK,HM);
 
-        v = PAIR256.fexp(v);
+        v = PAIR8.fexp(v);
         if (v.isunity())
             return BLS_OK;
         return BLS_FAIL;

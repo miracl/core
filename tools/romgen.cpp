@@ -440,6 +440,7 @@ void help()
     printf("34. BLS24479\n");
     printf("35. BLS48556\n");
     printf("36. BLS48581\n");
+    printf("37. BLS48286\n");
 
     printf("\nromgen curve wordlength basebits language\n");
     printf("where wordlength is 16, 32 or 64\n");
@@ -528,7 +529,7 @@ int main(int argc, char **argv)
         curvename[i] = toupper(curvename[i]);
     }
 
-    //cout << "curvename= " << curvename << " " << strlen(curvename) << endl;
+//    cout << "curvename= " << curvename << " " << strlen(curvename) << endl;
 
     curve = 0; ip++;
     chunk = atoi(argv[ip++]);
@@ -2161,6 +2162,115 @@ int main(int argc, char **argv)
         cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
     }
 
+
+    if (strcmp(curvename, "BLS48286") == 0)
+    {
+        curve = PS+11;
+        printf("Curve is BLS48286\n");
+        strcpy(fieldname, curvename);
+
+        mbits = 286;
+
+        words = (1 + ((mbits - 1) / bb));
+        curvetype = WEIERSTRASS;
+        modtype = NOT_SPECIAL;
+        curve_a = 0;
+        mip->IOBASE = 16;
+
+        x = (char *)"F5EF";				// SIGN_OF_X is POSITIVE
+
+        atebits = bits(3 * x) - 1;
+        hw = hamming(x);
+
+        r = pow(x, 16) - pow(x, 8) + 1;
+        p = r * (((x - 1) * (x - 1)) / 3) + x;
+        t = x + 1;
+        cof = (p + 1 - t) / r;
+
+        cof = x - 1;
+
+        gx = -1; gy = 3;
+        curve_b = 10;
+        ecurve((Big)0, curve_b, p, MR_AFFINE);
+
+        mip->TWIST = MR_SEXTIC_M;
+
+        P.set(gx, gy);
+
+        P *= (x - 1) * (x - 1) / 3;
+
+        P.get(gx, gy);
+
+        Big x0 = 0;
+
+        forever
+        {
+            ZZn8 XX;
+            ZZn4 X;
+            ZZn2 t;
+
+            x0 += 1;
+            t.set((ZZn)0, (ZZn)x0);
+            X.set(t, (ZZn2)0);
+            XX.set(X, (ZZn4)0);
+            if (!Q8.set(X)) continue;
+            break;
+        }
+
+
+        tau[0] = 2; // count points on twist over extension p^8
+        tau[1] = t;
+        for (int jj = 1; jj < 8; jj++ ) tau[jj + 1] = t * tau[jj] - p * tau[jj - 1];
+
+        TT = tau[8];
+
+        PP = pow(p, 8);
+        FF = sqrt((4 * PP - TT * TT) / 3);
+        np = PP + 1 - (3 * FF + TT) / 2; //?
+
+        Q8 = (np / r) * Q8;
+
+//cout << "Q8= " << Q8 << endl;
+//cout << "r*Q8= " << r*Q8 << endl;
+//cout << "2*QQ= " << QQ+QQ << endl;
+//cout << "3*QQ= " << (QQ+QQ)+QQ << endl;
+
+        zcru = pow((ZZn)2, (p - 1) / 3);
+        //zcru*=zcru;   // right cube root of unity -  not for M-TYPE
+        cru = (Big)zcru;
+
+        zsqrtm3=sqrt((ZZn)-3);
+        sqrtm3=(Big)zsqrtm3;
+        if (sqrtm3%2==1)
+            sqrtm3=p-sqrtm3;
+//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl; 
+
+/*
+        ZZn Z=-1;
+        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
+        int sgn=((Big)CA)%2;
+        if (sgn==1) CA=-CA;
+        CB=(ZZn)1/(3*Z*Z);
+
+        cout << "CA= " << CA << endl;
+        cout << "CB= " << CB << endl;
+
+        ZZn8 Z2((ZZn4)1,(ZZn4)1);
+        ZZn8 B=tx((ZZn8)curve_b);
+        CA8=sqrt(-3*(Z2*Z2*Z2+B));
+        if ((Big)real(real(real(CA8)))!=0)
+            sgn=((Big)real(real(real(CA8))))%2;
+        else
+            sgn=((Big)imaginary(real(real(CA8))))%2;
+        if (sgn==1) CA8=-CA8;
+        CB8=(ZZn8)1/(3*Z2*Z2);
+
+        cout << "CA8= " << CA8 << endl;
+        cout << "CB8= " << CB8 << endl;
+*/
+        cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
+    }
+
     if (curve == 0) {help(); return 0;}
 
     if (curvetype == WEIERSTRASS) printf("Hash to Curve Z= %d\n",findZ(curve_a,curve_b,p));
@@ -2457,7 +2567,7 @@ int main(int argc, char **argv)
         else
         {
             if (curve == PS+8) set_frobenius_constant(X, 24);
-            if (curve == PS+9 || curve == PS+10) set_frobenius_constant(X, 48);
+            if (curve == PS+9 || curve == PS+10 || curve == PS+11) set_frobenius_constant(X, 48);
             if (curve == PS+10) X = -X;
         }
 
@@ -2761,14 +2871,14 @@ int main(int argc, char **argv)
 
     }
 
-    if (curve == PS+9 || curve == PS+10)
+    if (curve == PS+9 || curve == PS+10 || curve == PS+11)
     {
         cout << endl;
 
         cout << pre1 << toupperit((char *)"CURVE_Bnx", lang) << post1 ; output(chunk, words, x, m); cout << term << endl;
 //        cout << pre1 << toupperit((char *)"CURVE_Cru", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
 
-        if (curve == PS+9)
+        if (curve == PS+9 || curve == PS+11)
             Q8.get(X8, Y8);
         X8.get(AA, BB);
 
@@ -2806,7 +2916,7 @@ int main(int argc, char **argv)
         cout << pre1 << toupperit((char *)"CURVE_Pybba", lang) << post1; output(chunk, words, a, m); cout << term << endl;
         cout << pre1 << toupperit((char *)"CURVE_Pybbb", lang) << post1; output(chunk, words, b, m); cout << term << endl;
 
-        if (curve == PS+9)
+        if (curve == PS+9 || curve == PS+11)
         {
             Q8 *= r;
             if (!Q.iszero())
@@ -2845,8 +2955,9 @@ int main(int argc, char **argv)
         cout << ","; output(chunk, words, (Big)0, m);
         cout << ","; output(chunk, words, (Big)0, m);
         cout << ","; output(chunk, words, (Big)0, m);
-*/
+
         cout << close;
         cout << close << term << endl;
+*/
     }
 }

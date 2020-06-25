@@ -58,8 +58,8 @@
 <script type="text/javascript" src=./fp48.js></script>
 <script type="text/javascript" src=./ecp4.js></script>
 <script type="text/javascript" src=./ecp8.js></script>
-<script type="text/javascript" src=./pair192.js></script>
-<script type="text/javascript" src=./pair256.js></script>
+<script type="text/javascript" src=./pair4.js></script>
+<script type="text/javascript" src=./pair8.js></script>
 <script type="text/javascript" src=./mpin192.js></script>
 <script type="text/javascript" src=./mpin256.js></script>
 <script type="text/javascript"src=./bls192.js></script>
@@ -809,7 +809,7 @@
 			fail=true;
 		}
 
-		var P=ctx.PAIR192.G1mul(G,r);
+		var P=ctx.PAIR4.G1mul(G,r);
 
 		if (!P.is_infinity())
 		{
@@ -821,7 +821,7 @@
 		var start = performance.now();
 		var iterations=0;
 		do {
-			P=ctx.PAIR192.G1mul(G,s);
+			P=ctx.PAIR4.G1mul(G,s);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -838,13 +838,13 @@
             alert("HASHING FAILURE - P=O");
 			fail=true;
         }
-        W = ctx.PAIR192.G2mul(W, r);
+        W = ctx.PAIR4.G2mul(W, r);
         if (!W.is_infinity()) {
             alert("FAILURE - rQ!=O");
 			fail=true;
         }
 
-		W=ctx.PAIR192.G2mul(Q,r);
+		W=ctx.PAIR4.G2mul(Q,r);
 
 		if (!W.is_infinity())
 		{
@@ -855,7 +855,7 @@
 		start = performance.now();
 		iterations=0;
 		do {
-			W=ctx.PAIR192.G2mul(Q,s);
+			W=ctx.PAIR4.G2mul(Q,s);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -863,10 +863,10 @@
 		mywindow.document.write("G2 mul -                " + iterations + " iteration  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
-		var w=ctx.PAIR192.ate(Q,P);
-		w=ctx.PAIR192.fexp(w);
+		var w=ctx.PAIR4.ate(Q,P);
+		w=ctx.PAIR4.fexp(w);
 
-		var g=ctx.PAIR192.GTpow(w,r);
+		var g=ctx.PAIR4.GTpow(w,r);
 
 		if (!g.isunity())
 		{
@@ -877,7 +877,7 @@
 		start = performance.now();
 		iterations=0;
 		do {
-			g=ctx.PAIR192.GTpow(w,s);
+			g=ctx.PAIR4.GTpow(w,s);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -888,7 +888,7 @@
 		start = performance.now();
 		iterations=0;
 		do {
-			w=ctx.PAIR192.ate(Q,P);
+			w=ctx.PAIR4.ate(Q,P);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -899,7 +899,7 @@
 		start = performance.now();
 		iterations=0;
 		do {
-			g=ctx.PAIR192.fexp(w);
+			g=ctx.PAIR4.fexp(w);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -910,28 +910,28 @@
 		P.copy(G);
 		Q.copy(W);
 
-		P=ctx.PAIR192.G1mul(P,s);
-		g=ctx.PAIR192.ate(Q,P);
-		g=ctx.PAIR192.fexp(g);
+		P=ctx.PAIR4.G1mul(P,s);
+		g=ctx.PAIR4.ate(Q,P);
+		g=ctx.PAIR4.fexp(g);
 
 		P.copy(G);
-		Q=ctx.PAIR192.G2mul(Q,s);
-		w=ctx.PAIR192.ate(Q,P);
-		w=ctx.PAIR192.fexp(w);
+		Q=ctx.PAIR4.G2mul(Q,s);
+		w=ctx.PAIR4.ate(Q,P);
+		w=ctx.PAIR4.fexp(w);
 
-        if (!ctx.PAIR192.G1member(P))
+        if (!ctx.PAIR4.G1member(P))
         {
             alert("FAILURE - P not in G1 ");
 			fail=true;
         }
 
-        if (!ctx.PAIR192.G2member(Q))
+        if (!ctx.PAIR4.G2member(Q))
         {
             alert("FAILURE - Q not in G2 ");
 			fail=true;
         }
 
-        if (!ctx.PAIR192.GTmember(w))
+        if (!ctx.PAIR4.GTmember(w))
         {
             alert("FAILURE - e(Q,P) not in GT ");
 			fail=true;
@@ -945,9 +945,9 @@
 		}
 
 		Q.copy(W);
-		g=ctx.PAIR192.ate(Q,P);
-		g=ctx.PAIR192.fexp(g);
-		g=ctx.PAIR192.GTpow(g,s);
+		g=ctx.PAIR4.ate(Q,P);
+		g=ctx.PAIR4.fexp(g);
+		g=ctx.PAIR4.GTpow(g,s);
 
 		if (!g.equals(w))
 		{
@@ -1002,7 +1002,7 @@
 			fail=true;
 		}
 
-		var P=ctx.PAIR256.G1mul(G,r);
+		var P=ctx.PAIR8.G1mul(G,r);
 
 		if (!P.is_infinity())
 		{
@@ -1014,7 +1014,7 @@
 		var start = performance.now();
 		var iterations=0;
 		do {
-			P=ctx.PAIR256.G1mul(G,s);
+			P=ctx.PAIR8.G1mul(G,s);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -1031,14 +1031,14 @@
             alert("HASHING FAILURE - P=O");
 			fail=true;
         }
-        W = ctx.PAIR256.G2mul(W, r);
+        W = ctx.PAIR8.G2mul(W, r);
         if (!W.is_infinity()) {
             alert("FAILURE - rQ!=O");
 			fail=true;
         }
 
 
-		W=ctx.PAIR256.G2mul(Q,r);
+		W=ctx.PAIR8.G2mul(Q,r);
 
 		if (!W.is_infinity())
 		{
@@ -1049,7 +1049,7 @@
 		start = performance.now();
 		iterations=0;
 		do {
-			W=ctx.PAIR256.G2mul(Q,s);
+			W=ctx.PAIR8.G2mul(Q,s);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -1057,10 +1057,10 @@
 		mywindow.document.write("G2 mul -                " + iterations + " iteration  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
-		var w=ctx.PAIR256.ate(Q,P);
-		w=ctx.PAIR256.fexp(w);
+		var w=ctx.PAIR8.ate(Q,P);
+		w=ctx.PAIR8.fexp(w);
 
-		var g=ctx.PAIR256.GTpow(w,r);
+		var g=ctx.PAIR8.GTpow(w,r);
 
 		if (!g.isunity())
 		{
@@ -1071,7 +1071,7 @@
 		start = performance.now();
 		iterations=0;
 		do {
-			g=ctx.PAIR256.GTpow(w,s);
+			g=ctx.PAIR8.GTpow(w,s);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -1082,7 +1082,7 @@
 		start = performance.now();
 		iterations=0;
 		do {
-			w=ctx.PAIR256.ate(Q,P);
+			w=ctx.PAIR8.ate(Q,P);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -1093,7 +1093,7 @@
 		start = performance.now();
 		iterations=0;
 		do {
-			g=ctx.PAIR256.fexp(w);
+			g=ctx.PAIR8.fexp(w);
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
@@ -1104,28 +1104,28 @@
 		P.copy(G);
 		Q.copy(W);
 
-		P=ctx.PAIR256.G1mul(P,s);
-		g=ctx.PAIR256.ate(Q,P);
-		g=ctx.PAIR256.fexp(g);
+		P=ctx.PAIR8.G1mul(P,s);
+		g=ctx.PAIR8.ate(Q,P);
+		g=ctx.PAIR8.fexp(g);
 
 		P.copy(G);
-		Q=ctx.PAIR256.G2mul(Q,s);
-		w=ctx.PAIR256.ate(Q,P);
-		w=ctx.PAIR256.fexp(w);
+		Q=ctx.PAIR8.G2mul(Q,s);
+		w=ctx.PAIR8.ate(Q,P);
+		w=ctx.PAIR8.fexp(w);
 
-        if (!ctx.PAIR256.G1member(P))
+        if (!ctx.PAIR8.G1member(P))
         {
             alert("FAILURE - P not in G1 ");
 			fail=true;
         }
 
-        if (!ctx.PAIR256.G2member(Q))
+        if (!ctx.PAIR8.G2member(Q))
         {
             alert("FAILURE - Q not in G2 ");
 			fail=true;
         }
 
-        if (!ctx.PAIR256.GTmember(w))
+        if (!ctx.PAIR8.GTmember(w))
         {
             alert("FAILURE - e(Q,P) not in GT ");
 			fail=true;
@@ -1138,9 +1138,9 @@
 		}
 
 		Q.copy(W);
-		g=ctx.PAIR256.ate(Q,P);
-		g=ctx.PAIR256.fexp(g);
-		g=ctx.PAIR256.GTpow(g,s);
+		g=ctx.PAIR8.ate(Q,P);
+		g=ctx.PAIR8.fexp(g);
+		g=ctx.PAIR8.GTpow(g,s);
 
 		if (!g.equals(w))
 		{

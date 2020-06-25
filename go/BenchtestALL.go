@@ -247,7 +247,7 @@ func BN_254(rng *core.RAND) {
 	if BN254.CURVE_PAIRING_TYPE == BN254.BN {
 		fmt.Printf("BN Pairing-Friendly Curve\n")
 	}
-	if BN254.CURVE_PAIRING_TYPE == BN254.BLS {
+	if BN254.CURVE_PAIRING_TYPE > BN254.BN {
 		fmt.Printf("BLS Pairing-Friendly Curve\n")
 	}
 
@@ -432,7 +432,7 @@ func BLS_383(rng *core.RAND) {
 	if BLS12383.CURVE_PAIRING_TYPE == BLS12383.BN {
 		fmt.Printf("BN Pairing-Friendly Curve\n")
 	}
-	if BLS12383.CURVE_PAIRING_TYPE == BLS12383.BLS {
+	if BLS12383.CURVE_PAIRING_TYPE > BLS12383.BN {
 		fmt.Printf("BLS Pairing-Friendly Curve\n")
 	}
 
@@ -617,7 +617,7 @@ func BLS_24(rng *core.RAND) {
 	if BLS24479.CURVE_PAIRING_TYPE == BLS24479.BN {
 		fmt.Printf("BN Pairing-Friendly Curve\n")
 	}
-	if BLS24479.CURVE_PAIRING_TYPE == BLS24479.BLS {
+	if BLS24479.CURVE_PAIRING_TYPE > BLS24479.BN {
 		fmt.Printf("BLS Pairing-Friendly Curve\n")
 	}
 
@@ -802,7 +802,7 @@ func BLS_48(rng *core.RAND) {
 	if BLS48556.CURVE_PAIRING_TYPE == BLS48556.BN {
 		fmt.Printf("BN Pairing-Friendly Curve\n")
 	}
-	if BLS48556.CURVE_PAIRING_TYPE == BLS48556.BLS {
+	if BLS48556.CURVE_PAIRING_TYPE > BLS48556.BN {
 		fmt.Printf("BLS Pairing-Friendly Curve\n")
 	}
 

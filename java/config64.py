@@ -205,8 +205,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fpath+"FP2.java","XXX",tc)
         replace(fpath+"FP4.java","XXX",tc)
 
-        if cs == "128" :
-
+        if pf == "BN" or pf == "BLS12" :
             os.system(copytext+"ECP2.java "+fpath+"ECP2.java")
             os.system(copytext+"FP12.java "+fpath+"FP12.java")
             os.system(copytext+"PAIR.java "+fpath+"PAIR.java")
@@ -231,11 +230,11 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
                 replace(fpath+"PAIR.java","PFBNS","*/")
                 replace(fpath+"PAIR.java","PFBNF","/*")
 
-        if cs == "192" :
+        if pf == "BLS24" :
             os.system(copytext+"ECP4.java "+fpath+"ECP4.java")
             os.system(copytext+"FP8.java "+fpath+"FP8.java")
             os.system(copytext+"FP24.java "+fpath+"FP24.java")
-            os.system(copytext+"PAIR192.java "+fpath+"PAIR192.java")
+            os.system(copytext+"PAIR4.java "+fpath+"PAIR4.java")
             os.system(copytext+"MPIN192.java "+fpath+"MPIN192.java")
             os.system(copytext+"BLS192.java "+fpath+"BLS192.java")
             os.system(copytext+"TestMPIN192.java "+fpathTest+"TestMPIN192.java")    #ms
@@ -245,19 +244,19 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"FP8.java","XXX",tc)
             replace(fpath+"FP24.java","XXX",tc)
             replace(fpath+"ECP4.java","XXX",tc)
-            replace(fpath+"PAIR192.java","XXX",tc)
+            replace(fpath+"PAIR4.java","XXX",tc)
             replace(fpath+"MPIN192.java","XXX",tc)
             replace(fpath+"BLS192.java","XXX",tc)
             replace(fpathTest+"TestMPIN192.java","XXX",tc)  #ms
             replace(fpathTest+"TestBLS192.java","XXX",tc)  #ms
             replace(fpathTest+"TesttimeMPIN192.java","XXX",tc)  #ms
 
-        if cs == "256" :
+        if pf == "BLS48" :
             os.system(copytext+"FP8.java "+fpath+"FP8.java")
             os.system(copytext+"ECP8.java "+fpath+"ECP8.java")
             os.system(copytext+"FP16.java "+fpath+"FP16.java")
             os.system(copytext+"FP48.java "+fpath+"FP48.java")
-            os.system(copytext+"PAIR256.java "+fpath+"PAIR256.java")
+            os.system(copytext+"PAIR8.java "+fpath+"PAIR8.java")
             os.system(copytext+"MPIN256.java "+fpath+"MPIN256.java")
             os.system(copytext+"BLS256.java "+fpath+"BLS256.java")
             os.system(copytext+"TestMPIN256.java "+fpathTest+"TestMPIN256.java")    #ms
@@ -268,7 +267,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"FP16.java","XXX",tc)
             replace(fpath+"FP48.java","XXX",tc)
             replace(fpath+"ECP8.java","XXX",tc)
-            replace(fpath+"PAIR256.java","XXX",tc)
+            replace(fpath+"PAIR8.java","XXX",tc)
             replace(fpath+"MPIN256.java","XXX",tc)
             replace(fpath+"BLS256.java","XXX",tc)
             replace(fpathTest+"TestMPIN256.java","XXX",tc)  #ms
@@ -321,16 +320,17 @@ print("32. BLS12461")
 print("33. BN462")
 print("34. BLS24479")
 print("35. BLS48556")
-print("36. BLS48581\n")
+print("36. BLS48581")
+print("37. BLS48286\n")
 
 print("RSA")
-print("37. RSA2048")
-print("38. RSA3072")
-print("39. RSA4096")
+print("38. RSA2048")
+print("39. RSA3072")
+print("40. RSA4096")
 
 selection=[]
 ptr=0
-max=40
+max=41
 
 curve_selected=False
 pfcurve_selected=False
@@ -368,8 +368,8 @@ while ptr<max:
 # Curve A parameter
 # pairing_friendly is BN, BLS or NOT (if not pairing friendly)
 # if pairing friendly. M or D type twist, and sign of the family parameter x
-# ate bits is number of bits in Ate parameter (from romgen program)
 # g2_table size is number of entries in precomputed table
+# ate bits is number of bits in Ate parameter (from romgen program)
 # curve security is AES equivalent, rounded up.
 
 
@@ -466,11 +466,11 @@ while ptr<max:
         curveset("BN254CX","56","254","1",["-1","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","76","66","128")
         pfcurve_selected=True
     if x==28:
-        curveset("BLS12383","58","383","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","POSITIVEX","68","65","128")  # change to 58
+        curveset("BLS12383","58","383","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","68","65","128")  # change to 58
         pfcurve_selected=True
 
     if x==29:
-        curveset("BLS12381","58","381","1",["-3","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","NEGATIVEX","69","65","128")  # change to 58
+        curveset("BLS12381","58","381","1",["-3","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","69","65","128")  # change to 58
         pfcurve_selected=True
 
     if x==30:
@@ -481,7 +481,7 @@ while ptr<max:
         pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
     if x==32:
-        curveset("BLS12461","60","461","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","NEGATIVEX","79","78","128")
+        curveset("BLS12461","60","461","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","79","78","128")
         pfcurve_selected=True
 
     if x==33:
@@ -489,33 +489,38 @@ while ptr<max:
         pfcurve_selected=True
 
     if x==34:
-        curveset("BLS24479","56","479","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","POSITIVEX","52","49","192")
+        curveset("BLS24479","56","479","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24","M_TYPE","POSITIVEX","52","49","192")
         pfcurve_selected=True
 
     if x==35:
-        curveset("BLS48556","58","556","1",["-1","2"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS","M_TYPE","POSITIVEX","35","32","256")
+        curveset("BLS48556","58","556","1",["-1","2"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","35","32","256")
         pfcurve_selected=True
 
     if x==36:
-        curveset("BLS48581","60","581","1",["2","2"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS","D_TYPE","NEGATIVEX","36","33","256")
+        curveset("BLS48581","60","581","1",["2","2"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48","D_TYPE","NEGATIVEX","36","33","256")
         pfcurve_selected=True
+
+    if x==37:
+        curveset("BLS48286","60","286","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","20","17","128")
+        pfcurve_selected=True
+
 
 # rsaset(rsaname,big_length_bytes,bits_in_base,multiplier)
 # The RSA name reflects the modulus size, which is a 2^m multiplier
 # of the underlying big length
 
 # There are choices here, different ways of getting the same result, but some faster than others
-    if x==37:
+    if x==38:
         #256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
         #512 is faster.. but best is 1024
         rsaset("RSA2048","128","58","2")
         #rsaset("RSA2048","64","60","4")
         #rsaset("RSA2048","32","56","8")
         rsa_selected=True
-    if x==38:
+    if x==39:
         rsaset("RSA3072","48","56","8")
         rsa_selected=True
-    if x==39:
+    if x==40:
         #rsaset("RSA4096","32","56","16")
         rsaset("RSA4096","64","60","8")
         rsa_selected=True

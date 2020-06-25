@@ -35,8 +35,8 @@
 #include "ecp_NIST256.h"
 #include "ecp_GOLDILOCKS.h"
 #include "pair_BLS12383.h"
-#include "pair192_BLS24479.h"
-#include "pair256_BLS48556.h"
+#include "pair4_BLS24479.h"
+#include "pair8_BLS48556.h"
 #endif
 
 #define MIN_TIME 10.0

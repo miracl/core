@@ -380,7 +380,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnameh,"XXX",bd)
         replace(fnameh,"ZZZ",tc)
 
-        if cs == "128" :
+        if pf == "BN_CURVE" or pf == "BLS12_CURVE" :
             fnamec="fp12_"+tf+".cpp"
             fnameh="fp12_"+tf+".h"
 
@@ -441,7 +441,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
 
-        if cs == "192" :
+        if pf == "BLS24_CURVE" :
             fnamec="fp8_"+tf+".cpp"
             fnameh="fp8_"+tf+".h"
 
@@ -478,11 +478,11 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
 
-            fnamec="pair192_"+tc+".cpp"
-            fnameh="pair192_"+tc+".h"
+            fnamec="pair4_"+tc+".cpp"
+            fnameh="pair4_"+tc+".h"
 
-            os.system(copytext+" pair192.cpp "+fnamec)
-            os.system(copytext+" pair192.h "+fnameh)
+            os.system(copytext+" pair4.cpp "+fnamec)
+            os.system(copytext+" pair4.h "+fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -514,7 +514,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
 
-        if cs == "256" :
+        if pf == "BLS48_CURVE" :
 
             fnamec="fp8_"+tf+".cpp"
             fnameh="fp8_"+tf+".h"
@@ -564,11 +564,11 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
 
-            fnamec="pair256_"+tc+".cpp"
-            fnameh="pair256_"+tc+".h"
+            fnamec="pair8_"+tc+".cpp"
+            fnameh="pair8_"+tc+".h"
 
-            os.system(copytext+" pair256.cpp "+fnamec)
-            os.system(copytext+" pair256.h "+fnameh)
+            os.system(copytext+" pair8.cpp "+fnamec)
+            os.system(copytext+" pair8.h "+fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -646,17 +646,18 @@ print("32. BLS12461")
 print("33. BN462")
 print("34. BLS24479")
 print("35. BLS48556")
-print("36. BLS48581\n")
+print("36. BLS48581")
+print("37. BLS48286\n")
 
 print("RSA")
-print("37. RSA2048")
-print("38. RSA3072")
-print("39. RSA4096")
-print("40. NewHope\n")
+print("38. RSA2048")
+print("39. RSA3072")
+print("40. RSA4096")
+print("41. NewHope\n")
 
 selection=[]
 ptr=0
-max=41
+max=42
 
 def selected(selection,sel,len) :
     for i in range(0,len):
@@ -699,8 +700,8 @@ while ptr<max:
 # Curve A parameter
 # pairing_friendly is BN_CURVE, BLS_CURVE or NOT_PF (if not pairing friendly)
 # if pairing friendly. M or D type twist, and sign of the family parameter x
-# ate bits is number of bits in Ate parameter (from romgen program)
 # g2_table size is number of entries in precomputed table
+# ate bits is number of bits in Ate parameter (from romgen program)
 # curve security is AES equiavlent, rounded up.
 
     if x==1:
@@ -831,6 +832,10 @@ while ptr<max:
         curveset("581","BLS48581","BLS48581","29","1",["2","2"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS_CURVE","D_TYPE","NEGATIVEX","36","33","256")
         pfcurve_selected=True
 
+    if x==37:
+        curveset("286","BLS48286","BLS48286","29","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS_CURVE","M_TYPE","POSITIVEX","20","17","128")
+        pfcurve_selected=True
+
 # rsaset(big,ring,big_length_bytes,bit_bits_in_base,multiplier)
 # for each choice give distinct names for "big" and "ring".
 # Typically "big" is the length in bits of the underlying big number type
@@ -841,22 +846,22 @@ while ptr<max:
 
 # There are choices here, different ways of getting the same result, but some faster than others
 # There are choices here, different ways of getting the same result, but some faster than others
-    if x==37:
+    if x==38:
         #256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
         #512 is faster.. but best is 1024
         rsaset("1024","RSA2048","28","2")
         #rsaset("512","RSA2048","29","4")
         #rsaset("256","RSA2048","29","8")
         rsa_selected=True
-    if x==38:
+    if x==39:
         rsaset("384","RSA3072","28","8")
         rsa_selected=True
-    if x==39:
+    if x==40:
         #rsaset("256","RSA4096","29","16")
         rsaset("512","RSA4096","29","8")
         rsa_selected=True
 
-    if x==40:
+    if x==41:
         nhs_selected=True
 
     break;
@@ -893,11 +898,11 @@ os.system(deltext+" pair.*")
 os.system(deltext+" mpin.*")
 os.system(deltext+" bls.*")
 
-os.system(deltext+" pair192.*")
+os.system(deltext+" pair4.*")
 os.system(deltext+" mpin192.*")
 os.system(deltext+" bls192.*")
 
-os.system(deltext+" pair256.*")
+os.system(deltext+" pair8.*")
 os.system(deltext+" mpin256.*")
 os.system(deltext+" bls256.*")
 
@@ -1074,6 +1079,9 @@ if not selected(selection,36,ptr) :
     os.system(deltext+" rom_field_BLS48581.cpp")
     os.system(deltext+" rom_curve_BLS48581.cpp")
 
+if not selected(selection,37,ptr) :
+    os.system(deltext+" rom_field_BLS48286.cpp")
+    os.system(deltext+" rom_curve_BLS48286.cpp")
 
     os.system(deltext+" testbls.cpp")
     os.system(deltext+" testecc.cpp")

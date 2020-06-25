@@ -18,7 +18,7 @@
  */
 
 //
-//  pair256.swift
+//  pair8.swift
 //
 //  Created by Michael Scott on 07/07/2015.
 //  Copyright (c) 2015 Michael Scott. All rights reserved.
@@ -26,7 +26,7 @@
 
 /* CORE BLS Curve Pairing functions */
 
-public struct PAIR256 {
+public struct PAIR8 {
     
    // Point doubling for pairings
     static private func dbl(_ A: inout ECP8,_ AA: inout FP8,_ BB: inout FP8,_ CC: inout FP8)
@@ -375,10 +375,10 @@ public struct PAIR256 {
         var lv:FP48
     
 	if Q1.is_infinity() {
-		return PAIR256.ate(R1,S1);
+		return PAIR8.ate(R1,S1);
 	}
 	if S1.is_infinity() {
-		return PAIR256.ate(P1,Q1);
+		return PAIR8.ate(P1,Q1);
 	}
 
         var P=ECP8(); P.copy(P1); P.affine()
@@ -666,7 +666,7 @@ public struct PAIR256 {
             let q=BIG(ROM.CURVE_Order)
             let cru=FP(BIG(ROM.CRu))
             var t=BIG(0)
-            var u=PAIR256.glv(e)
+            var u=PAIR8.glv(e)
             Q.mulx(cru);            
     
             var np=u[0].nbits()
@@ -706,7 +706,7 @@ public struct PAIR256 {
             var Q=[ECP8]()
             let F=ECP8.frob_constants()
             let q=BIG(ROM.CURVE_Order);
-            var u=PAIR256.gs(e);
+            var u=PAIR8.gs(e);
     
             var t=BIG(0)
             Q.append(ECP8())

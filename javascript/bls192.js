@@ -70,7 +70,7 @@ var BLS192 = function(ctx) {
         init: function() {
             var G = ctx.ECP4.generator();
 			if (G.is_infinity()) return this.BLS_FAIL;
-            this.G2_TAB = ctx.PAIR192.precomp(G);
+            this.G2_TAB = ctx.PAIR4.precomp(G);
 			return this.BLS_OK;
         },
 
@@ -129,7 +129,7 @@ var BLS192 = function(ctx) {
             var s=dx.mod(r);
             s.toBytes(S);
 // SkToPk
-            G = ctx.PAIR192.G2mul(G, s);
+            G = ctx.PAIR4.G2mul(G, s);
             G.toBytes(W,true);
             return this.BLS_OK;
         },
@@ -139,7 +139,7 @@ var BLS192 = function(ctx) {
         core_sign: function(SIG, M, S) {
             var D = this.bls_hash_to_point(M);
             var s = ctx.BIG.fromBytes(S);
-            D = ctx.PAIR192.G1mul(D, s);
+            D = ctx.PAIR4.G1mul(D, s);
             D.toBytes(SIG, true);
             return this.BLS_OK;
         },
@@ -150,22 +150,22 @@ var BLS192 = function(ctx) {
             var HM = this.bls_hash_to_point(M);
 
             var D = ctx.ECP.fromBytes(SIG);
-            if (!ctx.PAIR192.G1member(D)) return this.BLS_FAIL;
+            if (!ctx.PAIR4.G1member(D)) return this.BLS_FAIL;
             D.neg();
 
             var PK = ctx.ECP4.fromBytes(W);
-            if (!ctx.PAIR192.G2member(PK)) return this.BLS_FAIL;
+            if (!ctx.PAIR4.G2member(PK)) return this.BLS_FAIL;
 
             // Use new multi-pairing mechanism 
-            var r = ctx.PAIR192.initmp();
-            //			ctx.PAIR192.another(r,G,D);
-            ctx.PAIR192.another_pc(r, this.G2_TAB, D);
-            ctx.PAIR192.another(r, PK, HM);
-            var v = ctx.PAIR192.miller(r);
+            var r = ctx.PAIR4.initmp();
+            //			ctx.PAIR4.another(r,G,D);
+            ctx.PAIR4.another_pc(r, this.G2_TAB, D);
+            ctx.PAIR4.another(r, PK, HM);
+            var v = ctx.PAIR4.miller(r);
 
             //.. or alternatively
-            //			var v=ctx.PAIR192.ate2(G,D,PK,HM);
-            v = ctx.PAIR192.fexp(v);
+            //			var v=ctx.PAIR4.ate2(G,D,PK,HM);
+            v = ctx.PAIR4.fexp(v);
             if (v.isunity())
                 return this.BLS_OK;
             return this.BLS_FAIL;

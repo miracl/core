@@ -58,7 +58,10 @@
 
 #define NOT_PF 0
 #define BN_CURVE 1
-#define BLS_CURVE 2
+#define BLS12_CURVE 2
+#define BLS24_CURVE 3
+#define BLS48_CURVE 4
+
 
 #define D_TYPE 0
 #define M_TYPE 1

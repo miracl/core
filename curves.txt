@@ -38,7 +38,8 @@ security and above.
 34. BLS24479 - An experimental (approx AES-192 bit security) BLS24 GT-Strong curve
 35. BLS48556 - An experimental (approx AES-256 bit security) BLS48 GT-Strong curve
 36. BLS48581 - A 581 bit BLS48 curve suggested by Sakemi, Kobayashi and Saito https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/
+37. BLS48286 - A 286 bit BLS48 curve (approx AES-128 bit security) inspired by https://eprint.iacr.org/2020/760 which optimises operations in G1
 
-Note that it is quite possible to add new curves, and some programs are supplied to assist in the process.
+Note that it is quite easy to add new curves, and some programs are supplied to assist in the process.
 Let us know if you have a particular request - mike.scott@miracl.com
 

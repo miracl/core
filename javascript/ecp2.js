@@ -573,7 +573,7 @@ var ECP2 = function(ctx) {
                 this.add(T);
             }
 
-            if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BLS) {
+            if (ctx.ECP.CURVE_PAIRING_TYPE > ctx.ECP.BN) {
 
                 xQ = this.mul(x);
                 x2Q = xQ.mul(x);

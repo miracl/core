@@ -502,8 +502,9 @@ while ptr<max:
 # Curve A parameter
 # pairing_friendly is BN, BLS or NOT (if not pairing friendly)
 # if pairing friendly. M or D type twist, and sign of the family parameter x
-# ate bits is number of bits in Ate parameter (from romgen program)
 # g2_table size is number of entries in precomputed table
+# ate bits is number of bits in Ate parameter (from romgen program)
+
 # curve security is AES equivalent, rounded up.
 
     if x==1:

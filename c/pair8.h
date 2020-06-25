@@ -18,14 +18,14 @@
  */
 
 /**
- * @file pair256.h
+ * @file pair8.h
  * @author Mike Scott
  * @brief PAIR Header File
  *
  */
 
-#ifndef PAIR256_ZZZ_H
-#define PAIR256_ZZZ_H
+#ifndef PAIR8_ZZZ_H
+#define PAIR8_ZZZ_H
 
 #include "fp48_YYY.h"
 #include "ecp8_ZZZ.h"

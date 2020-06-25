@@ -32,7 +32,7 @@ build in the new directory execute
 
     python3 config32.py
 
-Then select options 1, 3, 7, 26, 28, 34, 35 and 37, which are fixed for 
+Then select options 1, 3, 7, 26, 28, 34, 35 and 38, which are fixed for 
 the example programs.
 
 Build the test programs with
