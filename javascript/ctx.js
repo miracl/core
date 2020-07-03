@@ -967,6 +967,7 @@ var CTX = function(input_parameter) {
     prepareModule("HASH512");
     prepareModule("SHA3");
     prepareModule("RAND");
+    prepareModule("SHARE");
     prepareModule("NHS");
 
     if (typeof input_parameter === "undefined") {

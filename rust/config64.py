@@ -245,6 +245,7 @@ if __name__ == '__main__':
     os.system(copytext+ "hmac.rs core"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "sha3.rs core"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "rand.rs core"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "share.rs core"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "aes.rs core"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "gcm.rs core"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "nhs.rs core"+slashtext+"src"+slashtext+".")
@@ -499,6 +500,7 @@ if __name__ == '__main__':
     os.system(deltext+" sha3.rs")
     os.system(deltext+" aes.rs")
     os.system(deltext+" rand.rs")
+    os.system(deltext+" share.rs")
     os.system(deltext+" gcm.rs")
     os.system(deltext+" nhs.rs")
 

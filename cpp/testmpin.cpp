@@ -38,7 +38,7 @@ int mpin_BN254(csprng *RNG)
 {
 
     using namespace BN254;
-    int pin, rtn;
+    int i, pin, rtn;
     char x[PGS_BN254], s[PGS_BN254], y[PGS_BN254], client_id[100], sst[4 * PFS_BN254 + 1], token[2 * PFS_BN254 + 1], sec[2 * PFS_BN254 + 1], u[2 * PFS_BN254 + 1];
     char hcid[2*PFS_BN254+1], hsid[2*PFS_BN254+1], dst[256];
 
@@ -88,6 +88,30 @@ int mpin_BN254(csprng *RNG)
             MPIN_EXTRACT_PIN(&HCID, pin, &TOKEN);
             printf("Client Token= ");
             OCT_output(&TOKEN);
+
+
+// Exercise Secret Sharing
+            char s1[2 * PFS_BN254 + 1],s2[2 * PFS_BN254 + 1],s3[2 * PFS_BN254 + 1],s4[2 * PFS_BN254 + 1],r[128];
+            octet S1 = {0, sizeof(s1), s1};
+            octet S2 = {0, sizeof(s2), s2};
+            octet S3 = {0, sizeof(s3), s3};
+            octet S4 = {0, sizeof(s4), s4};
+            octet R = {0,sizeof(r),r};
+            OCT_rand(&R,RNG,128);
+
+        // create 4 unique shares of TOKEN
+            share Sh1=getshare(1,3,&S1,&TOKEN,&R);  // indicate 3 shares required for recovery
+            share Sh2=getshare(2,3,&S2,&TOKEN,&R);
+            share Sh3=getshare(3,3,&S3,&TOKEN,&R);
+            share Sh4=getshare(4,3,&S4,&TOKEN,&R);
+
+            OCT_clear(&TOKEN);  // kill token
+
+            share Shares[3];
+            Shares[0]=Sh1;  // any 3 shares to recover TOKEN
+            Shares[1]=Sh2;
+            Shares[2]=Sh4; 
+            recover(&TOKEN,Shares);  // recover token
 
 // MPin Protocol
 
@@ -470,7 +494,7 @@ int main()
     RAW.val[1] = ran >> 8;
     RAW.val[2] = ran >> 16;
     RAW.val[3] = ran >> 24;
-    for (i = 4; i < 100; i++) RAW.val[i] = i;
+    for (i = 0; i < 100; i++) RAW.val[i] = i;
 
     CREATE_CSPRNG(&RNG, &RAW);  // initialise strong RNG
 

@@ -281,7 +281,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 os.system(makedir + corepath)
 
 os.system(copytext + "pom.xml " + "core" + slashtext + ".")
-for file in ['HASH*.java', 'HMAC.java', 'SHA3.java', 'RAND.java', 'AES.java', 'GCM.java', 'NHS.java']:
+for file in ['HASH*.java', 'HMAC.java', 'SHA3.java', 'RAND.java', 'AES.java', 'GCM.java', 'NHS.java', 'SHARE.java']:
     os.system(copytext + file + " " + corepath+slashtext+".")
 
 print("Elliptic Curves")

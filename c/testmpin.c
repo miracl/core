@@ -37,7 +37,14 @@ int mpin_BN254(csprng *RNG)
     int pin, rtn;
     char x[PGS_BN254], s[PGS_BN254], y[PGS_BN254], client_id[100], sst[4 * PFS_BN254 + 1], token[2 * PFS_BN254 + 1], sec[2 * PFS_BN254 + 1], u[2 * PFS_BN254 + 1];
     char hcid[2*PFS_BN254+1], hsid[2*PFS_BN254+1], dst[256];
-
+    
+    char s1[2 * PFS_BN254 + 1],s2[2 * PFS_BN254 + 1],s3[2 * PFS_BN254 + 1],s4[2 * PFS_BN254 + 1],r[128];
+    octet S1 = {0, sizeof(s1), s1};
+    octet S2 = {0, sizeof(s2), s2};
+    octet S3 = {0, sizeof(s3), s3};
+    octet S4 = {0, sizeof(s4), s4};
+    octet R = {0,sizeof(r),r};
+    
     octet S = {0, sizeof(s), s};
     octet X = {0, sizeof(x), x};
     octet Y = {0, sizeof(y), y};
@@ -49,6 +56,8 @@ int mpin_BN254(csprng *RNG)
     octet HCID = {0, sizeof(hcid), hcid};
     octet HSID = {0, sizeof(hsid), hsid};
     octet DST = {0, sizeof(dst), dst};
+
+
     OCT_jstring(&DST,(char *)"BN254G1_XMD:SHA-256_SVDW_NU_MPIN"); // Domain Separation Tag
 
     // Trusted Authority (TA) set-up
@@ -84,6 +93,25 @@ int mpin_BN254(csprng *RNG)
             MPIN_BN254_EXTRACT_PIN(&HCID, pin, &TOKEN);
             printf("Client Token= ");
             OCT_output(&TOKEN);
+
+// Exercise Secret Sharing
+
+            OCT_rand(&R,RNG,128);
+
+        // create 4 unique shares of TOKEN
+            share Sh1=getshare(1,3,&S1,&TOKEN,&R);  // indicate 3 shares required for recovery
+            share Sh2=getshare(2,3,&S2,&TOKEN,&R);
+            share Sh3=getshare(3,3,&S3,&TOKEN,&R);
+            share Sh4=getshare(4,3,&S4,&TOKEN,&R);
+
+            OCT_clear(&TOKEN);  // kill token
+
+            share Shares[3];
+            Shares[0]=Sh1;  // any 3 shares to recover TOKEN
+            Shares[1]=Sh2;
+            Shares[2]=Sh4; 
+            recover(&TOKEN,Shares);  // recover token
+
 
 // MPin Protocol
 

@@ -22,6 +22,7 @@ extern crate core;
 use std::io;
 
 use core::rand::RAND;
+use core::share::SHARE;
 
 pub fn printbinary(array: &[u8]) {
     for i in 0..array.len() {
@@ -30,6 +31,7 @@ pub fn printbinary(array: &[u8]) {
     println!("")
 }
 
+#[allow(unused_variables)]
 fn mpin_bn254(mut rng: &mut RAND) {
 
     use core::bn254::mpin;
@@ -86,9 +88,30 @@ fn mpin_bn254(mut rng: &mut RAND) {
         let mut rtn = mpin::extract_pin(&hcid, pin, &mut token);
         if rtn != 0 {
             println!("FAILURE: EXTRACT_PIN rtn: {}", rtn);
+            return;
         }
         print!("Client Token TK: 0x");
         printbinary(&token);
+
+// Exercise Secret Sharing
+        let mut r: [u8; 128] = [0; 128];
+        let mut s1b: [u8; G1S] = [0; G1S];
+        let mut s2b: [u8; G1S] = [0; G1S];
+        let mut s3b: [u8; G1S] = [0; G1S];
+        let mut s4b: [u8; G1S] = [0; G1S];
+
+        for i in 0..128 {
+            r[i]=rng.getbyte();
+        }
+    // create 4 unique shares of TOKEN
+        let sh1 = SHARE::new(1,3,&mut s1b,&token,&r);  // indicate 3 shares required for recovery
+        let sh2 = SHARE::new(2,3,&mut s2b,&token,&r);
+        let sh3 = SHARE::new(3,3,&mut s3b,&token,&r);
+        let sh4 = SHARE::new(4,3,&mut s4b,&token,&r);
+
+        let shares: [SHARE;3]=[sh1,sh2,sh4]; // any 3 shares to recover TOKEN
+       
+        SHARE::recover(&mut token,&shares);  // recover token
 
 // MPin Protocol
 
@@ -113,6 +136,7 @@ fn mpin_bn254(mut rng: &mut RAND) {
         );
         if rtn != 0 {
             println!("FAILURE: CLIENT_1 rtn: {}", rtn);
+            return;
         }
 
 
@@ -126,6 +150,7 @@ fn mpin_bn254(mut rng: &mut RAND) {
         rtn = mpin::client_2(&x, &y, &mut sec);
         if rtn != 0 {
             println!("FAILURE: CLIENT_2 rtn: {}", rtn);
+            return;
         }
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST.
@@ -138,8 +163,12 @@ fn mpin_bn254(mut rng: &mut RAND) {
                     &sec
                 );
     
-                if rtn == mpin::BAD_PIN {
-                    println!("Server says - Bad Pin. I don't know you. Feck off.\n");
+                if rtn != 0 {
+                    if rtn == mpin::BAD_PIN {
+                        println!("Server says - Bad Pin. I don't know you. Feck off.\n");
+                    } else {
+                        println!("FAILURE: SERVER rtn: {}",rtn);
+                    }
                 } else {
                     println!("Server says - PIN is good! You really are {}\n", name);
                 }
@@ -201,6 +230,7 @@ fn mpin_bls12383(mut rng: &mut RAND) {
         let mut rtn = mpin::extract_pin(&hcid, pin, &mut token);
         if rtn != 0 {
             println!("FAILURE: EXTRACT_PIN rtn: {}", rtn);
+            return;
         }
         print!("Client Token TK: 0x");
         printbinary(&token);
@@ -228,6 +258,7 @@ fn mpin_bls12383(mut rng: &mut RAND) {
         );
         if rtn != 0 {
             println!("FAILURE: CLIENT_1 rtn: {}", rtn);
+            return;
         }
 
 
@@ -241,6 +272,7 @@ fn mpin_bls12383(mut rng: &mut RAND) {
         rtn = mpin::client_2(&x, &y, &mut sec);
         if rtn != 0 {
             println!("FAILURE: CLIENT_2 rtn: {}", rtn);
+            return;
         }
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST.
@@ -253,8 +285,12 @@ fn mpin_bls12383(mut rng: &mut RAND) {
                     &sec
                 );
     
-                if rtn == mpin::BAD_PIN {
-                    println!("Server says - Bad Pin. I don't know you. Feck off.\n");
+                if rtn != 0 {
+                    if rtn == mpin::BAD_PIN {
+                        println!("Server says - Bad Pin. I don't know you. Feck off.\n");
+                    } else {
+                        println!("FAILURE: SERVER rtn: {}",rtn);
+                    }
                 } else {
                     println!("Server says - PIN is good! You really are {}\n", name);
                 }
@@ -315,6 +351,7 @@ fn mpin_bls24479(mut rng: &mut RAND) {
         let mut rtn = mpin192::extract_pin(&hcid, pin, &mut token);
         if rtn != 0 {
             println!("FAILURE: EXTRACT_PIN rtn: {}", rtn);
+            return;
         }
         print!("Client Token TK: 0x");
         printbinary(&token);
@@ -342,6 +379,7 @@ fn mpin_bls24479(mut rng: &mut RAND) {
         );
         if rtn != 0 {
             println!("FAILURE: CLIENT_1 rtn: {}", rtn);
+            return;
         }
 
 
@@ -355,6 +393,7 @@ fn mpin_bls24479(mut rng: &mut RAND) {
         rtn = mpin192::client_2(&x, &y, &mut sec);
         if rtn != 0 {
             println!("FAILURE: CLIENT_2 rtn: {}", rtn);
+            return;
         }
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST.
@@ -367,8 +406,12 @@ fn mpin_bls24479(mut rng: &mut RAND) {
                     &sec
                 );
     
-                if rtn == mpin192::BAD_PIN {
-                    println!("Server says - Bad Pin. I don't know you. Feck off.\n");
+                if rtn != 0 {
+                    if rtn == mpin192::BAD_PIN {
+                        println!("Server says - Bad Pin. I don't know you. Feck off.\n");
+                    } else {
+                        println!("FAILURE: SERVER rtn: {}",rtn);
+                    }
                 } else {
                     println!("Server says - PIN is good! You really are {}\n", name);
                 }
@@ -429,6 +472,7 @@ fn mpin_bls48556(mut rng: &mut RAND) {
         let mut rtn = mpin256::extract_pin(&hcid, pin, &mut token);
         if rtn != 0 {
             println!("FAILURE: EXTRACT_PIN rtn: {}", rtn);
+            return;
         }
         print!("Client Token TK: 0x");
         printbinary(&token);
@@ -456,6 +500,7 @@ fn mpin_bls48556(mut rng: &mut RAND) {
         );
         if rtn != 0 {
             println!("FAILURE: CLIENT_1 rtn: {}", rtn);
+            return;
         }
 
 
@@ -469,6 +514,7 @@ fn mpin_bls48556(mut rng: &mut RAND) {
         rtn = mpin256::client_2(&x, &y, &mut sec);
         if rtn != 0 {
             println!("FAILURE: CLIENT_2 rtn: {}", rtn);
+            return;
         }
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST.
@@ -481,8 +527,12 @@ fn mpin_bls48556(mut rng: &mut RAND) {
                     &sec
                 );
     
-                if rtn == mpin256::BAD_PIN {
-                    println!("Server says - Bad Pin. I don't know you. Feck off.\n");
+                if rtn != 0 {
+                    if rtn == mpin256::BAD_PIN {
+                        println!("Server says - Bad Pin. I don't know you. Feck off.\n");
+                    } else {
+                        println!("FAILURE: SERVER rtn: {}",rtn);
+                    }
                 } else {
                     println!("Server says - PIN is good! You really are {}\n", name);
                 }

@@ -122,11 +122,13 @@ public class TestMPIN256 extends TestCase { //
                     rtn = MPIN256.SERVER(HSID, Y, SST,U, SEC);
 
                     if (rtn != 0)
-                        fail("FAILURE: SERVER_2 rtn: " + rtn);
-        
-                    if (rtn == MPIN256.BAD_PIN) 
-                        fail("Server says - Bad Pin. I don't know you. Feck off");
-                    else 
+                    {
+                        if (rtn == MPIN256.BAD_PIN) 
+                            fail("Server says - Bad Pin. I don't know you. Feck off\n");
+                        else
+                            fail("FAILURE: SERVER_2 rtn: " + rtn);
+                    } else { 
                         System.out.println("Server says - PIN is good! You really are " + IDstr + "\n");
+                    }
     }
 }

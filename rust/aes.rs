@@ -182,95 +182,97 @@ pub struct AES {
     pub f: [u8; 16],
 }
 
+
+fn rotl8(x: u32) -> u32 {
+    return ((x) << 8) | ((x) >> 24);
+}
+
+fn rotl16(x: u32) -> u32 {
+    return ((x) << 16) | ((x) >> 16);
+}
+
+fn rotl24(x: u32) -> u32 {
+    return ((x) << 24) | ((x) >> 8);
+}
+
+fn pack(b: [u8; 4]) -> u32 {
+    /* pack bytes into a 32-bit Word */
+    return ((((b[3]) & 0xff) as u32) << 24)
+        | ((((b[2]) & 0xff) as u32) << 16)
+        | ((((b[1]) & 0xff) as u32) << 8)
+        | (((b[0]) & 0xff) as u32);
+}
+
+fn unpack(a: u32) -> [u8; 4] {
+    /* unpack bytes from a word */
+    let b: [u8; 4] = [
+        (a & 0xff) as u8,
+        ((a >> 8) & 0xff) as u8,
+        ((a >> 16) & 0xff) as u8,
+        ((a >> 24) & 0xff) as u8,
+    ];
+    return b;
+}
+
+fn bmul(x: u8, y: u8) -> u8 {
+    /* x.y= AntiLog(Log(x) + Log(y)) */
+    let ix = (x as usize) & 0xff;
+    let iy = (y as usize) & 0xff;
+    let lx = (LTAB[ix] as usize) & 0xff;
+    let ly = (LTAB[iy] as usize) & 0xff;
+
+    if x != 0 && y != 0 {
+        return PTAB[(lx + ly) % 255];
+    } else {
+        return 0;
+    }
+}
+
+fn subbyte(a: u32) -> u32 {
+    let mut b = unpack(a);
+    b[0] = FBSUB[b[0] as usize];
+    b[1] = FBSUB[b[1] as usize];
+    b[2] = FBSUB[b[2] as usize];
+    b[3] = FBSUB[b[3] as usize];
+    return pack(b);
+}
+
+fn product(x: u32, y: u32) -> u8 {
+    /* dot product of two 4-byte arrays */
+    let xb = unpack(x);
+    let yb = unpack(y);
+
+    return bmul(xb[0], yb[0])
+        ^ bmul(xb[1], yb[1])
+        ^ bmul(xb[2], yb[2])
+        ^ bmul(xb[3], yb[3]);
+}
+
+fn invmixcol(x: u32) -> u32 {
+    /* matrix Multiplication */
+    let mut b: [u8; 4] = [0; 4];
+    let mut m = pack(INCO);
+    b[3] = product(m, x);
+    m = rotl24(m);
+    b[2] = product(m, x);
+    m = rotl24(m);
+    b[1] = product(m, x);
+    m = rotl24(m);
+    b[0] = product(m, x);
+    let y = pack(b);
+    return y;
+}
+
+fn increment(f: &mut [u8; 16]) {
+    for i in 0..16 {
+        f[i] += 1;
+        if f[i] != 0 {
+            break;
+        }
+    }
+}
+
 impl AES {
-    fn rotl8(x: u32) -> u32 {
-        return ((x) << 8) | ((x) >> 24);
-    }
-
-    fn rotl16(x: u32) -> u32 {
-        return ((x) << 16) | ((x) >> 16);
-    }
-
-    fn rotl24(x: u32) -> u32 {
-        return ((x) << 24) | ((x) >> 8);
-    }
-
-    fn pack(b: [u8; 4]) -> u32 {
-        /* pack bytes into a 32-bit Word */
-        return ((((b[3]) & 0xff) as u32) << 24)
-            | ((((b[2]) & 0xff) as u32) << 16)
-            | ((((b[1]) & 0xff) as u32) << 8)
-            | (((b[0]) & 0xff) as u32);
-    }
-
-    fn unpack(a: u32) -> [u8; 4] {
-        /* unpack bytes from a word */
-        let b: [u8; 4] = [
-            (a & 0xff) as u8,
-            ((a >> 8) & 0xff) as u8,
-            ((a >> 16) & 0xff) as u8,
-            ((a >> 24) & 0xff) as u8,
-        ];
-        return b;
-    }
-
-    fn bmul(x: u8, y: u8) -> u8 {
-        /* x.y= AntiLog(Log(x) + Log(y)) */
-        let ix = (x as usize) & 0xff;
-        let iy = (y as usize) & 0xff;
-        let lx = (LTAB[ix] as usize) & 0xff;
-        let ly = (LTAB[iy] as usize) & 0xff;
-
-        if x != 0 && y != 0 {
-            return PTAB[(lx + ly) % 255];
-        } else {
-            return 0;
-        }
-    }
-
-    fn subbyte(a: u32) -> u32 {
-        let mut b = AES::unpack(a);
-        b[0] = FBSUB[b[0] as usize];
-        b[1] = FBSUB[b[1] as usize];
-        b[2] = FBSUB[b[2] as usize];
-        b[3] = FBSUB[b[3] as usize];
-        return AES::pack(b);
-    }
-
-    fn product(x: u32, y: u32) -> u8 {
-        /* dot product of two 4-byte arrays */
-        let xb = AES::unpack(x);
-        let yb = AES::unpack(y);
-
-        return AES::bmul(xb[0], yb[0])
-            ^ AES::bmul(xb[1], yb[1])
-            ^ AES::bmul(xb[2], yb[2])
-            ^ AES::bmul(xb[3], yb[3]);
-    }
-
-    fn invmixcol(x: u32) -> u32 {
-        /* matrix Multiplication */
-        let mut b: [u8; 4] = [0; 4];
-        let mut m = AES::pack(INCO);
-        b[3] = AES::product(m, x);
-        m = AES::rotl24(m);
-        b[2] = AES::product(m, x);
-        m = AES::rotl24(m);
-        b[1] = AES::product(m, x);
-        m = AES::rotl24(m);
-        b[0] = AES::product(m, x);
-        let y = AES::pack(b);
-        return y;
-    }
-
-    fn increment(f: &mut [u8; 16]) {
-        for i in 0..16 {
-            f[i] += 1;
-            if f[i] != 0 {
-                break;
-            }
-        }
-    }
 
     pub fn new() -> AES {
         AES {
@@ -318,7 +320,7 @@ impl AES {
             for k in 0..4 {
                 b[k] = key[j + k]
             }
-            cipherkey[i] = AES::pack(b);
+            cipherkey[i] = pack(b);
             j += 4;
         }
 
@@ -330,7 +332,7 @@ impl AES {
         let mut k = 0;
         while j < n {
             self.fkey[j] =
-                self.fkey[j - nk] ^ AES::subbyte(AES::rotl24(self.fkey[j - 1])) ^ (RCO[k] as u32);
+                self.fkey[j - nk] ^ subbyte(rotl24(self.fkey[j - 1])) ^ (RCO[k] as u32);
             if nk<=6 { 
 		for i in 1..nk {
 			if (i + j) >= n {
@@ -347,7 +349,7 @@ impl AES {
 		}
 		
 		if (j + 4) < n {
-			self.fkey[j + 4] = self.fkey[j + 4 - nk] ^ AES::subbyte(self.fkey[j + 3]);
+			self.fkey[j + 4] = self.fkey[j + 4 - nk] ^ subbyte(self.fkey[j + 3]);
 		}
 		for i in 5..nk {
 			if (i + j) >= n {
@@ -369,7 +371,7 @@ impl AES {
         while i < n - 4 {
             let k = n - 4 - i;
             for j in 0..4 {
-                self.rkey[k + j] = AES::invmixcol(self.fkey[i + j])
+                self.rkey[k + j] = invmixcol(self.fkey[i + j])
             }
             i += 4;
         }
@@ -398,7 +400,7 @@ impl AES {
             for k in 0..4 {
                 b[k] = buff[j + k]
             }
-            p[i] = AES::pack(b);
+            p[i] = pack(b);
             p[i] ^= self.fkey[i];
             j += 4;
         }
@@ -409,27 +411,27 @@ impl AES {
         for _ in 1..self.nr {
             q[0] = self.fkey[k]
                 ^ FTABLE[(p[0] & 0xff) as usize]
-                ^ AES::rotl8(FTABLE[((p[1] >> 8) & 0xff) as usize])
-                ^ AES::rotl16(FTABLE[((p[2] >> 16) & 0xff) as usize])
-                ^ AES::rotl24(FTABLE[((p[3] >> 24) & 0xff) as usize]);
+                ^ rotl8(FTABLE[((p[1] >> 8) & 0xff) as usize])
+                ^ rotl16(FTABLE[((p[2] >> 16) & 0xff) as usize])
+                ^ rotl24(FTABLE[((p[3] >> 24) & 0xff) as usize]);
 
             q[1] = self.fkey[k + 1]
                 ^ FTABLE[(p[1] & 0xff) as usize]
-                ^ AES::rotl8(FTABLE[((p[2] >> 8) & 0xff) as usize])
-                ^ AES::rotl16(FTABLE[((p[3] >> 16) & 0xff) as usize])
-                ^ AES::rotl24(FTABLE[((p[0] >> 24) & 0xff) as usize]);
+                ^ rotl8(FTABLE[((p[2] >> 8) & 0xff) as usize])
+                ^ rotl16(FTABLE[((p[3] >> 16) & 0xff) as usize])
+                ^ rotl24(FTABLE[((p[0] >> 24) & 0xff) as usize]);
 
             q[2] = self.fkey[k + 2]
                 ^ FTABLE[(p[2] & 0xff) as usize]
-                ^ AES::rotl8(FTABLE[((p[3] >> 8) & 0xff) as usize])
-                ^ AES::rotl16(FTABLE[((p[0] >> 16) & 0xff) as usize])
-                ^ AES::rotl24(FTABLE[((p[1] >> 24) & 0xff) as usize]);
+                ^ rotl8(FTABLE[((p[3] >> 8) & 0xff) as usize])
+                ^ rotl16(FTABLE[((p[0] >> 16) & 0xff) as usize])
+                ^ rotl24(FTABLE[((p[1] >> 24) & 0xff) as usize]);
 
             q[3] = self.fkey[k + 3]
                 ^ FTABLE[(p[3] & 0xff) as usize]
-                ^ AES::rotl8(FTABLE[((p[0] >> 8) & 0xff) as usize])
-                ^ AES::rotl16(FTABLE[((p[1] >> 16) & 0xff) as usize])
-                ^ AES::rotl24(FTABLE[((p[2] >> 24) & 0xff) as usize]);
+                ^ rotl8(FTABLE[((p[0] >> 8) & 0xff) as usize])
+                ^ rotl16(FTABLE[((p[1] >> 16) & 0xff) as usize])
+                ^ rotl24(FTABLE[((p[2] >> 24) & 0xff) as usize]);
 
             k += 4;
             for j in 0..4 {
@@ -443,31 +445,31 @@ impl AES {
 
         q[0] = self.fkey[k]
             ^ (FBSUB[(p[0] & 0xff) as usize] as u32)
-            ^ AES::rotl8((FBSUB[((p[1] >> 8) & 0xff) as usize]) as u32)
-            ^ AES::rotl16((FBSUB[((p[2] >> 16) & 0xff) as usize]) as u32)
-            ^ AES::rotl24((FBSUB[((p[3] >> 24) & 0xff) as usize]) as u32);
+            ^ rotl8((FBSUB[((p[1] >> 8) & 0xff) as usize]) as u32)
+            ^ rotl16((FBSUB[((p[2] >> 16) & 0xff) as usize]) as u32)
+            ^ rotl24((FBSUB[((p[3] >> 24) & 0xff) as usize]) as u32);
 
         q[1] = self.fkey[k + 1]
             ^ (FBSUB[(p[1] & 0xff) as usize] as u32)
-            ^ AES::rotl8((FBSUB[((p[2] >> 8) & 0xff) as usize]) as u32)
-            ^ AES::rotl16((FBSUB[((p[3] >> 16) & 0xff) as usize]) as u32)
-            ^ AES::rotl24((FBSUB[((p[0] >> 24) & 0xff) as usize]) as u32);
+            ^ rotl8((FBSUB[((p[2] >> 8) & 0xff) as usize]) as u32)
+            ^ rotl16((FBSUB[((p[3] >> 16) & 0xff) as usize]) as u32)
+            ^ rotl24((FBSUB[((p[0] >> 24) & 0xff) as usize]) as u32);
 
         q[2] = self.fkey[k + 2]
             ^ (FBSUB[(p[2] & 0xff) as usize] as u32)
-            ^ AES::rotl8((FBSUB[((p[3] >> 8) & 0xff) as usize]) as u32)
-            ^ AES::rotl16((FBSUB[((p[0] >> 16) & 0xff) as usize]) as u32)
-            ^ AES::rotl24((FBSUB[((p[1] >> 24) & 0xff) as usize]) as u32);
+            ^ rotl8((FBSUB[((p[3] >> 8) & 0xff) as usize]) as u32)
+            ^ rotl16((FBSUB[((p[0] >> 16) & 0xff) as usize]) as u32)
+            ^ rotl24((FBSUB[((p[1] >> 24) & 0xff) as usize]) as u32);
 
         q[3] = self.fkey[k + 3]
             ^ (FBSUB[(p[3] & 0xff) as usize] as u32)
-            ^ AES::rotl8((FBSUB[((p[0] >> 8) & 0xff) as usize]) as u32)
-            ^ AES::rotl16((FBSUB[((p[1] >> 16) & 0xff) as usize]) as u32)
-            ^ AES::rotl24((FBSUB[((p[2] >> 24) & 0xff) as usize]) as u32);
+            ^ rotl8((FBSUB[((p[0] >> 8) & 0xff) as usize]) as u32)
+            ^ rotl16((FBSUB[((p[1] >> 16) & 0xff) as usize]) as u32)
+            ^ rotl24((FBSUB[((p[2] >> 24) & 0xff) as usize]) as u32);
 
         j = 0;
         for i in 0..4 {
-            b = AES::unpack(q[i]);
+            b = unpack(q[i]);
             for k in 0..4 {
                 buff[j + k] = b[k]
             }
@@ -486,7 +488,7 @@ impl AES {
             for k in 0..4 {
                 b[k] = buff[j + k]
             }
-            p[i] = AES::pack(b);
+            p[i] = pack(b);
             p[i] ^= self.rkey[i];
             j += 4;
         }
@@ -497,27 +499,27 @@ impl AES {
         for _ in 1..self.nr {
             q[0] = self.rkey[k]
                 ^ RTABLE[(p[0] & 0xff) as usize]
-                ^ AES::rotl8(RTABLE[((p[3] >> 8) & 0xff) as usize])
-                ^ AES::rotl16(RTABLE[((p[2] >> 16) & 0xff) as usize])
-                ^ AES::rotl24(RTABLE[((p[1] >> 24) & 0xff) as usize]);
+                ^ rotl8(RTABLE[((p[3] >> 8) & 0xff) as usize])
+                ^ rotl16(RTABLE[((p[2] >> 16) & 0xff) as usize])
+                ^ rotl24(RTABLE[((p[1] >> 24) & 0xff) as usize]);
 
             q[1] = self.rkey[k + 1]
                 ^ RTABLE[(p[1] & 0xff) as usize]
-                ^ AES::rotl8(RTABLE[((p[0] >> 8) & 0xff) as usize])
-                ^ AES::rotl16(RTABLE[((p[3] >> 16) & 0xff) as usize])
-                ^ AES::rotl24(RTABLE[((p[2] >> 24) & 0xff) as usize]);
+                ^ rotl8(RTABLE[((p[0] >> 8) & 0xff) as usize])
+                ^ rotl16(RTABLE[((p[3] >> 16) & 0xff) as usize])
+                ^ rotl24(RTABLE[((p[2] >> 24) & 0xff) as usize]);
 
             q[2] = self.rkey[k + 2]
                 ^ RTABLE[(p[2] & 0xff) as usize]
-                ^ AES::rotl8(RTABLE[((p[1] >> 8) & 0xff) as usize])
-                ^ AES::rotl16(RTABLE[((p[0] >> 16) & 0xff) as usize])
-                ^ AES::rotl24(RTABLE[((p[3] >> 24) & 0xff) as usize]);
+                ^ rotl8(RTABLE[((p[1] >> 8) & 0xff) as usize])
+                ^ rotl16(RTABLE[((p[0] >> 16) & 0xff) as usize])
+                ^ rotl24(RTABLE[((p[3] >> 24) & 0xff) as usize]);
 
             q[3] = self.rkey[k + 3]
                 ^ RTABLE[(p[3] & 0xff) as usize]
-                ^ AES::rotl8(RTABLE[((p[2] >> 8) & 0xff) as usize])
-                ^ AES::rotl16(RTABLE[((p[1] >> 16) & 0xff) as usize])
-                ^ AES::rotl24(RTABLE[((p[0] >> 24) & 0xff) as usize]);
+                ^ rotl8(RTABLE[((p[2] >> 8) & 0xff) as usize])
+                ^ rotl16(RTABLE[((p[1] >> 16) & 0xff) as usize])
+                ^ rotl24(RTABLE[((p[0] >> 24) & 0xff) as usize]);
 
             k += 4;
             for j in 0..4 {
@@ -531,31 +533,31 @@ impl AES {
 
         q[0] = self.rkey[k]
             ^ (RBSUB[(p[0] & 0xff) as usize] as u32)
-            ^ AES::rotl8((RBSUB[((p[3] >> 8) & 0xff) as usize]) as u32)
-            ^ AES::rotl16((RBSUB[((p[2] >> 16) & 0xff) as usize]) as u32)
-            ^ AES::rotl24((RBSUB[((p[1] >> 24) & 0xff) as usize]) as u32);
+            ^ rotl8((RBSUB[((p[3] >> 8) & 0xff) as usize]) as u32)
+            ^ rotl16((RBSUB[((p[2] >> 16) & 0xff) as usize]) as u32)
+            ^ rotl24((RBSUB[((p[1] >> 24) & 0xff) as usize]) as u32);
 
         q[1] = self.rkey[k + 1]
             ^ (RBSUB[(p[1] & 0xff) as usize] as u32)
-            ^ AES::rotl8((RBSUB[((p[0] >> 8) & 0xff) as usize]) as u32)
-            ^ AES::rotl16((RBSUB[((p[3] >> 16) & 0xff) as usize]) as u32)
-            ^ AES::rotl24((RBSUB[((p[2] >> 24) & 0xff) as usize]) as u32);
+            ^ rotl8((RBSUB[((p[0] >> 8) & 0xff) as usize]) as u32)
+            ^ rotl16((RBSUB[((p[3] >> 16) & 0xff) as usize]) as u32)
+            ^ rotl24((RBSUB[((p[2] >> 24) & 0xff) as usize]) as u32);
 
         q[2] = self.rkey[k + 2]
             ^ (RBSUB[(p[2] & 0xff) as usize] as u32)
-            ^ AES::rotl8((RBSUB[((p[1] >> 8) & 0xff) as usize]) as u32)
-            ^ AES::rotl16((RBSUB[((p[0] >> 16) & 0xff) as usize]) as u32)
-            ^ AES::rotl24((RBSUB[((p[3] >> 24) & 0xff) as usize]) as u32);
+            ^ rotl8((RBSUB[((p[1] >> 8) & 0xff) as usize]) as u32)
+            ^ rotl16((RBSUB[((p[0] >> 16) & 0xff) as usize]) as u32)
+            ^ rotl24((RBSUB[((p[3] >> 24) & 0xff) as usize]) as u32);
 
         q[3] = self.rkey[k + 3]
             ^ (RBSUB[((p[3]) & 0xff) as usize] as u32)
-            ^ AES::rotl8((RBSUB[((p[2] >> 8) & 0xff) as usize]) as u32)
-            ^ AES::rotl16((RBSUB[((p[1] >> 16) & 0xff) as usize]) as u32)
-            ^ AES::rotl24((RBSUB[((p[0] >> 24) & 0xff) as usize]) as u32);
+            ^ rotl8((RBSUB[((p[2] >> 8) & 0xff) as usize]) as u32)
+            ^ rotl16((RBSUB[((p[1] >> 16) & 0xff) as usize]) as u32)
+            ^ rotl24((RBSUB[((p[0] >> 24) & 0xff) as usize]) as u32);
 
         j = 0;
         for i in 0..4 {
-            b = AES::unpack(q[i]);
+            b = unpack(q[i]);
             for k in 0..4 {
                 buff[j + k] = b[k]
             }
@@ -633,7 +635,7 @@ impl AES {
                 for j in 0..bytes {
                     buff[j] ^= st[j]
                 }
-                AES::increment(&mut (self.f));
+                increment(&mut (self.f));
                 return 0;
             }
 
@@ -712,7 +714,7 @@ impl AES {
                 for j in 0..bytes {
                     buff[j] ^= st[j]
                 }
-                AES::increment(&mut (self.f));
+                increment(&mut (self.f));
                 return 0;
             }
 

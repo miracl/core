@@ -91,8 +91,27 @@ public func TestMPIN_bn254(_ rng: inout RAND)
         var pin:Int32=1234
         print("Client extracts PIN= \(pin)")
         var rtn=bn254.MPIN.EXTRACT_PIN(HCID,pin,&TOKEN)
-        if rtn != 0 {print("FAILURE: EXTRACT_PIN rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: EXTRACT_PIN rtn: \(rtn)")
+            return
+        }
         print("Client Token TK: 0x",terminator: ""); printBinary(TOKEN);
+
+// Exercise Secret Sharing
+            var R=[UInt8](repeating: 0,count: 128)
+            for i in 0..<128 {
+                R[i]=rng.getByte()
+            }
+       // create 4 unique shares of TOKEN
+            let Sh1=SHARE(1,3,TOKEN,R)  // indicate 3 shares required for recovery
+            let Sh2=SHARE(2,3,TOKEN,R)
+            //let Sh3=SHARE(3,3,TOKEN,R)
+            let Sh4=SHARE(4,3,TOKEN,R)
+
+            let Shares:[SHARE] = [Sh1,Sh2,Sh4]  // any 3 shares to recover TOKEN
+
+            TOKEN=SHARE.recover(Shares)  // recover token
+
 
 // MPin Protocol
 
@@ -109,7 +128,10 @@ public func TestMPIN_bn254(_ rng: inout RAND)
 
         var REALRNG : RAND? = rng
         rtn=bn254.MPIN.CLIENT_1(HCID,&REALRNG,&X,pin,TOKEN,&SEC,&xID)
-        if rtn != 0 {print("FAILURE: CLIENT_1 rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: CLIENT_1 rtn: \(rtn)")
+            return
+        }
 
 // Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.m to points on the curve
                 bn254.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,&HSID)
@@ -119,15 +141,20 @@ public func TestMPIN_bn254(_ rng: inout RAND)
 
 // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC
         rtn=bn254.MPIN.CLIENT_2(X,Y,&SEC);
-        if rtn != 0 {print("FAILURE: CLIENT_2 rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: CLIENT_2 rtn: \(rtn)")
+            return
+        }
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST.
                 rtn=bn254.MPIN.SERVER(HSID,Y,SST,xID,SEC);
 
-                if rtn != 0 {print("FAILURE: SERVER rtn: \(rtn)")}
-                if (rtn == bn254.MPIN.BAD_PIN)
-                {
-                    print("Server says - Bad Pin. I don't know you. Feck off.\n");
+                if rtn != 0 {
+                    if (rtn == bn254.MPIN.BAD_PIN) {
+                        print("Server says - Bad Pin. I don't know you. Feck off.\n");
+                    } else {
+                        print("FAILURE: SERVER rtn: \(rtn)")
+                    }
                 }
                 else {print("Server says - PIN is good! You really are "+IDstr+"\n")}
 
@@ -181,7 +208,10 @@ public func TestMPIN_bls12383(_ rng: inout RAND)
         var pin:Int32=1234
         print("Client extracts PIN= \(pin)")
         var rtn=bls12383.MPIN.EXTRACT_PIN(HCID,pin,&TOKEN)
-        if rtn != 0 {print("FAILURE: EXTRACT_PIN rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: EXTRACT_PIN rtn: \(rtn)")
+            return
+        }
         print("Client Token TK: 0x",terminator: ""); printBinary(TOKEN);
 
 // MPin Protocol
@@ -199,7 +229,10 @@ public func TestMPIN_bls12383(_ rng: inout RAND)
 
         var REALRNG : RAND? = rng
         rtn=bls12383.MPIN.CLIENT_1(HCID,&REALRNG,&X,pin,TOKEN,&SEC,&xID)
-        if rtn != 0 {print("FAILURE: CLIENT_1 rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: CLIENT_1 rtn: \(rtn)")
+            return
+        }
 
 // Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.m to points on the curve
                 bls12383.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,&HSID)
@@ -209,15 +242,20 @@ public func TestMPIN_bls12383(_ rng: inout RAND)
 
 // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC
         rtn=bls12383.MPIN.CLIENT_2(X,Y,&SEC);
-        if rtn != 0 {print("FAILURE: CLIENT_2 rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: CLIENT_2 rtn: \(rtn)")
+            return
+        }
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST.
                 rtn=bls12383.MPIN.SERVER(HSID,Y,SST,xID,SEC);
 
-                if rtn != 0 {print("FAILURE: SERVER rtn: \(rtn)")}
-                if (rtn == bls12383.MPIN.BAD_PIN)
-                {
-                    print("Server says - Bad Pin. I don't know you. Feck off.\n");
+                if rtn != 0 {
+                    if (rtn == bls12383.MPIN.BAD_PIN) {
+                        print("Server says - Bad Pin. I don't know you. Feck off.\n");
+                    } else {
+                        print("FAILURE: SERVER rtn: \(rtn)")
+                    }
                 }
                 else {print("Server says - PIN is good! You really are "+IDstr+"\n")}
 
@@ -272,7 +310,10 @@ public func TestMPIN_bls24479(_ rng: inout RAND)
         var pin:Int32=1234
         print("Client extracts PIN= \(pin)")
         var rtn=bls24479.MPIN192.EXTRACT_PIN(HCID,pin,&TOKEN)
-        if rtn != 0 {print("FAILURE: EXTRACT_PIN rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: EXTRACT_PIN rtn: \(rtn)")
+            return
+        }
         print("Client Token TK: 0x",terminator: ""); printBinary(TOKEN);
 
 // MPin Protocol
@@ -290,7 +331,10 @@ public func TestMPIN_bls24479(_ rng: inout RAND)
 
         var REALRNG : RAND? = rng
         rtn=bls24479.MPIN192.CLIENT_1(HCID,&REALRNG,&X,pin,TOKEN,&SEC,&xID)
-        if rtn != 0 {print("FAILURE: CLIENT_1 rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: CLIENT_1 rtn: \(rtn)")
+            return
+        }
 
 // Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.m to points on the curve
                 bls24479.MPIN192.ENCODE_TO_CURVE(DST,CLIENT_ID,&HSID)
@@ -300,15 +344,20 @@ public func TestMPIN_bls24479(_ rng: inout RAND)
 
 // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC
         rtn=bls24479.MPIN192.CLIENT_2(X,Y,&SEC);
-        if rtn != 0 {print("FAILURE: CLIENT_2 rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: CLIENT_2 rtn: \(rtn)")
+            return
+        }
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST.
                 rtn=bls24479.MPIN192.SERVER(HSID,Y,SST,xID,SEC);
 
-                if rtn != 0 {print("FAILURE: SERVER rtn: \(rtn)")}
-                if (rtn == bls24479.MPIN192.BAD_PIN)
-                {
-                    print("Server says - Bad Pin. I don't know you. Feck off.\n");
+                if rtn != 0 {
+                    if (rtn == bls24479.MPIN192.BAD_PIN) {
+                        print("Server says - Bad Pin. I don't know you. Feck off.\n");
+                    } else {
+                        print("FAILURE: SERVER rtn: \(rtn)")
+                    }
                 }
                 else {print("Server says - PIN is good! You really are "+IDstr+"\n")}
 
@@ -362,7 +411,10 @@ public func TestMPIN_bls48556(_ rng: inout RAND)
         var pin:Int32=1234
         print("Client extracts PIN= \(pin)")
         var rtn=bls48556.MPIN256.EXTRACT_PIN(HCID,pin,&TOKEN)
-        if rtn != 0 {print("FAILURE: EXTRACT_PIN rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: EXTRACT_PIN rtn: \(rtn)")
+            return
+        }
         print("Client Token TK: 0x",terminator: ""); printBinary(TOKEN);
 
 // MPin Protocol
@@ -380,7 +432,10 @@ public func TestMPIN_bls48556(_ rng: inout RAND)
 
         var REALRNG : RAND? = rng
         rtn=bls48556.MPIN256.CLIENT_1(HCID,&REALRNG,&X,pin,TOKEN,&SEC,&xID)
-        if rtn != 0 {print("FAILURE: CLIENT_1 rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: CLIENT_1 rtn: \(rtn)")
+            return
+        }
 
 // Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.m to points on the curve
                 bls48556.MPIN256.ENCODE_TO_CURVE(DST,CLIENT_ID,&HSID)
@@ -390,15 +445,20 @@ public func TestMPIN_bls48556(_ rng: inout RAND)
 
 // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC
         rtn=bls48556.MPIN256.CLIENT_2(X,Y,&SEC);
-        if rtn != 0 {print("FAILURE: CLIENT_2 rtn: \(rtn)")}
+        if rtn != 0 {
+            print("FAILURE: CLIENT_2 rtn: \(rtn)")
+            return
+        }
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST.
                 rtn=bls48556.MPIN256.SERVER(HSID,Y,SST,xID,SEC);
 
-                if rtn != 0 {print("FAILURE: SERVER rtn: \(rtn)")}
-                if (rtn == bls48556.MPIN256.BAD_PIN)
-                {
-                    print("Server says - Bad Pin. I don't know you. Feck off.\n");
+                if rtn != 0 {
+                    if (rtn == bls48556.MPIN256.BAD_PIN) {
+                        print("Server says - Bad Pin. I don't know you. Feck off.\n");
+                    } else {
+                        print("FAILURE: SERVER rtn: \(rtn)")
+                    }
                 }
                 else {print("Server says - PIN is good! You really are "+IDstr+"\n")}
 

@@ -23,6 +23,7 @@ package org.miracl.core.XXX;  //
 import java.util.Scanner;
 import junit.framework.TestCase;      //
 import org.miracl.core.RAND;
+import org.miracl.core.SHARE;
 
 public class TestMPIN extends TestCase { //
     private static void printBinary(byte[] array) {
@@ -90,6 +91,24 @@ public class TestMPIN extends TestCase { //
                 fail("FAILURE: EXTRACT_PIN rtn: " + rtn);
             System.out.print("Client Token TK: 0x"); printBinary(TOKEN);
 
+// Exercise Secret Sharing
+            byte[] R=new byte[128];
+            for (int i=0;i<128;i++)
+                R[i]=(byte)rng.getByte();
+       // create 4 unique shares of TOKEN
+            SHARE Sh1=new SHARE(1,3,TOKEN,R);  // indicate 3 shares required for recovery
+            SHARE Sh2=new SHARE(2,3,TOKEN,R);
+            SHARE Sh3=new SHARE(3,3,TOKEN,R);
+            SHARE Sh4=new SHARE(4,3,TOKEN,R);
+
+            SHARE[] Shares=new SHARE[3];
+
+            Shares[0]=Sh1;  // any 3 shares to recover TOKEN
+            Shares[1]=Sh2;
+            Shares[2]=Sh4;
+       
+            TOKEN=SHARE.recover(Shares);  // recover token
+
 // MPin Protocol
 
 // Client enters ID and PIN
@@ -98,7 +117,6 @@ public class TestMPIN extends TestCase { //
 //		pin=scan.nextInt();
 
             pin = 1234;
-        
          
 // Client First pass: Inputs H(CLIENT_ID), RNG, pin, and TOKEN. Output x and U = x.H(CLIENT_ID) and re-combined secret SEC
             rtn = MPIN.CLIENT_1(HCID, rng, X, pin, TOKEN, SEC, U);
@@ -120,11 +138,13 @@ public class TestMPIN extends TestCase { //
          
                     rtn = MPIN.SERVER(HSID, Y, SST, U, SEC);
                     if (rtn != 0)
-                        fail("FAILURE: SERVER_2 rtn: " + rtn);
-        
-                    if (rtn == MPIN.BAD_PIN) 
-                        fail("Server says - Bad Pin. I don't know you. Feck off\n");
-                    else 
+                    {
+                        if (rtn == MPIN.BAD_PIN) 
+                            fail("Server says - Bad Pin. I don't know you. Feck off\n");
+                        else
+                            fail("FAILURE: SERVER_2 rtn: " + rtn);
+                    } else { 
                         System.out.println("Server says - PIN is good! You really are " + IDstr + "\n");
+                    }
     }
 }

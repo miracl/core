@@ -88,9 +88,33 @@ func mpin_BN254(rng *core.RAND) {
 		if rtn != 0 {
 			fmt.Printf("FAILURE: EXTRACT_PIN rtn: %d", rtn)
 			fmt.Printf("\n")
+			return
 		}
 		fmt.Printf("Client Token TK: 0x")
 		printBinary(TOKEN[:])
+
+// Exercise Secret Sharing
+		R:=make([]byte,128)
+		for i:=0;i<128;i++ {
+			R[i]=rng.GetByte()
+		}
+	// create 4 unique shares of TOKEN
+		Sh1:=core.NewSHARE(1,3,TOKEN[:],R)  // indicate 3 shares required for recovery
+		Sh2:=core.NewSHARE(2,3,TOKEN[:],R)
+		// Sh3:=core.NewSHARE(3,3,TOKEN[:],R)	// must comment out or Go throws an error (Grrr..)
+		Sh4:=core.NewSHARE(4,3,TOKEN[:],R)
+
+		var Shares [3]*core.SHARE
+
+		Shares[0]=Sh1  // any 3 shares to recover TOKEN
+		Shares[1]=Sh2
+		Shares[2]=Sh4
+       
+		for i:=0;i<len(TOKEN);i++ {
+			TOKEN[i]=0
+		}
+
+		copy(TOKEN[:],core.Recover(Shares[:]))  // recover token
 
 // MPin Protocol
 
@@ -103,6 +127,7 @@ func mpin_BN254(rng *core.RAND) {
 		rtn = BN254.MPIN_CLIENT_1(HCID[:], rng, X[:], pin, TOKEN[:], SEC[:], xID[:])
 		if rtn != 0 {
 			fmt.Printf("FAILURE: CLIENT_1 rtn: %d\n", rtn)
+			return
 		}
 
 // Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
@@ -116,6 +141,7 @@ func mpin_BN254(rng *core.RAND) {
 			rtn = BN254.MPIN_CLIENT_2(X[:], Y[:], SEC[:])
 			if rtn != 0 {
 				fmt.Printf("FAILURE: CLIENT_2 rtn: %d\n", rtn)
+				return
 			}
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
@@ -123,11 +149,11 @@ func mpin_BN254(rng *core.RAND) {
 			rtn = BN254.MPIN_SERVER(HSID[:], Y[:], SST[:], xID[:], SEC[:])
 
 			if rtn != 0 {
-				fmt.Printf("FAILURE: SERVER rtn: %d\n", rtn)
-			}
-
-			if rtn == BN254.BAD_PIN {
-				fmt.Printf("Server says - Bad Pin. I don't know you. Feck off.\n")
+				if rtn == BN254.BAD_PIN {
+					fmt.Printf("Server says - Bad Pin. I don't know you. Feck off.\n")
+				} else {
+					fmt.Printf("FAILURE: SERVER rtn: %d\n", rtn)
+				}
 			} else {
 				fmt.Printf("Server says - PIN is good! You really are " + IDstr + "\n")
 			}
@@ -185,6 +211,7 @@ func mpin_BLS12383(rng *core.RAND) {
 		if rtn != 0 {
 			fmt.Printf("FAILURE: EXTRACT_PIN rtn: %d", rtn)
 			fmt.Printf("\n")
+			return
 		}
 		fmt.Printf("Client Token TK: 0x")
 		printBinary(TOKEN[:])
@@ -200,6 +227,7 @@ func mpin_BLS12383(rng *core.RAND) {
 		rtn = BLS12383.MPIN_CLIENT_1(HCID[:], rng, X[:], pin, TOKEN[:], SEC[:], xID[:])
 		if rtn != 0 {
 			fmt.Printf("FAILURE: CLIENT_1 rtn: %d\n", rtn)
+			return
 		}
 
 // Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
@@ -213,6 +241,7 @@ func mpin_BLS12383(rng *core.RAND) {
 			rtn = BLS12383.MPIN_CLIENT_2(X[:], Y[:], SEC[:])
 			if rtn != 0 {
 				fmt.Printf("FAILURE: CLIENT_2 rtn: %d\n", rtn)
+				return
 			}
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
@@ -220,11 +249,11 @@ func mpin_BLS12383(rng *core.RAND) {
 			rtn = BLS12383.MPIN_SERVER(HSID[:], Y[:], SST[:], xID[:], SEC[:])
 
 			if rtn != 0 {
-				fmt.Printf("FAILURE: SERVER rtn: %d\n", rtn)
-			}
-
-			if rtn == BLS12383.BAD_PIN {
-				fmt.Printf("Server says - Bad Pin. I don't know you. Feck off.\n")
+				if rtn == BLS12383.BAD_PIN {
+					fmt.Printf("Server says - Bad Pin. I don't know you. Feck off.\n")
+				} else {
+					fmt.Printf("FAILURE: SERVER rtn: %d\n", rtn)
+				}
 			} else {
 				fmt.Printf("Server says - PIN is good! You really are " + IDstr + "\n")
 			}
@@ -282,6 +311,7 @@ func mpin_BLS24479(rng *core.RAND) {
 		if rtn != 0 {
 			fmt.Printf("FAILURE: EXTRACT_PIN rtn: %d", rtn)
 			fmt.Printf("\n")
+			return
 		}
 		fmt.Printf("Client Token TK: 0x")
 		printBinary(TOKEN[:])
@@ -297,6 +327,7 @@ func mpin_BLS24479(rng *core.RAND) {
 		rtn = BLS24479.MPIN_CLIENT_1(HCID[:], rng, X[:], pin, TOKEN[:], SEC[:], xID[:])
 		if rtn != 0 {
 			fmt.Printf("FAILURE: CLIENT_1 rtn: %d\n", rtn)
+			return
 		}
 
 // Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
@@ -310,6 +341,7 @@ func mpin_BLS24479(rng *core.RAND) {
 			rtn = BLS24479.MPIN_CLIENT_2(X[:], Y[:], SEC[:])
 			if rtn != 0 {
 				fmt.Printf("FAILURE: CLIENT_2 rtn: %d\n", rtn)
+				return
 			}
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
@@ -317,11 +349,11 @@ func mpin_BLS24479(rng *core.RAND) {
 			rtn = BLS24479.MPIN_SERVER(HSID[:], Y[:], SST[:], xID[:], SEC[:])
 
 			if rtn != 0 {
-				fmt.Printf("FAILURE: SERVER rtn: %d\n", rtn)
-			}
-
-			if rtn == BLS24479.BAD_PIN {
-				fmt.Printf("Server says - Bad Pin. I don't know you. Feck off.\n")
+				if rtn == BLS24479.BAD_PIN {
+					fmt.Printf("Server says - Bad Pin. I don't know you. Feck off.\n")
+				} else {
+					fmt.Printf("FAILURE: SERVER rtn: %d\n", rtn)
+				}
 			} else {
 				fmt.Printf("Server says - PIN is good! You really are " + IDstr + "\n")
 			}
@@ -379,6 +411,7 @@ func mpin_BLS48556(rng *core.RAND) {
 		if rtn != 0 {
 			fmt.Printf("FAILURE: EXTRACT_PIN rtn: %d", rtn)
 			fmt.Printf("\n")
+			return
 		}
 		fmt.Printf("Client Token TK: 0x")
 		printBinary(TOKEN[:])
@@ -394,6 +427,7 @@ func mpin_BLS48556(rng *core.RAND) {
 		rtn = BLS48556.MPIN_CLIENT_1(HCID[:], rng, X[:], pin, TOKEN[:], SEC[:], xID[:])
 		if rtn != 0 {
 			fmt.Printf("FAILURE: CLIENT_1 rtn: %d\n", rtn)
+			return
 		}
 
 // Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
@@ -407,6 +441,7 @@ func mpin_BLS48556(rng *core.RAND) {
 			rtn = BLS48556.MPIN_CLIENT_2(X[:], Y[:], SEC[:])
 			if rtn != 0 {
 				fmt.Printf("FAILURE: CLIENT_2 rtn: %d\n", rtn)
+				return
 			}
 
 // Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
@@ -414,11 +449,11 @@ func mpin_BLS48556(rng *core.RAND) {
 			rtn = BLS48556.MPIN_SERVER(HSID[:], Y[:], SST[:], xID[:], SEC[:])
 
 			if rtn != 0 {
-				fmt.Printf("FAILURE: SERVER rtn: %d\n", rtn)
-			}
-
-			if rtn == BLS48556.BAD_PIN {
-				fmt.Printf("Server says - Bad Pin. I don't know you. Feck off.\n")
+				if rtn == BLS48556.BAD_PIN {
+					fmt.Printf("Server says - Bad Pin. I don't know you. Feck off.\n")
+				} else {
+					fmt.Printf("FAILURE: SERVER rtn: %d\n", rtn)
+				}
 			} else {
 				fmt.Printf("Server says - PIN is good! You really are " + IDstr + "\n")
 			}

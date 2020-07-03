@@ -35,11 +35,10 @@ build in the new directory execute
 Then select options 1, 3, 7, 26, 28, 34, 35 and 38, which are fixed for 
 the example programs.
 
-Build the test programs with
+Build some test programs with
 
     emcc -O2 benchtest_all.c core.a -s WASM=1 -o benchtest_all.html
     emcc -O2 testecc.c core.a -s WASM=1 -o testecc.html
-    emcc -O2 testmpin.c core.a -s WASM=1 -o testmpin.html
     emcc -O2 testbls.c core.a -s WASM=1 -o testbls.html
 
 Then run a local HTML server (as described in the link above) 

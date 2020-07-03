@@ -214,6 +214,14 @@ typedef struct
     char *val; /**< byte array  */
 } octet;
 
+/**
+ * @brief Share instance */
+typedef struct
+{
+    int id;  /**< Unique Share ID */
+    int nsr; /**< number of shares required */
+    octet *B; /**< share as octet */
+} share;
 
 /* Octet string handlers */
 /**	@brief Formats and outputs an octet to the console in hex
@@ -719,6 +727,28 @@ void AES_GCM_ENCRYPT(octet *K, octet *IV, octet *H, octet *P, octet *C, octet *T
 	@param T Checksum
  */
 void AES_GCM_DECRYPT(octet *K, octet *IV, octet *H, octet *C, octet *P, octet *T);
+
+
+/* secret sharing */
+
+/**	@brief Get a share of a message
+ *
+    @param id unique share ID
+    @param nsr number of shares needed for message recovery
+    @param S the output share as an octet
+    @param M the Message octet to be shared
+	@param R an octet of random seed bytes
+	@return a share structure
+
+ */
+extern share getshare(int id,int nsr,octet *S,octet *M,octet *R);
+/**	@brief Recover message from shares
+ *
+    @param M the recovered Message octet
+    @param S an array of sufficient shares
+    @return 0 on success else -1
+ */
+extern int recover(octet *M,share *S);
 
 /* random numbers */
 /**	@brief Seed a random number generator from an array of bytes

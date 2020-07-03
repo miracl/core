@@ -24,6 +24,7 @@
 <body>
 <h1>JavaScript Test MPIN Examples</h1>
 <script type="text/javascript"src=./rand.js></script>
+<script type="text/javascript"src=./share.js></script>
 <script type="text/javascript"src=./rom_curve.js></script>
 <script type="text/javascript"src=./rom_field.js></script>
 <script type="text/javascript"src=./uint64.js></script>
@@ -138,6 +139,24 @@ function BN254() {
 			mywindow.document.write("Failed to extract PIN " + "<br>");  
 		mywindow.document.write("Client Token TK: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");        
 
+// Exercise Secret Sharing
+            var R=[];
+            for (var i=0;i<128;i++)
+                R[i]=rng.getByte();
+       // create 4 unique shares of TOKEN
+            var Sh1=new ctx.SHARE(1,3,TOKEN,R);  // indicate 3 shares required for recovery
+            var Sh2=new ctx.SHARE(2,3,TOKEN,R);
+            var Sh3=new ctx.SHARE(3,3,TOKEN,R);
+            var Sh4=new ctx.SHARE(4,3,TOKEN,R);
+
+            var Shares=[];
+
+            Shares[0]=Sh1;  // any 3 shares to recover TOKEN
+            Shares[1]=Sh2;
+            Shares[2]=Sh4;
+       
+            TOKEN=ctx.SHARE.recover(Shares);  // recover token
+
 // MPin Protocol
 
 // Client enters ID and PIN
@@ -164,15 +183,14 @@ function BN254() {
 				rtn=ctx.MPIN.SERVER(HSID,Y,SST,U,SEC);
     
 				if (rtn != 0)
-					mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
-    
-				if (rtn == ctx.MPIN.BAD_PIN)
 				{
-					mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
-
-				}
-				else 
-				{
+					if (rtn == ctx.MPIN.BAD_PIN)
+					{
+						mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+					} else {
+						mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+					}
+				} else {
 					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
 				}
 }
@@ -269,15 +287,14 @@ function BLS12383() {
 				rtn=ctx.MPIN.SERVER(HSID,Y,SST,U,SEC);
     
 				if (rtn != 0)
-					mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
-    
-				if (rtn == ctx.MPIN.BAD_PIN)
 				{
-					mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
-
-				}
-				else 
-				{
+					if (rtn == ctx.MPIN.BAD_PIN)
+					{
+						mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+					} else {
+						mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+					}
+				} else {
 					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
 				}
 }
@@ -375,15 +392,14 @@ function BLS24479() {
 				rtn=ctx.MPIN192.SERVER(HSID,Y,SST,U,SEC);
     
 				if (rtn != 0)
-					mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
-    
-				if (rtn == ctx.MPIN192.BAD_PIN)
 				{
-					mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
-
-				}
-				else 
-				{
+					if (rtn == ctx.MPIN192.BAD_PIN)
+					{
+						mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+					} else {
+						mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+					}
+				} else {
 					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
 				}
 
@@ -480,15 +496,14 @@ function BLS48556() {
 				rtn=ctx.MPIN256.SERVER(HSID,Y,SST,U,SEC);
     
 				if (rtn != 0)
-					mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
-    
-				if (rtn == ctx.MPIN256.BAD_PIN)
 				{
-					mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
-
-				}
-				else 
-				{
+					if (rtn == ctx.MPIN256.BAD_PIN)
+					{
+						mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+					} else {
+						mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+					}
+				} else {
 					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
 				}
 
