@@ -52,7 +52,6 @@ Wait for programs to complete (which may take a while).
 Alternatively run the examples in Node.js
 
     node testecc.js
-    node testmpin.js
     node testbls.js
     node benchtest_all.js
 
