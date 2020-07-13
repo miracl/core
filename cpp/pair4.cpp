@@ -490,7 +490,7 @@ void ZZZ::PAIR_fexp(FP24 *r)
     FP2 X;
     BIG x;
     FP a, b;
-    FP24 t0, t1, t2, t3, t4, t5, t6, t7; // could lose one of these - r=t3
+    FP24 t0, t1, t2; //, t3, t4, t5, t6, t7; // could lose one of these - r=t3
 
     BIG_rcopy(x, CURVE_Bnx);
     FP_rcopy(&a, Fra);
@@ -509,6 +509,60 @@ void ZZZ::PAIR_fexp(FP24 *r)
 
     FP24_mul(r, &t0);
 
+// See https://eprint.iacr.org/2020/875.pdf
+    FP24_usqr(&t2,r);
+    FP24_mul(&t2,r);     // t2=r^3
+
+    FP24_pow(&t1,r,x);   // t1=r^x
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP24_conj(&t1, &t1);
+#endif
+    FP24_conj(&t0,r);    // t0=r^-1
+    FP24_copy(r,&t1);
+    FP24_mul(r,&t0);    // r=r^(x-1)
+
+    FP24_pow(&t1,r,x);   // t1=r^x
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP24_conj(&t1, &t1);
+#endif
+    FP24_conj(&t0,r);    // t0=r^-1
+    FP24_copy(r,&t1);
+    FP24_mul(r,&t0);    // r=r^(x-1)
+
+// ^(x+p)
+    FP24_pow(&t1,r,x);  // t1=r^x
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP24_conj(&t1, &t1);
+#endif
+    FP24_copy(&t0,r);   
+    FP24_frob(&t0,&X,1); // t0=r^p
+    FP24_copy(r,&t1);
+    FP24_mul(r,&t0); // r=r^x.r^p
+
+// ^(x^2+p^2)
+    FP24_pow(&t1,r,x);  
+    FP24_pow(&t1,&t1,x); // t1=r^x^2
+    FP24_copy(&t0,r);    
+    FP24_frob(&t0,&X,2);   // t0=r^p^2
+    FP24_mul(&t1,&t0);   // t1=r^x^2.r^p^2
+    FP24_copy(r,&t1);
+
+// ^(x^4+p^4-1)
+    FP24_pow(&t1,r,x);  
+    FP24_pow(&t1,&t1,x); 
+    FP24_pow(&t1,&t1,x); 
+    FP24_pow(&t1,&t1,x); // t1=r^x^4
+    FP24_copy(&t0,r);    
+    FP24_frob(&t0,&X,4); // t0=r^p^4
+    FP24_mul(&t1,&t0);   // t1=r^x^4.r^p^4
+    FP24_conj(&t0,r);    // t0=r^-1
+    FP24_copy(r,&t1);    
+    FP24_mul(r,&t0);     // r=r^x^4.r^p^4.r^-1
+
+    FP24_mul(r,&t2);    
+    FP24_reduce(r);
+
+/*
 // Ghamman & Fouotsa Method - (completely garbled in  https://eprint.iacr.org/2016/130)
 
     FP24_usqr(&t7, r);          // t7=f^2
@@ -587,7 +641,7 @@ void ZZZ::PAIR_fexp(FP24 *r)
 
     FP24_mul(r, &t3);
     FP24_reduce(r);
-
+*/
 }
 
 #ifdef USE_GLV_ZZZ

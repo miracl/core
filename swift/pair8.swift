@@ -441,10 +441,10 @@ public struct PAIR8 {
     static public func fexp(_ m:FP48) -> FP48
     {
         let f=FP2(BIG(ROM.Fra),BIG(ROM.Frb));
-        var x=BIG(ROM.CURVE_Bnx)
+        let x=BIG(ROM.CURVE_Bnx)
         var r=FP48(m)
-	var t1:FP48
-	var t2:FP48
+	//var t1:FP48
+	//var t2:FP48
     
     // Easy part of final exp
         var lv=FP48(r)
@@ -458,6 +458,76 @@ public struct PAIR8 {
      
     // Hard part of final exp
 
+// See https://eprint.iacr.org/2020/875.pdf
+        var y1=FP48(r)
+        y1.usqr()
+        y1.mul(r) // y1=r^3
+
+        var y0=FP48(r.pow(x))
+        if CONFIG_CURVE.SIGN_OF_X==CONFIG_CURVE.NEGATIVEX {
+            y0.conj()
+        }
+        var t0=FP48(r); t0.conj()
+        r.copy(y0)
+        r.mul(t0)
+
+        y0.copy(r.pow(x))
+        if CONFIG_CURVE.SIGN_OF_X==CONFIG_CURVE.NEGATIVEX {
+            y0.conj()
+        }
+        t0.copy(r); t0.conj()
+        r.copy(y0)
+        r.mul(t0)
+
+// ^(x+p)
+        y0.copy(r.pow(x))
+        if CONFIG_CURVE.SIGN_OF_X==CONFIG_CURVE.NEGATIVEX {
+            y0.conj()
+        }
+        t0.copy(r)
+        t0.frob(f,1)
+        r.copy(y0)
+        r.mul(t0)
+
+// ^(x^2+p^2)
+        y0.copy(r.pow(x))
+        y0.copy(y0.pow(x))
+        t0.copy(r)
+        t0.frob(f,2)
+        r.copy(y0)
+        r.mul(t0)
+
+// ^(x^4+p^4)
+        y0.copy(r.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        t0.copy(r)
+        t0.frob(f,4)
+        r.copy(y0)
+        r.mul(t0)
+
+// ^(x^8+p^8-1)
+        y0.copy(r.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        t0.copy(r)
+        t0.frob(f,8)
+        y0.mul(t0)
+        t0.copy(r); t0.conj()
+        r.copy(y0)
+        r.mul(t0)
+
+        r.mul(y1)
+        r.reduce()       
+
+
+/*
         var t7=FP48(r); t7.usqr()
 
 	if x.parity()==1 {
@@ -603,7 +673,7 @@ public struct PAIR8 {
         t2.frob(f,15)
         r.mul(t2)
 
-        r.reduce()
+        r.reduce() */
         return r
     }
 

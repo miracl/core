@@ -437,10 +437,81 @@ public final class PAIR8 {
         r.frob(f, 8);
         r.mul(lv);
 
-        FP48 t0, t1, t2, t3, t4, t5, t6, t7;
-        /* Hard part of final exp */
-// Ghamman & Fouotsa Method
 
+// See https://eprint.iacr.org/2020/875.pdf
+        FP48 t0,y0,y1;
+        y1=new FP48(r);
+        y1.usqr();
+        y1.mul(r); // y1=r^3
+
+        y0=new FP48(r.pow(x));
+        if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+            y0.conj();
+        }
+        t0=new FP48(r); t0.conj();
+        r.copy(y0);
+        r.mul(t0);
+
+        y0.copy(r.pow(x));
+        if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+            y0.conj();
+        }
+        t0.copy(r); t0.conj();
+        r.copy(y0);
+        r.mul(t0);
+
+// ^(x+p)
+        y0.copy(r.pow(x));
+        if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+            y0.conj();
+        }
+        t0.copy(r);
+        t0.frob(f,1);
+        r.copy(y0);
+        r.mul(t0);
+
+// ^(x^2+p^2)
+        y0.copy(r.pow(x));
+        y0.copy(y0.pow(x));
+        t0.copy(r);
+        t0.frob(f,2);
+        r.copy(y0);
+        r.mul(t0);
+
+// ^(x^4+p^4)
+        y0.copy(r.pow(x));
+        y0.copy(y0.pow(x));
+        y0.copy(y0.pow(x));
+        y0.copy(y0.pow(x));
+        t0.copy(r);
+        t0.frob(f,4);
+        r.copy(y0);
+        r.mul(t0);
+
+// ^(x^8+p^8-1)
+        y0.copy(r.pow(x));
+        y0.copy(y0.pow(x));
+        y0.copy(y0.pow(x));
+        y0.copy(y0.pow(x));
+        y0.copy(y0.pow(x));
+        y0.copy(y0.pow(x));
+        y0.copy(y0.pow(x));
+        y0.copy(y0.pow(x));
+        t0.copy(r);
+        t0.frob(f,8);
+        y0.mul(t0);
+        t0.copy(r); t0.conj();
+        r.copy(y0);
+        r.mul(t0);
+
+        r.mul(y1);
+        r.reduce();        
+        
+
+        /* Hard part of final exp */
+/*
+// Ghamman & Fouotsa Method
+        FP48 t0, t1, t2, t3, t4, t5, t6, t7;
         t7 = new FP48(r); t7.usqr();
 
         if (x.parity() == 1) {
@@ -587,6 +658,7 @@ public final class PAIR8 {
         r.mul(t2);
 
         r.reduce();
+*/
         return r;
     }
 

@@ -698,21 +698,64 @@ void PAIR_ZZZ_fexp(FP12_YYY *r)
     FP12_YYY_mul(r, &y3); // r=r*y3
     FP12_YYY_reduce(r);
 #else
-// Ghamman & Fouotsa Method
 
+// See https://eprint.iacr.org/2020/875.pdf
+    FP12_YYY_usqr(&y1,r);
+    FP12_YYY_mul(&y1,r);     // y1=r^3
+
+    FP12_YYY_pow(&y0,r,x);   // y0=r^x
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP12_YYY_conj(&y0, &y0);
+#endif
+    FP12_YYY_conj(&t0,r);    // t0=r^-1
+    FP12_YYY_copy(r,&y0);
+    FP12_YYY_mul(r,&t0);    // r=r^(x-1)
+
+    FP12_YYY_pow(&y0,r,x);   // y0=r^x
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP12_YYY_conj(&y0, &y0);
+#endif
+    FP12_YYY_conj(&t0,r);    // t0=r^-1
+    FP12_YYY_copy(r,&y0);
+    FP12_YYY_mul(r,&t0);    // r=r^(x-1)
+
+// ^(x+p)
+    FP12_YYY_pow(&y0,r,x);  // y0=r^x
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP12_YYY_conj(&y0, &y0);
+#endif
+    FP12_YYY_copy(&t0,r);   
+    FP12_YYY_frob(&t0,&X); // t0=r^p
+    FP12_YYY_copy(r,&y0);
+    FP12_YYY_mul(r,&t0); // r=r^x.r^p
+
+// ^(x^2+p^2-1)
+    FP12_YYY_pow(&y0,r,x);  
+    FP12_YYY_pow(&y0,&y0,x); // y0=r^x^2
+    FP12_YYY_copy(&t0,r);    
+    FP12_YYY_frob(&t0,&X);
+    FP12_YYY_frob(&t0,&X);   // t0=r^p^2
+    FP12_YYY_mul(&y0,&t0);   // y0=r^x^2.r^p^2
+    FP12_YYY_conj(&t0,r);    // t0=r^-1
+    FP12_YYY_copy(r,&y0);    // 
+    FP12_YYY_mul(r,&t0);     // r=r^x^2.r^p^2.r^-1
+
+    FP12_YYY_mul(r,&y1);    
+    FP12_YYY_reduce(r);
+
+// Ghamman & Fouotsa Method
+/*
     FP12_YYY_usqr(&y0, r);
     FP12_YYY_pow(&y1, &y0, x);
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     FP12_YYY_conj(&y1, &y1);
 #endif
 
-
     BIG_XXX_fshr(x, 1);
     FP12_YYY_pow(&y2, &y1, x);
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     FP12_YYY_conj(&y2, &y2);
 #endif
-
 
     BIG_XXX_fshl(x, 1); // x must be even
     FP12_YYY_conj(&y3, r);
@@ -754,7 +797,7 @@ void PAIR_ZZZ_fexp(FP12_YYY *r)
     FP12_YYY_mul(&y1, &y2);
     FP12_YYY_copy(r, &y1);
     FP12_YYY_reduce(r);
-
+*/
 #endif
 }
 

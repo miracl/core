@@ -623,6 +623,55 @@ public final class PAIR {
             r.mul(lv);
             r.reduce();
         } else {
+// See https://eprint.iacr.org/2020/875.pdf
+            FP12 t0,y0,y1;
+            y1=new FP12(r);
+            y1.usqr();
+            y1.mul(r); // y1=r^3
+
+            y0=new FP12(r.pow(x));
+            if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+                y0.conj();
+            }
+            t0=new FP12(r); t0.conj();
+            r.copy(y0);
+            r.mul(t0);
+
+            y0.copy(r.pow(x));
+            if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+                y0.conj();
+            }
+            t0.copy(r); t0.conj();
+            r.copy(y0);
+            r.mul(t0);
+
+// ^(x+p)
+            y0.copy(r.pow(x));
+            if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+                y0.conj();
+            }
+            t0.copy(r);
+            t0.frob(f);
+            r.copy(y0);
+            r.mul(t0);
+
+// ^(x^2+p^2-1)
+            y0.copy(r.pow(x));
+            y0.copy(y0.pow(x));
+            t0.copy(r);
+            t0.frob(f); t0.frob(f);
+            y0.mul(t0);
+            t0.copy(r); t0.conj();
+            r.copy(y0);
+            r.mul(t0);
+
+            r.mul(y1);
+            r.reduce();
+            
+
+/*
+
+
 
             FP12 y0, y1, y2, y3;
 // Ghamman & Fouotsa Method
@@ -670,7 +719,7 @@ public final class PAIR {
             y2.copy(y3); y2.frob(f);
             y1.mul(y2);
             r.copy(y1);
-            r.reduce();
+            r.reduce(); */
         }
 
         return r;

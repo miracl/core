@@ -418,8 +418,8 @@ var PAIR8 = function(ctx) {
 
         /* final exponentiation - keep separate for multi-pairings and to avoid thrashing stack */
         fexp: function(m) {
-            var fa, fb, f, x, r, lv,
-                t1,t2,t3,t7;
+            var fa, fb, f, x, r, lv;
+            //    t1,t2,t3,t7;
 
             fa = new ctx.BIG(0);
             fa.rcopy(ctx.ROM_FIELD.Fra);
@@ -441,6 +441,77 @@ var PAIR8 = function(ctx) {
             r.mul(lv);
 
             /* Hard part of final exp */
+
+// See https://eprint.iacr.org/2020/875.pdf
+            var t0,y0,y1;
+            y1=new ctx.FP48(r);
+            y1.usqr();
+            y1.mul(r); // y1=r^3
+
+            y0=new ctx.FP48(r.pow(x));
+            if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+                y0.conj();
+            }
+            t0=new ctx.FP48(r); t0.conj();
+            r.copy(y0);
+            r.mul(t0);
+
+            y0.copy(r.pow(x));
+            if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+               y0.conj();
+            }
+            t0.copy(r); t0.conj();
+         r.copy(y0);
+            r.mul(t0);
+
+// ^(x+p)
+            y0.copy(r.pow(x));
+            if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+                y0.conj();
+            }
+            t0.copy(r);
+            t0.frob(f,1);
+            r.copy(y0);
+            r.mul(t0);
+
+// ^(x^2+p^2)
+            y0.copy(r.pow(x));
+            y0.copy(y0.pow(x));
+            t0.copy(r);
+            t0.frob(f,2);
+            r.copy(y0);
+            r.mul(t0);
+
+// ^(x^4+p^4)
+            y0.copy(r.pow(x));
+            y0.copy(y0.pow(x));
+            y0.copy(y0.pow(x));
+            y0.copy(y0.pow(x));
+            t0.copy(r);
+            t0.frob(f,4);
+            r.copy(y0);
+            r.mul(t0);
+
+// ^(x^8+p^8-1)
+            y0.copy(r.pow(x));
+            y0.copy(y0.pow(x));
+            y0.copy(y0.pow(x));
+            y0.copy(y0.pow(x));
+            y0.copy(y0.pow(x));
+            y0.copy(y0.pow(x));
+            y0.copy(y0.pow(x));
+            y0.copy(y0.pow(x));
+            t0.copy(r);
+            t0.frob(f,8);
+            y0.mul(t0);
+            t0.copy(r); t0.conj();
+            r.copy(y0);
+            r.mul(t0);
+
+            r.mul(y1);
+            r.reduce();      
+
+/*
             // Ghamman & Fouotsa Method
             t7=new ctx.FP48(r); t7.usqr();
 
@@ -588,6 +659,7 @@ var PAIR8 = function(ctx) {
             r.mul(t2);
 
             r.reduce();
+*/
             return r;
         }
     };

@@ -476,7 +476,7 @@ void PAIR_ZZZ_fexp(FP48_YYY *r)
     FP2_YYY X;
     BIG_XXX x;
     FP_YYY a, b;
-    FP48_YYY t1, t2, t3, t7;
+    FP48_YYY t0, t1, t2, t3;
 
     BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
     FP_YYY_rcopy(&a, Fra_YYY);
@@ -485,16 +485,84 @@ void PAIR_ZZZ_fexp(FP48_YYY *r)
 
     /* Easy part of final exp - r^(p^24-1)(p^8+1)*/
 
-    FP48_YYY_inv(&t7, r);
+    FP48_YYY_inv(&t0, r);
     FP48_YYY_conj(r, r);
 
-    FP48_YYY_mul(r, &t7);
-    FP48_YYY_copy(&t7, r);
+    FP48_YYY_mul(r, &t0);
+    FP48_YYY_copy(&t0, r);
 
     FP48_YYY_frob(r, &X, 8);
 
-    FP48_YYY_mul(r, &t7);
+    FP48_YYY_mul(r, &t0);
 
+// See https://eprint.iacr.org/2020/875.pdf
+    FP48_YYY_usqr(&t2,r);
+    FP48_YYY_mul(&t2,r);     // t2=r^3
+
+    FP48_YYY_pow(&t1,r,x);   // t1=r^x
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP48_YYY_conj(&t1, &t1);
+#endif
+    FP48_YYY_conj(&t0,r);    // t0=r^-1
+    FP48_YYY_copy(r,&t1);
+    FP48_YYY_mul(r,&t0);    // r=r^(x-1)
+
+    FP48_YYY_pow(&t1,r,x);   // t1=r^x
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP48_YYY_conj(&t1, &t1);
+#endif
+    FP48_YYY_conj(&t0,r);    // t0=r^-1
+    FP48_YYY_copy(r,&t1);
+    FP48_YYY_mul(r,&t0);    // r=r^(x-1)
+
+// ^(x+p)
+    FP48_YYY_pow(&t1,r,x);  // t1=r^x
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP48_YYY_conj(&t1, &t1);
+#endif
+    FP48_YYY_copy(&t0,r);   
+    FP48_YYY_frob(&t0,&X,1); // t0=r^p
+    FP48_YYY_copy(r,&t1);
+    FP48_YYY_mul(r,&t0); // r=r^x.r^p
+
+// ^(x^2+p^2)
+    FP48_YYY_pow(&t1,r,x);  
+    FP48_YYY_pow(&t1,&t1,x); // t1=r^x^2
+    FP48_YYY_copy(&t0,r);    
+    FP48_YYY_frob(&t0,&X,2);   // t0=r^p^2
+    FP48_YYY_mul(&t1,&t0);   // t1=r^x^2.r^p^2
+    FP48_YYY_copy(r,&t1);
+
+// ^(x^4+p^4)
+    FP48_YYY_pow(&t1,r,x);  
+    FP48_YYY_pow(&t1,&t1,x);
+    FP48_YYY_pow(&t1,&t1,x); 
+    FP48_YYY_pow(&t1,&t1,x); // t1=r^x^4
+    FP48_YYY_copy(&t0,r);    
+    FP48_YYY_frob(&t0,&X,4);   // t0=r^p^4
+    FP48_YYY_mul(&t1,&t0);   // t1=r^x^4.r^p^4
+    FP48_YYY_copy(r,&t1);
+
+// ^(x^8+p^8-1)
+    FP48_YYY_pow(&t1,r,x);  
+    FP48_YYY_pow(&t1,&t1,x); 
+    FP48_YYY_pow(&t1,&t1,x); 
+    FP48_YYY_pow(&t1,&t1,x); 
+    FP48_YYY_pow(&t1,&t1,x);
+    FP48_YYY_pow(&t1,&t1,x);
+    FP48_YYY_pow(&t1,&t1,x); 
+    FP48_YYY_pow(&t1,&t1,x); // t1=r^x^8
+    FP48_YYY_copy(&t0,r);    
+    FP48_YYY_frob(&t0,&X,8); // t0=r^p^8
+    FP48_YYY_mul(&t1,&t0);   // t1=r^x^8.r^p^8
+    FP48_YYY_conj(&t0,r);    // t0=r^-1
+    FP48_YYY_copy(r,&t1);    
+    FP48_YYY_mul(r,&t0);     // r=r^x^4.r^p^4.r^-1
+
+    FP48_YYY_mul(r,&t2);    
+    FP48_YYY_reduce(r);
+
+/*
 // f^e0.f^e1^p.f^e2^p^2.. .. f^e14^p^14.f^e15^p^15
 
     FP48_YYY_usqr(&t7, r);          // t7=f^2
@@ -644,9 +712,8 @@ void PAIR_ZZZ_fexp(FP48_YYY *r)
     FP48_YYY_frob(&t2, &X, 15); // f^(e15.p^15)
     FP48_YYY_mul(r, &t2);
 
-
     FP48_YYY_reduce(r);
-
+*/
 }
 
 #ifdef USE_GLV_ZZZ

@@ -442,7 +442,7 @@ public struct PAIR4 {
     static public func fexp(_ m:FP24) -> FP24
     {
         let f=FP2(BIG(ROM.Fra),BIG(ROM.Frb));
-        var x=BIG(ROM.CURVE_Bnx)
+        let x=BIG(ROM.CURVE_Bnx)
         var r=FP24(m)
     
     // Easy part of final exp
@@ -457,6 +457,61 @@ public struct PAIR4 {
     
     // Hard part of final exp
 
+// See https://eprint.iacr.org/2020/875.pdf
+        var y1=FP24(r)
+        y1.usqr()
+        y1.mul(r) // y1=r^3
+
+        var y0=FP24(r.pow(x))
+        if CONFIG_CURVE.SIGN_OF_X==CONFIG_CURVE.NEGATIVEX {
+            y0.conj()
+        }
+        var t0=FP24(r); t0.conj()
+        r.copy(y0)
+        r.mul(t0)
+
+        y0.copy(r.pow(x))
+        if CONFIG_CURVE.SIGN_OF_X==CONFIG_CURVE.NEGATIVEX {
+            y0.conj()
+        }
+        t0.copy(r); t0.conj()
+        r.copy(y0)
+        r.mul(t0)
+
+// ^(x+p)
+        y0.copy(r.pow(x))
+        if CONFIG_CURVE.SIGN_OF_X==CONFIG_CURVE.NEGATIVEX {
+            y0.conj()
+        }
+        t0.copy(r)
+        t0.frob(f,1)
+        r.copy(y0)
+        r.mul(t0)
+
+// ^(x^2+p^2)
+        y0.copy(r.pow(x))
+        y0.copy(y0.pow(x))
+        t0.copy(r)
+        t0.frob(f,2)
+        r.copy(y0)
+        r.mul(t0)
+
+// ^(x^4+p^4-1)
+        y0.copy(r.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        y0.copy(y0.pow(x))
+        t0.copy(r)
+        t0.frob(f,4)
+        y0.mul(t0)
+        t0.copy(r); t0.conj()
+        r.copy(y0)
+        r.mul(t0)
+
+        r.mul(y1)
+        r.reduce()
+
+/*
         var t7=FP24(r); t7.usqr()
         var t1=t7.pow(x)
 
@@ -524,7 +579,7 @@ public struct PAIR4 {
 
         r.mul(t3)
 
-        r.reduce()
+        r.reduce() */
         return r
     }
 

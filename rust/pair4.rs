@@ -462,7 +462,7 @@ pub fn ate2(P1: &ECP4, Q1: &ECP, R1: &ECP4, S1: &ECP) -> FP24 {
 /* final exponentiation - keep separate for multi-pairings and to avoid thrashing stack */
 pub fn fexp(m: &FP24) -> FP24 {
     let f = FP2::new_bigs(&BIG::new_ints(&rom::FRA), &BIG::new_ints(&rom::FRB));
-    let mut x = BIG::new_ints(&rom::CURVE_BNX);
+    let x = BIG::new_ints(&rom::CURVE_BNX);
     let mut r = FP24::new_copy(m);
 
     /* Easy part of final exp */
@@ -476,6 +476,62 @@ pub fn fexp(m: &FP24) -> FP24 {
     r.mul(&lv);
 
     /* Hard part of final exp */
+
+// See https://eprint.iacr.org/2020/875.pdf
+        let mut y1 = FP24::new_copy(&r);
+        y1.usqr();
+        y1.mul(&r); // y1=r^3
+
+        let mut y0 = FP24::new_copy(&r.pow(&x));
+        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+            y0.conj();
+        }
+        let mut t0 = FP24::new_copy(&r); t0.conj();
+        r.copy(&y0);
+        r.mul(&t0);
+
+        y0.copy(&r.pow(&x));
+        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+            y0.conj();
+        }
+        t0.copy(&r); t0.conj();
+        r.copy(&y0);
+        r.mul(&t0);
+
+// ^(x+p)
+        y0.copy(&r.pow(&x));
+        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+            y0.conj();
+        }
+        t0.copy(&r);
+        t0.frob(&f,1);
+        r.copy(&y0);
+        r.mul(&t0);
+
+// ^(x^2+p^2)
+        y0.copy(&r.pow(&x));
+        y0.copy(&y0.pow(&x));
+        t0.copy(&r);
+        t0.frob(&f,2); 
+        r.copy(&y0);
+        r.mul(&t0);
+
+// ^(x^4+p^4-1)
+        y0.copy(&r.pow(&x));
+        y0.copy(&y0.pow(&x));
+        y0.copy(&y0.pow(&x));
+        y0.copy(&y0.pow(&x));
+        t0.copy(&r);
+        t0.frob(&f,4);
+        y0.mul(&t0);
+        t0.copy(&r); t0.conj();
+        r.copy(&y0);
+        r.mul(&t0);
+
+        r.mul(&y1);
+        r.reduce();
+
+/*    
     // Ghamman & Fouotsa Method
 
     let mut t7 = FP24::new_copy(&r);
@@ -550,7 +606,7 @@ pub fn fexp(m: &FP24) -> FP24 {
 
     r.mul(&t3);
 
-    r.reduce();
+    r.reduce(); */
     return r;
 }
 

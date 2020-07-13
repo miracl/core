@@ -560,11 +560,9 @@ var PAIR = function(ctx) {
             return r;
         },
 
-        /* final exponentiation - keep separate for multi-pairings and to avoid thrashing stack */
+        /* final exponentiation - keep separate for multi-pairings */
         fexp: function(m) {
-            var fa, fb, f, x, r, lv,
-                x0, x1, x2, x3, x4, x5,
-                y0, y1, y2, y3;
+            var fa, fb, f, x, r, lv;
 
             fa = new ctx.BIG(0);
             fa.rcopy(ctx.ROM_FIELD.Fra);
@@ -588,6 +586,8 @@ var PAIR = function(ctx) {
 
             /* Hard part of final exp */
             if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BN) {
+                var x0, x1, x2, x3, x4, x5;
+                
                 lv.copy(r);
                 lv.frob(f);
                 x0 = new ctx.FP12(lv); //x0.copy(lv);
@@ -643,6 +643,54 @@ var PAIR = function(ctx) {
                 r.mul(lv);
                 r.reduce();
             } else {
+
+// See https://eprint.iacr.org/2020/875.pdf
+            var t0,y0,y1;
+            y1=new ctx.FP12(r);
+            y1.usqr();
+            y1.mul(r); // y1=r^3
+
+            y0=new ctx.FP12(r.pow(x));
+            if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+                y0.conj();
+            }
+            t0=new ctx.FP12(r); t0.conj();
+            r.copy(y0);
+            r.mul(t0);
+
+            y0.copy(r.pow(x));
+            if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+                y0.conj();
+            }
+            t0.copy(r); t0.conj();
+            r.copy(y0);
+            r.mul(t0);
+
+// ^(x+p)
+            y0.copy(r.pow(x));
+            if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+                y0.conj();
+            }
+            t0.copy(r);
+            t0.frob(f);
+            r.copy(y0);
+            r.mul(t0);
+
+// ^(x^2+p^2-1)
+            y0.copy(r.pow(x));
+            y0.copy(y0.pow(x));
+            t0.copy(r);
+            t0.frob(f); t0.frob(f);
+            y0.mul(t0);
+            t0.copy(r); t0.conj();
+            r.copy(y0);
+            r.mul(t0);
+
+            r.mul(y1);
+            r.reduce();
+
+/*
+                var y0, y1, y2, y3;
                 // Ghamman & Fouotsa Method
                 y0 = new ctx.FP12(r);
                 y0.usqr();
@@ -696,6 +744,7 @@ var PAIR = function(ctx) {
                 y1.mul(y2);
                 r.copy(y1);
                 r.reduce();
+*/
             }
 
             return r;

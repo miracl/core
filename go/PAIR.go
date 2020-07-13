@@ -670,6 +670,51 @@ func Fexp(m *FP12) *FP12 {
 		r.reduce()
 	} else {
 
+// See https://eprint.iacr.org/2020/875.pdf
+		y1:=NewFP12copy(r)
+		y1.usqr()
+		y1.Mul(r) // y1=r^3
+
+		y0:=NewFP12copy(r.Pow(x))
+		if SIGN_OF_X == NEGATIVEX {
+			y0.conj()
+		}
+		t0:=NewFP12copy(r); t0.conj()
+		r.Copy(y0)
+		r.Mul(t0)
+
+		y0.Copy(r.Pow(x))
+		if SIGN_OF_X == NEGATIVEX {
+			y0.conj()
+		}
+		t0.Copy(r); t0.conj()
+		r.Copy(y0)
+		r.Mul(t0)
+
+// ^(x+p)
+		y0.Copy(r.Pow(x));
+		if SIGN_OF_X == NEGATIVEX {
+			y0.conj()
+		}
+		t0.Copy(r)
+		t0.frob(f)
+		r.Copy(y0)
+		r.Mul(t0);
+
+// ^(x^2+p^2-1)
+		y0.Copy(r.Pow(x))
+		y0.Copy(y0.Pow(x))
+		t0.Copy(r)
+		t0.frob(f); t0.frob(f)
+		y0.Mul(t0)
+		t0.Copy(r); t0.conj()
+		r.Copy(y0)
+		r.Mul(t0)
+
+		r.Mul(y1)
+		r.reduce();
+
+/*
 		// Ghamman & Fouotsa Method
 		y0 := NewFP12copy(r)
 		y0.usqr()
@@ -727,6 +772,7 @@ func Fexp(m *FP12) *FP12 {
 		y1.Mul(y2)
 		r.Copy(y1)
 		r.reduce()
+*/
 	}
 	return r
 }

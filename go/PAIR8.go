@@ -441,7 +441,7 @@ func Fexp(m *FP48) *FP48 {
 	f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
 	x := NewBIGints(CURVE_Bnx)
 	r := NewFP48copy(m)
-	var t1, t2 *FP48
+//	var t1, t2 *FP48
 
 	/* Easy part of final exp */
 	lv := NewFP48copy(r)
@@ -455,6 +455,76 @@ func Fexp(m *FP48) *FP48 {
 	r.Mul(lv)
 
 	/* Hard part of final exp */
+// See https://eprint.iacr.org/2020/875.pdf
+		y1:=NewFP48copy(r)
+		y1.usqr()
+		y1.Mul(r) // y1=r^3
+
+		y0:=NewFP48copy(r.Pow(x))
+		if SIGN_OF_X == NEGATIVEX {
+			y0.conj()
+		}
+		t0:=NewFP48copy(r); t0.conj()
+		r.Copy(y0)
+		r.Mul(t0)
+
+		y0.Copy(r.Pow(x))
+		if SIGN_OF_X == NEGATIVEX {
+			y0.conj()
+		}
+		t0.Copy(r); t0.conj()
+		r.Copy(y0)
+		r.Mul(t0)
+
+// ^(x+p)
+		y0.Copy(r.Pow(x));
+		if SIGN_OF_X == NEGATIVEX {
+			y0.conj()
+		}
+		t0.Copy(r)
+		t0.frob(f,1)
+		r.Copy(y0)
+		r.Mul(t0);
+
+// ^(x^2+p^2)
+		y0.Copy(r.Pow(x))
+		y0.Copy(y0.Pow(x))
+		t0.Copy(r)
+		t0.frob(f,2)
+		r.Copy(y0)
+		r.Mul(t0)
+
+// ^(x^4+p^4)
+		y0.Copy(r.Pow(x))
+		y0.Copy(y0.Pow(x))
+		y0.Copy(y0.Pow(x))
+		y0.Copy(y0.Pow(x))
+		t0.Copy(r)
+		t0.frob(f,4); 
+		r.Copy(y0)
+		r.Mul(t0)
+
+// ^(x^8+p^8-1)
+		y0.Copy(r.Pow(x))
+		y0.Copy(y0.Pow(x))
+		y0.Copy(y0.Pow(x))
+		y0.Copy(y0.Pow(x))
+		y0.Copy(y0.Pow(x))
+		y0.Copy(y0.Pow(x))
+		y0.Copy(y0.Pow(x))
+		y0.Copy(y0.Pow(x))
+		t0.Copy(r)
+		t0.frob(f,8); 
+		y0.Mul(t0)
+		t0.Copy(r); t0.conj()
+		r.Copy(y0)
+		r.Mul(t0)
+
+
+		r.Mul(y1)
+		r.reduce();
+
+/*
 	// Ghamman & Fouotsa Method
 
 	t7 := NewFP48copy(r)
@@ -607,7 +677,7 @@ func Fexp(m *FP48) *FP48 {
 	r.Mul(t2)
 
 	r.reduce()
-
+*/
 	return r
 }
 
