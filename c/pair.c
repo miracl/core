@@ -624,7 +624,10 @@ void PAIR_ZZZ_fexp(FP12_YYY *r)
     FP2_YYY X;
     BIG_XXX x;
     FP_YYY a, b;
-    FP12_YYY t0, y0, y1, y2, y3;
+    FP12_YYY t0, y0, y1;
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
+    FP12_YYY y2, y3;
+#endif
 
     BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
     FP_YYY_rcopy(&a, Fra_YYY);

@@ -631,8 +631,10 @@ void ZZZ::PAIR_fexp(FP12 *r)
     FP2 X;
     BIG x;
     FP a, b;
-    FP12 t0, y0, y1, y2, y3;
-
+    FP12 t0, y0, y1;
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
+    FP12 y2, y3;
+#endif
     BIG_rcopy(x, CURVE_Bnx);
     FP_rcopy(&a, Fra);
     FP_rcopy(&b, Frb);
@@ -748,7 +750,6 @@ void ZZZ::PAIR_fexp(FP12 *r)
     FP12_mul(r,&t0);     // r=r^x^2.r^p^2.r^-1
 
     FP12_mul(r,&y1);    
-
     FP12_reduce(r);
 
 /*

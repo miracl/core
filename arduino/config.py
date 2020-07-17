@@ -799,11 +799,11 @@ while ptr<max:
         curveset("254","BN254CX","BN254CX","28","1",["-1","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
         pfcurve_selected=True
     if x==28:
-        curveset("383","BLS12383","BLS12383","29","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS_CURVE","M_TYPE","POSITIVEX","68","65","128")
+        curveset("383","BLS12383","BLS12383","29","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12_CURVE","M_TYPE","POSITIVEX","68","65","128")
         pfcurve_selected=True
 
     if x==29:
-        curveset("381","BLS12381","BLS12381","29","1",["-3","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS_CURVE","M_TYPE","NEGATIVEX","69","65","128")
+        curveset("381","BLS12381","BLS12381","29","1",["-3","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12_CURVE","M_TYPE","NEGATIVEX","69","65","128")
         pfcurve_selected=True
 
     if x==30:
@@ -814,26 +814,26 @@ while ptr<max:
         pfcurve_selected=True
 # https://eprint.iacr.org/2017/334.pdf
     if x==32:
-        curveset("461","BLS12461","BLS12461","28","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS_CURVE","M_TYPE","NEGATIVEX","79","78","128")
+        curveset("461","BLS12461","BLS12461","28","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12_CURVE","M_TYPE","NEGATIVEX","79","78","128")
         pfcurve_selected=True
 
     if x==33:
         curveset("462","BN462","BN462","28","1",["1","1"],"NOT_SPECIAL","1","WEIERSTRASS","0","BN_CURVE","D_TYPE","POSITIVEX","125","118","128")   # was 0 M_TYPE
         pfcurve_selected=True
     if x==34:
-        curveset("479","BLS24479","BLS24479","29","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS_CURVE","M_TYPE","POSITIVEX","52","49","192")
+        curveset("479","BLS24479","BLS24479","29","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24_CURVE","M_TYPE","POSITIVEX","52","49","192")
         pfcurve_selected=True
 
     if x==35:
-        curveset("556","BLS48556","BLS48556","29","1",["-1","2"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS_CURVE","M_TYPE","POSITIVEX","35","32","256")
+        curveset("556","BLS48556","BLS48556","29","1",["-1","2"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48_CURVE","M_TYPE","POSITIVEX","35","32","256")
         pfcurve_selected=True
 
     if x==36:
-        curveset("581","BLS48581","BLS48581","29","1",["2","2"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS_CURVE","D_TYPE","NEGATIVEX","36","33","256")
+        curveset("581","BLS48581","BLS48581","29","1",["2","2"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48_CURVE","D_TYPE","NEGATIVEX","36","33","256")
         pfcurve_selected=True
 
     if x==37:
-        curveset("286","BLS48286","BLS48286","29","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS_CURVE","M_TYPE","POSITIVEX","20","17","128")
+        curveset("286","BLS48286","BLS48286","29","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48_CURVE","M_TYPE","POSITIVEX","20","17","128")
         pfcurve_selected=True
 
 # rsaset(big,ring,big_length_bytes,bit_bits_in_base,multiplier)

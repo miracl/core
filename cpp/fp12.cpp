@@ -181,6 +181,7 @@ void YYY::FP12_usqr(FP12 *w, FP12 *x)
     FP4_add(&(w->c), &C, &(w->c));
 
     w->type = FP_DENSE;
+    //FP12_norm(w);
     FP12_reduce(w);     /* reduce here as in pow function repeated squarings would trigger multiple reductions */
 }
 

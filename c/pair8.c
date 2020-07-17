@@ -476,7 +476,7 @@ void PAIR_ZZZ_fexp(FP48_YYY *r)
     FP2_YYY X;
     BIG_XXX x;
     FP_YYY a, b;
-    FP48_YYY t0, t1, t2, t3;
+    FP48_YYY t0, t1, t2;//, t3;
 
     BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
     FP_YYY_rcopy(&a, Fra_YYY);
