@@ -1079,7 +1079,6 @@ BIG = function(ctx) {
 
     /* return a+b mod m */
     BIG.modadd = function(a1, b1, m) {
-        var d;
 		var a=new BIG(0); a.copy(a1);
 		var b=new BIG(0); b.copy(b1);
         a.mod(m);

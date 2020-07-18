@@ -25,6 +25,7 @@
 <h1>JavaScript Benchmarks - each takes a few seconds to complete</h1>
 
 <script type="text/javascript" src=./rand.js></script>
+<script type="text/javascript"src=./share.js></script>
 <script type="text/javascript" src=./rom_curve.js></script>
 <script type="text/javascript" src=./rom_field.js></script>
 <script type="text/javascript" src=./uint64.js></script>
@@ -84,8 +85,10 @@
 // ED25519 context
 	function ED25519() {
 		var ctx = new CTX('ED25519');
-		var i,j;
-		var result;
+		
+		var mywindow=window.open();
+
+		var i;
 		var MIN_ITERS=5;
 		var MIN_TIME=3;
 		var fail=false;
@@ -97,8 +100,6 @@
 		for (i=0;i<100;i++) RAW[i]=i;
 
 		rng.seed(100,RAW);
-
-		mywindow=window.open();
 
 		mywindow.document.write("<br> Curve ED25519"+ "<br>");
 		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
@@ -133,9 +134,8 @@
 
 		mywindow.document.write("Modulus size "+ctx.FP.MODBITS+ " bits"+ "<br>");
 
-		var r,gx,gy,s;
+		var r,s;
 		var G,WP;
-		var res=0;
 
 		G=ctx.ECP.generator();
 
@@ -164,10 +164,10 @@
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
+		var dur=elapsed/iterations;
 		mywindow.document.write("EC  mul - " + iterations + " iterations  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
-
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
 	}
 
 // BLS12383 context
@@ -175,11 +175,10 @@
 	function BLS12383() {
 		var ctx = new CTX('BLS12383');
 		var i;
-		var result;
 		var MIN_ITERS=5;
 		var MIN_TIME=3;
-		var G;
-		var Q;
+		var G,r,s;
+		var Q,W;
 		var RAW=[];
 
 		var rng=new ctx.RAND();
@@ -189,7 +188,7 @@
 
 		rng.seed(100,RAW);
 
-		mywindow=window.open();
+		var mywindow=window.open();
 
 		mywindow.document.write("<br> Curve BLS12383"+ "<br>");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
@@ -233,7 +232,7 @@
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
+		var dur=elapsed/iterations;
 		mywindow.document.write("G1 mul -                " + iterations + " iterations  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
@@ -373,15 +372,14 @@
 			alert("FAILURE - e(sQ,p)!=e(Q,P)^s");
 			fail=true;
 		}
-
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
 	}
 
 // NIST256 context
 	function NIST256() {
 
 		var ctx = new CTX('NIST256');
-		var i,j;
-		var result;
+		var i;
 		var MIN_ITERS=5;
 		var MIN_TIME=3;
 		var fail=false;
@@ -394,7 +392,7 @@
 
 		rng.seed(100,RAW);
 
-		mywindow=window.open();
+		var mywindow=window.open();
 
 		mywindow.document.write("<br> Curve NIST256"+ "<br>");
 		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
@@ -429,9 +427,8 @@
 
 		mywindow.document.write("Modulus size "+ctx.FP.MODBITS+ " bits"+ "<br>");
 
-		var r,gx,gy,s;
+		var r,s;
 		var G,WP;
-		var res=0;
 
 		G=ctx.ECP.generator();
 
@@ -460,10 +457,10 @@
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
+		var dur=elapsed/iterations;
 		mywindow.document.write("EC  mul - " + iterations + " iterations  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
-
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
 	}
 
 
@@ -471,8 +468,7 @@
 	function GOLDILOCKS() {
 
 		var ctx = new CTX('GOLDILOCKS');
-		var i,j;
-		var result;
+		var i;
 		var MIN_ITERS=5;
 		var MIN_TIME=3;
 		var fail=false;
@@ -485,7 +481,7 @@
 
 		rng.seed(100,RAW);
 
-		mywindow=window.open();
+		var mywindow=window.open();
 
 		mywindow.document.write("<br> Curve GOLDILOCKS"+ "<br>");
 		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
@@ -520,9 +516,8 @@
 
 		mywindow.document.write("Modulus size "+ctx.FP.MODBITS+ " bits"+ "<br>");
 
-		var r,gx,gy,s;
+		var r,s;
 		var G,WP;
-		var res=0;
 
 		G=ctx.ECP.generator();
 
@@ -551,10 +546,10 @@
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
+		var dur=elapsed/iterations;
 		mywindow.document.write("EC  mul - " + iterations + " iterations  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
-
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
 	}
 
 
@@ -563,11 +558,10 @@
 
 		var ctx = new CTX('BN254');
 		var i;
-		var result;
 		var MIN_ITERS=5;
 		var MIN_TIME=3;
-		var G;
-		var Q;
+		var G,r,s;
+		var Q,W;
 		var RAW=[];
 
 		var rng=new ctx.RAND();
@@ -577,7 +571,7 @@
 
 		rng.seed(100,RAW);
 
-		mywindow=window.open();
+		var mywindow=window.open();
 
 		mywindow.document.write("<br> Curve BN254"+ "<br>");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
@@ -620,7 +614,7 @@
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
+		var dur=elapsed/iterations;
 		mywindow.document.write("G1 mul -                " + iterations + " iterations  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
@@ -761,6 +755,7 @@
 			alert("FAILURE - e(sQ,p)!=e(Q,P)^s");
 			fail=true;
 		}
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
 	}
 
 // BLS24479 context
@@ -768,11 +763,10 @@
 
 		var ctx = new CTX('BLS24479');
 		var i;
-		var result;
 		var MIN_ITERS=3;
 		var MIN_TIME=3;
-		var G;
-		var Q;
+		var G,r,s;
+		var Q,W;
 		var RAW=[];
 
 		var rng=new ctx.RAND();
@@ -782,7 +776,7 @@
 
 		rng.seed(100,RAW);
 
-		mywindow=window.open();
+		var mywindow=window.open();
 
 		mywindow.document.write("<br> Curve BLS24479"+ "<br>");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
@@ -825,7 +819,7 @@
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
+		var dur=elapsed/iterations;
 		mywindow.document.write("G1 mul -                " + iterations + " iterations  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
@@ -954,6 +948,7 @@
 			alert("FAILURE - e(sQ,p)!=e(Q,P)^s");
 			fail=true;
 		}
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
 	}
 
 // BLS48556 context
@@ -961,11 +956,10 @@
 
 		var ctx = new CTX('BLS48556');
 		var i;
-		var result;
 		var MIN_ITERS=1;
 		var MIN_TIME=3;
-		var G;
-		var Q;
+		var G,r,s;
+		var Q,W;
 		var RAW=[];
 
 		var rng=new ctx.RAND();
@@ -975,7 +969,7 @@
 
 		rng.seed(100,RAW);
 
-		mywindow=window.open();
+		var mywindow=window.open();
 
 		mywindow.document.write("<br> Curve BLS48556"+ "<br>");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
@@ -1018,7 +1012,7 @@
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
+		var dur=elapsed/iterations;
 		mywindow.document.write("G1 mul -                " + iterations + " iterations  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 
@@ -1147,6 +1141,7 @@
 			alert("FAILURE - e(sQ,p)!=e(Q,P)^s");
 			fail=true;
 		}
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
 	}
 
 // RSA2048 context
@@ -1163,7 +1158,7 @@
 		var rng=new ctx.RAND();
 
 		rng.clean();
-		for (i=0;i<100;i++) RAW[i]=i;
+		for (var i=0;i<100;i++) RAW[i]=i;
 
 		rng.seed(100,RAW);
 
@@ -1184,7 +1179,7 @@
 			iterations++;
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
-		dur=elapsed/iterations;
+		var dur=elapsed/iterations;
 		mywindow.document.write("RSA gen - " + iterations + " iteration  ");
 		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
 

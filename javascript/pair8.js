@@ -251,7 +251,6 @@ var PAIR8 = function(ctx) {
 
 /* Accumulate another set of line functions for n-pairing */
 		another: function(r,P1,Q1) {
-			var f;
 			var n=new ctx.BIG(0);
 			var n3=new ctx.BIG(0);
 			var lv,lv2;
@@ -298,7 +297,7 @@ var PAIR8 = function(ctx) {
 
         /* Optimal R-ate pairing */
         ate: function(P1, Q1) {
-            var x, n, n3, lv, lv2,
+            var n, n3, lv, lv2,
                 Qx, Qy, A, NP, r, nb, bt,
                 i;
 
@@ -348,7 +347,7 @@ var PAIR8 = function(ctx) {
 
         /* Optimal R-ate double pairing e(P,Q).e(R,S) */
         ate2: function(P1, Q1, R1, S1) {
-            var x, n, n3, lv, lv2,
+            var n, n3, lv, lv2,
                 Qx, Qy, Sx, Sy, A, B, NP, NR, r, nb, bt,
                 i;
 

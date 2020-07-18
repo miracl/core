@@ -1447,7 +1447,7 @@ var FP48 = function(ctx) {
             s3 = [],
             w4 = [],
             s4 = [],
-            i, j, k, nb, bt, pb1, pb2, pb3, pb4, f;
+            i, j, k, nb, bt, pb1, pb2, pb3, pb4;
 
         for (i = 0; i < 16; i++) {
             t[i] = new ctx.BIG(u[i]); t[i].norm();

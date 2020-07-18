@@ -61,17 +61,14 @@
 function ED25519() {
 	var ctx = new CTX('ED25519');
 
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br> ED25519 Curve "+  "<br>");
 
-	var i,j=0,res;
-	var result;
+	var i,res;
 	var pp="M0ng00se";
 
 	var EGS=ctx.ECDH.EGS;
-	var EFS=ctx.ECDH.EFS;
-	var EAS=ctx.ECP.AESKEY;
 	var sha=ctx.ECP.HASH_TYPE;
 
 	var S1=[];
@@ -183,16 +180,13 @@ function ED25519() {
 
 function NIST256() {
 	var ctx = new CTX('NIST256');
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br> NIST256 Curve "+  "<br>");
-	var i,j=0,res;
-	var result;
+	var i,res;
 	var pp="M0ng00se";
 
 	var EGS=ctx.ECDH.EGS;
-	var EFS=ctx.ECDH.EFS;
-	var EAS=ctx.ECP.AESKEY;
 	var sha=ctx.ECP.HASH_TYPE;
 
 	var S1=[];
@@ -307,17 +301,14 @@ function NIST256() {
 // GOLDILOCKS context
 function GOLDILOCKS() {
 	var ctx = new CTX('GOLDILOCKS');
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br> GOLDILOCKS Curve "+  "<br>");
 
-	var i,j=0,res;
-	var result;
+	var i,res;
 	var pp="M0ng00se";
 
 	var EGS=ctx.ECDH.EGS;
-	var EFS=ctx.ECDH.EFS;
-	var EAS=ctx.ECP.AESKEY;
 	var sha=ctx.ECP.HASH_TYPE;
 
 	var S1=[];
@@ -437,8 +428,7 @@ function GOLDILOCKS() {
 function RSA2048() {
 	var ctx = new CTX('RSA2048');
 
-	var i,j=0,res;
-	var result;
+	var i,j=0;
 
 	var sha=ctx.RSA.HASH_TYPE;
 
@@ -459,7 +449,7 @@ function RSA2048() {
 
 	rng.seed(100,RAW);
 
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	var start,end,time;
 	start=new Date().getTime();

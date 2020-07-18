@@ -83,7 +83,7 @@ var ECDH = function(ctx) {
                 s = ctx.BIG.fromBytes(S);
                 s.mod(r);
             } else {
-                s = ctx.BIG.randtrunc(r, 16 * ctx.ECP.AESKEY, RNG)
+                s = ctx.BIG.randtrunc(r, 16 * ctx.ECP.AESKEY, RNG);
 
             }
 
@@ -332,7 +332,7 @@ var ECDH = function(ctx) {
                 K2 = [],
                 TAG = new Array(T.length),
                 M = [],
-                K, L2, AC, same, i;
+                K, L2, AC, i;
 
             if (this.ECPSVDP_DH(U, V, Z) !== 0) {
                 return M;

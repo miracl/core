@@ -38,11 +38,11 @@ var HPKE = function(ctx) {
         LabeledExtract: function(SALT,label,IKM) {
             var rfc="RFCXX"+"XX ";
             var prefix=ctx.ECDH.asciitobytes(rfc+label);
-            var IKMlen;
-            if (IKM==null)
-                IKMlen=0;
-            else
-                IKMlen=IKM.length;
+            //var IKMlen;
+            //if (IKM==null)
+            //    IKMlen=0;
+            //else
+            //    IKMlen=IKM.length;
             var LIKM = [];
             var k=0;
             for (var i=0;i<prefix.length;i++)

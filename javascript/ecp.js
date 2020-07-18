@@ -1374,7 +1374,7 @@ var ECP = function(ctx) {
             B.rcopy(ctx.ROM_CURVE.CURVE_B);
             var A;
             var K=new ctx.FP(0);
-            var sgn=t.sign();
+            //var sgn=t.sign();
             var rfc=0;
 
             if (ctx.FP.MODTYPE!=ctx.FP.GENERALISED_MERSENNE)
@@ -1537,8 +1537,7 @@ var ECP = function(ctx) {
                 w.neg(); w.norm();
                 X2.copy(w); X2.mul(A);
                 X3.copy(t); X3.mul(X2);
-                var rhs=ECP.RHS(X2);
-                rhs=ECP.RHS(X3);
+                var rhs=ECP.RHS(X3);
                 X2.cmove(X3,rhs.qr(null));
                 rhs.copy(ECP.RHS(X2));
                 Y.copy(rhs.sqrt(null));

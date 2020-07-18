@@ -325,7 +325,7 @@ var FP2 = function(ctx) {
             w3.norm();
             w3.div2();
 
-            w2.cmove(w3,w3.qr(null))
+            w2.cmove(w3,w3.qr(null));
 
             w2.invsqrt(w2,this.a);
             w2.mul(this.a);

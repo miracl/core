@@ -91,18 +91,11 @@ Swap G1S and G2S in this program
 // BN254 context
 function BN254() {
 	var ctx = new CTX('BN254');
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br> BN254 Pairing-Friendly Curve "+  "<br>");
 
 	var i,res;
-	var result;
-
-	var BGS=ctx.BLS.BGS;
-	var BFS=ctx.BLS.BFS;
-
-	var G1S=BFS+1; // Group 1 Size 
-	var G2S=4*BFS+1; // Group 2 Size 
 
 	var S=[];
 	var W=[];
@@ -154,18 +147,11 @@ function BN254() {
 // BLS383 context
 function BLS12383() {
 	var ctx = new CTX('BLS12383');
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br> BLS12 Pairing-Friendly Curve "+  "<br>");
 
 	var i,res;
-	var result;
-
-	var BGS=ctx.BLS.BGS;
-	var BFS=ctx.BLS.BFS;
-
-	var G1S=BFS+1; /* Group 1 Size */
-	var G2S=4*BFS+1; /* Group 2 Size */
 
 	var S=[];
 	var W=[];
@@ -218,18 +204,11 @@ function BLS12383() {
 // BLS24 context
 function BLS24479() {
 	var ctx = new CTX('BLS24479');
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br> BLS24 Pairing-Friendly Curve "+  "<br>");
 
 	var i,res;
-	var result;
-
-	var BGS=ctx.BLS192.BGS;
-	var BFS=ctx.BLS192.BFS;
-
-	var G1S=BFS+1; /* Group 1 Size */
-	var G2S=4*BFS+1; /* Group 2 Size */
 
 	var S=[];
 	var W=[];
@@ -282,18 +261,11 @@ function BLS24479() {
 // BLS48 context
 function BLS48556() {
 	var ctx = new CTX('BLS48556');
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br> BLS48 Pairing-Friendly Curve "+  "<br>");
 
 	var i,res;
-	var result;
-
-	var BGS=ctx.BLS256.BGS;
-	var BFS=ctx.BLS256.BFS;
-
-	var G1S=BFS+1; /* Group 1 Size */
-	var G2S=4*BFS+1; /* Group 2 Size */
 
 	var S=[];
 	var W=[];

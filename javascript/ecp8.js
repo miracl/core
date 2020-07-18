@@ -568,7 +568,7 @@ var ECP8 = function(ctx) {
     /* clear cofactor */
         cfp: function(h) {
             var F=ECP8.frob_constants(),
-            x, X, X2, X4,
+            x,
             xQ, x2Q, x3Q, x4Q, x5Q, x6Q, x7Q, x8Q;
 
         /* Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez */
@@ -629,7 +629,7 @@ var ECP8 = function(ctx) {
             this.add(x2Q);
             this.add(xQ);
 
-            this.affine()
+            this.affine();
         }
     };
 

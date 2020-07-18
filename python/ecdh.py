@@ -140,8 +140,8 @@ def ECP_SpDSA(S, F):
         for i in range(0, HS):
             B[i + FS - HS] = H[i]
 
-    C = bytearray(FS)
-    D = bytearray(FS)
+    #C = bytearray(FS)
+    #D = bytearray(FS)
 
     r = curve.r
     s = big.from_bytes(S)
@@ -202,7 +202,7 @@ def ECP_SvDSA(P, F, C, D):
     WP = ECp()
     if not WP.fromBytes(P):
         return False
-    P = ECp.mul(WP, h2, G, f)
+    P = mul(WP, h2, G, f)
 
     if P.isinf():
         return False

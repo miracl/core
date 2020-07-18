@@ -153,12 +153,12 @@ def initmp() :
     nb,n3,n=lbits()
     r=[]
     for i in range (nb-1,-1,-1) :
-        r.append(Fp12.one())
+        r.append(one())
     return r
 
 def miller(r) :
     nb,n3,n=lbits()
-    res=Fp12.one()
+    res=one()
     for i in range (nb-1,0,-1) :
         res.sqr()
         res *= r[i]
@@ -287,7 +287,7 @@ def e(P, Q):
 
 def ate(P1, Q1):
     if Q1.isinf() :
-        return Fp12.one();
+        return one();
     nb,n3,n=lbits()
     
     P = P1.copy()
@@ -297,7 +297,7 @@ def ate(P1, Q1):
     Q.affine()
     A = P.copy()
     Qx, Qy = Q.getxy()
-    r = Fp12.one()
+    r = one()
 # miller loop
     for i in range(nb - 2, 0, -1):
         r.sqr()
@@ -351,7 +351,7 @@ def double_ate(P1, Q1, U1, V1):
     Qx, Qy = Q.getxy()
     B = U.copy()
     Wx, Wy = V.getxy()
-    r = Fp12.one()
+    r = one()
 # miller loop
     for i in range(nb - 2, 0, -1):
         r.sqr()

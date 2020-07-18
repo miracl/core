@@ -168,7 +168,7 @@ var MPIN = function(ctx) {
         /* Implement step 1 on client side of MPin protocol */
         CLIENT_1: function(CID, rng, X, pin, TOKEN, SEC, xID) {
             var r = new ctx.BIG(0),
-                x, P, T, W, h;
+                x, P, T, W;
 
             r.rcopy(ctx.ROM_CURVE.CURVE_Order);
             if (rng !== null) {

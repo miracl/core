@@ -222,8 +222,8 @@ class ECp:
                 t2 = self.z.copy()
                 t3 = self.x.copy()
                 z3 = self.z.copy()
-                y3 = Fp(0)
-                x3 = Fp(0)
+                #y3 = Fp(0)
+                #x3 = Fp(0)
                 b = ECp.B
 
                 t0 *= t0
@@ -277,7 +277,7 @@ class ECp:
             C = self.x.copy()
             D = self.y.copy()
             H = self.z.copy()
-            J = Fp(0)
+            #J = Fp(0)
 
             self.x *= self.y
             self.x += self.x
@@ -304,15 +304,15 @@ class ECp:
         if curve.CurveType == MONTGOMERY:
             A = self.x.copy()
             B = self.x.copy()
-            AA = Fp(0)
-            BB = Fp(0)
-            C = Fp(0)
+            #AA = Fp(0)
+            #BB = Fp(0)
+            #C = Fp(0)
 
             A += self.z
             AA = A * A
             B -= self.z
             BB = B * B
-            C = AA
+            #C = AA
             C = AA - BB
             self.x = AA * BB
 
@@ -381,7 +381,7 @@ class ECp:
                 t2 = self.z.copy()
                 t3 = self.x.copy()
                 t4 = other.x.copy()
-                z3 = Fp(0)
+                #z3 = Fp(0)
                 y3 = other.x.copy()
                 x3 = other.y.copy()
                 b = ECp.B
@@ -447,12 +447,12 @@ class ECp:
 
         if curve.CurveType == EDWARDS:
             A = self.z.copy()
-            B = Fp(0)
+            #B = Fp(0)
             C = self.x.copy()
             D = self.y.copy()
-            E = Fp(0)
-            F = Fp(0)
-            G = Fp(0)
+            #E = Fp(0)
+            #F = Fp(0)
+            #G = Fp(0)
             b = ECp.B
 
             # print(self.z.int())
@@ -498,8 +498,8 @@ class ECp:
         B = self.x.copy()
         C = Q.x.copy()
         D = Q.x.copy()
-        DA = Fp(0)
-        CB = Fp(0)
+        #DA = Fp(0)
+        #CB = Fp(0)
 
         A += self.z
         B -= self.z
@@ -525,7 +525,7 @@ class ECp:
         R = ECp()
         if curve.CurveType == MONTGOMERY:
             e = other
-            D = ECp()
+            #D = ECp()
             R0 = self.copy()
             R1 = self.copy()
             R1.dbl()
@@ -559,37 +559,6 @@ class ECp:
                     R.add(self)
                 if big.bit(b3, i) == 0 and big.bit(b, i) == 1:
                     R.add(mself)
-        return R
-
-    def mul(P, a, Q, b):  # double multiplication a*P+b*Q
-        # P.affine()
-        # Q.affine()
-        if a < 0:
-            a = -a
-            P = -P
-        if b < 0:
-            b = -b
-            Q = -Q
-        R = ECp()
-        ia = a.bit_length()
-        ib = b.bit_length()
-        k = ia
-        if (ib > ia):
-            k = ib
-        k = curve.r.bit_length()
-        W = P.copy()
-        W.add(Q)
-        # W.affine()
-        for i in range(k - 1, -1, -1):
-            R.dbl()
-            if (big.bit(a, i) == 1):
-                if (big.bit(b, i) == 1):
-                    R.add(W)
-                else:
-                    R.add(P)
-            else:
-                if (big.bit(b, i) == 1):
-                    R.add(Q)
         return R
 
     def __str__(self):			# pretty print
@@ -657,8 +626,34 @@ class ECp:
 
         return PK
 
-# calculate Right Hand Side of elliptic curve equation y^2=RHS(x)
+def mul(P, a, Q, b):  # double multiplication a*P+b*Q
+    # P.affine()
+    # Q.affine()
+    if a < 0:
+        a = -a
+        P = -P
+    if b < 0:
+        b = -b
+        Q = -Q
+    R = ECp()
+    k = curve.r.bit_length()
+    W = P.copy()
+    W.add(Q)
+    # W.affine()
+    for i in range(k - 1, -1, -1):
+        R.dbl()
+        if (big.bit(a, i) == 1):
+            if (big.bit(b, i) == 1):
+                R.add(W)
+            else:
+                R.add(P)
+        else:
+            if (big.bit(b, i) == 1):
+                R.add(Q)
+    return R
 
+
+# calculate Right Hand Side of elliptic curve equation y^2=RHS(x)
 
 def RHS(x):
     if curve.CurveType == WEIERSTRASS:

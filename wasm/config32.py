@@ -272,8 +272,6 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnameh,"@TW@","NEGATOWER")
 
     ib=int(base)
-
-    ib=int(base)
     inb=int(nb)
     inbt=int(nbt)
     nlen=(1+((8*inb-1)//ib))

@@ -636,7 +636,7 @@ var FP = function(ctx) {
             {
                 for (var j=1;j<k-1;j++)
                     b.sqr();
-                var u=b.isunity()? 0:1
+                var u=b.isunity()? 0:1;
                 g.copy(r); g.mul(v);
                 r.cmove(g,u);
                 v.sqr();

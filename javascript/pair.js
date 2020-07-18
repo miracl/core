@@ -367,7 +367,7 @@ var PAIR = function(ctx) {
 
         /* Optimal R-ate pairing */
         ate: function(P1, Q1) {
-            var fa, fb, f, x, n, n3, K, lv, lv2,
+            var fa, fb, f, n, n3, K, lv, lv2,
                 Qx, Qy, A, NP, r, nb, bt,
                 i;
 
@@ -450,7 +450,7 @@ var PAIR = function(ctx) {
         /* Optimal R-ate double pairing e(P,Q).e(R,S) */
 	
         ate2: function(P1, Q1, R1, S1) {
-            var fa, fb, f, x, n, n3, K, lv, lv2,
+            var fa, fb, f, n, n3, K, lv, lv2,
                 Qx, Qy, Sx, Sy, A, B, NP,NR,r, nb, bt,
                 i;
 

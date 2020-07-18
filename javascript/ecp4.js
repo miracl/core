@@ -522,7 +522,7 @@ var ECP4 = function(ctx) {
  
         cfp: function() {
             var F=ECP4.frob_constants(),
-                x, X, X2, xQ, x2Q, x3Q, x4Q;
+                x, xQ, x2Q, x3Q, x4Q;
 
    
         /* Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez */

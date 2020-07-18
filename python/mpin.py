@@ -76,7 +76,6 @@ def H(mpin_id):
 
 
 def random_generate():
-    FS = curve.EFS
     s = big.rand(curve.r)
     Z = big.to_bytes(s)
     return Z
@@ -190,8 +189,6 @@ TS = 10
 TRAP = 200
 
 def kangaroo(E, F):
-    FS = curve.EFS
-
     e = Fp12()
     e.fromBytes(E)
     f = Fp12()
@@ -209,7 +206,7 @@ def kangaroo(E, F):
         s *= 2
         t.usqr()
 
-    t = Fp12.one()
+    t = one()
     # set trap
     dn = 0
     for j in range(0, TRAP):

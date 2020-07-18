@@ -53,10 +53,10 @@
 
 <p><a id="myLink4" href="#" onclick="location.reload(false);ED25519();">ED25519 Hash to Point</a></p>
 <p><a id="myLink5" href="#" onclick="location.reload(false);NIST256();">NIST256 Hash to Point</a></p>
-<p><a id="myLink5" href="#" onclick="location.reload(false);GOLDILOCKS();">GOLDILOCKS Hash to Point</a></p>
-<p><a id="myLink5" href="#" onclick="location.reload(false);SECP256K1();">SECP256K1 Hash to Point</a></p>
-<p><a id="myLink5" href="#" onclick="location.reload(false);BLS12381();">BLS12381_G1 Hash to Point</a></p>
-<p><a id="myLink5" href="#" onclick="location.reload(false);BLS12381_G2();">BLS12381_G2 Hash to Point</a></p>
+<p><a id="myLink6" href="#" onclick="location.reload(false);GOLDILOCKS();">GOLDILOCKS Hash to Point</a></p>
+<p><a id="myLink7" href="#" onclick="location.reload(false);SECP256K1();">SECP256K1 Hash to Point</a></p>
+<p><a id="myLink8" href="#" onclick="location.reload(false);BLS12381();">BLS12381_G1 Hash to Point</a></p>
+<p><a id="myLink9" href="#" onclick="location.reload(false);BLS12381_G2();">BLS12381_G2 Hash to Point</a></p>
 
 <script>
 
@@ -190,7 +190,7 @@ function ED25519() {
 	var ro="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_";
 	var nu="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_NU_";
 	var hlen=64;//SHA512
-	mywindow=window.open();
+	var mywindow=window.open();
     htp(mywindow,ctx,"",ro,nu,hlen);
     htp(mywindow,ctx,"abc",ro,nu,hlen);
     htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
@@ -204,7 +204,7 @@ function NIST256() {
 	var ro="QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_";
 	var nu="QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;
-	mywindow=window.open();
+	var mywindow=window.open();
     htp(mywindow,ctx,"",ro,nu,hlen);
     htp(mywindow,ctx,"abc",ro,nu,hlen);
     htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
@@ -218,7 +218,7 @@ function GOLDILOCKS() {
 	var ro="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_";
 	var nu="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;
-	mywindow=window.open();
+	var mywindow=window.open();
     htp(mywindow,ctx,"",ro,nu,hlen);
     htp(mywindow,ctx,"abc",ro,nu,hlen);
     htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
@@ -232,7 +232,7 @@ function SECP256K1() {
 	var ro="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_";
 	var nu="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;
-	mywindow=window.open();
+	var mywindow=window.open();
     htp(mywindow,ctx,"",ro,nu,hlen);
     htp(mywindow,ctx,"abc",ro,nu,hlen);
     htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
@@ -246,7 +246,7 @@ function BLS12381() {
 	var ro="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_";
 	var nu="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;
-	mywindow=window.open();
+	var mywindow=window.open();
     htp(mywindow,ctx,"",ro,nu,hlen);
     htp(mywindow,ctx,"abc",ro,nu,hlen);
     htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
@@ -260,7 +260,7 @@ function BLS12381_G2() {
 	var ro="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_";
 	var nu="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;
-	mywindow=window.open();
+	var mywindow=window.open();
     htp2(mywindow,ctx,"",ro,nu,hlen);
     htp2(mywindow,ctx,"abc",ro,nu,hlen);
     htp2(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);

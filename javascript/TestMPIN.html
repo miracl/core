@@ -77,18 +77,10 @@
 // BN254 context
 function BN254() {
 	var ctx = new CTX('BN254');
-	mywindow=window.open();
+	var mywindow=window.open();
 	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BN254 <br>");
 
-	var i,res;
-	var result;
-
-	var EGS=ctx.MPIN.EGS;
-	var EFS=ctx.MPIN.EFS;
-	var EAS=ctx.ECP.AESKEY;
-
-	var G1S=2*EFS+1; /* Group 1 Size */
-	var G2S=4*EFS+1; /* Group 2 Size */
+	var i;
 
 	var S=[];
 	var SST=[];
@@ -198,19 +190,11 @@ function BN254() {
 // BLS12383 context
 function BLS12383() {
 	var ctx = new CTX('BLS12383');
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BLS12383 <br>");
 
-	var i,res;
-	var result;
-
-	var EGS=ctx.MPIN.EGS;
-	var EFS=ctx.MPIN.EFS;
-	var EAS=ctx.ECP.AESKEY;
-
-	var G1S=2*EFS+1; /* Group 1 Size */
-	var G2S=4*EFS+1; /* Group 2 Size */
+	var i;
 
 	var S=[];
 	var SST=[];
@@ -304,19 +288,11 @@ function BLS12383() {
 // BLS24479 context
 function BLS24479() {
 	var ctx = new CTX('BLS24479');
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BLS24479 <br>");
 
-	var i,res;
-	var result;
-
-	var EGS=ctx.MPIN192.EGS;
-	var EFS=ctx.MPIN192.EFS;
-	var EAS=ctx.ECP.AESKEY;
-
-	var G1S=2*EFS+1; /* Group 1 Size */
-	var G2S=8*EFS+1; /* Group 2 Size */   /**/
+	var i;
 
 	var S=[];
 	var SST=[];
@@ -408,19 +384,11 @@ function BLS24479() {
 // BLS48556 context
 function BLS48556() {
 	var ctx = new CTX('BLS48556');
-	mywindow=window.open();
+	var mywindow=window.open();
 
 	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BLS48556 <br>");
 
-	var i,res;
-	var result;
-
-	var EGS=ctx.MPIN256.EGS;
-	var EFS=ctx.MPIN256.EFS;
-	var EAS=ctx.ECP.AESKEY;
-
-	var G1S=2*EFS+1; // Group 1 Size 
-	var G2S=16*EFS+1; // Group 2 Size    **
+	var i;
 
 	var S=[];
 	var SST=[];

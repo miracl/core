@@ -536,7 +536,7 @@ var ECP2 = function(ctx) {
         cfp: function() {
             var fa = new ctx.BIG(0),
                 fb = new ctx.BIG(0),
-                q, x, T, K, X, xQ, x2Q;
+                x, T, K, X, xQ, x2Q;
 
         // Fast Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
             fa.rcopy(ctx.ROM_FIELD.Fra);

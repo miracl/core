@@ -1194,7 +1194,7 @@ var FP24 = function(ctx) {
             s1 = [],
             w2 = [],
             s2 = [],
-            i, j, k, nb, bt, pb1, pb2, f;
+            i, j, k, nb, bt, pb1, pb2;
 
         for (i = 0; i < 8; i++) {
             t[i] = new ctx.BIG(u[i]); t[i].norm();

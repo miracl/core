@@ -76,12 +76,6 @@ class Fp12:
     def copy(self):
         return copy.deepcopy(self)
 
-    def one():
-        return Fp12(Fp4(Fp2(Fp(1))))
-
-    def zero():
-        return Fp12(Fp4(Fp2(Fp(0))))
-
     def get(self):
         return(self.a, self.b, self.c)
 
@@ -420,3 +414,9 @@ class Fp12:
             E[11 * FS + i] = W[i]
 
         return E
+
+def one():
+    return Fp12(Fp4(Fp2(Fp(1))))
+
+def zero():
+    return Fp12(Fp4(Fp2(Fp(0))))
