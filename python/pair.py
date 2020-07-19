@@ -58,8 +58,8 @@ from XXX.fp2 import *
 from XXX.fp4 import *
 from XXX.fp12 import *
 
-from XXX import ecp
-from XXX import ecp2
+#from XXX import ecp
+#from XXX import ecp2
 
 # line function
 

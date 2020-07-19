@@ -41,7 +41,7 @@ func mpin_BN254(rng *core.RAND) {
 	const MGS = BN254.MGS
 	const MFS = BN254.MFS
 	const G1S = 2*MFS + 1 /* Group 1 Size */
-	const G2S = 4 * MFS +1  /* Group 2 Size */
+	const G2S = 4*MFS + 1  /* Group 2 Size */
 
 	var S [MGS]byte
 	var SST [G2S]byte
@@ -164,7 +164,7 @@ func mpin_BLS12383(rng *core.RAND) {
 	const MGS = BLS12383.MGS
 	const MFS = BLS12383.MFS
 	const G1S = 2*MFS + 1 /* Group 1 Size */
-	const G2S = 4 * MFS +1  /* Group 2 Size */
+	const G2S = 4*MFS + 1  /* Group 2 Size */
 
 	var S [MGS]byte
 	var SST [G2S]byte
@@ -264,7 +264,7 @@ func mpin_BLS24479(rng *core.RAND) {
 	const MGS = BLS24479.MGS
 	const MFS = BLS24479.MFS
 	const G1S = 2*MFS + 1 /* Group 1 Size */
-	const G2S = 8 * MFS +1  /* Group 2 Size */
+	const G2S = 8*MFS + 1  /* Group 2 Size */
 
 	var S [MGS]byte
 	var SST [G2S]byte
@@ -364,7 +364,7 @@ func mpin_BLS48556(rng *core.RAND) {
 	const MGS = BLS48556.MGS
 	const MFS = BLS48556.MFS
 	const G1S = 2*MFS + 1 /* Group 1 Size */
-	const G2S = 16 * MFS +1  /* Group 2 Size */
+	const G2S = 16*MFS + 1  /* Group 2 Size */
 
 	var S [MGS]byte
 	var SST [G2S]byte

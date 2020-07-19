@@ -50,7 +50,7 @@
 #
 
 import hashlib
-from XXX import ecp
+#from XXX import ecp
 from XXX import ecp2
 from XXX import curve
 from XXX import big

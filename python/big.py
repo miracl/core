@@ -50,8 +50,8 @@
 # M Scott August 2013
 #
 
-import math
-import types
+#import math
+#import types
 import random
 
 from XXX import curve
