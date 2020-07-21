@@ -54,7 +54,9 @@ from constants import *
 
 from XXX import big
 from XXX import curve
-from XXX.ecp import *
+from XXX.ecp import ECp
+from XXX.ecp import generator
+from XXX.ecp import mul
 
 # Calculate a public/private EC GF(p) key pair.
 

@@ -52,8 +52,8 @@
 
 import copy
 from XXX import curve
-from XXX.fp2 import *
-
+from XXX.fp2 import Fp2
+from XXX.fp import Fp
 
 class Fp4:
     def __init__(self, a=None, b=None):

@@ -52,11 +52,12 @@
 #
 
 import copy
-
+from constants import *
 from XXX import big
 from XXX import curve
-from XXX.fp2 import *
-from XXX.ecp import *
+from XXX.fp2 import Fp2
+from XXX.fp import Fp
+from XXX.ecp import ECp
 
 
 class ECp2:

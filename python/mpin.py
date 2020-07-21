@@ -54,13 +54,13 @@ import hashlib
 from XXX import ecp2
 from XXX import curve
 from XXX import big
-from XXX.ecp import *
-from XXX.ecp2 import *
+from XXX.ecp import ECp
+from XXX.ecp2 import ECp2
 from XXX import pair
-from XXX.fp12 import *
+from XXX.fp12 import Fp12
+from XXX.fp12 import one
 
 # hash ID to point on curve
-
 
 def H(mpin_id):
     p = curve.p

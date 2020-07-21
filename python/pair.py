@@ -51,15 +51,12 @@
 #
 
 from constants import *
-
 from XXX import curve
 from XXX import big
-from XXX.fp2 import *
-from XXX.fp4 import *
-from XXX.fp12 import *
-
-#from XXX import ecp
-#from XXX import ecp2
+from XXX.fp2 import Fp2
+from XXX.fp4 import Fp4
+from XXX.fp12 import Fp12
+from XXX.fp12 import one
 
 # line function
 
@@ -83,23 +80,6 @@ def dbl(A) :
     BB=BB-YY
     A.dbl()
     return (AA,BB,CC)
-
-
-#    AA = AA.muli(4) 
-#    AA = -AA
-#    BB = BB.muli(3 * curve.B)
-#    CC = CC.muli(6)
-#    if curve.SexticTwist == D_TYPE:
-#        BB = BB.divQNR2()
-#    else:
-#        BB = BB.mulQNR()
-#        BB += BB
-#        AA = AA.mulQNR()
-
-#    BB=BB-(YY+YY)
-
-#    A.dbl()
-#    return (AA,BB,CC)
 
 def add(A,B) :
     X1, Y1, Z1 = A.getxyz()

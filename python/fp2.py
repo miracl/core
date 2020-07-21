@@ -51,10 +51,10 @@
 #
 
 import copy
-from XXX.fp import *
+from XXX.fp import Fp
+from XXX import curve
 
 # a+ib, where a,b are Fp, i is "imaginary" sqrt(-1) mod p
-
 
 class Fp2:
 

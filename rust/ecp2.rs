@@ -578,7 +578,8 @@ impl ECP2 {
             X.norm();
         }
         let mut x = BIG::new_ints(&rom::CURVE_BNX);
-
+    // Faster Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
+    // Q -> xQ + F(3xQ) + F(F(xQ)) + F(F(F(Q))).
         if ecp::CURVE_PAIRING_TYPE == ecp::BN {
             let mut T = self.mul(&mut x);
             if ecp::SIGN_OF_X == ecp::NEGATIVEX {
@@ -599,6 +600,8 @@ impl ECP2 {
             T.frob(&X);
             self.add(&T);
         }
+    // Efficient hash maps to G2 on BLS curves - Budroni, Pintore
+    // Q -> x2Q -xQ -Q +F(xQ -Q) +F(F(2Q))
         if ecp::CURVE_PAIRING_TYPE > ecp::BN {
             let mut xQ = self.mul(&mut x);
             let mut x2Q = xQ.mul(&mut x);

@@ -637,6 +637,7 @@ impl ECP4 {
         return P;
     }
 
+    // Efficient hash maps to G2 on BLS curves - Budroni, Pintore
     #[allow(non_snake_case)]
     pub fn cfp(&mut self) {
         let f = ECP4::frob_constants();

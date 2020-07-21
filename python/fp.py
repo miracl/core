@@ -54,7 +54,6 @@ import copy
 from XXX import big
 from XXX import curve
 
-
 class Fp:
     p = curve.p
 

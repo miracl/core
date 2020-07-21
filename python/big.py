@@ -56,10 +56,8 @@ import random
 
 from XXX import curve
 
-
 def to_bytes(b):
     return b.to_bytes(curve.EFS, byteorder='big')
-
 
 def from_bytes(B):
     return int.from_bytes(B, byteorder='big')

@@ -162,7 +162,6 @@ impl BIG {
 
     /* normalise BIG - force all digits < 2^BASEBITS */
     pub fn norm(&mut self) -> Chunk {
-        //let mut carry = 0 as Chunk;
         let mut carry = self.w[0]>>BASEBITS;
         self.w[0] &= BMASK;
         for i in 1..NLEN - 1 {
@@ -691,10 +690,10 @@ impl BIG {
 /* create randum BIG less than r and less than trunc bits */
     pub fn randtrunc(q: &BIG, trunc: usize, rng: &mut RAND) -> BIG {
         let mut m=BIG::randomnum(q,rng);
-	if q.nbits() > trunc {
-	    m.mod2m(trunc);
-	}
-	return m;
+	    if q.nbits() > trunc {
+	        m.mod2m(trunc);
+	    }
+	    return m;
     }
 
     /* Jacobi Symbol (this/p). Returns 0, 1 or -1 */
@@ -791,8 +790,7 @@ impl BIG {
         self.cmove(&x2,BIG::comp(&u,&one)&1);
     }
 
-    /* return a*b as DBIG */
-
+    /* return a*b as DBIG - Simple Karatsuba */
     pub fn mul(a: &BIG, b: &BIG) -> DBIG {
         let mut c = DBIG::new();
         let rm = BMASK as DChunk;
@@ -805,19 +803,19 @@ impl BIG {
         let mut s = d[0];
         let mut t = s;
         c.w[0] = (t & rm) as Chunk;
-        let mut co = t >> rb;
+        t >>= rb;
         for k in 1..NLEN {
             s += d[k];
-            t = co + s;
+            t += s;
             for i in 1 + k / 2..k + 1 {
                 t += ((a.w[i] - a.w[k - i]) as DChunk) * ((b.w[k - i] - b.w[i]) as DChunk)
             }
             c.w[k] = (t & rm) as Chunk;
-            co = t >> rb;
+            t >>= rb;
         }
         for k in NLEN..2 * NLEN - 1 {
             s -= d[k - NLEN];
-            t = co + s;
+            t += s;
             let mut i = 1 + k / 2;
             while i < NLEN {
                 t += ((a.w[i] - a.w[k - i]) as DChunk) * ((b.w[k - i] - b.w[i]) as DChunk);
@@ -825,9 +823,9 @@ impl BIG {
             }
 
             c.w[k] = (t & rm) as Chunk;
-            co = t >> rb;
+            t >>= rb;
         }
-        c.w[2 * NLEN - 1] = co as Chunk;
+        c.w[2 * NLEN - 1] = t as Chunk;
         return c;
     }
 
@@ -901,6 +899,7 @@ impl BIG {
         return c;
     }
 
+    /* Montgomery reduction */
     pub fn monty(md: &BIG, mc: Chunk, d: &mut DBIG) -> BIG {
         let mut b = BIG::new();
         let rm = BMASK as DChunk;
@@ -914,10 +913,10 @@ impl BIG {
         let mut t = d.w[0] as DChunk;
         v[0] = (((t & rm) as Chunk).wrapping_mul(mc)) & BMASK;
         t += (v[0] as DChunk) * (md.w[0] as DChunk);
-        let mut c = (d.w[1] as DChunk) + (t >> rb);
+        t = (d.w[1] as DChunk) + (t >> rb);
         let mut s: DChunk = 0;
         for k in 1..NLEN {
-            t = c + s + (v[0] as DChunk) * (md.w[k] as DChunk);
+            t = t + s + (v[0] as DChunk) * (md.w[k] as DChunk);
             let mut i = 1 + k / 2;
             while i < k {
                 t += ((v[k - i] - v[i]) as DChunk) * ((md.w[i] - md.w[k - i]) as DChunk);
@@ -925,26 +924,27 @@ impl BIG {
             }
             v[k] = (((t & rm) as Chunk).wrapping_mul(mc)) & BMASK;
             t += (v[k] as DChunk) * (md.w[0] as DChunk);
-            c = (d.w[k + 1] as DChunk) + (t >> rb);
+            t = (d.w[k + 1] as DChunk) + (t >> rb);
             dd[k] = (v[k] as DChunk) * (md.w[k] as DChunk);
             s += dd[k];
         }
 
         for k in NLEN..2 * NLEN - 1 {
-            t = c + s;
+            t = t + s;
             let mut i = 1 + k / 2;
             while i < NLEN {
                 t += ((v[k - i] - v[i]) as DChunk) * ((md.w[i] - md.w[k - i]) as DChunk);
                 i += 1;
             }
             b.w[k - NLEN] = (t & rm) as Chunk;
-            c = (d.w[k + 1] as DChunk) + (t >> rb);
+            t = (d.w[k + 1] as DChunk) + (t >> rb);
             s -= dd[k + 1 - NLEN];
         }
-        b.w[NLEN - 1] = (c & rm) as Chunk;
+        b.w[NLEN - 1] = (t & rm) as Chunk;
         return b;
     }
 
+    /* Fast combined shift, subtract and norm. Return sign of result */
     pub fn ssn(r: &mut BIG, a: &BIG, m: &mut BIG) -> isize {
         let n = NLEN - 1;
         m.w[0] = (m.w[0] >> 1) | ((m.w[1] << (BASEBITS - 1)) & BMASK);

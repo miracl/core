@@ -331,7 +331,6 @@ impl FP2 {
     }
 
     /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-    /* returns true if this is QR */
     pub fn sqrt(&mut self) {
         if self.iszilch() {
             return;

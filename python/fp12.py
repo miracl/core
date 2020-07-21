@@ -52,9 +52,11 @@
 
 import copy
 from constants import *
+from XXX import big
 from XXX import curve
-from XXX.fp4 import *
-
+from XXX.fp4 import Fp4
+from XXX.fp2 import Fp2
+from XXX.fp import Fp
 
 class Fp12:
 

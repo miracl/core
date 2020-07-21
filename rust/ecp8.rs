@@ -752,6 +752,7 @@ impl ECP8 {
         return P;
     }
 
+    // Efficient hash maps to G2 on BLS curves - Budroni, Pintore
     #[allow(non_snake_case)]
     pub fn cfp(&mut self) {
         let f = ECP8::frob_constants();

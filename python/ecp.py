@@ -55,7 +55,7 @@ from constants import *
 
 from XXX import big
 from XXX import curve
-from XXX.fp import *
+from XXX.fp import Fp
 
 
 class ECp:

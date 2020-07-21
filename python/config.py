@@ -206,4 +206,4 @@ os.system(deltext + " nist521.py")
 os.system(deltext + " sec256k1.py")
 
 if testing:
-    os.system("python test.py < pins.txt")
+    os.system("python3 test.py < pins.txt")
