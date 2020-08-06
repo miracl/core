@@ -30,7 +30,18 @@ const ERROR int = -3
 const EFS int = int(MODBYTES)
 const EGS int = int(MODBYTES)
 
-
+/* return true if S is in ranger 0 < S < order , else return false */
+func ECDH_IN_RANGE(S []byte) bool {
+	r := NewBIGints(CURVE_Order)
+	s := FromBytes(S)
+	if s.iszilch() {
+		return false
+	}
+    if Comp(s,r)>=0 {
+		return false
+	}
+	return true
+}
 
 /* Calculate a public/private EC GF(p) key pair W,S where W=S.G mod EC(p),
  * where S is the secret key and W is the public key
@@ -98,9 +109,11 @@ func ECDH_PUBLIC_KEY_VALIDATE(W []byte) int {
 }
 
 /* IEEE-1363 Diffie-Hellman online calculation Z=S.WD */
-func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte) int {
+// type = 0 is just x coordinate output
+// type = 1 for standard compressed output
+// type = 2 for standard uncompress output 04|x|y
+func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte,typ int) int {
 	res := 0
-	var T [EFS]byte
 
 	s := FromBytes(S)
 
@@ -116,9 +129,19 @@ func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte) int {
 		if W.Is_infinity() {
 			res = ERROR
 		} else {
-			W.GetX().ToBytes(T[:])
-			for i := 0; i < EFS; i++ {
-				Z[i] = T[i]
+			if CURVETYPE != MONTGOMERY {
+				if typ>0 {
+					if typ==1 {
+						W.ToBytes(Z,true)
+					} else {
+						W.ToBytes(Z,false)
+					}
+				} else {
+					W.GetX().ToBytes(Z)
+				}
+				return res;
+			} else {
+				W.GetX().ToBytes(Z)
 			}
 		}
 	}
@@ -229,7 +252,7 @@ func ECDH_ECIES_ENCRYPT(sha int, P1 []byte, P2 []byte, RNG *core.RAND, W []byte,
 	if ECDH_KEY_PAIR_GENERATE(RNG, U[:], V) != 0 {
 		return nil
 	}
-	if ECDH_ECPSVDP_DH(U[:], W, Z[:]) != 0 {
+	if ECDH_ECPSVDP_DH(U[:], W, Z[:], 0) != 0 {
 		return nil
 	}
 
@@ -289,7 +312,7 @@ func ECDH_ECIES_DECRYPT(sha int, P1 []byte, P2 []byte, V []byte, C []byte, T []b
 
 	var TAG []byte = T[:]
 
-	if ECDH_ECPSVDP_DH(U, V, Z[:]) != 0 {
+	if ECDH_ECPSVDP_DH(U, V, Z[:], 0) != 0 {
 		return nil
 	}
 

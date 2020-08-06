@@ -176,8 +176,8 @@ public func TestECDH_ed25519(_ rng: inout RAND)
 
     /* Calculate common key using DH - IEEE 1363 method */
 
-    ed25519.ECDH.ECPSVDP_DH(S0,W1,&Z0)
-    ed25519.ECDH.ECPSVDP_DH(S1,W0,&Z1)
+    ed25519.ECDH.ECPSVDP_DH(S0,W1,&Z0,0)
+    ed25519.ECDH.ECPSVDP_DH(S1,W0,&Z1,0)
 
     var same=true
     for i in 0 ..< EFS
@@ -314,8 +314,8 @@ public func TestECDH_nist256(_ rng: inout RAND)
 
     /* Calculate common key using DH - IEEE 1363 method */
 
-    nist256.ECDH.ECPSVDP_DH(S0,W1,&Z0)
-    nist256.ECDH.ECPSVDP_DH(S1,W0,&Z1)
+    nist256.ECDH.ECPSVDP_DH(S0,W1,&Z0,0)
+    nist256.ECDH.ECPSVDP_DH(S1,W0,&Z1,0)
 
     var same=true
     for i in 0 ..< EFS
@@ -451,8 +451,8 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
 
     /* Calculate common key using DH - IEEE 1363 method */
 
-    goldilocks.ECDH.ECPSVDP_DH(S0,W1,&Z0)
-    goldilocks.ECDH.ECPSVDP_DH(S1,W0,&Z1)
+    goldilocks.ECDH.ECPSVDP_DH(S0,W1,&Z0,0)
+    goldilocks.ECDH.ECPSVDP_DH(S1,W0,&Z1,0)
 
     var same=true
     for i in 0 ..< EFS

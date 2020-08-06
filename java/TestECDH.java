@@ -115,8 +115,8 @@ public class TestECDH extends TestCase { //
 
         /* Calculate common key using DH - IEEE 1363 method */
 
-        ECDH.SVDP_DH(S0, W1, Z0);
-        ECDH.SVDP_DH(S1, W0, Z1);
+        ECDH.SVDP_DH(S0, W1, Z0, 0);
+        ECDH.SVDP_DH(S1, W0, Z1, 0);
 
         boolean same = true;
         for (i = 0; i < EFS; i++)

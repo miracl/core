@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <!--
 -- Copyright (c) 2012-2020 MIRACL UK Ltd.
 --
@@ -46,10 +46,10 @@
 <script type="text/javascript"src=./ctx.js></script>
 
 
-<p><a id="myLink1" href="#" onclick="location.reload(false);ED25519();">ED25519 Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
-<p><a id="myLink2" href="#" onclick="location.reload(false);NIST256();">NIST256 Weierstrass Elliptic Curve ECDH/ECIES/ECDSA</a></p>
-<p><a id="myLink3" href="#" onclick="location.reload(false);GOLDILOCKS();">GOLDILOCKS Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
-<p><a id="myLink8" href="#" onclick="location.reload(false);RSA2048();">RSA2048 RSA Key generation/Encryption/Decryption</a></p>
+<p><a id="myLink1" href="#" onclick="ED25519();">ED25519 Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
+<p><a id="myLink2" href="#" onclick="NIST256();">NIST256 Weierstrass Elliptic Curve ECDH/ECIES/ECDSA</a></p>
+<p><a id="myLink3" href="#" onclick="GOLDILOCKS();">GOLDILOCKS Edwards Elliptic Curve ECDH/ECIES/ECDSA</a></p>
+<p><a id="myLink8" href="#" onclick="RSA2048();">RSA2048 RSA Key generation/Encryption/Decryption</a></p>
 
 
 <script>
@@ -123,8 +123,8 @@ function ED25519() {
 
 // Calculate common key using DH - IEEE 1363 method 
 
-	ctx.ECDH.ECPSVDP_DH(S0,W1,Z0);
-	ctx.ECDH.ECPSVDP_DH(S1,W0,Z1);
+	ctx.ECDH.ECPSVDP_DH(S0,W1,Z0,0);
+	ctx.ECDH.ECPSVDP_DH(S1,W0,Z1,0);
 
 	var same=true;
 	for (i=0;i<ctx.ECDH.EFS;i++)
@@ -174,7 +174,7 @@ function ED25519() {
 		if (ctx.ECDH.ECPVP_DSA(sha,W0,M,CS,DS)!=0)
 			alert("***ECDSA Verification Failed");
 		else mywindow.document.write("ECDSA Signature/Verification succeeded "+  "<br>");
-	}
+	} 
 }
 // NIST256 context
 
@@ -217,11 +217,11 @@ function NIST256() {
 	mywindow.document.write("Alice's Passphrase= " + pp + "<br>");
 
 	var PW=ctx.ECDH.asciitobytes(pp);
-/* private key S0 of size EGS bytes derived from Password and Salt */
+// private key S0 of size EGS bytes derived from Password and Salt 
 	var S0=ctx.HMAC.PBKDF2(ctx.HMAC.MC_SHA2, sha,PW,SALT,1000,EGS);
 
 	mywindow.document.write("Alice's private key= 0x"+ctx.ECDH.bytestostring(S0)+ "<br>");
-/* Generate Key pair S/W */
+// Generate Key pair S/W 
 	ctx.ECDH.KEY_PAIR_GENERATE(null,S0,W0); 
 
 	mywindow.document.write("Alice's public key= 0x"+ctx.ECDH.bytestostring(W0)+ "<br>");
@@ -229,7 +229,7 @@ function NIST256() {
 	res=ctx.ECDH.PUBLIC_KEY_VALIDATE(W0);
 	if (res!=0)
 		alert("ECP Public Key is invalid!");
-/* Random private key for other party */
+// Random private key for other party 
 	ctx.ECDH.KEY_PAIR_GENERATE(rng,S1,W1);
 
 	mywindow.document.write("Servers private key= 0x"+ctx.ECDH.bytestostring(S1)+ "<br>");
@@ -240,10 +240,10 @@ function NIST256() {
 		alert("ECP Public Key is invalid!");
 			
 
-/* Calculate common key using DH - IEEE 1363 method */
+// Calculate common key using DH - IEEE 1363 method 
 
-	ctx.ECDH.ECPSVDP_DH(S0,W1,Z0);
-	ctx.ECDH.ECPSVDP_DH(S1,W0,Z1);
+	ctx.ECDH.ECPSVDP_DH(S0,W1,Z0,0);
+	ctx.ECDH.ECPSVDP_DH(S1,W0,Z1,0);
 
 	var same=true;
 	for (i=0;i<ctx.ECDH.EFS;i++)
@@ -340,11 +340,11 @@ function GOLDILOCKS() {
 	mywindow.document.write("Alice's Passphrase= " + pp + "<br>");
 
 	var PW=ctx.ECDH.asciitobytes(pp);
-/* private key S0 of size EGS bytes derived from Password and Salt */
+// private key S0 of size EGS bytes derived from Password and Salt 
 	var S0=ctx.HMAC.PBKDF2(ctx.HMAC.MC_SHA2, sha,PW,SALT,1000,EGS);
 
 	mywindow.document.write("Alice's private key= 0x"+ctx.ECDH.bytestostring(S0)+ "<br>");
-/* Generate Key pair S/W */
+// Generate Key pair S/W 
 	ctx.ECDH.KEY_PAIR_GENERATE(null,S0,W0); 
 
 	mywindow.document.write("Alice's public key= 0x"+ctx.ECDH.bytestostring(W0)+ "<br>");
@@ -352,7 +352,7 @@ function GOLDILOCKS() {
 	res=ctx.ECDH.PUBLIC_KEY_VALIDATE(W0);
 	if (res!=0)
 		alert("ECP Public Key is invalid!");
-/* Random private key for other party */
+// Random private key for other party 
 	ctx.ECDH.KEY_PAIR_GENERATE(rng,S1,W1);
 
 	mywindow.document.write("Servers private key= 0x"+ctx.ECDH.bytestostring(S1)+ "<br>");
@@ -363,10 +363,10 @@ function GOLDILOCKS() {
 		alert("ECP Public Key is invalid!");
 			
 
-/* Calculate common key using DH - IEEE 1363 method */
+// Calculate common key using DH - IEEE 1363 method 
 
-	ctx.ECDH.ECPSVDP_DH(S0,W1,Z0);
-	ctx.ECDH.ECPSVDP_DH(S1,W0,Z1);
+	ctx.ECDH.ECPSVDP_DH(S0,W1,Z0,0);
+	ctx.ECDH.ECPSVDP_DH(S1,W0,Z1,0);
 
 	var same=true;
 	for (i=0;i<ctx.ECDH.EFS;i++)
@@ -420,8 +420,8 @@ function GOLDILOCKS() {
 }
 
 
-/* Test RSA */
-/* test driver and function exerciser for RSA API Functions */
+// Test RSA 
+// test driver and function exerciser for RSA API Functions 
 
 
 // RSA2048 context
@@ -462,13 +462,13 @@ function RSA2048() {
 	var M=ctx.RSA.stringtobytes(message);  
 	mywindow.document.write("Encrypting test string <br>");
 
-	var E=ctx.RSA.OAEP_ENCODE(sha,M,rng,null); /* OAEP encode message m to e  */
+	var E=ctx.RSA.OAEP_ENCODE(sha,M,rng,null); // OAEP encode message m to e  
 	mywindow.document.write("Encoding= 0x" + ctx.RSA.bytestohex(E) + "<br>");  
 
 	mywindow.document.write("Public key= 0x"+pub.n.toString() + "<br>"); 
 
 	start=new Date().getTime();	
-	ctx.RSA.ENCRYPT(pub,E,C);     /* encrypt encoded message */
+	ctx.RSA.ENCRYPT(pub,E,C);     // encrypt encoded message 
 	end=new Date().getTime();	
 	time=end-start;
 	mywindow.document.write("Time in ms= "+time+"<br>");
@@ -492,7 +492,7 @@ function RSA2048() {
 	if (cmp) mywindow.document.write("Decryption is OK <br>");
 	else mywindow.document.write("Decryption Failed <br>");
 
-	var MS=ctx.RSA.OAEP_DECODE(sha,null,ML); /* OAEP decode message  */
+	var MS=ctx.RSA.OAEP_DECODE(sha,null,ML); // OAEP decode message  
 	mywindow.document.write("Decoding= 0x" + ctx.RSA.bytestohex(MS) + "<br>");  
 
 	mywindow.document.write("message= "+ctx.RSA.bytestostring(MS) + "<br>");  
@@ -501,7 +501,7 @@ function RSA2048() {
 	mywindow.document.write("Signing message <br>");
 	ctx.RSA.PKCS15(sha,M,C);
 
-	ctx.RSA.DECRYPT(priv,C,S); /* create signature in S */ 
+	ctx.RSA.DECRYPT(priv,C,S); // create signature in S  
 
 	mywindow.document.write("Signature= 0x" + ctx.RSA.bytestohex(S) + "<br>");  
 

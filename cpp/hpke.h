@@ -46,11 +46,22 @@ using namespace core;
 
 namespace ZZZ {
 
-static void LabeledExtract(octet *PRK,octet *SALT,char *label,octet *IKM);
-static void LabeledExpand(octet *OKM,octet *PRK,char *label,octet *INFO,int L);
-static void ExtractAndExpand(octet *OKM,octet *DH,octet *CONTEXT);
+static void LabeledExtract(octet *PRK,octet *SALT,octet *SUITE_ID,char *label,octet *IKM);
+static void LabeledExpand(octet *OKM,octet *PRK,octet *SUITE_ID,char *label,octet *INFO,int L);
+static void ExtractAndExpand(int config_id,octet *OKM,octet *DH,octet *CONTEXT);
 
 /* HPKE DHKEM primitives */
+
+/**	@brief Derive a Key Pair from a seed
+ *
+    @param config_id is the configuration KEM/KDF/AEAD
+    @param SK is the output secret key
+    @param PK is the output public key
+    @param SEED is the input random seed
+    @return 1 if OK, 0 if failed
+ */
+extern int DeriveKeyPair(int config_id,octet *SK,octet *PK,octet *SEED);
+
 /**	@brief Encapsulate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
@@ -64,32 +75,35 @@ extern void HPKE_Encap(int config_id,octet *SK,octet *Z,octet *pkE,octet *pkR);
 /**	@brief Decapsulate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
+    @param skR the respondents private key
     @param Z is a pointer to a shared secret DH(skR,pkE)
 	@param pkE the ephemeral public key
-	@param skR the respondents private key
+	@param pkR the respondents public key
  */
-extern void HPKE_Decap(int config_id,octet *Z,octet *pkE,octet *skR);
+extern void HPKE_Decap(int config_id,octet *skR,octet *Z,octet *pkE,octet *pkR);
 
 /**	@brief Encapsulate/Authenticate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
-    @param SK is the input ephemeral secret 
+    @param skE is the input ephemeral secret 
+    @param skS is the Initiators private key 
     @param Z is a pointer to a shared secret DH(skE,pkR)
 	@param pkE the ephemeral public key, which is skE.G, where G is a fixed generator
 	@param pkR the Respondents public key
-    @param skI the Initiators private key
+    @param pkS the Initiators public key
  */
-extern void HPKE_AuthEncap(int config_id,octet *SK,octet *Z,octet *pkE,octet *pkR,octet *skI);
+extern void HPKE_AuthEncap(int config_id,octet *sKE,octet *skS,octet *Z,octet *pkE,octet *pkR,octet *pkS);
 
 /**	@brief Decapsulate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
+    @param skR is the Respondents private key 
     @param Z is a pointer to a shared secret DH(skR,pkE)
 	@param pkE the ephemeral public key
-	@param skR the Respondents private key
-    @param pkI the Initiators public key
+	@param pkR the Respondents public key
+    @param pkS the Initiators public key
  */
-extern void HPKE_AuthDecap(int config_id,octet *Z,octet *pkE,octet *skR,octet *pkI);
+extern void HPKE_AuthDecap(int config_id,octet *skR,octet *Z,octet *pkE,octet *pkR,octet *pkS);
 
 /**	@brief KeyScheduler function
  *

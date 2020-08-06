@@ -26,6 +26,18 @@
 
 #include "ecdh_ZZZ.h"
 
+/* return 1 if S is in ranger 0 < S < order , else return 0 */
+int ECP_ZZZ_IN_RANGE(octet* S)
+{
+    BIG_XXX r,s;
+    BIG_XXX_rcopy(r, CURVE_Order_ZZZ);
+    BIG_XXX_fromBytes(s,S->val);
+    if (BIG_XXX_iszilch(s)) return 0;
+    if (BIG_XXX_comp(s,r)>=0) return 0;
+    return 1;
+}
+
+
 /* Calculate a public/private EC GF(p) key pair. W=S.G mod EC(p),
  * where S is the secret key and W is the public key
  * and G is fixed generator.
@@ -100,7 +112,10 @@ int ECP_ZZZ_PUBLIC_KEY_VALIDATE(octet *W)
 }
 
 /* IEEE-1363 Diffie-Hellman online calculation Z=S.WD */
-int ECP_ZZZ_SVDP_DH(octet *S, octet *WD, octet *Z)
+// type = 0 is just x coordinate output
+// type = 1 for standard compressed output
+// type = 2 for standard uncompress output 04|x|y
+int ECP_ZZZ_SVDP_DH(octet *S, octet *WD, octet *Z, int type)
 {
     BIG_XXX r, s, wx;
     int valid;
@@ -122,7 +137,14 @@ int ECP_ZZZ_SVDP_DH(octet *S, octet *WD, octet *Z)
         else
         {
 #if CURVETYPE_ZZZ!=MONTGOMERY
-            ECP_ZZZ_get(wx, wx, &W);
+            if (type>0)
+            {
+                if (type==1) ECP_ZZZ_toOctet(Z,&W,true);
+                else ECP_ZZZ_toOctet(Z,&W,false);
+                return res;
+            }
+            else
+                ECP_ZZZ_get(wx, wx, &W);
 #else
             ECP_ZZZ_get(wx, &W);
 #endif
@@ -296,7 +318,7 @@ void ECP_ZZZ_ECIES_ENCRYPT(int hlen, octet *P1, octet *P2, csprng *RNG, octet *W
     octet U = {0, sizeof(u), u};
 
     if (ECP_ZZZ_KEY_PAIR_GENERATE(RNG, &U, V) != 0) return;
-    if (ECP_ZZZ_SVDP_DH(&U, W, &Z) != 0) return;
+    if (ECP_ZZZ_SVDP_DH(&U, W, &Z, 0) != 0) return;
 
     OCT_copy(&VZ, V);
     OCT_joctet(&VZ, &Z);
@@ -335,7 +357,7 @@ int ECP_ZZZ_ECIES_DECRYPT(int hlen, octet *P1, octet *P2, octet *V, octet *C, oc
     octet L2 = {0, sizeof(l2), l2};
     octet TAG = {0, sizeof(tag), tag};
 
-    if (ECP_ZZZ_SVDP_DH(U, V, &Z) != 0) return 0;
+    if (ECP_ZZZ_SVDP_DH(U, V, &Z, 0) != 0) return 0;
 
     OCT_copy(&VZ, V);
     OCT_joctet(&VZ, &Z);

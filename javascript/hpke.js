@@ -35,297 +35,276 @@ var HPKE = function(ctx) {
 	        }
         },
 
-        LabeledExtract: function(SALT,label,IKM) {
-            var rfc="RFCXX"+"XX ";
-            var prefix=ctx.ECDH.asciitobytes(rfc+label);
-            //var IKMlen;
-            //if (IKM==null)
-            //    IKMlen=0;
-            //else
-            //    IKMlen=IKM.length;
+        LabeledExtract: function(SALT,SUITE_ID,label,IKM) {
+            var rfc="HPKE-05 ";
+            var RFC=ctx.ECDH.asciitobytes(rfc);
+            var LABEL=ctx.ECDH.asciitobytes(label);
             var LIKM = [];
             var k=0;
-            for (var i=0;i<prefix.length;i++)
-                LIKM[k++]=prefix[i];
+            for (var i=0;i<RFC.length;i++)
+                LIKM[k++]=RFC[i];
+            for (var i=0;i<SUITE_ID.length;i++)
+                LIKM[k++]=SUITE_ID[i];
+            for (var i=0;i<LABEL.length;i++)
+                LIKM[k++]=LABEL[i];
             if (IKM!=null) {
                 for (var i=0;i<IKM.length;i++)
                     LIKM[k++]=IKM[i];
             }
-
             return ctx.HMAC.HKDF_Extract(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,SALT,LIKM);
         },
 
-        LabeledExpand: function(PRK,label,INFO,L) {
-            var ar = ctx.HMAC.inttobytes(L, 2);
-            var rfc="RFCXX" +"XX ";
-            var prefix=ctx.ECDH.asciitobytes(rfc+label);   
+        LabeledExpand: function(PRK,SUITE_ID,label,INFO,L) {
+            var AR = ctx.HMAC.inttobytes(L, 2);
+            var rfc="HPKE-05 ";
+            var RFC=ctx.ECDH.asciitobytes(rfc);
+            var LABEL=ctx.ECDH.asciitobytes(label);
             var LINFO = [];
-            LINFO[0]=ar[0];
-            LINFO[1]=ar[1];
+            LINFO[0]=AR[0];
+            LINFO[1]=AR[1];
             var k=2;
-            for (var i=0;i<prefix.length;i++)
-                LINFO[k++]=prefix[i];
-            for (var i=0;i<INFO.length;i++)
-                LINFO[k++]=INFO[i];
-
+            for (var i=0;i<RFC.length;i++)
+                LINFO[k++]=RFC[i];
+            for (var i=0;i<SUITE_ID.length;i++)
+                LINFO[k++]=SUITE_ID[i];
+            for (var i=0;i<LABEL.length;i++)
+                LINFO[k++]=LABEL[i];
+            if (INFO!=null) {
+                for (var i=0;i<INFO.length;i++)
+                    LINFO[k++]=INFO[i];
+            }
             return ctx.HMAC.HKDF_Expand(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,L,PRK,LINFO);
         },
 
-        ExtractAndExpand: function(DH,CONTEXT) {
-            var PRK=this.LabeledExtract(null,"dh",DH);
-            return this.LabeledExpand(PRK,"prk",CONTEXT,ctx.ECP.HASH_TYPE);
+        ExtractAndExpand: function(config_id,DH,CONTEXT) {
+	        var kem = config_id&255;
+            var txt="KEM";
+            var KEM_ID = ctx.HMAC.inttobytes(kem, 2);
+            var KEM =ctx.ECDH.asciitobytes(txt);
+            var SUITE_ID = [];
+            var k=KEM.length;
+            for (var i=0;i<k;i++)
+                SUITE_ID[i]=KEM[i];
+            SUITE_ID[k]=KEM_ID[0];
+            SUITE_ID[k+1]=KEM_ID[1];
+            var PRK=this.LabeledExtract(null,SUITE_ID,"eae_prk",DH);
+            return this.LabeledExpand(PRK,SUITE_ID,"shared_secret",CONTEXT,ctx.ECP.HASH_TYPE);
         },
 
-        encap: function(config_id,SKE,pkE,pkR) {
-            var skE = [];
-            var DH = [];
-            var KEMCONTEXT=[];
+        DeriveKeyPair: function(config_id,SK,PK,SEED) {
+            var counter=0;
+            var INFO=[];
 	        var kem = config_id&255;
-	        
-		    for (var i=0;i<ctx.ECDH.EGS;i++) 
-			    skE[i]=SKE[i];
+            var txt="KEM";
+            var KEM_ID = ctx.HMAC.inttobytes(kem, 2);
+            var KEM =ctx.ECDH.asciitobytes(txt);
+            var SUITE_ID = [];
+            var k=KEM.length;
+            for (var i=0;i<k;i++)
+                SUITE_ID[i]=KEM[i];
+            SUITE_ID[k]=KEM_ID[0];
+            SUITE_ID[k+1]=KEM_ID[1];
+
+            var PRK=this.LabeledExtract(null,SUITE_ID,"dkp_prk",SEED);
+            var S;
 		    if (kem==32 || kem==33) {
-			    this.reverse(skE);
-			    if (kem==32) {
-				    skE[ctx.ECDH.EGS-1]&=248;
-				    skE[0]&=127;
-				    skE[0]|=64;
-			    } else {
-				    skE[ctx.ECDH.EGS-1]&=252;
-				    skE[0]|=128;
-			    }
-		    }
-	        
-	        ctx.ECDH.KEY_PAIR_GENERATE(null, skE, pkE);
-	        if (kem==32 || kem==33) 
-		        this.reverse(pkR);
-
-	        ctx.ECDH.ECPSVDP_DH(skE, pkR, DH);
-	        if (kem==32 || kem==33) {
-		        this.reverse(pkR);
-		        this.reverse(pkE);
-		        this.reverse(DH);
-	        }
-            var k=0;
-            for (var i=0;i<pkE.length;i++)
-                KEMCONTEXT[k++]=pkE[i];
-            for (var i=0;i<pkR.length;i++)
-                KEMCONTEXT[k++]=pkR[i];
-
-    	    return this.ExtractAndExpand(DH,KEMCONTEXT);
+                S=this.LabeledExpand(PRK,SUITE_ID,"sk",null,ctx.ECDH.EGS);
+                this.reverse(S);
+                if (kem==32)
+                {
+	                S[ctx.ECDH.EGS-1]&=248;
+				    S[0]&=127;
+				    S[0]|=64;
+                } else {
+				    S[ctx.ECDH.EGS-1]&=252;
+				    S[0]|=128;
+                }
+            } else {
+                var bit_mask;
+                if (kem==18) bit_mask=1;
+                else bit_mask=0xff;
+                S=[];
+                for (var i=0;i<ctx.ECDH.EGS;i++)
+                    S[i]=0;
+                while (!ctx.ECDH.IN_RANGE(S) && counter<256)
+                {
+                    INFO[0]=counter;
+                    S=this.LabeledExpand(PRK,SUITE_ID,"candidate",INFO,ctx.ECDH.EGS);
+                    S[0]&=bit_mask;
+                    counter++;
+                }
+            }
+            for (var i=0;i<ctx.ECDH.EGS;i++)
+                SK[i]=S[i];
+	        ctx.ECDH.KEY_PAIR_GENERATE(null, SK, PK);  
+            if (kem==32 || kem==33)
+                this.reverse(PK);
+            if (counter<256) return true;
+            return false;
         },
 
-        decap: function(config_id,pkE,SKR) {
-            var skR = [];
+        encap: function(config_id,skE,pkE,pkR) {
             var DH = [];
             var KEMCONTEXT=[];
-            var pkR = [];
 	        var kem = config_id&255;
-
-	        for (var i=0;i<ctx.ECDH.EGS;i++)
-		        skR[i]=SKR[i];
-	        if (kem==32 || kem==33) {
-		        this.reverse(skR);
-		        this.reverse(pkE);
-		        if (kem==32) {
-			        skR[ctx.ECDH.EGS-1]&=248;
-			        skR[0]&=127;
-			        skR[0]|=64;
-		        } else {
-			        skR[ctx.ECDH.EGS-1]&=252;
-			        skR[0]|=128;
-		        }
-	        }
-	        ctx.ECDH.ECPSVDP_DH(skR, pkE, DH);
-	        if (kem==32 || kem==33) {
-		        this.reverse(pkE);
-		        this.reverse(DH);
-	        }
-            ctx.ECDH.KEY_PAIR_GENERATE(null,skR,pkR);
-	        if (kem==32 || kem==33) {
+	        
+		    if (kem==32 || kem==33) {
+			    this.reverse(pkR);
+	            ctx.ECDH.ECPSVDP_DH(skE, pkR, DH, 0);
 		        this.reverse(pkR);
-	        }
+		        this.reverse(DH);
+	        } else {
+	            ctx.ECDH.ECPSVDP_DH(skE, pkR, DH, 2);
+            }
             var k=0;
             for (var i=0;i<pkE.length;i++)
                 KEMCONTEXT[k++]=pkE[i];
             for (var i=0;i<pkR.length;i++)
                 KEMCONTEXT[k++]=pkR[i];
 
-    	    return this.ExtractAndExpand(DH,KEMCONTEXT);
+    	    return this.ExtractAndExpand(config_id,DH,KEMCONTEXT);
         },
 
-        authEncap: function(config_id,SKE,pkE,pkR,SKS) {
+        decap: function(config_id,skR,pkE,pkR) {
+            var DH = [];
+            var KEMCONTEXT=[];
+	        var kem = config_id&255;
+
+
+	        if (kem==32 || kem==33) {
+		        this.reverse(pkE);
+	            ctx.ECDH.ECPSVDP_DH(skR, pkE, DH,0);
+		        this.reverse(pkE);
+		        this.reverse(DH);
+	        } else{ 
+                ctx.ECDH.ECPSVDP_DH(skR, pkE, DH, 2);
+            }
+
+            var k=0;
+            for (var i=0;i<pkE.length;i++)
+                KEMCONTEXT[k++]=pkE[i];
+            for (var i=0;i<pkR.length;i++)
+                KEMCONTEXT[k++]=pkR[i];
+
+    	    return this.ExtractAndExpand(config_id,DH,KEMCONTEXT);
+        },
+
+        authEncap: function(config_id,skE,skS,pkE,pkR,pkS) {
             var pklen=pkE.length;
-            var skE = [];
             var DH = [];
             var DH1 = [];
-            var skS = [];
-            var pkS = [];
             var KEMCONTEXT = [];
 	
 	        var kem = config_id&255;
 
-		    for (var i=0;i<ctx.ECDH.EGS;i++) {
-			    skE[i]=SKE[i];
-			    skS[i]=SKS[i];
-		    }	
 		    if (kem==32 || kem==33) {
-			    this.reverse(skE);
-			    this.reverse(skS);
-			    if (kem==32) {
-				    skE[ctx.ECDH.EGS-1]&=248;
-				    skE[0]&=127;
-				    skE[0]|=64;
-				    skS[ctx.ECDH.EGS-1]&=248;
-				    skS[0]&=127;
-				    skS[0]|=64;	
-			    } else {
-				    skE[ctx.ECDH.EGS-1]&=252;
-				    skE[0]|=128;
-				    skS[ctx.ECDH.EGS-1]&=252;
-				    skS[0]|=128;
-			    }
-		    }
-	     
-	        ctx.ECDH.KEY_PAIR_GENERATE(null, skE, pkE);
-	        if (kem==32 || kem==33) 
-		        this.reverse(pkR);
-	
-	        ctx.ECDH.ECPSVDP_DH(skE, pkR, DH);
-	        ctx.ECDH.ECPSVDP_DH(skS, pkR, DH1);
-
-	        if (kem==32 || kem==33) {
+			    this.reverse(pkR);
+	            ctx.ECDH.ECPSVDP_DH(skE, pkR, DH,0);
+	            ctx.ECDH.ECPSVDP_DH(skS, pkR, DH1,0);
+                this.reverse(pkR);
 		        this.reverse(DH);
 		        this.reverse(DH1);
-	        }
-	        var ZZ = [];
-	        for (var i=0;i<ctx.ECDH.EFS;i++) {
-		        ZZ[i] = DH[i];
-                ZZ[ctx.ECDH.EFS+i]= DH1[i];
-	        }
-
-            ctx.ECDH.KEY_PAIR_GENERATE(null, skS, pkS);
-
-            if (kem==32 || kem==33)
-            {
-                this.reverse(pkR);
-		        this.reverse(pkE);
-                this.reverse(pkS);
+	        } else {
+	            ctx.ECDH.ECPSVDP_DH(skE, pkR, DH,2);
+	            ctx.ECDH.ECPSVDP_DH(skS, pkR, DH1,2);
             }
+	        var ZZ = [];
+	        for (var i=0;i<pklen;i++) {
+		        ZZ[i] = DH[i];
+                ZZ[pklen+i]= DH1[i];
+	        }
+
 	        for (var i=0;i<pklen;i++) {
 		        KEMCONTEXT[i] = pkE[i];
                 KEMCONTEXT[pklen+i]= pkR[i];
                 KEMCONTEXT[2*pklen+i]= pkS[i];
 	        }
 
-	        return this.ExtractAndExpand(ZZ,KEMCONTEXT);
+	        return this.ExtractAndExpand(config_id,ZZ,KEMCONTEXT);
         },
 
-        authDecap: function(config_id,pkE,SKR,pkS) {
+        authDecap: function(config_id,skR,pkE,pkR,pkS) {
             var pklen=pkE.length;
-            var skR = [];
             var DH = [];
             var DH1 = [];
-            var pkR = [];
             var KEMCONTEXT = [];
 
 		    var kem = config_id&255;
-
-	        for (var i=0;i<ctx.ECDH.EGS;i++) 
-		        skR[i]=SKR[i];
 	
 	        if (kem==32 || kem==33) {
-		        this.reverse(skR);
 		        this.reverse(pkE);
 		        this.reverse(pkS);
-		        if (kem==32) {
-			        skR[ctx.ECDH.EGS-1]&=248;
-			        skR[0]&=127;
-			        skR[0]|=64;
-		        } else {
-		    	    skR[ctx.ECDH.EGS-1]&=252;
-			        skR[0]|=128;
-		        }  
-	        }
-	        ctx.ECDH.ECPSVDP_DH(skR, pkE, DH);
-	        ctx.ECDH.ECPSVDP_DH(skR, pkS, DH1);
-
-	        if (kem==32 || kem==33) {
+	            ctx.ECDH.ECPSVDP_DH(skR, pkE, DH,0);
+	            ctx.ECDH.ECPSVDP_DH(skR, pkS, DH1,0);
+		        this.reverse(pkE);
+		        this.reverse(pkS);
 		        this.reverse(DH);
 		        this.reverse(DH1);
-	        }
+	        } else {
+	            ctx.ECDH.ECPSVDP_DH(skR, pkE, DH,2);
+	            ctx.ECDH.ECPSVDP_DH(skR, pkS, DH1,2);
+            }    
+
 	        var ZZ = [];
-	        for (var i=0;i<ctx.ECDH.EFS;i++) {
+	        for (var i=0;i<pklen;i++) {
 		        ZZ[i] = DH[i];
-                ZZ[ctx.ECDH.EFS+i]= DH1[i];
+                ZZ[pklen+i]= DH1[i];
 	        }
             
-            ctx.ECDH.KEY_PAIR_GENERATE(null, skR, pkR);
-
-            if (kem==32 || kem==33)
-            {
-                this.reverse(pkR);
-		        this.reverse(pkE);
-                this.reverse(pkS);
-            }
 	        for (var i=0;i<pklen;i++) {
 		        KEMCONTEXT[i] = pkE[i];
                 KEMCONTEXT[pklen+i]= pkR[i];
                 KEMCONTEXT[2*pklen+i]= pkS[i];
 	        }
 
-	        return this.ExtractAndExpand(ZZ,KEMCONTEXT);
+	        return this.ExtractAndExpand(config_id,ZZ,KEMCONTEXT);
         },
 
         keySchedule: function(config_id,key,nonce,exp_secret,mode,Z,info,psk,pskID) {
 	        var context = [];
-            var ZEROS = [];
-	        var kem_id=config_id&255;
-	        var kdf_id=(config_id>>8)&3;
-	        var aead_id=(config_id>>10)&3;
-            var k=0;
-	
-	        var ar=ctx.HMAC.inttobytes(kem_id, 2);
+	        var kem=config_id&255;
+	        var kdf=(config_id>>8)&3;
+	        var aead=(config_id>>10)&3;
+            var num,k;
+            var txt="HPKE"; 
+            var KEM =ctx.ECDH.asciitobytes(txt);
+            var SUITE_ID = [];
+            k=KEM.length;
+            for (var i=0;i<k;i++)
+                SUITE_ID[i]=KEM[i];
+            num = ctx.HMAC.inttobytes(kem, 2);
+            SUITE_ID[k++]=num[0];
+            SUITE_ID[k++]=num[1];
+            num = ctx.HMAC.inttobytes(kdf, 2);
+            SUITE_ID[k++]=num[0];
+            SUITE_ID[k++]=num[1];
+            num = ctx.HMAC.inttobytes(aead, 2);
+            SUITE_ID[k++]=num[0];
+            SUITE_ID[k++]=num[1];
+            k=0;
+	        var ar = ctx.HMAC.inttobytes(mode, 1);
             for (var i=0;i<ar.length;i++)
 		        context[k++] = ar[i];
 
-	        ar=ctx.HMAC.inttobytes(kdf_id, 2);
-            for (var i=0;i<ar.length;i++)
-		        context[k++] = ar[i];
-
-	        ar=ctx.HMAC.inttobytes(aead_id, 2);
-            for (var i=0;i<ar.length;i++)
-		        context[k++] = ar[i];
-
-	        ar = ctx.HMAC.inttobytes(mode, 1);
-            for (var i=0;i<ar.length;i++)
-		        context[k++] = ar[i];
-
-            for (var i=0;i<ctx.ECP.HASH_TYPE;i++)
-                ZEROS[i]=0;
-
-            var H=this.LabeledExtract(ZEROS,"pskID_hash",pskID);
-            for (var i=0;i<ctx.ECP.HASH_TYPE;i++)
-                context[k++]=H[i];
-            H=this.LabeledExtract(ZEROS,"info",info);
+            var H=this.LabeledExtract(null,SUITE_ID,"psk_id_hash",pskID);
             for (var i=0;i<ctx.ECP.HASH_TYPE;i++)
                 context[k++]=H[i];
+            H=this.LabeledExtract(null,SUITE_ID,"info_hash",info);
+            for (var i=0;i<ctx.ECP.HASH_TYPE;i++)
+                context[k++]=H[i];
 
-            if (psk==null)
-                H=this.LabeledExtract(ZEROS,"psk_hash",ZEROS);
-            else
-                H=this.LabeledExtract(ZEROS,"psk_hash",psk);
-            var secret=this.LabeledExtract(H,"zz",Z);
+            H=this.LabeledExtract(null,SUITE_ID,"psk_hash",psk);
+            var secret=this.LabeledExtract(H,SUITE_ID,"secret",Z);
 
-            var ex=this.LabeledExpand(secret,"key",context,ctx.ECP.AESKEY);
+            var ex=this.LabeledExpand(secret,SUITE_ID,"key",context,ctx.ECP.AESKEY);
             for (var i=0;i<ex.length;i++) key[i]=ex[i];
 
-            ex=this.LabeledExpand(secret,"nonce",context,12);
+            ex=this.LabeledExpand(secret,SUITE_ID,"nonce",context,12);
             for (var i=0;i<ex.length;i++) nonce[i]=ex[i];
 
             if (exp_secret!=null)
             {
-                ex=this.LabeledExpand(secret,"exp",context,ctx.ECP.HASH_TYPE);
+                ex=this.LabeledExpand(secret,SUITE_ID,"exp",context,ctx.ECP.HASH_TYPE);
                 for (var i=0;i<ex.length;i++) exp_secret[i]=ex[i];
             }
         }

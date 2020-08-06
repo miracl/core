@@ -30,7 +30,6 @@ import org.miracl.core.GCM;
 public final class HPKE {
 
     static final int GROUP = ECDH.EGS;
-    static final int FIELD = ECDH.EFS;
 
 /*
     private static void printBinary(byte[] array) {
@@ -50,18 +49,24 @@ public final class HPKE {
 	    }
     }
 
-    static byte[] LabeledExtract(byte[] SALT,String label,byte[] IKM) {
-        String rfc="RFCXX"+"XX ";
-        byte[] prefix=(rfc+label).getBytes();
+    static byte[] LabeledExtract(byte[] SALT,byte[] SUITE_ID,String label,byte[] IKM) {
+        String rfc="HPKE-05 ";
+
+        byte[] RFC=rfc.getBytes();
+        byte[] LABEL=label.getBytes();
         int IKMlen;
         if (IKM==null)
             IKMlen=0;
         else
             IKMlen=IKM.length;
-        byte[] LIKM = new byte[prefix.length+IKMlen];
+        byte[] LIKM = new byte[RFC.length+SUITE_ID.length+LABEL.length+IKMlen];
         int k=0;
-        for (int i=0;i<prefix.length;i++)
-            LIKM[k++]=prefix[i];
+        for (int i=0;i<RFC.length;i++)
+            LIKM[k++]=RFC[i];
+        for (int i=0;i<SUITE_ID.length;i++)
+            LIKM[k++]=SUITE_ID[i];
+        for (int i=0;i<LABEL.length;i++)
+            LIKM[k++]=LABEL[i];
         if (IKM!=null) {
             for (int i=0;i<IKM.length;i++)
                 LIKM[k++]=IKM[i];
@@ -70,278 +75,263 @@ public final class HPKE {
         return HMAC.HKDF_Extract(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,SALT,LIKM);
     }
 
-    static byte[] LabeledExpand(byte[] PRK,String label,byte[] INFO,int L) {
-        byte[] ar = HMAC.inttoBytes(L, 2);
-        String rfc="RFCXX" +"XX ";
-        byte[] prefix=(rfc+label).getBytes();
-        byte[] LINFO = new byte[2+prefix.length+INFO.length];
-        LINFO[0]=ar[0];
-        LINFO[1]=ar[1];
+    static byte[] LabeledExpand(byte[] PRK,byte[] SUITE_ID,String label,byte[] INFO,int L) {
+        byte[] AR = HMAC.inttoBytes(L, 2);
+        String rfc="HPKE-05 ";
+        byte[] RFC=rfc.getBytes();
+        byte[] LABEL=label.getBytes();
+        int INFOlen;
+        if (INFO==null)
+            INFOlen=0;
+        else
+            INFOlen=INFO.length;
+        byte[] LINFO=new byte[2+RFC.length+SUITE_ID.length+LABEL.length+INFOlen];
+        LINFO[0]=AR[0];
+        LINFO[1]=AR[1];
         int k=2;
-        for (int i=0;i<prefix.length;i++)
-            LINFO[k++]=prefix[i];
-        for (int i=0;i<INFO.length;i++)
-            LINFO[k++]=INFO[i];
+        for (int i=0;i<RFC.length;i++)
+            LINFO[k++]=RFC[i];
+        for (int i=0;i<SUITE_ID.length;i++)
+            LINFO[k++]=SUITE_ID[i];
+        for (int i=0;i<LABEL.length;i++)
+            LINFO[k++]=LABEL[i];
+        if (INFO!=null) {
+            for (int i=0;i<INFO.length;i++)
+                LINFO[k++]=INFO[i];
+        }
 
         return HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,PRK,LINFO);
     }
 
-    static byte[] ExtractAndExpand(byte[] DH,byte[] CONTEXT) {
-        byte[] PRK=LabeledExtract(null,"dh",DH);
-        return LabeledExpand(PRK,"prk",CONTEXT,CONFIG_CURVE.HASH_TYPE);
+    static byte[] ExtractAndExpand(int config_id,byte[] DH,byte[] CONTEXT) {
+	    int kem = config_id&255;
+        String txt="KEM";
+        byte[] KEM_ID = HMAC.inttoBytes(kem, 2);
+        byte[] KEM =txt.getBytes();
+        byte[] SUITE_ID = new byte[2+KEM.length];
+        int k=KEM.length;
+        for (int i=0;i<k;i++)
+            SUITE_ID[i]=KEM[i];
+        SUITE_ID[k]=KEM_ID[0];
+        SUITE_ID[k+1]=KEM_ID[1];
+
+        byte[] PRK=LabeledExtract(null,SUITE_ID,"eae_prk",DH);
+        return LabeledExpand(PRK,SUITE_ID,"shared_secret",CONTEXT,CONFIG_CURVE.HASH_TYPE);
     }
 
-    public static byte[] encap(int config_id,byte[] SKE,byte[] pkE,byte[] pkR) {
-        byte[] skE = new byte[GROUP];
-        byte[] DH = new byte[FIELD];
-        byte[] kemcontext = new byte[2*pkE.length];
+    public static boolean DeriveKeyPair(int config_id,byte[] SK,byte[] PK,byte[] SEED) {
+        int counter=0;
+        byte[] INFO=new byte[1];
 	    int kem = config_id&255;
-
-		for (int i=0;i<GROUP;i++) 
-			skE[i]=SKE[i];
+        String txt="KEM";
+        byte[] KEM_ID = HMAC.inttoBytes(kem, 2);
+        byte[] KEM =txt.getBytes();
+        byte[] SUITE_ID = new byte[2+KEM.length];
+        int k=KEM.length;
+        for (int i=0;i<k;i++)
+            SUITE_ID[i]=KEM[i];
+        SUITE_ID[k]=KEM_ID[0];
+        SUITE_ID[k+1]=KEM_ID[1];
+        byte[] PRK=LabeledExtract(null,SUITE_ID,"dkp_prk",SEED);
+        byte[] S;
 		if (kem==32 || kem==33) {
-			reverse(skE);
-			if (kem==32) {
-	            skE[GROUP-1]&=248;
-				skE[0]&=127;
-				skE[0]|=64;
-			} else {
-				skE[GROUP-1]&=252;
-				skE[0]|=128;
-			}
-		}
-	 
-	    ECDH.KEY_PAIR_GENERATE(null, skE, pkE);
-	    if (kem==32 || kem==33) 
-		    reverse(pkR);
-
-	    ECDH.SVDP_DH(skE, pkR, DH);
-	    if (kem==32 || kem==33) {
-		    reverse(pkR);
-		    reverse(pkE);
-		    reverse(DH);
-	    }
-        int k=0;
-        for (int i=0;i<pkE.length;i++)
-            kemcontext[k++]=pkE[i];
-        for (int i=0;i<pkR.length;i++)
-            kemcontext[k++]=pkR[i];
-
-    	return ExtractAndExpand(DH,kemcontext);
+           S=LabeledExpand(PRK,SUITE_ID,"sk",null,GROUP);
+           reverse(S);
+           if (kem==32)
+           {
+	            S[GROUP-1]&=248;
+				S[0]&=127;
+				S[0]|=64;
+           } else {
+				S[GROUP-1]&=252;
+				S[0]|=128;
+           }
+        } else {
+            int bit_mask;
+            if (kem==18) bit_mask=1;
+            else bit_mask=0xff;
+            S=new byte[GROUP];
+            while (!ECDH.IN_RANGE(S) && counter<256)
+            {
+                INFO[0]=(byte)counter;
+                S=LabeledExpand(PRK,SUITE_ID,"candidate",INFO,GROUP);
+                S[0]&=bit_mask;
+                counter++;
+            }
+        }
+        for (int i=0;i<GROUP;i++)
+            SK[i]=S[i];
+	    ECDH.KEY_PAIR_GENERATE(null, SK, PK);  
+        if (kem==32 || kem==33)
+            reverse(PK);
+        if (counter<256) return true;
+        return false;
     }
 
-    public static byte[] decap(int config_id,byte[] pkE,byte[] SKR) {
-        byte[] skR = new byte[GROUP];
-        byte[] DH = new byte[FIELD];
+    public static byte[] encap(int config_id,byte[] skE,byte[] pkE,byte[] pkR) {
+        byte[] DH = new byte[pkE.length];
         byte[] kemcontext = new byte[2*pkE.length];
-        byte[] pkR = new byte[pkE.length];
 	    int kem = config_id&255;
 
-	    for (int i=0;i<GROUP;i++)
-		    skR[i]=SKR[i];
-	    if (kem==32 || kem==33) {
-		    reverse(skR);
-		    reverse(pkE);
-		    if (kem==32) {
-			    skR[GROUP-1]&=248;
-			    skR[0]&=127;
-			    skR[0]|=64;
-		    } else {
-			    skR[GROUP-1]&=252;
-			    skR[0]|=128;
-		    }
-	    }
-	    ECDH.SVDP_DH(skR, pkE, DH);
-	    if (kem==32 || kem==33) {
-		    reverse(pkE);
-		    reverse(DH);
-	    }
-        ECDH.KEY_PAIR_GENERATE(null,skR,pkR);
-	    if (kem==32 || kem==33) {
-		    reverse(pkR);
-	    }
+		if (kem==32 || kem==33) {
+			reverse(pkR);
+	        ECDH.SVDP_DH(skE, pkR, DH, 0);
+            reverse(pkR);
+            reverse(DH);
+		} else {
+	        ECDH.SVDP_DH(skE, pkR, DH, 2);
+        }
+	 
         int k=0;
         for (int i=0;i<pkE.length;i++)
             kemcontext[k++]=pkE[i];
         for (int i=0;i<pkR.length;i++)
             kemcontext[k++]=pkR[i];
 
-    	return ExtractAndExpand(DH,kemcontext);
+    	return ExtractAndExpand(config_id,DH,kemcontext);
     }
 
-    public static byte[] authEncap(int config_id,byte[] SKE,byte[] pkE,byte[] pkR,byte[] SKS) {
+    public static byte[] decap(int config_id,byte[] skR,byte[] pkE,byte[] pkR) {
+        byte[] DH = new byte[pkE.length];
+        byte[] kemcontext = new byte[2*pkE.length];
+	    int kem = config_id&255;
+
+	    if (kem==32 || kem==33) {
+		    reverse(pkE);
+	        ECDH.SVDP_DH(skR, pkE, DH, 0);
+            reverse(pkE);
+            reverse(DH);
+	    } else {
+            ECDH.SVDP_DH(skR, pkE, DH, 2);
+        }
+
+        int k=0;
+        for (int i=0;i<pkE.length;i++)
+            kemcontext[k++]=pkE[i];
+        for (int i=0;i<pkR.length;i++)
+            kemcontext[k++]=pkR[i];
+
+    	return ExtractAndExpand(config_id,DH,kemcontext);
+    }
+
+    public static byte[] authEncap(int config_id,byte[] skE,byte[] skS,byte[] pkE,byte[] pkR,byte[] pkS) {
         int pklen=pkE.length;
-        byte[] skE = new byte[GROUP];
-        byte[] DH = new byte[FIELD];
-        byte[] DH1 = new byte[FIELD];
-        byte[] skS = new byte[GROUP];
-        byte[] pkS = new byte[pklen];
+        byte[] DH = new byte[pklen];
+        byte[] DH1 = new byte[pklen];
         byte[] kemcontext = new byte[3*pklen];
 	
 	    int kem = config_id&255;
 
-		for (int i=0;i<GROUP;i++) {
-			skE[i]=SKE[i];
-			skS[i]=SKS[i];
-		}	
 		if (kem==32 || kem==33) {
-			reverse(skE);
-			reverse(skS);
-			if (kem==32) {
-				skE[GROUP-1]&=248;
-				skE[0]&=127;
-				skE[0]|=64;
-				skS[GROUP-1]&=248;
-				skS[0]&=127;
-				skS[0]|=64;	
-			} else {
-				skE[GROUP-1]&=252;
-				skE[0]|=128;
-				skS[GROUP-1]&=252;
-				skS[0]|=128;
-			}
-		}
-	    
-	    ECDH.KEY_PAIR_GENERATE(null, skE, pkE);
-	    if (kem==32 || kem==33) 
-		    reverse(pkR);
-	
-	    ECDH.SVDP_DH(skE, pkR, DH);
-	    ECDH.SVDP_DH(skS, pkR, DH1);
-
-	    if (kem==32 || kem==33) {
-		    reverse(DH);
-		    reverse(DH1);
-	    }
-
-	    byte[] ZZ = new byte[2*FIELD];
-	    for (int i=0;i<FIELD;i++) {
-		    ZZ[i] = DH[i];
-            ZZ[FIELD+i]= DH1[i];
-	    }
-
-        ECDH.KEY_PAIR_GENERATE(null,skS,pkS);
-
-        if (kem==32 || kem==33)
-        {
-            reverse(pkR);
-		    reverse(pkE);
-            reverse(pkS);
+			reverse(pkR);
+	        ECDH.SVDP_DH(skE, pkR, DH, 0);
+	        ECDH.SVDP_DH(skS, pkR, DH1, 0);
+			reverse(pkR);
+            reverse(DH);
+            reverse(DH1);
+		} else {
+	        ECDH.SVDP_DH(skE, pkR, DH, 2);
+	        ECDH.SVDP_DH(skS, pkR, DH1, 2);
         }
+
+	    byte[] ZZ = new byte[2*pklen];
+	    for (int i=0;i<pklen;i++) {
+		    ZZ[i] = DH[i];
+            ZZ[pklen+i]= DH1[i];
+	    }
+
 	    for (int i=0;i<pklen;i++) {
 		    kemcontext[i] = pkE[i];
             kemcontext[pklen+i]= pkR[i];
             kemcontext[2*pklen+i]= pkS[i];
 	    }
 
-	    return ExtractAndExpand(ZZ,kemcontext);
+	    return ExtractAndExpand(config_id,ZZ,kemcontext);
     }
 
-    public static byte[] authDecap(int config_id,byte[] pkE,byte[] SKR,byte[] pkS) {
+    public static byte[] authDecap(int config_id,byte[] skR,byte[] pkE,byte[] pkR,byte[] pkS) {
         int pklen=pkE.length;
-        byte[] skR = new byte[GROUP];
-        byte[] DH = new byte[FIELD];
-        byte[] DH1 = new byte[FIELD];
-        byte[] pkR = new byte[pklen];
+        byte[] DH = new byte[pklen];
+        byte[] DH1 = new byte[pklen];
         byte[] kemcontext = new byte[3*pklen];
 
 		int kem = config_id&255;
 
-	    for (int i=0;i<GROUP;i++) 
-		    skR[i]=SKR[i];
-	
 	    if (kem==32 || kem==33) {
-		    reverse(skR);
 		    reverse(pkE);
 		    reverse(pkS);
-		    if (kem==32) {
-			    skR[GROUP-1]&=248;
-			    skR[0]&=127;
-			    skR[0]|=64;
-		    } else {
-		    	skR[GROUP-1]&=252;
-			    skR[0]|=128;
-		    }  
-	    }
-	    ECDH.SVDP_DH(skR, pkE, DH);
-	    ECDH.SVDP_DH(skR, pkS, DH1);
-
-	    if (kem==32 || kem==33) {
-		    reverse(DH);
-		    reverse(DH1);
-	    }
-
-	    byte[] ZZ = new byte[2*FIELD];
-	    for (int i=0;i<FIELD;i++) {
-		    ZZ[i] = DH[i];
-            ZZ[FIELD+i]= DH1[i];
-	    }
-        ECDH.KEY_PAIR_GENERATE(null,skR,pkR);
-
-        if (kem==32 || kem==33)
-        {
-            reverse(pkR);
-		    reverse(pkE);
+    	    ECDH.SVDP_DH(skR, pkE, DH, 0);
+	        ECDH.SVDP_DH(skR, pkS, DH1, 0);
+            reverse(pkE);
             reverse(pkS);
+            reverse(DH);
+            reverse(DH1);
+	    } else {
+	        ECDH.SVDP_DH(skR, pkE, DH, 2);
+	        ECDH.SVDP_DH(skR, pkS, DH1, 2);
         }
+
+	    byte[] ZZ = new byte[2*pklen];
+	    for (int i=0;i<pklen;i++) {
+		    ZZ[i] = DH[i];
+            ZZ[pklen+i]= DH1[i];
+	    }
+
 	    for (int i=0;i<pklen;i++) {
 		    kemcontext[i] = pkE[i];
             kemcontext[pklen+i]= pkR[i];
             kemcontext[2*pklen+i]= pkS[i];
 	    }
-	    return ExtractAndExpand(ZZ,kemcontext);
+	    return ExtractAndExpand(config_id,ZZ,kemcontext);
     }
 
     public static void keySchedule(int config_id,byte[] key,byte[] nonce,byte[] exp_secret,int mode,byte[] Z,byte[] info,byte[] psk,byte[] pskID) {
-        int ctxlen=7+2*CONFIG_CURVE.HASH_TYPE;
+        int ctxlen=1+2*CONFIG_CURVE.HASH_TYPE;
 	    byte[] context = new byte[ctxlen];
-	    int kem_id=config_id&255;
-	    int kdf_id=(config_id>>8)&3;
-	    int aead_id=(config_id>>10)&3;
-        int k=0;
-	
-	    byte[] ar=HMAC.inttoBytes(kem_id, 2);
+        byte[] num;	
+
+	    int kem = config_id&255;
+	    int kdf=(config_id>>8)&3;
+	    int aead=(config_id>>10)&3;
+        String txt="HPKE"; 
+        byte[] KEM =txt.getBytes();
+        byte[] SUITE_ID = new byte[6+KEM.length];
+        int k=KEM.length;
+        for (int i=0;i<k;i++)
+            SUITE_ID[i]=KEM[i];
+        num = HMAC.inttoBytes(kem, 2);
+        SUITE_ID[k++]=num[0];
+        SUITE_ID[k++]=num[1];
+        num = HMAC.inttoBytes(kdf, 2);
+        SUITE_ID[k++]=num[0];
+        SUITE_ID[k++]=num[1];
+        num = HMAC.inttoBytes(aead, 2);
+        SUITE_ID[k++]=num[0];
+        SUITE_ID[k++]=num[1];
+        k=0;
+	    byte[] ar = HMAC.inttoBytes(mode, 1);
         for (int i=0;i<ar.length;i++)
 		    context[k++] = ar[i];
 
-	    ar=HMAC.inttoBytes(kdf_id, 2);
-        for (int i=0;i<ar.length;i++)
-		    context[k++] = ar[i];
-
-	    ar=HMAC.inttoBytes(aead_id, 2);
-        for (int i=0;i<ar.length;i++)
-		    context[k++] = ar[i];
-
-	    ar = HMAC.inttoBytes(mode, 1);
-        for (int i=0;i<ar.length;i++)
-		    context[k++] = ar[i];
-
-        byte[] ZEROS = new byte[CONFIG_CURVE.HASH_TYPE];
-        for (int i=0;i<CONFIG_CURVE.HASH_TYPE;i++)
-            ZEROS[i]=0;
-
-        byte[] H=LabeledExtract(ZEROS,"pskID_hash",pskID);
-        for (int i=0;i<CONFIG_CURVE.HASH_TYPE;i++)
-            context[k++]=H[i];
-        H=LabeledExtract(ZEROS,"info",info);
+        byte[] H=LabeledExtract(null,SUITE_ID,"psk_id_hash",pskID);
         for (int i=0;i<CONFIG_CURVE.HASH_TYPE;i++)
             context[k++]=H[i];
-
-        if (psk==null)
-            H=LabeledExtract(ZEROS,"psk_hash",ZEROS);
-        else
-            H=LabeledExtract(ZEROS,"psk_hash",psk);
-        byte[] secret=LabeledExtract(H,"zz",Z);
-
-        byte[] ex=LabeledExpand(secret,"key",context,CONFIG_CURVE.AESKEY);
+        H=LabeledExtract(null,SUITE_ID,"info_hash",info);
+        for (int i=0;i<CONFIG_CURVE.HASH_TYPE;i++)
+            context[k++]=H[i];
+//System.out.print("context= 0x"); printBinary(context);
+        H=LabeledExtract(null,SUITE_ID,"psk_hash",psk);
+        byte[] secret=LabeledExtract(H,SUITE_ID,"secret",Z);
+//System.out.print("secret= 0x"); printBinary(secret);
+        byte[] ex=LabeledExpand(secret,SUITE_ID,"key",context,CONFIG_CURVE.AESKEY);
         for (int i=0;i<ex.length;i++) key[i]=ex[i];
 
-        ex=LabeledExpand(secret,"nonce",context,12);
+        ex=LabeledExpand(secret,SUITE_ID,"nonce",context,12);
         for (int i=0;i<ex.length;i++) nonce[i]=ex[i];
 
         if (exp_secret!=null)
         {
-            ex=LabeledExpand(secret,"exp",context,CONFIG_CURVE.HASH_TYPE);
+            ex=LabeledExpand(secret,SUITE_ID,"exp",context,CONFIG_CURVE.HASH_TYPE);
             for (int i=0;i<ex.length;i++) exp_secret[i]=ex[i];
         }
     }

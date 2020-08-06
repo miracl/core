@@ -53,6 +53,13 @@
 #define ECDH_BAD_ASSUMPTION        -8*/
 
 /* ECDH primitives */
+
+/**	@brief Test if group element in correct range
+ *
+	@param s is a random number
+    @return 1 if 0<s<r where r is group order, else 0
+*/
+extern int ECP_ZZZ_IN_RANGE(octet *s);
 /**	@brief Generate an ECC public/private key pair
  *
 	@param R is a pointer to a cryptographically secure random number generator
@@ -76,9 +83,10 @@ extern int  ECP_ZZZ_PUBLIC_KEY_VALIDATE(octet *W);
 	@param s is the input private key,
 	@param W the input public key of the other party
 	@param K the output shared key, in fact the x-coordinate of s.W
+    @param type the output form = 0 for just x, 1 for compressed, 2 for uncompressed
 	@return 0 or an error code
  */
-extern int ECP_ZZZ_SVDP_DH(octet *s, octet *W, octet *K);
+extern int ECP_ZZZ_SVDP_DH(octet *s, octet *W, octet *K, int type);
 /*extern int ECPSVDP_DHC(octet *,octet *,int,octet *);*/
 
 /*#if CURVETYPE!=MONTGOMERY */

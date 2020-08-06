@@ -30,6 +30,17 @@ using namespace XXX;
 using namespace YYY;
 
 
+/* return 1 if S is in ranger 0 < S < order , else return 0 */
+int ZZZ::ECP_IN_RANGE(octet* S)
+{
+    BIG r,s;
+    BIG_rcopy(r, CURVE_Order);
+    BIG_fromBytes(s,S->val);
+    if (BIG_iszilch(s)) return 0;
+    if (BIG_comp(s,r)>=0) return 0;
+    return 1;
+}
+ 
 /* Calculate a public/private EC GF(p) key pair. W=S.G mod EC(p),
  * where S is the secret key and W is the public key
  * and G is fixed generator.
@@ -99,7 +110,10 @@ int ZZZ::ECP_PUBLIC_KEY_VALIDATE(octet *W)
 }
 
 /* IEEE-1363 Diffie-Hellman online calculation Z=S.WD */
-int ZZZ::ECP_SVDP_DH(octet *S, octet *WD, octet *Z/*,bool compress*/)
+// type = 0 is just x coordinate output
+// type = 1 for standard compressed output
+// type = 2 for standard uncompress output 04|x|y
+int ZZZ::ECP_SVDP_DH(octet *S, octet *WD, octet *Z,int type)
 {
     BIG r, s, wx;
     int valid;
@@ -121,12 +135,13 @@ int ZZZ::ECP_SVDP_DH(octet *S, octet *WD, octet *Z/*,bool compress*/)
         else
         {
 #if CURVETYPE_ZZZ!=MONTGOMERY
-//            if (!compress)
-//            {
-//                ECP_toOctet(Z,&W,false);
-//                return res;
-//            }
-//            else
+            if (type>0)
+            {
+                if (type==1) ECP_toOctet(Z,&W,true);
+                else ECP_toOctet(Z,&W,false);
+                return res;
+            }
+            else
                 ECP_get(wx, wx, &W);
 #else
             ECP_get(wx, &W);
@@ -300,7 +315,7 @@ void ZZZ::ECP_ECIES_ENCRYPT(int hlen, octet *P1, octet *P2, csprng *RNG, octet *
     octet U = {0, sizeof(u), u};
 
     if (ECP_KEY_PAIR_GENERATE(RNG, &U, V) != 0) return;
-    if (ECP_SVDP_DH(&U, W, &Z) != 0) return;
+    if (ECP_SVDP_DH(&U, W, &Z,0) != 0) return;
 
     OCT_copy(&VZ, V);
     OCT_joctet(&VZ, &Z);
@@ -339,7 +354,7 @@ int ZZZ::ECP_ECIES_DECRYPT(int hlen, octet *P1, octet *P2, octet *V, octet *C, o
     octet L2 = {0, sizeof(l2), l2};
     octet TAG = {0, sizeof(tag), tag};
 
-    if (ECP_SVDP_DH(U, V, &Z) != 0) return 0;
+    if (ECP_SVDP_DH(U, V, &Z,0) != 0) return 0;
 
     OCT_copy(&VZ, V);
     OCT_joctet(&VZ, &Z);

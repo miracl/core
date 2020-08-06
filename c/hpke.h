@@ -43,6 +43,17 @@
 #define HPKE_ERROR                 -3	/**< HPKE Internal Error */
 
 /* HPKE DHKEM primitives */
+
+/**	@brief Derive a Key Pair from a seed
+ *
+    @param config_id is the configuration KEM/KDF/AEAD
+    @param SK is the output secret key
+    @param PK is the output public key
+    @param SEED is the input random seed
+    @return 1 if OK, 0 if failed
+ */
+extern int DeriveKeyPair_ZZZ(int config_id,octet *SK,octet *PK,octet *SEED);
+
 /**	@brief Encapsulate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
@@ -56,32 +67,35 @@ extern void HPKE_ZZZ_Encap(int config_id,octet *SK,octet *Z,octet *pkE,octet *pk
 /**	@brief Decapsulate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
+    @param skR the respondents private key
     @param Z is a pointer to a shared secret DH(skR,pkE)
 	@param pkE the ephemeral public key
 	@param skR the respondents private key
  */
-extern void HPKE_ZZZ_Decap(int config_id,octet *Z,octet *pkE,octet *skR);
+extern void HPKE_ZZZ_Decap(int config_id,octet *skR,octet *Z,octet *pkE,octet *pkR);
 
 /**	@brief Encapsulate/Authenticate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
-    @param SK is the input ephemeral secret 
+    @param skE is the input ephemeral secret 
+    @param skS is the Initiators private key 
     @param Z is a pointer to a shared secret DH(skE,pkR)
 	@param pkE the ephemeral public key, which is skE.G, where G is a fixed generator
 	@param pkR the Respondents public key
-    @param skI the Initiators private key
+    @param pkS the Initiators public key
  */
-extern void HPKE_ZZZ_AuthEncap(int config_id,octet *SK,octet *Z,octet *pkE,octet *pkR,octet *skI);
+extern void HPKE_ZZZ_AuthEncap(int config_id,octet *skE,octet *skS,octet *Z,octet *pkE,octet *pkR,octet *pkS);
 
 /**	@brief Decapsulate function
  *
     @param config_id is the configuration KEM/KDF/AEAD
+    @param skR is the Respondents private key 
     @param Z is a pointer to a shared secret DH(skR,pkE)
 	@param pkE the ephemeral public key
-	@param skR the Respondents private key
-    @param pkI the Initiators public key
+	@param pkR the Respondents public key
+    @param pkS the Initiators public key
  */
-extern void HPKE_ZZZ_AuthDecap(int config_id,octet *Z,octet *pkE,octet *skR,octet *pkI);
+extern void HPKE_ZZZ_AuthDecap(int config_id,octet *skR,octet *Z,octet *pkE,octet *pkR,octet *pkS);
 
 /**	@brief KeyScheduler function
  *

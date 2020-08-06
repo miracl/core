@@ -101,8 +101,8 @@ func ecdh_ED25519(rng *core.RAND) {
 	}
 	/* Calculate common key using DH - IEEE 1363 method */
 
-	ED25519.ECDH_ECPSVDP_DH(S0, W1[:], Z0[:])
-	ED25519.ECDH_ECPSVDP_DH(S1[:], W0[:], Z1[:])
+	ED25519.ECDH_ECPSVDP_DH(S0, W1[:], Z0[:], 0)
+	ED25519.ECDH_ECPSVDP_DH(S1[:], W0[:], Z1[:], 0)
 
 	same := true
 	for i := 0; i < ED25519.EFS; i++ {
@@ -245,8 +245,8 @@ func ecdh_NIST256(rng *core.RAND) {
 	}
 	/* Calculate common key using DH - IEEE 1363 method */
 
-	NIST256.ECDH_ECPSVDP_DH(S0, W1[:], Z0[:])
-	NIST256.ECDH_ECPSVDP_DH(S1[:], W0[:], Z1[:])
+	NIST256.ECDH_ECPSVDP_DH(S0, W1[:], Z0[:], 0)
+	NIST256.ECDH_ECPSVDP_DH(S1[:], W0[:], Z1[:], 0)
 
 	same := true
 	for i := 0; i < NIST256.EFS; i++ {
@@ -389,8 +389,8 @@ func ecdh_GOLDILOCKS(rng *core.RAND) {
 	}
 	/* Calculate common key using DH - IEEE 1363 method */
 
-	GOLDILOCKS.ECDH_ECPSVDP_DH(S0, W1[:], Z0[:])
-	GOLDILOCKS.ECDH_ECPSVDP_DH(S1[:], W0[:], Z1[:])
+	GOLDILOCKS.ECDH_ECPSVDP_DH(S0, W1[:], Z0[:], 0)
+	GOLDILOCKS.ECDH_ECPSVDP_DH(S1[:], W0[:], Z1[:], 0)
 
 	same := true
 	for i := 0; i < GOLDILOCKS.EFS; i++ {

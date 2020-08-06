@@ -51,7 +51,7 @@ Then compile
 
     gcc -O2 -std=c99 testecc.c core.a -o testecc
 
-(if using MINGW-W64 in Windows change -o testall to -o testall.exe)
+(if using MINGW-W64 in Windows change -o testecc to -o testecc.exe)
 
 The test program exercises 3 different ordinary elliptic curves (for ECDH 
 Key exchange, ECDSA signature and ECIES encryption), plus RSA, all in the 

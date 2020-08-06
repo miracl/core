@@ -99,8 +99,8 @@ int ecdh_ED25519(csprng *RNG)
 
     // Calculate common key using DH - IEEE 1363 method
 
-    ECP_SVDP_DH(&S0, &W1, &Z0);
-    ECP_SVDP_DH(&S1, &W0, &Z1);
+    ECP_SVDP_DH(&S0, &W1, &Z0, 0);
+    ECP_SVDP_DH(&S1, &W0, &Z1, 0);
 
     if (!OCT_comp(&Z0, &Z1))
     {
@@ -257,8 +257,8 @@ int ecdh_NIST256(csprng *RNG)
 
     // Calculate common key using DH - IEEE 1363 method
 
-    ECP_SVDP_DH(&S0, &W1, &Z0);
-    ECP_SVDP_DH(&S1, &W0, &Z1);
+    ECP_SVDP_DH(&S0, &W1, &Z0, 0);
+    ECP_SVDP_DH(&S1, &W0, &Z1, 0);
 
     if (!OCT_comp(&Z0, &Z1))
     {
@@ -414,8 +414,8 @@ int ecdh_GOLDILOCKS(csprng *RNG)
 
     // Calculate common key using DH - IEEE 1363 method
 
-    ECP_SVDP_DH(&S0, &W1, &Z0);
-    ECP_SVDP_DH(&S1, &W0, &Z1);
+    ECP_SVDP_DH(&S0, &W1, &Z0, 0);
+    ECP_SVDP_DH(&S1, &W0, &Z1, 0);
 
     if (!OCT_comp(&Z0, &Z1))
     {

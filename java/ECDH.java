@@ -35,6 +35,16 @@ public final class ECDH {
     public static final int EFS = CONFIG_BIG.MODBYTES;
     public static final int EGS = CONFIG_BIG.MODBYTES;
 
+    /* return true if S is in ranger 0 < S < order , else return false */
+    public static boolean IN_RANGE(byte[] S) {
+        BIG r, s;
+        r = new BIG(ROM.CURVE_Order);
+        s = BIG.fromBytes(S);
+        if (s.iszilch()) return false;
+        if (BIG.comp(s,r)>=0) return false;
+        return true;
+    }
+
     /* Calculate a public/private EC GF(p) key pair W,S where W=S.G mod EC(p),
      * where S is the secret key and W is the public key
      * and G is fixed generator.
@@ -94,16 +104,15 @@ public final class ECDH {
     }
 
     /* IEEE-1363 Diffie-Hellman online calculation Z=S.WD */
-    public static int SVDP_DH(byte[] S, byte[] WD, byte[] Z) {
-        BIG r, s, wx, wy, z;
-        int valid;
-        ECP W;
+    // type = 0 is just x coordinate output
+    // type = 1 for standard compressed output
+    // type = 2 for standard uncompress output 04|x|y
+    public static int SVDP_DH(byte[] S, byte[] WD, byte[] Z, int type) {
+        BIG r, s;
         int res = 0;
-        byte[] T = new byte[EFS];
 
         s = BIG.fromBytes(S);
-
-        W = ECP.fromBytes(WD);
+        ECP W = ECP.fromBytes(WD);
         if (W.is_infinity()) res = ERROR;
 
         if (res == 0) {
@@ -113,8 +122,20 @@ public final class ECDH {
             W = W.mul(s);
             if (W.is_infinity()) res = ERROR;
             else {
-                W.getX().toBytes(T);
-                for (int i = 0; i < EFS; i++) Z[i] = T[i];
+		        if (CONFIG_CURVE.CURVETYPE!=CONFIG_CURVE.MONTGOMERY)
+		        {
+                    if (type>0) {
+                        if (type==1)
+                            W.toBytes(Z,true);
+                        else 
+                            W.toBytes(Z,false);
+                    } else {
+                        W.getX().toBytes(Z);
+                    }
+                    return res;
+                } else {
+                    W.getX().toBytes(Z);
+                }
             }
         }
         return res;
@@ -219,7 +240,7 @@ public final class ECDH {
         byte[] U = new byte[EGS];
 
         if (KEY_PAIR_GENERATE(RNG, U, V) != 0) return new byte[0];
-        if (SVDP_DH(U, W, Z) != 0) return new byte[0];
+        if (SVDP_DH(U, W, Z, 0) != 0) return new byte[0];
 
         for (i = 0; i < 2 * EFS + 1; i++) VZ[i] = V[i];
         for (i = 0; i < EFS; i++) VZ[2 * EFS + 1 + i] = Z[i];
@@ -264,7 +285,7 @@ public final class ECDH {
         byte[] K2 = new byte[CONFIG_CURVE.AESKEY];
         byte[] TAG = new byte[T.length];
 
-        if (SVDP_DH(U, V, Z) != 0) return new byte[0];
+        if (SVDP_DH(U, V, Z, 0) != 0) return new byte[0];
 
         for (i = 0; i < 2 * EFS + 1; i++) VZ[i] = V[i];
         for (i = 0; i < EFS; i++) VZ[2 * EFS + 1 + i] = Z[i];

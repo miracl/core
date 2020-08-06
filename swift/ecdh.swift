@@ -41,6 +41,20 @@ public struct ECDH
     static public let SHA384=48
     static public let SHA512=64
 
+    /* return true if S is in ranger 0 < S < order , else return false */
+    static public func IN_RANGE(_ S: [UInt8]) -> Bool
+    {
+       let r=BIG(ROM.CURVE_Order)
+       let s=BIG.fromBytes(S)
+       if s.iszilch() {
+            return false
+       }
+       if BIG.comp(s,r) >= 0 {
+            return false
+       }
+       return true
+    }
+
     /* Calculate a public/private EC GF(p) key pair W,S where W=S.G mod EC(p),
     * where S is the secret key and W is the public key
     * and G is fixed generator.
@@ -102,11 +116,12 @@ public struct ECDH
         return res;
     }
     /* IEEE-1363 Diffie-Hellman online calculation Z=S.WD */
-    @discardableResult static public func ECPSVDP_DH(_ S:[UInt8],_ WD:[UInt8],_ Z:inout [UInt8]) -> Int
+    // type = 0 is just x coordinate output
+    // type = 1 for standard compressed output
+    // type = 2 for standard uncompress output 04|x|y
+    @discardableResult static public func ECPSVDP_DH(_ S:[UInt8],_ WD:[UInt8],_ Z:inout [UInt8],_ type:Int) -> Int
     {
         var res=0
-        var T=[UInt8](repeating: 0,count: ECDH.EFS)
-
         var s=BIG.fromBytes(S)
 
         var W=ECP.fromBytes(WD)
@@ -121,11 +136,23 @@ public struct ECDH
             if W.is_infinity() {res=ECDH.ERROR}
             else
             {
-                W.getX().toBytes(&T);
-                for i in 0 ..< ECDH.EFS {Z[i]=T[i]}
+                if CONFIG_CURVE.CURVETYPE != CONFIG_CURVE.MONTGOMERY {
+                    if type>0 {
+                        if type==1 {
+                            W.toBytes(&Z,true)
+                        } else {
+                            W.toBytes(&Z,false)
+                        }
+                    } else {
+                        W.getX().toBytes(&Z)
+                    }
+                    return res
+                } else {
+                    W.getX().toBytes(&Z)
+                }
             }
         }
-        return res;
+        return res
     }
     /* IEEE ECDSA Signature, C and D are signature on F using private key S */
     static public func ECPSP_DSA(_ sha:Int,_ RNG: inout RAND,_ S:[UInt8],_ F:[UInt8],_ C:inout [UInt8],_ D:inout [UInt8]) -> Int
@@ -221,7 +248,7 @@ public struct ECDH
 
 
         if ECDH.KEY_PAIR_GENERATE(&RNG,&U,&V) != 0 {return [UInt8]()}
-        if ECDH.ECPSVDP_DH(U,W,&Z) != 0 {return [UInt8]()}
+        if ECDH.ECPSVDP_DH(U,W,&Z,0) != 0 {return [UInt8]()}
 
         for i in 0 ..< 2*ECDH.EFS+1 {VZ[i]=V[i]}
         for i in 0 ..< ECDH.EFS {VZ[2*ECDH.EFS+1+i]=Z[i]}
@@ -266,7 +293,7 @@ public struct ECDH
 
         var TAG=[UInt8](repeating: 0,count: T.count)
 
-        if ECPSVDP_DH(U,V,&Z) != 0 {return [UInt8]()}
+        if ECPSVDP_DH(U,V,&Z,0) != 0 {return [UInt8]()}
 
         for i in 0 ..< 2*ECDH.EFS+1 {VZ[i]=V[i]}
         for i in 0 ..< ECDH.EFS {VZ[2*EFS+1+i]=Z[i]}

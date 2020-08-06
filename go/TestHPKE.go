@@ -37,7 +37,12 @@ func printBinary(array []byte) {
 
 func hpke_C25519(rng *core.RAND) {
 	config_id:=0x520
+	var skE [C25519.EGS]byte
+	var skR [C25519.EGS]byte
+	var skS [C25519.EGS]byte
 	var pkE [C25519.EFS]byte
+	var pkR [C25519.EFS]byte
+	var pkS [C25519.EFS]byte
 
 	INFO,_:=hex.DecodeString("4f6465206f6e2061204772656369616e2055726e")
 	psk,_:=hex.DecodeString("5db3b80a81cb63ca59470c83414ef70a")
@@ -48,15 +53,16 @@ func hpke_C25519(rng *core.RAND) {
 // Mode 0
     mode:=0;
     fmt.Printf("\nMode 0\n");
-	skR,_:=hex.DecodeString("d3c8ca6516cd4cc75f66210c5a49d05381bfbfc0de090c19432d778ea4599829")
-	skE,_:=hex.DecodeString("b9d453d3ec0dbe59fa4a193bde3e4ea17f80c9b2fa69f2f3e029120303b86885")
-	pkR,_:=hex.DecodeString("10b2fc2332b75206d2c791c3db1094dfd298b6508138ce98fec2c0c7a4dbc408")
+	seedE,_:=hex.DecodeString("a77ae3e14cc2ec9e603a9049423d48e66a5e3139e896e95cf19919430657adc7")
+	seedR,_:=hex.DecodeString("1289f0db1d8f68d0c531b5e53a40911a2a2347059355d7c267717033fef2b08c")
+	C25519.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
+	C25519.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 
-	Z:=C25519.Encap(config_id,skE,pkE[:],pkR)
+	Z:=C25519.Encap(config_id,skE[:],pkE[:],pkR[:])
 	fmt.Printf("pkE= "); printBinary(pkE[:])
 	fmt.Printf("Encapsulated Z= "); printBinary(Z[:])
 
-	Z=C25519.Decap(config_id,pkE[:],skR)
+	Z=C25519.Decap(config_id,skR[:],pkE[:],pkR[:])
 	fmt.Printf("Decapsulated Z= "); printBinary(Z[:])
 
 	KEY,NONCE,EXP_SECRET:=C25519.KeySchedule(config_id,mode,Z,INFO,nil,nil)
@@ -71,15 +77,16 @@ func hpke_C25519(rng *core.RAND) {
 // Mode 1
     mode=1;
     fmt.Printf("\nMode 1\n");
-	skR,_=hex.DecodeString("1f68f688b24c27f825012d40efa4fb33e033d717d569047a702c3ef5a64bde64")
-	skE,_=hex.DecodeString("8ad4455d6eda442a9731ac224c9f8a468f489c77e3871cde9ebdd12e9027bad7")
-	pkR,_=hex.DecodeString("6f61735fee57c59ce6489d80a11d77b7b2f9e9fddc3cb0bff0cf5a982ce7f344")
+	seedE,_=hex.DecodeString("0fa1407ccee05de0cceb2f2d2381d2df0602dbd43be90eefd288ce4ad0b3ba32")
+	seedR,_=hex.DecodeString("326ee379f778718e6cb343f55668fbb9d0098ba0503cd4414a8f1ce252605c39")
+	C25519.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
+	C25519.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 
-	Z=C25519.Encap(config_id,skE,pkE[:],pkR)
+	Z=C25519.Encap(config_id,skE[:],pkE[:],pkR[:])
 	fmt.Printf("pkE= "); printBinary(pkE[:])
 	fmt.Printf("Encapsulated Z= "); printBinary(Z[:])
 
-	Z=C25519.Decap(config_id,pkE[:],skR)
+	Z=C25519.Decap(config_id,skR[:],pkE[:],pkR[:])
 	fmt.Printf("Decapsulated Z= "); printBinary(Z[:])
 
 	KEY,NONCE,EXP_SECRET=C25519.KeySchedule(config_id,mode,Z,INFO,psk,pskID)
@@ -95,17 +102,18 @@ func hpke_C25519(rng *core.RAND) {
 
     mode=2;
     fmt.Printf("\nMode 2\n");
-	skR,_=hex.DecodeString("41ee53399ebae982cd067fefa138b6b401cea1a7ef428fe9d6bc90e903a88f6e")
-	skS,_:=hex.DecodeString("55799581f14ec785dbaa11857700adf78f842a51b5ae6a4b4e5a4d99c66e5793")
-	skE,_=hex.DecodeString("367299c0da446bfa8f3b41382c58b1b77fdadb5cf056d1fe94d6ab0b8741a184")
-	pkR,_=hex.DecodeString("777b10479021ffb3d21ff7ad0d7ff1a27220f6203e729826a71dc1dd7f77ed27")
-	pkS,_:=hex.DecodeString("2bba172f178cf852e8670e574fdcdd62d8dcfa063548d3424d84f3e403f4e64c")
+	seedE,_=hex.DecodeString("02900cb4856b5f222293a9bd7bda2f1f81c562dc3002336ad1c39f6572402b7d")
+	seedR,_=hex.DecodeString("518df90f0f5044ce653180c700e4902d37a7ba1cd23482a76e18b300fecaac4e")
+	seedS,_:=hex.DecodeString("262a05ad0c08030cdbbaafc03d64f33b95bf8089f216c62ac39b72064a4b4dcb")
+	C25519.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
+	C25519.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
+	C25519.DeriveKeyPair(config_id,skS[:],pkS[:],seedS)
 
-	Z=C25519.AuthEncap(config_id,skE,pkE[:],pkR,skS)
+	Z=C25519.AuthEncap(config_id,skE[:],skS[:],pkE[:],pkR[:],pkS[:])
 	fmt.Printf("pkE= "); printBinary(pkE[:])
 	fmt.Printf("Encapsulated Z= "); printBinary(Z[:])
 
-	Z=C25519.AuthDecap(config_id,pkE[:],skR,pkS)
+	Z=C25519.AuthDecap(config_id,skR[:],pkE[:],pkR[:],pkS[:])
 	fmt.Printf("Decapsulated Z= "); printBinary(Z[:])
 
 	KEY,NONCE,EXP_SECRET=C25519.KeySchedule(config_id,mode,Z,INFO,nil,nil)
@@ -121,17 +129,18 @@ func hpke_C25519(rng *core.RAND) {
 
     mode=3;
     fmt.Printf("\nMode 3\n");
-	skR,_=hex.DecodeString("2fe8ef0b6fdf5f8da2b43472ca05bc324f7e6aabd9e2b65b2dfa5b892f832a20")
-	skS,_=hex.DecodeString("aede8f90d017a796c2dc73f3674168837a0ca0afaf3577b6aeeb784dc0b31c49")
-	skE,_=hex.DecodeString("84a883acd803f41ea16ec23e81ebe3af3cff34fa3c6b50616d67511404d3daa0")
-	pkR,_=hex.DecodeString("09171abdb6c6c8833791cb29357e39c2dbd5d6a7c1ed726f77bbdca5eddf397a")
-	pkS,_=hex.DecodeString("92bf662e7ae5fda99130c32334f556803b00a419bb726386017c1fe217fb0e3d")
+	seedE,_=hex.DecodeString("c1d1028243a951dbf6469025f3a1304407b08fb932104e61c7aab42ab4f1995c")
+	seedR,_=hex.DecodeString("02a965d8f53bbdcc11cc618d4f31f69277500b75959ca97fd533058315511d1b")
+	seedS,_=hex.DecodeString("e9c09a3e50073935e75d3846007a26088a93ebf58ad0bb30ad6c42a9d4d2419e")
+	C25519.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
+	C25519.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
+	C25519.DeriveKeyPair(config_id,skS[:],pkS[:],seedS)
 
-	Z=C25519.AuthEncap(config_id,skE,pkE[:],pkR,skS)
+	Z=C25519.AuthEncap(config_id,skE[:],skS[:],pkE[:],pkR[:],pkS[:])
 	fmt.Printf("pkE= "); printBinary(pkE[:])
 	fmt.Printf("Encapsulated Z= "); printBinary(Z[:])
 
-	Z=C25519.AuthDecap(config_id,pkE[:],skR,pkS)
+	Z=C25519.AuthDecap(config_id,skR[:],pkE[:],pkR[:],pkS[:])
 	fmt.Printf("Decapsulated Z= "); printBinary(Z[:])
 
 	KEY,NONCE,EXP_SECRET=C25519.KeySchedule(config_id,mode,Z,INFO,psk,pskID)
@@ -147,8 +156,12 @@ func hpke_C25519(rng *core.RAND) {
 
 func hpke_NIST521(rng *core.RAND) {
 	config_id:=0xB12
-
+	var skE [NIST521.EGS]byte
+	var skR [NIST521.EGS]byte
+	var skS [NIST521.EGS]byte
 	var pkE [2*NIST521.EFS+1]byte
+	var pkR [2*NIST521.EFS+1]byte
+	var pkS [2*NIST521.EFS+1]byte
 
 	INFO,_:=hex.DecodeString("4f6465206f6e2061204772656369616e2055726e")
 	psk,_:=hex.DecodeString("5db3b80a81cb63ca59470c83414ef70a")
@@ -159,15 +172,16 @@ func hpke_NIST521(rng *core.RAND) {
 // Mode 0
     mode:=0;
     fmt.Printf("\nMode 0\n");
-	skR,_:=hex.DecodeString("01b3e33a2cf926ef496fff7e86a3743c23a9797c3bf99af8366ce22b3b0940fff1f1934e4d0bd539e130bdc3ff5991d37bdf45fc73529fe9a2e00e138d376610c26a")
-	skE,_:=hex.DecodeString("00252116681dacf4e707e9881aff5496942a36e74185347df21ab9d647dfe2a910e325b027ac3114335c038589d86a6a1a665498a5a6ea687ad5ddbd4258f273e2e7")
-	pkR,_:=hex.DecodeString("0400ec315d49eee4579d51967cb9cf2a848d918059769f530f0fcfb92342bbf00b561a55dc58fae5f8ef0fcf53e86514600b09787dc886afbbd682feb5cd3d1b3e671800be3c0358bf880ba2435eada8a1d5ea3585ea920c29ae39a5cb035de057721b8fc07d0666d46a6be634b257427404a19c7ebface8fa37da857bbef6fe04622d9627")
+	seedE,_:=hex.DecodeString("1ed3768f499b5b3c2beda3166528b649d4b117a0bd450f0e9e19815c2597d1777ac67ea367415fb28c8819c94b383a0a8a15c9f03b4835330e3e6c8bc8319202e473")
+	seedR,_:=hex.DecodeString("62641514bccd2858f3d6513305288d6ca0e443f00a86eb33ccd519d1803aebc5d07bbad0e1013ce61d9c9d713b3c90c8e79a1af01d6c69750f67cbbd1d9d4afeedfa")
+	NIST521.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
+	NIST521.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 
-	Z:=NIST521.Encap(config_id,skE,pkE[:],pkR)
+	Z:=NIST521.Encap(config_id,skE[:],pkE[:],pkR[:])
 	fmt.Printf("pkE= "); printBinary(pkE[:])
 	fmt.Printf("Encapsulated Z= "); printBinary(Z[:])
 
-	Z=NIST521.Decap(config_id,pkE[:],skR)
+	Z=NIST521.Decap(config_id,skR[:],pkE[:],pkR[:])
 	fmt.Printf("Decapsulated Z= "); printBinary(Z[:])
 
 	KEY,NONCE,EXP_SECRET:=NIST521.KeySchedule(config_id,mode,Z,INFO,nil,nil)
@@ -182,15 +196,16 @@ func hpke_NIST521(rng *core.RAND) {
 // Mode 1
     mode=1;
     fmt.Printf("\nMode 1\n");
-	skR,_=hex.DecodeString("017ee8d2bb7dc4766d91596bc1fa741d03ac78c729258e9118c65a2b21d9fcb4249b3854049a384c8c3c18387ae4d94b57e11407359d62cb5de0e7c2eeded7c5ee32")
-	skE,_=hex.DecodeString("009c521217c269a1c94169f6bcd3b399903ea6d385b38d51eac1fa07a4aac06bc144613ba531e3377a817715d987fd63229e3adcaa1e585e3fe75ea8288a486ae3a8")
-	pkR,_=hex.DecodeString("04009070038197aaa0221dc91ad4c638ce2e28ba901d9cf588f4dcec4ae243507f19bf14c835d442aa26a9ee6d14f69777ae92c6f3a80f29bdd24ec38972a23ce0e89a00f81d57db61fb8f530c25fb9dd226bf57de3c914254baf5c57c2de46cded50e051531b0d5e7ea57c26a4ab80bba58e1b862110ad67b505e8f1011e00ad3f23a0d43")
+	seedE,_=hex.DecodeString("64463def238f309f1e9d1f28c15dc126cffa4ded911a4c527eeb71ba593847fb405756239d2c694ce4effa3996cafb5cc0b3736dd988deb7289210ec92bf6b339302")
+	seedR,_=hex.DecodeString("41b782c18c14986c9d7a636152f13677aeddf479c1c7791ea46e0ebbe35ca9dd524c23d730eef443741d7d965415833d6c549c8c1b31ad05f2b9a88f916b2930528e")
+	NIST521.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
+	NIST521.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 
-	Z=NIST521.Encap(config_id,skE,pkE[:],pkR)
+	Z=NIST521.Encap(config_id,skE[:],pkE[:],pkR[:])
 	fmt.Printf("pkE= "); printBinary(pkE[:])
 	fmt.Printf("Encapsulated Z= "); printBinary(Z[:])
 
-	Z=NIST521.Decap(config_id,pkE[:],skR)
+	Z=NIST521.Decap(config_id,skR[:],pkE[:],pkR[:])
 	fmt.Printf("Decapsulated Z= "); printBinary(Z[:])
 
 	KEY,NONCE,EXP_SECRET=NIST521.KeySchedule(config_id,mode,Z,INFO,psk,pskID)
@@ -205,17 +220,18 @@ func hpke_NIST521(rng *core.RAND) {
 // Mode 2
     mode=2;
     fmt.Printf("\nMode 2\n");
-	skR,_=hex.DecodeString("00e4a39e9808aec7cf16708aeb13eaa70fd0bcb453534233836f3207d88c61af1c23a4a993687973b42d178c1789bee1656f01d463e86cad6758c79f817f680e26bf")
-	skS,_:=hex.DecodeString("01dd6f1ea81fbcb28da541d801edfa89e5648cc809b42cbe8b503caf6d7c5026a8bd9ea058951b8b9eee10e095a1865ef26ef247a3e62c25062f3877ff0627711eca")
-	skE,_=hex.DecodeString("0179c8ecb90db0cec33df6cf79fda902d4facfd55a1e26216e176769d149df8da12d46f35f07c7cabd5613dc47826fc5b778f24a50381c4ed0a9b93cee969f32f735")
-	pkR,_=hex.DecodeString("0400bd881c923366876ec86f5110ec695d2da0cd8b35e64adbd5a9b13fc6daa9daac5b38277b6cd791fd6b47deab09815492426f373ead722b2ea7257b9e110681ec1001800806a1c5f656bb354333c001d20a7639e5749fb3bc1a209f00e512752bceffa60e771926ce9d6972bb3abeaf6d314b09d3c0ae69452dd61db2b84a21d70402dc")
-	pkS,_:=hex.DecodeString("040162d338cc04cf8f7aa40bf50efdef65fd17d561a22e387e833fa71408a9a3a7e44900964544c58ce2e3e444a4622fafdaa0ce72d39266b6aae61d01879783bd5d910063ec49234436b959148f8220e583774298e5dbd28be96be0c4f754ac93a10306c72495a84472d08376547d5fec4da477d316c4f6810cd97a9e97e792a06745fbc8")
+	seedE,_=hex.DecodeString("81dc51e31ef8e9b33fefcdf00bd3b0ff585b941fe76cf39a86c269e2f53be7edb3db0be1a58b6cb8d8e6020fe8a2018c59d47cacb35b2b8c61bd4155438b5eda5c0d")
+	seedR,_=hex.DecodeString("54af23ea93c8fc34deb6a7cd70e657ea8990fc4e9a18656d5764b62f7a33a9e0212adeae1585ad2ef28688c1b558866c1975973c4dff08955c1f9fd7939b10b5fbfc")
+	seedS,_:=hex.DecodeString("b65599d814192278ab826ef197a61b77db50f40495f77502dfaa03acd1f3565a3cefebd59de2328ece0638c90d8a89f9ca58f2850e39e9a4c9c339290d66da12fdf0")
+	NIST521.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
+	NIST521.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
+	NIST521.DeriveKeyPair(config_id,skS[:],pkS[:],seedS)
 
-	Z=NIST521.AuthEncap(config_id,skE,pkE[:],pkR,skS)
+	Z=NIST521.AuthEncap(config_id,skE[:],skS[:],pkE[:],pkR[:],pkS[:])
 	fmt.Printf("pkE= "); printBinary(pkE[:])
 	fmt.Printf("Encapsulated Z= "); printBinary(Z[:])
 
-	Z=NIST521.AuthDecap(config_id,pkE[:],skR,pkS)
+	Z=NIST521.AuthDecap(config_id,skR[:],pkE[:],pkR[:],pkS[:])
 	fmt.Printf("Decapsulated Z= "); printBinary(Z[:])
 
 	KEY,NONCE,EXP_SECRET=NIST521.KeySchedule(config_id,mode,Z,INFO,nil,nil)
@@ -230,17 +246,18 @@ func hpke_NIST521(rng *core.RAND) {
 // Mode 3
     mode=3;
     fmt.Printf("\nMode 3\n");
-	skR,_=hex.DecodeString("00dcca4c7aad3a047a5d0c579dce56d45a6ef7446055ef19d4295dff1b8d1586f95e09052f733c5d1c9fa8bb7eab289cc3c5bb23e55559606a7b509d56bd660a63d0")
-	skS,_=hex.DecodeString("002a28ddb89ecbb9af391e31185cdaf7a4683c9bf3f950866b73e65cae7f769a849a792b23c65266cda967208a6f7d741ce06b9a5b206a1c670a36a02c0b2d62bbc5")
-	skE,_=hex.DecodeString("00a69a328f366433eb173d1cd308627e6733d7b52d88745eb8bd63a4d4959d6ff82389a1ead33fa9816afcb348532d78d41e1444f9f1aa945cdfc4f4bb98c8514722")
-	pkR,_=hex.DecodeString("0400475fd0db79dacda40f43684ccc8a3397689135f422388905a95f7fc4357fad0ef3dec49c98a5aaa722457e4ee51d4eca72845b2d0580a8e77ab5086c3a9c6edede00c5bfa1b71a8c8ba3672952e5ceebc0446df94c96cc0051faa671158d5c9c86a05797c3ca6ccc19173b09bf2fe9b8e052f4ffecc871df03dc1da15b00cb1bfaa003")
-	pkS,_=hex.DecodeString("040031d4c9313147b1b3e76ae4721a1fd12b8ff0096f5b4301e062e52d59d5cbebf1826b424e4ce29ebf726fd67425451506f3a38fe9b5d38c967ef4f03d9b4ae55e4901449a96bc684065b5e10e7852b43b7fbba72e3ecd3daf740c1b32289194beed37aa233c70ef8ae5cccd2ff65cbce812135e7dc5771b37506f1671f98dede8641dd8")
+	seedE,_=hex.DecodeString("dc1fda9b21a1af6925ecf9ad79d2422f698b4168587c7908b36f5f58352181b9506554d8d8c9427e0dd2cfda25f0eabf58e9f5597e1b76ac12c799fe96e3cc03dc59")
+	seedR,_=hex.DecodeString("46592c2b171b8cdcce89601fab103f63ed43badadcf9df62a928ae3b7fa91f269eff3485f6401c374e19a8bb988005626b9c26d39795282b1095bcc4f62a67255e15")
+	seedS,_=hex.DecodeString("d02446c344c10cd162486caa69aa1156ac3066e0fd668fa7faaf13bdbc944edbc0cd68ee36e4c30ecc36c2c5ab0978473eb1b5dcfff27985c9328877e85fd48b657d")
+	NIST521.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
+	NIST521.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
+	NIST521.DeriveKeyPair(config_id,skS[:],pkS[:],seedS)
 
-	Z=NIST521.AuthEncap(config_id,skE,pkE[:],pkR,skS)
+	Z=NIST521.AuthEncap(config_id,skE[:],skS[:],pkE[:],pkR[:],pkS[:])
 	fmt.Printf("pkE= "); printBinary(pkE[:])
 	fmt.Printf("Encapsulated Z= "); printBinary(Z[:])
 
-	Z=NIST521.AuthDecap(config_id,pkE[:],skR,pkS)
+	Z=NIST521.AuthDecap(config_id,skR[:],pkE[:],pkR[:],pkS[:])
 	fmt.Printf("Decapsulated Z= "); printBinary(Z[:])
 
 	KEY,NONCE,EXP_SECRET=NIST521.KeySchedule(config_id,mode,Z,INFO,psk,pskID)

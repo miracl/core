@@ -100,8 +100,8 @@ fn ecdh_ed25519(mut rng: &mut RAND) {
     }
     /* Calculate common key using DH - IEEE 1363 method */
 
-    ecdh::ecpsvdp_dh(&s0, &w1, &mut z0);
-    ecdh::ecpsvdp_dh(&s1, &w0, &mut z1);
+    ecdh::ecpsvdp_dh(&s0, &w1, &mut z0, 0);
+    ecdh::ecpsvdp_dh(&s1, &w0, &mut z1, 0);
 
     let mut same = true;
     for i in 0..EFS {
@@ -252,8 +252,8 @@ fn ecdh_nist256(mut rng: &mut RAND) {
     }
     /* Calculate common key using DH - IEEE 1363 method */
 
-    ecdh::ecpsvdp_dh(&s0, &w1, &mut z0);
-    ecdh::ecpsvdp_dh(&s1, &w0, &mut z1);
+    ecdh::ecpsvdp_dh(&s0, &w1, &mut z0, 0);
+    ecdh::ecpsvdp_dh(&s1, &w0, &mut z1, 0);
 
     let mut same = true;
     for i in 0..EFS {
@@ -405,8 +405,8 @@ fn ecdh_goldilocks(mut rng: &mut RAND) {
     }
     /* Calculate common key using DH - IEEE 1363 method */
 
-    ecdh::ecpsvdp_dh(&s0, &w1, &mut z0);
-    ecdh::ecpsvdp_dh(&s1, &w0, &mut z1);
+    ecdh::ecpsvdp_dh(&s0, &w1, &mut z0, 0);
+    ecdh::ecpsvdp_dh(&s1, &w0, &mut z1, 0);
 
     let mut same = true;
     for i in 0..EFS {

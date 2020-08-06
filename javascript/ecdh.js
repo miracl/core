@@ -69,6 +69,16 @@ var ECDH = function(ctx) {
 
         /* ctx.AES encryption/decryption */
 
+        IN_RANGE: function(S) {
+            var r,s;
+            r = new ctx.BIG(0);
+            r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+            s = ctx.BIG.fromBytes(S);
+            if (s.iszilch()) return false;
+            if (ctx.BIG.comp(s,r)>=0) return false;
+            return true;
+        },
+
         KEY_PAIR_GENERATE: function(RNG, S, W) {
             var res = 0,
                 r, s, G, WP;
@@ -133,9 +143,8 @@ var ECDH = function(ctx) {
             return res;
         },
 
-        ECPSVDP_DH: function(S, WD, Z) {
-            var T = [],
-                res = 0,
+        ECPSVDP_DH: function(S, WD, Z, type) {
+            var res = 0,
                 r, s, i,
                 W;
 
@@ -155,13 +164,23 @@ var ECDH = function(ctx) {
                 if (W.is_infinity()) {
                     res = this.ERROR;
                 } else {
-                    W.getX().toBytes(T);
-                    for (i = 0; i < this.EFS; i++) {
-                        Z[i] = T[i];
+                    if (ctx.ECP.CURVETYPE != ctx.ECP.MONTGOMERY)
+                    {
+                        if (type>0)
+                        {
+                            if (type==1)
+                                W.toBytes(Z,true);
+                            else
+                                W.toBytes(Z,false);
+                        } else {
+                            W.getX().toBytes(Z);
+                        }
+                        return res;
+                    } else {
+                        W.getX().toBytes(Z);
                     }
                 }
             }
-
             return res;
         },
 
@@ -277,7 +296,7 @@ var ECDH = function(ctx) {
                 return C;
             }
 
-            if (this.ECPSVDP_DH(U, W, Z) !== 0) {
+            if (this.ECPSVDP_DH(U, W, Z, 0) !== 0) {
                 return C;
             }
 
@@ -334,7 +353,7 @@ var ECDH = function(ctx) {
                 M = [],
                 K, L2, AC, i;
 
-            if (this.ECPSVDP_DH(U, V, Z) !== 0) {
+            if (this.ECPSVDP_DH(U, V, Z, 0) !== 0) {
                 return M;
             }
 

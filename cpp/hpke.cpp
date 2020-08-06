@@ -27,296 +27,248 @@
 #include "hpke_ZZZ.h"
 
 #define GROUP EGS_ZZZ
-#define FIELD EFS_ZZZ 
 #define POINT (2*EFS_ZZZ+1)
 #define MAX_HASH HASH_TYPE_ZZZ
 #define MAX_LABEL 20                // may need adjustment
 
-static void ZZZ::LabeledExtract(octet *PRK,octet *SALT,char *label,octet *IKM)
+static void ZZZ::LabeledExtract(octet *PRK,octet *SALT,octet *SUITE_ID,char *label,octet *IKM)
 {
-    char likm[8+MAX_LABEL+POINT];
+    char likm[18+MAX_LABEL+2*POINT];
     octet LIKM={0,sizeof(likm),likm};
-    OCT_jstring(&LIKM,(char *)"RFCXXXX ");
+    OCT_jstring(&LIKM,(char *)"HPKE-05 ");
+    OCT_joctet(&LIKM,SUITE_ID);
     OCT_jstring(&LIKM,label);
     if (IKM!=NULL)
         OCT_joctet(&LIKM,IKM);
     HKDF_Extract(MC_SHA2,HASH_TYPE_ZZZ,PRK,SALT,&LIKM);
 }
 
-static void ZZZ::LabeledExpand(octet *OKM,octet *PRK,char *label,octet *INFO,int L)
+static void ZZZ::LabeledExpand(octet *OKM,octet *PRK,octet *SUITE_ID,char *label,octet *INFO,int L)
 {
-    char linfo[10+MAX_LABEL+3*POINT];
+    char linfo[20+MAX_LABEL+3*POINT];
     octet LINFO={0,sizeof(linfo),linfo};
     OCT_jint(&LINFO,L,2);    
-    OCT_jstring(&LINFO,(char *)"RFCXXXX ");
+    OCT_jstring(&LINFO,(char *)"HPKE-05 ");
+    OCT_joctet(&LINFO,SUITE_ID);
     OCT_jstring(&LINFO,label);
-    OCT_joctet(&LINFO,INFO);
+    if (INFO!=NULL)
+        OCT_joctet(&LINFO,INFO);
     HKDF_Expand(MC_SHA2,HASH_TYPE_ZZZ,OKM,L,PRK,&LINFO);
 }
 
-static void ZZZ::ExtractAndExpand(octet *OKM,octet *DH,octet *CONTEXT)
+static void ZZZ::ExtractAndExpand(int config_id,octet *OKM,octet *DH,octet *CONTEXT)
 {
-    char zeros[MAX_HASH];
-    octet ZEROS={0,sizeof(zeros),zeros};
     char prk[MAX_HASH];
     octet PRK={0,sizeof(prk),prk};
-    OCT_jbyte(&ZEROS,0,HASH_TYPE_ZZZ);
-    LabeledExtract(&PRK,&ZEROS,(char *)"dh",DH);
-    LabeledExpand(OKM, &PRK,(char *)"prk",CONTEXT,HASH_TYPE_ZZZ);  
+    char suite_id[10];
+    octet SUITE_ID={0,sizeof(suite_id),suite_id};
+
+    int kem_id=config_id&255;
+    OCT_jstring(&SUITE_ID,(char *)"KEM");
+    OCT_jint(&SUITE_ID,kem_id,2);
+
+    LabeledExtract(&PRK,NULL,&SUITE_ID,(char *)"eae_prk",DH);
+    LabeledExpand(OKM, &PRK,&SUITE_ID,(char *)"shared_secret",CONTEXT,HASH_TYPE_ZZZ);  
 }
 
-void ZZZ::HPKE_Encap(int config_id,octet *SKE,octet *Z,octet *pkE,octet *pkR)
+int ZZZ::DeriveKeyPair(int config_id,octet *SK,octet *PK,octet *SEED)
+{
+    int counter=0;
+    char prk[MAX_HASH];
+    octet PRK={0,sizeof(prk),prk};
+    char suite_id[10];
+    octet SUITE_ID={0,sizeof(suite_id),suite_id};
+    char info[2];
+    octet INFO={0,sizeof(info),info};
+    int bit_mask,kem=config_id&255;
+    OCT_jstring(&SUITE_ID,(char *)"KEM");
+    OCT_jint(&SUITE_ID,kem,2);
+    LabeledExtract(&PRK,NULL,&SUITE_ID,(char *)"dkp_prk",SEED);
+    if (kem==32 || kem==33)
+    {
+        LabeledExpand(SK,&PRK,&SUITE_ID,(char *)"sk",NULL,GROUP);
+        OCT_reverse(SK);
+        if (kem==32)
+        {
+            SK->val[GROUP-1]&=248;  
+            SK->val[0]&=127;
+            SK->val[0]|=64;
+        } else {
+            SK->val[GROUP-1]&=252;
+            SK->val[0]|=128;
+        }
+
+    } else {
+        if (kem==18) bit_mask=1;
+        else bit_mask=0xFF;
+        OCT_clear(SK);
+        while (!ECP_IN_RANGE(SK) && counter<256)
+        {
+            OCT_empty(&INFO);
+            OCT_jbyte(&INFO,counter,1);
+            LabeledExpand(SK,&PRK,&SUITE_ID,(char *)"candidate",&INFO,GROUP);
+            SK->val[0]&=bit_mask;
+            counter++;
+        }
+    }
+
+    ECP_KEY_PAIR_GENERATE(NULL, SK, PK);
+    if (kem==32 || kem==33)
+        OCT_reverse(PK);
+ 
+    if (counter<256) return 1;
+    else return 0;
+}
+
+void ZZZ::HPKE_Encap(int config_id,octet *skE,octet *Z,octet *pkE,octet *pkR)
 {
     int res,kem;
-    char ske[GROUP];
-    octet skE={0,sizeof(ske),ske};
-    char dh[FIELD];
+    char dh[POINT];
     octet DH={0,sizeof(dh),dh};
     char kemcontext[2*POINT];
     octet KEMCONTEXT={0,sizeof(kemcontext),kemcontext};
     kem=config_id&255;
 
-    OCT_copy(&skE,SKE);
-    if (kem==32 || kem==33) {
-        OCT_reverse(&skE);
-        if (kem==32)
-        {
-            skE.val[GROUP-1]&=248;  
-            skE.val[0]&=127;
-            skE.val[0]|=64;
-        } else {
-            skE.val[GROUP-1]&=252;
-            skE.val[0]|=128;
-        }
-    }
-    
-    res=ECP_KEY_PAIR_GENERATE(NULL, &skE, pkE);
-    if (kem==32 || kem==33)
+    if (kem==32 || kem==33) 
+    {
         OCT_reverse(pkR);
-    
-    res=ECP_SVDP_DH(&skE, pkR, &DH);
-    if (kem==32 || kem==33) {
+        res=ECP_SVDP_DH(skE, pkR, &DH, 0);
         OCT_reverse(pkR);
-        OCT_reverse(pkE);
         OCT_reverse(&DH);
+    } else {
+        res=ECP_SVDP_DH(skE, pkR, &DH, 2);
     }
+
     OCT_copy(&KEMCONTEXT,pkE);
     OCT_joctet(&KEMCONTEXT,pkR);
-
-    ExtractAndExpand(Z,&DH,&KEMCONTEXT);
+    ExtractAndExpand(config_id,Z,&DH,&KEMCONTEXT);
 }
 
-void ZZZ::HPKE_Decap(int config_id,octet *Z,octet *pkE,octet *SKR)
+void ZZZ::HPKE_Decap(int config_id,octet *skR,octet *Z,octet *pkE,octet *pkR)
 {
     int res,kem;
-    char skr[GROUP];
-    octet skR={0,sizeof(skr),skr};
-    char dh[FIELD];
+    char dh[POINT];
     octet DH={0,sizeof(dh),dh};
-    kem=config_id&255;
-    char pkr[POINT];
-    octet pkR={0,sizeof(pkr),pkr};
     char kemcontext[2*POINT];
     octet KEMCONTEXT={0,sizeof(kemcontext),kemcontext};
-
-    OCT_copy(&skR,SKR);
-
-    if (kem==32 || kem==33) {
-        OCT_reverse(&skR);
-        OCT_reverse(pkE);
-        if (kem==32)
-        {
-            skR.val[GROUP-1]&=248;
-            skR.val[0]&=127;
-            skR.val[0]|=64;
-        } else {
-            skR.val[GROUP-1]&=252;
-            skR.val[0]|=128;
-        }       
-    }
-    ECP_SVDP_DH(&skR, pkE, &DH);
-    if (kem==32 || kem==33) {
-        OCT_reverse(pkE);
-        OCT_reverse(&DH);
-    }
-    ECP_KEY_PAIR_GENERATE(NULL, &skR, &pkR);
-    if (kem==32 || kem==33) {
-        OCT_reverse(&pkR);
-    }
-    OCT_copy(&KEMCONTEXT,pkE);
-    OCT_joctet(&KEMCONTEXT,&pkR);
-
-    ExtractAndExpand(Z,&DH,&KEMCONTEXT);
-}
-
-void ZZZ::HPKE_AuthEncap(int config_id,octet *SKE,octet *Z,octet *pkE,octet *pkR,octet *SKS)
-{
-    int res,kem;
-
-    char dh[2*FIELD];
-    octet DH={0,sizeof(dh),dh};
-    char dh1[FIELD];
-    octet DH1={0,sizeof(dh1),dh1};
-    char pks[POINT];
-    octet pkS={0,sizeof(pks),pks};
-    char ske[GROUP];
-    octet skE={0,sizeof(ske),ske};
-    char sks[GROUP];
-    octet skS={0,sizeof(sks),sks};
-    char kemcontext[3*POINT];
-    octet KEMCONTEXT={0,sizeof(kemcontext),kemcontext};
-
     kem=config_id&255;
 
-    OCT_copy(&skE,SKE);
-    OCT_copy(&skS,SKS);
-    if (kem==32 || kem==33) {
-        OCT_reverse(&skE);
-        OCT_reverse(&skS);
-        if (kem==32)
-        {
-            skE.val[GROUP-1]&=248;
-            skE.val[0]&=127;
-            skE.val[0]|=64;
-            skS.val[GROUP-1]&=248;
-            skS.val[0]&=127;
-            skS.val[0]|=64;
-        } else {
-            skE.val[GROUP-1]&=252;
-            skE.val[0]|=128;
-            skS.val[GROUP-1]&=252;
-            skS.val[0]|=128;
-        }
-    }
-    
-
-    ECP_KEY_PAIR_GENERATE(NULL, &skE, pkE);
-
     if (kem==32 || kem==33)
-        OCT_reverse(pkR);
-
-    ECP_SVDP_DH(&skE, pkR, &DH);
-    ECP_SVDP_DH(&skS, pkR, &DH1);
-
-    if (kem==32 || kem==33) {
-        OCT_reverse(&DH);
-        OCT_reverse(&DH1);
-    }
-
-    OCT_joctet(&DH,&DH1);
-
-    ECP_KEY_PAIR_GENERATE(NULL, &skS, &pkS);  
-    
-    if (kem==32 || kem==33) {
-        OCT_reverse(pkR);
+    {
         OCT_reverse(pkE);
-        OCT_reverse(&pkS);
+        ECP_SVDP_DH(skR, pkE, &DH, 0);
+        OCT_reverse(pkE);
+        OCT_reverse(&DH);
+    } else {
+        ECP_SVDP_DH(skR, pkE, &DH, 2);
     }
 
     OCT_copy(&KEMCONTEXT,pkE);
     OCT_joctet(&KEMCONTEXT,pkR);
-    OCT_joctet(&KEMCONTEXT,&pkS);
 
-    ExtractAndExpand(Z,&DH,&KEMCONTEXT);
+    ExtractAndExpand(config_id,Z,&DH,&KEMCONTEXT);
 }
 
-void ZZZ::HPKE_AuthDecap(int config_id,octet *Z,octet *pkE,octet *SKR,octet *pkS)
+void ZZZ::HPKE_AuthEncap(int config_id,octet *skE,octet *skS,octet *Z,octet *pkE,octet *pkR,octet *pkS)
 {
     int res,kem;
-    char skr[GROUP];
-    octet skR={0,sizeof(skr),skr};
-
-    char dh[2*FIELD];
+    char dh[2*POINT];
     octet DH={0,sizeof(dh),dh};
-    char dh1[FIELD];
+    char dh1[POINT];
     octet DH1={0,sizeof(dh1),dh1};
-    char pkr[POINT];
-    octet pkR={0,sizeof(pkr),pkr};
     char kemcontext[3*POINT];
     octet KEMCONTEXT={0,sizeof(kemcontext),kemcontext};
 
-
-    OCT_copy(&skR,SKR);
     kem=config_id&255;
 
-    if (kem==32 || kem==33) {
-        OCT_reverse(&skR);
-        OCT_reverse(pkE);
-        OCT_reverse(pkS);
-        if (kem==32)
-        {
-            skR.val[GROUP-1]&=248;
-            skR.val[0]&=127;
-            skR.val[0]|=64;
-        } else {
-            skR.val[GROUP-1]&=252;
-            skR.val[0]|=128;
-        }
-    }
-
-    ECP_SVDP_DH(&skR, pkE, &DH);
-    ECP_SVDP_DH(&skR, pkS, &DH1);
-    if (kem==32 || kem==33) {
+    if (kem==32 || kem==33)
+    {
+        OCT_reverse(pkR);
+        ECP_SVDP_DH(skE, pkR, &DH,0);
+        ECP_SVDP_DH(skS, pkR, &DH1,0);
+        OCT_reverse(pkR);
         OCT_reverse(&DH);
         OCT_reverse(&DH1);
+    } else {
+        ECP_SVDP_DH(skE, pkR, &DH, 2);
+        ECP_SVDP_DH(skS, pkR, &DH1,2);
     }
+
     OCT_joctet(&DH,&DH1);
-
-    ECP_KEY_PAIR_GENERATE(NULL, &skR, &pkR); 
-
-    if (kem==32 || kem==33) {
-        OCT_reverse(pkE);
-        OCT_reverse(&pkR);
-        OCT_reverse(pkS);
-    }
-
     OCT_copy(&KEMCONTEXT,pkE);
-    OCT_joctet(&KEMCONTEXT,&pkR);
+    OCT_joctet(&KEMCONTEXT,pkR);
     OCT_joctet(&KEMCONTEXT,pkS);
 
-    ExtractAndExpand(Z,&DH,&KEMCONTEXT);
+    ExtractAndExpand(config_id,Z,&DH,&KEMCONTEXT);
+}
+
+void ZZZ::HPKE_AuthDecap(int config_id,octet *skR,octet *Z,octet *pkE,octet *pkR,octet *pkS)
+{
+    int res,kem;
+    char dh[2*POINT];
+    octet DH={0,sizeof(dh),dh};
+    char dh1[POINT];
+    octet DH1={0,sizeof(dh1),dh1};
+    char kemcontext[3*POINT];
+    octet KEMCONTEXT={0,sizeof(kemcontext),kemcontext};
+
+    kem=config_id&255;
+
+    if (kem==32 || kem==33) {
+        OCT_reverse(pkE);
+        OCT_reverse(pkS);
+        ECP_SVDP_DH(skR, pkE, &DH,0);
+        ECP_SVDP_DH(skR, pkS, &DH1,0);
+        OCT_reverse(pkE);
+        OCT_reverse(pkS);
+        OCT_reverse(&DH);
+        OCT_reverse(&DH1);
+    } else {
+        ECP_SVDP_DH(skR, pkE, &DH, 2);
+        ECP_SVDP_DH(skR, pkS, &DH1, 2);
+    }
+    OCT_joctet(&DH,&DH1);
+
+    OCT_copy(&KEMCONTEXT,pkE);
+    OCT_joctet(&KEMCONTEXT,pkR);
+    OCT_joctet(&KEMCONTEXT,pkS);
+
+    ExtractAndExpand(config_id,Z,&DH,&KEMCONTEXT);
 }
 
 void ZZZ::HPKE_KeySchedule(int config_id,octet *key,octet *nonce,octet *exp_secret,int mode,octet *Z,octet *info,octet *psk,octet *pskID)
 {
-    char context[7+2*MAX_HASH];
+    char context[1+2*MAX_HASH];
     octet CONTEXT={0,sizeof(context),context};
 
     char h[MAX_HASH];
     octet H={0,sizeof(h),h};
     char secret_h[MAX_HASH];
     octet secret={0,sizeof(secret_h),secret_h};
-    char zeros[MAX_HASH];
-    octet ZEROS={0,sizeof(zeros),zeros};
 
     int kem_id=config_id&255;
     int kdf_id=(config_id>>8)&3;
     int aead_id=(config_id>>10)&3;
 
-    OCT_jint(&CONTEXT,kem_id,2);
-    OCT_jint(&CONTEXT,kdf_id,2);
-    OCT_jint(&CONTEXT,aead_id,2);
+    char suite_id[10];
+    octet SUITE_ID={0,sizeof(suite_id),suite_id};
+    OCT_jstring(&SUITE_ID,(char *)"HPKE");
+    OCT_jint(&SUITE_ID,kem_id,2);
+    OCT_jint(&SUITE_ID,kdf_id,2);
+    OCT_jint(&SUITE_ID,aead_id,2);
+
     OCT_jint(&CONTEXT,mode,1);
 
-
-    OCT_jbyte(&ZEROS,0,HASH_TYPE_ZZZ);
-    LabeledExtract(&H,&ZEROS,(char *)"pskID_hash",pskID);
+    LabeledExtract(&H,NULL,&SUITE_ID,(char *)"psk_id_hash",pskID);
     OCT_joctet(&CONTEXT,&H);
-    LabeledExtract(&H,&ZEROS,(char *)"info",info);
+    LabeledExtract(&H,NULL,&SUITE_ID,(char *)"info_hash",info);
     OCT_joctet(&CONTEXT,&H);
-  
-//printf("context= "); OCT_output(&CONTEXT);
 
-    if (psk==NULL)
-        LabeledExtract(&H,&ZEROS,(char *)"psk_hash",&ZEROS);
-    else
-        LabeledExtract(&H,&ZEROS,(char *)"psk_hash",psk);
-    LabeledExtract(&secret,&H,(char *)"zz",Z);
+    LabeledExtract(&H,NULL,&SUITE_ID,(char *)"psk_hash",psk);
+    LabeledExtract(&secret,&H,&SUITE_ID,(char *)"secret",Z);
 
-//printf("secret== "); OCT_output(&secret);
-
-    LabeledExpand(key,&secret,(char *)"key",&CONTEXT,AESKEY_ZZZ);
-    LabeledExpand(nonce,&secret,(char *)"nonce",&CONTEXT,12);
+    LabeledExpand(key,&secret,&SUITE_ID,(char *)"key",&CONTEXT,AESKEY_ZZZ);
+    LabeledExpand(nonce,&secret,&SUITE_ID,(char *)"nonce",&CONTEXT,12);
     if (exp_secret!=NULL)
-        LabeledExpand(exp_secret,&secret,(char *)"exp",&CONTEXT,HASH_TYPE_ZZZ);
+        LabeledExpand(exp_secret,&secret,&SUITE_ID,(char *)"exp",&CONTEXT,HASH_TYPE_ZZZ);
 }

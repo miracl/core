@@ -34,7 +34,17 @@ pub const EFS: usize = big::MODBYTES as usize;
 pub const EGS: usize = big::MODBYTES as usize;
 
 #[allow(non_snake_case)]
-
+pub fn in_range(s: &[u8]) -> bool {
+    let r = BIG::new_ints(&rom::CURVE_ORDER);
+    let sc = BIG::frombytes(&s);
+    if sc.iszilch() {
+        return false;
+    }
+    if BIG::comp(&sc, &r) >= 0 {
+        return false;
+    }
+    return true;
+}
 
 /* Calculate a public/private EC GF(p) key pair w,s where W=s.G mod EC(p),
  * where s is the secret key and W is the public key
@@ -102,9 +112,8 @@ pub fn public_key_validate(w: &[u8]) -> isize {
 
 /* IEEE-1363 Diffie-Hellman online calculation Z=S.WD */
 #[allow(non_snake_case)]
-pub fn ecpsvdp_dh(s: &[u8], wd: &[u8], z: &mut [u8]) -> isize {
+pub fn ecpsvdp_dh(s: &[u8], wd: &[u8], z: &mut [u8], typ: isize) -> isize {
     let mut res = 0;
-    let mut t: [u8; EFS] = [0; EFS];
 
     let mut sc = BIG::frombytes(&s);
 
@@ -120,9 +129,19 @@ pub fn ecpsvdp_dh(s: &[u8], wd: &[u8], z: &mut [u8]) -> isize {
         if W.is_infinity() {
             res = ERROR;
         } else {
-            W.getx().tobytes(&mut t);
-            for i in 0..EFS {
-                z[i] = t[i]
+            if ecp::CURVETYPE != ecp::MONTGOMERY {
+                if typ>0 {
+                    if typ==1 {
+                        W.tobytes(z,true);
+                    } else {
+                        W.tobytes(z,false);
+                    }
+                } else {
+                    W.getx().tobytes(z);
+                }
+                return res;
+            } else {
+                W.getx().tobytes(z);
             }
         }
     }
@@ -269,7 +288,7 @@ pub fn ecies_encrypt(
     if key_pair_generate(Some(rng), &mut u, v) != 0 {
         return None;
     }
-    if ecpsvdp_dh(&u, &w, &mut z) != 0 {
+    if ecpsvdp_dh(&u, &w, &mut z, 0) != 0 {
         return None;
     }
 
@@ -345,7 +364,7 @@ pub fn ecies_decrypt(
         tag[i] = t[i]
     }
 
-    if ecpsvdp_dh(&u, &v, &mut z) != 0 {
+    if ecpsvdp_dh(&u, &v, &mut z, 0) != 0 {
         return None;
     }
 

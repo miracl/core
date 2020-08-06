@@ -36,14 +36,21 @@ func reverse(X []byte) {
 }
 
 
-func labeledExtract(SALT []byte,label string,IKM []byte) []byte {
-	rfc:="RFCXX"+"XX "
-	prefix:=[]byte(rfc+label)
+func labeledExtract(SALT []byte,SUITE_ID []byte,label string,IKM []byte) []byte {
+	rfc:="HPKE-05 "
+	RFC:=[]byte(rfc)
+	LABEL:=[]byte(label)
 	var LIKM []byte
-	for i:=0;i<len(prefix);i++ {
-		LIKM=append(LIKM,prefix[i])
+	for i:=0;i<len(RFC);i++ {
+		LIKM=append(LIKM,RFC[i])
 	}
-	if (IKM!=nil) {
+	for i:=0;i<len(SUITE_ID);i++ {
+		LIKM=append(LIKM,SUITE_ID[i])
+	}
+	for i:=0;i<len(LABEL);i++ {
+		LIKM=append(LIKM,LABEL[i])
+	}
+	if IKM!=nil {
 		for i:=0;i<len(IKM);i++ {
 			LIKM=append(LIKM,IKM[i])
 		}
@@ -51,59 +58,117 @@ func labeledExtract(SALT []byte,label string,IKM []byte) []byte {
 	return core.HKDF_Extract(core.MC_SHA2,HASH_TYPE,SALT,LIKM);
 }
 
-func labeledExpand(PRK []byte,label string,INFO []byte,L int) []byte {
-	rfc:="RFCXX" +"XX "
-	prefix:=[]byte(rfc+label)
-	ar := core.InttoBytes(L,2)
+func labeledExpand(PRK []byte,SUITE_ID []byte,label string,INFO []byte,L int) []byte {
+	rfc:="HPKE-05 "
+	RFC:=[]byte(rfc)
+	LABEL:=[]byte(label)
+	AR := core.InttoBytes(L,2)
 	var LINFO []byte
-	for i:=0;i<len(ar);i++ {
-		LINFO = append(LINFO, ar[i])
+	for i:=0;i<len(AR);i++ {
+		LINFO = append(LINFO, AR[i])
 	}
-	for i:=0;i<len(prefix);i++ {
-		LINFO=append(LINFO,prefix[i])
+	for i:=0;i<len(RFC);i++ {
+		LINFO=append(LINFO,RFC[i])
 	}	
-	for i:=0;i<len(INFO);i++ {
-		LINFO=append(LINFO,INFO[i])
-	}	
+	for i:=0;i<len(SUITE_ID);i++ {
+		LINFO=append(LINFO,SUITE_ID[i])
+	}
+	for i:=0;i<len(LABEL);i++ {
+		LINFO=append(LINFO,LABEL[i])
+	}
+	if INFO!=nil {
+		for i:=0;i<len(INFO);i++ {
+			LINFO=append(LINFO,INFO[i])
+		}
+	}
 
 	return core.HKDF_Expand(core.MC_SHA2,HASH_TYPE,L,PRK,LINFO)
 }
 
-func extractAndExpand(DH []byte,context []byte) []byte {
-	PRK:=labeledExtract(nil,"dh",DH);
-	return labeledExpand(PRK,"prk",context,HASH_TYPE);
+func extractAndExpand(config_id int,DH []byte,context []byte) []byte {
+	kem := config_id&255
+	txt := "KEM"
+	KEM_ID := core.InttoBytes(kem,2)
+	KEM := []byte(txt)
+	var SUITE_ID []byte
+	for i:=0;i<len(KEM);i++ {
+		SUITE_ID=append(SUITE_ID,KEM[i])
+	}
+	SUITE_ID=append(SUITE_ID,KEM_ID[0])
+	SUITE_ID=append(SUITE_ID,KEM_ID[1])
+
+	PRK:=labeledExtract(nil,SUITE_ID,"eae_prk",DH);
+	return labeledExpand(PRK,SUITE_ID,"shared_secret",context,HASH_TYPE);
 }
 
-func Encap(config_id int,SKE []byte,pkE []byte,pkR []byte) []byte {
-	var skE [EGS]byte
-	var DH [EFS]byte
-	var kemcontext [] byte
+func DeriveKeyPair(config_id int,SK []byte,PK []byte,SEED []byte) bool {
+	counter:=0
 	kem := config_id&255
 
-	for i:=0;i<EGS;i++ {
-		skE[i]=SKE[i]
+	txt := "KEM"
+	KEM_ID := core.InttoBytes(kem,2)
+	KEM := []byte(txt)
+	var SUITE_ID []byte
+	for i:=0;i<len(KEM);i++ {
+		SUITE_ID=append(SUITE_ID,KEM[i])
 	}
+	SUITE_ID=append(SUITE_ID,KEM_ID[0])
+	SUITE_ID=append(SUITE_ID,KEM_ID[1])
+
+    PRK:=labeledExtract(nil,SUITE_ID,"dkp_prk",SEED)
+    var S []byte
 	if kem==32 || kem==33 {
-		reverse(skE[:])
+		S=labeledExpand(PRK,SUITE_ID,"sk",nil,EGS)
+		reverse(S)
 		if kem==32 {
-			skE[EGS-1]&=248
-			skE[0]&=127
-			skE[0]|=64
+			S[EGS-1]&=248
+			S[0]&=127
+			S[0]|=64
 		} else {
-			skE[EGS-1]&=252
-			skE[0]|=128
+			S[EGS-1]&=252
+			S[0]|=128
+		}
+	} else {
+		bit_mask:=0xff
+		if kem==18 {
+			bit_mask=1
+		}
+		for i:=0;i<EGS;i++ {
+			S=append(S,0);
+		}
+		for !ECDH_IN_RANGE(S) && counter<256 {
+			var INFO [1]byte
+			INFO[0]=byte(counter)
+			S=labeledExpand(PRK,SUITE_ID,"candidate",INFO[:],EGS)
+			S[0]&=byte(bit_mask)
+			counter++
 		}
 	}
-	
-	ECDH_KEY_PAIR_GENERATE(nil, skE[:], pkE)
-	if kem==32 || kem==33 {
-		reverse(pkR)
+	for i:=0;i<EGS;i++ {
+		SK[i]=S[i]
 	}
-	ECDH_ECPSVDP_DH(skE[:], pkR[:], DH[:])
+	ECDH_KEY_PAIR_GENERATE(nil, SK, PK)
+	if kem==32 || kem==33 {
+		reverse(PK)
+	}
+	if counter<256 {
+		return true
+	}
+	return false;
+}
+
+func Encap(config_id int,skE []byte,pkE []byte,pkR []byte) []byte {
+	DH:=make([]byte,len(pkE))
+	var kemcontext []byte
+	kem := config_id&255
+
 	if kem==32 || kem==33 {
 		reverse(pkR)
-		reverse(pkE)
+		ECDH_ECPSVDP_DH(skE, pkR, DH[:], 0)
+		reverse(pkR)
 		reverse(DH[:])
+	} else {
+		ECDH_ECPSVDP_DH(skE, pkR, DH[:], 2)
 	}
 	for i:=0;i<len(pkE);i++ {
 		kemcontext=append(kemcontext,pkE[i]);
@@ -111,164 +176,98 @@ func Encap(config_id int,SKE []byte,pkE []byte,pkR []byte) []byte {
 	for i:=0;i<len(pkR);i++ {
 		kemcontext=append(kemcontext,pkR[i]);
 	}
-
-	return extractAndExpand(DH[:],kemcontext)
+	return extractAndExpand(config_id,DH[:],kemcontext)
 }
 		
-func Decap(config_id int,pkE []byte,SKR []byte) []byte {
-	var skR [EGS]byte
-	var DH [EFS]byte
-	pkR:=make([]byte,len(pkE)) 
+func Decap(config_id int,skR []byte,pkE []byte,pkR []byte) []byte {
+	DH:=make([]byte,len(pkE))
 	var kemcontext [] byte
 	kem := config_id&255
-	for i:=0;i<EGS;i++ {
-		skR[i]=SKR[i]
-	}
+
 	if kem==32 || kem==33 {
-		reverse(skR[:])
 		reverse(pkE)
-		if kem==32 {
-			skR[EGS-1]&=248
-			skR[0]&=127
-			skR[0]|=64
-		} else {
-			skR[EGS-1]&=252
-			skR[0]|=128
-		}
-	}
-	ECDH_ECPSVDP_DH(skR[:], pkE, DH[:])
-	if kem==32 || kem==33 {
+		ECDH_ECPSVDP_DH(skR, pkE, DH[:], 0)
 		reverse(pkE)
 		reverse(DH[:])
+	} else {
+		ECDH_ECPSVDP_DH(skR, pkE, DH[:], 2)
 	}
-	ECDH_KEY_PAIR_GENERATE(nil,skR[:],pkR)
-	if kem==32 || kem==33 {
-		reverse(pkR[:])
-	}
+
 	for i:=0;i<len(pkE);i++ {
 		kemcontext=append(kemcontext,pkE[i]);
 	}
 	for i:=0;i<len(pkR);i++ {
 		kemcontext=append(kemcontext,pkR[i]);
 	}
-
-	return extractAndExpand(DH[:],kemcontext)
+	return extractAndExpand(config_id,DH[:],kemcontext)
 }
 
-func AuthEncap(config_id int,SKE []byte,pkE []byte,pkR []byte,SKS []byte) []byte {
-	var skE [EGS]byte	
-	var skS [EGS]byte
-	var DH [EFS]byte
-	var DH1 [EFS]byte
+func AuthEncap(config_id int,skE []byte,skS []byte,pkE []byte,pkR []byte,pkS []byte) []byte {
 	pklen:=len(pkE)
-	pkS:=make([]byte,pklen) 
+	DH:=make([]byte,pklen)
+	DH1:=make([]byte,pklen)
+
 	kemcontext:=make([] byte,3*pklen)
 	kem := config_id&255
 
-	for i:=0;i<EGS;i++ {
-		skE[i]=SKE[i]
-		skS[i]=SKS[i]
-	}	
-	if kem==32 || kem==33 {
-		reverse(skE[:])
-		reverse(skS[:])
-		if kem==32 {
-			skE[EGS-1]&=248
-			skE[0]&=127
-			skE[0]|=64
-			skS[EGS-1]&=248
-			skS[0]&=127
-			skS[0]|=64	
-		} else {
-			skE[EGS-1]&=252
-			skE[0]|=128
-			skS[EGS-1]&=252
-			skS[0]|=128
-		}
-	}
-	
-	ECDH_KEY_PAIR_GENERATE(nil, skE[:], pkE)
 	if kem==32 || kem==33 {
 		reverse(pkR)
-	}
-	ECDH_ECPSVDP_DH(skE[:], pkR, DH[:])
-	ECDH_ECPSVDP_DH(skS[:], pkR, DH1[:])
-	if kem==32 || kem==33 {
+		ECDH_ECPSVDP_DH(skE, pkR, DH[:], 0)
+		ECDH_ECPSVDP_DH(skS, pkR, DH1[:], 0)
+		reverse(pkR)
 		reverse(DH[:])
 		reverse(DH1[:])
+	} else {
+		ECDH_ECPSVDP_DH(skE, pkR, DH[:], 2)
+		ECDH_ECPSVDP_DH(skS, pkR, DH1[:], 2)
 	}
-	var ZZ [2*EFS]byte
-	for i:=0;i<EFS;i++ {
-		ZZ[i]=DH[i];
-		ZZ[EFS+i]=DH1[i];
+	ZZ:=make([]byte,2*pklen)
+	for i:=0;i<pklen;i++ {
+		ZZ[i]=DH[i]
+		ZZ[pklen+i]=DH1[i]
 	}
 
-	ECDH_KEY_PAIR_GENERATE(nil, skS[:], pkS[:])
-	
-	if kem==32 || kem==33 {
-		reverse(pkR)
-		reverse(pkE)
-		reverse(pkS[:])
-	}
 	for i:=0;i<pklen;i++ {
 		kemcontext[i] = pkE[i]
         kemcontext[pklen+i]= pkR[i]
         kemcontext[2*pklen+i]= pkS[i]
 	}
-	return extractAndExpand(ZZ[:],kemcontext)
+	return extractAndExpand(config_id,ZZ[:],kemcontext)
 }
 
-func AuthDecap(config_id int,pkE []byte,SKR []byte,pkS []byte) []byte  {
-	var skR [EGS]byte	
-	var DH [EFS]byte
-	var DH1 [EFS]byte
+func AuthDecap(config_id int,skR []byte,pkE []byte,pkR []byte,pkS []byte) []byte  {
 	pklen:=len(pkE)
-	pkR:=make([]byte,pklen) 
+	DH:=make([]byte,pklen)
+	DH1:=make([]byte,pklen)
 	kemcontext:=make([] byte,3*pklen)
 
 	kem := config_id&255
 
-	for i:=0;i<EGS;i++ {
-		skR[i]=SKR[i]
-	}
 	if kem==32 || kem==33 {
-		reverse(skR[:])
 		reverse(pkE)
 		reverse(pkS)
-		if kem==32 {
-			skR[EGS-1]&=248
-			skR[0]&=127
-			skR[0]|=64
-		} else {
-			skR[EGS-1]&=252
-			skR[0]|=128
-		}
-	}
-	ECDH_ECPSVDP_DH(skR[:], pkE, DH[:])
-	ECDH_ECPSVDP_DH(skR[:], pkS, DH1[:])
-	if kem==32 || kem==33 {
+		ECDH_ECPSVDP_DH(skR[:], pkE, DH[:], 0)
+		ECDH_ECPSVDP_DH(skR[:], pkS, DH1[:], 0)
+		reverse(pkE)
+		reverse(pkS)
 		reverse(DH[:])
 		reverse(DH1[:])
+	} else {
+		ECDH_ECPSVDP_DH(skR[:], pkE, DH[:], 2)
+		ECDH_ECPSVDP_DH(skR[:], pkS, DH1[:], 2)
 	}
-	var ZZ [2*EFS]byte
-	for i:=0;i<EFS;i++ {
+	ZZ:=make([]byte,2*pklen)
+	for i:=0;i<pklen;i++ {
 		ZZ[i]=DH[i];
-		ZZ[EFS+i]=DH1[i];
+		ZZ[pklen+i]=DH1[i];
 	}
 
-	ECDH_KEY_PAIR_GENERATE(nil, skR[:], pkR[:])
-
-	if kem==32 || kem==33 {
-		reverse(pkR[:])
-		reverse(pkE)
-		reverse(pkS)
-	}
 	for i:=0;i<pklen;i++ {
 		kemcontext[i] = pkE[i]
         kemcontext[pklen+i]= pkR[i]
         kemcontext[2*pklen+i]= pkS[i]
 	}
-	return extractAndExpand(ZZ[:],kemcontext)
+	return extractAndExpand(config_id,ZZ[:],kemcontext)
 }
 
 /*
@@ -283,51 +282,45 @@ func printBinary(array []byte) {
 func KeySchedule(config_id int,mode int,Z []byte,info []byte,psk []byte,pskID []byte) ([]byte,[]byte,[]byte) {
 	var context []byte
 
-	kem_id:=config_id&255
-	kdf_id:=(config_id>>8)&3
-	aead_id:=(config_id>>10)&3
+	kem:=config_id&255
+	kdf:=(config_id>>8)&3
+	aead:=(config_id>>10)&3
 
-	ar:=core.InttoBytes(kem_id, 2)
-	for i:=0;i<len(ar);i++ {
-		context = append(context, ar[i])
+	txt := "HPKE"
+	KEM := []byte(txt)
+	var SUITE_ID []byte
+	for i:=0;i<len(KEM);i++ {
+		SUITE_ID=append(SUITE_ID,KEM[i])
 	}
-	ar=core.InttoBytes(kdf_id, 2)
-	for i:=0;i<len(ar);i++ {
-		context = append(context, ar[i])
-	}
-	ar=core.InttoBytes(aead_id, 2)
-	for i:=0;i<len(ar);i++ {
-		context = append(context, ar[i])
-	}
-	ar = core.InttoBytes(mode, 1)
+	num := core.InttoBytes(kem,2)
+	SUITE_ID=append(SUITE_ID,num[0])
+	SUITE_ID=append(SUITE_ID,num[1])
+	num = core.InttoBytes(kdf,2)
+	SUITE_ID=append(SUITE_ID,num[0])
+	SUITE_ID=append(SUITE_ID,num[1])
+	num = core.InttoBytes(aead,2)
+	SUITE_ID=append(SUITE_ID,num[0])
+	SUITE_ID=append(SUITE_ID,num[1])
+
+	ar := core.InttoBytes(mode, 1)
 	for i:=0;i<len(ar);i++ {
 		context = append(context, ar[i])
 	}
 
-	var ZEROS [HASH_TYPE]byte
-	for i:=0;i<HASH_TYPE;i++ {
-		ZEROS[i]=0
-	}
-
-	H:=labeledExtract(ZEROS[:],"pskID_hash",pskID);
-	for i:=0;i<HASH_TYPE;i++ {
-		context=append(context,H[i])
-	}
-	H=labeledExtract(ZEROS[:],"info",info)
+	H:=labeledExtract(nil,SUITE_ID,"psk_id_hash",pskID);
 	for i:=0;i<HASH_TYPE;i++ {
 		context=append(context,H[i])
 	}
-
-	if psk==nil {
-		H=labeledExtract(ZEROS[:],"psk_hash",ZEROS[:])
-	} else {
-		H=labeledExtract(ZEROS[:],"psk_hash",psk)
+	H=labeledExtract(nil,SUITE_ID,"info_hash",info)
+	for i:=0;i<HASH_TYPE;i++ {
+		context=append(context,H[i])
 	}
-	secret:=labeledExtract(H,"zz",Z)
+	H=labeledExtract(nil,SUITE_ID,"psk_hash",psk)
+	secret:=labeledExtract(H,SUITE_ID,"secret",Z)
 
-	key:=labeledExpand(secret,"key",context,AESKEY)
-	nonce:=labeledExpand(secret,"nonce",context,12)
-	exp_secret:=labeledExpand(secret,"exp",context,HASH_TYPE)
+	key:=labeledExpand(secret,SUITE_ID,"key",context,AESKEY)
+	nonce:=labeledExpand(secret,SUITE_ID,"nonce",context,12)
+	exp_secret:=labeledExpand(secret,SUITE_ID,"exp",context,HASH_TYPE)
 
 	return key,nonce,exp_secret
 }	
