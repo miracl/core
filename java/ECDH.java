@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-/* Elliptic Curve API high-level functions  */
+/* ECDH/ECIES/ECDSA API Functions */
 
 package org.miracl.core.XXX;
 

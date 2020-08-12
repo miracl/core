@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-/* test driver and function exerciser for BLS Signature API Functions */
+/* Test driver and function exerciser for Boneh-Lynn-Shacham BLS Signature API Functions */
 
 #include <stdio.h>
 #include <stdlib.h>

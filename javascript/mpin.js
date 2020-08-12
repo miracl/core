@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-/* MPIN API Functions */
+/* MPIN 128-bit API Functions */
 
 var MPIN = function(ctx) {
     "use strict";

@@ -18,11 +18,13 @@
  */
 
 //
-//  mpin256.swift
+//  mpin192.swift
 //
 //  Created by Michael Scott on 08/07/2015.
 //  Copyright (c) 2015 Michael Scott. All rights reserved.
 //
+
+/* MPIN 192-bit API Functions */
 
 import Foundation
 import core

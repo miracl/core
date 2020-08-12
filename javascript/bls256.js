@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-/* BLS API Functions */
+/* Boneh-Lynn-Shacham signature 256-bit API Functions */
 
 var BLS256 = function(ctx) {
     "use strict";

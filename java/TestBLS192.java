@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-/* test driver and function exerciser for BLS API Functions */
+/* Test driver and function exerciser for Boneh-Lynn-Shacham BLS Signature API Functions */
 
 /* To reverse the groups G1 and G2, edit BLS*.go
 

@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+/* test driver and function exerciser for ECDH/ECIES/ECDSA API Functions */
+
 extern crate core;
 
 use std::str;

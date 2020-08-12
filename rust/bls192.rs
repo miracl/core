@@ -29,7 +29,7 @@ use crate::xxx::pair4;
 use crate::xxx::rom;
 use crate::hmac;
 
-/* BLS API Functions */
+/* Boneh-Lynn-Shacham signature 192-bit API Functions */
 
 pub const BFS: usize = big::MODBYTES as usize;
 pub const BGS: usize = big::MODBYTES as usize;

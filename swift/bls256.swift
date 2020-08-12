@@ -24,7 +24,7 @@
 //  Copyright (c) 2015 Michael Scott. All rights reserved.
 //
 
-/* Boneh-Lynn-Shacham Signature API Functions */
+/* Boneh-Lynn-Shacham signature 256-bit API Functions */
 
 /* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-02 */
 

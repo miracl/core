@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+/* ECDH/ECIES/ECDSA API Functions */
+
 var ECDH = function(ctx) {
     "use strict";
 

@@ -17,9 +17,9 @@
  * limitations under the License.
  */
 
-/* MPIN Functions */
+/* MPIN 192-bit API Functions */
 
-/* Version 3.0 - supports Time Permits */
+/* Version 3.0  */
 
 #include <stdio.h>
 #include <stdlib.h>

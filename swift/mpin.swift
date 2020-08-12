@@ -24,6 +24,8 @@
 //  Copyright (c) 2015 Michael Scott. All rights reserved.
 //
 
+/* MPIN 128-bit API Functions */
+
 import Foundation
 import core
 

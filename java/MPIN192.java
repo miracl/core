@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-/* MPIN API Functions */
+/* MPIN 192-bit API Functions */
 
 package org.miracl.core.XXX;
 

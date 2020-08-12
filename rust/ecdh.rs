@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+/* ECDH/ECIES/ECDSA API Functions */
+
 use crate::xxx::big;
 use crate::xxx::big::BIG;
 use crate::xxx::ecp;

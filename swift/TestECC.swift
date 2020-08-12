@@ -24,7 +24,7 @@
 //  Copyright (c) 2015 Michael Scott. All rights reserved.
 //
 
-/* Test Elliptic curve API */
+/* test driver and function exerciser for ECDH/ECIES/ECDSA API Functions */
 
 import Foundation
 import core // comment out for Xcode

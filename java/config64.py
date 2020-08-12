@@ -355,7 +355,7 @@ while ptr<max:
     selection.append(x)
     ptr=ptr+1
 
-# curveset(curve,big_length_bytes,bits_in_base,modulus_bits,modulus_mod_8,Z,modulus_type,curve_type,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
+# curveset(curve,big_length_bytes,bits_in_base,modulus_bits,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
 # where "curve" is the common name for the elliptic curve
 # big_length_bytes is the modulus size rounded up to a number of bytes
 # bits_in_base gives the number base used for 64 bit architectures, as n where the base is 2^n

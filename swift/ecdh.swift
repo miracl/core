@@ -28,7 +28,7 @@
 //import Darwin
 import core
 
-/* Elliptic Curve API high-level functions  */
+/* ECDH/ECIES/ECDSA API Functions */
 
 public struct ECDH
 {

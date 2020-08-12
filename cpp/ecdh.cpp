@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-/* ECDH/ECIES/ECDSA Functions - see main program below */
+/* ECDH/ECIES/ECDSA API Functions */
 
 #include <stdio.h>
 #include <string.h>

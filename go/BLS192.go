@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-/* Boneh-Lynn-Shacham  API Functions */
+/* Boneh-Lynn-Shacham signature 192-bit API Functions */
 
 /* Loosely (for now) following https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature-02 */
 

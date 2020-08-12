@@ -715,7 +715,7 @@ while ptr<max:
     selection.append(x)
     ptr=ptr+1
 
-# curveset(modulus_bits,field,curve,bits_in_base,modulus_mod_8,Z,modulus_type,curve_type,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
+# curveset(modulus_bits,field,curve,bits_in_base,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
 # for each curve give names for field and curve. In many cases the latter two will be the same.
 # modulus_bits is the bit length of the modulus, typically the same or slightly smaller than "big"
 # Typically "field" describes the modulus, and "curve" is the common name for the elliptic curve
