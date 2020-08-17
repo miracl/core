@@ -255,15 +255,30 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"@NBT@",nbt)
     replace(fnameh,"@M8@",m8)
     replace(fnameh,"@MT@",mt)
-#    replace(fnameh,"@RZ@",rz)
+    hc="0"
+    hc2="0"
+# Get Hash-to-Curve Z for G1 and G2
 
-# Get Z for G1 and G2
     if isinstance(rz,list) :
-        replace(fnameh,"@RZ@",rz[0])
-        replace(fnameh,"@RZ2@",rz[1])
+        if len(rz)==2 :     # Z followed by SSWU isogeny degree
+            replace(fnameh,"@RZ@",rz[0])
+            replace(fnameh,"@RZ2A@","0")
+            replace(fnameh,"@RZ2B@","0")
+            hc=rz[1]
+        if len(rz)==3 :     # Z for G1 followed by Z for G2 (for SVDW)
+            replace(fnameh,"@RZ@",rz[0])
+            replace(fnameh,"@RZ2A@",rz[1])
+            replace(fnameh,"@RZ2B@",rz[2])
+        if len(rz)==5 :     # Z for G1, Z for G2, SSWU isogeny degree for G1, SSWU isogeny degree for G2
+            replace(fnameh,"@RZ@",rz[0])
+            replace(fnameh,"@RZ2A@",rz[1])
+            replace(fnameh,"@RZ2B@",rz[2])
+            hc=rz[3]
+            hc2=rz[4]
     else :
-        replace(fnameh,"@RZ@",rz)
-        replace(fnameh,"@RZ2@","0")
+        replace(fnameh,"@RZ@",rz)   # just Z for SSWU, or indicates RFC7748 or Generic for Elligator
+        replace(fnameh,"@RZ2A@","0")
+        replace(fnameh,"@RZ2B@","0")
 
     itw=int(qi)%10
     replace(fnameh,"@QI@",str(itw))
@@ -296,6 +311,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"@CS@",cs)
     replace(fnameh,"@AB@",ab)
     replace(fnameh,"@G2@",g2)
+
+    replace(fnameh,"@HC@",hc) 
+    replace(fnameh,"@HC2@",hc2) 
 
     fnamec="big_"+bd+".c"
     fnameh="big_"+bd+".h"
@@ -520,10 +538,10 @@ while ptr<max:
 
 
     if x==4:
-        curveset("254","BN254","BN254","13","1",["-1","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
+        curveset("254","BN254","BN254","13","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
         pfcurve_selected=True
     if x==5:
-        curveset("254","BN254CX","BN254CX","13",["-1","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
+        curveset("254","BN254CX","BN254CX","13",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
         pfcurve_selected=True
 
 # rsaset(big,ring,bit_bits_in_base,multiplier)

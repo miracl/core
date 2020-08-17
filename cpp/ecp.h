@@ -34,9 +34,16 @@ extern const XXX::BIG CURVE_B;     /**< Elliptic curve B parameter */
 extern const XXX::BIG CURVE_Order; /**< Elliptic curve group order */
 extern const XXX::BIG CURVE_Cof;   /**< Elliptic curve cofactor */
 
-//extern const XXX::BIG CURVE_Ad;
-//extern const XXX::BIG CURVE_Bd;
-//extern const XXX::BIG PC[];
+extern const XXX::BIG CURVE_Ad;
+extern const XXX::BIG CURVE_Bd;
+extern const XXX::BIG PC[];
+
+extern const XXX::BIG CURVE_Adr;
+extern const XXX::BIG CURVE_Adi;
+extern const XXX::BIG CURVE_Bdr;
+extern const XXX::BIG CURVE_Bdi;
+extern const XXX::BIG PCR[];
+extern const XXX::BIG PCI[];
 
 /* Generator point on G1 */
 extern const XXX::BIG CURVE_Gx; /**< x-coordinate of generator point in group G1  */

@@ -851,7 +851,7 @@ public final class ECP8 {
         FP8 T=new FP8(H);
         sgn=T.sign();
 
-        FP Z=new FP(CONFIG_FIELD.RIADZG2);
+        FP Z=new FP(CONFIG_FIELD.RIADZG2A);
         FP8 X1=new FP8(Z);
         FP8 A=RHS(X1);
         FP8 W=new FP8(A);

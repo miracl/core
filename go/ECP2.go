@@ -737,58 +737,140 @@ func ECP2_hap2point(h *BIG) *ECP2 {
     NY:=NewFP2int(1)
     T:=NewFP2copy(H) /**/
 	sgn:=T.sign() /**/
+	if HTC_ISO_G2 == 0 {
+		Z:=NewFPint(RIADZG2A);
+		X1:=NewFP2fp(Z)
+		X3:=NewFP2copy(X1)
+		A:=RHS2(X1)
+		W:=NewFP2copy(A)
+		if (RIADZG2A==-1 && RIADZG2B==0 && SEXTIC_TWIST==M_TYPE && CURVE_B_I==4) { // special case for BLS12381
+			W.copy(NewFP2ints(2,1))
+		} else {
+			W.sqrt()
+		}
+		s:=NewFPbig(NewBIGints(SQRTm3))
+		Z.mul(s)
 
-	Z:=NewFPint(RIADZG2);
-	X1:=NewFP2fp(Z)
-	X3:=NewFP2copy(X1)
-	A:=RHS2(X1)
-	W:=NewFP2copy(A)
-    if (RIADZG2==-1 && SEXTIC_TWIST==M_TYPE && CURVE_B_I==4) { // special case for BLS12381
-        W.copy(NewFP2ints(2,1))
-    } else {
-        W.sqrt()
-    }
-	s:=NewFPbig(NewBIGints(SQRTm3))
-	Z.mul(s)
-
-	T.sqr()
-	Y:=NewFP2copy(A); Y.mul(T)
-	T.copy(NY); T.add(Y); T.norm()
-	Y.rsub(NY); Y.norm()
-	NY.copy(T); NY.mul(Y); 
+		T.sqr()
+		Y:=NewFP2copy(A); Y.mul(T)
+		T.copy(NY); T.add(Y); T.norm()
+		Y.rsub(NY); Y.norm()
+		NY.copy(T); NY.mul(Y); 
 	
-	NY.pmul(Z)
-	NY.inverse()
+		NY.pmul(Z)
+		NY.inverse()
 
-    W.pmul(Z)
-    if (W.sign()==1) {
-        W.neg()
-        W.norm()
-    }
-    W.pmul(Z)
-	W.mul(H); W.mul(Y); W.mul(NY)
+		W.pmul(Z)
+		if (W.sign()==1) {
+			W.neg()
+			W.norm()
+		}
+		W.pmul(Z)
+		W.mul(H); W.mul(Y); W.mul(NY)
 
-	X1.neg(); X1.norm(); X1.div2()
-	X2:=NewFP2copy(X1)
-	X1.sub(W); X1.norm()
-	X2.add(W); X2.norm()
-	A.add(A); A.add(A); A.norm()
-	T.sqr(); T.mul(NY); T.sqr()
-	A.mul(T)
-	X3.add(A); X3.norm()
+		X1.neg(); X1.norm(); X1.div2()
+		X2:=NewFP2copy(X1)
+		X1.sub(W); X1.norm()
+		X2.add(W); X2.norm()
+		A.add(A); A.add(A); A.norm()
+		T.sqr(); T.mul(NY); T.sqr()
+		A.mul(T)
+		X3.add(A); X3.norm()
 
-    Y.copy(RHS2(X2))
-    X3.cmove(X2,Y.qr())
-    Y.copy(RHS2(X1))
-    X3.cmove(X1,Y.qr())
-    Y.copy(RHS2(X3))
-    Y.sqrt()
+		Y.copy(RHS2(X2))
+		X3.cmove(X2,Y.qr())
+		Y.copy(RHS2(X1))
+		X3.cmove(X1,Y.qr())
+		Y.copy(RHS2(X3))
+		Y.sqrt()
 
-    ne:=Y.sign()^sgn
-    W.copy(Y); W.neg(); W.norm()
-    Y.cmove(W,ne)
+		ne:=Y.sign()^sgn
+		W.copy(Y); W.neg(); W.norm()
+		Y.cmove(W,ne)
 
-    return NewECP2fp2s(X3,Y);
+		return NewECP2fp2s(X3,Y)
+	} else {
+		Q:=NewECP2()
+/* CAHCZS
+		Ad:=NewFP2bigs(NewBIGints(CURVE_Adr), NewBIGints(CURVE_Adi))
+		Bd:=NewFP2bigs(NewBIGints(CURVE_Bdr), NewBIGints(CURVE_Bdi))
+		ZZ:=NewFP2ints(RIADZG2A,RIADZG2B)
+
+		T.sqr()
+		T.mul(ZZ)
+		W:=NewFP2copy(T)
+		W.add(NY); W.norm()
+
+		W.mul(T)
+		A:=NewFP2copy(Ad)
+		A.mul(W)
+		A.inverse()
+		W.add(NY); W.norm()
+		W.mul(Bd); 
+		W.neg(); W.norm()
+
+		X2:=NewFP2copy(W)
+		X2.mul(A)
+		X3:=NewFP2copy(T)
+		X3.mul(X2)
+
+		W.copy(X3); W.sqr(); W.add(Ad); W.norm(); W.mul(X3); W.add(Bd); W.norm() // x^3+Ax+b
+		X2.cmove(X3,W.qr())
+		W.copy(X2); W.sqr(); W.add(Ad); W.norm(); W.mul(X2); W.add(Bd); W.norm() // x^3+Ax+b
+		Y:=NewFP2copy(W)
+		Y.sqrt()
+
+		ne:=Y.sign()^sgn
+		W.copy(Y); W.neg(); W.norm()
+		Y.cmove(W,ne)
+
+		k:=0
+		isox:=HTC_ISO_G2
+		isoy:=3*(isox-1)/2
+
+//xnum
+		xnum:=NewFP2bigs(NewBIGints(PCR[k]),NewBIGints(PCI[k])); k+=1
+		for i:=0;i<isox;i++ {
+			xnum.mul(X2)
+			xnum.add(NewFP2bigs(NewBIGints(PCR[k]),NewBIGints(PCI[k]))); k+=1
+			xnum.norm();
+		}
+//xden
+		xden:=NewFP2copy(X2)
+		xden.add(NewFP2bigs(NewBIGints(PCR[k]),NewBIGints(PCI[k]))); k+=1
+		xden.norm();
+		for i:=0;i<isox-2;i++ {
+			xden.mul(X2)
+			xden.add(NewFP2bigs(NewBIGints(PCR[k]),NewBIGints(PCI[k]))); k+=1
+			xden.norm();
+		}		
+//ynum
+		ynum:=NewFP2bigs(NewBIGints(PCR[k]),NewBIGints(PCI[k])); k+=1
+		for i:=0;i<isoy;i++ {
+			ynum.mul(X2)
+			ynum.add(NewFP2bigs(NewBIGints(PCR[k]),NewBIGints(PCI[k]))); k+=1
+			ynum.norm();
+		}
+//yden
+		yden:=NewFP2copy(X2)
+		yden.add(NewFP2bigs(NewBIGints(PCR[k]),NewBIGints(PCI[k]))); k+=1
+		yden.norm();
+		for i:=0;i<isoy-1;i++ {
+			yden.mul(X2)
+			yden.add(NewFP2bigs(NewBIGints(PCR[k]),NewBIGints(PCI[k]))); k+=1
+			yden.norm();
+		}	
+		ynum.mul(Y)
+		T.copy(xnum); T.mul(yden)
+		Q.x.copy(T)
+		T.copy(ynum); T.mul(xden)
+		Q.y.copy(T)
+		T.copy(xden); T.mul(yden)
+		Q.z.copy(T)
+
+CAHCZF */
+		return Q
+	}
 }
 
 /* Map octet string to curve point */

@@ -717,7 +717,7 @@ func ECP4_map2point(H *FP4) *ECP4 {
     T:=NewFP4copy(H)
     sgn:=T.sign()
 
-	Z:=NewFPint(RIADZG2);
+	Z:=NewFPint(RIADZG2A);
 	X1:=NewFP4fp(Z)
 	X3:=NewFP4copy(X1)
 	A:=RHS4(X1)

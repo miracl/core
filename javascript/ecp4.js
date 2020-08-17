@@ -833,7 +833,7 @@ var ECP4 = function(ctx) {
         var T=new ctx.FP4(H);
         sgn=T.sign();
 
-        var Z=new ctx.FP(ctx.FP.RIADZG2);
+        var Z=new ctx.FP(ctx.FP.RIADZG2A);
         var X1=new ctx.FP4(Z);
         var A=ECP4.RHS(X1);
         var W=new ctx.FP4(A);

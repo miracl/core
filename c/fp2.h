@@ -125,6 +125,14 @@ extern void FP2_YYY_zero(FP2_YYY *x);
  */
 extern void FP2_YYY_one(FP2_YYY *x);
 
+/**	@brief Copy from ROM to an FP2
+ *
+	@param w FP2 number to be copied to
+	@param a BIG real part to be copied from ROM
+	@param b BIG imag part to be copied from ROM
+ */
+extern void FP2_YYY_rcopy(FP2_YYY *w,const BIG_XXX a,const BIG_XXX b);
+
 /**	@brief Sign of FP2
  *
 	@param x FP2 instance

@@ -235,7 +235,7 @@ fn htp_secp256k1(mess: &str) {
     use core::secp256k1::ecp::ECP;
     println!("\nRandom Access - message= {}",mess);
     let m = mess.as_bytes();
-    let mut dst = "QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_".as_bytes();
+    let mut dst = "QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_".as_bytes();
     let mut u=hash_to_field_secp256k1(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
@@ -249,7 +249,7 @@ fn htp_secp256k1(mess: &str) {
     println!("P= {}",P.tostring());
 
     println!("\nNon-Uniform");
-    dst = "QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_".as_bytes();
+    dst = "QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_NU_".as_bytes();
     u=hash_to_field_secp256k1(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP::map2point(&u[0]);
@@ -293,7 +293,7 @@ fn htp_bls12381(mess: &str) {
     use core::bls12381::ecp::ECP;
     println!("\nRandom Access - message= {}",mess);
     let m = mess.as_bytes();
-    let mut dst = "QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_".as_bytes();
+    let mut dst = "QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_".as_bytes();
     let mut u=hash_to_field_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
@@ -307,7 +307,7 @@ fn htp_bls12381(mess: &str) {
     println!("P= {}",P.tostring());
 
     println!("\nNon-Uniform");
-    dst = "QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_".as_bytes();
+    dst = "QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_NU_".as_bytes();
     u=hash_to_field_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP::map2point(&u[0]);
@@ -358,7 +358,7 @@ fn htp2_bls12381(mess: &str) {
     use core::bls12381::ecp2::ECP2;
     println!("\nRandom Access - message= {}",mess);
     let m = mess.as_bytes();
-    let mut dst = "QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_".as_bytes();
+    let mut dst = "QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_".as_bytes();
     let mut u=hash_to_field2_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
@@ -372,7 +372,7 @@ fn htp2_bls12381(mess: &str) {
     println!("P= {}",P.tostring());
 
     println!("\nNon-Uniform");
-    dst = "QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_".as_bytes();
+    dst = "QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_NU_".as_bytes();
     u=hash_to_field2_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP2::map2point(&u[0]);

@@ -202,7 +202,7 @@ func hash_to_field_SECP256K1(hash int,hlen int,DST []byte,M []byte,ctr int) []*S
 func htp_SECP256K1(mess []byte) {
 	
 	fmt.Println("Random Access - message= "+string(mess))
-	DST := []byte("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_")
+	DST := []byte("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_")
 	u:=hash_to_field_SECP256K1(core.MC_SHA2,SECP256K1.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
 	fmt.Printf("u[1]= %s\n",u[1].ToString())
@@ -216,7 +216,7 @@ func htp_SECP256K1(mess []byte) {
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 	fmt.Printf("Non-Uniform\n")
-    DST=[]byte("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_");
+    DST=[]byte("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_NU_");
     u=hash_to_field_SECP256K1(core.MC_SHA2,SECP256K1.HASH_TYPE,DST,mess,1);
 	fmt.Printf("u= %s\n",u[0].ToString())
 	P=SECP256K1.ECP_map2point(u[0])
@@ -250,7 +250,7 @@ func hash_to_field_BLS12381(hash int,hlen int,DST []byte,M []byte,ctr int) []*BL
 func htp_BLS12381(mess []byte) {
 	
 	fmt.Println("Random Access - message= "+string(mess))
-	DST := []byte("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_")
+	DST := []byte("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_")
 	u:=hash_to_field_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
 	fmt.Printf("u[1]= %s\n",u[1].ToString())
@@ -264,7 +264,7 @@ func htp_BLS12381(mess []byte) {
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 	fmt.Printf("Non-Uniform\n")
-    DST=[]byte("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_");
+    DST=[]byte("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_NU_");
     u=hash_to_field_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,1);
 	fmt.Printf("u= %s\n",u[0].ToString())
 	P=BLS12381.ECP_map2point(u[0])
@@ -304,7 +304,7 @@ func hash_to_field2_BLS12381(hash int,hlen int,DST []byte,M []byte,ctr int) []*B
 func htp2_BLS12381(mess []byte) {
 	
 	fmt.Println("Random Access - message= "+string(mess))
-	DST := []byte("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_")
+	DST := []byte("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_")
 	u:=hash_to_field2_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
 	fmt.Printf("u[1]= %s\n",u[1].ToString())
@@ -318,7 +318,7 @@ func htp2_BLS12381(mess []byte) {
 	fmt.Printf("P= %s\n\n",P.ToString())
 
 	fmt.Printf("Non-Uniform\n")
-    DST=[]byte("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_");
+    DST=[]byte("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_NU_");
     u=hash_to_field2_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,1);
 	fmt.Printf("u= %s\n",u[0].ToString())
 	P=BLS12381.ECP2_map2point(u[0])

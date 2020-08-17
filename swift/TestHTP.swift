@@ -217,7 +217,7 @@ public func htp_secp256k1(_ mess: String)
 {
     print("Random Access - message= "+mess)
     let M=[UInt8](mess.utf8)
-	var DST = [UInt8]("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_".utf8)
+	var DST = [UInt8]("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field_secp256k1(HMAC.MC_SHA2,secp256k1.CONFIG_CURVE.HASH_TYPE,DST,M,2)
 
     print("u[0]= "+u[0].toString())
@@ -233,7 +233,7 @@ public func htp_secp256k1(_ mess: String)
     print("P= "+P.toString())
 
     print("\nNon-Uniform");
-    DST = [UInt8]("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_".utf8)
+    DST = [UInt8]("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_NU_".utf8)
     u=hash_to_field_secp256k1(HMAC.MC_SHA2,secp256k1.CONFIG_CURVE.HASH_TYPE,DST,M,1);
     print("u[0]= "+u[0].toString())
     P=secp256k1.ECP.map2point(u[0])
@@ -268,7 +268,7 @@ public func htp_bls12381(_ mess: String)
 {
     print("Random Access - message= "+mess)
     let M=[UInt8](mess.utf8)
-	var DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_".utf8)
+	var DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field_bls12381(HMAC.MC_SHA2,bls12381.CONFIG_CURVE.HASH_TYPE,DST,M,2)
 
     print("u[0]= "+u[0].toString())
@@ -284,7 +284,7 @@ public func htp_bls12381(_ mess: String)
     print("P= "+P.toString())
 
     print("\nNon-Uniform");
-    DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_".utf8)
+    DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_NU_".utf8)
     u=hash_to_field_bls12381(HMAC.MC_SHA2,bls12381.CONFIG_CURVE.HASH_TYPE,DST,M,1);
     print("u[0]= "+u[0].toString())
     P=bls12381.ECP.map2point(u[0])
@@ -326,7 +326,7 @@ public func htp2_bls12381(_ mess: String)
 {
     print("Random Access - message= "+mess)
     let M=[UInt8](mess.utf8)
-	var DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_".utf8)
+	var DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field2_bls12381(HMAC.MC_SHA2,bls12381.CONFIG_CURVE.HASH_TYPE,DST,M,2)
 
     print("u[0]= "+u[0].toString())
@@ -342,7 +342,7 @@ public func htp2_bls12381(_ mess: String)
     print("P= "+P.toString())
 
     print("\nNon-Uniform");
-    DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_".utf8)
+    DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_NU_".utf8)
     u=hash_to_field2_bls12381(HMAC.MC_SHA2,bls12381.CONFIG_CURVE.HASH_TYPE,DST,M,1);
     print("u[0]= "+u[0].toString())
     P=bls12381.ECP2.map2point(u[0])

@@ -108,14 +108,14 @@ public class TestHTP extends TestCase {
             oneofmine=true;
         }
         if (packageName == "org.miracl.core.SECP256K1") {
-            ro="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_";
-            nu="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_";
+            ro="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_";
+            nu="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_NU_";
             System.out.println("\nTesting HTP for curve SECP256K1");
             oneofmine=true;
         }
         if (packageName == "org.miracl.core.BLS12381") {
-            ro="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_";
-            nu="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_";
+            ro="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_";
+            nu="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_NU_";
             System.out.println("\nTesting HTP for curve BLS12381_G1");
             oneofmine=true;
         }

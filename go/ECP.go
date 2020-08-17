@@ -1364,32 +1364,103 @@ func ECP_map2point(h *FP) *ECP {
 	}
 	if CURVETYPE == WEIERSTRASS {
 	// swu method
+			A:=NewFP()
+			B:=NewFP()
+			X2:=NewFP()
+			X3:=NewFP()
             one:=NewFPint(1)
             t:=NewFPcopy(h)
+			w:=NewFP()
             x:=NewBIG()
 			Y:=NewFP()
 			NY:=NewFP()
             sgn:=t.sign()
-            if CURVE_A!=0 {
-                A:=NewFPint(CURVE_A)
-				B:=NewFPbig(NewBIGints(CURVE_B))
-
+            if CURVE_A != 0 || HTC_ISO != 0{
+				if HTC_ISO!=0 {
+/* CAHCZS
+					A.copy(NewFPbig(NewBIGints(CURVE_Ad)))
+					B.copy(NewFPbig(NewBIGints(CURVE_Bd)))
+CAHCZF */
+				} else {
+					A.copy(NewFPint(CURVE_A))
+					B.copy(NewFPbig(NewBIGints(CURVE_B)))
+				}
+				// SSWU method
 				t.sqr();
 				t.imul(RIADZ)
-                w:=NewFPcopy(t); w.add(one); w.norm()
-                w.mul(t)
-                A.mul(w)
-                A.inverse(nil)
+                w.copy(t); w.add(one); w.norm()
+
+                w.mul(t); NY.copy(A)
+                NY.mul(w)
+                NY.inverse(nil)
                 w.add(one); w.norm()
                 w.mul(B)
                 w.neg(); w.norm()
-                X2:=NewFPcopy(w); X2.mul(A)
-                X3:=NewFPcopy(t); X3.mul(X2)
-                rhs:=RHS(X3)
-                X2.cmove(X3,rhs.qr(nil))
-                rhs.copy(RHS(X2))
-                Y.copy(rhs.sqrt(nil))
-                x.copy(X2.redc())
+
+                X2.copy(w); X2.mul(NY)
+                X3.copy(t); X3.mul(X2)
+				if HTC_ISO==0 {
+					rhs:=RHS(X3)
+					X2.cmove(X3,rhs.qr(nil))
+					rhs.copy(RHS(X2))
+					Y.copy(rhs.sqrt(nil))
+					x.copy(X2.redc())
+				} else {
+/* CAHCZS
+					w.copy(X3); w.sqr(); w.add(A); w.norm(); w.mul(X3); w.add(B); w.norm() // w=x^3+Ax+B
+					X2.cmove(X3,w.qr(nil))
+					w.copy(X2); w.sqr(); w.add(A); w.norm(); w.mul(X2); w.add(B); w.norm()
+					Y.copy(w.sqrt(nil))
+
+					ne:=Y.sign()^sgn
+					NY.copy(Y); NY.neg(); NY.norm()
+					Y.cmove(NY,ne)
+
+					k:=0
+					isox:=HTC_ISO
+					isoy:=3*(isox-1)/2
+
+				//xnum
+					xnum:=NewFPbig(NewBIGints(PC[k])); k+=1
+					for i:=0;i<isox;i++ {
+						xnum.mul(X2)
+						w.copy(NewFPbig(NewBIGints(PC[k]))); k+=1
+						xnum.add(w); xnum.norm()
+					}
+				//xden
+					xden:=NewFPcopy(X2)
+					w.copy(NewFPbig(NewBIGints(PC[k]))); k+=1
+					xden.add(w);xden.norm();
+					for i:=0;i<isox-2;i++ {
+						xden.mul(X2)
+						w.copy(NewFPbig(NewBIGints(PC[k]))); k+=1
+						xden.add(w); xden.norm()
+					}
+				//ynum
+					ynum:=NewFPbig(NewBIGints(PC[k])); k+=1
+					for i:=0;i<isoy;i++ {
+						ynum.mul(X2)
+						w.copy(NewFPbig(NewBIGints(PC[k]))); k+=1
+						ynum.add(w); ynum.norm()
+					}
+					yden:=NewFPcopy(X2)
+					w.copy(NewFPbig(NewBIGints(PC[k]))); k+=1
+					yden.add(w);yden.norm();
+					for i:=0;i<isoy-1;i++ {
+						yden.mul(X2)
+						w.copy(NewFPbig(NewBIGints(PC[k]))); k+=1
+						yden.add(w); yden.norm()
+					}
+					ynum.mul(Y)
+					w.copy(xnum); w.mul(yden)
+					P.x.copy(w)
+					w.copy(ynum); w.mul(xden)
+					P.y.copy(w)
+					w.copy(xden); w.mul(yden)
+					P.z.copy(w)
+					return P
+CAHCZF */
+				}
             } else {
 // Shallue and van de Woestijne
 // SQRTm3 not available, so preprocess this out

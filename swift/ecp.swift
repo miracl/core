@@ -1182,34 +1182,104 @@ public struct ECP {
 
         if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.WEIERSTRASS {
 // swu method
+            var A=FP()
+            var B=FP()
             var X2=FP()
             var X3=FP()
             let one=FP(1)
             var Y=FP()
             var NY=FP()
             var t=FP(h)
+            var w=FP()
             var x=BIG(0)
             let sgn=t.sign();
-            if CONFIG_CURVE.CURVE_A != 0
+            if CONFIG_CURVE.CURVE_A != 0 || CONFIG_CURVE.HTC_ISO != 0
             {
-                var A=FP(CONFIG_CURVE.CURVE_A)
-                let B=FP(BIG(ROM.CURVE_B))
+                if CONFIG_CURVE.HTC_ISO != 0 {
+/* CAHCZS
+                    A.copy(FP(BIG(ROM.CURVE_Ad)))
+                    B.copy(FP(BIG(ROM.CURVE_Bd)))
+CAHCZF */
+                } else {
+                    A.copy(FP(CONFIG_CURVE.CURVE_A))
+                    B.copy(FP(BIG(ROM.CURVE_B)))
+                }
+                // SSWU method
                 t.sqr()
                 t.imul(CONFIG_FIELD.RIADZ)
-                var w=FP(t); w.add(one); w.norm()
-                w.mul(t)
-                A.mul(w)
-                A.inverse(pNIL)
+                w.copy(t); w.add(one); w.norm()
+
+                w.mul(t); NY.copy(A)
+                NY.mul(w)
+                NY.inverse(pNIL)
                 w.add(one); w.norm()
                 w.mul(B)
                 w.neg(); w.norm()
-                X2.copy(w); X2.mul(A)
+
+                X2.copy(w); X2.mul(NY)
                 X3.copy(t); X3.mul(X2)
-                var rhs=ECP.RHS(X3)
-                X2.cmove(X3,rhs.qr(&pNIL))
-                rhs.copy(ECP.RHS(X2))
-                Y.copy(rhs.sqrt(pNIL))
-                x.copy(X2.redc())
+                if CONFIG_CURVE.HTC_ISO == 0 {
+                    var rhs=ECP.RHS(X3)
+                    X2.cmove(X3,rhs.qr(&pNIL))
+                    rhs.copy(ECP.RHS(X2))
+                    Y.copy(rhs.sqrt(pNIL))
+                    x.copy(X2.redc())
+                } else {
+/* CAHCZS
+					w.copy(X3); w.sqr(); w.add(A); w.norm(); w.mul(X3); w.add(B); w.norm() // w=x^3+Ax+B
+					X2.cmove(X3,w.qr(&pNIL));
+					w.copy(X2); w.sqr(); w.add(A); w.norm(); w.mul(X2); w.add(B); w.norm()
+					Y.copy(w.sqrt(pNIL));
+
+                    let ne=Y.sign()^sgn
+                    NY.copy(Y); NY.neg(); NY.norm()
+                    Y.cmove(NY,ne)
+
+                    var k=0
+                    let isox=CONFIG_CURVE.HTC_ISO
+                    let isoy=3*(isox-1)/2
+                //xnum
+                    var xnum=FP(BIG(ROM.PC[k])); k+=1
+                    for _ in 0..<isox {
+                        xnum.mul(X2)
+                        w.copy(FP(BIG(ROM.PC[k]))); k+=1
+                        xnum.add(w); xnum.norm()
+                    }
+                //xden
+                    var xden=FP(X2)
+                    w.copy(FP(BIG(ROM.PC[k]))); k+=1
+                    xden.add(w); xden.norm();
+                    for _ in 0..<isox-2 {
+                        xden.mul(X2)
+                        w.copy(FP(BIG(ROM.PC[k]))); k+=1
+                        xden.add(w); xden.norm()
+                    }
+                //ynum
+                    var ynum=FP(BIG(ROM.PC[k])); k+=1
+                    for _ in 0..<isoy {
+                        ynum.mul(X2)
+                        w.copy(FP(BIG(ROM.PC[k]))); k+=1
+                        ynum.add(w); ynum.norm()
+                    }
+                //yden
+                    var yden=FP(X2)
+                    w.copy(FP(BIG(ROM.PC[k]))); k+=1
+                    yden.add(w); yden.norm();
+                    for _ in 0..<isoy-1 {
+                        yden.mul(X2)
+                        w.copy(FP(BIG(ROM.PC[k]))); k+=1
+                        yden.add(w); yden.norm()
+                    }
+                    ynum.mul(Y)
+					w.copy(xnum); w.mul(yden)
+					P.x.copy(w)
+					w.copy(ynum); w.mul(xden)
+					P.y.copy(w)
+					w.copy(xden); w.mul(yden)
+					P.z.copy(w)
+					return P
+CAHCZF */
+                }
             } else {
 // Shallue and van de Woestijne
 // SQRTm3 not available, so preprocess this out

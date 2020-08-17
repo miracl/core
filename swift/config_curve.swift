@@ -37,6 +37,8 @@ public struct CONFIG_CURVE{
     static public let SEXTIC_TWIST = @ST@
     static public let SIGN_OF_X = @SX@
     static public let ATE_BITS = @AB@    
+    static public let HTC_ISO = @HC@
+    static public let HTC_ISO_G2 = @HC2@
 
     static public let HASH_TYPE = @HT@
     static public let AESKEY = @AK@

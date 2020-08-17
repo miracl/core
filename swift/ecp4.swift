@@ -737,7 +737,7 @@ public struct ECP4 {
         var T=FP4(H)
         let sgn=T.sign()
 
-        var Z=FP(CONFIG_FIELD.RIADZG2)
+        var Z=FP(CONFIG_FIELD.RIADZG2A)
         var X1=FP4(Z)
         var X3=FP4(X1)
         var A=ECP4.RHS(X1)

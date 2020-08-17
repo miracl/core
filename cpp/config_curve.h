@@ -29,11 +29,11 @@
 #define CURVE_A_ZZZ @CA@
 #define PAIRING_FRIENDLY_ZZZ @PF@
 #define CURVE_SECURITY_ZZZ @CS@
-//#define HTC_ISO_ZZZ @HT@
+#define HTC_ISO_ZZZ @HC@
 
 #if PAIRING_FRIENDLY_ZZZ != NOT_PF
 
-//#define HTC_ISO_G2_ZZZ @HT2@
+#define HTC_ISO_G2_ZZZ @HC2@
 
 #define USE_GLV_ZZZ   /**< Note this method is patented (GLV), so maybe you want to comment this out */
 #define USE_GS_G2_ZZZ /**< Well we didn't patent it :) But may be covered by GLV patent :( */

@@ -586,14 +586,22 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     int sgn,ne;
     BIG_XXX a,x,y;
     FP_YYY X1,X2,X3,t,w,one,A,B,Y,NY;
+
+#if HTC_ISO_ZZZ != 0
+    int i,k,isox,isoy,iso=HTC_ISO_ZZZ;
+    FP_YYY xnum,xden,ynum,yden;
+    BIG_XXX z;
+    FP_YYY_rcopy(&A,CURVE_Ad_ZZZ);
+    FP_YYY_rcopy(&B,CURVE_Bd_ZZZ);
+#else
+        FP_YYY_from_int(&A,CURVE_A_ZZZ);
+        FP_YYY_rcopy(&B,CURVE_B_ZZZ);
+#endif
     FP_YYY_one(&one);
     FP_YYY_copy(&t,h);
     sgn=FP_YYY_sign(&t);
 
-#if CURVE_A_ZZZ != 0
-
-        FP_YYY_from_int(&A,CURVE_A_ZZZ);
-        FP_YYY_rcopy(&B,CURVE_B_ZZZ);
+#if CURVE_A_ZZZ != 0 || HTC_ISO_ZZZ != 0
 
         FP_YYY_sqr(&t,&t);
         FP_YYY_imul(&t,&t,RIADZ_YYY);
@@ -610,13 +618,84 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 
         FP_YYY_mul(&X2,&w,&NY);   // -B(w+1)/Aw
         FP_YYY_mul(&X3,&t,&X2);
+ #if HTC_ISO_ZZZ == 0
 
         ECP_ZZZ_rhs(&w,&X3);
         FP_YYY_cmove(&X2,&X3,FP_YYY_qr(&w,NULL));
         ECP_ZZZ_rhs(&w,&X2);
         FP_YYY_sqrt(&Y,&w,NULL);
         FP_YYY_redc(x,&X2);
+#else
+// Now get back to original curve
+        FP_YYY_sqr(&w,&X3); FP_YYY_add(&w,&w,&A); FP_YYY_norm(&w); FP_YYY_mul(&w,&w,&X3); FP_YYY_add(&w,&w,&B); FP_YYY_norm(&w);  // w=x^3+Ax+B
+        FP_YYY_cmove(&X2,&X3,FP_YYY_qr(&w,NULL));                       // ***
+        FP_YYY_sqr(&w,&X2); FP_YYY_add(&w,&w,&A); FP_YYY_norm(&w); FP_YYY_mul(&w,&w,&X2); FP_YYY_add(&w,&w,&B); FP_YYY_norm(&w);
+        FP_YYY_sqrt(&Y,&w,NULL);                                    // ***
 
+        ne=FP_YYY_sign(&Y)^sgn;
+        FP_YYY_neg(&NY,&Y); FP_YYY_norm(&NY);
+        FP_YYY_cmove(&Y,&NY,ne);
+
+// (X2,Y) is on isogenous curve
+        k=0;
+        isox=iso;
+        isoy=3*(iso-1)/2;
+
+// xnum
+        FP_YYY_rcopy(&xnum,PC_ZZZ[k++]);
+        for (i=0;i<isox;i++)
+        {
+            FP_YYY_mul(&xnum,&xnum,&X2); 
+            FP_YYY_rcopy(&w,PC_ZZZ[k++]);
+            FP_YYY_add(&xnum,&xnum,&w); FP_YYY_norm(&xnum);
+        }
+
+// xden
+        FP_YYY_copy(&xden,&X2);
+        FP_YYY_rcopy(&w,PC_ZZZ[k++]);
+        FP_YYY_add(&xden,&xden,&w); FP_YYY_norm(&xden);
+ 
+        for (i=0;i<isox-2;i++)
+        {
+            FP_YYY_mul(&xden,&xden,&X2);
+            FP_YYY_rcopy(&w,PC_ZZZ[k++]);
+            FP_YYY_add(&xden,&xden,&w); FP_YYY_norm(&xden);
+        }
+
+// ynum
+        FP_YYY_rcopy(&ynum,PC_ZZZ[k++]);
+        for (i=0;i<isoy;i++)
+        {
+            FP_YYY_mul(&ynum,&ynum,&X2); 
+            FP_YYY_rcopy(&w,PC_ZZZ[k++]);
+            FP_YYY_add(&ynum,&ynum,&w); FP_YYY_norm(&ynum);
+        }
+
+// yden 
+        FP_YYY_copy(&yden,&X2);
+        FP_YYY_rcopy(&w,PC_ZZZ[k++]);
+        FP_YYY_add(&yden,&yden,&w); FP_YYY_norm(&yden);
+      
+        for (i=0;i<isoy-1;i++)
+        {
+            FP_YYY_mul(&yden,&yden,&X2); 
+            FP_YYY_rcopy(&w,PC_ZZZ[k++]);
+            FP_YYY_add(&yden,&yden,&w); FP_YYY_norm(&yden);
+        }
+
+        FP_YYY_mul(&ynum,&ynum,&Y);
+
+// return in projective coordinates
+        FP_YYY_mul(&t,&xnum,&yden);
+        FP_YYY_copy(&(P->x),&t);
+
+        FP_YYY_mul(&t,&ynum,&xden);
+        FP_YYY_copy(&(P->y),&t);
+
+        FP_YYY_mul(&t,&xden,&yden);
+        FP_YYY_copy(&(P->z),&t);
+        return;
+#endif
 #else
 
 // Shallue and van de Woestijne

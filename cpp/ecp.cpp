@@ -105,7 +105,6 @@ static void ECP_select(ZZZ::ECP *P, ZZZ::ECP W[], sign32 b)
 int ZZZ::ECP_equals(ECP *P, ECP *Q)
 {
     FP a, b;
-
     FP_mul(&a, &(P->x), &(Q->z));
     FP_mul(&b, &(Q->x), &(P->z));
     if (!FP_equals(&a, &b)) return 0;
@@ -117,7 +116,6 @@ int ZZZ::ECP_equals(ECP *P, ECP *Q)
 #endif
 
     return 1;
-
 }
 
 /* Set P=Q */
@@ -1377,17 +1375,27 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 #endif
 
 #if CURVETYPE_ZZZ==WEIERSTRASS
-    int sgn,ne; // ,isox,isoy,iso=HTC_ISO_ZZZ;
+    int sgn,ne;
     BIG a,x,y;
-    FP X1,X2,X3,t,w,one,A,B,Y,NY;//,num,den;
+    FP X1,X2,X3,t,w,one,A,B,Y,NY;
+
+#if HTC_ISO_ZZZ != 0
+// Map to point on isogenous curve
+    int i,k,isox,isoy,iso=HTC_ISO_ZZZ;
+    FP xnum,xden,ynum,yden;
+    BIG z;
+    FP_rcopy(&A,CURVE_Ad);
+    FP_rcopy(&B,CURVE_Bd);
+#else
+    FP_from_int(&A,CURVE_A_ZZZ);
+    FP_rcopy(&B,CURVE_B);
+#endif
+
     FP_one(&one);
     FP_copy(&t,h);
     sgn=FP_sign(&t);
 
-#if CURVE_A_ZZZ != 0
-
-        FP_from_int(&A,CURVE_A_ZZZ);
-        FP_rcopy(&B,CURVE_B);
+#if CURVE_A_ZZZ != 0 || HTC_ISO_ZZZ != 0
 
         FP_sqr(&t,&t);
         FP_imul(&t,&t,RIADZ_YYY);  // Z from hash-to-point draft standard
@@ -1404,95 +1412,84 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
         FP_mul(&X2,&w,&NY);     // -B(w+1)/Aw
         FP_mul(&X3,&t,&X2);
-//#if HTC_ISO_ZZZ == 0
+#if HTC_ISO_ZZZ == 0
         ECP_rhs(&w,&X3);
         FP_cmove(&X2,&X3,FP_qr(&w,NULL));                       // ***
         ECP_rhs(&w,&X2);
         FP_sqrt(&Y,&w,NULL);                                    // ***
         FP_redc(x,&X2);
-/*
 #else
-        FP_sqr(&w,&X3); FP_add(&w,&w,&A); FP_norm(&w); FP_mul(&w,&w,&X3); FP_add(&w,&w,&B); FP_norm(&w);
+// Now get back to original curve
+        FP_sqr(&w,&X3); FP_add(&w,&w,&A); FP_norm(&w); FP_mul(&w,&w,&X3); FP_add(&w,&w,&B); FP_norm(&w);  // w=x^3+Ax+B
         FP_cmove(&X2,&X3,FP_qr(&w,NULL));                       // ***
         FP_sqr(&w,&X2); FP_add(&w,&w,&A); FP_norm(&w); FP_mul(&w,&w,&X2); FP_add(&w,&w,&B); FP_norm(&w);
-
         FP_sqrt(&Y,&w,NULL);                                    // ***
 
         ne=FP_sign(&Y)^sgn;
         FP_neg(&NY,&Y); FP_norm(&NY);
         FP_cmove(&Y,&NY,ne);
 
-printf("XD= "); FP_output(&X2); printf("\n");
-printf("YD= "); FP_output(&Y); printf("\n");
-FP_sqr(&w,&Y); 
-printf("LHS= "); FP_output(&w); printf("\n");
-FP_sqr(&w,&X2); FP_add(&w,&w,&A); FP_norm(&w); FP_mul(&w,&w,&X2); FP_add(&w,&w,&B); FP_norm(&w);
-printf("RHS= "); FP_output(&w); printf("\n");
-
-
 // (X2,Y) is on isogenous curve
         k=0;
         isox=iso;
-        if (iso==3) isoy=3;
-        if (iso==11) isoy=15;
+        isoy=3*(iso-1)/2;
 
 // xnum
-        FP_rcopy(&num,PC[k++]);
+        FP_rcopy(&xnum,PC[k++]);
         for (i=0;i<isox;i++)
         {
-            FP_mul(&num,&num,&X2); 
+            FP_mul(&xnum,&xnum,&X2); 
             FP_rcopy(&w,PC[k++]);
-            FP_add(&num,&num,&w); FP_norm(&num);
+            FP_add(&xnum,&xnum,&w); FP_norm(&xnum);
         }
-//printf("k= %d xnum= ",k); FP_output(&num); printf("\n");
+
 // xden
-        FP_copy(&den,&X2);
+        FP_copy(&xden,&X2);
         FP_rcopy(&w,PC[k++]);
-        FP_add(&den,&den,&w); FP_norm(&den);
+        FP_add(&xden,&xden,&w); FP_norm(&xden);
  
         for (i=0;i<isox-2;i++)
         {
-            FP_mul(&den,&den,&X2);
+            FP_mul(&xden,&xden,&X2);
             FP_rcopy(&w,PC[k++]);
-            FP_add(&den,&den,&w); FP_norm(&den);
+            FP_add(&xden,&xden,&w); FP_norm(&xden);
         }
-//printf("k= %d xden= ",k); FP_output(&den); printf("\n");
-        FP_inv(&den,&den);                                          // ***
-        FP_mul(&t,&num,&den);
 
 // ynum
-        FP_rcopy(&num,PC[k++]);
+        FP_rcopy(&ynum,PC[k++]);
         for (i=0;i<isoy;i++)
         {
-            FP_mul(&num,&num,&X2); 
+            FP_mul(&ynum,&ynum,&X2); 
             FP_rcopy(&w,PC[k++]);
-            FP_add(&num,&num,&w); FP_norm(&num);
+            FP_add(&ynum,&ynum,&w); FP_norm(&ynum);
         }
-//printf("k= %d ynum= ",k); FP_output(&num); printf("\n");
+
 // yden 
-        FP_copy(&den,&X2);
+        FP_copy(&yden,&X2);
         FP_rcopy(&w,PC[k++]);
-        FP_add(&den,&den,&w); FP_norm(&den);
+        FP_add(&yden,&yden,&w); FP_norm(&yden);
       
         for (i=0;i<isoy-1;i++)
         {
-            FP_mul(&den,&den,&X2); 
+            FP_mul(&yden,&yden,&X2); 
             FP_rcopy(&w,PC[k++]);
-            FP_add(&den,&den,&w); FP_norm(&den);
+            FP_add(&yden,&yden,&w); FP_norm(&yden);
         }
-//printf("k= %d yden= ",k); FP_output(&den); printf("\n");
-//printf("isox= %d isoy= %d k= %d\n",isox,isoy,k);
-        FP_inv(&den,&den);                                          // ***
-        FP_mul(&num,&num,&den);
-        FP_mul(&Y,&Y,&num);
-        FP_copy(&X2,&t);
 
-        FP_redc(x,&X2);
-        FP_redc(y,&Y);
+        FP_mul(&ynum,&ynum,&Y);
 
-        ECP_set(P,x,y);
+// return in projective coordinates
+        FP_mul(&t,&xnum,&yden);
+        FP_copy(&(P->x),&t);
+
+        FP_mul(&t,&ynum,&xden);
+        FP_copy(&(P->y),&t);
+
+        FP_mul(&t,&xden,&yden);
+        FP_copy(&(P->z),&t);
+        return;
 #endif
-*/
+
 #else 
 // SVDW - Shallue and van de Woestijne
         FP_from_int(&Y,RIADZ_YYY);
@@ -1510,13 +1507,6 @@ printf("RHS= "); FP_output(&w); printf("\n");
         FP_copy(&w,&A);
         FP_tpo(&NY,&w);   // tv3=inv0(tv1*tv2*z*sqrt(-3)) and sqrt(g(Z)) 
 
-//        FP_sqrt(&w,&A,NULL); // sqrt(g(Z))
-//        FP_inv(&NY,&NY,NULL);     // tv3=inv0(tv1*tv2*z*sqrt(-3))                   // ***
-        //FP_neg(&A,&A); FP_norm(&A);     // -g(Z)
-        //FP_imul(&w,&A,3);    // -3*g(Z);
-        //FP_sqrt(&w,&w,NULL);                                        // *** Constant
-//printf("c1= "); FP_output(&w); printf("\n");
-        //FP_imul(&w,&w,RIADZ_YYY); // tv4=Z*sqrt(-3g(Z))
         FP_mul(&w,&w,&B);  // tv4=Z.sqrt(-3).sqrt(g(Z))
         if (FP_sign(&w)==1)
         { // depends only on sign of constant RIADZ

@@ -229,8 +229,8 @@ function GOLDILOCKS() {
 // SECP256K1 context
 function SECP256K1() {
 	var ctx = new CTX('SECP256K1');
-	var ro="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_";
-	var nu="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_";
+	var ro="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_";
+	var nu="QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;
 	var mywindow=window.open();
     htp(mywindow,ctx,"",ro,nu,hlen);
@@ -243,8 +243,8 @@ function SECP256K1() {
 // BLS12381 context
 function BLS12381() {
 	var ctx = new CTX('BLS12381');
-	var ro="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_";
-	var nu="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_";
+	var ro="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_";
+	var nu="QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;
 	var mywindow=window.open();
     htp(mywindow,ctx,"",ro,nu,hlen);
@@ -257,8 +257,8 @@ function BLS12381() {
 // BLS12381 context
 function BLS12381_G2() {
 	var ctx = new CTX('BLS12381');
-	var ro="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_";
-	var nu="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_";
+	var ro="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_";
+	var nu="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;
 	var mywindow=window.open();
     htp2(mywindow,ctx,"",ro,nu,hlen);

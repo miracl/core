@@ -702,7 +702,7 @@ public final class ECP4 {
         FP4 T=new FP4(H);
         sgn=T.sign();
 
-        FP Z=new FP(CONFIG_FIELD.RIADZG2);
+        FP Z=new FP(CONFIG_FIELD.RIADZG2A);
         FP4 X1=new FP4(Z);
         FP4 A=RHS(X1);
         FP4 W=new FP4(A);

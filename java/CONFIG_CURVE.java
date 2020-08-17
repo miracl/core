@@ -40,7 +40,8 @@ public class CONFIG_CURVE {
     public static final int SIGN_OF_X = @SX@;
     public static final int ATE_BITS = @AB@;
     public static final int G2_TABLE = @G2@;
-
+    public static final int HTC_ISO = @HC@;
+    public static final int HTC_ISO_G2 = @HC2@;
 
     public static final int SHA256 = 32;
     public static final int SHA384 = 48;

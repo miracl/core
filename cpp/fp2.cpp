@@ -92,10 +92,6 @@ void YYY::FP2_from_ints(FP2 *w, int xa, int xb)
     FP_from_int(&a,xa);
     FP_from_int(&b,xb);
     FP2_from_FPs(w,&a,&b);
-    //BIG a, b;
-    //BIG_zero(a); BIG_inc(a, xa); BIG_norm(a);
-    //BIG_zero(b); BIG_inc(b, xb); BIG_norm(b);
-    //FP2_from_BIGs(w, a, b);
 }
 
 /* Create FP2 from FP */
@@ -138,6 +134,12 @@ void YYY::FP2_one(FP2 *w)
     FP one;
     FP_one(&one);
     FP2_from_FP(w, &one);
+}
+
+void YYY::FP2_rcopy(FP2 *w,const BIG a,const BIG b)
+{
+    FP_rcopy(&(w->a),a);
+    FP_rcopy(&(w->b),b);
 }
 
 int YYY::FP2_sign(FP2 *w)

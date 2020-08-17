@@ -107,13 +107,35 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     if ca == "0" :
         replace(fpath+"ecp.rs","CAISZS","*/")
         replace(fpath+"ecp.rs","CAISZF","/*")
-# Get Z for G1 and G2
+
+    hc="0"
+    hc2="0"
+# Get Hash-to-Curve Z for G1 and G2
+
     if isinstance(rz,list) :
-        replace(fpath+"fp.rs","@RZ@",rz[0])
-        replace(fpath+"fp.rs","@RZ2@",rz[1])
+        if len(rz)==2 :     # Z followed by SSWU isogeny degree
+            replace(fpath+"fp.rs","@RZ@",rz[0])
+            replace(fpath+"fp.rs","@RZ2A@","0")
+            replace(fpath+"fp.rs","@RZ2B@","0")
+            hc=rz[1]
+        if len(rz)==3 :     # Z for G1 followed by Z for G2 (for SVDW)
+            replace(fpath+"fp.rs","@RZ@",rz[0])
+            replace(fpath+"fp.rs","@RZ2A@",rz[1])
+            replace(fpath+"fp.rs","@RZ2B@",rz[2])
+        if len(rz)==5 :     # Z for G1, Z for G2, SSWU isogeny degree for G1, SSWU isogeny degree for G2
+            replace(fpath+"fp.rs","@RZ@",rz[0])
+            replace(fpath+"fp.rs","@RZ2A@",rz[1])
+            replace(fpath+"fp.rs","@RZ2B@",rz[2])
+            hc=rz[3]
+            hc2=rz[4]
     else :
-        replace(fpath+"fp.rs","@RZ@",rz)
-        replace(fpath+"fp.rs","@RZ2@","0")
+        replace(fpath+"fp.rs","@RZ@",rz)   # just Z for SSWU, or indicates RFC7748 or Generic for Elligator
+        replace(fpath+"fp.rs","@RZ2A@","0")
+        replace(fpath+"fp.rs","@RZ2B@","0")
+
+    if hc!="0" :
+        replace(fpath+"ecp.rs","CAHCZS","*/")
+        replace(fpath+"ecp.rs","CAHCZF","/*")
 
     itw=int(qi)%10
     replace(fpath+"fp.rs","@QI@",str(itw))
@@ -141,6 +163,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fpath+"ecp.rs","@AB@",ab)
     replace(fpath+"ecp.rs","@G2@",g2)
 
+    replace(fpath+"ecp.rs","@HC@",hc) 
+    replace(fpath+"ecp.rs","@HC2@",hc2) 
 
     if cs == "128" :
         replace(fpath+"ecp.rs","@HT@","32")
@@ -166,6 +190,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             os.system(copytext+"pair.rs "+fpath+"pair.rs")
             os.system(copytext+"mpin.rs "+fpath+"mpin.rs")
             os.system(copytext+"bls.rs "+fpath+"bls.rs")
+
+            if hc2 != "0" :
+                replace(fpath+"ecp2.rs","CAHCZS","*/")
+                replace(fpath+"ecp2.rs","CAHCZF","/*")
 
             replace(fpath+"fp12.rs","xxx",tc)
             replace(fpath+"ecp2.rs","xxx",tc)
@@ -389,7 +417,9 @@ if __name__ == '__main__':
             curve_selected=True
 
         if x==17:
-            curveset("secp256k1","56","256","1","1","NOT_SPECIAL","0","WEIERSTRASS","0","NOT","NOT","NOT","NOT","NOT","128")
+#                                              ,"1", for SVDW
+# set for SSWU plus isogenies
+            curveset("secp256k1","56","256","1",["-11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","NOT","NOT","NOT","NOT","NOT","128")
             curve_selected=True
         if x==18:
             curveset("sm2","56","256","1","-9","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128")
@@ -423,48 +453,50 @@ if __name__ == '__main__':
             curve_selected=True
 
         if x==26:
-            curveset("bn254","56","254","1",["-1","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","71","66","128")
+            curveset("bn254","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","71","66","128")
             pfcurve_selected=True
         if x==27:
-            curveset("bn254CX","56","254","1",["-1","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","76","66","128")
+            curveset("bn254CX","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","76","66","128")
             pfcurve_selected=True
         if x==28:
-            curveset("bls12383","58","383","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","68","65","128")
+            curveset("bls12383","58","383","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","68","65","128")
             pfcurve_selected=True
 
         if x==29:
-            curveset("bls12381","58","381","1",["-3","-1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","69","65","128")
+#                                              ["-3" ,"-1", "0"]  for SVDW
+# set for SSWU plus isogenies
+            curveset("bls12381","58","381","1",["11","-2","-1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","69","65","128")
             pfcurve_selected=True
 
         if x==30:
-            curveset("fp256bn","56","256","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","NEGATIVEX","83","66","128")
+            curveset("fp256bn","56","256","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","NEGATIVEX","83","66","128")
             pfcurve_selected=True
         if x==31:
-            curveset("fp512bn","60","512","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","POSITIVEX","172","130","128")
+            curveset("fp512bn","60","512","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","POSITIVEX","172","130","128")
             pfcurve_selected=True
     # https://eprint.iacr.org/2017/334.pdf
         if x==32:
-            curveset("bls12461","60","461","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","79","78","128")
+            curveset("bls12461","60","461","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","79","78","128")
             pfcurve_selected=True
 
         if x==33:
-            curveset("bn462","60","462","1",["1","1"],"NOT_SPECIAL","1","WEIERSTRASS","0","BN","D_TYPE","POSITIVEX","125","118","128")
+            curveset("bn462","60","462","1",["1","1","0"],"NOT_SPECIAL","1","WEIERSTRASS","0","BN","D_TYPE","POSITIVEX","125","118","128")
             pfcurve_selected=True
 
         if x==34:
-            curveset("bls24479","56","479","1",["1","4"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24","M_TYPE","POSITIVEX","52","49","192")
+            curveset("bls24479","56","479","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24","M_TYPE","POSITIVEX","52","49","192")
             pfcurve_selected=True
 
         if x==35:
-            curveset("bls48556","58","556","1",["-1","2"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","35","32","256")
+            curveset("bls48556","58","556","1",["-1","2","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","35","32","256")
             pfcurve_selected=True
 
         if x==36:
-            curveset("bls48581","60","581","1",["2","2"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48","D_TYPE","NEGATIVEX","36","33","256")
+            curveset("bls48581","60","581","1",["2","2","0"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48","D_TYPE","NEGATIVEX","36","33","256")
             pfcurve_selected=True
 
         if x==37:
-            curveset("bls48286","60","286","1",["1","1"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","20","17","128")
+            curveset("bls48286","60","286","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","20","17","128")
             pfcurve_selected=True
 
 

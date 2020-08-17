@@ -598,60 +598,143 @@ public final class ECP2 {
         FP2 NY=new FP2(1);
         FP2 T=new FP2(H);  /**/
         sgn=T.sign(); /**/
-
-        FP Z=new FP(CONFIG_FIELD.RIADZG2);
-        FP2 X1=new FP2(Z);
-        FP2 A=RHS(X1);
-        FP2 W=new FP2(A);
-        if (CONFIG_FIELD.RIADZG2==-1 && CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE && ROM.CURVE_B_I==4)
-        { // special case for BLS12381
-            W.copy(new FP2(2,1));
-        } else {
-            W.sqrt();
-        }
-        FP s=new FP(new BIG(ROM.SQRTm3));
-        Z.mul(s);
-
-        T.sqr();
-        FP2 Y=new FP2(A); Y.mul(T);
-        T.copy(NY); T.add(Y); T.norm();
-        Y.rsub(NY); Y.norm();
-        NY.copy(T); NY.mul(Y); 
-
-        NY.pmul(Z);
-        NY.inverse();
-
-        W.pmul(Z);
-        if (W.sign()==1)
+        if (CONFIG_CURVE.HTC_ISO_G2 == 0)
         {
-            W.neg();
-            W.norm();
+            FP Z=new FP(CONFIG_FIELD.RIADZG2A);
+            FP2 X1=new FP2(Z);
+            FP2 A=RHS(X1);
+            FP2 W=new FP2(A);
+            if (CONFIG_FIELD.RIADZG2A==-1 && CONFIG_FIELD.RIADZG2B==0 && CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE && ROM.CURVE_B_I==4)
+            { // special case for BLS12381
+                W.copy(new FP2(2,1));
+            } else {
+                W.sqrt();
+            }
+            FP s=new FP(new BIG(ROM.SQRTm3));
+            Z.mul(s);
+
+            T.sqr();
+            FP2 Y=new FP2(A); Y.mul(T);
+            T.copy(NY); T.add(Y); T.norm();
+            Y.rsub(NY); Y.norm();
+            NY.copy(T); NY.mul(Y); 
+
+            NY.pmul(Z);
+            NY.inverse();
+
+            W.pmul(Z);
+            if (W.sign()==1)
+            {
+                W.neg();
+                W.norm();
+            }
+            W.pmul(Z);
+            W.mul(H); W.mul(Y); W.mul(NY);
+
+            FP2 X3=new FP2(X1);
+            X1.neg(); X1.norm(); X1.div2();
+            FP2 X2=new FP2(X1);
+            X1.sub(W); X1.norm();
+            X2.add(W); X2.norm();
+            A.add(A); A.add(A); A.norm();
+            T.sqr(); T.mul(NY); T.sqr();
+            A.mul(T);
+            X3.add(A); X3.norm();
+
+            Y.copy(RHS(X2));
+            X3.cmove(X2,Y.qr());
+            Y.copy(RHS(X1));
+            X3.cmove(X1,Y.qr());
+            Y.copy(RHS(X3));
+            Y.sqrt();
+
+            ne=Y.sign()^sgn;
+            W.copy(Y); W.neg(); W.norm();
+            Y.cmove(W,ne);
+
+            return new ECP2(X3,Y);
+        } else {
+            ECP2 Q=new ECP2();
+/* CAHCZS
+            FP2 Ad=new FP2(new BIG(ROM.CURVE_Adr),new BIG(ROM.CURVE_Adi));
+            FP2 Bd=new FP2(new BIG(ROM.CURVE_Bdr),new BIG(ROM.CURVE_Bdi)); 
+            FP2 ZZ=new FP2(CONFIG_FIELD.RIADZG2A,CONFIG_FIELD.RIADZG2B);
+           
+            T.sqr();
+            T.mul(ZZ);
+            FP2 W=new FP2(T);
+            W.add(NY); W.norm();
+
+            W.mul(T);
+            FP2 A=new FP2(Ad);
+            A.mul(W);
+            A.inverse();
+            W.add(NY); W.norm();
+            W.mul(Bd);
+            W.neg(); W.norm();
+
+            FP2 X2=new FP2(W);
+            X2.mul(A);
+            FP2 X3=new FP2(T);
+            X3.mul(X2);
+
+            W.copy(X3); W.sqr(); W.add(Ad); W.norm(); W.mul(X3); W.add(Bd); W.norm(); // x^3+Ax+b
+            X2.cmove(X3,W.qr());
+            W.copy(X2); W.sqr(); W.add(Ad); W.norm(); W.mul(X2); W.add(Bd); W.norm(); // x^3+Ax+b
+            FP2 Y=new FP2(W);
+            Y.sqrt();
+
+            ne=Y.sign()^sgn;
+            W.copy(Y); W.neg(); W.norm();
+            Y.cmove(W,ne);
+
+            int k=0;
+            int isox=CONFIG_CURVE.HTC_ISO_G2;
+            int isoy=3*(isox-1)/2;
+
+        // xnum
+            FP2 xnum=new FP2(new BIG(ROM.PCR[k]),new BIG(ROM.PCI[k])); k++;
+            for (int i=0;i<isox;i++) {
+                xnum.mul(X2);
+                xnum.add(new FP2(new BIG(ROM.PCR[k]),new BIG(ROM.PCI[k]))); k++;
+                xnum.norm();
+            }
+        //xden
+            FP2 xden=new FP2(X2);
+            xden.add(new FP2(new BIG(ROM.PCR[k]),new BIG(ROM.PCI[k]))); k++;
+            xden.norm();
+            for (int i=0;i<isox-2;i++) {
+                xden.mul(X2);
+                xden.add(new FP2(new BIG(ROM.PCR[k]),new BIG(ROM.PCI[k]))); k++;
+                xden.norm();                
+            }
+        //ynum
+            FP2 ynum=new FP2(new BIG(ROM.PCR[k]),new BIG(ROM.PCI[k])); k++;          
+            for (int i=0;i<isoy;i++) {
+                ynum.mul(X2);
+                ynum.add(new FP2(new BIG(ROM.PCR[k]),new BIG(ROM.PCI[k]))); k++;
+                ynum.norm();
+            }
+        //yden
+            FP2 yden=new FP2(X2);
+            yden.add(new FP2(new BIG(ROM.PCR[k]),new BIG(ROM.PCI[k]))); k++;
+            yden.norm(); 
+            for (int i=0;i<isoy-1;i++) {
+                yden.mul(X2);
+                yden.add(new FP2(new BIG(ROM.PCR[k]),new BIG(ROM.PCI[k]))); k++;
+                yden.norm();
+            }
+            ynum.mul(Y);
+
+            T.copy(xnum); T.mul(yden);
+            Q.x.copy(T);
+            T.copy(ynum); T.mul(xden);
+            Q.y.copy(T);
+            T.copy(xden); T.mul(yden);
+            Q.z.copy(T);
+CAHCZF */
+            return Q;
         }
-        W.pmul(Z);
-        W.mul(H); W.mul(Y); W.mul(NY);
-
-        FP2 X3=new FP2(X1);
-        X1.neg(); X1.norm(); X1.div2();
-        FP2 X2=new FP2(X1);
-        X1.sub(W); X1.norm();
-        X2.add(W); X2.norm();
-        A.add(A); A.add(A); A.norm();
-        T.sqr(); T.mul(NY); T.sqr();
-        A.mul(T);
-        X3.add(A); X3.norm();
-
-        Y.copy(RHS(X2));
-        X3.cmove(X2,Y.qr());
-        Y.copy(RHS(X1));
-        X3.cmove(X1,Y.qr());
-        Y.copy(RHS(X3));
-        Y.sqrt();
-
-        ne=Y.sign()^sgn;
-        W.copy(Y); W.neg(); W.norm();
-        Y.cmove(W,ne);
-
-        return new ECP2(X3,Y);
     }
 
 /* Map octet string to curve point

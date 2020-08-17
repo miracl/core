@@ -52,6 +52,8 @@ var ECP = function(ctx) {
     ECP.SEXTIC_TWIST = ctx.config["@ST"];
     ECP.SIGN_OF_X = ctx.config["@SX"];
     ECP.ATE_BITS = ctx.config["@AB"];
+    ECP.HTC_ISO = ctx.config["@HC"];
+    ECP.HTC_ISO_G2 = ctx.config["@HC2"];
 
     ECP.HASH_TYPE = ctx.config["@HT"];
     ECP.AESKEY = ctx.config["@AK"];
@@ -1512,36 +1514,105 @@ var ECP = function(ctx) {
         }
         if (ECP.CURVETYPE == ECP.WEIERSTRASS)
         { // swu method
+            var A=new ctx.FP(0);
+            var B=new ctx.FP(0);
             var X1=new ctx.FP(0);
             var X2=new ctx.FP(0);
             var X3=new ctx.FP(0);
             var one=new ctx.FP(1);
-            var B = new ctx.FP(0);
             var Y=new ctx.FP(0);
             var NY=new ctx.FP(0);
             var t=new ctx.FP(h);
+            var w=new ctx.FP(0);
             var x=new ctx.BIG(0);
             var sgn=t.sign();
-            if (ECP.CURVE_A!=0)
+            if (ECP.CURVE_A!=0 || ECP.HTC_ISO!=0)
             {
-                var A=new ctx.FP(ECP.CURVE_A);
-                B.rcopy(ctx.ROM_CURVE.CURVE_B);
+                if (ECP.HTC_ISO!=0)
+                {
+                    A.rcopy(ctx.ROM_CURVE.CURVE_Ad);
+                    B.rcopy(ctx.ROM_CURVE.CURVE_Bd);
+                } else {
+                    A.copy(new ctx.FP(ECP.CURVE_A));
+                    B.rcopy(ctx.ROM_CURVE.CURVE_B);
+                }
+                // SSWU Method
                 t.sqr();
                 t.imul(ctx.FP.RIADZ);
                 var w=new ctx.FP(t); w.add(one); w.norm();
-                w.mul(t);
-                A.mul(w);
-                A.inverse(null);
+                w.mul(t); NY.copy(A);
+                NY.mul(w);
+                NY.inverse(null);
                 w.add(one); w.norm();
                 w.mul(B);
                 w.neg(); w.norm();
-                X2.copy(w); X2.mul(A);
+
+                X2.copy(w); X2.mul(NY);
                 X3.copy(t); X3.mul(X2);
-                var rhs=ECP.RHS(X3);
-                X2.cmove(X3,rhs.qr(null));
-                rhs.copy(ECP.RHS(X2));
-                Y.copy(rhs.sqrt(null));
-                x.copy(X2.redc());
+                if (ECP.HTC_ISO==0)
+                {
+                    var rhs=ECP.RHS(X3);
+                    X2.cmove(X3,rhs.qr(null));
+                    rhs.copy(ECP.RHS(X2));
+                    Y.copy(rhs.sqrt(null));
+                    x.copy(X2.redc());
+                } else {
+                    w.copy(X3); w.sqr(); w.add(A); w.norm(); w.mul(X3); w.add(B); w.norm(); // w=x^3+Ax+B
+                    X2.cmove(X3,w.qr(null));
+                    w.copy(X2); w.sqr(); w.add(A); w.norm(); w.mul(X2); w.add(B); w.norm();
+                    Y.copy(w.sqrt(null));
+
+                    var ne=Y.sign()^sgn;
+                    NY.copy(Y); NY.neg(); NY.norm();
+                    Y.cmove(NY,ne);
+
+                    var k=0;
+                    var isox=ECP.HTC_ISO;
+                    var isoy=3*(isox-1)/2;
+                // xnum
+                    var xnum=new ctx.FP(0);
+                    xnum.rcopy(ctx.ROM_CURVE.PC[k++]);
+                    for (var i=0;i<isox;i++) {
+                        xnum.mul(X2);
+                        w.rcopy(ctx.ROM_CURVE.PC[k++]);
+                        xnum.add(w); xnum.norm();
+                    }
+                // xden
+                    var xden=new ctx.FP(X2);
+                    w.rcopy(ctx.ROM_CURVE.PC[k++]);
+                    xden.add(w); xden.norm();
+                    for (var i=0;i<isox-2;i++) {
+                        xden.mul(X2);
+                        w.rcopy(ctx.ROM_CURVE.PC[k++]);
+                        xden.add(w); xden.norm();
+                    }
+                // ynum
+                    var ynum=new ctx.FP(0);
+                    ynum.rcopy(ctx.ROM_CURVE.PC[k++]);
+                    for (var i=0;i<isoy;i++) {
+                        ynum.mul(X2);
+                        w.rcopy(ctx.ROM_CURVE.PC[k++]);
+                        ynum.add(w); ynum.norm();
+                    }
+                // yden
+                    var yden=new ctx.FP(X2);
+                    w.rcopy(ctx.ROM_CURVE.PC[k++]);
+                    yden.add(w); yden.norm();
+                    for (var i=0;i<isoy-1;i++) {
+                        yden.mul(X2);
+                        w.rcopy(ctx.ROM_CURVE.PC[k++]);
+                        yden.add(w); yden.norm();
+                    }  
+                    ynum.mul(Y);
+                    w.copy(xnum); w.mul(yden);
+                    P=new ECP();
+                    P.x.copy(w);
+                    w.copy(ynum); w.mul(xden);
+                    P.y.copy(w);
+                    w.copy(xden); w.mul(yden);
+                    P.z.copy(w);
+                    return P;
+                }
             } else {
 // Shallue and van de Woestijne
                 var Z=ctx.FP.RIADZ;

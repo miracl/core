@@ -96,8 +96,8 @@ public class TestHTP2 extends TestCase {
         boolean oneofmine=false;
 
         if (packageName == "org.miracl.core.BLS12381") {
-            ro="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_";
-            nu="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_";
+            ro="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_";
+            nu="QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_NU_";
             System.out.println("\nTesting HTP for curve BLS12381_G2");
             oneofmine=true;
         }

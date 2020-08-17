@@ -372,7 +372,7 @@ int htp_SECP256K1(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_RO_");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_");
     hash_to_field_SECP256K1(MC_SHA2,HASH_TYPE_SECP256K1,u,&DST,&MSG,2);
     printf("u[0]= "); FP_SECP256K1_output(&u[0]); printf("\n");
     printf("u[1]= "); FP_SECP256K1_output(&u[1]); printf("\n");
@@ -387,7 +387,7 @@ int htp_SECP256K1(char *mess)
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
-    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SVDW_NU_");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_NU_");
     hash_to_field_SECP256K1(MC_SHA2,HASH_TYPE_SECP256K1,u,&DST,&MSG,1);
     printf("u[0]= "); FP_SECP256K1_output(&u[0]); printf("\n");
     ECP_SECP256K1_map2point(&P,&u[0]);
@@ -441,7 +441,7 @@ int htp_BLS12381(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_RO_");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_");
     hash_to_field_BLS12381(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,2);
     printf("u[0]= "); FP_BLS12381_output(&u[0]); printf("\n");
     printf("u[1]= "); FP_BLS12381_output(&u[1]); printf("\n");
@@ -456,7 +456,7 @@ int htp_BLS12381(char *mess)
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
-    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SVDW_NU_");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_NU_");
     hash_to_field_BLS12381(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,1);
     printf("u[0]= "); FP_BLS12381_output(&u[0]); printf("\n");
     ECP_BLS12381_map2point(&P,&u[0]);
@@ -517,7 +517,7 @@ int htp_BLS12381_G2(char *mess)
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
-    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_RO_");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_");
     hash_to_field_BLS12381_G2(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,2);
     printf("u[0]= "); FP2_BLS12381_output(&u[0]); printf("\n");
     printf("u[1]= "); FP2_BLS12381_output(&u[1]); printf("\n");
@@ -532,7 +532,7 @@ int htp_BLS12381_G2(char *mess)
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
-    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SVDW_NU_");
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_NU_");
     hash_to_field_BLS12381_G2(MC_SHA2,HASH_TYPE_BLS12381,u,&DST,&MSG,1);
     printf("u[0]= "); FP2_BLS12381_output(&u[0]); printf("\n");
     ECP2_BLS12381_map2point(&P,&u[0]);

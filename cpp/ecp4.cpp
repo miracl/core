@@ -792,7 +792,7 @@ void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
     FP4_copy(&T,H);
     sgn=FP4_sign(&T);
      
-    FP_from_int(&Z,RIADZG2_YYY);
+    FP_from_int(&Z,RIADZG2A_YYY);
     FP4_from_FP(&A,&Z);
     ECP4_rhs(&A,&A);  // A=g(Z)
 
@@ -821,7 +821,7 @@ void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
     FP4_mul(&W,&W,&Y);
     FP4_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4*Z*sqrt(-3)
    
-    FP_from_int(&s,RIADZG2_YYY);
+    FP_from_int(&s,RIADZG2A_YYY);
     FP4_from_FP(&X1,&s);
 
     FP4_copy(&X3,&X1);

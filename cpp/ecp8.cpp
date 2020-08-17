@@ -965,7 +965,7 @@ void ZZZ::ECP8_map2point(ECP8 *Q,FP8 *H)
     FP8_copy(&T,H);
     sgn=FP8_sign(&T);
  
-    FP_from_int(&Z,RIADZG2_YYY);
+    FP_from_int(&Z,RIADZG2A_YYY);
     FP8_from_FP(&A,&Z);
     ECP8_rhs(&A,&A);  // A=g(Z)
 
@@ -994,7 +994,7 @@ void ZZZ::ECP8_map2point(ECP8 *Q,FP8 *H)
     FP8_mul(&W,&W,&Y);
     FP8_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4
 
-    FP_from_int(&s,RIADZG2_YYY);
+    FP_from_int(&s,RIADZG2A_YYY);
     FP8_from_FP(&X1,&s);
 
     FP8_copy(&X3,&X1);

@@ -776,7 +776,7 @@ void ECP4_ZZZ_map2point(ECP4_ZZZ *Q,FP4_YYY *H)
     FP4_YYY_copy(&T,H);
     sgn=FP4_YYY_sign(&T);
 
-    FP_YYY_from_int(&Z,RIADZG2_YYY);
+    FP_YYY_from_int(&Z,RIADZG2A_YYY);
     FP4_YYY_from_FP(&A,&Z);
     ECP4_ZZZ_rhs(&A,&A);  // A=g(Z)
 
@@ -805,7 +805,7 @@ void ECP4_ZZZ_map2point(ECP4_ZZZ *Q,FP4_YYY *H)
     FP4_YYY_mul(&W,&W,&Y);
     FP4_YYY_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4*Z*sqrt(-3)
 
-    FP_YYY_from_int(&s,RIADZG2_YYY);
+    FP_YYY_from_int(&s,RIADZG2A_YYY);
     FP4_YYY_from_FP(&X1,&s);
 
     FP4_YYY_copy(&X3,&X1);

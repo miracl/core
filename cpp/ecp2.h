@@ -56,7 +56,6 @@ extern const XXX::BIG CURVE_Order; /**< Elliptic curve group order */
 extern const XXX::BIG CURVE_Cof;   /**< Elliptic curve cofactor */
 extern const XXX::BIG CURVE_Bnx;   /**< Elliptic curve parameter */
 
-
 /* Generator point on G1 */
 extern const XXX::BIG CURVE_Gx; /**< x-coordinate of generator point in group G1  */
 extern const XXX::BIG CURVE_Gy; /**< y-coordinate of generator point in group G1  */
@@ -68,6 +67,8 @@ extern const XXX::BIG CURVE_Pxa; /**< real part of x-coordinate of generator poi
 extern const XXX::BIG CURVE_Pxb; /**< imaginary part of x-coordinate of generator point in group G2 */
 extern const XXX::BIG CURVE_Pya; /**< real part of y-coordinate of generator point in group G2 */
 extern const XXX::BIG CURVE_Pyb; /**< imaginary part of y-coordinate of generator point in group G2 */
+
+
 
 /* ECP2 E(Fp2) prototypes */
 /**	@brief Tests for ECP2 point equal to infinity

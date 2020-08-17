@@ -21,6 +21,7 @@
 /* SU=m, m is Stack Usage */
 
 #include "ecp2_ZZZ.h"
+#include "ecp_ZZZ.h"
 
 using namespace XXX;
 using namespace YYY;
@@ -658,23 +659,121 @@ void ZZZ::ECP2_hap2point(ECP2 *Q,BIG h)
     }
 }
 */
+
 /* Constant time Map FP2 to Point in G2 */
 void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
 {
-// SVDW - Shallue and van de Woestijne method.
-    int sgn,ne;
+// SSWU plus isogenies method
+    int i,k,sgn,ne,isox,isoy,iso=HTC_ISO_G2_ZZZ;
     FP2 X1,X2,X3,W,Y,T,A,NY;
     FP Z,s;
+#if HTC_ISO_G2_ZZZ != 0
+    FP2 ZZ,Ad,Bd;
+    FP2 xnum,xden,ynum,yden;
+    FP2_from_ints(&ZZ,RIADZG2A_ZZZ,RIADZG2B_ZZZ);
+
+    FP2_rcopy(&Ad,CURVE_Adr,CURVE_Adi);
+    FP2_rcopy(&Bd,CURVE_Bdr,CURVE_Bdi);
 
     FP2_one(&NY);
     FP2_copy(&T,H);
     sgn=FP2_sign(&T);
 
-    FP_from_int(&Z,RIADZG2_YYY);
+    FP2_sqr(&T,&T);
+    FP2_mul(&T,&T,&ZZ);
+    FP2_add(&W,&T,&NY);
+    FP2_norm(&W);
+
+    FP2_mul(&W,&W,&T);
+    FP2_mul(&A,&Ad,&W);
+    FP2_inv(&A,&A);
+    FP2_add(&W,&W,&NY);
+    FP2_norm(&W);
+    FP2_mul(&W,&W,&Bd);
+    FP2_neg(&W,&W);
+    FP2_norm(&W);
+
+    FP2_mul(&X2,&W,&A);
+    FP2_mul(&X3,&T,&X2);
+
+    FP2_sqr(&W,&X3); FP2_add(&W,&W,&Ad); FP2_norm(&W); FP2_mul(&W,&W,&X3); FP2_add(&W,&W,&Bd); FP2_norm(&W);  // w=x^3+Ax+B
+    FP2_cmove(&X2,&X3,FP2_qr(&W));                    
+    FP2_sqr(&W,&X2); FP2_add(&W,&W,&Ad); FP2_norm(&W); FP2_mul(&W,&W,&X2); FP2_add(&W,&W,&Bd); FP2_norm(&W);
+    FP2_sqrt(&Y,&W);  
+
+    ne=FP2_sign(&Y)^sgn;
+    FP2_neg(&NY,&Y); FP2_norm(&NY);
+    FP2_cmove(&Y,&NY,ne);
+
+// (X2,Y) is on isogenous curve
+
+    k=0;
+    isox=iso;
+    isoy=3*(iso-1)/2;
+
+// xnum
+    FP2_rcopy(&xnum,PCR[k],PCI[k]); k++;
+    for (i=0;i<isox;i++)
+    {
+        FP2_mul(&xnum,&xnum,&X2); 
+        FP2_rcopy(&W,PCR[k],PCI[k]); k++;
+        FP2_add(&xnum,&xnum,&W); FP2_norm(&xnum);
+    }
+
+// xden
+    FP2_copy(&xden,&X2);
+    FP2_rcopy(&W,PCR[k],PCI[k]); k++;
+    FP2_add(&xden,&xden,&W); FP2_norm(&xden);
+    for (i=0;i<isox-2;i++)
+    {
+        FP2_mul(&xden,&xden,&X2);
+        FP2_rcopy(&W,PCR[k],PCI[k]); k++;
+        FP2_add(&xden,&xden,&W); FP2_norm(&xden);
+    }
+
+// ynum
+        FP2_rcopy(&ynum,PCR[k],PCI[k]); k++;
+        for (i=0;i<isoy;i++)
+        {
+            FP2_mul(&ynum,&ynum,&X2); 
+            FP2_rcopy(&W,PCR[k],PCI[k]); k++;
+            FP2_add(&ynum,&ynum,&W); FP2_norm(&ynum);
+        }
+
+// yden 
+        FP2_copy(&yden,&X2);
+        FP2_rcopy(&W,PCR[k],PCI[k]); k++;
+        FP2_add(&yden,&yden,&W); FP2_norm(&yden);
+      
+        for (i=0;i<isoy-1;i++)
+        {
+            FP2_mul(&yden,&yden,&X2); 
+            FP2_rcopy(&W,PCR[k],PCI[k]); k++;
+            FP2_add(&yden,&yden,&W); FP2_norm(&yden);
+        }
+
+        FP2_mul(&ynum,&ynum,&Y);
+
+        FP2_mul(&T,&xnum,&yden);
+        FP2_copy(&(Q->x),&T);
+
+        FP2_mul(&T,&ynum,&xden);
+        FP2_copy(&(Q->y),&T);
+
+        FP2_mul(&T,&xden,&yden);
+        FP2_copy(&(Q->z),&T);
+
+#else
+// SVDW - Shallue and van de Woestijne method.
+    FP2_one(&NY);
+    FP2_copy(&T,H);
+    sgn=FP2_sign(&T);
+
+    FP_from_int(&Z,RIADZG2A_YYY);
     FP2_from_FP(&A,&Z);
     ECP2_rhs(&A,&A);  // A=g(Z)
 
-    if (CURVE_B_I==4 && SEXTIC_TWIST_ZZZ==M_TYPE && RIADZG2_YYY==-1)
+    if (CURVE_B_I==4 && SEXTIC_TWIST_ZZZ==M_TYPE && RIADZG2A_YYY==-1 && RIADZG2B_YYY==0)
     { // special case for BLS12381
         FP2_from_ints(&W,2,1);
     } else {
@@ -704,7 +803,7 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_mul(&W,&W,&Y);
     FP2_mul(&W,&W,&NY);     // tv5=u*tv1*tv3*tv4*Z*sqrt(-3)
    
-    FP2_from_ints(&X1,RIADZG2_YYY,0);
+    FP2_from_ints(&X1,RIADZG2A_YYY,RIADZG2B_YYY);
     FP2_copy(&X3,&X1);
     FP2_neg(&X1,&X1); FP2_norm(&X1); FP2_div2(&X1,&X1); // -Z/2
     FP2_copy(&X2,&X1);
@@ -731,6 +830,7 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_cmove(&Y,&W,ne);
 
     ECP2_set(Q,&X3,&Y);
+#endif
 }
 
 /* Map octet to point on G2 */
@@ -751,7 +851,7 @@ void ZZZ::ECP2_mapit(ECP2 *Q, octet *W)
 /* cofactor product */
 void ZZZ::ECP2_cfp(ECP2 *Q)
 {
-    FP Fx, Fy;
+//    FP Fx, Fy;
     FP2 X;
     BIG x;
 #if (PAIRING_FRIENDLY_ZZZ == BN_CURVE)
@@ -759,9 +859,11 @@ void ZZZ::ECP2_cfp(ECP2 *Q)
 #elif (PAIRING_FRIENDLY_ZZZ > BN_CURVE)
     ECP2 xQ, x2Q;
 #endif
-    FP_rcopy(&Fx, Fra);
-    FP_rcopy(&Fy, Frb);
-    FP2_from_FPs(&X, &Fx, &Fy);
+//    FP_rcopy(&Fx, Fra);
+//    FP_rcopy(&Fy, Frb);
+//    FP2_from_FPs(&X, &Fx, &Fy);
+
+    FP2_rcopy(&X,Fra,Frb);
 
 #if SEXTIC_TWIST_ZZZ==M_TYPE
     FP2_inv(&X, &X);
@@ -825,11 +927,12 @@ void ZZZ::ECP2_cfp(ECP2 *Q)
 int ZZZ::ECP2_generator(ECP2 *G)
 {
     FP2 wx, wy;
-
-    FP_rcopy(&(wx.a), CURVE_Pxa);
-    FP_rcopy(&(wx.b), CURVE_Pxb);
-    FP_rcopy(&(wy.a), CURVE_Pya);
-    FP_rcopy(&(wy.b), CURVE_Pyb);
+    FP2_rcopy(&wx,CURVE_Pxa,CURVE_Pxb);
+    FP2_rcopy(&wy,CURVE_Pya,CURVE_Pyb);
+//    FP_rcopy(&(wx.a), CURVE_Pxa);
+//    FP_rcopy(&(wx.b), CURVE_Pxb);
+//    FP_rcopy(&(wy.a), CURVE_Pya);
+//    FP_rcopy(&(wy.b), CURVE_Pyb);
     return ECP2_set(G, &wx, &wy);
 }
 

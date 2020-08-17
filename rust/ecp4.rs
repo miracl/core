@@ -889,7 +889,7 @@ impl ECP4 {
         let mut T=FP4::new_copy(H);
         let sgn=T.sign();
 
-        let mut Z=FP::new_int(fp::RIADZG2);
+        let mut Z=FP::new_int(fp::RIADZG2A);
         let mut X1=FP4::new_fp(&Z);
         let mut X3=FP4::new_copy(&X1);
         let mut A=ECP4::rhs(&X1);

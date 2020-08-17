@@ -1052,7 +1052,7 @@ var ECP8 = function(ctx) {
         var T=new ctx.FP8(H);
         sgn=T.sign();
 
-        var Z=new ctx.FP(ctx.FP.RIADZG2);
+        var Z=new ctx.FP(ctx.FP.RIADZG2A);
         var X1=new ctx.FP8(Z);
         var A=ECP8.RHS(X1);
         var W=new ctx.FP8(A);

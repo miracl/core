@@ -151,6 +151,7 @@ extern void FP_YYY_redc(BIG_XXX x, FP_YYY *y);
  */
 extern void FP_YYY_one(FP_YYY *x);
 
+
 /**	@brief returns "sign" of an FP
  *
 	@param x FP number

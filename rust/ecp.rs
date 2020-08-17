@@ -51,6 +51,8 @@ pub const SEXTIC_TWIST:usize=@ST@;
 pub const SIGN_OF_X:usize=@SX@;
 pub const ATE_BITS:usize=@AB@;
 pub const G2_TABLE:usize=@G2@;
+pub const HTC_ISO:usize=@HC@;
+pub const HTC_ISO_G2:usize=@HC2@;
 
 pub const HASH_TYPE:usize=@HT@;
 pub const AESKEY:usize=@AK@;
@@ -1421,6 +1423,8 @@ impl ECP {
         }
         if CURVETYPE==WEIERSTRASS {
         // swu method
+            let mut A=FP::new();
+            let mut B=FP::new();
             let mut X2=FP::new();
             let mut X3=FP::new();
             let one=FP::new_int(1);
@@ -1428,44 +1432,106 @@ impl ECP {
             let mut NY=FP::new();
             let mut t=FP::new_copy(h);
             let mut x=BIG::new_int(0);
+            let mut w=FP::new();
             let sgn=t.sign();
 
-            if CURVE_A != 0
+            if CURVE_A != 0 || HTC_ISO != 0
             {
-                let mut A=FP::new_int(CURVE_A);
-                let B = FP::new_big(&BIG::new_ints(&rom::CURVE_B));
+                if HTC_ISO != 0 {
+/* CAHCZS
+                    A.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_AD)));
+                    B.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_BD)));
+CAHCZF */
+                } else {
+                    A.copy(&FP::new_int(CURVE_A));
+                    B.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_B)));
+                }
+                // SSWU Method
                 t.sqr();
-            //    if fp::PM1D2 == 2 {
-            //        t.dbl();
-            //    } else {
-            //        t.neg();
-            //    }
-            //    t.norm();
                 t.imul(fp::RIADZ);
-                let mut w=FP::new_copy(&t); w.add(&one); w.norm();
-                w.mul(&t);
-                A.mul(&w);
-                A.inverse(None);
+                w.copy(&t); w.add(&one); w.norm();
+
+                w.mul(&t); NY.copy(&A);
+                NY.mul(&w);
+                NY.inverse(None);
                 w.add(&one); w.norm();
                 w.mul(&B);
                 w.neg(); w.norm();
-                X2.copy(&w); X2.mul(&A);
+
+                X2.copy(&w); X2.mul(&NY);
                 X3.copy(&t); X3.mul(&X2);
-                let mut rhs=ECP::rhs(&X3);
-                X2.cmove(&X3,rhs.qr(None));
-                rhs.copy(&ECP::rhs(&X2));
-                Y.copy(&rhs.sqrt(None));
-                x.copy(&X2.redc());
+                if HTC_ISO == 0 {
+                    let mut rhs=ECP::rhs(&X3);
+                    X2.cmove(&X3,rhs.qr(None));
+                    rhs.copy(&ECP::rhs(&X2));
+                    Y.copy(&rhs.sqrt(None));
+                    x.copy(&X2.redc());
+                } else {
+/* CAHCZS
+                    w.copy(&X3); w.sqr(); w.add(&A); w.norm(); w.mul(&X3); w.add(&B); w.norm(); // w=x^3+Ax+B
+                    X2.cmove(&X3,w.qr(None));
+                    w.copy(&X2); w.sqr(); w.add(&A); w.norm(); w.mul(&X2); w.add(&B); w.norm();
+                    Y.copy(&w.sqrt(None));
+
+                    let ne=Y.sign()^sgn;
+                    NY.copy(&Y); NY.neg(); NY.norm();
+                    Y.cmove(&NY,ne);
+
+                    let mut k=0;
+                    let isox=HTC_ISO;
+                    let isoy=3*(isox-1)/2;
+                // xnum
+                    let mut xnum=FP::new_big(&BIG::new_ints(&rom::PC[k])); k+=1;
+                    for _ in 0..isox {
+                        xnum.mul(&X2);
+                        w.copy(&FP::new_big(&BIG::new_ints(&rom::PC[k]))); k+=1;
+                        xnum.add(&w); xnum.norm();
+                    }
+                // xden
+                    let mut xden=FP::new_copy(&X2);
+                    w.copy(&FP::new_big(&BIG::new_ints(&rom::PC[k]))); k+=1;
+                    xden.add(&w); xden.norm();
+                    for _ in 0..isox-2 {
+                        xden.mul(&X2);
+                        w.copy(&FP::new_big(&BIG::new_ints(&rom::PC[k]))); k+=1;
+                        xden.add(&w); xden.norm();
+                    }
+                // ynum
+                    let mut ynum=FP::new_big(&BIG::new_ints(&rom::PC[k])); k+=1;
+                    for _ in 0..isoy {
+                        ynum.mul(&X2);
+                        w.copy(&FP::new_big(&BIG::new_ints(&rom::PC[k]))); k+=1;
+                        ynum.add(&w); ynum.norm();
+                    }
+                // yden
+                    let mut yden=FP::new_copy(&X2);
+                    w.copy(&FP::new_big(&BIG::new_ints(&rom::PC[k]))); k+=1;
+                    yden.add(&w); yden.norm();
+                    for _ in 0..isoy-1 {
+                        yden.mul(&X2);
+                        w.copy(&FP::new_big(&BIG::new_ints(&rom::PC[k]))); k+=1;
+                        yden.add(&w); yden.norm();
+                    }  
+                    ynum.mul(&Y);
+                    w.copy(&xnum); w.mul(&yden);
+                    P.x.copy(&w);
+                    w.copy(&ynum); w.mul(&xden);
+                    P.y.copy(&w);
+                    w.copy(&xden); w.mul(&yden);
+                    P.z.copy(&w);
+                    return P;
+CAHCZF */
+                }
             } else {
 // Shallue and van de Woestijne
-// SQRTm3 not available, so preprocess this out
+// SQRTM3 not available, so preprocess this out
 /* CAISZS
                 let mut X1=FP::new();
                 let Z=fp::RIADZ;
                 X1.copy(&FP::new_int(Z));
                 X3.copy(&X1);
-                let mut A=ECP::rhs(&X1);
-                let mut B = FP::new_big(&BIG::new_ints(&rom::SQRTM3));
+                A.copy(&ECP::rhs(&X1));
+                B.copy(&FP::new_big(&BIG::new_ints(&rom::SQRTM3)));
                 B.imul(Z);
 
                 t.sqr();
@@ -1475,7 +1541,7 @@ impl ECP {
                 NY.copy(&t); NY.mul(&Y); 
                 NY.mul(&B);
                 
-                let mut w=FP::new_copy(&A); 
+                w.copy(&A);
                 FP::tpo(&mut NY,&mut w);
 
                 w.mul(&B);

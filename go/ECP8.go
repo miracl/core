@@ -848,7 +848,7 @@ func ECP8_map2point(H *FP8) *ECP8 {
     T:=NewFP8copy(H)
     sgn:=T.sign()
 
-	Z:=NewFPint(RIADZG2);
+	Z:=NewFPint(RIADZG2A);
 	X1:=NewFP8fp(Z)
 	X3:=NewFP8copy(X1)
 	A:=RHS8(X1)

@@ -133,6 +133,12 @@ void FP2_YYY_one(FP2_YYY *w)
     FP2_YYY_from_FP(w, &one);
 }
 
+void FP2_YYY_rcopy(FP2_YYY *w,const BIG_XXX a,const BIG_XXX b)
+{
+    FP_YYY_rcopy(&(w->a),a);
+    FP_YYY_rcopy(&(w->b),b);
+}
+
 int FP2_YYY_sign(FP2_YYY *w)
 {
     int p1,p2;
