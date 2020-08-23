@@ -1366,15 +1366,20 @@ func ECP_map2point(h *FP) *ECP {
 	// swu method
 			A:=NewFP()
 			B:=NewFP()
+			X1:=NewFP()
 			X2:=NewFP()
 			X3:=NewFP()
             one:=NewFPint(1)
+			Y:=NewFP()
+			D:=NewFP()
             t:=NewFPcopy(h)
 			w:=NewFP()
-            x:=NewBIG()
-			Y:=NewFP()
-			NY:=NewFP()
+			D2:=NewFP()
+			hint:=NewFP()
+			GX1:=NewFP()
+			Y3:=NewFP()
             sgn:=t.sign()
+
             if CURVE_A != 0 || HTC_ISO != 0{
 				if HTC_ISO!=0 {
 /* CAHCZS
@@ -1390,32 +1395,50 @@ CAHCZF */
 				t.imul(RIADZ)
                 w.copy(t); w.add(one); w.norm()
 
-                w.mul(t); NY.copy(A)
-                NY.mul(w)
-                NY.inverse(nil)
+                w.mul(t); D.copy(A)
+                D.mul(w)
+       
                 w.add(one); w.norm()
                 w.mul(B)
                 w.neg(); w.norm()
 
-                X2.copy(w); X2.mul(NY)
+                X2.copy(w); 
                 X3.copy(t); X3.mul(X2)
-				if HTC_ISO==0 {
-					rhs:=RHS(X3)
-					X2.cmove(X3,rhs.qr(nil))
-					rhs.copy(RHS(X2))
-					Y.copy(rhs.sqrt(nil))
-					x.copy(X2.redc())
-				} else {
+
+// x^3+Ad^2x+Bd^3
+                GX1.copy(X2); GX1.sqr(); D2.copy(D)
+                D2.sqr(); w.copy(A); w.mul(D2); GX1.add(w); GX1.norm(); GX1.mul(X2); D2.mul(D);w.copy(B); w.mul(D2); GX1.add(w); GX1.norm()
+
+                w.copy(GX1); w.mul(D)
+                qr:=w.qr(hint)
+                D.copy(w); D.inverse(hint)
+                D.mul(GX1)
+                X2.mul(D)
+                X3.mul(D)
+                t.mul(h)
+                D2.copy(D); D2.sqr()
+
+                Y.copy(w.sqrt(hint))
+                Y.mul(D2)
+
+                D2.mul(t)
+                w.imul(RIADZ)
+
+                X1.copy(NewFPbig(NewBIGints(CURVE_HTPC)))
+                hint.mul(X1)
+                
+                Y3.copy(w.sqrt(hint))
+                Y3.mul(D2)
+
+                X2.cmove(X3,1-qr)
+                Y.cmove(Y3,1-qr)
+
+				ne:=Y.sign()^sgn
+				w.copy(Y); w.neg(); w.norm()
+				Y.cmove(w,ne)
+
+				if HTC_ISO!=0 {
 /* CAHCZS
-					w.copy(X3); w.sqr(); w.add(A); w.norm(); w.mul(X3); w.add(B); w.norm() // w=x^3+Ax+B
-					X2.cmove(X3,w.qr(nil))
-					w.copy(X2); w.sqr(); w.add(A); w.norm(); w.mul(X2); w.add(B); w.norm()
-					Y.copy(w.sqrt(nil))
-
-					ne:=Y.sign()^sgn
-					NY.copy(Y); NY.neg(); NY.norm()
-					Y.cmove(NY,ne)
-
 					k:=0
 					isox:=HTC_ISO
 					isoy:=3*(isox-1)/2
@@ -1460,27 +1483,32 @@ CAHCZF */
 					P.z.copy(w)
 					return P
 CAHCZF */
+				} else {
+					x:=X2.redc()
+					y:=Y.redc()
+					P.Copy(NewECPbigs(x,y))
+					return P
 				}
             } else {
 // Shallue and van de Woestijne
 // SQRTm3 not available, so preprocess this out
 /* CAISZS
                 Z:=RIADZ
-                X1:=NewFPint(Z)
-                X3:=NewFPcopy(X1)
-                A:=RHS(X1)
-				B:=NewFPbig(NewBIGints(SQRTm3))
+                X1.copy(NewFPint(Z))
+                X3.copy(X1)
+                A.copy(RHS(X1))
+				B.copy(NewFPbig(NewBIGints(SQRTm3)))
 				B.imul(Z)
 
                 t.sqr()
                 Y.copy(A); Y.mul(t)
                 t.copy(one); t.add(Y); t.norm()
                 Y.rsub(one); Y.norm()
-                NY.copy(t); NY.mul(Y); 
-				NY.mul(B)
+                D.copy(t); D.mul(Y); 
+				D.mul(B)
 				
-                w:=NewFPcopy(A);
-				FP_tpo(NY,w)
+                w.copy(A);
+				FP_tpo(D,w)
 
                 w.mul(B)
                 if (w.sign()==1) {
@@ -1489,14 +1517,14 @@ CAHCZF */
                 }
 
                 w.mul(B)				
-                w.mul(h); w.mul(Y); w.mul(NY)
+                w.mul(h); w.mul(Y); w.mul(D)
 
                 X1.neg(); X1.norm(); X1.div2()
-                X2:=NewFPcopy(X1)
+                X2.copy(X1)
                 X1.sub(w); X1.norm()
                 X2.add(w); X2.norm()
                 A.add(A); A.add(A); A.norm()
-                t.sqr(); t.mul(NY); t.sqr()
+                t.sqr(); t.mul(D); t.sqr()
                 A.mul(t)
                 X3.add(A); X3.norm()
 
@@ -1506,15 +1534,17 @@ CAHCZF */
                 X3.cmove(X1,rhs.qr(nil))
                 rhs.copy(RHS(X3))
                 Y.copy(rhs.sqrt(nil))
-                x.copy(X3.redc())
+
+				ne:=Y.sign()^sgn
+				w.copy(Y); w.neg(); w.norm()
+				Y.cmove(w,ne)
+
+				x:=X3.redc();
+				y:=Y.redc();
+				P.Copy(NewECPbigs(x,y))
+				return P
 CAISZF */
             }
-            ne:=Y.sign()^sgn
-            NY.copy(Y); NY.neg(); NY.norm()
-            Y.cmove(NY,ne)
-
-            y:=Y.redc()
-            P.Copy(NewECPbigs(x,y))
 	}
 	return P
 }

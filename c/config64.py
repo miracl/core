@@ -788,16 +788,16 @@ while ptr<max:
         curveset("256","F256PME","NUMS256E","56","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","128")
         curve_selected=True
     if x==13:
-        curveset("384","F384PM","NUMS384W","56","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT_PF","","","","","192")
+        curveset("384","F384PM","NUMS384W","58","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT_PF","","","","","192")
         curve_selected=True
     if x==14:
         curveset("384","F384PM","NUMS384E","56","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","192")
         curve_selected=True
     if x==15:
-        curveset("512","F512PM","NUMS512W","56","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT_PF","","","","","256")
+        curveset("512","F512PM","NUMS512W","60","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT_PF","","","","","256")
         curve_selected=True
     if x==16:
-        curveset("512","F512PM","NUMS512E","56","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","256")
+        curveset("512","F512PM","NUMS512E","60","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","256")
         curve_selected=True
 
     if x==17:

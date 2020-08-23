@@ -1188,10 +1188,13 @@ public final class ECP {
             FP X3=new FP();
             FP one=new FP(1);
             FP Y=new FP();
-            FP NY=new FP();
+            FP D=new FP();
             FP t=new FP(h);
             FP w=new FP();
-            BIG x=new BIG(0);
+            FP D2=new FP();
+            FP hint=new FP();
+            FP GX1=new FP();
+            FP Y3=new FP();
             int sgn=t.sign();
 
             if (CONFIG_CURVE.CURVE_A!=0 || CONFIG_CURVE.HTC_ISO!=0)
@@ -1206,38 +1209,55 @@ CAHCZF */
                     A.copy(new FP(CONFIG_CURVE.CURVE_A));
                     B.copy(new FP(new BIG(ROM.CURVE_B)));
                 }
-                
                 // SSWU Method
                 t.sqr();
                 t.imul(CONFIG_FIELD.RIADZ);
                 w.copy(t); w.add(one); w.norm();
 
-                w.mul(t); NY.copy(A);
-                NY.mul(w);
-                NY.inverse(null);
+                w.mul(t); D.copy(A);
+                D.mul(w);
+               
                 w.add(one); w.norm();
                 w.mul(B);
                 w.neg(); w.norm();
 
-                X2.copy(w); X2.mul(NY);
+                X2.copy(w); 
                 X3.copy(t); X3.mul(X2);
-                if (CONFIG_CURVE.HTC_ISO == 0)
-                {
-                    FP rhs=RHS(X3);
-                    X2.cmove(X3,rhs.qr(null));
-                    rhs.copy(RHS(X2));
-                    Y.copy(rhs.sqrt(null));
-                    x.copy(X2.redc());
-                } else {
-/* CAHCZS
-                    w.copy(X3); w.sqr(); w.add(A); w.norm(); w.mul(X3); w.add(B); w.norm(); // w=x^3+Ax+B
-                    X2.cmove(X3,w.qr(null));
-                    w.copy(X2); w.sqr(); w.add(A); w.norm(); w.mul(X2); w.add(B); w.norm();
-                    Y.copy(w.sqrt(null));
+// x^3+Ad^2x+Bd^3
+                GX1.copy(X2); GX1.sqr(); D2.copy(D);
+                D2.sqr(); w.copy(A); w.mul(D2); GX1.add(w); GX1.norm(); GX1.mul(X2); D2.mul(D);w.copy(B); w.mul(D2); GX1.add(w); GX1.norm();
 
-                    int ne=Y.sign()^sgn;
-                    NY.copy(Y); NY.neg(); NY.norm();
-                    Y.cmove(NY,ne);
+                w.copy(GX1); w.mul(D);
+                int qr=w.qr(hint);
+                D.copy(w); D.inverse(hint);
+                D.mul(GX1);
+                X2.mul(D);
+                X3.mul(D);
+                t.mul(h);
+                D2.copy(D); D2.sqr();
+
+                Y.copy(w.sqrt(hint));
+                Y.mul(D2);
+
+                D2.mul(t);
+                w.imul(CONFIG_FIELD.RIADZ);
+
+                X1.copy(new FP(new BIG(ROM.CURVE_HTPC)));
+                hint.mul(X1);
+                
+                Y3.copy(w.sqrt(hint));
+                Y3.mul(D2);
+
+                X2.cmove(X3,1-qr);
+                Y.cmove(Y3,1-qr);
+
+                int ne=Y.sign()^sgn;
+                w.copy(Y); w.neg(); w.norm();
+                Y.cmove(w,ne);
+
+                if (CONFIG_CURVE.HTC_ISO != 0)
+                {
+/* CAHCZS
 
                     int k=0;
                     int isox=CONFIG_CURVE.HTC_ISO;
@@ -1284,6 +1304,11 @@ CAHCZF */
                     P.z.copy(w);
                     return P;
 CAHCZF */
+                } else {
+                    BIG x=X2.redc();
+                    BIG y=Y.redc();
+                    P=new ECP(x,y);
+                    return P;
                 }
             } else {
 // Shallue and van de Woestijne
@@ -1300,11 +1325,11 @@ CAHCZF */
                 Y.copy(A); Y.mul(t);
                 t.copy(one); t.add(Y); t.norm();
                 Y.rsub(one); Y.norm();
-                NY.copy(t); NY.mul(Y);
-                NY.mul(B);
+                D.copy(t); D.mul(Y);
+                D.mul(B);
 
                 w.copy(A);
-                FP.tpo(NY,w);
+                FP.tpo(D,w);
 
                 w.mul(B);
                 if (w.sign()==1)
@@ -1314,14 +1339,14 @@ CAHCZF */
                 }
 
                 w.mul(B);
-                w.mul(h); w.mul(Y); w.mul(NY);
+                w.mul(h); w.mul(Y); w.mul(D);
 
                 X1.neg(); X1.norm(); X1.div2();
                 X2.copy(X1);
                 X1.sub(w); X1.norm();
                 X2.add(w); X2.norm();
                 A.add(A); A.add(A); A.norm();
-                t.sqr(); t.mul(NY); t.sqr();
+                t.sqr(); t.mul(D); t.sqr();
                 A.mul(t);
                 X3.add(A); X3.norm();
 
@@ -1331,15 +1356,18 @@ CAHCZF */
                 X3.cmove(X1,rhs.qr(null));
                 rhs.copy(RHS(X3));
                 Y.copy(rhs.sqrt(null));
-                x.copy(X3.redc());
+
+                int ne=Y.sign()^sgn;
+                w.copy(Y); w.neg(); w.norm();
+                Y.cmove(w,ne);
+
+                BIG x=X3.redc();
+                BIG y=Y.redc();
+                P=new ECP(x,y);
+                return P;
+
 CAISZF */
             }
-            int ne=Y.sign()^sgn;
-            NY.copy(Y); NY.neg(); NY.norm();
-            Y.cmove(NY,ne);
-
-            BIG y=Y.redc();
-            P=new ECP(x,y);
         }
         return P;
     }

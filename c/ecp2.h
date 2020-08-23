@@ -50,6 +50,7 @@ extern const BIG_XXX CURVE_B_ZZZ;     /**< Elliptic curve B parameter */
 extern const BIG_XXX CURVE_Order_ZZZ; /**< Elliptic curve group order */
 extern const BIG_XXX CURVE_Cof_ZZZ;   /**< Elliptic curve cofactor */
 extern const BIG_XXX CURVE_Bnx_ZZZ;   /**< Elliptic curve parameter */
+extern const BIG_XXX CURVE_HTPC_ZZZ;  /**< Hash to Point precomputation */
 
 extern const BIG_XXX Fra_YYY; /**< real part of BN curve Frobenius Constant */
 extern const BIG_XXX Frb_YYY; /**< imaginary part of BN curve Frobenius Constant */

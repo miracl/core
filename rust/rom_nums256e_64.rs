@@ -66,3 +66,4 @@ pub const CURVE_GY: [Chunk; NLEN] = [
     0xD9D925C7CE9665,
     0x44D53E9F,
 ];
+pub const CURVE_HTPC:[Chunk;NLEN]=[0x1,0x0,0x0,0x0,0x0];

@@ -36,6 +36,7 @@ extern const int CURVE_B_I_ZZZ;       /**< Elliptic curve B_i parameter */
 extern const BIG_XXX CURVE_B_ZZZ;     /**< Elliptic curve B parameter */
 extern const BIG_XXX CURVE_Order_ZZZ; /**< Elliptic curve group order */
 extern const BIG_XXX CURVE_Cof_ZZZ;   /**< Elliptic curve cofactor */
+extern const BIG_XXX CURVE_HTPC_ZZZ;  /**< Hash to Point precomputation */
 
 extern const BIG_XXX CURVE_Ad_ZZZ;
 extern const BIG_XXX CURVE_Bd_ZZZ;

@@ -47,13 +47,13 @@ typedef struct
 } ECP4;
 
 
-/* Curve Params - see rom.c */
+/* Curve Params - see rom*.cpp */
 extern const int CURVE_B_I;		/**< Elliptic curve B parameter */
 extern const XXX::BIG CURVE_B;     /**< Elliptic curve B parameter */
 extern const XXX::BIG CURVE_Order; /**< Elliptic curve group order */
 extern const XXX::BIG CURVE_Cof;   /**< Elliptic curve cofactor */
 extern const XXX::BIG CURVE_Bnx;   /**< Elliptic curve parameter */
-
+extern const XXX::BIG CURVE_HTPC;  /**< Hash to Point precomputation */
 
 /* Generator point on G1 */
 extern const XXX::BIG CURVE_Gx; /**< x-coordinate of generator point in group G1  */

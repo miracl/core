@@ -27,12 +27,13 @@ using namespace core;
 
 namespace ZZZ {
 
-/* Curve Params - see rom.c */
+/* Curve Params - see rom*.cpp */
 extern const int CURVE_B_I;
 extern const int CURVE_Cof_I;
 extern const XXX::BIG CURVE_B;     /**< Elliptic curve B parameter */
 extern const XXX::BIG CURVE_Order; /**< Elliptic curve group order */
 extern const XXX::BIG CURVE_Cof;   /**< Elliptic curve cofactor */
+extern const XXX::BIG CURVE_HTPC;  /**< Hash to Point precomputation */
 
 extern const XXX::BIG CURVE_Ad;
 extern const XXX::BIG CURVE_Bd;

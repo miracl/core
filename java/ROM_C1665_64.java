@@ -40,5 +40,6 @@ public static final long[] CURVE_B= {0x1686L,0x0L,0x0L};
 public static final long[] CURVE_Order= {0x80FF0A99DBA8B27L,0xFFFFFFFFFD5EF01L,0xFFFFFFFFFFFL};
 public static final long[] CURVE_Gx= {0x671B9DBF9D52398L,0x9A0618EE0F666CL,0x14C94DA505B8L};
 public static final long[] CURVE_Gy= {0xC7087B244920345L,0x13BFC7739D62DC2L,0x29414549BC0AL};
+public static final long[] CURVE_HTPC= {0x1L,0x0L,0x0L};
 }
 

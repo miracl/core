@@ -1425,14 +1425,19 @@ impl ECP {
         // swu method
             let mut A=FP::new();
             let mut B=FP::new();
+            let mut X1=FP::new();
             let mut X2=FP::new();
             let mut X3=FP::new();
             let one=FP::new_int(1);
             let mut Y=FP::new();
-            let mut NY=FP::new();
+            let mut D=FP::new();
             let mut t=FP::new_copy(h);
-            let mut x=BIG::new_int(0);
             let mut w=FP::new();
+            let mut D2=FP::new();
+            let mut hint=FP::new();
+            let mut GX1=FP::new();
+            let mut Y3=FP::new();
+
             let sgn=t.sign();
 
             if CURVE_A != 0 || HTC_ISO != 0
@@ -1451,32 +1456,51 @@ CAHCZF */
                 t.imul(fp::RIADZ);
                 w.copy(&t); w.add(&one); w.norm();
 
-                w.mul(&t); NY.copy(&A);
-                NY.mul(&w);
-                NY.inverse(None);
+                w.mul(&t); D.copy(&A);
+                D.mul(&w);
+            
                 w.add(&one); w.norm();
                 w.mul(&B);
                 w.neg(); w.norm();
 
-                X2.copy(&w); X2.mul(&NY);
+                X2.copy(&w); 
                 X3.copy(&t); X3.mul(&X2);
-                if HTC_ISO == 0 {
-                    let mut rhs=ECP::rhs(&X3);
-                    X2.cmove(&X3,rhs.qr(None));
-                    rhs.copy(&ECP::rhs(&X2));
-                    Y.copy(&rhs.sqrt(None));
-                    x.copy(&X2.redc());
-                } else {
+
+// x^3+Ad^2x+Bd^3
+                GX1.copy(&X2); GX1.sqr(); D2.copy(&D);
+                D2.sqr(); w.copy(&A); w.mul(&D2); GX1.add(&w); GX1.norm(); GX1.mul(&X2); D2.mul(&D); w.copy(&B); w.mul(&D2); GX1.add(&w); GX1.norm();
+
+                w.copy(&GX1); w.mul(&D);
+                let qr=w.qr(Some(&mut hint));
+                D.copy(&w); D.inverse(Some(&hint));
+                D.mul(&GX1);
+                X2.mul(&D);
+                X3.mul(&D);
+                t.mul(h);
+                D2.copy(&D); D2.sqr();
+
+                Y.copy(&w.sqrt(Some(&hint)));
+                Y.mul(&D2);
+
+                D2.mul(&t);
+                w.imul(fp::RIADZ);
+
+                X1.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_HTPC)));
+                hint.mul(&X1);
+                
+                Y3.copy(&w.sqrt(Some(&hint)));
+                Y3.mul(&D2);
+
+                X2.cmove(&X3,1-qr);
+                Y.cmove(&Y3,1-qr);
+
+                let ne=Y.sign()^sgn;
+                w.copy(&Y); w.neg(); w.norm();
+                Y.cmove(&w,ne);
+
+                if HTC_ISO != 0 {
+ 
 /* CAHCZS
-                    w.copy(&X3); w.sqr(); w.add(&A); w.norm(); w.mul(&X3); w.add(&B); w.norm(); // w=x^3+Ax+B
-                    X2.cmove(&X3,w.qr(None));
-                    w.copy(&X2); w.sqr(); w.add(&A); w.norm(); w.mul(&X2); w.add(&B); w.norm();
-                    Y.copy(&w.sqrt(None));
-
-                    let ne=Y.sign()^sgn;
-                    NY.copy(&Y); NY.neg(); NY.norm();
-                    Y.cmove(&NY,ne);
-
                     let mut k=0;
                     let isox=HTC_ISO;
                     let isoy=3*(isox-1)/2;
@@ -1521,12 +1545,16 @@ CAHCZF */
                     P.z.copy(&w);
                     return P;
 CAHCZF */
+                } else {
+                    let x=X2.redc();
+                    let y=Y.redc();
+                    P.copy(&ECP::new_bigs(&x,&y));
+                    return P;
                 }
             } else {
 // Shallue and van de Woestijne
 // SQRTM3 not available, so preprocess this out
 /* CAISZS
-                let mut X1=FP::new();
                 let Z=fp::RIADZ;
                 X1.copy(&FP::new_int(Z));
                 X3.copy(&X1);
@@ -1538,11 +1566,11 @@ CAHCZF */
                 Y.copy(&A); Y.mul(&t);
                 t.copy(&one); t.add(&Y); t.norm();
                 Y.rsub(&one); Y.norm();
-                NY.copy(&t); NY.mul(&Y); 
-                NY.mul(&B);
+                D.copy(&t); D.mul(&Y); 
+                D.mul(&B);
                 
                 w.copy(&A);
-                FP::tpo(&mut NY,&mut w);
+                FP::tpo(&mut D,&mut w);
 
                 w.mul(&B);
                 if w.sign()==1 {
@@ -1550,14 +1578,14 @@ CAHCZF */
                     w.norm();
                 }
                 w.mul(&B);
-                w.mul(&h); w.mul(&Y); w.mul(&NY);
+                w.mul(&h); w.mul(&Y); w.mul(&D);
 
                 X1.neg(); X1.norm(); X1.div2();
                 X2.copy(&X1);
                 X1.sub(&w); X1.norm();
                 X2.add(&w); X2.norm();
                 A.dbl(); A.dbl(); A.norm();
-                t.sqr(); t.mul(&NY); t.sqr();
+                t.sqr(); t.mul(&D); t.sqr();
                 A.mul(&t);
                 X3.add(&A); X3.norm();
 
@@ -1567,15 +1595,17 @@ CAHCZF */
                 X3.cmove(&X1,rhs.qr(None));
                 rhs.copy(&ECP::rhs(&X3));
                 Y.copy(&rhs.sqrt(None));
-                x.copy(&X3.redc());
+
+                let ne=Y.sign()^sgn;
+                w.copy(&Y); w.neg(); w.norm();
+                Y.cmove(&w,ne);
+
+                let x=X3.redc();
+                let y=Y.redc();
+                P.copy(&ECP::new_bigs(&x,&y));
+                return P;
 CAISZF */
             }
-            let ne=Y.sign()^sgn;
-            NY.copy(&Y); NY.neg(); NY.norm();
-            Y.cmove(&NY,ne);
-
-            let y=Y.redc();
-            P.copy(&ECP::new_bigs(&x,&y));
         }
         return P;
     }

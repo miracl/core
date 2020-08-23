@@ -1189,7 +1189,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
     FP_one(&one);
     FP_add(&t,&t,&one); FP_norm(&t);
-    FP_inv(&t,&t,NULL);      // 1/(1+z.t^2)
+    FP_inv(&t,&t,NULL);      // 1/(1+z.t^2)     // ***
     FP_mul(&X1,&t,&A);
     FP_neg(&X1,&X1);    // X1 = -A* [1/(1+z.t^2)]
     FP_copy(&X2,&X1);
@@ -1232,7 +1232,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
     FP_neg(&K,&B); FP_norm(&K);
     //FP_inv(&K,&K,NULL);    // K
-    FP_invsqrt(&K,&w1,&K);
+    FP_invsqrt(&K,&w1,&K);                      // ***
 
     rfc=RIADZ_YYY;
     if (rfc)
@@ -1260,7 +1260,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_imul(&t,&t,QNRI_YYY);  // precomputed QNR
 
     FP_add(&t,&t,&one); FP_norm(&t);
-    FP_inv(&t,&t,NULL);      // 1/(1+z.t^2)
+    FP_inv(&t,&t,NULL);      // 1/(1+z.t^2)         // ***
 
     FP_mul(&X1,&t,&A);
     FP_neg(&X1,&X1);    // -(J/K).inv(1+z.t^2)
@@ -1295,13 +1295,13 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     }
     FP_norm(&w2);
 
-    qres=FP_qr(&w2,NULL);
+    qres=FP_qr(&w2,NULL);                       // ***
     FP_cmove(&X1,&X2,qres);
     FP_cmove(&w1,&w2,qres);
 
 // Map back to Edwards curve - X1 is now the right X
 
-    FP_sqrt(&Y,&w1,NULL);   // This is only sign ambiguity
+    FP_sqrt(&Y,&w1,NULL);   // This is only sign ambiguity      // ***
 
 // this is now in...
     FP_neg(&NY,&Y); FP_norm(&NY);
@@ -1337,7 +1337,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_norm(&Y);        // 4v^2
     FP_add(&w2,&t,&Y);  // w2=(u^2-1)^2+4v^2
     FP_norm(&w2);
-    FP_inv(&w2,&w2,NULL);
+    FP_inv(&w2,&w2,NULL);                           // ***
     FP_mul(&w1,&w1,&w2); // w1=4v(u^2-1)/[(u^2-1)^2+4v^2]
 
     FP_sub(&w2,&Y,&t);   // w2=4v^2-(u^2-1)^2
@@ -1349,7 +1349,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_mul(&w1,&Y,&NY);  // w1=2v^2(u^2+1)
     FP_sub(&w1,&t,&w1);  // w1=u(u^2-1)^2 - 2v^2(u^2+1)
     FP_norm(&w1);
-    FP_inv(&w1,&w1,NULL);
+    FP_inv(&w1,&w1,NULL);                       // ***
     FP_mul(&Y,&w2,&w1);  // Y=u(4v^2-(u^2-1)*2) / u(u^2-1)^2 - 2v^2(u^2+1)
 
 #else
@@ -1357,7 +1357,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_add(&w1,&X1,&one); FP_norm(&w1); // (s+1)
     FP_sub(&w2,&X1,&one); FP_norm(&w2); // (s-1)
     FP_mul(&t,&w1,&Y);
-    FP_inv(&t,&t,NULL);
+    FP_inv(&t,&t,NULL);                         // ***
     FP_mul(&X1,&X1,&w1);
     FP_mul(&X1,&X1,&t);
 
@@ -1377,7 +1377,8 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 #if CURVETYPE_ZZZ==WEIERSTRASS
     int sgn,ne;
     BIG a,x,y;
-    FP X1,X2,X3,t,w,one,A,B,Y,NY;
+    FP X1,X2,X3,t,w,one,A,B,Y,D;
+    FP D2,hint,GX1,Y3;
 
 #if HTC_ISO_ZZZ != 0
 // Map to point on isogenous curve
@@ -1402,32 +1403,50 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_add(&w,&t,&one);     // w=Zt^2+1
         FP_norm(&w);
 
-        FP_mul(&w,&w,&t);       // w=Z^2*t^4+Zt^2
-        FP_mul(&NY,&A,&w);      // A=Aw
-        FP_inv(&NY,&NY,NULL);                                        // ***
+        FP_mul(&w,&w,&t);      // w=Z^2*t^4+Zt^2
+        FP_mul(&D,&A,&w);      // A=Aw
+                               
         FP_add(&w,&w,&one); FP_norm(&w);
         FP_mul(&w,&w,&B);
         FP_neg(&w,&w);          // -B(w+1)
         FP_norm(&w);
 
-        FP_mul(&X2,&w,&NY);     // -B(w+1)/Aw
+        FP_copy(&X2,&w);        // Numerators
         FP_mul(&X3,&t,&X2);
-#if HTC_ISO_ZZZ == 0
-        ECP_rhs(&w,&X3);
-        FP_cmove(&X2,&X3,FP_qr(&w,NULL));                       // ***
-        ECP_rhs(&w,&X2);
-        FP_sqrt(&Y,&w,NULL);                                    // ***
-        FP_redc(x,&X2);
-#else
-// Now get back to original curve
-        FP_sqr(&w,&X3); FP_add(&w,&w,&A); FP_norm(&w); FP_mul(&w,&w,&X3); FP_add(&w,&w,&B); FP_norm(&w);  // w=x^3+Ax+B
-        FP_cmove(&X2,&X3,FP_qr(&w,NULL));                       // ***
-        FP_sqr(&w,&X2); FP_add(&w,&w,&A); FP_norm(&w); FP_mul(&w,&w,&X2); FP_add(&w,&w,&B); FP_norm(&w);
-        FP_sqrt(&Y,&w,NULL);                                    // ***
+
+// x^3+Ad^2x+Bd^3
+        FP_sqr(&GX1,&X2);
+        FP_sqr(&D2,&D); FP_mul(&w,&A,&D2); FP_add(&GX1,&GX1,&w); FP_norm(&GX1); FP_mul(&GX1,&GX1,&X2); FP_mul(&D2,&D2,&D); FP_mul(&w,&B,&D2); FP_add(&GX1,&GX1,&w); FP_norm(&GX1);
+
+        FP_mul(&w,&GX1,&D);
+        int qr=FP_qr(&w,&hint);   // qr(ad) - only exp happens here
+        FP_inv(&D,&w,&hint);     // d=1/(ad)
+        FP_mul(&D,&D,&GX1);     // 1/d
+        FP_mul(&X2,&X2,&D);     // X2/=D
+        FP_mul(&X3,&X3,&D);     // X3/=D
+        FP_mul(&t,&t,h);        // t=Z.u^3
+        FP_sqr(&D2,&D);
+
+        FP_sqrt(&Y,&w,&hint);  // first candidate if X2 is correct
+        FP_mul(&Y,&Y,&D2);
+
+        FP_mul(&D2,&D2,&t);     // second candidate if X3 is correct
+        FP_imul(&w,&w,RIADZ_YYY); 
+
+        FP_rcopy(&X1,CURVE_HTPC);     
+        FP_mul(&hint,&hint,&X1); // modify hint
+
+        FP_sqrt(&Y3,&w,&hint);
+        FP_mul(&Y3,&Y3,&D2);
+
+        FP_cmove(&X2,&X3,!qr); 
+        FP_cmove(&Y,&Y3,!qr); 
 
         ne=FP_sign(&Y)^sgn;
-        FP_neg(&NY,&Y); FP_norm(&NY);
-        FP_cmove(&Y,&NY,ne);
+        FP_neg(&w,&Y); FP_norm(&w);
+        FP_cmove(&Y,&w,ne);
+
+#if HTC_ISO_ZZZ != 0
 
 // (X2,Y) is on isogenous curve
         k=0;
@@ -1488,8 +1507,13 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_mul(&t,&xden,&yden);
         FP_copy(&(P->z),&t);
         return;
-#endif
+#else
 
+        FP_redc(x,&X2);
+        FP_redc(y,&Y);
+        ECP_set(P,x,y);
+        return;
+#endif
 #else 
 // SVDW - Shallue and van de Woestijne
         FP_from_int(&Y,RIADZ_YYY);
@@ -1501,11 +1525,11 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_mul(&Y,&A,&t);   // tv1=u^2*g(Z)
         FP_add(&t,&one,&Y); FP_norm(&t); // tv2=1+tv1
         FP_sub(&Y,&one,&Y); FP_norm(&Y); // tv1=1-tv1
-        FP_mul(&NY,&t,&Y);
-        FP_mul(&NY,&NY,&B);
+        FP_mul(&D,&t,&Y);
+        FP_mul(&D,&D,&B);
 
         FP_copy(&w,&A);
-        FP_tpo(&NY,&w);   // tv3=inv0(tv1*tv2*z*sqrt(-3)) and sqrt(g(Z)) 
+        FP_tpo(&D,&w);   // tv3=inv0(tv1*tv2*z*sqrt(-3)) and sqrt(g(Z))   // ***
 
         FP_mul(&w,&w,&B);  // tv4=Z.sqrt(-3).sqrt(g(Z))
         if (FP_sign(&w)==1)
@@ -1516,7 +1540,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_mul(&w,&w,&B);  // Z.sqrt(-3)
         FP_mul(&w,&w,h);    // u
         FP_mul(&w,&w,&Y);   // tv1
-        FP_mul(&w,&w,&NY);  // tv3   // tv5=u*tv1*tv3*tv4*Z*sqrt(-3)
+        FP_mul(&w,&w,&D);  // tv3   // tv5=u*tv1*tv3*tv4*Z*sqrt(-3)
 
         FP_from_int(&X1,RIADZ_YYY);
         FP_copy(&X3,&X1);
@@ -1528,13 +1552,9 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_add(&A,&A,&A);
         FP_norm(&A);      // 4*g(Z)
         FP_sqr(&t,&t);
-        FP_mul(&t,&t,&NY);
+        FP_mul(&t,&t,&D);
         FP_sqr(&t,&t);    // (tv2^2*tv3)^2
         FP_mul(&A,&A,&t); // 4*g(Z)*(tv2^2*tv3)^2
-        //FP_from_int(&t,RIADZ_YYY*RIADZ_YYY*3);
-        //FP_inv(&t,&t);                                              // *** Constant
-
-        //FP_mul(&A,&A,&t);
         FP_add(&X3,&X3,&A); FP_norm(&X3);
 
         ECP_rhs(&w,&X2);
@@ -1543,15 +1563,17 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_cmove(&X3,&X1,FP_qr(&w,NULL));                           // ***
         ECP_rhs(&w,&X3);
         FP_sqrt(&Y,&w,NULL);                                        // ***
-        FP_redc(x,&X3);
 
-#endif
         ne=FP_sign(&Y)^sgn;
-        FP_neg(&NY,&Y); FP_norm(&NY);
-        FP_cmove(&Y,&NY,ne);
+        FP_neg(&w,&Y); FP_norm(&w);
+        FP_cmove(&Y,&w,ne);
 
+        FP_redc(x,&X3);
         FP_redc(y,&Y);
         ECP_set(P,x,y);
+        return;
+#endif
+
 #endif
 }
 

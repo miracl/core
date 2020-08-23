@@ -61,7 +61,7 @@ public func hash_to_field_ed25519(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UInt
 
 public func htp_ed25519(_ mess: String)
 {
-    print("Random Access - message= "+mess)
+    print("\nRandom Access - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_".utf8)
 	var u=hash_to_field_ed25519(HMAC.MC_SHA2,64,DST,M,2)
@@ -113,7 +113,7 @@ public func hash_to_field_nist256(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UInt
 
 public func htp_nist256(_ mess: String)
 {
-    print("Random Access - message= "+mess)
+    print("\nRandom Access - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field_nist256(HMAC.MC_SHA2,nist256.CONFIG_CURVE.HASH_TYPE,DST,M,2)
@@ -164,7 +164,7 @@ public func hash_to_field_goldilocks(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[U
 
 public func htp_goldilocks(_ mess: String)
 {
-    print("Random Access - message= "+mess)
+    print("\nRandom Access - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_".utf8)
 	var u=hash_to_field_goldilocks(HMAC.MC_SHA2,goldilocks.CONFIG_CURVE.HASH_TYPE,DST,M,2)
@@ -215,7 +215,7 @@ public func hash_to_field_secp256k1(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UI
 
 public func htp_secp256k1(_ mess: String)
 {
-    print("Random Access - message= "+mess)
+    print("\nRandom Access - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field_secp256k1(HMAC.MC_SHA2,secp256k1.CONFIG_CURVE.HASH_TYPE,DST,M,2)
@@ -266,7 +266,7 @@ public func hash_to_field_bls12381(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UIn
 
 public func htp_bls12381(_ mess: String)
 {
-    print("Random Access - message= "+mess)
+    print("\nRandom Access - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field_bls12381(HMAC.MC_SHA2,bls12381.CONFIG_CURVE.HASH_TYPE,DST,M,2)
@@ -324,7 +324,7 @@ public func hash_to_field2_bls12381(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UI
 
 public func htp2_bls12381(_ mess: String)
 {
-    print("Random Access - message= "+mess)
+    print("\nRandom Access - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field2_bls12381(HMAC.MC_SHA2,bls12381.CONFIG_CURVE.HASH_TYPE,DST,M,2)

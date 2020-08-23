@@ -308,6 +308,18 @@ int findR(Big AA,Big AB,Big p)
     return 0;
 }
 
+Big finde(Big p)
+{
+    Big e,p1=p-1;
+    e=1;
+    while (p1%2==0)
+    {
+        p1/=2;
+        e*=2;
+    }
+    return (p-e-1)/(2*e);
+}
+
 Big output(int chunk, int w, Big t, Big m)
 {
     Big last, y = t;
@@ -442,10 +454,8 @@ void help()
     printf("36. BLS48581\n");
     printf("37. BLS48286\n");
 
-    printf("\nromgen curve wordlength basebits language\n");
-    printf("where wordlength is 16, 32 or 64\n");
-    printf("basebits is less than wordlength\n\n");
-    printf("Use check utility to determine best choice for basebits\n");
+    printf("\nromgen curve wordlength language\n");
+    printf("where wordlength is 16, 32 or 64 (always 32 for javascript)\n");
     printf("language is c, cpp, java, javascript, go, rust or swift\n\n");
 }
 
@@ -481,11 +491,14 @@ int hamming(Big x)
 int main(int argc, char **argv)
 {
     miracl *mip = &precision;
-    Big p, R, B, mc, curve_b, cru, cof, tau[9];//,ad,bd;
+    Big p, R, B, mc, curve_b, cru, cof, tau[9],ad,bd;
     Big m, x, y, w, t, c, n, r, a, b, gx, gy, r2modp,roi;
-    Big np, PP, TT, FF,sqrtm3;
-//    Big pc[60];
-//    int xt, yt, ncs;
+    Big np, PP, TT, FF, htpc, sqrtm3;
+    Big pc[60];
+    int xt, yt, ncs, ncs2, e;
+
+    Big adr,adi,bdr,bdi,pcr[13],pci[13],p1;
+
     int i, A, curve, bb, chunk, words, mbits, bytes, ip = 0;
     int modtype, curvetype, curve_a, curve_b_i, cof_i, lang = 0;
     int atebits, hw;
@@ -503,18 +516,18 @@ int main(int argc, char **argv)
     ZZn2 CA2, CB2;
     ZZn4 CA4, CB4;
     ZZn8 CA8, CB8;
-    char pre0[50], pre1[50], pre2[50], pre3[50], pre4[50], pre5[50], pre6[50];
-    char post0[50], post1[50], post2[50], post3[50], post4[50], post5[50], post6[50];
-    char pre7[50], post7[50], lg[50];
-//    char pre8[50], post8[50];
+    char pre0[60], pre1[60], pre2[60], pre3[60], pre4[60], pre5[60], pre6[60];
+    char post0[60], post1[60], post2[60], post3[60], post4[60], post5[60], post6[60];
+    char pre7[60], post7[60], lg[60];
+    char pre8[60], post8[60], post9[60];
 
     char xxx[50], yyy[50], zzz[50];
 
-    char curvename[50], fieldname[50];
+    char curvename[40], fieldname[40];
 
     argv++; argc--;
 
-    if (argc < 4)
+    if (argc < 3)
     {
         help();
         return 0;
@@ -533,13 +546,14 @@ int main(int argc, char **argv)
 
     curve = 0; ip++;
     chunk = atoi(argv[ip++]);
-    bb = atoi(argv[ip++]);
+    //bb = atoi(argv[ip++]);
 
     strcpy(lg, argv[ip]);
 
     if (chunk != 16 && chunk != 32 && chunk != 64) {help(); return 0;}
-    if (bb < 0 || bb >= chunk) {help(); return 0;}
+    //if (bb < 0 || bb >= chunk) {help(); return 0;}
 
+    htpc=(Big)0;
     sqrtm3=(Big)0;
     cru=(Big)0;
 
@@ -547,7 +561,16 @@ int main(int argc, char **argv)
 
     if (strcmp(curvename, "ED25519") == 0)
     {   // ED25519
-        curve = 1;
+        curve = 1; 
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
+        
         printf("Curve is ED25519\n");
         strcpy(fieldname, "F25519");
         mbits = 255;               // bits in modulus
@@ -562,11 +585,20 @@ int main(int argc, char **argv)
         curve_b = (char *)"52036CEE2B6FFE738CC740797779E89800700A4D4141D8AB75EB4DCA135978A3"; // curve B parameter
         gx = (char *)"216936D3CD6E53FEC0A4E231FDD6DC5C692CC7609525A7B2C9562D608F25D51A";     // generator point
         gy = (char *)"6666666666666666666666666666666666666666666666666666666666666658";
+        htpc=pow((Big)2,finde(p),p);
     }
 
     if (strcmp(curvename, "C25519") == 0)
     {
         curve = 2;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is C25519\n");
         strcpy(fieldname, "F25519");
         mbits = 255;
@@ -582,11 +614,20 @@ int main(int argc, char **argv)
         mip->IOBASE = 16;
         gx = (char *)"9";
         gy = 0;
+        htpc=pow((Big)2,finde(p),p);
     }
 
     if (strcmp(curvename, "X448") == 0)
     {
         curve = 21;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=58;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is X448\n");
         strcpy(fieldname, "GOLDILOCKS");
         mbits = 448;
@@ -601,11 +642,20 @@ int main(int argc, char **argv)
         curve_b = 0;
         gx = (char *)"5";
         gy = 0;
+        htpc=pow(p-1,finde(p),p);
     }
 
     if (strcmp(curvename, "SECP160R1") == 0)
     {
         curve = 22;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is SECP160R1\n");
         strcpy(fieldname, curvename);
         mbits = 160;
@@ -621,12 +671,22 @@ int main(int argc, char **argv)
         curve_b = (char *)"1C97BEFC54BD7A8B65ACF89F81D4D4ADC565FA45";
         gx = (char *)"4A96B5688EF573284664698968C38BB913CBFC82";
         gy = (char *)"23A628553168947D59DCC912042351377AC5FB32";
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
 
     if (strcmp(curvename, "NIST256") == 0)
     {
         curve = 3;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is NIST256\n");
         strcpy(fieldname, curvename);
         mbits = 256;
@@ -643,11 +703,20 @@ int main(int argc, char **argv)
         gx = (char *)"6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296";
         gy = (char *)"4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5";
 
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
     if (strcmp(curvename, "SM2") == 0)
     {
         curve = 18;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is SM2\n");
         strcpy(fieldname, curvename);
         mbits = 256;
@@ -664,11 +733,20 @@ int main(int argc, char **argv)
         gx = (char *)"32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7";
         gy = (char *)"BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0";
 
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
     if (strcmp(curvename, "C13318") == 0)
     {
         curve = 19;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is C13318\n");
         strcpy(fieldname, "F25519");
         mbits = 255;
@@ -684,11 +762,21 @@ int main(int argc, char **argv)
         mip->IOBASE = 16;
         gx=5 ;
         gy=(char *)"6675AAD926BCA6F1381630E5166966369D4CCB04CF016DB5B8C8D3546B6EAD0B";
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
     if (strcmp(curvename, "JUBJUB") == 0)
     {
         curve = 20;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is JUBJUB\n");
         strcpy(fieldname, curvename);
         mbits=255;
@@ -704,11 +792,21 @@ int main(int argc, char **argv)
 
         gx=(char *)"5183972af8eff38ca624b4df00384882000c546bf2f39ede7f4ecf1a74f976c4";
         gy=(char *)"3b43f8472ca2fc2c9e8fcc5abd9dc308096c8707ffa6833b146bad709349702e";
+
+        htpc=pow((Big)5,finde(p),p);
     }
 
     if (strcmp(curvename, "BRAINPOOL") == 0)
     {
         curve = 4;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is BRAINPOOL\n");
         strcpy(fieldname, curvename);
         mbits = 256;
@@ -725,11 +823,21 @@ int main(int argc, char **argv)
         mip->IOBASE = 16;
         gx = (char *)"a3e8eb3cc1cfe7b7732213b23a656149afa142c47aafbc2b79a191562e1305f4";
         gy = (char *)"2d996c823439c56d7f7b22e14644417e69bcb6de39d027001dabe8f35b25c9be";
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
     if (strcmp(curvename, "ANSSI") == 0)
     {
         curve = 5;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is ANSSI\n");
         strcpy(fieldname, curvename);
         mbits = 256;
@@ -746,11 +854,21 @@ int main(int argc, char **argv)
         mip->IOBASE = 16;
         gx = (char *)"b6b3d4c356c139eb31183d4749d423958c27d2dcaf98b70164c97a2dd98f5cff";
         gy = (char *)"6142e0f7c8b204911f9271f0f3ecef8c2701c307e8e4c9e183115a1554062cfb";
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
     if (strcmp(curvename, "HIFIVE") == 0)
     {
         curve = 6;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is HIFIVE\n");
         strcpy(fieldname, curvename);
         mbits = 336;
@@ -768,11 +886,20 @@ int main(int argc, char **argv)
         mip->IOBASE = 16;
         gx = (char *)"C";
         gy = (char *)"C0DC616B56502E18E1C161D007853D1B14B46C3811C7EF435B6DB5D5650CA0365DB12BEC68505FE8632";
+        htpc=pow((Big)2,finde(p),p);
     }
 
     if (strcmp(curvename, "GOLDILOCKS") == 0)
     {
         curve = 7;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=58;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is GOLDILOCKS\n");
         strcpy(fieldname, curvename);
         mbits = 448;
@@ -789,11 +916,20 @@ int main(int argc, char **argv)
 
         gx = (char *)"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa955555555555555555555555555555555555555555555555555555555";
         gy = (char *)"ae05e9634ad7048db359d6205086c2b0036ed7a035884dd7b7e36d728ad8c4b80d6565833a2a3098bbbcb2bed1cda06bdaeafbcdea9386ed";
+        htpc=pow(p-1,finde(p),p);
     }
 
     if (strcmp(curvename, "NIST384") == 0)
     {
         curve = 8;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is NIST384\n");
         strcpy(fieldname, curvename);
         mbits = 384;
@@ -809,11 +945,21 @@ int main(int argc, char **argv)
         mip->IOBASE = 16;
         gx = (char *)"aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7";
         gy = (char *)"3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f";
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
     if (strcmp(curvename, "C41417") == 0)
     {
         curve = 9;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=22;
         printf("Curve is C41417\n");
         strcpy(fieldname, curvename);
         mbits = 414;
@@ -829,11 +975,20 @@ int main(int argc, char **argv)
         mip->IOBASE = 16;
         gx = (char *)"1a334905141443300218c0631c326e5fcd46369f44c03ec7f57ff35498a4ab4d6d6ba111301a73faa8537c64c4fd3812f3cbc595";
         gy = (char *)"22";
+        htpc=pow(p-1,finde(p),p);
     }
 
     if (strcmp(curvename, "C1174") == 0)
     {
         curve = 23;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is C1174\n");
         strcpy(fieldname, curvename);
         mbits = 251;
@@ -849,12 +1004,21 @@ int main(int argc, char **argv)
 
         gx=(char *)"037fbb0cea308c479343aee7c029a190c021d96a492ecd6516123f27bce29eda";
         gy=(char *)"06b72f82d47fb7cc6656841169840e0c4fe2dee2af3f976ba4ccb1bf9b46360e";
+        htpc=pow(p-1,finde(p),p);
 
     }
 
     if (strcmp(curvename, "C1665") == 0)
     {
         curve = 24;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is C1665\n");
         strcpy(fieldname, curvename);
         mbits = 166;
@@ -873,12 +1037,20 @@ int main(int argc, char **argv)
         //r=(char*)"1000000000000000000002A10FE7F00F56624574D7";
         gx=(char *)"14C94DA505B809A0618EE0F666C671B9DBF9D52398";
         gy=(char *)"29414549BC0A13BFC7739D62DC2C7087B244920345";
-
+        htpc=pow(p-1,finde(p),p);
     }
 
     if (strcmp(curvename, "MDC") == 0)
     {
         curve = 25;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is Million Dollar Curve\n");
         strcpy(fieldname, curvename);
         mbits = 256;
@@ -894,12 +1066,21 @@ int main(int argc, char **argv)
         gx=(char *)"82549803222202399340024462032964942512025856818700414254726364205096731424315";
         gy=(char *)"91549545637415734422658288799119041756378259523097147807813396915125932811445";
         mip->IOBASE = 16;
+        htpc=pow(p-1,finde(p),p);
     }
 
 
     if (strcmp(curvename, "NIST521") == 0)
     {
         curve = 10;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is NIST521\n");
         strcpy(fieldname, curvename);
         mbits = 521;
@@ -916,11 +1097,22 @@ int main(int argc, char **argv)
 
         gx = (char *)"C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66";
         gy = (char *)"11839296A789A3BC0045C8A5FB42C7D1BD998F54449579B446817AFBD17273E662C97EE72995EF42640C550B9013FAD0761353C7086A272C24088BE94769FD16650";
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
+
     }
 
     if (strcmp(curvename, "NUMS256W") == 0)
     {
         curve = 11;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is NUMS256W\n");
         strcpy(fieldname, "256PMW");
         mbits = 256;
@@ -936,11 +1128,21 @@ int main(int argc, char **argv)
         curve_b = (char *)"25581";
         gx = (char *)"BC9ED6B65AAADB61297A95A04F42CB0983579B0903D4C73ABC52EE1EB21AACB1";
         gy = (char *)"D08FC0F13399B6A673448BF77E04E035C955C3D115310FBB80B5B9CB2184DE9F";
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
     if (strcmp(curvename, "NUMS256E") == 0)
     {
         curve = 12;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is NUMS256E\n");
         strcpy(fieldname, "256PME");
         mbits = 256;
@@ -956,12 +1158,21 @@ int main(int argc, char **argv)
         curve_b = (char *)"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC355";
         gx = (char *)"8A7514FB6AEA237DCD1E3D5F69209BD60C398A0EE3083586A0DEC0902EED13DA";
         gy = (char *)"44D53E9FD9D925C7CE9665D9A64B8010715F61D810856ED32FA616E7798A89E6";
+        htpc=pow(p-1,finde(p),p);
     }
 
 
     if (strcmp(curvename, "NUMS384W") == 0)
     {
         curve = 13;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=58;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is NUMS384W\n");
         strcpy(fieldname, "384PM");
         mbits = 384;
@@ -977,11 +1188,21 @@ int main(int argc, char **argv)
         curve_b = (char *)"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF77BB";
         gx = (char *)"757956F0B16F181C4880CA224105F1A60225C1CDFB81F9F4F3BD291B2A6CC742522EED100F61C47BEB9CBA042098152A";
         gy = (char *)"ACDEE368E19B8E38D7E33D300584CF7EB0046977F87F739CB920837D121A837EBCD6B4DBBFF4AD265C74B8EC66180716";
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
     if (strcmp(curvename, "NUMS384E") == 0)
     {
         curve = 14;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is NUMS384E\n");
         strcpy(fieldname, "384PM");
         mbits = 384;
@@ -997,11 +1218,20 @@ int main(int argc, char **argv)
         curve_b = (char *)"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD19F";
         gx = (char *)"61B111FB45A9266CC0B6A2129AE55DB5B30BF446E5BE4C005763FFA8F33163406FF292B16545941350D540E46C206BDE";
         gy = (char *)"82983E67B9A6EEB08738B1A423B10DD716AD8274F1425F56830F98F7F645964B0072B0F946EC48DC9D8D03E1F0729392";
+        htpc=pow(p-1,finde(p),p);
     }
 
     if (strcmp(curvename, "NUMS512W") == 0)
     {
         curve = 15;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is NUMS512W\n");
         strcpy(fieldname, "512PM");
         mbits = 512;
@@ -1017,11 +1247,21 @@ int main(int argc, char **argv)
         curve_b = (char *)"1D99B";
         gx = (char *)"3AC03447141D0A93DA2B7002A03D3B5298CAD83BB501F6854506E0C25306D9F95021A151076B359E93794286255615831D5D60137D6F5DE2DC8287958CABAE57";
         gy = (char *)"943A54CA29AD56B3CE0EEEDC63EBB1004B97DBDEABBCBB8C8F4B260C7BD14F14A28415DA8B0EEDE9C121A840B25A5602CF2B5C1E4CFD0FE923A08760383527A6";
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
     }
 
     if (strcmp(curvename, "NUMS512E") == 0)
     {
         curve = 16;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is NUMS512E\n");
         strcpy(fieldname, "512PM");
         mbits = 512;
@@ -1037,12 +1277,21 @@ int main(int argc, char **argv)
         curve_b = (char *)"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFECBEF";
         gx = (char *)"DF8E316D128DB69C7A18CB7888D3C5332FD1E79F4DC4A38227A17EBE273B81474621C14EEE46730F78BDC992568904AD0FE525427CC4F015C5B9AB2999EC57FE";
         gy = (char *)"6D09BFF39D49CA7198B0F577A82A256EE476F726D8259D22A92B6B95909E834120CA53F2E9963562601A06862AECC1FD0266D38A9BF1D01F326DDEC0C1E2F5E1";
+        htpc=pow(p-1,finde(p),p);
     }
 
 
     if (strcmp(curvename, "SECP256K1") == 0)
     {   // SECP256K1
         curve = 17;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is SECP256K1\n");
         strcpy(fieldname, "SECP256K1");
         mbits = 256;               // bits in modulus
@@ -1066,19 +1315,9 @@ int main(int argc, char **argv)
         sqrtm3=(Big)zsqrtm3;
         if (sqrtm3%2==1)
             sqrtm3=p-sqrtm3;
+// Use above if using SVDW for hashing, else..
+        htpc=pow((Big)-11,(p-3)/4,p);
 
-
-/*
-        ZZn Z=1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
-
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
-*/
-/*
         ad = (char *)"3f8731abdd661adca08a5558f0f5d272e953d363cb6f0e5d405447c01a444533";
 
         bd=1771;
@@ -1097,13 +1336,21 @@ int main(int argc, char **argv)
         pc[10]=(char *)"6484aa716545ca2cf3a70c3fa8fe337e0a3d21162f0d6299a7bf8192bfd2a76f";
         pc[11]=(char *)"7a06534bb8bdb49fd5e9e6632722c2989467c1bfc8e8d978dfb425d2685c2573";
         pc[12]=(char *)"fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffff93b";
-*/
+
     }
 
 
     if (strcmp(curvename, "BN254") == 0)
     {
         curve = PS+0;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is BN254\n");
         strcpy(fieldname, curvename);
         mbits = 254;
@@ -1136,36 +1383,9 @@ int main(int argc, char **argv)
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2); // cube root of unity for GLV method
 
         sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
-//        cout << "sign= " << sqrtm3%2 << endl;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
-//        cout << "p=           " << p << endl;
-//        cout << "sqrt(-3)=    " << -sqrt((ZZn)-3) << endl;
-//        cout << "sqrt(-3)=    " << 36*pow(x,3) - 36*x*x + 18*x -3 << endl;
-//exit(0);
-/*
-        ZZn Z=-1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
 
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
 
-        ZZn2 Z2(0,-1);
-        ZZn2 B=txd((ZZn2)curve_b);
-        CA2=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(CA2)!=0)
-            sgn=((Big)real(CA2))%2;
-        else
-            sgn=((Big)imaginary(CA2))%2;
-
-        if (sgn==1) CA2=-CA2;
-        CB2=(ZZn2)1/(3*Z2*Z2);
-
-        cout << "CA2= " << CA2 << endl;
-        cout << "CB2= " << CB2 << endl;
-*/
         cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1173,6 +1393,14 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BN254CX") == 0)
     {
         curve = PS+1;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is BN254CX\n");
         strcpy(fieldname, curvename);
         mbits = 254;
@@ -1205,37 +1433,23 @@ int main(int argc, char **argv)
         //cofactor(Q,X,x);
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2);
         sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
-//        cout << "sign= " << sqrtm3%2 << endl;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
-/*
-        ZZn Z=-1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
 
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
 
-        ZZn2 Z2(0,-1);
-        ZZn2 B=txd((ZZn2)curve_b);
-        CA2=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(CA2)!=0)
-            sgn=((Big)real(CA2))%2;
-        else
-            sgn=((Big)imaginary(CA2))%2;
-        if (sgn==1) CA2=-CA2;
-        CB2=(ZZn2)1/(3*Z2*Z2);
-
-        cout << "CA2= " << CA2 << endl;
-        cout << "CB2= " << CB2 << endl;
-*/
         cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS12383") == 0)
     {
         curve = PS+2;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=58;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is BLS12383\n");
         strcpy(fieldname, curvename);
         mbits = 383;
@@ -1288,37 +1502,23 @@ int main(int argc, char **argv)
         cru = (Big)zcru;
 
         sqrtm3=p-(2 * pow(x, 5) - 6*pow(x,4) + 6*pow(x,3) - 2*x + 3);
-//        cout << "sign= " << sqrtm3%2 << endl;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
-/*
-        ZZn Z=1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
 
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
 
-        ZZn2 Z2(0,1);
-        ZZn2 B=txx((ZZn2)curve_b);
-        CA2=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(CA2)!=0)
-            sgn=((Big)real(CA2))%2;
-        else
-            sgn=((Big)imaginary(CA2))%2;
-        if (sgn==1) CA2=-CA2;
-        CB2=(ZZn2)1/(3*Z2*Z2);
-
-        cout << "CA2= " << CA2 << endl;
-        cout << "CB2= " << CB2 << endl;
-*/
         cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS12381") == 0)
     {
         curve = PS+3;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=58;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is BLS12381\n");
         strcpy(fieldname, curvename);
         mbits = 381;
@@ -1371,32 +1571,45 @@ int main(int argc, char **argv)
         //zcru*=zcru;   // right cube root of unity ?? if x>0 do this??
         cru = (Big)zcru;
         sqrtm3=  p+(-2 * pow(x, 5) - 6*pow(x,4) - 6*pow(x,3) + 2*x + 3);
-//        cout << "sign= " << sqrtm3%2 << endl;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
-/*    
-        ZZn Z=-3;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
 
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
+// Use above if using SVDW for hashing, else..
+        htpc=pow((Big)11,(p-3)/4,p);
 
-        ZZn2 Z2(0,1);
-        ZZn2 B=txx((ZZn2)curve_b);
-        CA2=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(CA2)!=0)
-            sgn=((Big)real(CA2))%2;
-        else
-            sgn=((Big)imaginary(CA2))%2;
-        if (sgn==1) CA2=-CA2;
-        CB2=(ZZn2)1/(3*Z2*Z2);
+        adr = 0;
+        adi = 240;
+        bdr = 1012;
+        bdi = 1012;
 
-        cout << "CA2= " << CA2 << endl;
-        cout << "CB2= " << CB2 << endl;
-*/
-/*
+        xt=4; yt=4; ncs2=xt+xt-2+yt+yt-1;
+
+        pcr[0]=(char *)"171d6541fa38ccfaed6dea691f5fb614cb14b4e7f4e810aa22d6108f142b85757098e38d0f671c7188e2aaaaaaaa5ed1";
+        pci[0]=0;
+        pcr[1]=(char *)"11560bf17baa99bc32126fced787c88f984f87adf7ae0c7f9a208c6b4f20a4181472aaa9cb8d555526a9ffffffffc71e";
+        pci[1]=(char *)"8ab05f8bdd54cde190937e76bc3e447cc27c3d6fbd7063fcd104635a790520c0a395554e5c6aaaa9354ffffffffe38d";
+        pcr[2]=0;
+        pci[2]=(char *)"11560bf17baa99bc32126fced787c88f984f87adf7ae0c7f9a208c6b4f20a4181472aaa9cb8d555526a9ffffffffc71a";
+        pcr[3]=(char *)"5c759507e8e333ebb5b7a9a47d7ed8532c52d39fd3a042a88b58423c50ae15d5c2638e343d9c71c6238aaaaaaaa97d6";
+        pci[3]=(char *)"5c759507e8e333ebb5b7a9a47d7ed8532c52d39fd3a042a88b58423c50ae15d5c2638e343d9c71c6238aaaaaaaa97d6";
+        pcr[4]=(char *)"c";
+        pci[4]=(char *)"1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaa9f";
+        pcr[5]=0;
+        pci[5]=(char *)"1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaa63";
+        pcr[6]=(char *)"124c9ad43b6cf79bfbf7043de3811ad0761b0f37a1e26286b0e977c69aa274524e79097a56dc4bd9e1b371c71c718b10";
+        pci[6]=0;
+        pcr[7]=(char *)"11560bf17baa99bc32126fced787c88f984f87adf7ae0c7f9a208c6b4f20a4181472aaa9cb8d555526a9ffffffffc71c";
+        pci[7]=(char *)"8ab05f8bdd54cde190937e76bc3e447cc27c3d6fbd7063fcd104635a790520c0a395554e5c6aaaa9354ffffffffe38f";
+        pcr[8]=0;
+        pci[8]=(char *)"5c759507e8e333ebb5b7a9a47d7ed8532c52d39fd3a042a88b58423c50ae15d5c2638e343d9c71c6238aaaaaaaa97be";
+        pcr[9]=(char *)"1530477c7ab4113b59a4c18b076d11930f7da5d4a07f649bf54439d87d27e500fc8c25ebf8c92f6812cfc71c71c6d706";
+        pci[9]=(char *)"1530477c7ab4113b59a4c18b076d11930f7da5d4a07f649bf54439d87d27e500fc8c25ebf8c92f6812cfc71c71c6d706";
+        pcr[10]=(char *)"12";
+        pci[10]=(char *)"1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaa99";
+        pcr[11]=0;
+        pci[11]=(char *)"1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffa9d3";
+        pcr[12]=(char *)"1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffa8fb";
+        pci[12]=(char *)"1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffa8fb";
+
+
         ad = (char *)"144698a3b8e9433d693a02c96d4982b0ea985383ee66a8d8e8981aefd881ac98936f8da0e0f97f5cf428082d584c1d";
         bd = (char *)"12e2908d11688030018b12e8753eee3b2016c1f0f24f4070a0b9c14fcef35ef55a23215a316ceaa5d1cc48e98e172be0";
         xt=12; yt=16; ncs=xt+xt-2+yt+yt-1;
@@ -1457,7 +1670,7 @@ int main(int argc, char **argv)
         pc[50]=(char *)"58df3306640da276faaae7d6e8eb15778c4855551ae7f310c35a5dd279cd2eca6757cd636f96f891e2538b53dbf67f2";
         pc[51]=(char *)"1962d75c2381201e1a0cbd6c43c348b885c84ff731c4d59ca4a10356f453e01f78a4260763529e3532f6102c2e49a03d";
         pc[52]=(char *)"16112c4c3a9c98b252181140fad0eae9601a6de578980be6eec3232b5be72e7a07f3688ef60c206d01479253b03663c1";
-*/
+
         cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
@@ -1465,6 +1678,14 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BLS12461") == 0)
     {
         curve = PS+6;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is BLS12461\n");
         strcpy(fieldname, curvename);
         mbits = 461;
@@ -1507,37 +1728,23 @@ int main(int argc, char **argv)
         //zcru*=zcru;   // right cube root of unity
         cru = (Big)zcru;
         sqrtm3=  p+(-2 * pow(x, 5) - 6*pow(x,4) - 6*pow(x,3) + 2*x + 3);
-//        cout << "sign= " << sqrtm3%2 << endl;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
-/*
-        ZZn Z=1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
 
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
 
-        ZZn2 Z2(4,1);
-        ZZn2 B=txx((ZZn2)curve_b);
-        CA2=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(CA2)!=0)
-            sgn=((Big)real(CA2))%2;
-        else
-            sgn=((Big)imaginary(CA2))%2;
-        if (sgn==1) CA2=-CA2;
-        CB2=(ZZn2)1/(3*Z2*Z2);
-
-        cout << "CA2= " << CA2 << endl;
-        cout << "CB2= " << CB2 << endl;
-*/
         cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BN462") == 0)
     {
         curve = PS+7;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is BN462\n");
         strcpy(fieldname, curvename);
         mbits = 462;
@@ -1592,37 +1799,22 @@ int main(int argc, char **argv)
         cru = p - (18 * pow(x, 3) + 18 * x * x + 9 * x + 2);
 
         sqrtm3=p+(-36*pow(x,3) - 36*x*x - 18*x - 3);
-//        cout << "sign= " << sqrtm3%2 << endl;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
-/*
-        ZZn Z=1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
 
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
-
-        ZZn2 Z2(0,-1);
-        ZZn2 B=txd((ZZn2)curve_b);
-        CA2=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(CA2)!=0)
-            sgn=((Big)real(CA2))%2;
-        else
-            sgn=((Big)imaginary(CA2))%2;
-        if (sgn==1) CA2=-CA2;
-        CB2=(ZZn2)1/(3*Z2*Z2);
-
-        cout << "CA2= " << CA2 << endl;
-        cout << "CB2= " << CB2 << endl;
-*/
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "FP256BN") == 0)
     {
         curve = PS+4;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=28;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
         printf("Curve is FP256BN\n");
         strcpy(fieldname, curvename);
         mbits = 256;
@@ -1657,37 +1849,22 @@ int main(int argc, char **argv)
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2);
 
         sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
-//        cout << "sign= " << sqrtm3%2 << endl;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;
-/*        
-        ZZn Z=1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
 
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
-
-        ZZn2 Z2(0,1);
-        ZZn2 B=txx((ZZn2)curve_b);
-        CA2=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(CA2)!=0)
-            sgn=((Big)real(CA2))%2;
-        else
-            sgn=((Big)imaginary(CA2))%2;
-        if (sgn==1) CA2=-CA2;
-        CB2=(ZZn2)1/(3*Z2*Z2);
-
-        cout << "CA2= " << CA2 << endl;
-        cout << "CB2= " << CB2 << endl;
-*/
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "FP512BN") == 0)
     {
         curve = PS+5;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is FP512BN\n");
         strcpy(fieldname, curvename);
         mbits = 512;
@@ -1723,38 +1900,22 @@ int main(int argc, char **argv)
         cru = p - (18 * pow(x, 3) + 18 * x * x + 9 * x + 2);
 
         sqrtm3=p - (36*pow(x,3) + 36*x*x + 18*x + 3);
-//        cout << "sign= " << sqrtm3%2 << endl;
-//        cout << "p=   " << p << endl;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p << endl;
-/*
-        ZZn Z=1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
 
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
-
-        ZZn2 Z2(0,-1);
-        ZZn2 B=txx((ZZn2)curve_b);
-        CA2=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(CA2)!=0)
-            sgn=((Big)real(CA2))%2;
-        else
-            sgn=((Big)imaginary(CA2))%2;
-        if (sgn==1) CA2=-CA2;
-        CB2=(ZZn2)1/(3*Z2*Z2);
-
-        cout << "CA2= " << CA2 << endl;
-        cout << "CB2= " << CB2 << endl;
-*/
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS24479") == 0)
     {
         curve = PS+8;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is BLS24479\n");
         strcpy(fieldname, curvename);
 
@@ -1825,32 +1986,8 @@ int main(int argc, char **argv)
         sqrtm3=(Big)zsqrtm3;
         if (sqrtm3%2==1)
             sqrtm3=p-sqrtm3;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl;        
-/*
-        ZZn Z=1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
 
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
-
-        ZZn4 Z2((ZZn2)1,(ZZn2)1);
-        ZZn4 B=tx((ZZn4)curve_b);
-        CA4=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(real(CA4))!=0)
-            sgn=((Big)real(real(CA4)))%2;
-        else
-            sgn=((Big)imaginary(real(CA4)))%2;
-        if (sgn==1) CA4=-CA4;
-        CB4=(ZZn4)1/(3*Z2*Z2);
-
-        cout << "CA4= " << CA4 << endl;
-        cout << "CB4= " << CB4 << endl;
-*/
-//ZZn4 fz=findZ4(curve_b);
-//exit(0);
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ4(curve_b) << endl;
     }
 
@@ -1858,6 +1995,14 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BLS48556") == 0)
     {
         curve = PS+9;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=58;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is BLS48556\n");
         strcpy(fieldname, curvename);
 
@@ -1925,11 +2070,6 @@ int main(int argc, char **argv)
 
         Q8 = (np / r) * Q8;
 
-//cout << "Q8= " << Q8 << endl;
-//cout << "r*Q8= " << r*Q8 << endl;
-//cout << "2*QQ= " << QQ+QQ << endl;
-//cout << "3*QQ= " << (QQ+QQ)+QQ << endl;
-
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity -  not for M-TYPE
         cru = (Big)zcru;
@@ -1938,37 +2078,21 @@ int main(int argc, char **argv)
         sqrtm3=(Big)zsqrtm3;
         if (sqrtm3%2==1)
             sqrtm3=p-sqrtm3;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl; 
-
-/*
-        ZZn Z=-1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
-
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
-
-        ZZn8 Z2((ZZn4)1,(ZZn4)1);
-        ZZn8 B=tx((ZZn8)curve_b);
-        CA8=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(real(real(CA8)))!=0)
-            sgn=((Big)real(real(real(CA8))))%2;
-        else
-            sgn=((Big)imaginary(real(real(CA8))))%2;
-        if (sgn==1) CA8=-CA8;
-        CB8=(ZZn8)1/(3*Z2*Z2);
-
-        cout << "CA8= " << CA8 << endl;
-        cout << "CB8= " << CB8 << endl;
-*/
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
     }
 
     if (strcmp(curvename, "BLS48581") == 0)
     {
         curve = PS+10;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is BLS48581\n");
         strcpy(fieldname, curvename);
 
@@ -2000,33 +2124,14 @@ int main(int argc, char **argv)
 
         mip->TWIST = MR_SEXTIC_D;
 
-        //mip->IOBASE=10;
-        //gx=(char *)"4258736819635888510719226922301423369609633131342557579758281231565577240750348576646920600528529682191246450994803200560373551112655126678927104568272621858560534577202293646";
-        //gy=(char *)"3427753022670262326398897872606828748191995684951918749279729536371139924954542845900842929251072627395333429414195787875631282056102416831610447264733414174240889928748279117";
-        //mip->IOBASE=16;
 
         gx = (char *)"2af59b7ac340f2baf2b73df1e93f860de3f257e0e86868cf61abdbaedffb9f7544550546a9df6f9645847665d859236ebdbc57db368b11786cb74da5d3a1e6d8c3bce8732315af640";
         gy = (char *)"cefda44f6531f91f86b3a2d1fb398a488a553c9efeb8a52e991279dd41b720ef7bb7beffb98aee53e80f678584c3ef22f487f77c2876d1b2e35f37aef7b926b576dbb5de3e2587a70";
         P.set(gx, gy);
 
-        //mip->IOBASE=10;
-        //cout << "gx= " << gx << endl;
-        //cout << "gy= " << gy << endl;
-
-        //cout << "P= " << P << endl;
 
         Big A, B, C, D, E, F, G, H;
 
-        /*
-        		A=(char *)"488522055906013098943370946455285145355750022558560065778362316774880512321957078343030869711412368852213762684582445262738574506980017266080882902887975281911127402138877276";
-        		B=(char *)"4530198686318730510615089875264680313006345876681012648895720789199763506189688649358387867840809822428403436871165001502645614044016797532584433912003964549501792725823854756";
-        		C=(char *)"683837078546764585195750064552918557516365179073606906666761988700558966619842277357379749824515752510816863908059582033421855827477583545210267363313213829241029716522797255";
-        		D=(char *)"1981934010367807061915652782383503071917169317527775149288469127162084642848020133860443159207600913612194229288603419175030496303585499135445245021122248421992420686302425383";
-        		E=(char *)"168328765107154049987937110753764973401681006189099111956765018971541681538951029395375149352531639886350950053859438193946060081015269247643286488404161156278246150756577891";
-        		F=(char *)"3765116545484126637555129173607875429930449845266957448618134161173541239495345577260720369556871499909791600240654025123169064763242585032002364763888696589321867639260119261";
-        		G=(char *)"2529386951286407488724612742599500309109994334805943776951296491260985735531939220379556337276196918517309051294000130102897987426747727701435767021012046080593011881209249823";
-        		H=(char *)"3350331868018643152265912673171698250622202352563501404345821417390238956281236395761710054662997264976015254771313408174115751829265818705241778095377681706221075354386408203";
-        */
         mip->IOBASE = 16;
 
         Big xd = (char *)"01690ae06061530e3164040ce6e7466974a0865edb6d5b825df11e5db6b724681c2b5a805af2c7c45f60300c3c4238a1f5f6d3b64429f5b655a4709a8bddf790ec477b5fb1ed4a0156dec43f7f6c401164da6b6f9af79b9fc2c0e09d2cd4b65900d2394b61aa3bb48c7c731a1468de0a17346e34e17d58d8707f845face35202bb9d64b5eff29cbfc85f5c6d601d794c8796c20e6781dffed336fc1ff6d3ae3193dec0060391acb6811f1fbde38027a0ef591e6b21c6e31c5f1fda66eb05582b6b0399c6a2459cb2abfd0d5d953447a92786e194b289588e63ef1b8b61ad354bed299b5a497c549d7a56a74879b7665a7042fbcaf1190d915f945fef6c0fcec14b4afc403f507747204d810c5700de16926309352f660f26a5529a2f74cb9d10440595dc25d6d12fcce84fc56557217bd4bc2d645ab4ca167fb812de7cacc3b9427fc78212985680b883bf7fee7eae01991eb7a52a0f4cbb01f5a8e3c16c41350dc62be2c19cbd2b98d9c9d2687cd811db7863779c97e9a15bd6967d5eb21f972d28ad9d437de412342524931998f280a9a9c799c33ff8f838ca35bddebbb79cdc2967946cc0f77995411692e18519243d5598bdb4623a11dc97ca388949f32c65db3fc6a47124bd5d063549e50b0f8b030d3a9830e1e3bef5cd4283939d33a28cfdc3df89640df257c0fc254477a9c8eff69b57cff042e6fd1ef3e293c57beca2cd61dc44838014c208eda095e10d5e89e705ff690704789596e419699650879771f58935d768cdc3b55150cca3693e2833b62df34f1e2491ef8c5824f8a80cd86e65193a";
@@ -2051,17 +2156,6 @@ int main(int argc, char **argv)
         ZZn4 xb(xba, xbb);
 
         X8.set(xa, xb);
-        /*
-        		A=(char *)"1752792025746338528024487525888549368413081275325602641340459351157268126367292017499287064777262888681363907551242455740753520720646621236386819731028718543609868153423984647";
-        		B=(char *)"2868397909921871882437653406338359330849869736920682748716626290360573813614970955881513871275020481583722584452488193924358479769164147029352260763115998160803794306498494391";
-        		C=(char *)"1863845751178157488246660458090179186845236426212411521385655190629190609029418750286436531057181929252995969970422233447486763009676404818692624871899449613743689472888122869";
-        		D=(char *)"4130428535653681329585296374200928046386195800843673002887975436457007892165426804712153353358564618967673827278843186985619333036209283245589330093261961913009398742697993336";
-        		E=(char *)"1732340534986452053971826795759250223535962464757445465821947496318112301027427981988601709548889033580829119912332584118587866796935614094152016493282077373930038948286692454";
-        		F=(char *)"2960630917170779964461366236940322101671590500139330287091284102683723381820302564880131181856363418825111505237215584983014806947545094962779602044989872378419578311531860585";
-        		G=(char *)"2718719781479526894128944593378055641217078194586954694958080216383349654864844236158275766770132073693386915005687021760158794555089580856491736525086318868009818515997753870";
-        		H=(char *)"2501101090817478348088902140218203391417482850174097957696120668742105502488232898688748719467444122961977036174041583876415008384452991231279210159249877706951729963181544641";
-        */
-
 
         A = yd % p; yd /= p;
         B = yd % p; yd /= p;
@@ -2081,51 +2175,7 @@ int main(int argc, char **argv)
         ZZn4 yb(yba, ybb);
 
         Y8.set(ya, yb);
-        /*
-        		Q8.set(X8,Y8);
 
-        		mip->IOBASE=16;
-
-        		cout << "X= " << X8 << endl;
-        		cout << "Y= " << Y8 << endl;
-        		cout << "Y*Y=   "  << Y8*Y8 << endl;
-        		cout << "X*X*X= "  << X8*X8*X8+txd((ZZn8)1) << endl;
-        		cout << "MyQ8= " << Q8 << endl;
-        exit(0); */
-        /*		Big x0=0;
-
-        		forever
-        		{
-        			ZZn8 XX;
-        			ZZn4 X;
-        			ZZn2 t;
-
-        			x0+=1;
-        			t.set((ZZn)0,(ZZn)x0);
-        			X.set(t,(ZZn2)0);
-        			XX.set(X,(ZZn4)0);
-        			if (!Q8.set(X)) continue;
-        			break;
-        		}
-
-
-        		tau[0]=2;  // count points on twist over extension p^8
-        		tau[1]=t;
-        		for (int jj=1;jj<8;jj++ ) tau[jj+1]=t*tau[jj]-p*tau[jj-1];
-
-        		TT=tau[8];
-
-        		PP=pow(p,8);
-        		FF=sqrt((4*PP-TT*TT)/3);
-        		np=PP+1-(3*FF+TT)/2;  //?
-
-        		Q8=(np/r)*Q8;
-
-        cout << "Q8= " << Q8 << endl;
-        */
-//cout << "r*Q8= " << r*Q8 << endl;
-//cout << "2*QQ= " << QQ+QQ << endl;
-//cout << "3*QQ= " << (QQ+QQ)+QQ << endl;
 
         zcru = pow((ZZn)2, (p - 1) / 3);
         zcru *= zcru; // right cube root of unity -  not for M-TYPE
@@ -2135,30 +2185,7 @@ int main(int argc, char **argv)
         sqrtm3=(Big)zsqrtm3;
         if (sqrtm3%2==1)
             sqrtm3=p-sqrtm3;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl; 
-/*
-        ZZn Z=2;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
-
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
-
-        ZZn8 Z2((ZZn4)1,(ZZn4)1);
-        ZZn8 B2=txd((ZZn8)curve_b);
-        CA8=sqrt(-3*(Z2*Z2*Z2+B2));
-        if ((Big)real(real(real(CA8)))!=0)
-            sgn=((Big)real(real(real(CA8))))%2;
-        else
-            sgn=((Big)imaginary(real(real(CA8))))%2;
-        if (sgn==1) CA8=-CA8;
-        CB8=(ZZn8)1/(3*Z2*Z2);
-
-        cout << "CA8= " << CA8 << endl;
-        cout << "CB8= " << CB8 << endl;
-*/
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
     }
 
@@ -2166,6 +2193,14 @@ int main(int argc, char **argv)
     if (strcmp(curvename, "BLS48286") == 0)
     {
         curve = PS+11;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=60;
+        if (strcmp(lg, "javascript") == 0)
+            bb=23;
         printf("Curve is BLS48286\n");
         strcpy(fieldname, curvename);
 
@@ -2230,11 +2265,6 @@ int main(int argc, char **argv)
 
         Q8 = (np / r) * Q8;
 
-//cout << "Q8= " << Q8 << endl;
-//cout << "r*Q8= " << r*Q8 << endl;
-//cout << "2*QQ= " << QQ+QQ << endl;
-//cout << "3*QQ= " << (QQ+QQ)+QQ << endl;
-
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity -  not for M-TYPE
         cru = (Big)zcru;
@@ -2243,31 +2273,7 @@ int main(int argc, char **argv)
         sqrtm3=(Big)zsqrtm3;
         if (sqrtm3%2==1)
             sqrtm3=p-sqrtm3;
-//        cout << "-3 = " << (sqrtm3*sqrtm3)%p-p << endl; 
-
-/*
-        ZZn Z=-1;
-        CA=sqrt(-3*(Z*Z*Z+(ZZn)curve_b));
-        int sgn=((Big)CA)%2;
-        if (sgn==1) CA=-CA;
-        CB=(ZZn)1/(3*Z*Z);
-
-        cout << "CA= " << CA << endl;
-        cout << "CB= " << CB << endl;
-
-        ZZn8 Z2((ZZn4)1,(ZZn4)1);
-        ZZn8 B=tx((ZZn8)curve_b);
-        CA8=sqrt(-3*(Z2*Z2*Z2+B));
-        if ((Big)real(real(real(CA8)))!=0)
-            sgn=((Big)real(real(real(CA8))))%2;
-        else
-            sgn=((Big)imaginary(real(real(CA8))))%2;
-        if (sgn==1) CA8=-CA8;
-        CB8=(ZZn8)1/(3*Z2*Z2);
-
-        cout << "CA8= " << CA8 << endl;
-        cout << "CB8= " << CB8 << endl;
-*/
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
     }
 
@@ -2300,7 +2306,7 @@ int main(int argc, char **argv)
         sprintf(pre5, "const BIG%s", xxx);
         sprintf(pre6, "const BIG%s", xxx);
         sprintf(pre7, "const BIG%s", xxx);
-//        sprintf(pre8, "const BIG%s", xxx);
+        sprintf(pre8, "const BIG%s", xxx);
 
         sprintf(zzz, "_%s", curvename);
         sprintf(yyy, "_%s", fieldname);
@@ -2313,7 +2319,8 @@ int main(int argc, char **argv)
         sprintf(post5, "%s[4]= ", zzz);
         sprintf(post6, "%s[4][4]= ", zzz);
         sprintf(post7, "%s= ", yyy);
-//        sprintf(post8, "%s[%d]= ", zzz, ncs);
+        sprintf(post8, "%s[%d]= ", zzz, ncs);
+        sprintf(post9, "%s[%d]= ", zzz, ncs2);
 
     }
 
@@ -2333,7 +2340,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "const BIG ");
         strcpy(pre6, "const BIG ");
         strcpy(pre7, "const BIG ");
-//        strcpy(pre8, "const BIG ");
+        strcpy(pre8, "const BIG ");
 
         strcpy(post0, "= ");
         strcpy(post1, "= ");
@@ -2343,7 +2350,8 @@ int main(int argc, char **argv)
         strcpy(post5, "[4]= ");
         strcpy(post6, "[4][4]= ");
         strcpy(post7, "= ");
-//        sprintf(post8, "[%d]= ",ncs);
+        sprintf(post8, "[%d]= ",ncs);
+        sprintf(post9, "[%d]= ",ncs2);
     }
 
     if (strcmp(lg, "java") == 0)
@@ -2363,7 +2371,7 @@ int main(int argc, char **argv)
             strcpy(pre5, "public static final long[][] ");
             strcpy(pre6, "public static final long[][][] ");
             strcpy(pre7, "public static final long[] ");
- //           strcpy(pre8, "public static final long[][] ");
+            strcpy(pre8, "public static final long[][] ");
 
         }
         else
@@ -2376,7 +2384,7 @@ int main(int argc, char **argv)
             strcpy(pre5, "public static final int[][] ");
             strcpy(pre6, "public static final int[][][] ");
             strcpy(pre7, "public static final int[] ");
-//            strcpy(pre8, "public static final int[][] ");
+            strcpy(pre8, "public static final int[][] ");
 
         }
         strcpy(post0, "= ");
@@ -2387,7 +2395,8 @@ int main(int argc, char **argv)
         strcpy(post5, "= ");
         strcpy(post6, "= ");
         strcpy(post7, "= ");
-//        strcpy(post8, "= ");
+        strcpy(post8, "= ");
+        strcpy(post9, "= ");
     }
 
     if (strcmp(lg, "javascript") == 0)
@@ -2404,7 +2413,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "");
         strcpy(pre6, "");
         strcpy(pre7, "");
-//        strcpy(pre8, "");
+        strcpy(pre8, "");
         strcpy(post0, ": ");
         strcpy(post1, ": ");
         strcpy(post2, ": ");
@@ -2413,7 +2422,8 @@ int main(int argc, char **argv)
         strcpy(post5, ": ");
         strcpy(post6, ": ");
         strcpy(post7, ": ");
-//        strcpy(post8, ": ");
+        strcpy(post8, ": ");
+        strcpy(post9, ": ");
     }
 
     if (strcmp(lg, "go") == 0)
@@ -2430,7 +2440,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "var ");
         strcpy(pre6, "var ");
         strcpy(pre7, "var ");
-//        strcpy(pre8, "var ");
+        strcpy(pre8, "var ");
         strcpy(post0, " int= ");
         strcpy(post1, "= [...]Chunk ");
         strcpy(post2, " Chunk=");
@@ -2439,7 +2449,8 @@ int main(int argc, char **argv)
         sprintf(post5, "=[4][%d]Chunk ", words);
         sprintf(post6, "=[4][4][%d]Chunk ", words);
         strcpy(post7, "= [...]Chunk ");
-//        sprintf(post8, "=[%d][%d]Chunk ", ncs, words);
+        sprintf(post8, "=[%d][%d]Chunk ", ncs, words);
+        sprintf(post9, "=[%d][%d]Chunk ", ncs2, words);
     }
 
     if (strcmp(lg, "rust") == 0)
@@ -2456,7 +2467,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "pub const ");
         strcpy(pre6, "pub const ");
         strcpy(pre7, "pub const ");
-//        strcpy(pre8, "pub const ");
+        strcpy(pre8, "pub const ");
         strcpy(post0, ":isize = ");
         strcpy(post1, ":[Chunk;NLEN]=");
         strcpy(post2, ":Chunk=");
@@ -2465,7 +2476,8 @@ int main(int argc, char **argv)
         strcpy(post5, ":[[Chunk;NLEN];4]=");
         strcpy(post6, ":[[[Chunk;NLEN];4];4]=");
         strcpy(post7, ":[Chunk;NLEN]=");
-//        sprintf(post8, ":[[Chunk;NLEN];%d]=",ncs);
+        sprintf(post8, ":[[Chunk;NLEN];%d]=",ncs);
+        sprintf(post9, ":[[Chunk;NLEN];%d]=",ncs2);
 
     }
 
@@ -2483,7 +2495,7 @@ int main(int argc, char **argv)
         strcpy(pre5, "static let ");
         strcpy(pre6, "static let ");
         strcpy(pre7, "static let ");
- //       strcpy(pre8, "static let ");
+        strcpy(pre8, "static let ");
         strcpy(post0, ":Int = ");
         strcpy(post1, ":[Chunk] = ");
         strcpy(post2, ":Chunk = ");
@@ -2492,7 +2504,8 @@ int main(int argc, char **argv)
         strcpy(post5, ":[[Chunk]] = ");
         strcpy(post6, ":[[[Chunk]]] = ");
         strcpy(post7, ":[Chunk] = ");
-//        strcpy(post8, ":[[Chunk]] = ");
+        strcpy(post8, ":[[Chunk]] = ");
+        strcpy(post9, ":[[Chunk]] = ");
     }
 
 
@@ -2510,7 +2523,7 @@ int main(int argc, char **argv)
     cout << pre7 << toupperit((char *)"Modulus", lang) << post7; mc = output(chunk, words, p, m); cout << term << endl;
     r2modp = pow((Big)2, 2 * words * bb) % p;
 
-    int e=0;
+    e=0;
     Big is=p-1;
     while (is%2==0)
     {
@@ -2538,7 +2551,7 @@ int main(int argc, char **argv)
     if (sqrtm3!=0)
     {
         cout << pre7 << toupperit((char *)"SQRTm3", lang) << post7; output(chunk, words, sqrtm3, m); cout << term << endl;
-    }
+    }  
     if (cru!=0)
     {
         cout << pre1 << toupperit((char *)"CRu", lang) << post1; output(chunk, words, cru, m); cout << term << endl;
@@ -2616,7 +2629,9 @@ int main(int argc, char **argv)
     cout << pre1 << toupperit((char *)"CURVE_Order", lang) << post1; output(chunk, words, r, m); cout << term << endl;
     cout << pre1 << toupperit((char *)"CURVE_Gx", lang) << post1; output(chunk, words, gx, m); cout << term << endl;
     cout << pre1 << toupperit((char *)"CURVE_Gy", lang) << post1; output(chunk, words, gy, m); cout << term << endl;
-/*
+    cout << pre1 << toupperit((char *)"CURVE_HTPC", lang) << post1; output(chunk, words, htpc, m); cout << term << endl; // A Hash To Point Constant -  differs depending on HTP method.
+
+
     if (curve == 17)   // secp256k1
     {
         cout << pre1 << toupperit((char *)"CURVE_Ad", lang) << post1; output(chunk, words, ad, m); cout << term << endl;
@@ -2629,7 +2644,7 @@ int main(int argc, char **argv)
         output(chunk, words, pc[ncs-1], m);  
         cout << close << term << endl;
     }
-*/
+
 // BN curves, negative x
     if (curve == PS || curve == PS+1 || curve == PS+4)
     {
@@ -2755,42 +2770,12 @@ int main(int argc, char **argv)
             cout << "**** Failed ****" << endl;
             cout << "\nQ= " << Q << endl << endl;
         }
-/*
-        cout << pre3 << "CURVE_W" << post3 << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close << term << endl;
-        cout << pre4 << "CURVE_SB" << post4 << open; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << ","; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << close << term << endl;
 
-        cout << pre5 << "CURVE_WB" << post5 << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close << term << endl;
-
-        cout << pre6 << "CURVE_BB" << post6 << open;
-        cout << open;
-        output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << close;
-
-        cout << ","; cout << open; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << close;
-        cout << ","; cout << open; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << close;
-
-        cout << ","; cout << open; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-*/
         cout << close;
         cout << close << term << endl;
 
     }
-/*
+
     if (curve == PS+3)   // bls12381
     {
         cout << pre1 << toupperit((char *)"CURVE_Ad", lang) << post1; output(chunk, words, ad, m); cout << term << endl;
@@ -2803,7 +2788,31 @@ int main(int argc, char **argv)
         output(chunk, words, pc[ncs-1], m);  
         cout << close << term << endl;
     }
-*/
+
+
+    if (curve == PS+3)   // bls12381
+    {
+        cout << pre1 << toupperit((char *)"CURVE_Adr", lang) << post1; output(chunk, words, adr, m); cout << term << endl;
+        cout << pre1 << toupperit((char *)"CURVE_Adi", lang) << post1; output(chunk, words, adi, m); cout << term << endl;
+        cout << pre1 << toupperit((char *)"CURVE_Bdr", lang) << post1; output(chunk, words, bdr, m); cout << term << endl;
+        cout << pre1 << toupperit((char *)"CURVE_Bdi", lang) << post1; output(chunk, words, bdi, m); cout << term << endl;
+        cout << pre8 << "PCR" << post9 << open;
+        for (i=0;i<ncs2-1;i++)
+        {
+            output(chunk, words, pcr[i], m); cout << ",";
+        }
+        output(chunk, words, pcr[ncs2-1], m);  
+        cout << close << term << endl;
+        cout << pre8 << "PCI" << post9 << open;
+        for (i=0;i<ncs2-1;i++)
+        {
+            output(chunk, words, pci[i], m); cout << ",";
+        }
+        output(chunk, words, pci[ncs2-1], m);  
+        cout << close << term << endl;
+
+    }
+
     if (curve == PS+8)
     {
         cout << endl;
@@ -2835,37 +2844,7 @@ int main(int argc, char **argv)
             cout << "**** Failed ****" << endl;
             cout << "\nQQ= " << QQ << endl << endl;
         }
-/*
-        cout << pre3 << "CURVE_W" << post3 << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close << term << endl;
-        cout << pre4 << "CURVE_SB" << post4 << open; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << ","; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << close << term << endl;
 
-        cout << pre5 << "CURVE_WB" << post5 << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close << term << endl;
-
-        cout << pre6 << "CURVE_BB" << post6 << open;
-        cout << open;
-        output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << close;
-
-        cout << ","; cout << open; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << close;
-        cout << ","; cout << open; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << close;
-
-        cout << ","; cout << open; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-*/
         cout << close;
         cout << close << term << endl;
 
@@ -2925,39 +2904,6 @@ int main(int argc, char **argv)
                 cout << "\nQQ= " << QQ << endl << endl;
             }
         }
-/*
-        cout << pre3 << "CURVE_W" << post3 << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close << term << endl;
-        cout << pre4 << "CURVE_SB" << post4 << open; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << ","; cout << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close; cout << close << term << endl;
 
-        cout << pre5 << "CURVE_WB" << post5 << open; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m); cout << ","; output(chunk, words, (Big)0, m); cout << close << term << endl;
-
-        cout << pre6 << "CURVE_BB" << post6 << open;
-        cout << open;
-        output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << close;
-
-        cout << ","; cout << open; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << close;
-        cout << ","; cout << open; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << close;
-
-        cout << ","; cout << open; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-        cout << ","; output(chunk, words, (Big)0, m);
-
-        cout << close;
-        cout << close << term << endl;
-*/
     }
 }

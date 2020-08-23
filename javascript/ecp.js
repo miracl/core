@@ -1521,11 +1521,15 @@ var ECP = function(ctx) {
             var X3=new ctx.FP(0);
             var one=new ctx.FP(1);
             var Y=new ctx.FP(0);
-            var NY=new ctx.FP(0);
+            var D=new ctx.FP(0);
             var t=new ctx.FP(h);
             var w=new ctx.FP(0);
-            var x=new ctx.BIG(0);
+            var D2=new ctx.FP(0);
+            var hint=new ctx.FP(0);
+            var GX1=new ctx.FP(0);
+            var Y3=new ctx.FP(0);
             var sgn=t.sign();
+
             if (ECP.CURVE_A!=0 || ECP.HTC_ISO!=0)
             {
                 if (ECP.HTC_ISO!=0)
@@ -1539,33 +1543,52 @@ var ECP = function(ctx) {
                 // SSWU Method
                 t.sqr();
                 t.imul(ctx.FP.RIADZ);
-                var w=new ctx.FP(t); w.add(one); w.norm();
-                w.mul(t); NY.copy(A);
-                NY.mul(w);
-                NY.inverse(null);
+                w.copy(t); w.add(one); w.norm();
+
+                w.mul(t); D.copy(A);
+                D.mul(w);
+
                 w.add(one); w.norm();
                 w.mul(B);
                 w.neg(); w.norm();
 
-                X2.copy(w); X2.mul(NY);
+                X2.copy(w); 
                 X3.copy(t); X3.mul(X2);
-                if (ECP.HTC_ISO==0)
+
+// x^3+Ad^2x+Bd^3
+                GX1.copy(X2); GX1.sqr(); D2.copy(D);
+                D2.sqr(); w.copy(A); w.mul(D2); GX1.add(w); GX1.norm(); GX1.mul(X2); D2.mul(D);w.copy(B); w.mul(D2); GX1.add(w); GX1.norm();
+
+                w.copy(GX1); w.mul(D);
+                var qr=w.qr(hint);
+                D.copy(w); D.inverse(hint);
+                D.mul(GX1);
+                X2.mul(D);
+                X3.mul(D);
+                t.mul(h);
+                D2.copy(D); D2.sqr();
+
+                Y.copy(w.sqrt(hint));
+                Y.mul(D2);
+
+                D2.mul(t);
+                w.imul(ctx.FP.RIADZ);
+
+                X1.rcopy(ctx.ROM_CURVE.CURVE_HTPC);
+                hint.mul(X1);
+                
+                Y3.copy(w.sqrt(hint));
+                Y3.mul(D2);
+
+                X2.cmove(X3,1-qr);
+                Y.cmove(Y3,1-qr);
+
+                var ne=Y.sign()^sgn;
+                w.copy(Y); w.neg(); w.norm();
+                Y.cmove(w,ne);
+
+                if (ECP.HTC_ISO!=0)
                 {
-                    var rhs=ECP.RHS(X3);
-                    X2.cmove(X3,rhs.qr(null));
-                    rhs.copy(ECP.RHS(X2));
-                    Y.copy(rhs.sqrt(null));
-                    x.copy(X2.redc());
-                } else {
-                    w.copy(X3); w.sqr(); w.add(A); w.norm(); w.mul(X3); w.add(B); w.norm(); // w=x^3+Ax+B
-                    X2.cmove(X3,w.qr(null));
-                    w.copy(X2); w.sqr(); w.add(A); w.norm(); w.mul(X2); w.add(B); w.norm();
-                    Y.copy(w.sqrt(null));
-
-                    var ne=Y.sign()^sgn;
-                    NY.copy(Y); NY.neg(); NY.norm();
-                    Y.cmove(NY,ne);
-
                     var k=0;
                     var isox=ECP.HTC_ISO;
                     var isoy=3*(isox-1)/2;
@@ -1605,12 +1628,16 @@ var ECP = function(ctx) {
                     }  
                     ynum.mul(Y);
                     w.copy(xnum); w.mul(yden);
-                    P=new ECP();
                     P.x.copy(w);
                     w.copy(ynum); w.mul(xden);
                     P.y.copy(w);
                     w.copy(xden); w.mul(yden);
                     P.z.copy(w);
+                    return P;
+                } else {
+                    var x=X2.redc();
+                    var y=Y.redc();
+                    P.setxy(x,y);
                     return P;
                 }
             } else {
@@ -1626,11 +1653,11 @@ var ECP = function(ctx) {
                 Y.copy(A); Y.mul(t);
                 t.copy(one); t.add(Y); t.norm();
                 Y.rsub(one); Y.norm();
-                NY.copy(t); NY.mul(Y); 
-                NY.mul(B);
+                D.copy(t); D.mul(Y); 
+                D.mul(B);
                 
                 var w=new ctx.FP(A); 
-                ctx.FP.tpo(NY,w);
+                ctx.FP.tpo(D,w);
 
                 w.mul(B);
                 if (w.sign()==1)
@@ -1639,14 +1666,14 @@ var ECP = function(ctx) {
                     w.norm();
                 }
                 w.mul(B);
-                w.mul(h); w.mul(Y); w.mul(NY);
+                w.mul(h); w.mul(Y); w.mul(D);
 
                 X1.neg(); X1.norm(); X1.div2();
                 X2.copy(X1);
                 X1.sub(w); X1.norm();
                 X2.add(w); X2.norm();
                 A.add(A); A.add(A); A.norm();
-                t.sqr(); t.mul(NY); t.sqr();
+                t.sqr(); t.mul(D); t.sqr();
                 A.mul(t);
                 X3.add(A); X3.norm();
 
@@ -1656,16 +1683,16 @@ var ECP = function(ctx) {
                 X3.cmove(X1,rhs.qr(null));
                 rhs.copy(ECP.RHS(X3));
                 Y.copy(rhs.sqrt(null));
-                x.copy(X3.redc());
+  
+                var ne=Y.sign()^sgn;
+                w.copy(Y); w.neg(); w.norm();
+                Y.cmove(w,ne);
 
+                var x=X3.redc();
+                var y=Y.redc();
+                P.setxy(x,y);
+                return P;
             }
-            var ne=Y.sign()^sgn;
-            NY.copy(Y); NY.neg(); NY.norm();
-            Y.cmove(NY,ne);
-
-            var y=Y.redc();
-            P.setxy(x,y);
-
         }
         return P;
     };
