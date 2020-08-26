@@ -29,6 +29,7 @@
 import Foundation
 import core // comment out for Xcode
 import ed25519
+import c25519
 import nist256
 import goldilocks
 import secp256k1
@@ -61,7 +62,7 @@ public func hash_to_field_ed25519(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UInt
 
 public func htp_ed25519(_ mess: String)
 {
-    print("\nRandom Access - message= "+mess)
+    print("\nRandom oracle - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_".utf8)
 	var u=hash_to_field_ed25519(HMAC.MC_SHA2,64,DST,M,2)
@@ -83,6 +84,41 @@ public func htp_ed25519(_ mess: String)
     u=hash_to_field_ed25519(HMAC.MC_SHA2,64,DST,M,1)
     print("u[0]= "+u[0].toString())
     P=ed25519.ECP.map2point(u[0])
+    print("Q= "+P.toString())
+    P.cfp()
+    P.affine()
+    print("P= "+P.toString())
+}
+
+public func hash_to_field_c25519(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UInt8],_ ctr: Int) -> [c25519.FP] {
+    var u=[c25519.FP]()
+    let q=c25519.BIG(c25519.ROM.Modulus)
+    let k=q.nbits()
+    let r=c25519.BIG(c25519.ROM.CURVE_Order)
+    let m=r.nbits()
+    let L=ceil(k+ceil(m,2),8)
+    let OKM=HMAC.XMD_Expand(hf,hlen,L*ctr,DST,M)
+    var fd=[UInt8](repeating: 0,count: L)
+    for i in 0..<ctr {
+        for j in 0..<L {
+            fd[j]=OKM[i*L+j]
+        }
+		var dx=c25519.DBIG.fromBytes(fd)
+		let w=c25519.FP(dx.mod(q))
+		u.append(w)
+    }
+
+    return u
+}
+
+public func htp_c25519(_ mess: String)
+{
+    let M=[UInt8](mess.utf8)
+    print("\nNon-Uniform")
+    let DST = [UInt8]("QUUX-V01-CS02-with-curve25519_XMD:SHA-512_ELL2_NU_".utf8)
+    let u=hash_to_field_c25519(HMAC.MC_SHA2,64,DST,M,1)
+    print("u[0]= "+u[0].toString())
+    var P=c25519.ECP.map2point(u[0])
     print("Q= "+P.toString())
     P.cfp()
     P.affine()
@@ -113,7 +149,7 @@ public func hash_to_field_nist256(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UInt
 
 public func htp_nist256(_ mess: String)
 {
-    print("\nRandom Access - message= "+mess)
+    print("\nRandom oracle - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field_nist256(HMAC.MC_SHA2,nist256.CONFIG_CURVE.HASH_TYPE,DST,M,2)
@@ -164,7 +200,7 @@ public func hash_to_field_goldilocks(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[U
 
 public func htp_goldilocks(_ mess: String)
 {
-    print("\nRandom Access - message= "+mess)
+    print("\nRandom oracle - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_".utf8)
 	var u=hash_to_field_goldilocks(HMAC.MC_SHA2,goldilocks.CONFIG_CURVE.HASH_TYPE,DST,M,2)
@@ -215,7 +251,7 @@ public func hash_to_field_secp256k1(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UI
 
 public func htp_secp256k1(_ mess: String)
 {
-    print("\nRandom Access - message= "+mess)
+    print("\nRandom oracle - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field_secp256k1(HMAC.MC_SHA2,secp256k1.CONFIG_CURVE.HASH_TYPE,DST,M,2)
@@ -266,7 +302,7 @@ public func hash_to_field_bls12381(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UIn
 
 public func htp_bls12381(_ mess: String)
 {
-    print("\nRandom Access - message= "+mess)
+    print("\nRandom oracle - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field_bls12381(HMAC.MC_SHA2,bls12381.CONFIG_CURVE.HASH_TYPE,DST,M,2)
@@ -324,7 +360,7 @@ public func hash_to_field2_bls12381(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UI
 
 public func htp2_bls12381(_ mess: String)
 {
-    print("\nRandom Access - message= "+mess)
+    print("\nRandom oracle - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_".utf8)
 	var u=hash_to_field2_bls12381(HMAC.MC_SHA2,bls12381.CONFIG_CURVE.HASH_TYPE,DST,M,2)
@@ -359,6 +395,13 @@ htp_ed25519("abc")
 htp_ed25519("abcdef0123456789")
 htp_ed25519("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq")
 htp_ed25519("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
+print("\nTesting HTP for curve c25519\n")
+htp_c25519("")
+htp_c25519("abc")
+htp_c25519("abcdef0123456789")
+htp_c25519("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq")
+htp_c25519("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
 print("\nTesting HTP for curve nist256\n")
 htp_nist256("")

@@ -1002,14 +1002,19 @@ public struct ECP {
 /* Constant time Map to Point */
     static public func map2point(_ h: FP) -> ECP {
         var P=ECP()
-        var pNIL:FP?=nil
+//        var pNIL:FP?=nil
         if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.MONTGOMERY {
 // Elligator 2
             var X1=FP()
             var X2=FP()
             var t=FP(h)
+            var w=FP()
             let one=FP(1)
             let A=FP(CONFIG_CURVE.CURVE_A)
+            var hint:FP?=FP()
+            var D=FP()
+            var N=FP()
+
             t.sqr()
 
             if CONFIG_FIELD.PM1D2 == 2 {
@@ -1022,16 +1027,27 @@ public struct ECP {
                 t.imul(CONFIG_FIELD.QNRI)
             }
 
-            t.add(one)
             t.norm()
-            t.inverse(pNIL)
-            X1.copy(t); X1.mul(A)
+            D.copy(t); D.add(one); D.norm()
+
+            X1.copy(A)
             X1.neg(); X1.norm()
             X2.copy(X1)
-            X2.add(A); 
-            X2.neg(); X2.norm()
-            let rhs=ECP.RHS(X2)
-            X1.cmove(X2,rhs.qr(&pNIL))
+            X2.mul(t)
+
+            w.copy(X1); w.sqr(); N.copy(w); N.mul(X1)
+            w.mul(A); w.mul(D); N.add(w)
+            t.copy(D); t.sqr()
+            t.mul(X1)
+            N.add(t); N.norm()
+
+            t.copy(N); t.mul(D)
+            let qres=t.qr(&hint)
+            w.copy(t); w.inverse(hint)
+            D.copy(w); D.mul(N)
+            X1.mul(D)
+            X2.mul(D)
+            X1.cmove(X2,1-qres)
 
             let a=X1.redc()
             P.copy(ECP(a))

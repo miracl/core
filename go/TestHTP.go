@@ -25,6 +25,7 @@ import "fmt"
 
 import "github.com/miracl/core/go/core"
 import "github.com/miracl/core/go/core/ED25519"
+import "github.com/miracl/core/go/core/C25519"
 import "github.com/miracl/core/go/core/NIST256"
 import "github.com/miracl/core/go/core/GOLDILOCKS"
 import "github.com/miracl/core/go/core/SECP256K1"
@@ -56,7 +57,7 @@ func hash_to_field_ED25519(hash int,hlen int,DST []byte,M []byte,ctr int) []*ED2
 
 func htp_ED25519(mess []byte) {
 	
-	fmt.Println("Random Access - message= "+string(mess))
+	fmt.Println("Random oracle - message= "+string(mess))
 	DST := []byte("QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_")
 	u:=hash_to_field_ED25519(core.MC_SHA2,64,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
@@ -82,6 +83,40 @@ func htp_ED25519(mess []byte) {
 
 }
 
+func hash_to_field_C25519(hash int,hlen int,DST []byte,M []byte,ctr int) []*C25519.FP {
+	var u []*C25519.FP
+	q := C25519.NewBIGints(C25519.Modulus)
+	k := q.Nbits()
+	r := C25519.NewBIGints(C25519.CURVE_Order)
+	m := r.Nbits();
+	L:= ceil(k+ceil(m,2),8)
+	var fd=make([]byte,L)
+	OKM:=core.XMD_Expand(hash,hlen,L*ctr,DST,M)
+    for i:=0;i<ctr;i++ {
+        for j:=0;j<L;j++ {
+            fd[j]=OKM[i*L+j];
+        }
+		dx:=C25519.DBIG_fromBytes(fd)
+		w:=C25519.NewFPbig(dx.Mod(q))
+		u=append(u,w)
+    }
+	return u;
+}
+
+func htp_C25519(mess []byte) {
+
+	fmt.Printf("Non-Uniform\n")
+    DST:=[]byte("QUUX-V01-CS02-with-curve25519_XMD:SHA-512_ELL2_NU_");
+    u:=hash_to_field_C25519(core.MC_SHA2,64,DST,mess,1);
+	fmt.Printf("u= %s\n",u[0].ToString())
+	P:=C25519.ECP_map2point(u[0])
+	fmt.Printf("Q= %s\n",P.ToString())
+	P.Cfp()
+	P.Affine()
+	fmt.Printf("P= %s\n\n",P.ToString())
+}
+
+
 func hash_to_field_NIST256(hash int,hlen int,DST []byte,M []byte,ctr int) []*NIST256.FP {
 	var u []*NIST256.FP
 	q := NIST256.NewBIGints(NIST256.Modulus)
@@ -105,7 +140,7 @@ func hash_to_field_NIST256(hash int,hlen int,DST []byte,M []byte,ctr int) []*NIS
 
 func htp_NIST256(mess []byte) {
 	
-	fmt.Println("Random Access - message= "+string(mess))
+	fmt.Println("Random oracle - message= "+string(mess))
 	DST := []byte("QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_")
 	u:=hash_to_field_NIST256(core.MC_SHA2,NIST256.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
@@ -153,7 +188,7 @@ func hash_to_field_GOLDILOCKS(hash int,hlen int,DST []byte,M []byte,ctr int) []*
 
 func htp_GOLDILOCKS(mess []byte) {
 	
-	fmt.Println("Random Access - message= "+string(mess))
+	fmt.Println("Random oracle - message= "+string(mess))
 	DST := []byte("QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_")
 	u:=hash_to_field_GOLDILOCKS(core.MC_SHA2,GOLDILOCKS.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
@@ -201,7 +236,7 @@ func hash_to_field_SECP256K1(hash int,hlen int,DST []byte,M []byte,ctr int) []*S
 
 func htp_SECP256K1(mess []byte) {
 	
-	fmt.Println("Random Access - message= "+string(mess))
+	fmt.Println("Random oracle - message= "+string(mess))
 	DST := []byte("QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_")
 	u:=hash_to_field_SECP256K1(core.MC_SHA2,SECP256K1.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
@@ -249,7 +284,7 @@ func hash_to_field_BLS12381(hash int,hlen int,DST []byte,M []byte,ctr int) []*BL
 
 func htp_BLS12381(mess []byte) {
 	
-	fmt.Println("Random Access - message= "+string(mess))
+	fmt.Println("Random oracle - message= "+string(mess))
 	DST := []byte("QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_")
 	u:=hash_to_field_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
@@ -303,7 +338,7 @@ func hash_to_field2_BLS12381(hash int,hlen int,DST []byte,M []byte,ctr int) []*B
 
 func htp2_BLS12381(mess []byte) {
 	
-	fmt.Println("Random Access - message= "+string(mess))
+	fmt.Println("Random oracle - message= "+string(mess))
 	DST := []byte("QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_")
 	u:=hash_to_field2_BLS12381(core.MC_SHA2,BLS12381.HASH_TYPE,DST,mess,2)
 	fmt.Printf("u[0]= %s\n",u[0].ToString())
@@ -337,6 +372,14 @@ func main() {
 	htp_ED25519([]byte("abcdef0123456789"))
     htp_ED25519([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
 	htp_ED25519([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
+
+    fmt.Printf("\nTesting HTP for curve C25519\n");
+	htp_C25519([]byte(""))
+	htp_C25519([]byte("abc"))
+	htp_C25519([]byte("abcdef0123456789"))
+    htp_C25519([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
+	htp_C25519([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
+
 
     fmt.Printf("\nTesting HTP for curve NIST256\n");
 	htp_NIST256([]byte(""))

@@ -1248,8 +1248,12 @@ impl ECP {
             let mut X1=FP::new();
             let mut X2=FP::new();
             let mut t =FP::new_copy(h);
+            let mut w =FP::new();
             let one=FP::new_int(1);
             let A=FP::new_int(CURVE_A);
+            let mut N =FP::new();
+            let mut D =FP::new();
+            let mut hint =FP::new();
 
             t.sqr();
 
@@ -1263,16 +1267,27 @@ impl ECP {
                 t.imul(fp::QNRI as isize);
             }
 
-            t.add(&one);
             t.norm();
-            t.inverse(None);
-            X1.copy(&t); X1.mul(&A);
+            D.copy(&t); D.add(&one); D.norm();
+
+            X1.copy(&A);
             X1.neg(); X1.norm();
             X2.copy(&X1);
-            X2.add(&A); 
-            X2.neg(); X2.norm();
-            let rhs=ECP::rhs(&X2);
-            X1.cmove(&X2,rhs.qr(None));
+            X2.mul(&t);
+
+            w.copy(&X1); w.sqr(); N.copy(&w); N.mul(&X1);
+            w.mul(&A); w.mul(&D); N.add(&w); 
+            t.copy(&D); t.sqr();
+            t.mul(&X1);
+            N.add(&t); N.norm();
+
+            t.copy(&N); t.mul(&D);
+            let qres=t.qr(Some(&mut hint));
+            w.copy(&t); w.inverse(Some(&hint));
+            D.copy(&w); D.mul(&N);
+            X1.mul(&D);
+            X2.mul(&D);
+            X1.cmove(&X2,1-qres);
 
             let a=X1.redc();
             P.copy(&ECP::new_big(&a));

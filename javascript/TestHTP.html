@@ -52,6 +52,7 @@
 <script type="text/javascript"src=./bls.js></script>
 
 <p><a id="myLink4" href="#" onclick="ED25519();">ED25519 Hash to Point</a></p>
+<p><a id="myLink4" href="#" onclick="C25519();">C25519 Hash to Point</a></p>
 <p><a id="myLink5" href="#" onclick="NIST256();">NIST256 Hash to Point</a></p>
 <p><a id="myLink6" href="#" onclick="GOLDILOCKS();">GOLDILOCKS Hash to Point</a></p>
 <p><a id="myLink7" href="#" onclick="SECP256K1();">SECP256K1 Hash to Point</a></p>
@@ -97,24 +98,28 @@ function hash_to_field(ctx,hash,hlen,DST,M,ctr) {
 }
 
 function htp(mywindow,ctx,mess,ro,nu,hlen) {
-    mywindow.document.write("Random Access - message= "+mess+"<br>");
     var DSTRO = asciitobytes(ro);
     var DSTNU = asciitobytes(nu);
     var M = asciitobytes(mess);
+	var u,P,P1;
 
-    var u=hash_to_field(ctx,ctx.HMAC.MC_SHA2,hlen,DSTRO,M,2);
-    mywindow.document.write("u[0]= "+u[0].toString()+"<br>");
-    mywindow.document.write("u[1]= "+u[1].toString()+"<br>");
+	if (ctx.ECP.CURVETYPE != ctx.ECP.MONTGOMERY)
+	{
+		mywindow.document.write("Random oracle - message= "+mess+"<br>");
 
-    var P=ctx.ECP.map2point(u[0]);
-    mywindow.document.write("Q[0]= "+P.toString()+"<br>");
-    var P1=ctx.ECP.map2point(u[1]);
-    mywindow.document.write("Q[1]= "+P1.toString()+"<br>");
-    P.add(P1);
-    P.cfp();
-    P.affine();
-    mywindow.document.write("P= "+P.toString()+"<br>");
+	    u=hash_to_field(ctx,ctx.HMAC.MC_SHA2,hlen,DSTRO,M,2);
+		mywindow.document.write("u[0]= "+u[0].toString()+"<br>");
+		mywindow.document.write("u[1]= "+u[1].toString()+"<br>");
 
+		P=ctx.ECP.map2point(u[0]);
+		mywindow.document.write("Q[0]= "+P.toString()+"<br>");
+		P1=ctx.ECP.map2point(u[1]);
+		mywindow.document.write("Q[1]= "+P1.toString()+"<br>");
+		P.add(P1);
+		P.cfp();
+		P.affine();
+		mywindow.document.write("P= "+P.toString()+"<br>");
+	}
     mywindow.document.write("\nNon-Uniform"+"<br>");
     u=hash_to_field(ctx,ctx.HMAC.MC_SHA2,hlen,DSTNU,M,1);
     mywindow.document.write("u[0]= "+u[0].toString()+"<br>");
@@ -155,7 +160,7 @@ function hash_to_field2(ctx,hash,hlen,DST,M,ctr) {
 }
 
 function htp2(mywindow,ctx,mess,ro,nu,hlen) {
-    mywindow.document.write("Random Access - message= "+mess+"<br>");
+    mywindow.document.write("Random oracle - message= "+mess+"<br>");
     var DSTRO = asciitobytes(ro);
     var DSTNU = asciitobytes(nu);
     var M = asciitobytes(mess);
@@ -189,6 +194,20 @@ function ED25519() {
 	var ctx = new CTX('ED25519');
 	var ro="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_";
 	var nu="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_NU_";
+	var hlen=64;//SHA512
+	var mywindow=window.open();
+    htp(mywindow,ctx,"",ro,nu,hlen);
+    htp(mywindow,ctx,"abc",ro,nu,hlen);
+    htp(mywindow,ctx,"abcdef0123456789",ro,nu,hlen);
+    htp(mywindow,ctx,"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",ro,nu,hlen);
+    htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
+}
+
+// C25519 context
+function C25519() {
+	var ctx = new CTX('C25519');
+	var ro="QUUX-V01-CS02-with-curve25519_XMD:SHA-512_ELL2_RO_";
+	var nu="QUUX-V01-CS02-with-curve25519_XMD:SHA-512_ELL2_NU_";
 	var hlen=64;//SHA512
 	var mywindow=window.open();
     htp(mywindow,ctx,"",ro,nu,hlen);

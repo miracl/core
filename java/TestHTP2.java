@@ -56,7 +56,7 @@ public class TestHTP2 extends TestCase {
     }
 
     private static void htp2(String mess,String ro,String nu,int hlen) {
-        System.out.println("\nRandom Access - message= "+mess);
+        System.out.println("\nRandom oracle - message= "+mess);
         byte[] DSTRO = ro.getBytes();
         byte[] DSTNU = nu.getBytes();
         byte[] M = mess.getBytes();

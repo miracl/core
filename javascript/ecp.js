@@ -1336,7 +1336,11 @@ var ECP = function(ctx) {
             var X1=new ctx.FP(0);
             var X2=new ctx.FP(0);
             var t=new ctx.FP(h);
+            var w=new ctx.FP(0);
             var one=new ctx.FP(1);
+            var N=new ctx.FP(0);
+            var D=new ctx.FP(0);
+            var hint=new ctx.FP(0);
             var A=new ctx.FP(ECP.CURVE_A);
             t.sqr();
 
@@ -1349,17 +1353,27 @@ var ECP = function(ctx) {
             if (ctx.FP.PM1D2 > 2) {
                 t.imul(ctx.FP.PM1D2);
             }
-
-            t.add(one);
             t.norm();
-            t.inverse(null);
-            X1.copy(t); X1.mul(A);
-            X1.neg();  X1.norm();
+            D.copy(t); D.add(one); D.norm();
+
+            X1.copy(A);
+            X1.neg(); X1.norm();
             X2.copy(X1);
-            X2.add(A); 
-            X2.neg(); X2.norm();
-            var rhs=ECP.RHS(X2);
-            X1.cmove(X2,rhs.qr(null));
+            X2.mul(t);
+
+            w.copy(X1); w.sqr(); N.copy(w); N.mul(X1);
+            w.mul(A); w.mul(D); N.add(w); 
+            t.copy(D); t.sqr();
+            t.mul(X1);
+            N.add(t); N.norm();
+
+            t.copy(N); t.mul(D);
+            var qres=t.qr(hint);
+            w.copy(t); w.inverse(hint);
+            D.copy(w); D.mul(N);
+            X1.mul(D);
+            X2.mul(D);
+            X1.cmove(X2,1-qres);
 
             var a=X1.redc();
             P.setx(a);

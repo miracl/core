@@ -27,6 +27,7 @@
 #include "randapi.h"
 #include "ecp_NIST256.h"
 #include "ecp_ED25519.h"
+#include "ecp_C25519.h"
 #include "ecp_GOLDILOCKS.h"
 #include "ecp_SECP256K1.h"
 #include "ecp_BLS12381.h"
@@ -170,7 +171,7 @@ int htp_ED25519(char *mess)
     octet DST = {0,sizeof(dst),dst};
 
     BIG_ED_rcopy(r, CURVE_Order_ED25519);
-    printf("Random Access - message= %s\n",mess);
+    printf("Random oracle - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_");
@@ -205,6 +206,66 @@ int htp_ED25519(char *mess)
 
     return res;
 }
+
+
+/* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
+static void hash_to_field_C25519(int hash,int hlen,FP_F25519 *u,octet *DST,octet *M, int ctr)
+{
+    int i,j,L,k,m;
+    BIG_ED q,w,r;
+    DBIG_ED dx;
+    char okm[512],fd[256];
+    octet OKM = {0,sizeof(okm),okm};
+
+    BIG_ED_rcopy(q, Modulus_F25519);
+    k=BIG_ED_nbits(q);
+    BIG_ED_rcopy(r, CURVE_Order_C25519);
+    m=BIG_ED_nbits(r);
+    L=CEIL(k+CEIL(m,2),8);
+
+    XMD_Expand(hash,hlen,&OKM,L*ctr,DST,M);
+    for (i=0;i<ctr;i++)
+    {
+        for (j=0;j<L;j++)
+            fd[j]=OKM.val[i*L+j];
+        
+        BIG_ED_dfromBytesLen(dx,fd,L);
+        BIG_ED_dmod(w,dx,q);
+        FP_F25519_nres(&u[i],w);
+    }
+}
+
+int htp_C25519(char *mess)
+{
+    int res=0;
+    BIG_ED r;
+    FP_F25519 u[2];
+    ECP_C25519 P,P1;
+    char dst[100];
+    char msg[2000];
+    octet MSG = {0,sizeof(msg),msg};
+    octet DST = {0,sizeof(dst),dst};
+
+    OCT_jstring(&MSG,mess);
+    BIG_ED_rcopy(r, CURVE_Order_C25519);
+
+    printf("Non-Uniform\n");
+    OCT_clear(&DST);
+    OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-curve25519_XMD:SHA-512_ELL2_NU_");
+    hash_to_field_C25519(MC_SHA2,SHA512,u,&DST,&MSG,1);
+    printf("u[0]= "); FP_F25519_output(&u[0]); printf("\n");
+    ECP_C25519_map2point(&P,&u[0]);
+    printf("Q= "); ECP_C25519_output(&P);
+    ECP_C25519_cfp(&P);
+    ECP_C25519_affine(&P);
+    printf("P= "); ECP_C25519_output(&P); printf("\n");
+    ECP_C25519_mul(&P,r);
+    if (!ECP_C25519_isinf(&P))
+        printf("Hashing failure\n");
+
+    return res;
+}
+
 
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
 static void hash_to_field_NIST256(int hash,int hlen,FP_NIST256 *u,octet *DST,octet *M, int ctr)
@@ -246,7 +307,7 @@ int htp_NIST256(char *mess)
     octet DST = {0,sizeof(dst),dst};
 
     BIG_NT_rcopy(r, CURVE_Order_NIST256);
-    printf("Random Access - message= %s\n",mess);
+    printf("Random oracle - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_");
@@ -324,7 +385,7 @@ int htp_GOLDILOCKS(char *mess)
     octet DST = {0,sizeof(dst),dst};
 
     BIG_GL_rcopy(r, CURVE_Order_GOLDILOCKS);
-    printf("Random Access - message= %s\n",mess);
+    printf("Random oracle - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_");
@@ -400,7 +461,7 @@ int htp_SECP256K1(char *mess)
     octet DST = {0,sizeof(dst),dst};
 
     BIG_SP_rcopy(r, CURVE_Order_SECP256K1);
-    printf("Random Access - message= %s\n",mess);
+    printf("Random oracle - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_");
@@ -478,7 +539,7 @@ int htp_BLS12381(char *mess)
     octet DST = {0,sizeof(dst),dst};
 
     BIG_BLS12_rcopy(r, CURVE_Order_BLS12381);
-    printf("Random Access - message= %s\n",mess);
+    printf("Random oracle - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_");
@@ -564,7 +625,7 @@ int htp_BLS12381_G2(char *mess)
     octet DST = {0,sizeof(dst),dst};
 
     BIG_BLS12_rcopy(r, CURVE_Order_BLS12381);
-    printf("Random Access - message= %s\n",mess);
+    printf("Random oracle - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_");
@@ -629,6 +690,13 @@ int main()
     htp_ED25519((char *)"abcdef0123456789");
     htp_ED25519((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_ED25519((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+    printf("\nTesting HTP for curve C25519\n");
+    htp_C25519((char *)"");
+    htp_C25519((char *)"abc");
+    htp_C25519((char *)"abcdef0123456789");
+    htp_C25519((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+    htp_C25519((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
 
     printf("\nTesting HTP for curve NIST256\n");

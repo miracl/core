@@ -386,8 +386,9 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 {
 #if CURVETYPE_ZZZ==MONTGOMERY
 // Elligator 2
+    int qres;
     BIG_XXX a;
-    FP_YYY X1,X2,t,one,A;
+    FP_YYY X1,X2,w,t,one,A,N,D,hint;
     //BIG_XXX_zero(a); BIG_XXX_inc(a,CURVE_A_ZZZ); BIG_XXX_norm(a); FP_YYY_nres(&A,a);
     FP_YYY_from_int(&A,CURVE_A_ZZZ);
     FP_YYY_copy(&t,h);
@@ -399,19 +400,30 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
         FP_YYY_neg(&t,&t);      // -t^2
     if (PM1D2_YYY > 2)
         FP_YYY_imul(&t,&t,QNRI_YYY); // precomputed QNR
+    FP_YYY_norm(&t);  // z.t^2
 
     FP_YYY_one(&one);
-    FP_YYY_add(&t,&t,&one); FP_YYY_norm(&t);
-    FP_YYY_inv(&t,&t,NULL);      // 1/(1+z.t^2)
-    FP_YYY_mul(&X1,&t,&A);
-    FP_YYY_neg(&X1,&X1); FP_YYY_norm();
+    FP_YYY_add(&D,&t,&one); FP_YYY_norm(&D);  // Denominator D=1+z.t^2
+
+    FP_YYY_copy(&X1,&A);
+    FP_YYY_neg(&X1,&X1);  FP_YYY_norm(&X1);  // X1 = -A/D
     FP_YYY_copy(&X2,&X1);
-    FP_YYY_add(&X2,&X2,&A); 
-    FP_YYY_neg(&X2,&X2);  FP_YYY_norm(&X2);
+    FP_YYY_mul(&X2,&X2,&t);             // X2 = -At/D
 
-    ECP_ZZZ_rhs(&t,&X2);
+    FP_YYY_sqr(&w,&X1); FP_YYY_mul(&N,&w,&X1);  // w=X1^2, N=X1^3
+    FP_YYY_mul(&w,&w,&A); FP_YYY_mul(&w,&w,&D); FP_YYY_add(&N,&N,&w);  // N = X1^3+ADX1^2
+    FP_YYY_sqr(&t,&D);
+    FP_YYY_mul(&t,&t,&X1);  
+    FP_YYY_add(&N,&N,&t);  // N=X1^3+ADX1^2+D^2X1  // Numerator of gx =  N/D^3
+    FP_YYY_norm(&N);
 
-    FP_YYY_cmove(&X1,&X2,FP_YYY_qr(&t,NULL));
+    FP_YYY_mul(&t,&N,&D);                   // N.D
+    qres=FP_YYY_qr(&t,&hint);  // *** exp
+    FP_YYY_inv(&w,&t,&hint);
+    FP_YYY_mul(&D,&w,&N);     // 1/D
+    FP_YYY_mul(&X1,&X1,&D);    // get X1
+    FP_YYY_mul(&X2,&X2,&D);    // get X2
+    FP_YYY_cmove(&X1,&X2,1-qres);
     FP_YYY_redc(a,&X1);
 
     ECP_ZZZ_set(P,a);

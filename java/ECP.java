@@ -999,7 +999,11 @@ public final class ECP {
             FP X1=new FP();
             FP X2=new FP();
             FP t=new FP(h);
+            FP w=new FP();
             FP one=new FP(1);
+            FP N=new FP();
+            FP D=new FP();
+            FP hint=new FP();
             FP A=new FP(CONFIG_CURVE.CURVE_A);
             t.sqr();
 
@@ -1012,17 +1016,27 @@ public final class ECP {
             if (CONFIG_FIELD.PM1D2 > 2) {
                 t.imul(CONFIG_FIELD.QNRI);
             }
-
-            t.add(one);
             t.norm();
-            t.inverse(null);
-            X1.copy(t); X1.mul(A);
+            D.copy(t); D.add(one); D.norm();
+
+            X1.copy(A);
             X1.neg(); X1.norm();
             X2.copy(X1);
-            X2.add(A); 
-            X2.neg(); X2.norm();
-            FP rhs=RHS(X2);
-            X1.cmove(X2,rhs.qr(null));
+            X2.mul(t);
+
+            w.copy(X1); w.sqr(); N.copy(w); N.mul(X1);
+            w.mul(A); w.mul(D); N.add(w); 
+            t.copy(D); t.sqr();
+            t.mul(X1);
+            N.add(t); N.norm();
+
+            t.copy(N); t.mul(D);
+            int qres=t.qr(hint);
+            w.copy(t); w.inverse(hint);
+            D.copy(w); D.mul(N);
+            X1.mul(D);
+            X2.mul(D);
+            X1.cmove(X2,1-qres);
 
             BIG a=X1.redc();
             P=new ECP(a);

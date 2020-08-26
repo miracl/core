@@ -59,7 +59,7 @@ fn hash_to_field_ed25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usiz
 fn htp_ed25519(mess: &str) {
 //    use core::ed25519::ecp;
     use core::ed25519::ecp::ECP;
-    println!("\nRandom Access - message= {}",mess);
+    println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_".as_bytes();
     let mut u=hash_to_field_ed25519(hmac::MC_SHA2,64,dst,m,2);
@@ -79,6 +79,50 @@ fn htp_ed25519(mess: &str) {
     u=hash_to_field_ed25519(hmac::MC_SHA2,64,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP::map2point(&u[0]);
+    println!("Q= {}",P.tostring());
+    P.cfp();
+    P.affine();
+    println!("P= {}",P.tostring());
+}
+
+fn hash_to_field_c25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::c25519::fp::FP;2] {
+    use core::c25519::big::BIG;
+    use core::c25519::dbig::DBIG;
+    use core::c25519::fp::FP;
+    use core::c25519::rom;
+
+    let mut u: [FP; 2] = [FP::new(),FP::new()];
+
+    let q = BIG::new_ints(&rom::MODULUS);
+    let k=q.nbits();
+    let r = BIG::new_ints(&rom::CURVE_ORDER);
+    let m=r.nbits();
+    let L=ceil(k+ceil(m,2),8);
+    let mut okm: [u8;512]=[0;512];
+    hmac::xmd_expand(hash,hlen,&mut okm,L*ctr,&dst,&msg);
+    let mut fd: [u8;256]=[0;256];
+    for i in 0..ctr {
+        for j in 0..L {
+            fd[j]=okm[i*L+j];
+        }
+		let mut dx=DBIG::frombytes(&fd[0..L]);
+		let w=FP::new_big(&dx.dmod(&q));
+		u[i].copy(&w);
+    }
+
+    return u;
+}
+
+fn htp_c25519(mess: &str) {
+//    use core::c25519::ecp;
+    use core::c25519::ecp::ECP;
+    let m = mess.as_bytes();
+
+    println!("\nNon-Uniform");
+    let dst = "QUUX-V01-CS02-with-curve25519_XMD:SHA-512_ELL2_NU_".as_bytes();
+    let u=hash_to_field_c25519(hmac::MC_SHA2,64,dst,m,1);
+    println!("u[0]= {}",u[0].tostring());
+    let mut P=ECP::map2point(&u[0]);
     println!("Q= {}",P.tostring());
     P.cfp();
     P.affine();
@@ -117,7 +161,7 @@ fn hash_to_field_nist256(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usiz
 fn htp_nist256(mess: &str) {
     use core::nist256::ecp;
     use core::nist256::ecp::ECP;
-    println!("\nRandom Access - message= {}",mess);
+    println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_".as_bytes();
     let mut u=hash_to_field_nist256(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
@@ -175,7 +219,7 @@ fn hash_to_field_goldilocks(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: u
 fn htp_goldilocks(mess: &str) {
     use core::goldilocks::ecp;
     use core::goldilocks::ecp::ECP;
-    println!("\nRandom Access - message= {}",mess);
+    println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_".as_bytes();
     let mut u=hash_to_field_goldilocks(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
@@ -233,7 +277,7 @@ fn hash_to_field_secp256k1(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: us
 fn htp_secp256k1(mess: &str) {
     use core::secp256k1::ecp;
     use core::secp256k1::ecp::ECP;
-    println!("\nRandom Access - message= {}",mess);
+    println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_".as_bytes();
     let mut u=hash_to_field_secp256k1(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
@@ -291,7 +335,7 @@ fn hash_to_field_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usi
 fn htp_bls12381(mess: &str) {
     use core::bls12381::ecp;
     use core::bls12381::ecp::ECP;
-    println!("\nRandom Access - message= {}",mess);
+    println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_".as_bytes();
     let mut u=hash_to_field_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
@@ -356,7 +400,7 @@ fn hash_to_field2_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: us
 fn htp2_bls12381(mess: &str) {
     use core::bls12381::ecp;
     use core::bls12381::ecp2::ECP2;
-    println!("\nRandom Access - message= {}",mess);
+    println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_".as_bytes();
     let mut u=hash_to_field2_bls12381(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
@@ -389,6 +433,13 @@ fn main() {
     htp_ed25519("abcdef0123456789");
     htp_ed25519("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_ed25519("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+    println!("\nTesting HTP for curve c25519");
+    htp_c25519("");
+    htp_c25519("abc");
+    htp_c25519("abcdef0123456789");
+    htp_c25519("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+    htp_c25519("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     println!("\nTesting HTP for curve nist256\n");
     htp_nist256("");

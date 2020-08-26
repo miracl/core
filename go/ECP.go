@@ -1192,9 +1192,15 @@ func ECP_map2point(h *FP) *ECP {
 
 	if CURVETYPE == MONTGOMERY {
 // Elligator 2
+			X1:=NewFP()
+			X2:=NewFP()
+			w:=NewFP()
 			one:=NewFPint(1)
 			A:=NewFPint(CURVE_A)
 			t:=NewFPcopy(h)
+			N:=NewFP()
+			D:=NewFP()
+			hint:=NewFP()
 
             t.sqr();
 
@@ -1208,16 +1214,27 @@ func ECP_map2point(h *FP) *ECP {
                 t.imul(QNRI);
             }
 
-            t.add(one)
             t.norm()
-            t.inverse(nil)
-			X1:=NewFPcopy(t); X1.mul(A)
-            X1.neg();  X1.norm()
-			X2:=NewFPcopy(X1)
-            X2.add(A)
-            X2.neg(); X2.norm()
-            rhs:=RHS(X2)
-            X1.cmove(X2,rhs.qr(nil))
+            D.copy(t); D.add(one); D.norm()
+
+            X1.copy(A)
+            X1.neg(); X1.norm()
+            X2.copy(X1)
+            X2.mul(t)
+
+            w.copy(X1); w.sqr(); N.copy(w); N.mul(X1)
+            w.mul(A); w.mul(D); N.add(w)
+            t.copy(D); t.sqr()
+            t.mul(X1)
+            N.add(t); N.norm()
+
+            t.copy(N); t.mul(D)
+            qres:=t.qr(hint)
+            w.copy(t); w.inverse(hint)
+            D.copy(w); D.mul(N)
+            X1.mul(D)
+            X2.mul(D)
+            X1.cmove(X2,1-qres)
 
             a:=X1.redc()
             P.Copy(NewECPbig(a))

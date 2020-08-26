@@ -51,42 +51,44 @@ public class TestHTP extends TestCase {
     }
 
     private static void htp(String mess,String ro,String nu,int hlen) {
-        System.out.println("\nRandom Access - message= "+mess);
         byte[] DSTRO = ro.getBytes();
         byte[] DSTNU = nu.getBytes();
         byte[] M = mess.getBytes();
+     
         BIG r = new BIG(ROM.CURVE_Order);
+        if (CONFIG_CURVE.CURVETYPE!=CONFIG_CURVE.MONTGOMERY)
+        {
+            System.out.println("\nRandom oracle - message= "+mess);
+            FP[] u=hash_to_field(HMAC.MC_SHA2,hlen,DSTRO,M,2);
+            System.out.println("u[0]= "+u[0].toString());
+            System.out.println("u[1]= "+u[1].toString());
 
-        FP[] u=hash_to_field(HMAC.MC_SHA2,hlen,DSTRO,M,2);
-        System.out.println("u[0]= "+u[0].toString());
-        System.out.println("u[1]= "+u[1].toString());
-
-        ECP P=ECP.map2point(u[0]);
-        System.out.println("Q[0]= "+P.toString());
-        if (P.is_infinity())
-            fail("Hashing to curve failed\n");
-        ECP P1=ECP.map2point(u[1]);
-        System.out.println("Q[1]= "+P1.toString());
-        if (P1.is_infinity())
-            fail("Hashing to curve failed\n");
-        P.add(P1);
-        P.cfp();
-        P.affine();
-        System.out.println("P= "+P.toString());
-        P=P.mul(r);
-        if (!P.is_infinity())
-            fail("Hashing to curve failed\n");
-
+            ECP P=ECP.map2point(u[0]);
+            System.out.println("Q[0]= "+P.toString());
+            if (P.is_infinity())
+                fail("Hashing to curve failed\n");
+            ECP P1=ECP.map2point(u[1]);
+            System.out.println("Q[1]= "+P1.toString());
+            if (P1.is_infinity())
+                fail("Hashing to curve failed\n");
+            P.add(P1);
+            P.cfp();
+            P.affine();
+            System.out.println("P= "+P.toString());
+            P=P.mul(r);
+            if (!P.is_infinity())
+                fail("Hashing to curve failed\n");
+        }
         System.out.println("\nNon-Uniform");
-        u=hash_to_field(HMAC.MC_SHA2,hlen,DSTNU,M,1);
-        System.out.println("u[0]= "+u[0].toString());
-        P=ECP.map2point(u[0]);
-        System.out.println("Q= "+P.toString());
-        P.cfp();
-        P.affine();
-        System.out.println("P= "+P.toString());
-        P=P.mul(r);
-        if (!P.is_infinity())
+        FP[] un=hash_to_field(HMAC.MC_SHA2,hlen,DSTNU,M,1);
+        System.out.println("u[0]= "+un[0].toString());
+        ECP Q=ECP.map2point(un[0]);
+        System.out.println("Q= "+Q.toString());
+        Q.cfp();
+        Q.affine();
+        System.out.println("P= "+Q.toString());
+        Q=Q.mul(r);
+        if (!Q.is_infinity())
             fail("Hashing to curve failed\n");
     }
 
@@ -100,6 +102,12 @@ public class TestHTP extends TestCase {
             ro="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_";
             nu="QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_NU_";
             System.out.println("\nTesting HTP for curve ED25519");
+            oneofmine=true;
+        }
+        if (packageName == "org.miracl.core.C25519") {
+            ro="QUUX-V01-CS02-with-curve25519_XMD:SHA-512_ELL2_RO_";
+            nu="QUUX-V01-CS02-with-curve25519_XMD:SHA-512_ELL2_NU_";
+            System.out.println("\nTesting HTP for curve C25519");
             oneofmine=true;
         }
         if (packageName == "org.miracl.core.NIST256") {
@@ -134,7 +142,7 @@ public class TestHTP extends TestCase {
         }
 
         int hlen=CONFIG_CURVE.HASH_TYPE;  // default
-        if (packageName == "org.miracl.core.ED25519") { // exception
+        if (packageName == "org.miracl.core.ED25519" || packageName == "org.miracl.core.C25519") { // exception
             hlen=CONFIG_CURVE.SHA512;
         }
         htp("",ro,nu,hlen);

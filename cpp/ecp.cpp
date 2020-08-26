@@ -1174,8 +1174,9 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 {
 #if CURVETYPE_ZZZ==MONTGOMERY
 // Elligator 2
+    int qres;
     BIG a;
-    FP X1,X2,t,one,A;
+    FP X1,X2,w,N,t,one,A,D,hint;
     //BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
     FP_from_int(&A,CURVE_A_ZZZ);
     FP_copy(&t,h);
@@ -1187,19 +1188,30 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_neg(&t,&t);      // -t^2
     if (PM1D2_YYY > 2)
         FP_imul(&t,&t,QNRI_YYY); // precomputed QNR
+    FP_norm(&t);  // z.t^2
 
     FP_one(&one);
-    FP_add(&t,&t,&one); FP_norm(&t);
-    FP_inv(&t,&t,NULL);      // 1/(1+z.t^2)     // ***
-    FP_mul(&X1,&t,&A);
-    FP_neg(&X1,&X1);  FP_norm(&X1);  // X1 = -A* [1/(1+z.t^2)]
+    FP_add(&D,&t,&one); FP_norm(&D);  // Denominator D=1+z.t^2
+
+    FP_copy(&X1,&A);
+    FP_neg(&X1,&X1);  FP_norm(&X1);  // X1 = -A/D
     FP_copy(&X2,&X1);
-    FP_add(&X2,&X2,&A); 
-    FP_neg(&X2,&X2);  FP_norm(&X2);  // X2= -(X1+A)
+    FP_mul(&X2,&X2,&t);             // X2 = -At/D
 
-    ECP_rhs(&t,&X2);
+    FP_sqr(&w,&X1); FP_mul(&N,&w,&X1);  // w=X1^2, N=X1^3
+    FP_mul(&w,&w,&A); FP_mul(&w,&w,&D); FP_add(&N,&N,&w);  // N = X1^3+ADX1^2
+    FP_sqr(&t,&D);
+    FP_mul(&t,&t,&X1);  
+    FP_add(&N,&N,&t);  // N=X1^3+ADX1^2+D^2X1  // Numerator of gx =  N/D^3
+    FP_norm(&N);
 
-    FP_cmove(&X1,&X2,FP_qr(&t,NULL));
+    FP_mul(&t,&N,&D);                   // N.D
+    qres=FP_qr(&t,&hint);  // *** exp
+    FP_inv(&w,&t,&hint);
+    FP_mul(&D,&w,&N);     // 1/D
+    FP_mul(&X1,&X1,&D);    // get X1
+    FP_mul(&X2,&X2,&D);    // get X2
+    FP_cmove(&X1,&X2,1-qres);
     FP_redc(a,&X1);
 
     ECP_set(P,a);
