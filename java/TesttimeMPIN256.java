@@ -81,6 +81,11 @@ public class TesttimeMPIN256 extends TestCase {
         if (W.is_infinity()) {
             fail("HASHING FAILURE - P=O");
         }
+        W=W.mul(r);
+        if (!W.is_infinity()) {
+            fail("HASHING FAILURE - P=O");
+        } 
+
         W = PAIR8.G2mul(W, r);
         if (!W.is_infinity()) {
             fail("FAILURE - rQ!=O");

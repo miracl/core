@@ -404,10 +404,10 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     FP_YYY_add(&t,&t,&one); FP_YYY_norm(&t);
     FP_YYY_inv(&t,&t,NULL);      // 1/(1+z.t^2)
     FP_YYY_mul(&X1,&t,&A);
-    FP_YYY_neg(&X1,&X1);
+    FP_YYY_neg(&X1,&X1); FP_YYY_norm();
     FP_YYY_copy(&X2,&X1);
-    FP_YYY_add(&X2,&X2,&A); FP_YYY_norm(&X2);
-    FP_YYY_neg(&X2,&X2);
+    FP_YYY_add(&X2,&X2,&A); 
+    FP_YYY_neg(&X2,&X2);  FP_YYY_norm(&X2);
 
     ECP_ZZZ_rhs(&t,&X2);
 
@@ -420,9 +420,9 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 
 #if CURVETYPE_ZZZ==EDWARDS
 // Elligator 2 - map to Montgomery, place point, map back
-    int qres,sgn,ne,rfc;
+    int qres,ne,rfc,qnr;
     BIG_XXX x,y;
-    FP_YYY X1,X2,t,one,A,w1,w2,B,Y,K,NY;
+    FP_YYY X1,X2,t,w,one,A,w1,w2,B,Y,K,D,hint,Y3;
     FP_YYY_one(&one);
 
 #if MODTYPE_YYY != GENERALISED_MERSENNE
@@ -462,60 +462,72 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 #endif
 // Map to this Montgomery curve X^2=X^3+AX^2+BX
 
-    FP_YYY_copy(&t,h); sgn=FP_YYY_sign(&t);
+    FP_YYY_copy(&t,h); 
     FP_YYY_sqr(&t,&t);   // t^2
 
     if (PM1D2_YYY == 2)
-         FP_YYY_add(&t,&t,&t);  // 2t^2
+    {
+        FP_YYY_add(&t,&t,&t);  // 2t^2
+        qnr=2;
+    }
     if (PM1D2_YYY == 1)
+    {
         FP_YYY_neg(&t,&t);      // -t^2
+        qnr=-1;
+    }
     if (PM1D2_YYY > 2)
+    {
         FP_YYY_imul(&t,&t,QNRI_YYY);  // precomputed QNR
+        qnr=QNRI_YYY;
+    }
+    FP_YYY_norm(&t);
+    FP_YYY_add(&D,&t,&one); FP_YYY_norm(&D);  // Denominator=(1+z.u^2)
 
+    FP_YYY_copy(&X1,&A);
+    FP_YYY_neg(&X1,&X1);  FP_YYY_norm(&X1);    // X1=-(J/K).inv(1+z.u^2)
+    FP_YYY_mul(&X2,&X1,&t);  // X2=X1*z.u^2
 
-    FP_YYY_add(&t,&t,&one); FP_YYY_norm(&t);
-    FP_YYY_inv(&t,&t,NULL);      // 1/(1+z.t^2)
+// Figure out RHS of Montgomery curve in rational form gx1/d^3
 
-    FP_YYY_mul(&X1,&t,&A);
-    FP_YYY_neg(&X1,&X1);
-
-    FP_YYY_copy(&X2,&X1);
-    FP_YYY_add(&X2,&X2,&A); FP_YYY_norm(&X2);
-    FP_YYY_neg(&X2,&X2);
-
-
-    FP_YYY_norm(&X1);
-    FP_YYY_sqr(&t,&X1); FP_YYY_mul(&w1,&t,&X1);  // t=X1^2, w1=X1^3
-    FP_YYY_mul(&t,&t,&A); FP_YYY_add(&w1,&w1,&t);
+    FP_YYY_sqr(&w,&X1); FP_YYY_mul(&w1,&w,&X1);  // w=X1^2, w1=X1^3
+    FP_YYY_mul(&w,&w,&A); FP_YYY_mul(&w,&w,&D); FP_YYY_add(&w1,&w1,&w);  // w1 = X1^3+ADX1^2
+    FP_YYY_sqr(&w2,&D);
     if (!rfc)
     {
-        FP_YYY_mul(&t,&X1,&B);
-        FP_YYY_add(&w1,&w1,&t);   // w1=X1^3+AX1^2+BX1
+        FP_YYY_mul(&w,&X1,&B);
+        FP_YYY_mul(&w2,&w2,&w); //
+        FP_YYY_add(&w1,&w1,&w2);   // w1=X1^3+ADX1^2+BD^2X1
     } else {
-        FP_YYY_add(&w1,&w1,&X1);
+        FP_YYY_mul(&w2,&w2,&X1);  
+        FP_YYY_add(&w1,&w1,&w2);  // w1=X1^3+ADX1^2+D^2X1  // was &X1
     }
     FP_YYY_norm(&w1);
 
-    FP_YYY_norm(&X2);
-    FP_YYY_sqr(&t,&X2); FP_YYY_mul(&w2,&t,&X2);  // t=X1^2, w2=X1^3
-    FP_YYY_mul(&t,&t,&A); FP_YYY_add(&w2,&w2,&t);
-    if (!rfc)
-    {
-        FP_YYY_mul(&t,&X2,&B);
-        FP_YYY_add(&w2,&w2,&t);   // w2=X1^3+AX1^2+BX1
-    } else {
-        FP_YYY_add(&w2,&w2,&X2);
-    }
-    FP_YYY_norm(&w2);
+    FP_YYY_mul(&B,&w1,&D);     // gx1=num/den^3 - is_qr num*den (same as num/den, same as num/den^3)
+    qres=FP_YYY_qr(&B,&hint);  // ***
+    FP_YYY_inv(&w,&B,&hint);
+    FP_YYY_mul(&D,&w,&w1);     // 1/D
+    FP_YYY_mul(&X1,&X1,&D);    // get X1
+    FP_YYY_mul(&X2,&X2,&D);    // get X2
+    FP_YYY_sqr(&D,&D);
 
-    qres=FP_YYY_qr(&w2,NULL);
-    FP_YYY_cmove(&X1,&X2,qres);
-    FP_YYY_cmove(&w1,&w2,qres);
+    FP_YYY_sqrt(&Y,&B,&hint);   // sqrt(num*den)
+    FP_YYY_mul(&Y,&Y,&D);       // sqrt(num/den^3)
 
-    FP_YYY_sqrt(&Y,&w1,NULL);
+    FP_YYY_imul(&B,&B,qnr);     // now for gx2 = Z.u^2.gx1
+    FP_YYY_rcopy(&w,CURVE_HTPC_ZZZ);   // qnr^C3  
+    FP_YYY_mul(&hint,&hint,&w);    // modify hint for gx2
 
-    FP_YYY_neg(&NY,&Y); FP_YYY_norm(&NY);
-    FP_YYY_cmove(&Y,&NY,1-qres);
+    FP_YYY_sqrt(&Y3,&B,&hint);  // second candidate
+    FP_YYY_mul(&D,&D,h);
+    FP_YYY_mul(&Y3,&Y3,&D);
+
+    FP_YYY_cmove(&X1,&X2,1-qres);  // pick correct one
+    FP_YYY_cmove(&Y,&Y3,1-qres);
+
+// correct sign of Y
+    FP_YYY_neg(&w,&Y); FP_YYY_norm(&w);
+    FP_YYY_cmove(&Y,&w,qres^FP_YYY_sign(&Y));
 
     if (!rfc)
     {
@@ -523,62 +535,59 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
         FP_YYY_mul(&Y,&Y,&K);
     }
 
-//    ne=sgn^FP_YYY_sign(&Y);
-//    FP_YYY_neg(&NY,&Y); FP_YYY_norm(&NY);
-//    FP_YYY_cmove(&Y,&NY,ne);
-
 #if MODTYPE_YYY == GENERALISED_MERSENNE
 // GOLDILOCKS isogeny
     FP_YYY_sqr(&t,&X1);  // t=u^2
-    FP_YYY_add(&NY,&t,&one); // NY=u^2+1
-    FP_YYY_norm(&NY);
+    FP_YYY_add(&w,&t,&one); // w=u^2+1
+    FP_YYY_norm(&w);
     FP_YYY_sub(&t,&t,&one); // t=u^2-1
     FP_YYY_norm(&t);
     FP_YYY_mul(&w1,&t,&Y);  // w1=v(u^2-1)
     FP_YYY_add(&w1,&w1,&w1);
-    FP_YYY_add(&w1,&w1,&w1);
-    FP_YYY_norm(&w1);       // w1=4v(u^2-1)
+    FP_YYY_add(&X2,&w1,&w1);
+    FP_YYY_norm(&X2);       // w1=4v(u^2-1)
     FP_YYY_sqr(&t,&t);      // t=(u^2-1)^2
     FP_YYY_sqr(&Y,&Y);      // v^2
     FP_YYY_add(&Y,&Y,&Y);
     FP_YYY_add(&Y,&Y,&Y);
     FP_YYY_norm(&Y);        // 4v^2
-    FP_YYY_add(&w2,&t,&Y);  // w2=(u^2-1)^2+4v^2
-    FP_YYY_norm(&w2);
-    FP_YYY_inv(&w2,&w2,NULL);
-    FP_YYY_mul(&w1,&w1,&w2); // w1=4v(u^2-1)/[(u^2-1)^2+4v^2]
+    FP_YYY_add(&B,&t,&Y);  // w2=(u^2-1)^2+4v^2
+    FP_YYY_norm(&B);                                   // X1=w1/w2 - X2=w1, B=w2
 
     FP_YYY_sub(&w2,&Y,&t);   // w2=4v^2-(u^2-1)^2
     FP_YYY_norm(&w2);
     FP_YYY_mul(&w2,&w2,&X1); // w2=u(4v^2-(u^2-1)^2)
     FP_YYY_mul(&t,&t,&X1);   // t=u(u^2-1)^2
-    FP_YYY_copy(&X1,&w1);    // X=4v(u^2-1)/[(u^2-1)^2+4v^2]
     FP_YYY_div2(&Y,&Y);      // 2v^2
-    FP_YYY_mul(&w1,&Y,&NY);  // w1=2v^2(u^2+1)
+    FP_YYY_mul(&w1,&Y,&w);  // w1=2v^2(u^2+1)
     FP_YYY_sub(&w1,&t,&w1);  // w1=u(u^2-1)^2 - 2v^2(u^2+1)
-    FP_YYY_norm(&w1);
-    FP_YYY_inv(&w1,&w1,NULL);
-    FP_YYY_mul(&Y,&w2,&w1);  // Y=u(4v^2-(u^2-1)*2) / u(u^2-1)^2 - 2v^2(u^2+1)
+    FP_YYY_norm(&w1);                                   // Y=w2/w1
+
+    FP_YYY_mul(&t,&X2,&w1);    // output in projective to avoid inversion
+    FP_YYY_copy(&(P->x),&t);
+    FP_YYY_mul(&t,&w2,&B);
+    FP_YYY_copy(&(P->y),&t);
+    FP_YYY_mul(&t,&w1,&B);
+    FP_YYY_copy(&(P->z),&t);
+
+    return;
 
 #else
-
     FP_YYY_add(&w1,&X1,&one); FP_YYY_norm(&w1); // (s+1)
     FP_YYY_sub(&w2,&X1,&one); FP_YYY_norm(&w2); // (s-1)
     FP_YYY_mul(&t,&w1,&Y);
-    FP_YYY_inv(&t,&t,NULL);
     FP_YYY_mul(&X1,&X1,&w1);
-    FP_YYY_mul(&X1,&X1,&t);
 
     if (rfc)
         FP_YYY_mul(&X1,&X1,&K);
 
-    FP_YYY_mul(&Y,&Y,&w2);
-    FP_YYY_mul(&Y,&Y,&t);
-#endif
-    FP_YYY_redc(x,&X1);
-    FP_YYY_redc(y,&Y);
-    ECP_ZZZ_set(P,x,y);
+    FP_YYY_mul(&Y,&Y,&w2);      // output in projective to avoid inversion
+    FP_YYY_copy(&(P->x),&X1);
+    FP_YYY_copy(&(P->y),&Y);
+    FP_YYY_copy(&(P->z),&t);
     return;
+#endif
+
 #endif
 
 #if CURVETYPE_ZZZ==WEIERSTRASS
@@ -1439,6 +1448,7 @@ void ECP_ZZZ_mul(ECP_ZZZ *P, BIG_XXX e)
     ECP_ZZZ_dbl(&R1);
 
     ECP_ZZZ_copy(&D, P);
+    ECP_ZZZ_affine(&D);
 
     nb = BIG_XXX_nbits(e);
     for (i = nb - 2; i >= 0; i--)

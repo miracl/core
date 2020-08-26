@@ -161,6 +161,7 @@ static void hash_to_field_ED25519(int hash,int hlen,FP_F25519 *u,octet *DST,octe
 int htp_ED25519(char *mess)
 {
     int res=0;
+    BIG_ED r;
     FP_F25519 u[2];
     ECP_ED25519 P,P1;
     char dst[100];
@@ -168,6 +169,7 @@ int htp_ED25519(char *mess)
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
 
+    BIG_ED_rcopy(r, CURVE_Order_ED25519);
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
@@ -183,6 +185,9 @@ int htp_ED25519(char *mess)
     ECP_ED25519_cfp(&P);
     ECP_ED25519_affine(&P);
     printf("P= "); ECP_ED25519_output(&P); printf("\n");
+    ECP_ED25519_mul(&P,r);
+    if (!ECP_ED25519_isinf(&P))
+        printf("Hashing failure\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
@@ -194,6 +199,10 @@ int htp_ED25519(char *mess)
     ECP_ED25519_cfp(&P);
     ECP_ED25519_affine(&P);
     printf("P= "); ECP_ED25519_output(&P); printf("\n");
+    ECP_ED25519_mul(&P,r);
+    if (!ECP_ED25519_isinf(&P))
+        printf("Hashing failure\n");
+
     return res;
 }
 
@@ -228,6 +237,7 @@ int htp_NIST256(char *mess)
 {
  
     int res=0;
+    BIG_NT r;
     FP_NIST256 u[2];
     ECP_NIST256 P,P1;
     char dst[100];
@@ -235,6 +245,7 @@ int htp_NIST256(char *mess)
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
 
+    BIG_NT_rcopy(r, CURVE_Order_NIST256);
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
@@ -250,6 +261,9 @@ int htp_NIST256(char *mess)
     ECP_NIST256_cfp(&P);
     ECP_NIST256_affine(&P);
     printf("P= "); ECP_NIST256_output(&P); printf("\n");
+    ECP_NIST256_mul(&P,r);
+    if (!ECP_NIST256_isinf(&P))
+        printf("Hashing failure\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
@@ -261,6 +275,11 @@ int htp_NIST256(char *mess)
     ECP_NIST256_cfp(&P);
     ECP_NIST256_affine(&P);
     printf("P= "); ECP_NIST256_output(&P); printf("\n");
+    ECP_NIST256_mul(&P,r);
+    if (!ECP_NIST256_isinf(&P))
+        printf("Hashing failure\n");
+
+
     return res;
 }
 
@@ -296,6 +315,7 @@ int htp_GOLDILOCKS(char *mess)
 {
  
     int res=0;
+    BIG_GL r;
     FP_GOLDILOCKS u[2];
     ECP_GOLDILOCKS P,P1;
     char dst[100];
@@ -303,6 +323,7 @@ int htp_GOLDILOCKS(char *mess)
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
 
+    BIG_GL_rcopy(r, CURVE_Order_GOLDILOCKS);
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
@@ -318,6 +339,9 @@ int htp_GOLDILOCKS(char *mess)
     ECP_GOLDILOCKS_cfp(&P);
     ECP_GOLDILOCKS_affine(&P);
     printf("+P= "); ECP_GOLDILOCKS_output(&P); printf("\n");
+    ECP_GOLDILOCKS_mul(&P,r);
+    if (!ECP_GOLDILOCKS_isinf(&P))
+        printf("Hashing failure\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
@@ -329,6 +353,11 @@ int htp_GOLDILOCKS(char *mess)
     ECP_GOLDILOCKS_cfp(&P);
     ECP_GOLDILOCKS_affine(&P);
     printf("+P= "); ECP_GOLDILOCKS_output(&P); printf("\n");
+    ECP_GOLDILOCKS_mul(&P,r);
+    if (!ECP_GOLDILOCKS_isinf(&P))
+        printf("Hashing failure\n");
+
+
     return res;
 }
 
@@ -362,6 +391,7 @@ static void hash_to_field_SECP256K1(int hash,int hlen,FP_SECP256K1 *u,octet *DST
 int htp_SECP256K1(char *mess)
 {
     int res=0;
+    BIG_SP r;
     FP_SECP256K1 u[2];
     ECP_SECP256K1 P,P1;
     char dst[100];
@@ -369,6 +399,7 @@ int htp_SECP256K1(char *mess)
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
 
+    BIG_SP_rcopy(r, CURVE_Order_SECP256K1);
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
@@ -384,6 +415,9 @@ int htp_SECP256K1(char *mess)
     ECP_SECP256K1_cfp(&P);
     ECP_SECP256K1_affine(&P);
     printf("P= "); ECP_SECP256K1_output(&P); printf("\n");
+    ECP_SECP256K1_mul(&P,r);
+    if (!ECP_SECP256K1_isinf(&P))
+        printf("Hashing failure\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
@@ -395,6 +429,10 @@ int htp_SECP256K1(char *mess)
     ECP_SECP256K1_cfp(&P);
     ECP_SECP256K1_affine(&P);
     printf("P= "); ECP_SECP256K1_output(&P); printf("\n");
+    ECP_SECP256K1_mul(&P,r);
+    if (!ECP_SECP256K1_isinf(&P))
+        printf("Hashing failure\n");
+
     return res;
 }
 
@@ -431,6 +469,7 @@ int htp_BLS12381(char *mess)
 {
  
     int res=0;
+    BIG_BLS12 r;
     FP_BLS12381 u[2];
     ECP_BLS12381 P,P1;
     char dst[100];
@@ -438,6 +477,7 @@ int htp_BLS12381(char *mess)
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
 
+    BIG_BLS12_rcopy(r, CURVE_Order_BLS12381);
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
@@ -453,6 +493,10 @@ int htp_BLS12381(char *mess)
     ECP_BLS12381_cfp(&P);
     ECP_BLS12381_affine(&P);
     printf("P= "); ECP_BLS12381_output(&P); printf("\n");
+    ECP_BLS12381_mul(&P,r);
+    if (!ECP_BLS12381_isinf(&P))
+        printf("Hashing failure\n");
+
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
@@ -464,6 +508,10 @@ int htp_BLS12381(char *mess)
     ECP_BLS12381_cfp(&P);
     ECP_BLS12381_affine(&P);
     printf("P= "); ECP_BLS12381_output(&P); printf("\n");
+    ECP_BLS12381_mul(&P,r);
+    if (!ECP_BLS12381_isinf(&P))
+        printf("Hashing failure\n");
+
     return res;
 }
 
@@ -507,6 +555,7 @@ int htp_BLS12381_G2(char *mess)
 {
  
     int res=0;
+    BIG_BLS12 r;
     FP2_BLS12381 u[2];
     ECP2_BLS12381 P,P1;
     char dst[100];
@@ -514,6 +563,7 @@ int htp_BLS12381_G2(char *mess)
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
 
+    BIG_BLS12_rcopy(r, CURVE_Order_BLS12381);
     printf("Random Access - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
@@ -529,6 +579,9 @@ int htp_BLS12381_G2(char *mess)
     ECP2_BLS12381_cfp(&P);
     ECP2_BLS12381_affine(&P);
     printf("P= "); ECP2_BLS12381_output(&P); printf("\n");
+    ECP2_BLS12381_mul(&P,r);
+    if (!ECP2_BLS12381_isinf(&P))
+        printf("Hashing failure\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
@@ -540,6 +593,11 @@ int htp_BLS12381_G2(char *mess)
     ECP2_BLS12381_cfp(&P);
     ECP2_BLS12381_affine(&P);
     printf("P= "); ECP2_BLS12381_output(&P); printf("\n");
+    ECP2_BLS12381_mul(&P,r);
+    if (!ECP2_BLS12381_isinf(&P))
+        printf("Hashing failure\n");
+
+
     return res;
 }
 

@@ -79,6 +79,12 @@ public class TesttimeECDH extends TestCase {
         if (WP.is_infinity()) {
             fail("HASHING FAILURE - P=O");
         }
+        WP=WP.mul(r);
+        if (!WP.is_infinity()) {
+//        System.out.print("WP= "+WP.toString()+"\n");
+            fail("HASHING FAILURE - P=O");
+
+        }
 
         WP = G.mul(r);
         if (!WP.is_infinity()) {

@@ -1005,7 +1005,7 @@ var ECP = function(ctx) {
                 R1 = new ECP();
                 R1.copy(this);
                 R1.dbl();
-                D.copy(this);
+                D.copy(this); D.affine();
                 nb = e.nbits();
                 for (i = nb - 2; i >= 0; i--) {
                     b = e.bit(i);
@@ -1354,10 +1354,10 @@ var ECP = function(ctx) {
             t.norm();
             t.inverse(null);
             X1.copy(t); X1.mul(A);
-            X1.neg();
+            X1.neg();  X1.norm();
             X2.copy(X1);
-            X2.add(A); X2.norm();
-            X2.neg();
+            X2.add(A); 
+            X2.neg(); X2.norm();
             var rhs=ECP.RHS(X2);
             X1.cmove(X2,rhs.qr(null));
 
@@ -1369,19 +1369,24 @@ var ECP = function(ctx) {
             var X1=new ctx.FP(0);
             var X2=new ctx.FP(0);
             var t=new ctx.FP(h);
+            var w=new ctx.FP(0);
+            var one=new ctx.FP(1);
+            var A=new ctx.FP(0);
             var w1=new ctx.FP(0);
             var w2=new ctx.FP(0);
-            var one=new ctx.FP(1);
             var B = new ctx.FP(0);
             B.rcopy(ctx.ROM_CURVE.CURVE_B);
-            var A;
+            var Y = new ctx.FP(0);
             var K=new ctx.FP(0);
-            //var sgn=t.sign();
-            var rfc=0;
+            var D = new ctx.FP(0);   
+            var hint=new ctx.FP(0);
+            var Y3 = new ctx.FP(0);   
+           
+            var qres,qnr,rfc=0;
 
             if (ctx.FP.MODTYPE!=ctx.FP.GENERALISED_MERSENNE)
             {
-                A=new ctx.FP(B);
+                A.copy(B);
                 if (ECP.CURVE_A==1) {
                     A.add(one);
                     B.sub(one);
@@ -1410,61 +1415,70 @@ var ECP = function(ctx) {
                     B.sqr();
                 }
             } else {
-                A=new ctx.FP(156326);
+                A.copy(new ctx.FP(156326));
                 rfc=1;
             }
 
             t.sqr();
             if (ctx.FP.PM1D2 == 2) {
                 t.add(t);
+                qnr=2;
             }
             if (ctx.FP.PM1D2 == 1) {
                 t.neg();
+                qnr=-1;
             }
             if (ctx.FP.PM1D2 > 2) {
                 t.imul(ctx.FP.PM1D2);
+                qnr=ctx.FP.PM1D2;
             }
+            t.norm();
+            D.copy(t); D.add(one); D.norm();
+            X1.copy(A);
+            X1.neg(); X1.norm();
+            X2.copy(X1); X2.mul(t);
 
-            t.add(one); t.norm();
-            t.inverse(null);
-            X1.copy(t); X1.mul(A);
-            X1.neg();
+// Figure out RHS of Montgomery curve in rational form gx1/d^3            
 
-            X2.copy(X1);
-            X2.add(A); X2.norm();
-            X2.neg();
+            w.copy(X1); w.sqr(); w1.copy(w); w1.mul(X1);
+            w.mul(A); w.mul(D); w1.add(w);
+            w2.copy(D); w2.sqr();
 
-            X1.norm();
-            t.copy(X1); t.sqr(); w1.copy(t); w1.mul(X1);
-            t.mul(A); w1.add(t);
             if (rfc==0)
             {
-                t.copy(X1); t.mul(B);
-                w1.add(t);
+                w.copy(X1); w.mul(B);
+                w2.mul(w);
+                w1.add(w2);
             } else {
-                w1.add(X1);
+                w2.mul(X1);
+                w1.add(w2);
             }
             w1.norm();
 
-            X2.norm();
-            t.copy(X2); t.sqr(); w2.copy(t); w2.mul(X2);
-            t.mul(A); w2.add(t);
-            if (rfc==0)
-            {
-                t.copy(X2); t.mul(B);
-                w2.add(t);
-            } else {
-                w2.add(X2);
-            }
-            w2.norm();
+            B.copy(w1); B.mul(D);
+            qres=B.qr(hint);
+            w.copy(B); w.inverse(hint);
+            D.copy(w); D.mul(w1);
+            X1.mul(D);
+            X2.mul(D);
+            D.sqr();
 
-            var qres=w2.qr(null);
-            X1.cmove(X2,qres);
-            w1.cmove(w2,qres);
+            Y.copy(B.sqrt(hint));
+            Y.mul(D);
 
-            var Y=w1.sqrt(null);
-            var NY=new ctx.FP(Y); NY.neg(); NY.norm();
-            Y.cmove(NY,1-qres);
+            B.imul(qnr);
+            w.rcopy(ctx.ROM_CURVE.CURVE_HTPC);
+            hint.mul(w);
+
+            Y3.copy(B.sqrt(hint));
+            D.mul(h);
+            Y3.mul(D);
+
+            X1.cmove(X2,1-qres);
+            Y.cmove(Y3,1-qres);
+
+            w.copy(Y); w.neg(); w.norm();
+            Y.cmove(w,qres^Y.sign());
 
             if (rfc==0)
             {
@@ -1473,44 +1487,49 @@ var ECP = function(ctx) {
             }
 
             if (ctx.FP.MODTYPE==ctx.FP.GENERALISED_MERSENNE)
-            {
+            { // GOLDILOCKS isogeny
                 t.copy(X1); t.sqr();
-                NY.copy(t); NY.add(one); NY.norm();
+                w.copy(t); w.add(one); w.norm();
                 t.sub(one); t.norm();
                 w1.copy(t); w1.mul(Y);
-                w1.add(w1); w1.add(w1); w1.norm();
+                w1.add(w1); X2.copy(w1); X2.add(w1); X2.norm();
                 t.sqr();
                 Y.sqr(); Y.add(Y); Y.add(Y); Y.norm();
-                w2.copy(t); w2.add(Y); w2.norm();
-                w2.inverse(null);
-                w1.mul(w2);
+                B.copy(t); B.add(Y); B.norm();
 
                 w2.copy(Y); w2.sub(t); w2.norm();
                 w2.mul(X1);
                 t.mul(X1);
-                X1.copy(w1);
                 Y.div2();
-                w1.copy(Y); w1.mul(NY);
+                w1.copy(Y); w1.mul(w);
                 w1.rsub(t); w1.norm();
-                w1.inverse(null);
-                Y.copy(w2); Y.mul(w1);
+ 
+                t.copy(X2); t.mul(w1);
+                P=new ECP();
+                P.x.copy(t);
+                t.copy(w2); t.mul(B);
+                P.y.copy(t);
+                t.copy(w1); t.mul(B);
+                P.z.copy(t);
+
+                return P;
             } else {
                 w1.copy(X1); w1.add(one); w1.norm();
                 w2.copy(X1); w2.sub(one); w2.norm();
                 t.copy(w1); t.mul(Y);
-                t.inverse(null);
                 X1.mul(w1);
-                X1.mul(t);
+
                 if (rfc==1)
                     X1.mul(K);
 
                 Y.mul(w2);
-                Y.mul(t);
+                P=new ECP();
+                P.x.copy(X1);
+                P.y.copy(Y);
+                P.z.copy(t);
+                
+                return P;
             }
-            var x=X1.redc();
-            var y=Y.redc();
-            P.setxy(x,y);
-
         }
         if (ECP.CURVETYPE == ECP.WEIERSTRASS)
         { // swu method

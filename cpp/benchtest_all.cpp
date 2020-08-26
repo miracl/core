@@ -97,8 +97,10 @@ int ed25519(csprng *RNG)
 #endif
 
     ECP_generator(&EG);
+    BIG_rcopy(r, CURVE_Order);
 
     FP_rand(&rw,RNG);
+
     ECP_map2point(&EP,&rw);
     ECP_cfp(&EP);
 
@@ -107,8 +109,15 @@ int ed25519(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+    
+    ECP_mul(&EP,r);
+    if (!ECP_isinf(&EP))
+    {
+        printf("EP= "); ECP_output(&EP); printf("\n");
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
 
-    BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_ED25519, RNG);
 
     ECP_copy(&EP, &EG);
@@ -189,6 +198,7 @@ int nist256(csprng *RNG)
 #endif
 
     ECP_generator(&EG);
+    BIG_rcopy(r, CURVE_Order);
 
     FP_rand(&rw,RNG);
     ECP_map2point(&EP,&rw);
@@ -199,8 +209,13 @@ int nist256(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+    ECP_mul(&EP,r);
+    if (!ECP_isinf(&EP))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
 
-    BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_NIST256, RNG);
 
     ECP_copy(&EP, &EG);
@@ -279,7 +294,7 @@ int goldilocks(csprng *RNG)
 #endif
 
     ECP_generator(&EG);
-
+    BIG_rcopy(r, CURVE_Order);
     FP_rand(&rw,RNG);
     ECP_map2point(&EP,&rw);
     ECP_cfp(&EP);
@@ -289,8 +304,13 @@ int goldilocks(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+    ECP_mul(&EP,r);
+    if (!ECP_isinf(&EP))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
 
-    BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_GOLDILOCKS, RNG);
 
     ECP_copy(&EP, &EG);
@@ -340,7 +360,7 @@ int bn254(csprng *RNG)
     printf("\nTesting/Timing BN254 Pairings\n");
 
     ECP_generator(&G);
-
+    BIG_rcopy(r, CURVE_Order);
     FP_rand(&rz,RNG);
     ECP_map2point(&P,&rz);
     ECP_cfp(&P);
@@ -350,8 +370,13 @@ int bn254(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+    ECP_mul(&P,r);
+    if (!ECP_isinf(&P))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
 
-    BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BN254, RNG);
 
     ECP_copy(&P, &G);
@@ -581,7 +606,7 @@ int bls383(csprng *RNG)
     printf("\nTesting/Timing BLS12383 Pairings\n");
 
     ECP_generator(&G);
-
+    BIG_rcopy(r, CURVE_Order);
     FP_rand(&rz,RNG);
     ECP_map2point(&P,&rz);
     ECP_cfp(&P);
@@ -591,8 +616,13 @@ int bls383(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+    ECP_mul(&P,r);
+    if (!ECP_isinf(&P))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
 
-    BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS12383, RNG);
 
 
@@ -818,7 +848,7 @@ int bls24(csprng *RNG)
     printf("\nTesting/Timing BLS24479 Pairings\n");
 
     ECP_generator(&G);
-
+    BIG_rcopy(r, CURVE_Order);
     FP_rand(&rz,RNG);
     ECP_map2point(&P,&rz);
     ECP_cfp(&P);
@@ -828,8 +858,13 @@ int bls24(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+    ECP_mul(&P,r);
+    if (!ECP_isinf(&P))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
 
-    BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS24479, RNG);
 
     ECP_copy(&P, &G);
@@ -1062,7 +1097,7 @@ int bls48(csprng *RNG)
     printf("\nTesting/Timing BLS48556 Pairings\n");
 
     ECP_generator(&G);
-
+    BIG_rcopy(r, CURVE_Order);
     FP_rand(&rz,RNG);
     ECP_map2point(&P,&rz);
     ECP_cfp(&P);
@@ -1072,8 +1107,13 @@ int bls48(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+    ECP_mul(&P,r);
+    if (!ECP_isinf(&P))
+    {
+        printf("HASHING FAILURE - P=O\n");
+        return 0;
+    }
 
-    BIG_rcopy(r, CURVE_Order);
     BIG_randtrunc(s, r, 2 * CURVE_SECURITY_BLS48556, RNG);
 
     ECP_copy(&P, &G);
@@ -1110,6 +1150,7 @@ int bls48(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
     ECP8_mul(&Q,r);
     if (!ECP8_isinf(&Q))
     {

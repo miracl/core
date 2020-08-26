@@ -60,6 +60,7 @@ public class TestHTP2 extends TestCase {
         byte[] DSTRO = ro.getBytes();
         byte[] DSTNU = nu.getBytes();
         byte[] M = mess.getBytes();
+        BIG r = new BIG(ROM.CURVE_Order);
 
         FP2[] u=hash_to_field2(HMAC.MC_SHA2,hlen,DSTRO,M,2);
         System.out.println("u[0]= "+u[0].toString());
@@ -77,6 +78,9 @@ public class TestHTP2 extends TestCase {
         P.cfp();
         P.affine();
         System.out.println("P= "+P.toString());
+        P=P.mul(r);
+        if (!P.is_infinity())
+            fail("Hashing to curve failed\n");
 
         System.out.println("\nNon-Uniform");
         u=hash_to_field2(HMAC.MC_SHA2,hlen,DSTNU,M,1);
@@ -86,6 +90,9 @@ public class TestHTP2 extends TestCase {
         P.cfp();
         P.affine();
         System.out.println("P= "+P.toString());
+        P=P.mul(r);
+        if (!P.is_infinity())
+            fail("Hashing to curve failed\n");
     }
 
     public void testHTP2() {

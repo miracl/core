@@ -1004,7 +1004,7 @@ impl ECP {
             let mut R1 = ECP::new();
             R1.copy(&self);
             R1.dbl();
-            D.copy(&self);
+            D.copy(&self); D.affine();
             let nb = e.nbits();
 
             for i in (0..nb - 1).rev() {
@@ -1267,10 +1267,10 @@ impl ECP {
             t.norm();
             t.inverse(None);
             X1.copy(&t); X1.mul(&A);
-            X1.neg();
+            X1.neg(); X1.norm();
             X2.copy(&X1);
-            X2.add(&A); X2.norm();
-            X2.neg();
+            X2.add(&A); 
+            X2.neg(); X2.norm();
             let rhs=ECP::rhs(&X2);
             X1.cmove(&X2,rhs.qr(None));
 
@@ -1283,17 +1283,21 @@ impl ECP {
             let mut X1=FP::new();
             let mut X2=FP::new();
             let mut t=FP::new_copy(h);
+            let mut w=FP::new();
+            let one=FP::new_int(1);
+            let mut A=FP::new();
             let mut w1=FP::new();
             let mut w2=FP::new();
-            let one=FP::new_int(1);
             let mut B = FP::new_big(&BIG::new_ints(&rom::CURVE_B));
-            let mut A: FP;
+            let mut Y=FP::new();
             let mut K=FP::new();
- //           let sgn=t.sign();
+            let mut D=FP::new();
+            let mut hint=FP::new();
+            let mut Y3=FP::new();
             let rfc: isize;
 
             if fp::MODTYPE != fp::GENERALISED_MERSENNE {
-                A=FP::new_copy(&B);
+                A.copy(&B);
                 if CURVE_A==1 {
                     A.add(&one);
                     B.sub(&one);
@@ -1322,104 +1326,116 @@ impl ECP {
                 }
             } else {
                 rfc=1;
-                A=FP::new_int(156326);
+                A.copy(&FP::new_int(156326));
             }
             t.sqr();
+            let mut qnr=0;
             if fp::PM1D2 == 2 {
                 t.dbl();
+                qnr=2;
             }
             if fp::PM1D2 == 1 {
                 t.neg();
+                qnr = -1;
             }
             if fp::PM1D2 > 2 {
                 t.imul(fp::QNRI as isize);
+                qnr=fp::QNRI as isize;
             }
-            t.add(&one); t.norm();
-            t.inverse(None);
-            X1.copy(&t); X1.mul(&A);
-            X1.neg();
+            t.norm();
 
-            X2.copy(&X1);
-            X2.add(&A); X2.norm();
-            X2.neg();
+            D.copy(&t); D.add(&one); D.norm();
+            X1.copy(&A);
+            X1.neg(); X1.norm();
+            X2.copy(&X1); X2.mul(&t);
 
-            X1.norm();
-            t.copy(&X1); t.sqr(); w1.copy(&t); w1.mul(&X1);
-            t.mul(&A); w1.add(&t);
+// Figure out RHS of Montgomery curve in rational form gx1/d^3
+
+            w.copy(&X1); w.sqr(); w1.copy(&w); w1.mul(&X1);
+            w.mul(&A); w.mul(&D); w1.add(&w);
+            w2.copy(&D); w2.sqr();
+
             if rfc==0 {
-                t.copy(&X1); t.mul(&B);
-                w1.add(&t);
+                w.copy(&X1); w.mul(&B);
+                w2.mul(&w);
+                w1.add(&w2);
             } else {
-                w1.add(&X1);
+                w2.mul(&X1);
+                w1.add(&w2);
             }
             w1.norm();
 
-            X2.norm();
-            t.copy(&X2); t.sqr(); w2.copy(&t); w2.mul(&X2);
-            t.mul(&A); w2.add(&t);
-            if rfc==0 {
-                t.copy(&X2); t.mul(&B);
-                w2.add(&t);
-            } else {
-                w2.add(&X2);
-            }
-            w2.norm();
+            B.copy(&w1); B.mul(&D);
+            let qres=B.qr(Some(&mut hint));
+            w.copy(&B); w.inverse(Some(&hint));
+            D.copy(&w); D.mul(&w1);
+            X1.mul(&D);
+            X2.mul(&D);
+            D.sqr();
 
-            let qres=w2.qr(None);
-            X1.cmove(&X2,qres);
-            w1.cmove(&w2,qres);
+            Y.copy(&B.sqrt(Some(&hint)));
+            Y.mul(&D);
 
-            let mut Y=w1.sqrt(None);
-            let mut NY=FP::new_copy(&Y); NY.neg(); NY.norm();
-            Y.cmove(&NY,1-qres);
+            B.imul(qnr);
+            w.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_HTPC)));
+            hint.mul(&w);
+
+            Y3.copy(&B.sqrt(Some(&hint)));
+            D.mul(&h);
+            Y3.mul(&D);
+
+            X1.cmove(&X2,1-qres);
+            Y.cmove(&Y3,1-qres);
+
+            w.copy(&Y); w.neg(); w.norm();
+            Y.cmove(&w,qres^Y.sign());
 
             if rfc==0 {
                 X1.mul(&K);
                 Y.mul(&K);
             }
- //           let ne=Y.sign()^sgn;
- //           let mut NY=FP::new_copy(&Y); NY.neg(); NY.norm();
- //           Y.cmove(&NY,ne);
 
             if fp::MODTYPE == fp::GENERALISED_MERSENNE {
-                t.copy(&X1); t.sqr();
-                NY.copy(&t); NY.add(&one); NY.norm();
-                t.sub(&one); t.norm();
-                w1.copy(&t); w1.mul(&Y);
-                w1.dbl(); w1.dbl(); w1.norm();
-                t.sqr();
-                Y.sqr(); Y.dbl(); Y.dbl(); Y.norm();
-                w2.copy(&t); w2.add(&Y); w2.norm();
-                w2.inverse(None);
-                w1.mul(&w2);
+				t.copy(&X1); t.sqr();
+				w.copy(&t); w.add(&one); w.norm();
+				t.sub(&one); t.norm();
+				w1.copy(&t); w1.mul(&Y);
+				w1.dbl(); X2.copy(&w1); X2.add(&w1); X2.norm();
+				t.sqr();
+				Y.sqr(); Y.dbl(); Y.dbl(); Y.norm();
+				B.copy(&t); B.add(&Y); B.norm();
 
-                w2.copy(&Y); w2.sub(&t); w2.norm();
-                w2.mul(&X1);
-                t.mul(&X1);
-                X1.copy(&w1);
-                Y.div2();
-                w1.copy(&Y); w1.mul(&NY);
-                w1.rsub(&t); w1.norm();
-                w1.inverse(None);
-                Y.copy(&w2); Y.mul(&w1);
+				w2.copy(&Y); w2.sub(&t); w2.norm();
+				w2.mul(&X1);
+				t.mul(&X1);
+				Y.div2();
+				w1.copy(&Y); w1.mul(&w);
+				w1.rsub(&t); w1.norm();
+ 
+				t.copy(&X2); t.mul(&w1);
+				P.x.copy(&t);
+				t.copy(&w2); t.mul(&B);
+				P.y.copy(&t);
+				t.copy(&w1); t.mul(&B);
+				P.z.copy(&t);
+
+				return P;
             } else {
                 w1.copy(&X1); w1.add(&one); w1.norm();
                 w2.copy(&X1); w2.sub(&one); w2.norm();
-                t.copy(&w1); t.mul(&Y);
-                t.inverse(None);
+                t.copy(&w1); t.mul(&Y);  
                 X1.mul(&w1);
-                X1.mul(&t);
+            
                 if rfc==1 {
                     X1.mul(&K);
                 }
                 Y.mul(&w2);
-                Y.mul(&t);
+                P.x.copy(&X1);
+                P.y.copy(&Y);
+                P.z.copy(&t);
+
+                return P               
             }
-            let x=X1.redc();
-            let y=Y.redc();
-            P.copy(&ECP::new_bigs(&x,&y));
-
-
         }
         if CURVETYPE==WEIERSTRASS {
         // swu method
