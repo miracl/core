@@ -108,7 +108,7 @@ pub const CURVE_BNX: [Chunk; NLEN] = [
     0x0,
 ];
 pub const CURVE_COF: [Chunk; NLEN] = [0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0];
-pub const CURVE_CRU: [Chunk; NLEN] = [
+pub const CRU: [Chunk; NLEN] = [
     0xB0716209C79298A,
     0xCEE6799B8B17C14,
     0x78966BE526092AE,
