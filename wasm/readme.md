@@ -32,7 +32,7 @@ build in the new directory execute
 
     python3 config32.py
 
-Then select options 1, 3, 7, 26, 28, 34, 35 and 38, which are fixed for 
+Then select options 1, 3, 7, 28, 30, 36, 37 and 40, which are fixed for 
 the example programs.
 
 Build some test programs with
@@ -78,7 +78,7 @@ Build the Rust library by executing
 
     python3 config32.py
 
-Then select options 1, 3, 7, 26, 28, 34, 35 and 38, which are fixed for 
+Then select options 1, 3, 7, 28, 30, 36, 37 and 40, which are fixed for 
 the example programs.
 
 Copy the MIRACL Core library to the current directory

@@ -26,7 +26,7 @@ using namespace std;
 Miracl precision(100, 0);
 
 char open, close, term, el = 0;
-int PS=26;  // start of pairing friendly curves
+int PS=28;  // start of pairing friendly curves
 
 //
 // Shanks method modified to find cube roots
@@ -440,19 +440,22 @@ void help()
     printf("24. C1665\n");
     printf("25. MDC (Million Dollar Curve)\n");
 
-    printf("26. BN254\n");
-    printf("27. BN254CX\n");
-    printf("28. BLS12383\n");
-    printf("29. BLS12381\n");
-    printf("30. FP256BN\n");
-    printf("31. FP512BN\n");
-    printf("32. BLS12461\n");
-    printf("33. BN462\n");
+    printf("26. TWEEDLEDUM\n");
+    printf("27. TWEEDLEDEE\n");
 
-    printf("34. BLS24479\n");
-    printf("35. BLS48556\n");
-    printf("36. BLS48581\n");
-    printf("37. BLS48286\n");
+    printf("28. BN254\n");
+    printf("29. BN254CX\n");
+    printf("30. BLS12383\n");
+    printf("31. BLS12381\n");
+    printf("32. FP256BN\n");
+    printf("33. FP512BN\n");
+    printf("34. BLS12461\n");
+    printf("35. BN462\n");
+
+    printf("36. BLS24479\n");
+    printf("37. BLS48556\n");
+    printf("38. BLS48581\n");
+    printf("39. BLS48286\n");
 
     printf("\nromgen curve wordlength language\n");
     printf("where wordlength is 16, 32 or 64 (always 32 for javascript)\n");
@@ -760,7 +763,7 @@ int main(int argc, char **argv)
         r=pow((Big)2,255)+(char *)"325610659388873400306201440571661405155";
         curve_b=13318;
         mip->IOBASE = 16;
-        gx=5 ;
+        gx=5 ;                                                                              // (-7,114) is better
         gy=(char *)"6675AAD926BCA6F1381630E5166966369D4CCB04CF016DB5B8C8D3546B6EAD0B";
 
         htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
@@ -1339,6 +1342,82 @@ int main(int argc, char **argv)
 
     }
 
+
+    if (strcmp(curvename, "TWEEDLEDUM") == 0)
+    {   // 
+        curve = 26;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
+        printf("Curve is TWEEDLEDUM\n");
+        strcpy(fieldname, "TWEEDLEDUM");
+        mbits = 255;               // bits in modulus
+        words = (1 + ((mbits - 1) / bb)); // words per Big
+        curvetype = WEIERSTRASS;
+        /*if (chunk<64)*/ modtype = NOT_SPECIAL;
+        //modtype=PSEUDO_MERSENNE;
+        curve_a = 0;			   // Curve A parameter
+        cof = 1;
+        p = pow((Big)2, 254) + (Big)(char *)"4707489545178046908921067385359695873"; // Modulus
+        r = pow((Big)2, 254) + (Big)(char *)"4707489544292117082687961190295928833"; // group order
+
+        curve_b = (char *)"5"; // curve B parameter
+        gx = p-1;  // generator point
+        gy = 2;
+
+        modulo(p);
+
+        zsqrtm3=sqrt((ZZn)-3);
+        sqrtm3=(Big)zsqrtm3;
+        if (sqrtm3%2==1)
+            sqrtm3=p-sqrtm3;
+
+        htpc=pow((Big)5,finde(p),p);  // 5 is a QNR
+        mip->IOBASE=16;
+    }
+
+    if (strcmp(curvename, "TWEEDLEDEE") == 0)
+    {   // 
+        curve = 26;
+        if (chunk==16)
+            bb=13;
+        if (chunk==32)
+            bb=29;
+        if (chunk==64)
+            bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
+        printf("Curve is TWEEDLEDEE\n");
+        strcpy(fieldname, "TWEEDLEDEE");
+        mbits = 255;               // bits in modulus
+        words = (1 + ((mbits - 1) / bb)); // words per Big
+        curvetype = WEIERSTRASS;
+        /*if (chunk<64)*/ modtype = NOT_SPECIAL;
+        //modtype=PSEUDO_MERSENNE;
+        curve_a = 0;			   // Curve A parameter
+        cof = 1;
+        p = pow((Big)2, 254) + (Big)(char *)"4707489544292117082687961190295928833"; // Modulus
+        r = pow((Big)2, 254) + (Big)(char *)"4707489545178046908921067385359695873"; // group order
+
+        curve_b = (char *)"5"; // curve B parameter
+        gx = p-1;  // generator point
+        gy = 2;
+
+        modulo(p);
+
+        zsqrtm3=sqrt((ZZn)-3);
+        sqrtm3=(Big)zsqrtm3;
+        if (sqrtm3%2==1)
+            sqrtm3=p-sqrtm3;
+
+        htpc=pow((Big)5,finde(p),p); // 5 is a QNR
+        mip->IOBASE=16;
+    }
 
     if (strcmp(curvename, "BN254") == 0)
     {

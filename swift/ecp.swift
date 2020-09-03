@@ -1348,6 +1348,7 @@ CAHCZF */
 // Shallue and van de Woestijne
 // SQRTm3 not available, so preprocess this out
 /* CAISZS
+                var pNIL:FP?=nil
                 let Z=CONFIG_FIELD.RIADZ
                 X1.copy(FP(Z))
                 X3.copy(X1)

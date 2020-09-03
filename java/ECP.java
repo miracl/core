@@ -1363,7 +1363,7 @@ CAHCZF */
                 D.mul(B);
 
                 w.copy(A);
-                FP.tpo(D,w);
+                FP.tpo(D,w);                     // ***
 
                 w.mul(B);
                 if (w.sign()==1)
@@ -1385,11 +1385,11 @@ CAHCZF */
                 X3.add(A); X3.norm();
 
                 FP rhs=RHS(X2);
-                X3.cmove(X2,rhs.qr(null));
+                X3.cmove(X2,rhs.qr(null));    // ***
                 rhs.copy(RHS(X1));
-                X3.cmove(X1,rhs.qr(null));
+                X3.cmove(X1,rhs.qr(null));    // ***
                 rhs.copy(RHS(X3));
-                Y.copy(rhs.sqrt(null));
+                Y.copy(rhs.sqrt(null));       // ***
 
                 int ne=Y.sign()^sgn;
                 w.copy(Y); w.neg(); w.norm();

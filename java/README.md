@@ -18,7 +18,7 @@ To create a 64-bit library
 
     python3 config64.py
 
-Choose options 1, 3, 7, 26, 28, 34, 35 and 38, for example.
+Choose options 1, 3, 7, 28, 30, 36, 37 and 40, for example.
 
 Once the library is configured, you can compile and install with maven:
 
@@ -44,7 +44,7 @@ NEW: support for emerging Hash To Curve standard.
 See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
 
 
-Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 29 (ED25519, C25519, NIST256, GOLDILOCKS, SECP256K1 and BLS12381)
+Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (ED25519, C25519, NIST256, GOLDILOCKS, SECP256K1 and BLS12381)
 
     cd core
     mvn clean install
