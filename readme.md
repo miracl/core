@@ -28,12 +28,12 @@ MIRACL Core features:-
 
 - NEW easy to use and flexible Threshold Secret Sharing module added (see share.c, share.cpp, SHARE.java etc.) 
 - NEW example program to track test vectors from https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
-- NEW curves (SM2, BN462, BLS48581, C13318, JUBJUB, X448, SECP160R1, C1174, BLS48286)
+- NEW curves (SM2, BN462, BLS48581, C13318, JUBJUB, X448, SECP160R1, C1174, BLS48286, TWEEDLEDUM, TWEEDLEDEE)
 - Support for precomputation for pairings (see BLS API)
 - Performance and security improvements
 - New HMAC message authentication module (KDFs, HMAC, HKDF_Extract/Expand, XOF_Expand, XMD_Expand)
 - Improved side-channel resistance
-- Deterministic hashing to curve points map2point (Elligator, SVDW, SWU)
+- Deterministic hashing to curve points map2point (Elligator, SVDW, SSWU)
 - Point compression in G2
 - Demonstrated support for low-powered IoT processor nodes (ARM Cortex-M0/M4, MIPS32, RISC-V, ESP32)
 - Emerging-standards-compliant implementation of BLS signature
