@@ -70,7 +70,7 @@ extern void HPKE_ZZZ_Encap(int config_id,octet *SK,octet *Z,octet *pkE,octet *pk
     @param skR the respondents private key
     @param Z is a pointer to a shared secret DH(skR,pkE)
 	@param pkE the ephemeral public key
-	@param skR the respondents private key
+	@param pkR the respondents private key
  */
 extern void HPKE_ZZZ_Decap(int config_id,octet *skR,octet *Z,octet *pkE,octet *pkR);
 

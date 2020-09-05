@@ -38,16 +38,16 @@ extern const BIG_XXX CURVE_Order_ZZZ; /**< Elliptic curve group order */
 extern const BIG_XXX CURVE_Cof_ZZZ;   /**< Elliptic curve cofactor */
 extern const BIG_XXX CURVE_HTPC_ZZZ;  /**< Hash to Point precomputation */
 
-extern const BIG_XXX CURVE_Ad_ZZZ;
-extern const BIG_XXX CURVE_Bd_ZZZ;
-extern const BIG_XXX PC_ZZZ[];
+extern const BIG_XXX CURVE_Ad_ZZZ;      /**< A parameter of isogenous curve */
+extern const BIG_XXX CURVE_Bd_ZZZ;      /**< B parameter of isogenous curve */
+extern const BIG_XXX PC_ZZZ[];          /**< Precomputed isogenies  */
 
-extern const BIG_XXX CURVE_Adr_ZZZ;
-extern const BIG_XXX CURVE_Adi_ZZZ;
-extern const BIG_XXX CURVE_Bdr_ZZZ;
-extern const BIG_XXX CURVE_Bdi_ZZZ;
-extern const BIG_XXX PCR_ZZZ[];
-extern const BIG_XXX PCI_ZZZ[];
+extern const BIG_XXX CURVE_Adr_ZZZ;     /**< Real part of A parameter of isogenous curve in G2 */
+extern const BIG_XXX CURVE_Adi_ZZZ;     /**< Imaginary part of A parameter of isogenous curve in G2 */
+extern const BIG_XXX CURVE_Bdr_ZZZ;     /**< Real part of B parameter of isogenous curve in G2 */
+extern const BIG_XXX CURVE_Bdi_ZZZ;     /**< Imaginary part of B parameter of isogenous curve in G2 */
+extern const BIG_XXX PCR_ZZZ[];         /**< Real parts of precomputed isogenies */
+extern const BIG_XXX PCI_ZZZ[];         /**< Imaginary parts of precomputed isogenies */
 
 /* Generator point on G1 */
 extern const BIG_XXX CURVE_Gx_ZZZ; /**< x-coordinate of generator point in group G1  */

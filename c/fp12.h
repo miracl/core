@@ -38,7 +38,7 @@ typedef struct
     FP4_YYY a; /**< first part of FP12 */
     FP4_YYY b; /**< second part of FP12 */
     FP4_YYY c; /**< third part of FP12 */
-    int type;
+    int type;  /**< record sparseness */
 } FP12_YYY;
 
 extern const BIG_XXX Fra_YYY; /**< real part of BN curve Frobenius Constant */

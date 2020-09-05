@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
         cout << "Program to find best pairing-friendly curves" << endl;
         cout << "bestpair type bits Hamming-weight" << endl;
         cout << "where type is the curve (BN, BLS12, BLS24, BLS48)" << endl;
-        cout << "where bits is number of bits in curve x parameter (>15 and <200)" << endl;
+        cout << "where bits is number of bits in curve u parameter (>15 and <200)" << endl;
         cout << "and hamming-weight is the number of non-zero bits (>1 and <10)" << endl;
         cout << "e.g. bestpair BLS12 77 3" << endl;
         cout << "Use flag /GT for GT-Strong curves" << endl;
@@ -580,7 +580,7 @@ int main(int argc, char *argv[])
             bt = 1;
             mip->IOBASE = 16;
 
-            cout << "x= ";
+            cout << "u= ";
             for (k = 0; k < j; k++)
             {
                 if ((bt & i) != 0) {x += xp[k]; cout << "+2^" << pw[k];}

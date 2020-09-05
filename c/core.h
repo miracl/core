@@ -56,25 +56,25 @@
 
 /* Pairing-Friendly types */
 
-#define NOT_PF 0
-#define BN_CURVE 1
-#define BLS12_CURVE 2
-#define BLS24_CURVE 3
-#define BLS48_CURVE 4
+#define NOT_PF 0        /**< Not a pairing friendly curve */
+#define BN_CURVE 1      /**< BN pairing-friendy curve */
+#define BLS12_CURVE 2   /**< BLS12 pairing-friendy curve */
+#define BLS24_CURVE 3   /**< BLS24 pairing-friendy curve */
+#define BLS48_CURVE 4   /**< BLS48 pairing-friendy curve */
 
 
-#define D_TYPE 0
-#define M_TYPE 1
+#define D_TYPE 0        /**< D-Type pairing-friendy curve */
+#define M_TYPE 1        /**< M-Type pairing-friendy curve */
 
-#define FP_ZILCH 0
-#define FP_UNITY 1
-#define FP_SPARSEST 2
-#define FP_SPARSER 3
-#define FP_SPARSE 4
-#define FP_DENSE 5
+#define FP_ZILCH 0      /**< FP extension is zero */
+#define FP_UNITY 1      /**< FP extension is one */
+#define FP_SPARSEST 2   /**< FP extension is sparsest */
+#define FP_SPARSER 3    /**< FP extension is sparser */
+#define FP_SPARSE 4     /**< FP extension is sparse */
+#define FP_DENSE 5      /**< FP extension is dense */
 
-#define NEGATOWER 0			// Extension field tower type
-#define POSITOWER 1
+#define NEGATOWER 0			/**< Negative towering */
+#define POSITOWER 1         /**< Positive towering */
 
 /**
  * @brief SHA256 hash function instance */
@@ -110,8 +110,8 @@ typedef struct
     int len;           /**< Hash length in bytes */
 } sha3;
 
-#define MC_SHA2 2
-#define MC_SHA3 3
+#define MC_SHA2 2       /**< SHA2 family member */
+#define MC_SHA3 3       /**< SHA3 family member */
 
 #define SHA256 32 /**< SHA-256 hashing */
 #define SHA384 48 /**< SHA-384 hashing */
@@ -130,11 +130,11 @@ typedef struct
 
 //q= 12289
 
-#define RLWE_PRIME 0x3001	// q in Hex
-#define RLWE_LGN 10			// Degree n=2^LGN
-#define RLWE_ND 0xF7002FFF	// 1/(R-q) mod R
-#define RLWE_ONE 0x2AC8		// R mod q
-#define RLWE_R2MODP 0x1620	// R^2 mod q
+#define RLWE_PRIME 0x3001	/**< q in Hex */
+#define RLWE_LGN 10			/**< Degree n=2^LGN */
+#define RLWE_ND 0xF7002FFF	/**< 1/(R-q) mod R */
+#define RLWE_ONE 0x2AC8		/**< R mod q */
+#define RLWE_R2MODP 0x1620	/**< R^2 mod q */
 
 /* Symmetric Encryption AES structure */
 

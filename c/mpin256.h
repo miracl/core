@@ -18,7 +18,7 @@
  */
 
 /**
- * @file mpin.h
+ * @file mpin256.h
  * @author Mike Scott and Kealan McCusker
  * @date 2nd June 2015
  * @brief M-Pin Header file

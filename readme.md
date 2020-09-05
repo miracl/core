@@ -44,7 +44,8 @@ MIRACL Core features:-
 Read the user manual MIRACL_Core.pdf for more details
 
 Doxygen generated documentation for the C version of the library can be
-created by simply executing doxygen inside of the C directory
+created by simply executing doxygen inside of the C directory. The C++
+code is probably the best commented.
 
 Install Python 3 and suitable compilers for each language of interest to you.
 Python 3 scripts are used to build the libraries from the command line for

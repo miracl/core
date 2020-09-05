@@ -32,15 +32,15 @@
 
 // ECP stuff
 
-#define CURVETYPE_ZZZ @CT@
-#define CURVE_A_ZZZ @CA@
-#define PAIRING_FRIENDLY_ZZZ @PF@
-#define CURVE_SECURITY_ZZZ @CS@
-#define HTC_ISO_ZZZ @HC@
+#define CURVETYPE_ZZZ @CT@          /**< Define Curve Type */
+#define CURVE_A_ZZZ @CA@            /**< Curve A parameter */
+#define PAIRING_FRIENDLY_ZZZ @PF@   /**< Is curve pairing-friendly */
+#define CURVE_SECURITY_ZZZ @CS@     /**< Curve security level in AES bits */
+#define HTC_ISO_ZZZ @HC@            /**< Use Isogenies for Hash to Curve */
 
 #if PAIRING_FRIENDLY_ZZZ != NOT_PF
 
-#define HTC_ISO_G2_ZZZ @HC2@
+#define HTC_ISO_G2_ZZZ @HC2@        /**< Use Isogenies for G2 Hash to Curve */
 //#define USE_GLV_ZZZ     /**< Note this method is patented (GLV), so maybe you want to comment this out */
 //#define USE_GS_G2_ZZZ /**< Well we didn't patent it :) But may be covered by GLV patent :( */
 #define USE_GS_GT_ZZZ /**< Not patented, so probably OK to always use this */
@@ -48,11 +48,11 @@
 #define POSITIVEX 0
 #define NEGATIVEX 1
 
-#define SEXTIC_TWIST_ZZZ @ST@
-#define SIGN_OF_X_ZZZ @SX@
+#define SEXTIC_TWIST_ZZZ @ST@       /**< Sextic Twist M or D type */
+#define SIGN_OF_X_ZZZ @SX@          /**< Sign of curve parameter */ 
 
-#define ATE_BITS_ZZZ @AB@
-#define G2_TABLE_ZZZ @G2@
+#define ATE_BITS_ZZZ @AB@           /**< Number of Bits in curve parameter */
+#define G2_TABLE_ZZZ @G2@           /**< Size of table for pairing precomputation for fixed G2 */
 
 #endif
 

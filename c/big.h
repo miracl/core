@@ -35,9 +35,9 @@
 #include "config_big_XXX.h"
 
 /* could comment this out if code size is a major issue */
-#define UNWOUND
+#define UNWOUND  /**< Default to unwound code */
 /* Normally recommended, but may not be optimal for some architectures, for example 32-bit ARM M4 */
-#define USE_KARATSUBA
+#define USE_KARATSUBA  /**< Default to use Karatsuba method */
 
 #define BIGBITS_XXX (8*MODBYTES_XXX) /**< Length in bits */
 #define NLEN_XXX (1+((8*MODBYTES_XXX-1)/BASEBITS_XXX)) /**< length in bytes */

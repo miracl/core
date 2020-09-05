@@ -1255,38 +1255,38 @@ impl ECP {
             let mut D =FP::new();
             let mut hint =FP::new();
 
-            t.sqr();
+            t.sqr();   // t^2
 
             if fp::PM1D2 == 2 {
-                t.dbl();
+                t.dbl();    // 2t^2
             }
             if fp::PM1D2 == 1 {
-                t.neg();
+                t.neg();    // -t^2
             }
             if fp::PM1D2 > 2 {
-                t.imul(fp::QNRI as isize);
+                t.imul(fp::QNRI as isize);   // precomputed QNR
             }
 
             t.norm();
-            D.copy(&t); D.add(&one); D.norm();
+            D.copy(&t); D.add(&one); D.norm();  // Denominator D=1+z.t^2
 
             X1.copy(&A);
-            X1.neg(); X1.norm();
+            X1.neg(); X1.norm();                // X1=-A/D
             X2.copy(&X1);
-            X2.mul(&t);
+            X2.mul(&t);                         // X2=-At/D
 
             w.copy(&X1); w.sqr(); N.copy(&w); N.mul(&X1);
             w.mul(&A); w.mul(&D); N.add(&w); 
             t.copy(&D); t.sqr();
             t.mul(&X1);
-            N.add(&t); N.norm();
+            N.add(&t); N.norm();        // Numerator=x^3+ADx^2+D^2x
 
-            t.copy(&N); t.mul(&D);
-            let qres=t.qr(Some(&mut hint));
+            t.copy(&N); t.mul(&D);      // N*D
+            let qres=t.qr(Some(&mut hint)); // only exp
             w.copy(&t); w.inverse(Some(&hint));
-            D.copy(&w); D.mul(&N);
-            X1.mul(&D);
-            X2.mul(&D);
+            D.copy(&w); D.mul(&N);          // 1/D
+            X1.mul(&D);                     // get X1
+            X2.mul(&D);                     // get X2
             X1.cmove(&X2,1-qres);
 
             let a=X1.redc();
@@ -1314,28 +1314,27 @@ impl ECP {
             if fp::MODTYPE != fp::GENERALISED_MERSENNE {
                 A.copy(&B);
                 if CURVE_A==1 {
-                    A.add(&one);
-                    B.sub(&one);
+                    A.add(&one);        // A=B+1
+                    B.sub(&one);        // B=B-1
                 } else {
-                    A.sub(&one);
-                    B.add(&one);
+                    A.sub(&one);        // A=B-1
+                    B.add(&one);        // B=B+1
                 }
                 A.norm(); B.norm();
 
-                A.div2();
-                B.div2();
-                B.div2();
+                A.div2();               // (A+B)/2 = J/K
+                B.div2();               // (B-A)/2
+                B.div2();               // (B-A)/4 = -1/K
 
                 K.copy(&B);
                 K.neg(); K.norm();
-                //K.inverse(None);
-                K.invsqrt(&mut w2,&mut w1);
+ 
+                K.invsqrt(&mut w2,&mut w1);  // return K, sqrt(1/K) - could be precalculated!
                 K.copy(&w2);
                 rfc=fp::RIADZ;
                 if rfc==1 {
                     A.mul(&K);
                     K.mul(&w1);
-                    //K=K.sqrt(None);
                 } else {
                     B.sqr();
                 }
@@ -1343,7 +1342,8 @@ impl ECP {
                 rfc=1;
                 A.copy(&FP::new_int(156326));
             }
-            t.sqr();
+// Map to this Montgomery curve X^2=X^3+AX^2+BX
+            t.sqr();        // t^2
             let mut qnr=0;
             if fp::PM1D2 == 2 {
                 t.dbl();
@@ -1354,15 +1354,15 @@ impl ECP {
                 qnr = -1;
             }
             if fp::PM1D2 > 2 {
-                t.imul(fp::QNRI as isize);
+                t.imul(fp::QNRI as isize);  // precomputed QNR
                 qnr=fp::QNRI as isize;
             }
             t.norm();
 
-            D.copy(&t); D.add(&one); D.norm();
+            D.copy(&t); D.add(&one); D.norm();  // Denominator=(1+z.u^2)
             X1.copy(&A);
-            X1.neg(); X1.norm();
-            X2.copy(&X1); X2.mul(&t);
+            X1.neg(); X1.norm();                // X1=-(J/K).inv(1+z.u^2)
+            X2.copy(&X1); X2.mul(&t);           // X2=X1*z*u^2
 
 // Figure out RHS of Montgomery curve in rational form gx1/d^3
 
@@ -1373,35 +1373,36 @@ impl ECP {
             if rfc==0 {
                 w.copy(&X1); w.mul(&B);
                 w2.mul(&w);
-                w1.add(&w2);
+                w1.add(&w2);        // w1=X1^3+ADX1^2+BD^2X1
             } else {
                 w2.mul(&X1);
-                w1.add(&w2);
+                w1.add(&w2);        // w1=X1^3+ADX1^2+D^2X1  
             }
             w1.norm();
 
-            B.copy(&w1); B.mul(&D);
-            let qres=B.qr(Some(&mut hint));
+            B.copy(&w1); B.mul(&D);   // gx1=num/den^3 - is_qr num*den (same as num/den, same as num/den^3)
+            let qres=B.qr(Some(&mut hint));   // Exponentiation
             w.copy(&B); w.inverse(Some(&hint));
-            D.copy(&w); D.mul(&w1);
-            X1.mul(&D);
-            X2.mul(&D);
+            D.copy(&w); D.mul(&w1);             // 1/D
+            X1.mul(&D);                         // get X1
+            X2.mul(&D);                         // get X2
             D.sqr();
 
-            Y.copy(&B.sqrt(Some(&hint)));
-            Y.mul(&D);
+            Y.copy(&B.sqrt(Some(&hint)));       // sqrt(num*den)
+            Y.mul(&D);                          // sqrt(num/den^3)
 
-            B.imul(qnr);
-            w.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_HTPC)));
-            hint.mul(&w);
+            B.imul(qnr);                        // now for gx2 = Z.u^2.gx1
+            w.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_HTPC))); // qnr^C3 
+            hint.mul(&w);                       // modify hint for gx2
 
-            Y3.copy(&B.sqrt(Some(&hint)));
+            Y3.copy(&B.sqrt(Some(&hint)));      // second candidate
             D.mul(&h);
             Y3.mul(&D);
 
-            X1.cmove(&X2,1-qres);
+            X1.cmove(&X2,1-qres);               // pick correct one
             Y.cmove(&Y3,1-qres);
 
+// correct sign of Y
             w.copy(&Y); w.neg(); w.norm();
             Y.cmove(&w,qres^Y.sign());
 
@@ -1411,6 +1412,7 @@ impl ECP {
             }
 
             if fp::MODTYPE == fp::GENERALISED_MERSENNE {
+            // GOLDILOCKS isogeny
 				t.copy(&X1); t.sqr();
 				w.copy(&t); w.add(&one); w.norm();
 				t.sub(&one); t.norm();
@@ -1427,7 +1429,7 @@ impl ECP {
 				w1.copy(&Y); w1.mul(&w);
 				w1.rsub(&t); w1.norm();
  
-				t.copy(&X2); t.mul(&w1);
+				t.copy(&X2); t.mul(&w1);    // output in projective to avoid inversion
 				P.x.copy(&t);
 				t.copy(&w2); t.mul(&B);
 				P.y.copy(&t);
@@ -1436,15 +1438,15 @@ impl ECP {
 
 				return P;
             } else {
-                w1.copy(&X1); w1.add(&one); w1.norm();
-                w2.copy(&X1); w2.sub(&one); w2.norm();
+                w1.copy(&X1); w1.add(&one); w1.norm();  // s+1
+                w2.copy(&X1); w2.sub(&one); w2.norm();  // s-1
                 t.copy(&w1); t.mul(&Y);  
                 X1.mul(&w1);
             
                 if rfc==1 {
                     X1.mul(&K);
                 }
-                Y.mul(&w2);
+                Y.mul(&w2);     // output in projective to avoid inversion
                 P.x.copy(&X1);
                 P.y.copy(&Y);
                 P.z.copy(&t);
@@ -1453,7 +1455,7 @@ impl ECP {
             }
         }
         if CURVETYPE==WEIERSTRASS {
-        // swu method
+        // SSWU or SVDW method
             let mut A=FP::new();
             let mut B=FP::new();
             let mut X1=FP::new();
@@ -1472,7 +1474,7 @@ impl ECP {
             let sgn=t.sign();
 
             if CURVE_A != 0 || HTC_ISO != 0
-            {
+            { // Map to point on isogenous curve
                 if HTC_ISO != 0 {
 /* CAHCZS
                     A.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_AD)));
@@ -1484,7 +1486,7 @@ CAHCZF */
                 }
                 // SSWU Method
                 t.sqr();
-                t.imul(fp::RIADZ);
+                t.imul(fp::RIADZ);      // Z from hash-to-point draft standard
                 w.copy(&t); w.add(&one); w.norm();
 
                 w.mul(&t); D.copy(&A);

@@ -35,11 +35,11 @@
 #define MBITS_YYY @NBT@	/**< Modulus bits */
 #define PM1D2_YYY @M8@     /**< Largest m such that 2^m|(p-1) */
 #define MODTYPE_YYY @MT@  /**< Modulus type */
-#define MAXXES_YYY @SH@
-#define QNRI_YYY @QI@
-#define RIADZ_YYY @RZ@
-#define RIADZG2A_YYY @RZ2A@
-#define RIADZG2B_YYY @RZ2B@
-#define TOWER_YYY @TW@
+#define MAXXES_YYY @SH@     /**< Maximum excess for lazy reduction */
+#define QNRI_YYY @QI@       /**< Small Quadratic Non-Residue */
+#define RIADZ_YYY @RZ@      /**< Z for hash to Curve */
+#define RIADZG2A_YYY @RZ2A@     /**< real part of Z in G2 for Hash to Curve */
+#define RIADZG2B_YYY @RZ2B@     /**< imaginary part of Z in G2 for Hash to Curve */
+#define TOWER_YYY @TW@          /**< Postive or Negative towering */
 
 #endif

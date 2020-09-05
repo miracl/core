@@ -1245,7 +1245,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
     FP_neg(&K,&B); FP_norm(&K);
     //FP_inv(&K,&K,NULL);    // K
-    FP_invsqrt(&K,&w1,&K);                      // *** return K, w1=sqrt(1/K)
+    FP_invsqrt(&K,&w1,&K);                      // *** return K, w1=sqrt(1/K) - - could be precalculated!
 
     rfc=RIADZ_YYY;
     if (rfc)
@@ -1391,6 +1391,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 #endif
 
 #if CURVETYPE_ZZZ==WEIERSTRASS
+// SSWU or SVDW method
     int sgn,ne;
     BIG a,x,y;
     FP X1,X2,X3,t,w,one,A,B,Y,D;
