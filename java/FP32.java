@@ -663,7 +663,7 @@ public final class FP {
         return qr;
     }
 
-// Two for Price of One
+// Two for Price of One  - See Hamburg https://eprint.iacr.org/2012/309.pdf
 // Calculate inverse of i and square root of s, return QR
     public static int tpo(FP i, FP s)
     {

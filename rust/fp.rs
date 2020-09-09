@@ -742,6 +742,8 @@ impl FP {
         return qr;
     }
 
+// Two for the price of One  - See Hamburg https://eprint.iacr.org/2012/309.pdf
+// Calculate inverse of i and square root of s, return QR
     pub fn tpo(mut i: &mut FP,mut s: &mut FP) -> isize {
         let mut w = FP::new_copy(s);
         let mut t = FP::new_copy(i);

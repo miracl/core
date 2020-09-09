@@ -134,7 +134,7 @@ var FP2 = function(ctx) {
         sign: function() {
             var p1=this.a.sign();
             var p2=this.b.sign();
-            if (FP.BIG_ENDIAN_SIGN)
+            if (ctx.FP.BIG_ENDIAN_SIGN)
             {
                 var u=this.b.iszilch()? 1:0;
                 p2^=(p1^p2)&u;

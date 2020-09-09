@@ -1536,19 +1536,19 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_from_int(&Y,RIADZ_YYY);
         ECP_rhs(&A,&Y);  // A=g(Z)
         FP_rcopy(&B,SQRTm3);
-        FP_imul(&B,&B,RIADZ_YYY); // Z*sqrt(-3)
+        FP_imul(&B,&B,RIADZ_YYY); // B=Z*sqrt(-3)
 
         FP_sqr(&t,&t);
-        FP_mul(&Y,&A,&t);   // tv1=u^2*g(Z)
-        FP_add(&t,&one,&Y); FP_norm(&t); // tv2=1+tv1
-        FP_sub(&Y,&one,&Y); FP_norm(&Y); // tv1=1-tv1
+        FP_mul(&Y,&A,&t);   // Y=tv1=u^2*g(Z)
+        FP_add(&t,&one,&Y); FP_norm(&t); // t=tv2=1+tv1
+        FP_sub(&Y,&one,&Y); FP_norm(&Y); // Y=tv1=1-tv1
         FP_mul(&D,&t,&Y);
         FP_mul(&D,&D,&B);
 
         FP_copy(&w,&A);
-        FP_tpo(&D,&w);   // tv3=inv0(tv1*tv2*z*sqrt(-3)) and sqrt(g(Z))   // ***
+        FP_tpo(&D,&w);   // D=tv3=inv0(tv1*tv2*Z*sqrt(-3)) and w=sqrt(g(Z))   // ***
 
-        FP_mul(&w,&w,&B);  // tv4=Z.sqrt(-3).sqrt(g(Z))
+        FP_mul(&w,&w,&B);  // w=tv4=Z.sqrt(-3).sqrt(g(Z))
         if (FP_sign(&w)==1)
         { // depends only on sign of constant RIADZ
             FP_neg(&w,&w);

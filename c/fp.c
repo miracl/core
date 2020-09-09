@@ -826,7 +826,7 @@ int FP_YYY_invsqrt(FP_YYY *i, FP_YYY *s, FP_YYY *x)
     return qr;
 }
 
-// Two for Price of One
+// Two for Price of One - See Hamburg https://eprint.iacr.org/2012/309.pdf
 // Calculate inverse of i and square root of s, return QR
 int FP_YYY_tpo(FP_YYY *i, FP_YYY *s)
 {

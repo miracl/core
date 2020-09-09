@@ -680,6 +680,8 @@ func (F *FP) invsqrt(i *FP,s *FP) int {
 	return qr
 }
 
+// Two for the price of one  - See Hamburg https://eprint.iacr.org/2012/309.pdf
+// Calculate inverse of i and square root of s, return QR
 func FP_tpo(i *FP,s *FP) int {
 	w:=NewFPcopy(s)
 	t:=NewFPcopy(i)

@@ -654,6 +654,8 @@ public struct FP {
         return qres
     }
 
+// Two for the price of One  - See Hamburg https://eprint.iacr.org/2012/309.pdf
+// Calculate inverse of i and square root of s, return QR
     @discardableResult static func tpo(_ i:inout FP,_ s:inout FP) -> Int
     {
         var w = FP(s)

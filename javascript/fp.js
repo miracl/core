@@ -29,7 +29,7 @@ var FP = function(ctx) {
             this.f = new ctx.BIG(x.f);
             this.XES = x.XES;
         } else {
-            if (x instanceof BIG) {
+            if (x instanceof ctx.BIG) {
                 this.f = new ctx.BIG(x);
             } else {
                 if (x<0)
@@ -655,6 +655,8 @@ var FP = function(ctx) {
 
     };
 
+// Two for the price of One  - See Hamburg https://eprint.iacr.org/2012/309.pdf
+// Calculate inverse of i and square root of s, return QR
     FP.tpo = function(i,s) {
         var w = new FP(s);
         var t = new FP(i);
