@@ -674,3 +674,11 @@ var FP4 = function(ctx) {
 
     return FP4;
 };
+
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        FP4: FP4
+    };
+}
+

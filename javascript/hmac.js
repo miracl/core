@@ -399,3 +399,10 @@ var HMAC = function(ctx) {
         var okm=ctx.HMAC.HKDF_Expand(ctx.HMAC.MC_SHA2,32,42,prk,info);
         window.document.write("PRK= "+ctx.NHS.bytestostring(okm)+ "<br>");
 */
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        HMAC: HMAC
+    };
+}
+

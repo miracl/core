@@ -265,3 +265,10 @@ var MPIN256 = function(ctx) {
 
     return MPIN256;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        MPIN256: MPIN256
+    };
+}
+

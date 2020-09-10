@@ -838,3 +838,10 @@ var AES = function() {
 
     return AES;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        AES: AES
+    };
+}
+

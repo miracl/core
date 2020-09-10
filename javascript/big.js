@@ -1458,4 +1458,10 @@ DBIG = function(ctx) {
 };
 
 
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        BIG: BIG,
+        DBIG: DBIG
+    };
+}
 

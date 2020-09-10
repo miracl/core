@@ -689,3 +689,10 @@ var FP8 = function(ctx) {
 
     return FP8;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        FP8: FP8
+    };
+}
+

@@ -1164,3 +1164,8 @@ var ECP8 = function(ctx) {
 
     return ECP8;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports.ECP8 = ECP8;
+}
+

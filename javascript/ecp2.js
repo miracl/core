@@ -961,3 +961,8 @@ var ECP2 = function(ctx) {
 
     return ECP2;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports.ECP2 = ECP2;
+}
+

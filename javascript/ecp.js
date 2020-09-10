@@ -1746,3 +1746,8 @@ var ECP = function(ctx) {
 */
     return ECP;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports.ECP = ECP;
+}
+

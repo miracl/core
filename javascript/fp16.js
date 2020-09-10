@@ -570,3 +570,10 @@ var FP16 = function(ctx) {
 
     return FP16;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        FP16: FP16
+    };
+}
+

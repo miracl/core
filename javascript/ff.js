@@ -999,3 +999,10 @@ var FF = function(ctx) {
 
     return FF;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        FF: FF
+    };
+}
+

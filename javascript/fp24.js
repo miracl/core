@@ -1297,3 +1297,10 @@ var FP24 = function(ctx) {
 
     return FP24;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+	module.exports = {
+		FP24: FP24
+	};
+}
+

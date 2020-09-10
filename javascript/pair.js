@@ -1062,3 +1062,8 @@ var PAIR = function(ctx) {
 
     return PAIR;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+	module.exports.PAIR = PAIR;
+}
+

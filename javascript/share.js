@@ -158,3 +158,10 @@ var SHARE = function(ctx) {
     ];
     return SHARE;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        SHARE: SHARE
+    };
+}
+

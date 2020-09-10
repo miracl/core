@@ -262,3 +262,10 @@ var MPIN192 = function(ctx) {
 
     return MPIN192;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        MPIN192: MPIN192
+    };
+}
+

@@ -808,3 +808,8 @@ var PAIR4 = function(ctx) {
 
     return PAIR4;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports.PAIR4 = PAIR4;
+}
+

@@ -446,3 +446,10 @@ var GCM = function(ctx) {
 
     return GCM;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        GCM: GCM
+    };
+}
+

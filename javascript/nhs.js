@@ -563,3 +563,8 @@ var NHS = function(ctx) {
 
     return NHS;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports.NHS = NHS;
+}
+

@@ -182,3 +182,10 @@ var RAND = function(ctx) {
 
     return RAND;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        RAND: RAND
+    };
+}
+

@@ -174,3 +174,10 @@ var BLS = function(ctx) {
 
     return BLS;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        BLS: BLS
+    };
+}
+

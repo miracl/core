@@ -1203,3 +1203,8 @@ var CTX = function(input_parameter) {
     }
 
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = CTX;
+}
+

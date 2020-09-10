@@ -406,3 +406,10 @@ var ECDH = function(ctx) {
 
     return ECDH;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        ECDH: ECDH
+    };
+}
+

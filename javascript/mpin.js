@@ -261,3 +261,10 @@ var MPIN = function(ctx) {
 
     return MPIN;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        MPIN: MPIN
+    };
+}
+

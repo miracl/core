@@ -469,3 +469,12 @@ rsa_public_key = function(ctx) {
 
     return rsa_public_key;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        RSA: RSA,
+        rsa_private_key: rsa_private_key,
+        rsa_public_key: rsa_public_key
+    };
+}
+

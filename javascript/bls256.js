@@ -179,3 +179,10 @@ var BLS256 = function(ctx) {
 
     return BLS256;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        BLS256: BLS256
+    };
+}
+

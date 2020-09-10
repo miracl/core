@@ -930,3 +930,8 @@ var ECP4 = function(ctx) {
 
     return ECP4;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports.ECP4 = ECP4;
+}
+

@@ -782,3 +782,10 @@ var FP = function(ctx) {
 
     return FP;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        FP: FP
+    };
+}
+

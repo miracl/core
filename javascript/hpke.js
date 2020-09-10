@@ -312,3 +312,10 @@ var HPKE = function(ctx) {
     };
     return HPKE;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        HPKE: HPKE
+    };
+}
+

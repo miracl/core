@@ -910,3 +910,8 @@ var PAIR8 = function(ctx) {
 
     return PAIR8;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports.PAIR8 = PAIR8;
+}
+

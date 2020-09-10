@@ -279,3 +279,10 @@ var SHA3 = function(ctx) {
 
     return SHA3;
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+    module.exports = {
+        SHA3: SHA3
+    };
+}
+
