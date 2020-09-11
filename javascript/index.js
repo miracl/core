@@ -1,2 +1,2 @@
 
-module.exports.CTX = require('./ctx');
+module.exports.CTX = require('./src/ctx');

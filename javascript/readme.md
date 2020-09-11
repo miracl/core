@@ -50,6 +50,12 @@ It is also possible to use it as a npm package. Install it locally into your pro
 
     npm install --save <path-to-this-library>
 
+As an example in React it is possible to install the library with npm and import it with
+
+```javascript
+const ctx = require('amcl-js').CTX;
+```
+After the import the library is used as described above.
 
 --------------------------------------
 

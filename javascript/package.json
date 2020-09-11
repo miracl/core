@@ -8,5 +8,8 @@
 	},
 	"keywords": [],
 	"author": "Michael Scott, Alessandro Budroni, Kealan McCusker, Samuele Andreoli",
-	"license": "Apache License 2.0"
+	"license": "Apache License 2.0",
+	"dependencies": {
+		"prompt": "^1.0.0"
+	}
 }
