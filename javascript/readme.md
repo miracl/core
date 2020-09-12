@@ -40,6 +40,22 @@ If you want to create a context supporting only those general functions then ini
 
     var ctx = new CTX();
 
+To use this library in Node.js import it as follows:
+
+```javascript
+var CTX = require('./index.js');
+```
+
+It is also possible to use it as a npm package. Install it locally into your project with:
+
+    npm install --save <path-to-this-library>
+
+As an example in React it is possible to install the library with npm and import it with
+
+```javascript
+const ctx = require('amcl-js').CTX;
+```
+After the import the library is used as described above.
 
 --------------------------------------
 

@@ -1,0 +1,320 @@
+<!DOCTYPE HTML>
+<!--
+-- Copyright (c) 2012-2020 MIRACL UK Ltd.
+--
+-- This file is part of MIRACL Core
+-- (see https://github.com/miracl/core).
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+-->
+<html>
+<head>
+<title>JavaScript Test BLS</title>
+</head>
+<body>
+<h1>JavaScript Test BLS Example</h1>
+<script type="text/javascript"src=./../../src/rand.js></script>
+<script type="text/javascript"src=./../../src/share.js></script>
+<script type="text/javascript"src=./../../src/rom_curve.js></script>
+<script type="text/javascript"src=./../../src/rom_field.js></script>
+<script type="text/javascript"src=./../../src/uint64.js></script>
+<script type="text/javascript"src=./../../src/aes.js></script>
+<script type="text/javascript"src=./../../src/big.js></script>
+<script type="text/javascript"src=./../../src/gcm.js></script>
+<script type="text/javascript"src=./../../src/hmac.js></script>
+<script type="text/javascript"src=./../../src/hash256.js></script>
+<script type="text/javascript"src=./../../src/hash384.js></script>
+<script type="text/javascript"src=./../../src/hash512.js></script>
+<script type="text/javascript"src=./../../src/sha3.js></script>
+<script type="text/javascript"src=./../../src/nhs.js></script>
+<script type="text/javascript"src=./../../src/fp.js></script>
+<script type="text/javascript"src=./../../src/fp2.js></script>
+<script type="text/javascript"src=./../../src/fp4.js></script>
+<script type="text/javascript"src=./../../src/fp12.js></script>
+<script type="text/javascript"src=./../../src/ff.js></script>
+<script type="text/javascript"src=./../../src/rsa.js></script>
+<script type="text/javascript"src=./../../src/ecp.js></script>
+<script type="text/javascript"src=./../../src/ecp2.js></script>
+<script type="text/javascript"src=./../../src/ecdh.js></script>
+<script type="text/javascript"src=./../../src/hpke.js></script>
+<script type="text/javascript"src=./../../src/pair.js></script>
+<script type="text/javascript"src=./../../src/bls.js></script>
+<script type="text/javascript"src=./../../src/mpin.js></script>
+<script type="text/javascript"src=./../../src/ctx.js></script>
+
+<script type="text/javascript"src=./../../src/fp8.js></script>
+<script type="text/javascript"src=./../../src/fp16.js></script>
+<script type="text/javascript"src=./../../src/fp24.js></script>
+<script type="text/javascript"src=./../../src/fp48.js></script>
+<script type="text/javascript"src=./../../src/ecp4.js></script>
+<script type="text/javascript"src=./../../src/ecp8.js></script>
+<script type="text/javascript"src=./../../src/pair4.js></script>
+<script type="text/javascript"src=./../../src/pair8.js></script>
+<script type="text/javascript"src=./../../src/mpin192.js></script>
+<script type="text/javascript"src=./../../src/mpin256.js></script>
+<script type="text/javascript"src=./../../src/bls192.js></script>
+<script type="text/javascript"src=./../../src/bls256.js></script>
+
+
+<p><a id="myLink4" href="#" onclick="BN254();">BN254 254-bit k=12 Pairing-Friendly BN Curve Boneh-Lynn-Shacham</a></p>
+<p><a id="myLink5" href="#" onclick="BLS12383();">BLS12383 383-bit k=12 Pairing-Friendly BLS Curve Boneh-Lynn-Shacham</a></p>
+<p><a id="myLink6" href="#" onclick="BLS24479();">BLS24479 479-bit k=24 Pairing-Friendly BLS Curve Boneh-Lynn-Shacham</a></p>
+<p><a id="myLink7" href="#" onclick="BLS48556();">BLS48556 556-bit k=48 Pairing-Friendly BLS Curve Boneh-Lynn-Shacham</a></p>
+
+
+<script>
+
+
+/* Test driver and function exerciser for Boneh-Lynn-Shacham BLS Signature API Functions */
+
+/* To reverse the groups G1 and G2, edit BLS*.go
+
+Swap G1 <-> G2
+Swap ECP <-> ECPn
+Disable G2 precomputation
+Switch G1/G2 parameter order in pairing function calls
+
+Swap G1S and G2S in this program
+
+*/
+
+// BN254 context
+function BN254() {
+	var ctx = new CTX('BN254');
+	var mywindow=window.open();
+
+	mywindow.document.write("<br> BN254 Pairing-Friendly Curve "+  "<br>");
+
+	var i,res;
+
+	var S=[];
+	var W=[];
+	var SIG=[];
+
+	var RAW=[];
+	var rng=new ctx.RAND();
+
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+
+	rng.seed(100,RAW);
+
+	var IKM=[];
+	for (i=0;i<32;i++)
+		//IKM[i]=i+1;
+		IKM[i]=rng.getByte();
+
+	var res = ctx.BLS.init();
+	if (res!=0)
+	{
+		mywindow.document.write("Failed to initialize" + "<br>");
+		return;
+	}
+
+	mywindow.document.write ("Testing BLS code <br>");
+	var mess="This is a test message";
+	res=ctx.BLS.KeyPairGenerate(IKM,S,W);
+	if (res!=0)
+	{
+		mywindow.document.write("Failed to Generate Keys" + "<br>");
+		return;
+	}
+	mywindow.document.write("Private key : 0x"+ctx.BLS.bytestostring(S) + "<br>");
+	mywindow.document.write("Public  key : 0x"+ctx.BLS.bytestostring(W) + "<br>");
+
+	ctx.BLS.core_sign(SIG,ctx.BLS.asciitobytes(mess),S);
+	mywindow.document.write("Signature : 0x"+ctx.BLS.bytestostring(SIG) + "<br>");
+
+	res=ctx.BLS.core_verify(SIG,ctx.BLS.asciitobytes(mess),W);
+
+	if (res==0)
+		mywindow.document.write("Signature is OK" + "<br>");
+	else
+		mywindow.document.write("Signature is *NOT* OK"  + "<br>");
+
+}
+
+// BLS383 context
+function BLS12383() {
+	var ctx = new CTX('BLS12383');
+	var mywindow=window.open();
+
+	mywindow.document.write("<br> BLS12 Pairing-Friendly Curve "+  "<br>");
+
+	var i,res;
+
+	var S=[];
+	var W=[];
+	var SIG=[];
+
+	var RAW=[];
+	var rng=new ctx.RAND();
+
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+
+	rng.seed(100,RAW);
+
+	var IKM=[];
+	for (i=0;i<32;i++)
+		//IKM[i]=i+1;
+		IKM[i]=rng.getByte();
+
+	var res=ctx.BLS.init();
+	if (res!=0)
+	{
+		mywindow.document.write("Failed to initialize" + "<br>");
+		return;
+	}
+
+	mywindow.document.write ("Testing BLS code <br>");
+	var mess="This is a test message";
+
+	res=ctx.BLS.KeyPairGenerate(IKM,S,W);
+	if (res!=0)
+	{
+		mywindow.document.write("Failed to Generate Keys" + "<br>");
+		return;
+	}
+	mywindow.document.write("Private key : 0x"+ctx.BLS.bytestostring(S) + "<br>");
+	mywindow.document.write("Public  key : 0x"+ctx.BLS.bytestostring(W) + "<br>");
+
+	ctx.BLS.core_sign(SIG,ctx.BLS.asciitobytes(mess),S);
+	mywindow.document.write("Signature : 0x"+ctx.BLS.bytestostring(SIG) + "<br>");
+
+	res=ctx.BLS.core_verify(SIG,ctx.BLS.asciitobytes(mess),W);
+
+	if (res==0)
+		mywindow.document.write("Signature is OK" + "<br>");
+	else
+		mywindow.document.write("Signature is *NOT* OK"  + "<br>");
+ 
+}
+
+// BLS24 context
+function BLS24479() {
+	var ctx = new CTX('BLS24479');
+	var mywindow=window.open();
+
+	mywindow.document.write("<br> BLS24 Pairing-Friendly Curve "+  "<br>");
+
+	var i,res;
+
+	var S=[];
+	var W=[];
+	var SIG=[];
+
+	var RAW=[];
+	var rng=new ctx.RAND();
+
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+
+	rng.seed(100,RAW);
+
+	var IKM=[];
+	for (i=0;i<48;i++)
+		//IKM[i]=i+1;
+		IKM[i]=rng.getByte();
+
+	var res=ctx.BLS192.init();
+	if (res!=0)
+	{
+		mywindow.document.write("Failed to initialize" + "<br>");
+		return;
+	}
+
+	mywindow.document.write ("Testing BLS code <br>");
+	var mess="This is a test message";
+
+	res=ctx.BLS192.KeyPairGenerate(IKM,S,W);
+	if (res!=0)
+	{
+		mywindow.document.write("Failed to Generate Keys" + "<br>");
+		return;
+	}
+	mywindow.document.write("Private key : 0x"+ctx.BLS192.bytestostring(S) + "<br>");
+	mywindow.document.write("Public  key : 0x"+ctx.BLS192.bytestostring(W) + "<br>");
+
+	ctx.BLS192.core_sign(SIG,ctx.BLS192.asciitobytes(mess),S);
+	mywindow.document.write("Signature : 0x"+ctx.BLS192.bytestostring(SIG) + "<br>");
+
+	res=ctx.BLS192.core_verify(SIG,ctx.BLS192.asciitobytes(mess),W);
+
+	if (res==0)
+		mywindow.document.write("Signature is OK" + "<br>");
+	else
+		mywindow.document.write("Signature is *NOT* OK"  + "<br>");
+ 
+}
+
+// BLS48 context
+function BLS48556() {
+	var ctx = new CTX('BLS48556');
+	var mywindow=window.open();
+
+	mywindow.document.write("<br> BLS48 Pairing-Friendly Curve "+  "<br>");
+
+	var i,res;
+
+	var S=[];
+	var W=[];
+	var SIG=[];
+
+	var RAW=[];
+	var rng=new ctx.RAND();
+
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+
+	rng.seed(100,RAW);
+
+	var IKM=[];
+	for (i=0;i<64;i++)
+		//IKM[i]=i+1;
+		IKM[i]=rng.getByte();
+
+	var res=ctx.BLS256.init();
+	if (res!=0)
+	{
+		mywindow.document.write("Failed to initialize" + "<br>");
+		return;
+	}
+
+	mywindow.document.write ("Testing BLS code <br>");
+	var mess="This is a test message";
+
+	res=ctx.BLS256.KeyPairGenerate(IKM,S,W);
+	if (res!=0)
+	{
+		mywindow.document.write("Failed to Generate Keys" + "<br>");
+		return;
+	}
+	mywindow.document.write("Private key : 0x"+ctx.BLS256.bytestostring(S) + "<br>");
+	mywindow.document.write("Public  key : 0x"+ctx.BLS256.bytestostring(W) + "<br>");
+
+	ctx.BLS256.core_sign(SIG,ctx.BLS256.asciitobytes(mess),S);
+	mywindow.document.write("Signature : 0x"+ctx.BLS256.bytestostring(SIG) + "<br>");
+
+	res=ctx.BLS256.core_verify(SIG,ctx.BLS256.asciitobytes(mess),W);
+
+	if (res==0)
+		mywindow.document.write("Signature is OK" + "<br>");
+	else
+		mywindow.document.write("Signature is *NOT* OK"  + "<br>");
+ 
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE HTML>
+<!--
+-- Copyright (c) 2012-2020 MIRACL UK Ltd.
+--
+-- This file is part of MIRACL Core
+-- (see https://github.com/miracl/core).
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+-->
+<html>
+<head>
+<title>JavaScript Test HPKE</title>
+</head>
+<body>
+<h1>JavaScript Test HPKE Example</h1>
+<script type="text/javascript"src=./../../src/rand.js></script>
+<script type="text/javascript"src=./../../src/share.js></script>
+<script type="text/javascript"src=./../../src/rom_curve.js></script>
+<script type="text/javascript"src=./../../src/rom_field.js></script>
+<script type="text/javascript"src=./../../src/uint64.js></script>
+<script type="text/javascript"src=./../../src/aes.js></script>
+<script type="text/javascript"src=./../../src/big.js></script>
+<script type="text/javascript"src=./../../src/gcm.js></script>
+<script type="text/javascript"src=./../../src/hmac.js></script>
+<script type="text/javascript"src=./../../src/hash256.js></script>
+<script type="text/javascript"src=./../../src/hash384.js></script>
+<script type="text/javascript"src=./../../src/hash512.js></script>
+<script type="text/javascript"src=./../../src/sha3.js></script>
+<script type="text/javascript"src=./../../src/nhs.js></script>
+<script type="text/javascript"src=./../../src/fp.js></script>
+
+<script type="text/javascript"src=./../../src/ecp.js></script>
+<script type="text/javascript"src=./../../src/ecdh.js></script>
+<script type="text/javascript"src=./../../src/hpke.js></script>
+<script type="text/javascript"src=./../../src/ctx.js></script>
+
+<p><a id="myLink4" href="#" onclick="C25519();">C25519 Curve Hybrid Public Key Encryption</a></p>
+<p><a id="myLink5" href="#" onclick="NIST521();">NIST521 Curve Hybrid Public Key Encryption</a></p>
+
+<script>
+
+/* Test HPKE */
+
+// C25519 context
+function C25519() {
+	var ctx = new CTX('C25519');
+	var mywindow=window.open();
+	mywindow.document.write("<br>X25519 Curve "+  "<br>");
+	var config_id=0x520;
+
+	var pkE=[];
+	var INFO=ctx.ECDH.stringtobytes("4f6465206f6e2061204772656369616e2055726e");
+	var psk=ctx.ECDH.stringtobytes("5db3b80a81cb63ca59470c83414ef70a");
+	var pskID=ctx.ECDH.stringtobytes("456e6e796e20447572696e206172616e204d6f726961");
+	var plain=ctx.ECDH.stringtobytes("4265617574792069732074727574682c20747275746820626561757479");
+	var aad=ctx.ECDH.stringtobytes("436f756e742d30");
+    mywindow.document.write("Testing HPKE code <br>");
+
+	var key=[];
+	var nonce=[];
+	var exp_secret=[];
+	var cipher=[];
+	var tag=[];
+	var seedE,seedR,seedS;
+	var skR=[];
+	var skE=[];
+	var skS=[];
+	var pkR=[];
+	var pkS=[];
+	var pkE=[];
+
+	var mode,Z;
+// Mode 0
+    mode=0;
+    mywindow.document.write("Mode 0 <br>");
+     
+    seedE=ctx.ECDH.stringtobytes("a77ae3e14cc2ec9e603a9049423d48e66a5e3139e896e95cf19919430657adc7");
+    seedR=ctx.ECDH.stringtobytes("1289f0db1d8f68d0c531b5e53a40911a2a2347059355d7c267717033fef2b08c");
+
+	ctx.HPKE.DeriveKeyPair(config_id,skE,pkE,seedE);
+	ctx.HPKE.DeriveKeyPair(config_id,skR,pkR,seedR);
+		
+	Z=ctx.HPKE.encap(config_id,skE,pkE,pkR);
+	mywindow.document.write("pKE : 0x"+ctx.ECDH.bytestostring(pkE) + "<br>");
+	mywindow.document.write("Encapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>");  
+
+	Z=ctx.HPKE.decap(config_id,skR,pkE,pkR);
+	mywindow.document.write("Decapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>"); 
+
+	ctx.HPKE.keySchedule(config_id,key,nonce,exp_secret,mode,Z,INFO,null,null);
+	mywindow.document.write("Key :    0x"+ctx.ECDH.bytestostring(key) + "<br>");
+	mywindow.document.write("Nonce :  0x"+ctx.ECDH.bytestostring(nonce) + "<br>");
+	mywindow.document.write("Exporter secret :  0x"+ctx.ECDH.bytestostring(exp_secret) + "<br>");
+
+	ctx.GCM.encrypt(cipher,tag,key,nonce,aad,plain);
+	mywindow.document.write("Cipher : 0x"+ctx.ECDH.bytestostring(cipher) + "<br>");
+	mywindow.document.write("Tag :    0x"+ctx.ECDH.bytestostring(tag) + "<br>");
+
+// Mode 1
+    mode=1;
+    mywindow.document.write("<br> Mode 1 <br>");
+     
+    seedE=ctx.ECDH.stringtobytes("0fa1407ccee05de0cceb2f2d2381d2df0602dbd43be90eefd288ce4ad0b3ba32");
+    seedR=ctx.ECDH.stringtobytes("326ee379f778718e6cb343f55668fbb9d0098ba0503cd4414a8f1ce252605c39");
+
+	ctx.HPKE.DeriveKeyPair(config_id,skE,pkE,seedE);
+	ctx.HPKE.DeriveKeyPair(config_id,skR,pkR,seedR);
+	
+	Z=ctx.HPKE.encap(config_id,skE,pkE,pkR);
+	mywindow.document.write("pKE : 0x"+ctx.ECDH.bytestostring(pkE) + "<br>");
+	mywindow.document.write("Encapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>");  
+
+	Z=ctx.HPKE.decap(config_id,skR,pkE,pkR);
+	mywindow.document.write("Decapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>"); 
+
+	ctx.HPKE.keySchedule(config_id,key,nonce,exp_secret,mode,Z,INFO,psk,pskID);
+	mywindow.document.write("Key :    0x"+ctx.ECDH.bytestostring(key) + "<br>");
+	mywindow.document.write("Nonce :  0x"+ctx.ECDH.bytestostring(nonce) + "<br>");
+	mywindow.document.write("Exporter secret :  0x"+ctx.ECDH.bytestostring(exp_secret) + "<br>");
+
+	ctx.GCM.encrypt(cipher,tag,key,nonce,aad,plain);
+	mywindow.document.write("Cipher : 0x"+ctx.ECDH.bytestostring(cipher) + "<br>");
+	mywindow.document.write("Tag :    0x"+ctx.ECDH.bytestostring(tag) + "<br>");
+
+// Mode 2
+    mode=2;
+    mywindow.document.write("<br> Mode 2 <br>");
+     
+    seedE=ctx.ECDH.stringtobytes("02900cb4856b5f222293a9bd7bda2f1f81c562dc3002336ad1c39f6572402b7d");
+    seedR=ctx.ECDH.stringtobytes("518df90f0f5044ce653180c700e4902d37a7ba1cd23482a76e18b300fecaac4e");
+    seedS=ctx.ECDH.stringtobytes("262a05ad0c08030cdbbaafc03d64f33b95bf8089f216c62ac39b72064a4b4dcb");
+	ctx.HPKE.DeriveKeyPair(config_id,skE,pkE,seedE);
+	ctx.HPKE.DeriveKeyPair(config_id,skR,pkR,seedR);
+	ctx.HPKE.DeriveKeyPair(config_id,skS,pkS,seedS);
+        
+	Z=ctx.HPKE.authEncap(config_id,skE,skS,pkE,pkR,pkS);
+	mywindow.document.write("pKE : 0x"+ctx.ECDH.bytestostring(pkE) + "<br>");
+	mywindow.document.write("Encapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>");  
+
+	Z=ctx.HPKE.authDecap(config_id,skR,pkE,pkR,pkS);
+	mywindow.document.write("Decapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>"); 
+
+	ctx.HPKE.keySchedule(config_id,key,nonce,exp_secret,mode,Z,INFO,null,null);
+	mywindow.document.write("Key :    0x"+ctx.ECDH.bytestostring(key) + "<br>");
+	mywindow.document.write("Nonce :  0x"+ctx.ECDH.bytestostring(nonce) + "<br>");
+	mywindow.document.write("Exporter secret :  0x"+ctx.ECDH.bytestostring(exp_secret) + "<br>");
+
+	ctx.GCM.encrypt(cipher,tag,key,nonce,aad,plain);
+	mywindow.document.write("Cipher : 0x"+ctx.ECDH.bytestostring(cipher) + "<br>");
+	mywindow.document.write("Tag :    0x"+ctx.ECDH.bytestostring(tag) + "<br>");
+
+// Mode 3
+    mode=3;
+    mywindow.document.write("<br> Mode 3 <br>");
+     
+    seedE=ctx.ECDH.stringtobytes("c1d1028243a951dbf6469025f3a1304407b08fb932104e61c7aab42ab4f1995c");
+    seedR=ctx.ECDH.stringtobytes("02a965d8f53bbdcc11cc618d4f31f69277500b75959ca97fd533058315511d1b");
+    seedS=ctx.ECDH.stringtobytes("e9c09a3e50073935e75d3846007a26088a93ebf58ad0bb30ad6c42a9d4d2419e");
+	ctx.HPKE.DeriveKeyPair(config_id,skE,pkE,seedE);
+	ctx.HPKE.DeriveKeyPair(config_id,skR,pkR,seedR);
+	ctx.HPKE.DeriveKeyPair(config_id,skS,pkS,seedS);
+        
+	Z=ctx.HPKE.authEncap(config_id,skE,skS,pkE,pkR,pkS);
+	mywindow.document.write("pKE : 0x"+ctx.ECDH.bytestostring(pkE) + "<br>");
+	mywindow.document.write("Encapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>");  
+
+	Z=ctx.HPKE.authDecap(config_id,skR,pkE,pkR,pkS);
+	mywindow.document.write("Decapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>"); 
+
+	ctx.HPKE.keySchedule(config_id,key,nonce,exp_secret,mode,Z,INFO,psk,pskID);
+	mywindow.document.write("Key :    0x"+ctx.ECDH.bytestostring(key) + "<br>");
+	mywindow.document.write("Nonce :  0x"+ctx.ECDH.bytestostring(nonce) + "<br>");
+	mywindow.document.write("Exporter secret :  0x"+ctx.ECDH.bytestostring(exp_secret) + "<br>");
+
+	ctx.GCM.encrypt(cipher,tag,key,nonce,aad,plain);
+	mywindow.document.write("Cipher : 0x"+ctx.ECDH.bytestostring(cipher) + "<br>");
+	mywindow.document.write("Tag :    0x"+ctx.ECDH.bytestostring(tag) + "<br>");
+}
+
+// NIST521 context
+function NIST521() {
+	var ctx = new CTX('NIST521');
+	var mywindow=window.open();
+	mywindow.document.write("<br>NIST521 Curve "+  "<br>");
+	var config_id=0xB12;
+
+	var pkE=[];
+	var INFO=ctx.ECDH.stringtobytes("4f6465206f6e2061204772656369616e2055726e");
+	var psk=ctx.ECDH.stringtobytes("5db3b80a81cb63ca59470c83414ef70a");
+	var pskID=ctx.ECDH.stringtobytes("456e6e796e20447572696e206172616e204d6f726961");
+	var plain=ctx.ECDH.stringtobytes("4265617574792069732074727574682c20747275746820626561757479");
+	var aad=ctx.ECDH.stringtobytes("436f756e742d30");
+    mywindow.document.write("Testing HPKE code <br>");
+
+	var key=[];
+	var nonce=[];
+	var exp_secret=[];
+	var cipher=[];
+	var tag=[];
+	var seedE,seedR,seedS;
+
+	var skR=[];
+	var skE=[];
+	var skS=[];
+	var pkR=[];
+	var pkS=[];
+	var pkE=[];
+
+	var mode,Z;
+// Mode 0
+    mode=0;
+    mywindow.document.write("Mode 0 <br>");
+     
+    seedE=ctx.ECDH.stringtobytes("1ed3768f499b5b3c2beda3166528b649d4b117a0bd450f0e9e19815c2597d1777ac67ea367415fb28c8819c94b383a0a8a15c9f03b4835330e3e6c8bc8319202e473");
+    seedR=ctx.ECDH.stringtobytes("62641514bccd2858f3d6513305288d6ca0e443f00a86eb33ccd519d1803aebc5d07bbad0e1013ce61d9c9d713b3c90c8e79a1af01d6c69750f67cbbd1d9d4afeedfa");
+	ctx.HPKE.DeriveKeyPair(config_id,skE,pkE,seedE);
+	ctx.HPKE.DeriveKeyPair(config_id,skR,pkR,seedR);
+	
+	Z=ctx.HPKE.encap(config_id,skE,pkE,pkR);
+	mywindow.document.write("pKE : 0x"+ctx.ECDH.bytestostring(pkE) + "<br>");
+	mywindow.document.write("Encapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>");  
+
+	Z=ctx.HPKE.decap(config_id,skR,pkE,pkR);
+	mywindow.document.write("Decapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>"); 
+
+	ctx.HPKE.keySchedule(config_id,key,nonce,exp_secret,mode,Z,INFO,null,null);
+	mywindow.document.write("Key :    0x"+ctx.ECDH.bytestostring(key) + "<br>");
+	mywindow.document.write("Nonce :  0x"+ctx.ECDH.bytestostring(nonce) + "<br>");
+	mywindow.document.write("Exporter secret :  0x"+ctx.ECDH.bytestostring(exp_secret) + "<br>");
+
+	ctx.GCM.encrypt(cipher,tag,key,nonce,aad,plain);
+	mywindow.document.write("Cipher : 0x"+ctx.ECDH.bytestostring(cipher) + "<br>");
+	mywindow.document.write("Tag :    0x"+ctx.ECDH.bytestostring(tag) + "<br>");
+
+// Mode 1
+    mode=1;
+    mywindow.document.write("<br> Mode 1 <br>");
+     
+    seedE=ctx.ECDH.stringtobytes("64463def238f309f1e9d1f28c15dc126cffa4ded911a4c527eeb71ba593847fb405756239d2c694ce4effa3996cafb5cc0b3736dd988deb7289210ec92bf6b339302");
+    seedR=ctx.ECDH.stringtobytes("41b782c18c14986c9d7a636152f13677aeddf479c1c7791ea46e0ebbe35ca9dd524c23d730eef443741d7d965415833d6c549c8c1b31ad05f2b9a88f916b2930528e");
+	ctx.HPKE.DeriveKeyPair(config_id,skE,pkE,seedE);
+	ctx.HPKE.DeriveKeyPair(config_id,skR,pkR,seedR);
+
+	
+	Z=ctx.HPKE.encap(config_id,skE,pkE,pkR);
+	mywindow.document.write("pKE : 0x"+ctx.ECDH.bytestostring(pkE) + "<br>");
+	mywindow.document.write("Encapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>");  
+
+	Z=ctx.HPKE.decap(config_id,skR,pkE,pkR);
+	mywindow.document.write("Decapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>"); 
+
+	ctx.HPKE.keySchedule(config_id,key,nonce,exp_secret,mode,Z,INFO,psk,pskID);
+	mywindow.document.write("Key :    0x"+ctx.ECDH.bytestostring(key) + "<br>");
+	mywindow.document.write("Nonce :  0x"+ctx.ECDH.bytestostring(nonce) + "<br>");
+	mywindow.document.write("Exporter secret :  0x"+ctx.ECDH.bytestostring(exp_secret) + "<br>");
+
+	ctx.GCM.encrypt(cipher,tag,key,nonce,aad,plain);
+	mywindow.document.write("Cipher : 0x"+ctx.ECDH.bytestostring(cipher) + "<br>");
+	mywindow.document.write("Tag :    0x"+ctx.ECDH.bytestostring(tag) + "<br>");
+
+// Mode 2
+    mode=2;
+    mywindow.document.write("<br> Mode 2 <br>");
+     
+    seedE=ctx.ECDH.stringtobytes("81dc51e31ef8e9b33fefcdf00bd3b0ff585b941fe76cf39a86c269e2f53be7edb3db0be1a58b6cb8d8e6020fe8a2018c59d47cacb35b2b8c61bd4155438b5eda5c0d");
+    seedR=ctx.ECDH.stringtobytes("54af23ea93c8fc34deb6a7cd70e657ea8990fc4e9a18656d5764b62f7a33a9e0212adeae1585ad2ef28688c1b558866c1975973c4dff08955c1f9fd7939b10b5fbfc");
+    seedS=ctx.ECDH.stringtobytes("b65599d814192278ab826ef197a61b77db50f40495f77502dfaa03acd1f3565a3cefebd59de2328ece0638c90d8a89f9ca58f2850e39e9a4c9c339290d66da12fdf0");
+	ctx.HPKE.DeriveKeyPair(config_id,skE,pkE,seedE);
+	ctx.HPKE.DeriveKeyPair(config_id,skR,pkR,seedR);
+	ctx.HPKE.DeriveKeyPair(config_id,skS,pkS,seedS);
+	
+	Z=ctx.HPKE.authEncap(config_id,skE,skS,pkE,pkR,pkS);
+	mywindow.document.write("pKE : 0x"+ctx.ECDH.bytestostring(pkE) + "<br>");
+	mywindow.document.write("Encapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>");  
+
+	Z=ctx.HPKE.authDecap(config_id,skR,pkE,pkR,pkS);
+	mywindow.document.write("Decapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>"); 
+
+	ctx.HPKE.keySchedule(config_id,key,nonce,exp_secret,mode,Z,INFO,null,null);
+	mywindow.document.write("Key :    0x"+ctx.ECDH.bytestostring(key) + "<br>");
+	mywindow.document.write("Nonce :  0x"+ctx.ECDH.bytestostring(nonce) + "<br>");
+	mywindow.document.write("Exporter secret :  0x"+ctx.ECDH.bytestostring(exp_secret) + "<br>");
+
+	ctx.GCM.encrypt(cipher,tag,key,nonce,aad,plain);
+	mywindow.document.write("Cipher : 0x"+ctx.ECDH.bytestostring(cipher) + "<br>");
+	mywindow.document.write("Tag :    0x"+ctx.ECDH.bytestostring(tag) + "<br>");
+
+// Mode 3
+    mode=3;
+    mywindow.document.write("<br> Mode 3 <br>");
+     
+    seedE=ctx.ECDH.stringtobytes("dc1fda9b21a1af6925ecf9ad79d2422f698b4168587c7908b36f5f58352181b9506554d8d8c9427e0dd2cfda25f0eabf58e9f5597e1b76ac12c799fe96e3cc03dc59");
+    seedR=ctx.ECDH.stringtobytes("46592c2b171b8cdcce89601fab103f63ed43badadcf9df62a928ae3b7fa91f269eff3485f6401c374e19a8bb988005626b9c26d39795282b1095bcc4f62a67255e15");
+    seedS=ctx.ECDH.stringtobytes("d02446c344c10cd162486caa69aa1156ac3066e0fd668fa7faaf13bdbc944edbc0cd68ee36e4c30ecc36c2c5ab0978473eb1b5dcfff27985c9328877e85fd48b657d");
+	ctx.HPKE.DeriveKeyPair(config_id,skE,pkE,seedE);
+	ctx.HPKE.DeriveKeyPair(config_id,skR,pkR,seedR);
+	ctx.HPKE.DeriveKeyPair(config_id,skS,pkS,seedS);
+	
+	Z=ctx.HPKE.authEncap(config_id,skE,skS,pkE,pkR,pkS);
+	mywindow.document.write("pKE : 0x"+ctx.ECDH.bytestostring(pkE) + "<br>");
+	mywindow.document.write("Encapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>");  
+
+	Z=ctx.HPKE.authDecap(config_id,skR,pkE,pkR,pkS);
+	mywindow.document.write("Decapsulated Z : 0x"+ctx.ECDH.bytestostring(Z) + "<br>"); 
+
+	ctx.HPKE.keySchedule(config_id,key,nonce,exp_secret,mode,Z,INFO,psk,pskID);
+	mywindow.document.write("Key :    0x"+ctx.ECDH.bytestostring(key) + "<br>");
+	mywindow.document.write("Nonce :  0x"+ctx.ECDH.bytestostring(nonce) + "<br>");
+	mywindow.document.write("Exporter secret :  0x"+ctx.ECDH.bytestostring(exp_secret) + "<br>");
+
+	ctx.GCM.encrypt(cipher,tag,key,nonce,aad,plain);
+	mywindow.document.write("Cipher : 0x"+ctx.ECDH.bytestostring(cipher) + "<br>");
+	mywindow.document.write("Tag :    0x"+ctx.ECDH.bytestostring(tag) + "<br>");
+
+}
+
+
+</script>
+</body>
+</html>

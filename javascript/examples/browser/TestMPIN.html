@@ -1,0 +1,482 @@
+<!DOCTYPE HTML>
+<!--
+-- Copyright (c) 2012-2020 MIRACL UK Ltd.
+--
+-- This file is part of MIRACL Core
+-- (see https://github.com/miracl/core).
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+-->
+<html>
+<head>
+<title>JavaScript Test MPIN</title>
+</head>
+<body>
+<h1>JavaScript Test MPIN Examples</h1>
+<script type="text/javascript"src=./../../src/rand.js></script>
+<script type="text/javascript"src=./../../src/share.js></script>
+<script type="text/javascript"src=./../../src/rom_curve.js></script>
+<script type="text/javascript"src=./../../src/rom_field.js></script>
+<script type="text/javascript"src=./../../src/uint64.js></script>
+<script type="text/javascript"src=./../../src/aes.js></script>
+<script type="text/javascript"src=./../../src/big.js></script>
+<script type="text/javascript"src=./../../src/gcm.js></script>
+<script type="text/javascript"src=./../../src/hmac.js></script>
+<script type="text/javascript"src=./../../src/hash256.js></script>
+<script type="text/javascript"src=./../../src/hash384.js></script>
+<script type="text/javascript"src=./../../src/hash512.js></script>
+<script type="text/javascript"src=./../../src/sha3.js></script>
+<script type="text/javascript"src=./../../src/nhs.js></script>
+<script type="text/javascript"src=./../../src/fp.js></script>
+<script type="text/javascript"src=./../../src/fp2.js></script>
+<script type="text/javascript"src=./../../src/fp4.js></script>
+<script type="text/javascript"src=./../../src/fp12.js></script>
+<script type="text/javascript"src=./../../src/ff.js></script>
+<script type="text/javascript"src=./../../src/rsa.js></script>
+<script type="text/javascript"src=./../../src/ecp.js></script>
+<script type="text/javascript"src=./../../src/ecp2.js></script>
+<script type="text/javascript"src=./../../src/pair.js></script>
+<script type="text/javascript"src=./../../src/mpin.js></script>
+<script type="text/javascript"src=./../../src/bls.js></script>
+<script type="text/javascript"src=./../../src/ecdh.js></script>
+<script type="text/javascript"src=./../../src/hpke.js></script>
+<script type="text/javascript"src=./../../src/ctx.js></script>
+
+<script type="text/javascript"src=./../../src/fp8.js></script>
+<script type="text/javascript"src=./../../src/fp16.js></script>
+<script type="text/javascript"src=./../../src/fp24.js></script>
+<script type="text/javascript"src=./../../src/fp48.js></script>
+<script type="text/javascript"src=./../../src/ecp4.js></script>
+<script type="text/javascript"src=./../../src/ecp8.js></script>
+<script type="text/javascript"src=./../../src/pair4.js></script>
+<script type="text/javascript"src=./../../src/pair8.js></script>
+<script type="text/javascript"src=./../../src/mpin192.js></script>
+<script type="text/javascript"src=./../../src/mpin256.js></script>
+<script type="text/javascript"src=./../../src/bls192.js></script>
+<script type="text/javascript"src=./../../src/bls256.js></script>
+
+<p><a id="myLink4" href="#" onclick="BN254();">BN254 254-bit k=12 Pairing-Friendly BN Curve MPIN</a></p>
+<p><a id="myLink5" href="#" onclick="BLS12383();">BLS12383 383-bit k=12 Pairing-Friendly BLS Curve MPIN</a></p>
+<p><a id="myLink6" href="#" onclick="BLS24479();">BLS24479 479-bit k=24 Pairing-Friendly BLS Curve MPIN</a></p>
+<p><a id="myLink7" href="#" onclick="BLS48556();">BLS48556 556-bit k=48 Pairing-Friendly BLS Curve MPIN</a></p>
+
+<script>
+
+/* Test M-Pin */
+
+// BN254 context
+function BN254() {
+	var ctx = new CTX('BN254');
+	var mywindow=window.open();
+	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BN254 <br>");
+
+	var i;
+
+	var S=[];
+	var SST=[];
+	var TOKEN = [];
+	var SEC = [];
+	var U = [];
+	var X= [];
+	var Y= [];
+	var HCID=[];
+	var HSID=[];
+
+	var RAW=[];
+
+ 	var dst = "BN254G1_XMD:SHA-256_SVDW_NU_MPIN";
+	var DST = ctx.MPIN.asciitobytes(dst); 
+
+	var rng=new ctx.RAND();
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+	rng.seed(100,RAW);
+
+// Trusted Authority (TA) set-up 
+	ctx.MPIN.RANDOM_GENERATE(rng,S);
+	mywindow.document.write("M-Pin Master Secret s: 0x"+ctx.MPIN.bytestostring(S) + "<br>");
+ 
+ // Create Client Identity 
+ 		var IDstr = "testUser@miracl.com";
+		var CLIENT_ID = ctx.MPIN.asciitobytes(IDstr);  
+		ctx.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,HCID);
+		mywindow.document.write("Client ID Hashed to Curve= "+ctx.MPIN.bytestostring(HCID) + "<br>");
+
+// Client approaches Trusted Authority and is issued secret
+
+	ctx.MPIN.GET_CLIENT_SECRET(S,HCID,TOKEN);
+	mywindow.document.write("Client Secret CS: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");     
+// TA sends Client secret to Client
+
+// Server is issued secret by TA
+	ctx.MPIN.GET_SERVER_SECRET(S,SST);
+//	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN.bytestostring(SST) + "<br>");
+
+	
+// Client extracts PIN from secret to create Token 
+		var pin=1234;
+		mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
+		var rtn=ctx.MPIN.EXTRACT_PIN(HCID,pin,TOKEN);
+		if (rtn != 0)
+			mywindow.document.write("Failed to extract PIN " + "<br>");  
+		mywindow.document.write("Client Token TK: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");        
+
+// Exercise Secret Sharing
+            var R=[];
+            for (var i=0;i<128;i++)
+                R[i]=rng.getByte();
+       // create 4 unique shares of TOKEN
+            var Sh1=new ctx.SHARE(1,3,TOKEN,R);  // indicate 3 shares required for recovery
+            var Sh2=new ctx.SHARE(2,3,TOKEN,R);
+            var Sh3=new ctx.SHARE(3,3,TOKEN,R);
+            var Sh4=new ctx.SHARE(4,3,TOKEN,R);
+
+            var Shares=[];
+
+            Shares[0]=Sh1;  // any 3 shares to recover TOKEN
+            Shares[1]=Sh2;
+            Shares[2]=Sh4;
+       
+            TOKEN=ctx.SHARE.recover(Shares);  // recover token
+
+// MPin Protocol
+
+// Client enters ID and PIN
+		pin=parseInt(mywindow.prompt("Enter PIN= "));
+
+		rtn=ctx.MPIN.CLIENT_1(HCID,rng,X,pin,TOKEN,SEC,U);
+		if (rtn != 0)
+			mywindow.document.write("FAILURE: CLIENT_1 rtn: " + rtn + "<br>");   
+
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.  
+    
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
+				ctx.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,HSID);	
+    
+// Server generates Random number Y and sends it to Client
+				ctx.MPIN.RANDOM_GENERATE(rng,Y);
+    
+// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
+		rtn=ctx.MPIN.CLIENT_2(X,Y,SEC);
+		if (rtn != 0)
+			mywindow.document.write("FAILURE: CLIENT_2 rtn: " + rtn + "<br>");  
+
+// Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
+				rtn=ctx.MPIN.SERVER(HSID,Y,SST,U,SEC);
+    
+				if (rtn != 0)
+				{
+					if (rtn == ctx.MPIN.BAD_PIN)
+					{
+						mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+					} else {
+						mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+					}
+				} else {
+					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
+				}
+}
+
+// BLS12383 context
+function BLS12383() {
+	var ctx = new CTX('BLS12383');
+	var mywindow=window.open();
+
+	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BLS12383 <br>");
+
+	var i;
+
+	var S=[];
+	var SST=[];
+	var TOKEN = [];
+	var SEC = [];
+	var U = [];
+	var X= [];
+	var Y= [];
+	var HCID=[];
+	var HSID=[];
+	var RAW=[];
+
+ 	var dst = "BLS12383G1_XMD:SHA-256_SVDW_NU_MPIN";
+	var DST = ctx.MPIN.asciitobytes(dst); 
+
+	var rng=new ctx.RAND();
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+	rng.seed(100,RAW);
+
+
+// Trusted Authority (TA) set-up 
+	ctx.MPIN.RANDOM_GENERATE(rng,S);
+	mywindow.document.write("M-Pin Master Secret s: 0x"+ctx.MPIN.bytestostring(S) + "<br>");
+ 
+ // Create Client Identity 
+ 		var IDstr = "testUser@miracl.com";
+		var CLIENT_ID = ctx.MPIN.asciitobytes(IDstr);  
+		ctx.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,HCID);
+		mywindow.document.write("Client ID Hashed to Curve= "+ctx.MPIN.bytestostring(HCID) + "<br>");
+
+// Client approaches Trusted Authority and is issued secret
+
+	ctx.MPIN.GET_CLIENT_SECRET(S,HCID,TOKEN);
+	mywindow.document.write("Client Secret CS: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");     
+// TA sends Client secret to Client
+
+// Server is issued secret by TA
+	ctx.MPIN.GET_SERVER_SECRET(S,SST);
+//	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN.bytestostring(SST) + "<br>");
+
+	
+// Client extracts PIN from secret to create Token 
+		var pin=1234;
+		mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
+		var rtn=ctx.MPIN.EXTRACT_PIN(HCID,pin,TOKEN);
+		if (rtn != 0)
+			mywindow.document.write("Failed to extract PIN " + "<br>");  
+		mywindow.document.write("Client Token TK: 0x"+ctx.MPIN.bytestostring(TOKEN) + "<br>");        
+
+// MPin Protocol
+
+// Client enters ID and PIN
+		pin=parseInt(mywindow.prompt("Enter PIN= "));
+
+		rtn=ctx.MPIN.CLIENT_1(HCID,rng,X,pin,TOKEN,SEC,U);
+		if (rtn != 0)
+			mywindow.document.write("FAILURE: CLIENT_1 rtn: " + rtn + "<br>");   
+
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.  
+    
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
+				ctx.MPIN.ENCODE_TO_CURVE(DST,CLIENT_ID,HSID);	
+    
+// Server generates Random number Y and sends it to Client
+				ctx.MPIN.RANDOM_GENERATE(rng,Y);
+    
+// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
+		rtn=ctx.MPIN.CLIENT_2(X,Y,SEC);
+		if (rtn != 0)
+			mywindow.document.write("FAILURE: CLIENT_2 rtn: " + rtn + "<br>");  
+
+// Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
+				rtn=ctx.MPIN.SERVER(HSID,Y,SST,U,SEC);
+    
+				if (rtn != 0)
+				{
+					if (rtn == ctx.MPIN.BAD_PIN)
+					{
+						mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+					} else {
+						mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+					}
+				} else {
+					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
+				}
+}
+
+
+
+// BLS24479 context
+function BLS24479() {
+	var ctx = new CTX('BLS24479');
+	var mywindow=window.open();
+
+	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BLS24479 <br>");
+
+	var i;
+
+	var S=[];
+	var SST=[];
+	var TOKEN = [];
+	var SEC = [];
+	var U = [];
+	var X= [];
+	var Y= [];
+	var HCID=[];
+	var HSID=[];
+	var RAW=[];
+
+ 	var dst = "BLS24479G1_XMD:SHA-256_SVDW_NU_MPIN";
+	var DST = ctx.MPIN192.asciitobytes(dst); 
+
+	var rng=new ctx.RAND();
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+	rng.seed(100,RAW);
+
+// Trusted Authority (TA) set-up 
+	ctx.MPIN192.RANDOM_GENERATE(rng,S);
+	mywindow.document.write("M-Pin Master Secret s: 0x"+ctx.MPIN192.bytestostring(S) + "<br>");
+ 
+ // Create Client Identity 
+ 		var IDstr = "testUser@miracl.com";
+		var CLIENT_ID = ctx.MPIN192.asciitobytes(IDstr);  
+		ctx.MPIN192.ENCODE_TO_CURVE(DST,CLIENT_ID,HCID);
+		mywindow.document.write("Client ID Hashed to Curve= "+ctx.MPIN192.bytestostring(HCID) + "<br>");
+
+// Client approaches Trusted Authority and is issued secret
+
+	ctx.MPIN192.GET_CLIENT_SECRET(S,HCID,TOKEN);
+	mywindow.document.write("Client Secret CS: 0x"+ctx.MPIN192.bytestostring(TOKEN) + "<br>");     
+// TA sends Client secret to Client
+
+// Server is issued secret by TA
+	ctx.MPIN192.GET_SERVER_SECRET(S,SST);
+//	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN192.bytestostring(SST) + "<br>");
+
+	
+// Client extracts PIN from secret to create Token 
+		var pin=1234;
+		mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
+		var rtn=ctx.MPIN192.EXTRACT_PIN(HCID,pin,TOKEN);
+		if (rtn != 0)
+			mywindow.document.write("Failed to extract PIN " + "<br>");  
+		mywindow.document.write("Client Token TK: 0x"+ctx.MPIN192.bytestostring(TOKEN) + "<br>");        
+
+// MPin Protocol
+
+// Client enters ID and PIN
+		pin=parseInt(mywindow.prompt("Enter PIN= "));
+
+		rtn=ctx.MPIN192.CLIENT_1(HCID,rng,X,pin,TOKEN,SEC,U);
+		if (rtn != 0)
+			mywindow.document.write("FAILURE: CLIENT_1 rtn: " + rtn + "<br>");   
+
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.  
+    
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
+				ctx.MPIN192.ENCODE_TO_CURVE(DST,CLIENT_ID,HSID);	
+    
+// Server generates Random number Y and sends it to Client
+				ctx.MPIN192.RANDOM_GENERATE(rng,Y);
+    
+// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
+		rtn=ctx.MPIN192.CLIENT_2(X,Y,SEC);
+		if (rtn != 0)
+			mywindow.document.write("FAILURE: CLIENT_2 rtn: " + rtn + "<br>");  
+
+// Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
+				rtn=ctx.MPIN192.SERVER(HSID,Y,SST,U,SEC);
+    
+				if (rtn != 0)
+				{
+					if (rtn == ctx.MPIN192.BAD_PIN)
+					{
+						mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+					} else {
+						mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+					}
+				} else {
+					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
+				}
+
+} 
+
+// BLS48556 context
+function BLS48556() {
+	var ctx = new CTX('BLS48556');
+	var mywindow=window.open();
+
+	mywindow.document.write("<br>Testing MPIN 2-factor authentication protocol on curve BLS48556 <br>");
+
+	var i;
+
+	var S=[];
+	var SST=[];
+	var TOKEN = [];
+	var SEC = [];
+	var U = [];
+	var X= [];
+	var Y= [];
+	var HCID=[];
+	var HSID=[];
+	var RAW=[];
+
+ 	var dst = "BLS48556G1_XMD:SHA-256_SVDW_NU_MPIN";
+	var DST = ctx.MPIN256.asciitobytes(dst); 
+
+	var rng=new ctx.RAND();
+	rng.clean();
+	for (i=0;i<100;i++) RAW[i]=i;
+	rng.seed(100,RAW);
+
+// Trusted Authority (TA) set-up 
+	ctx.MPIN256.RANDOM_GENERATE(rng,S);
+	mywindow.document.write("M-Pin Master Secret s: 0x"+ctx.MPIN256.bytestostring(S) + "<br>");
+ 
+ // Create Client Identity 
+ 		var IDstr = "testUser@miracl.com";
+		var CLIENT_ID = ctx.MPIN256.asciitobytes(IDstr);  
+		ctx.MPIN256.ENCODE_TO_CURVE(DST,CLIENT_ID,HCID);
+		mywindow.document.write("Client ID Hashed to Curve= "+ctx.MPIN256.bytestostring(HCID) + "<br>");
+
+// Client approaches Trusted Authority and is issued secret
+
+	ctx.MPIN256.GET_CLIENT_SECRET(S,HCID,TOKEN);
+	mywindow.document.write("Client Secret CS: 0x"+ctx.MPIN256.bytestostring(TOKEN) + "<br>");     
+// TA sends Client secret to Client
+
+// Server is issued secret by TA
+	ctx.MPIN256.GET_SERVER_SECRET(S,SST);
+//	mywindow.document.write("Server Secret SS: 0x"+ctx.MPIN256.bytestostring(SST) + "<br>");
+
+	
+// Client extracts PIN from secret to create Token 
+		var pin=1234;
+		mywindow.document.write("Client extracts PIN= "+pin + "<br>"); 
+		var rtn=ctx.MPIN256.EXTRACT_PIN(HCID,pin,TOKEN);
+		if (rtn != 0)
+			mywindow.document.write("Failed to extract PIN " + "<br>");  
+		mywindow.document.write("Client Token TK: 0x"+ctx.MPIN256.bytestostring(TOKEN) + "<br>");        
+
+// MPin Protocol
+
+// Client enters ID and PIN
+		pin=parseInt(mywindow.prompt("Enter PIN= "));
+
+		rtn=ctx.MPIN256.CLIENT_1(HCID,rng,X,pin,TOKEN,SEC,U);
+		if (rtn != 0)
+			mywindow.document.write("FAILURE: CLIENT_1 rtn: " + rtn + "<br>");   
+
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.  
+    
+// Send CLIENT_ID and U=x.ID to server. Server hashes ID to curve.
+				ctx.MPIN256.ENCODE_TO_CURVE(DST,CLIENT_ID,HSID);	
+    
+// Server generates Random number Y and sends it to Client
+				ctx.MPIN256.RANDOM_GENERATE(rng,Y);
+    
+// Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC 
+		rtn=ctx.MPIN256.CLIENT_2(X,Y,SEC);
+		if (rtn != 0)
+			mywindow.document.write("FAILURE: CLIENT_2 rtn: " + rtn + "<br>");  
+
+// Server Second pass. Inputs H(CLIENT_ID), Y, -(x+y)*SEC, U and Server secret SST. 
+				rtn=ctx.MPIN256.SERVER(HSID,Y,SST,U,SEC);
+    
+				if (rtn != 0)
+				{
+					if (rtn == ctx.MPIN256.BAD_PIN)
+					{
+						mywindow.document.write("Server says - Bad Pin. I don't know you. Feck off." + "<br>"); 
+					} else {
+						mywindow.document.write("FAILURE: SERVER rtn: " + rtn+ "<br>");  
+					}
+				} else {
+					mywindow.document.write("Server says - PIN is good! You really are "+IDstr + "<br>"); 
+				}
+
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+	"name": "amcl-js",
+	"version": "3.0.0",
+	"description": "AMCL Library",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "Michael Scott, Alessandro Budroni, Kealan McCusker, Samuele Andreoli",
+	"license": "Apache License 2.0",
+	"dependencies": {
+		"prompt": "^1.0.0"
+	}
+}

@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<!--
+-- Copyright (c) 2012-2020 MIRACL UK Ltd.
+--
+-- This file is part of MIRACL Core
+-- (see https://github.com/miracl/core).
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+-->
+<html>
+<head>
+<title>JavaScript CORE Benchtest</title>
+</head>
+<body>
+<h1>JavaScript Benchmarks - each takes a few seconds to complete</h1>
+
+<script type="text/javascript" src=./../../src/rand.js></script>
+<script type="text/javascript"src=./../../src/share.js></script>
+<script type="text/javascript" src=./../../src/rom_curve.js></script>
+<script type="text/javascript" src=./../../src/rom_field.js></script>
+<script type="text/javascript" src=./../../src/uint64.js></script>
+<script type="text/javascript" src=./../../src/aes.js></script>
+<script type="text/javascript" src=./../../src/big.js></script>
+<script type="text/javascript" src=./../../src/gcm.js></script>
+<script type="text/javascript"src=./../../src/hmac.js></script>
+<script type="text/javascript" src=./../../src/hash256.js></script>
+<script type="text/javascript" src=./../../src/hash384.js></script>
+<script type="text/javascript" src=./../../src/hash512.js></script>
+<script type="text/javascript" src=./../../src/sha3.js></script>
+<script type="text/javascript" src=./../../src/nhs.js></script>
+<script type="text/javascript" src=./../../src/fp.js></script>
+<script type="text/javascript" src=./../../src/fp2.js></script>
+<script type="text/javascript" src=./../../src/fp4.js></script>
+<script type="text/javascript" src=./../../src/fp12.js></script>
+<script type="text/javascript" src=./../../src/ff.js></script>
+<script type="text/javascript" src=./../../src/rsa.js></script>
+<script type="text/javascript" src=./../../src/ecp.js></script>
+<script type="text/javascript" src=./../../src/ecp2.js></script>
+<script type="text/javascript" src=./../../src/ecdh.js></script>
+<script type="text/javascript" src=./../../src/hpke.js></script>
+<script type="text/javascript" src=./../../src/pair.js></script>
+<script type="text/javascript" src=./../../src/mpin.js></script>
+<script type="text/javascript" src=./../../src/bls.js></script>
+<script type="text/javascript" src=./../../src/ctx.js></script>
+
+<script type="text/javascript" src=./../../src/fp8.js></script>
+<script type="text/javascript" src=./../../src/fp16.js></script>
+<script type="text/javascript" src=./../../src/fp24.js></script>
+<script type="text/javascript" src=./../../src/fp48.js></script>
+<script type="text/javascript" src=./../../src/ecp4.js></script>
+<script type="text/javascript" src=./../../src/ecp8.js></script>
+<script type="text/javascript" src=./../../src/pair4.js></script>
+<script type="text/javascript" src=./../../src/pair8.js></script>
+<script type="text/javascript" src=./../../src/mpin192.js></script>
+<script type="text/javascript" src=./../../src/mpin256.js></script>
+<script type="text/javascript"src=./../../src/bls192.js></script>
+<script type="text/javascript"src=./../../src/bls256.js></script>
+
+<p><a id="myLink1" href="#" onclick="ED25519();">ED25519 Edwards Elliptic Curve</a></p>
+<p><a id="myLink2" href="#" onclick="NIST256();">NIST256 Weierstrass Elliptic Curve</a></p>
+<p><a id="myLink3" href="#" onclick="GOLDILOCKS();">GOLDILOCKS Edwards Elliptic Curve</a></p>
+<p><a id="myLink4" href="#" onclick="BN254();">BN254 k=12 Pairing-Friendly BN Curve</a></p>
+<p><a id="myLink5" href="#" onclick="BLS12383();">BLS12383 k=12 Pairing-Friendly BLS Curve</a></p>
+<p><a id="myLink6" href="#" onclick="BLS24479();">BLS24479 k=24 Pairing-Friendly BLS Curve</a></p>
+<p><a id="myLink7" href="#" onclick="BLS48556();">BLS48556 k=48 Pairing-Friendly BLS Curve</a></p>
+<p><a id="myLink8" href="#" onclick="rsa2048();">RSA2048 RSA Method</a></p>
+
+
+<script>
+/* test driver and function exerciser ECC functions */
+
+// NOTE: In the above the location.reload(false) is required as modified JS code must be reloaded before setting a new context
+// otherwise the optimizer may bail out on subsequent calls (it doesn't like it when code is modified at runtime).
+
+// ED25519 context
+	function ED25519() {
+		var ctx = new CTX('ED25519');
+		
+		var mywindow=window.open();
+
+		var i;
+		var MIN_ITERS=5;
+		var MIN_TIME=3;
+		var fail=false;
+		var RAW=[];
+
+		var rng=new ctx.RAND();
+
+		rng.clean();
+		for (i=0;i<100;i++) RAW[i]=i;
+
+		rng.seed(100,RAW);
+
+		mywindow.document.write("<br> Curve ED25519"+ "<br>");
+		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
+		{
+			mywindow.document.write("Weierstrass parameterization "+ "<br>");
+		}
+		if (ctx.ECP.CURVETYPE==ctx.ECP.EDWARDS)
+		{
+			mywindow.document.write("Edwards parameterization"+ "<br>");
+		}
+		if (ctx.ECP.CURVETYPE==ctx.ECP.MONTGOMERY)
+		{
+			mywindow.document.write("Montgomery parameterization"+ "<br>");
+		}
+
+		if (ctx.FP.MODTYPE==ctx.FP.PSEUDO_MERSENNE)
+		{
+			mywindow.document.write("Pseudo-Mersenne Modulus"+ "<br>");
+		}
+		if (ctx.FP.MODTYPE==ctx.FP.MONTGOMERY_FRIENDLY)
+		{
+			mywindow.document.write("Montgomery friendly Modulus"+ "<br>");
+		}
+		if (ctx.FP.MODTYPE==ctx.FP.GENERALISED_MERSENNE)
+		{
+			mywindow.document.write("Generalised-Mersenne Modulus"+ "<br>");
+		}
+		if (ctx.FP.MODTYPE==ctx.FP.NOT_SPECIAL)
+		{
+			mywindow.document.write("Not special Modulus"+ "<br>");
+		}
+
+		mywindow.document.write("Modulus size "+ctx.FP.MODBITS+ " bits"+ "<br>");
+
+		var r,s;
+		var G,WP;
+
+		G=ctx.ECP.generator();
+
+		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
+
+		var rw=ctx.FP.rand(rng);
+		WP=ctx.ECP.map2point(rw);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
+		WP=G.mul(r);
+		if (!WP.is_infinity())
+		{
+			alert("FAILURE - rG!=O");
+			fail=true;
+		}
+		var elapsed;
+		var start = performance.now();
+		var iterations=0;
+		do {
+			WP=G.mul(s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		var dur=elapsed/iterations;
+		mywindow.document.write("EC  mul - " + iterations + " iterations  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
+	}
+
+// BLS12383 context
+
+	function BLS12383() {
+		var ctx = new CTX('BLS12383');
+		var i;
+		var MIN_ITERS=5;
+		var MIN_TIME=3;
+		var G,r,s;
+		var Q,W;
+		var RAW=[];
+		var fail = false;
+
+		var rng=new ctx.RAND();
+
+		rng.clean();
+		for (i=0;i<100;i++) RAW[i]=i;
+
+		rng.seed(100,RAW);
+
+		var mywindow=window.open();
+
+		mywindow.document.write("<br> Curve BLS12383"+ "<br>");
+		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
+		{
+			mywindow.document.write("BN Pairing-Friendly Curve"+ "<br>");
+		}
+		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BLS)
+		{
+			mywindow.document.write("BLS Pairing-Friendly Curve"+ "<br>");
+		}
+
+		mywindow.document.write("Modulus size " + ctx.FP.MODBITS + " bits"+ "<br>");
+
+		G=ctx.ECP.generator();
+
+		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
+
+		var rw=ctx.FP.rand(rng);
+		var WP=ctx.ECP.map2point(rw);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
+
+		var P=ctx.PAIR.G1mul(G,r);
+
+		if (!P.is_infinity())
+		{
+			alert("FAILURE - rP!=O");
+			fail=true;
+		}
+
+		var elapsed;
+		var start = performance.now();
+		var iterations=0;
+		do {
+			P=ctx.PAIR.G1mul(G,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		var dur=elapsed/iterations;
+		mywindow.document.write("G1 mul -                " + iterations + " iterations  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		Q=ctx.ECP2.generator();
+
+		var rw=ctx.FP2.rand(rng);
+        W = ctx.ECP2.map2point(rw);
+        W.cfp();
+        if (W.is_infinity()) {
+            alert("HASHING FAILURE - P=O");
+			fail=true;
+        }
+        W = ctx.PAIR.G2mul(W, r);
+        if (!W.is_infinity()) {
+            alert("FAILURE - rQ!=O");
+			fail=true;
+        }
+
+		W=ctx.PAIR.G2mul(Q,r);
+
+		if (!W.is_infinity())
+		{
+			alert("FAILURE - rQ!=O");
+			fail=true;
+		}
+
+		start = performance.now();
+		iterations=0;
+		do {
+			W=ctx.PAIR.G2mul(Q,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("G2 mul -                " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		var w=ctx.PAIR.ate(Q,P);
+		w=ctx.PAIR.fexp(w);
+
+		var g=ctx.PAIR.GTpow(w,r);
+
+		if (!g.isunity())
+		{
+			alert("FAILURE - g^r!=1");
+			fail=true;
+		}
+
+		start = performance.now();
+		iterations=0;
+		do {
+			g=ctx.PAIR.GTpow(w,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("GT pow -                " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		var cr;
+		start = performance.now();
+		iterations=0;
+		do {
+			cr=w.compow(s,r);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("GT pow (compressed) -   " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		start = performance.now();
+		iterations=0;
+		do {
+			w=ctx.PAIR.ate(Q,P);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("PAIRing ATE   -         " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		start = performance.now();
+		iterations=0;
+		do {
+			g=ctx.PAIR.fexp(w);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("PAIRing FEXP -          " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		P.copy(G);
+		Q.copy(W);
+
+		P=ctx.PAIR.G1mul(P,s);
+		g=ctx.PAIR.ate(Q,P);
+		g=ctx.PAIR.fexp(g);
+
+		P.copy(G);
+		Q=ctx.PAIR.G2mul(Q,s);
+		w=ctx.PAIR.ate(Q,P);
+		w=ctx.PAIR.fexp(w);
+
+        if (!ctx.PAIR.G1member(P))
+        {
+            alert("FAILURE - P not in G1 ");
+			fail=true;
+        }
+
+        if (!ctx.PAIR.G2member(Q))
+        {
+            alert("FAILURE - Q not in G2 ");
+			fail=true;
+        }
+
+        if (!ctx.PAIR.GTmember(w))
+        {
+            alert("FAILURE - e(Q,P) not in GT ");
+			fail=true;
+        }
+
+		if (!g.equals(w))
+		{
+			alert("FAILURE - e(sQ,p)!=e(Q,sP)");
+			fail=true;
+		}
+
+		Q.copy(W);
+		g=ctx.PAIR.ate(Q,P);
+		g=ctx.PAIR.fexp(g);
+		g=ctx.PAIR.GTpow(g,s);
+
+		if (!g.equals(w))
+		{
+			alert("FAILURE - e(sQ,p)!=e(Q,P)^s");
+			fail=true;
+		}
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
+	}
+
+// NIST256 context
+	function NIST256() {
+
+		var ctx = new CTX('NIST256');
+		var i;
+		var MIN_ITERS=5;
+		var MIN_TIME=3;
+		var fail=false;
+		var RAW=[];
+
+		var rng=new ctx.RAND();
+
+		rng.clean();
+		for (i=0;i<100;i++) RAW[i]=i;
+
+		rng.seed(100,RAW);
+
+		var mywindow=window.open();
+
+		mywindow.document.write("<br> Curve NIST256"+ "<br>");
+		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
+		{
+			mywindow.document.write("Weierstrass parameterization "+ "<br>");
+		}
+		if (ctx.ECP.CURVETYPE==ctx.ECP.EDWARDS)
+		{
+			mywindow.document.write("Edwards parameterization"+ "<br>");
+		}
+		if (ctx.ECP.CURVETYPE==ctx.ECP.MONTGOMERY)
+		{
+			mywindow.document.write("Montgomery parameterization"+ "<br>");
+		}
+
+		if (ctx.FP.MODTYPE==ctx.FP.PSEUDO_MERSENNE)
+		{
+			mywindow.document.write("Pseudo-Mersenne Modulus"+ "<br>");
+		}
+		if (ctx.FP.MODTYPE==ctx.FP.MONTGOMERY_FRIENDLY)
+		{
+			mywindow.document.write("Montgomery friendly Modulus"+ "<br>");
+		}
+		if (ctx.FP.MODTYPE==ctx.FP.GENERALISED_MERSENNE)
+		{
+			mywindow.document.write("Generalised-Mersenne Modulus"+ "<br>");
+		}
+		if (ctx.FP.MODTYPE==ctx.FP.NOT_SPECIAL)
+		{
+			mywindow.document.write("Not special Modulus"+ "<br>");
+		}
+
+		mywindow.document.write("Modulus size "+ctx.FP.MODBITS+ " bits"+ "<br>");
+
+		var r,s;
+		var G,WP;
+
+		G=ctx.ECP.generator();
+
+		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
+
+		var rw=ctx.FP.rand(rng);
+		WP=ctx.ECP.map2point(rw);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
+		WP=G.mul(r);
+		if (!WP.is_infinity())
+		{
+			alert("FAILURE - rG!=O");
+			fail=true;
+		}
+		var elapsed;
+		var start = performance.now();
+		var iterations=0;
+		do {
+			WP=G.mul(s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		var dur=elapsed/iterations;
+		mywindow.document.write("EC  mul - " + iterations + " iterations  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
+	}
+
+
+// GOLDILOCKS context
+	function GOLDILOCKS() {
+
+		var ctx = new CTX('GOLDILOCKS');
+		var i;
+		var MIN_ITERS=5;
+		var MIN_TIME=3;
+		var fail=false;
+		var RAW=[];
+
+		var rng=new ctx.RAND();
+
+		rng.clean();
+		for (i=0;i<100;i++) RAW[i]=i;
+
+		rng.seed(100,RAW);
+
+		var mywindow=window.open();
+
+		mywindow.document.write("<br> Curve GOLDILOCKS"+ "<br>");
+		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
+		{
+			mywindow.document.write("Weierstrass parameterization "+ "<br>");
+		}
+		if (ctx.ECP.CURVETYPE==ctx.ECP.EDWARDS)
+		{
+			mywindow.document.write("Edwards parameterization"+ "<br>");
+		}
+		if (ctx.ECP.CURVETYPE==ctx.ECP.MONTGOMERY)
+		{
+			mywindow.document.write("Montgomery parameterization"+ "<br>");
+		}
+
+		if (ctx.FP.MODTYPE==ctx.FP.PSEUDO_MERSENNE)
+		{
+			mywindow.document.write("Pseudo-Mersenne Modulus"+ "<br>");
+		}
+		if (ctx.FP.MODTYPE==ctx.FP.MONTGOMERY_FRIENDLY)
+		{
+			mywindow.document.write("Montgomery friendly Modulus"+ "<br>");
+		}
+		if (ctx.FP.MODTYPE==ctx.FP.GENERALISED_MERSENNE)
+		{
+			mywindow.document.write("Generalised-Mersenne Modulus"+ "<br>");
+		}
+		if (ctx.FP.MODTYPE==ctx.FP.NOT_SPECIAL)
+		{
+			mywindow.document.write("Not special Modulus"+ "<br>");
+		}
+
+		mywindow.document.write("Modulus size "+ctx.FP.MODBITS+ " bits"+ "<br>");
+
+		var r,s;
+		var G,WP;
+
+		G=ctx.ECP.generator();
+
+		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
+
+		var rw=ctx.FP.rand(rng);
+		WP=ctx.ECP.map2point(rw);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
+		WP=G.mul(r);
+		if (!WP.is_infinity())
+		{
+			alert("FAILURE - rG!=O");
+			fail=true;
+		}
+		var elapsed;
+		var start = performance.now();
+		var iterations=0;
+		do {
+			WP=G.mul(s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		var dur=elapsed/iterations;
+		mywindow.document.write("EC  mul - " + iterations + " iterations  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
+	}
+
+
+// BN254 context
+	function BN254() {
+
+		var ctx = new CTX('BN254');
+		var i;
+		var MIN_ITERS=5;
+		var MIN_TIME=3;
+		var G,r,s;
+		var Q,W;
+		var RAW=[];
+		var fail = false;
+
+		var rng=new ctx.RAND();
+
+		rng.clean();
+		for (i=0;i<100;i++) RAW[i]=i;
+
+		rng.seed(100,RAW);
+
+		var mywindow=window.open();
+
+		mywindow.document.write("<br> Curve BN254"+ "<br>");
+		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
+		{
+			mywindow.document.write("BN Pairing-Friendly Curve"+ "<br>");
+		}
+		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BLS)
+		{
+			mywindow.document.write("BLS Pairing-Friendly Curve"+ "<br>");
+		}
+
+		mywindow.document.write("Modulus size " + ctx.FP.MODBITS + " bits"+ "<br>");
+
+		G=ctx.ECP.generator();
+
+		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
+
+		var rw=ctx.FP.rand(rng);
+		var WP=ctx.ECP.map2point(rw);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
+		var P=ctx.PAIR.G1mul(G,r);
+
+		if (!P.is_infinity())
+		{
+			alert("FAILURE - rP!=O");
+			fail=true;
+		}
+
+		var elapsed;
+		var start = performance.now();
+		var iterations=0;
+		do {
+			P=ctx.PAIR.G1mul(G,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		var dur=elapsed/iterations;
+		mywindow.document.write("G1 mul -                " + iterations + " iterations  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		Q=ctx.ECP2.generator();
+
+		var rw=ctx.FP2.rand(rng);
+        W = ctx.ECP2.map2point(rw);
+        W.cfp();
+        if (W.is_infinity()) {
+            alert("HASHING FAILURE - P=O");
+			fail=true;
+        }
+        W = ctx.PAIR.G2mul(W, r);
+        if (!W.is_infinity()) {
+            alert("FAILURE - rQ!=O");
+			fail=true;
+        }
+
+		W=ctx.PAIR.G2mul(Q,r);
+
+		if (!W.is_infinity())
+		{
+			alert("FAILURE - rQ!=O");
+			fail=true;
+		}
+
+		start = performance.now();
+		iterations=0;
+		do {
+			W=ctx.PAIR.G2mul(Q,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("G2 mul -                " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		var w=ctx.PAIR.ate(Q,P);
+		w=ctx.PAIR.fexp(w);
+
+		var g=ctx.PAIR.GTpow(w,r);
+
+		if (!g.isunity())
+		{
+			alert("FAILURE - g^r!=1");
+			fail=true;
+		}
+
+		start = performance.now();
+		iterations=0;
+		do {
+			g=ctx.PAIR.GTpow(w,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("GT pow -                " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+
+		var cr;
+		start = performance.now();
+		iterations=0;
+		do {
+			cr=w.compow(s,r);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("GT pow (compressed) -   " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		start = performance.now();
+		iterations=0;
+		do {
+			w=ctx.PAIR.ate(Q,P);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("PAIRing ATE   -         " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		start = performance.now();
+		iterations=0;
+		do {
+			g=ctx.PAIR.fexp(w);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("PAIRing FEXP -          " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		P.copy(G);
+		Q.copy(W);
+
+		P=ctx.PAIR.G1mul(P,s);
+		g=ctx.PAIR.ate(Q,P);
+		g=ctx.PAIR.fexp(g);
+
+		P.copy(G);
+		Q=ctx.PAIR.G2mul(Q,s);
+		w=ctx.PAIR.ate(Q,P);
+		w=ctx.PAIR.fexp(w);
+
+        if (!ctx.PAIR.G1member(P))
+        {
+            alert("FAILURE - P not in G1 ");
+			fail=true;
+        }
+
+        if (!ctx.PAIR.G2member(Q))
+        {
+            alert("FAILURE - Q not in G2 ");
+			fail=true;
+        }
+
+        if (!ctx.PAIR.GTmember(w))
+        {
+            alert("FAILURE - e(Q,P) not in GT ");
+			fail=true;
+        }
+
+		if (!g.equals(w))
+		{
+			alert("FAILURE - e(sQ,p)!=e(Q,sP)");
+			fail=true;
+		}
+
+		Q.copy(W);
+		g=ctx.PAIR.ate(Q,P);
+		g=ctx.PAIR.fexp(g);
+		g=ctx.PAIR.GTpow(g,s);
+
+		if (!g.equals(w))
+		{
+			alert("FAILURE - e(sQ,p)!=e(Q,P)^s");
+			fail=true;
+		}
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
+	}
+
+// BLS24479 context
+	function BLS24479() {
+
+		var ctx = new CTX('BLS24479');
+		var i;
+		var MIN_ITERS=3;
+		var MIN_TIME=3;
+		var G,r,s;
+		var Q,W;
+		var RAW=[];
+		var fail = false;
+
+		var rng=new ctx.RAND();
+
+		rng.clean();
+		for (i=0;i<100;i++) RAW[i]=i;
+
+		rng.seed(100,RAW);
+
+		var mywindow=window.open();
+
+		mywindow.document.write("<br> Curve BLS24479"+ "<br>");
+		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
+		{
+			mywindow.document.write("BN Pairing-Friendly Curve"+ "<br>");
+		}
+		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BLS)
+		{
+			mywindow.document.write("BLS24 Pairing-Friendly Curve"+ "<br>");
+		}
+
+		mywindow.document.write("Modulus size " + ctx.FP.MODBITS + " bits"+ "<br>");
+
+		G=ctx.ECP.generator();
+
+		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
+
+		var rw=ctx.FP.rand(rng);
+		var WP=ctx.ECP.map2point(rw);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
+		var P=ctx.PAIR4.G1mul(G,r);
+
+		if (!P.is_infinity())
+		{
+			alert("FAILURE - rP!=O");
+			fail=true;
+		}
+
+		var elapsed;
+		var start = performance.now();
+		var iterations=0;
+		do {
+			P=ctx.PAIR4.G1mul(G,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		var dur=elapsed/iterations;
+		mywindow.document.write("G1 mul -                " + iterations + " iterations  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		Q=ctx.ECP4.generator();
+
+		var rw=ctx.FP4.rand(rng);
+        W = ctx.ECP4.map2point(rw);
+        W.cfp();
+        if (W.is_infinity()) {
+            alert("HASHING FAILURE - P=O");
+			fail=true;
+        }
+        W = ctx.PAIR4.G2mul(W, r);
+        if (!W.is_infinity()) {
+            alert("FAILURE - rQ!=O");
+			fail=true;
+        }
+
+		W=ctx.PAIR4.G2mul(Q,r);
+
+		if (!W.is_infinity())
+		{
+			alert("FAILURE - rQ!=O");
+			fail=true;
+		}
+
+		start = performance.now();
+		iterations=0;
+		do {
+			W=ctx.PAIR4.G2mul(Q,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("G2 mul -                " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		var w=ctx.PAIR4.ate(Q,P);
+		w=ctx.PAIR4.fexp(w);
+
+		var g=ctx.PAIR4.GTpow(w,r);
+
+		if (!g.isunity())
+		{
+			alert("FAILURE - g^r!=1");
+			fail=true;
+		}
+
+		start = performance.now();
+		iterations=0;
+		do {
+			g=ctx.PAIR4.GTpow(w,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("GT pow -                " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		start = performance.now();
+		iterations=0;
+		do {
+			w=ctx.PAIR4.ate(Q,P);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("PAIRing ATE   -         " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		start = performance.now();
+		iterations=0;
+		do {
+			g=ctx.PAIR4.fexp(w);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("PAIRing FEXP -          " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		P.copy(G);
+		Q.copy(W);
+
+		P=ctx.PAIR4.G1mul(P,s);
+		g=ctx.PAIR4.ate(Q,P);
+		g=ctx.PAIR4.fexp(g);
+
+		P.copy(G);
+		Q=ctx.PAIR4.G2mul(Q,s);
+		w=ctx.PAIR4.ate(Q,P);
+		w=ctx.PAIR4.fexp(w);
+
+        if (!ctx.PAIR4.G1member(P))
+        {
+            alert("FAILURE - P not in G1 ");
+			fail=true;
+        }
+
+        if (!ctx.PAIR4.G2member(Q))
+        {
+            alert("FAILURE - Q not in G2 ");
+			fail=true;
+        }
+
+        if (!ctx.PAIR4.GTmember(w))
+        {
+            alert("FAILURE - e(Q,P) not in GT ");
+			fail=true;
+        }
+
+
+		if (!g.equals(w))
+		{
+			alert("FAILURE - e(sQ,p)!=e(Q,sP)");
+			fail=true;
+		}
+
+		Q.copy(W);
+		g=ctx.PAIR4.ate(Q,P);
+		g=ctx.PAIR4.fexp(g);
+		g=ctx.PAIR4.GTpow(g,s);
+
+		if (!g.equals(w))
+		{
+			alert("FAILURE - e(sQ,p)!=e(Q,P)^s");
+			fail=true;
+		}
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
+	}
+
+// BLS48556 context
+	function BLS48556() {
+
+		var ctx = new CTX('BLS48556');
+		var i;
+		var MIN_ITERS=1;
+		var MIN_TIME=3;
+		var G,r,s;
+		var Q,W;
+		var RAW=[];
+		var fail = false;
+
+		var rng=new ctx.RAND();
+
+		rng.clean();
+		for (i=0;i<100;i++) RAW[i]=i;
+
+		rng.seed(100,RAW);
+
+		var mywindow=window.open();
+
+		mywindow.document.write("<br> Curve BLS48556"+ "<br>");
+		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
+		{
+			mywindow.document.write("BN Pairing-Friendly Curve"+ "<br>");
+		}
+		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BLS)
+		{
+			mywindow.document.write("BLS48 Pairing-Friendly Curve"+ "<br>");
+		}
+
+		mywindow.document.write("Modulus size " + ctx.FP.MODBITS + " bits"+ "<br>");
+
+		G=ctx.ECP.generator();
+
+		r=new ctx.BIG(0); r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+		s=ctx.BIG.randtrunc(r,16*ctx.ECP.AESKEY,rng);
+
+		var rw=ctx.FP.rand(rng);
+		var WP=ctx.ECP.map2point(rw);
+		if (WP.is_infinity())
+		{
+			alert("HASHING FAILURE - P=O");
+			fail=true;
+		}
+
+		var P=ctx.PAIR8.G1mul(G,r);
+
+		if (!P.is_infinity())
+		{
+			alert("FAILURE - rP!=O");
+			fail=true;
+		}
+
+		var elapsed;
+		var start = performance.now();
+		var iterations=0;
+		do {
+			P=ctx.PAIR8.G1mul(G,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		var dur=elapsed/iterations;
+		mywindow.document.write("G1 mul -                " + iterations + " iterations  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		Q=ctx.ECP8.generator();
+
+		var rw=ctx.FP8.rand(rng);
+        W = ctx.ECP8.map2point(rw);
+        W.cfp();
+        if (W.is_infinity()) {
+            alert("HASHING FAILURE - P=O");
+			fail=true;
+        }
+        W = ctx.PAIR8.G2mul(W, r);
+        if (!W.is_infinity()) {
+            alert("FAILURE - rQ!=O");
+			fail=true;
+        }
+
+
+		W=ctx.PAIR8.G2mul(Q,r);
+
+		if (!W.is_infinity())
+		{
+			alert("FAILURE - rQ!=O");
+			fail=true;
+		}
+
+		start = performance.now();
+		iterations=0;
+		do {
+			W=ctx.PAIR8.G2mul(Q,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("G2 mul -                " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		var w=ctx.PAIR8.ate(Q,P);
+		w=ctx.PAIR8.fexp(w);
+
+		var g=ctx.PAIR8.GTpow(w,r);
+
+		if (!g.isunity())
+		{
+			alert("FAILURE - g^r!=1");
+			fail=true;
+		}
+
+		start = performance.now();
+		iterations=0;
+		do {
+			g=ctx.PAIR8.GTpow(w,s);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("GT pow -                " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		start = performance.now();
+		iterations=0;
+		do {
+			w=ctx.PAIR8.ate(Q,P);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("PAIRing ATE   -         " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		start = performance.now();
+		iterations=0;
+		do {
+			g=ctx.PAIR8.fexp(w);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("PAIRing FEXP -          " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		P.copy(G);
+		Q.copy(W);
+
+		P=ctx.PAIR8.G1mul(P,s);
+		g=ctx.PAIR8.ate(Q,P);
+		g=ctx.PAIR8.fexp(g);
+
+		P.copy(G);
+		Q=ctx.PAIR8.G2mul(Q,s);
+		w=ctx.PAIR8.ate(Q,P);
+		w=ctx.PAIR8.fexp(w);
+
+        if (!ctx.PAIR8.G1member(P))
+        {
+            alert("FAILURE - P not in G1 ");
+			fail=true;
+        }
+
+        if (!ctx.PAIR8.G2member(Q))
+        {
+            alert("FAILURE - Q not in G2 ");
+			fail=true;
+        }
+
+        if (!ctx.PAIR8.GTmember(w))
+        {
+            alert("FAILURE - e(Q,P) not in GT ");
+			fail=true;
+        }
+
+		if (!g.equals(w))
+		{
+			alert("FAILURE - e(sQ,p)!=e(Q,sP)");
+			fail=true;
+		}
+
+		Q.copy(W);
+		g=ctx.PAIR8.ate(Q,P);
+		g=ctx.PAIR8.fexp(g);
+		g=ctx.PAIR8.GTpow(g,s);
+
+		if (!g.equals(w))
+		{
+			alert("FAILURE - e(sQ,p)!=e(Q,P)^s");
+			fail=true;
+		}
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
+	}
+
+// RSA2048 context
+	function rsa2048() {
+
+		var ctx = new CTX('RSA2048');
+
+		var mywindow=window.open();
+
+		mywindow.document.write("<br> Generating 2048 bit RSA public/private key pair"+ "<br>");
+		var fail=false;
+		var RAW=[];
+
+		var rng=new ctx.RAND();
+
+		rng.clean();
+		for (var i=0;i<100;i++) RAW[i]=i;
+
+		rng.seed(100,RAW);
+
+		var pub=new ctx.rsa_public_key(ctx.FF.FFLEN);
+		var priv=new ctx.rsa_private_key(ctx.FF.HFLEN);
+
+		var M=[];
+		var C=[];
+		var P=[];
+
+		var MIN_ITERS=1;
+		var MIN_TIME=3;
+		var elapsed;
+		var start = performance.now();
+		var iterations=0;
+		do {
+			ctx.RSA.KEY_PAIR(rng,65537,priv,pub);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		var dur=elapsed/iterations;
+		mywindow.document.write("RSA gen - " + iterations + " iteration  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		MIN_ITERS=5;
+
+		for (i=0;i<ctx.RSA.RFS;i++) M[i]=(i%128);
+
+		start = performance.now();
+		iterations=0;
+		do {
+			ctx.RSA.ENCRYPT(pub,M,C);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("RSA enc - " + iterations + " iterations  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		start = performance.now();
+		iterations=0;
+		do {
+			ctx.RSA.DECRYPT(priv,C,P);
+			iterations++;
+			elapsed=(performance.now()-start);
+		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
+		dur=elapsed/iterations;
+		mywindow.document.write("RSA dec - " + iterations + " iterations  ");
+		mywindow.document.write(dur.toFixed(2) + " ms per iteration"+ "<br>");
+
+		var cmp=true;
+		for (i=0;i<ctx.RSA.RFS;i++)
+		{
+			if (P[i]!=M[i]) cmp=false;
+		}
+
+		if (!cmp)
+		{
+			alert("FAILURE - RSA decryption");
+			fail=true;
+		}
+		if (!fail) mywindow.document.write("All tests pass"+ "<br>");
+	}
+
+
+
+
+</script>
+
+
+
+</body>
+
+</html>
+
