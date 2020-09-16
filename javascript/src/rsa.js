@@ -456,6 +456,42 @@ rsa_private_key = function(ctx) {
         this.c = new ctx.FF(n);
     };
 
+    rsa_private_key.prototype = {
+        set: function(p, q, dp, dq, c) {
+            this.p = p;
+            this.q = q;
+            this.dp = dp;
+            this.dq = dq;
+            this.c = c;
+        },
+
+        set_p: function(p) {
+            this.p = p;
+        },
+
+        set_q: function (q) {
+            this.q = q;
+        },
+
+        set_dp: function (dp) {
+            this.dp = dp;
+        },
+
+        set_dq: function (dq) {
+            this.dq = dq;
+        },
+
+        set_c: function (c) {
+            this.c = c;
+        }
+    };
+
+    rsa_private_key.get_instance = function(p, q, dp, dq, c) {
+        let priv = new rsa_private_key(ctx.FF.HFLEN);
+        priv.set(p, q, dp, dq, c);
+        return priv;
+    }
+
     return rsa_private_key;
 };
 
@@ -465,6 +501,27 @@ rsa_public_key = function(ctx) {
     var rsa_public_key = function(m) {
         this.e = 0;
         this.n = new ctx.FF(m);
+    };
+
+    rsa_public_key.prototype = {
+        set: function(n, e) {
+            this.e = e;
+            ctx.FF.fromBytes(this.n, n);
+        },
+
+        set_e: function(e) {
+            this.e = e;
+        },
+
+        set_n: function(n) {
+            ctx.FF.fromBytes(this.n, n);
+        }
+    };
+
+    rsa_public_key.get_instance = function(n, e) {
+        var pub = new rsa_public_key(ctx.FF.FFLEN);
+        pub.set(n,e);
+        return pub;
     };
 
     return rsa_public_key;
