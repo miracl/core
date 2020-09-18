@@ -324,6 +324,9 @@ public final class FP2 {
 		FP w1=new FP(b);
 		FP w2=new FP(a);
 		FP w3=new FP(a);
+        FP w4=new FP();
+        FP hint=new FP();
+
 		w1.sqr(); w2.sqr(); w1.add(w2); w1.norm();
 		
 		w1=w1.sqrt(null);
@@ -331,22 +334,25 @@ public final class FP2 {
         w2.copy(a); w2.add(w1); 
 		w2.norm(); w2.div2();
 
-        w3.copy(a); w3.sub(w1); 
-		w3.norm(); w3.div2();
-      
-        w2.cmove(w3,w3.qr(null));
+        w1.copy(b); w1.div2();
+        int qr=w2.qr(hint);
 
-        w2.invsqrt(w2,a);
-        w2.mul(a);
-        w2.div2();
+        a.copy(w2.sqrt(hint));
+        w3.copy(w2); w3.inverse(hint);
+        w3.mul(a);
+        b.copy(w3); b.mul(w1);
 
-//		w2=w2.sqrt(null);
-//		a.copy(w2);
-//		w2.add(w2); w2.norm();
-//		w2.inverse(null);
+        hint.neg(); hint.norm();
+        w2.neg(); w2.norm();
 
-		b.mul(w2);
-	
+        w4.copy(w2.sqrt(hint));
+        w3.copy(w2); w3.inverse(hint);
+        w3.mul(w4);
+        w3.mul(w1);
+
+        a.cmove(w3,1-qr);
+        b.cmove(w4,1-qr);
+
         int sgn=this.sign();
         FP2 nr=new FP2(this);
         nr.neg(); nr.norm();

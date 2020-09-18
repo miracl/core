@@ -299,7 +299,7 @@ var FP2 = function(ctx) {
 
         /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
         sqrt: function() {
-            var w1, w2, w3;
+            var w1, w2, w3, w4, hint;
 
             if (this.iszilch()) {
                 return;
@@ -308,6 +308,8 @@ var FP2 = function(ctx) {
             w1 = new ctx.FP(this.b);
             w2 = new ctx.FP(this.a);
             w3 = new ctx.FP(this.a);
+            w4 = new ctx.FP(this.a);
+            hint = new ctx.FP(this.a);
 
             w1.sqr();
             w2.sqr();
@@ -320,23 +322,24 @@ var FP2 = function(ctx) {
             w2.norm();
             w2.div2();
 
-            w3.copy(this.a);
-            w3.sub(w1);
-            w3.norm();
-            w3.div2();
+            w1.copy(this.b); w1.div2();
+            var qr=w2.qr(hint);
 
-            w2.cmove(w3,w3.qr(null));
+            this.a.copy(w2.sqrt(hint));
+            w3.copy(w2); w3.inverse(hint);
+            w3.mul(this.a);
+            this.b.copy(w3); this.b.mul(w1);
 
-            w2.invsqrt(w2,this.a);
-            w2.mul(this.a);
-            w2.div2();
+            hint.neg(); hint.norm();
+            w2.neg(); w2.norm();
 
-            //w2 = w2.sqrt(null);
-            //this.a.copy(w2);
-            //w2.add(w2); w2.norm();
-            //w2.inverse(null);
+            w4.copy(w2.sqrt(hint));
+            w3.copy(w2); w3.inverse(hint);
+            w3.mul(w4);
+            w3.mul(w1);
 
-            this.b.mul(w2);
+            this.a.cmove(w3,1-qr);
+            this.b.cmove(w4,1-qr);
 
             var sgn=this.sign();
             var nr=new FP2(this);

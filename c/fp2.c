@@ -426,9 +426,9 @@ int FP2_YYY_qr(FP2_YYY *x)
 
 void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
 {
-    FP_YYY w1, w2, w3;
+    FP_YYY w1, w2, w3, w4, hint;
     FP2_YYY nw;
-    int sgn;
+    int sgn,qr;
 
     FP2_YYY_copy(w, u);
     if (FP2_YYY_iszilch(w)) return;
@@ -443,6 +443,32 @@ void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
     FP_YYY_norm(&w2);
     FP_YYY_div2(&w2, &w2);
 
+    FP_YYY_div2(&w1,&(w->b));                   // w1=b/2
+
+    qr=FP_YYY_qr(&w2,&hint);                    // only exp!
+
+    FP_YYY_sqrt(&(w->a),&w2,&hint);             // a=sqrt(w2)
+    FP_YYY_inv(&w3,&w2,&hint);                  // w3=1/w2
+    FP_YYY_mul(&w3,&w3,&(w->a));                // w3=1/sqrt(w2)
+    FP_YYY_mul(&(w->b),&w3,&w1);                // b=(b/2)*1/sqrt(w2)
+
+// tweak hint
+    FP_YYY_neg(&hint,&hint); FP_YYY_norm(&hint);    // QNR = -1
+    FP_YYY_neg(&w2,&w2); FP_YYY_norm(&w2);
+
+    FP_YYY_sqrt(&w4,&w2,&hint);                 // w4=sqrt(w2)
+    FP_YYY_inv(&w3,&w2,&hint);                  // w3=1/w2    
+    FP_YYY_mul(&w3,&w3,&w4);                    // w3=1/sqrt(w2)
+    FP_YYY_mul(&w3,&w3,&w1);                    // w3=(b/2)*1/sqrt(w2)
+
+    FP_YYY_cmove(&(w->a),&w3,1-qr);
+    FP_YYY_cmove(&(w->b),&w4,1-qr);
+
+    sgn=FP2_YYY_sign(w);
+    FP2_YYY_neg(&nw,w); FP2_YYY_norm(&nw);
+    FP2_YYY_cmove(w,&nw,sgn);
+
+/*
     FP_YYY_sub(&w3, &(w->a), &w1);
     FP_YYY_norm(&w3);
     FP_YYY_div2(&w3, &w3);
@@ -452,19 +478,12 @@ void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
     FP_YYY_invsqrt(&w3,&(w->a),&w2);
     FP_YYY_mul(&w3,&w3,&(w->a));
     FP_YYY_div2(&w2,&w3);
-/*
 
-    FP_YYY_sqrt(&w2, &w2,NULL);
-    FP_YYY_copy(&(w->a), &w2);
-    FP_YYY_add(&w2, &w2, &w2);
-    FP_YYY_norm(&w2);
-    FP_YYY_inv(&w2, &w2, NULL);
-*/
     FP_YYY_mul(&(w->b), &(w->b), &w2);
 
     sgn=FP2_YYY_sign(w);
     FP2_YYY_neg(&nw,w); FP2_YYY_norm(&nw);
-    FP2_YYY_cmove(w,&nw,sgn);
+    FP2_YYY_cmove(w,&nw,sgn); */
 }
 
 /* New stuff for ECp4 support */

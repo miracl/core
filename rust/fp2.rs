@@ -338,6 +338,8 @@ impl FP2 {
         let mut w1 = FP::new_copy(&self.b);
         let mut w2 = FP::new_copy(&self.a);
         let mut w3 = FP::new_copy(&self.a);
+        let mut w4 = FP::new();
+        let mut hint = FP::new();
 
         w1.sqr();
         w2.sqr();
@@ -351,20 +353,24 @@ impl FP2 {
         w2.norm();
         w2.div2();
 
-        w3.copy(&self.a);
-        w3.sub(&w1);
-        w3.norm();
-        w3.div2();
+        w1.copy(&self.b); w1.div2();
+        let qr=w2.qr(Some(&mut hint));
 
-        let d=w3.qr(None);
-        w2.cmove(&w3,d);
+        self.a.copy(&w2.sqrt(Some(&hint)));
+        w3.copy(&w2); w3.inverse(Some(&hint));
+        w3.mul(&self.a);
+        self.b.copy(&w3); self.b.mul(&w1);
 
-        w3.copy(&w2);
-        w3.invsqrt(&mut w2,&mut self.a);
-        w2.mul(&self.a);
-        w2.div2();
+        hint.neg(); hint.norm();
+        w2.neg(); w2.norm();
 
-        self.b.mul(&w2);
+        w4.copy(&w2.sqrt(Some(&hint)));
+        w3.copy(&w2); w3.inverse(Some(&hint));
+        w3.mul(&w4);
+        w3.mul(&w1);
+
+        self.a.cmove(&w3,1-qr);
+        self.b.cmove(&w4,1-qr);
 
         let sgn=self.sign();
         let mut nr=FP2::new_copy(&self);
