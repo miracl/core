@@ -323,7 +323,7 @@ func (F *FP8) toString() string {
 }
 
 /* this=1/this */
-func (F *FP8) inverse() {
+func (F *FP8) inverse(h *FP) {
 	t1 := NewFP4copy(F.a)
 	t2 := NewFP4copy(F.b)
 
@@ -334,7 +334,7 @@ func (F *FP8) inverse() {
 	t1.sub(t2)
 	t1.norm()
 
-	t1.inverse()
+	t1.inverse(h)
 
 	F.a.mul(t1)
 	t1.neg()
@@ -665,17 +665,19 @@ func (F *FP8) pow(b *BIG) {
 	F.copy(r);
 }
 */
-/* Test for Quadratic Residue */
-func (F *FP8) qr() int {
+
+/* PFGE48S
+// Test for Quadratic Residue 
+func (F *FP8) qr(h *FP) int {
 	c := NewFP8copy(F)
 	c.conj()
 	c.mul(F)
-	return c.a.qr()
+	return c.a.qr(h)
 }
 
 
-/* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-func (F *FP8) sqrt()  {
+// sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) 
+func (F *FP8) sqrt(h *FP)  {
 	if F.iszilch() {
 		return 
 	}
@@ -684,6 +686,7 @@ func (F *FP8) sqrt()  {
 	b := NewFP4()
 	s := NewFP4copy(F.b)
 	t := NewFP4copy(F.a)
+	hint := NewFP()
 
 	s.sqr()
 	a.sqr()
@@ -693,7 +696,7 @@ func (F *FP8) sqrt()  {
 
 	s.copy(a); s.norm()
 
-	s.sqrt()
+	s.sqrt(h)
 	a.copy(t)
 	b.copy(t)
 
@@ -701,24 +704,47 @@ func (F *FP8) sqrt()  {
 	a.norm()
 	a.div2()
 
-	b.sub(s)
-	b.norm()
-	b.div2()
+    b.copy(F.b); b.div2()
+    qr:=a.qr(hint)
 
-	a.cmove(b,b.qr())
+    F.a.copy(a); F.a.sqrt(hint)
+    s.copy(a); s.inverse(hint)
+    s.mul(F.a)
+    F.b.copy(s); F.b.mul(b)
 
-	a.sqrt()
-	t.copy(F.b)
-	s.copy(a)
-	s.add(a); s.norm()
-	s.inverse()
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
 
-	t.mul(s)
-	F.a.copy(a)
-	F.b.copy(t)
+	twk:=NewFPbig(NewBIGints(TWK))
+    hint.mul(twk)
+    a.div_i(); a.norm()
+
+    t.copy(a); t.sqrt(hint)
+    s.copy(a); s.inverse(hint)
+    s.mul(t)
+    s.mul(b)
+
+    F.a.cmove(s,1-qr)
+    F.b.cmove(t,1-qr)
+
+//	b.sub(s)
+//	b.norm()
+//	b.div2()
+
+//	a.cmove(b,b.qr(nil))
+
+//	a.sqrt(nil)
+//	t.copy(F.b)
+//	s.copy(a)
+//	s.add(a); s.norm()
+//	s.inverse(nil)
+
+//	t.mul(s)
+//	F.a.copy(a)
+//	F.b.copy(t)
 
 	sgn:=F.sign()
 	nr:=NewFP8copy(F)
 	nr.neg(); nr.norm()
 	F.cmove(nr,sgn)
 }
+PFGE48F */

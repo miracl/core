@@ -794,7 +794,7 @@ func (F *FP12) Inverse() {
 
 	f3.add(F.c)
 	f3.norm()
-	f3.inverse()
+	f3.inverse(nil)
 	F.a.copy(f0)
 	F.a.mul(f3)
 	F.b.copy(f1)

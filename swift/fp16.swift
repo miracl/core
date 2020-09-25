@@ -308,12 +308,13 @@ public struct FP16 {
     {
         var t1=FP8(a)
         var t2=FP8(b)
+        let pNIL:FP?=nil
 
         t1.sqr()
         t2.sqr()
         t2.times_i(); t2.norm()
         t1.sub(t2); t1.norm()
-        t1.inverse()
+        t1.inverse(pNIL)
         a.mul(t1)
         t1.neg(); t1.norm()
         b.mul(t1)

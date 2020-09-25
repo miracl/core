@@ -127,7 +127,7 @@ var ECP4 = function(ctx) {
                 return;
             }
 
-            this.z.inverse();
+            this.z.inverse(null);
 
             this.x.mul(this.z);
             this.x.reduce();
@@ -246,16 +246,16 @@ var ECP4 = function(ctx) {
 
         /* set this=(x,.) */
         setx: function(ix,s) {
-            var rhs;
+            var rhs,h;
 
             this.x.copy(ix);
             this.z.one();
 			this.x.norm();
             rhs = ECP4.RHS(this.x);
 
-		    if (rhs.qr()==1) 
+		    if (rhs.qr(h)==1) 
 		    {
-                rhs.sqrt();
+                rhs.sqrt(h);
                 if (rhs.sign() != s)
                     rhs.neg();
                 rhs.reduce();
@@ -838,7 +838,7 @@ var ECP4 = function(ctx) {
         var A=ECP4.RHS(X1);
         var W=new ctx.FP4(A);
 
-        W.sqrt();
+        W.sqrt(null);
 
         var s=new ctx.FP(0); s.rcopy(ctx.ROM_FIELD.SQRTm3);
         Z.mul(s);
@@ -850,7 +850,7 @@ var ECP4 = function(ctx) {
         NY.copy(T); NY.mul(Y); 
 
         NY.qmul(Z);
-        NY.inverse();
+        NY.inverse(null);
 
         W.qmul(Z);
         if (W.sign()==1)
@@ -872,11 +872,11 @@ var ECP4 = function(ctx) {
         X3.add(A); X3.norm();
 
         Y.copy(ECP4.RHS(X2));
-        X3.cmove(X2,Y.qr());
+        X3.cmove(X2,Y.qr(null));
         Y.copy(ECP4.RHS(X1));
-        X3.cmove(X1,Y.qr());
+        X3.cmove(X1,Y.qr(null));
         Y.copy(ECP4.RHS(X3));
-        Y.sqrt();
+        Y.sqrt(null);
 
         ne=Y.sign()^sgn;
         W.copy(Y); W.neg(); W.norm();
@@ -918,7 +918,7 @@ var ECP4 = function(ctx) {
         F1.copy(X);
         if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) {
             F1.mul_ip();
-            F1.inverse();
+            F1.inverse(null);
             F0.copy(F1); F0.sqr();
         }
         F0.mul_ip(); F0.norm();

@@ -185,7 +185,8 @@ public struct PAIR4 {
 
     static private func pack(_ AA: FP4,_ BB: FP4,_ CC: FP4) -> FP8 {
         var i=FP4(CC)
-        i.inverse()
+        let pNIL:FP?=nil   
+        i.inverse(pNIL)
         var a=FP4(AA)
         var b=FP4(BB)
         a.mul(i)

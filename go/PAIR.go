@@ -203,7 +203,7 @@ func Miller(r []*FP12) *FP12 {
 // Store precomputed line details in an FP4
 func pack(AA *FP2, BB *FP2, CC *FP2) *FP4 {
 	i := NewFP2copy(CC)
-	i.inverse()
+	i.inverse(nil)
 	a := NewFP2copy(AA)
 	a.mul(i)
 	b := NewFP2copy(BB)
@@ -249,7 +249,7 @@ func precomp(GV *ECP2) []*FP4 {
 	if CURVE_PAIRING_TYPE == BN {
 		f = NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
 		if SEXTIC_TWIST == M_TYPE {
-			f.inverse()
+			f.inverse(nil)
 			f.norm()
 		}
 	}
@@ -359,7 +359,7 @@ func Another(r []*FP12, P1 *ECP2, Q1 *ECP) {
 
 	if CURVE_PAIRING_TYPE == BN {
 		if SEXTIC_TWIST == M_TYPE {
-			f.inverse()
+			f.inverse(nil)
 			f.norm()
 		}
 	}
@@ -421,7 +421,7 @@ func Ate(P1 *ECP2, Q1 *ECP) *FP12 {
 
 	if CURVE_PAIRING_TYPE == BN {
 		if SEXTIC_TWIST == M_TYPE {
-			f.inverse()
+			f.inverse(nil)
 			f.norm()
 		}
 	}
@@ -502,7 +502,7 @@ func Ate2(P1 *ECP2, Q1 *ECP, R1 *ECP2, S1 *ECP) *FP12 {
 	}
 	if CURVE_PAIRING_TYPE == BN {
 		if SEXTIC_TWIST == M_TYPE {
-			f.inverse()
+			f.inverse(nil)
 			f.norm()
 		}
 	}
@@ -908,7 +908,7 @@ func G2mul(P *ECP2, e *BIG) *ECP2 {
 		f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
 
 		if SEXTIC_TWIST == M_TYPE {
-			f.inverse()
+			f.inverse(nil)
 			f.norm()
 		}
 

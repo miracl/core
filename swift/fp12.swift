@@ -710,7 +710,8 @@ public struct FP12
         var f1=FP4(b)
         var f2=FP4(a)
         var f3=FP4()
-    
+        let pNIL:FP?=nil  
+        
         norm()
         f0.sqr()
         f1.mul(c)
@@ -734,7 +735,7 @@ public struct FP12
         c.times_i()
     
         f3.add(c); f3.norm()
-        f3.inverse()
+        f3.inverse(pNIL)
         a.copy(f0); a.mul(f3)
         b.copy(f1); b.mul(f3)
         c.copy(f2); c.mul(f3)

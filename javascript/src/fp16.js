@@ -262,7 +262,7 @@ var FP16 = function(ctx) {
             t2.times_i();
             t2.norm(); // ??
             t1.sub(t2);
-            t1.inverse();
+            t1.inverse(null);
             this.a.mul(t1);
             t1.neg();
             t1.norm();

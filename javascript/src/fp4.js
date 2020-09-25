@@ -268,7 +268,7 @@ var FP4 = function(ctx) {
         },
 
         /* this=1/this */
-        inverse: function() {
+        inverse: function(h) {
             this.norm();
 
             var t1 = new ctx.FP2(this.a), 
@@ -279,7 +279,7 @@ var FP4 = function(ctx) {
             t2.mul_ip();
             t2.norm(); // ??
             t1.sub(t2);
-            t1.inverse();
+            t1.inverse(h);
             this.a.mul(t1);
             t1.neg();
             t1.norm();
@@ -618,14 +618,14 @@ var FP4 = function(ctx) {
             this.copy(r);
         },*/
 
-        qr: function() {
+        qr: function(h) {
             var c = new FP4(this);
             c.conj();
             c.mul(this);
-            return c.geta().qr();
+            return c.geta().qr(h);
         },
 
-        sqrt: function() {
+        sqrt: function(h) {
             if (this.iszilch()) {
                 return;
             }
@@ -633,6 +633,7 @@ var FP4 = function(ctx) {
                 wb=new ctx.FP2(this.a),
                 ws=new ctx.FP2(this.b),
                 wt=new ctx.FP2(this.a);
+            var hint=new ctx.FP(0);
 
             ws.sqr();
             wa.sqr();
@@ -641,24 +642,52 @@ var FP4 = function(ctx) {
             wa.sub(ws);
 
             ws.copy(wa); ws.norm();
-            ws.sqrt();
+            ws.sqrt(h);
 
             wa.copy(wt); wa.add(ws); 
             wa.norm(); wa.div2();
 
+
+            wb.copy(this.b); wb.div2();
+            var qr=wa.qr(hint);
+
+            this.a.copy(wa); this.a.sqrt(hint);
+            ws.copy(wa); ws.inverse(hint);
+            ws.mul(this.a);
+            this.b.copy(ws); this.b.mul(wb);
+
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+
+            var twk=new ctx.FP(0); twk.rcopy(ctx.ROM_FIELD.TWK);
+            hint.mul(twk);
+            wa.div_ip(); wa.norm();
+
+            wt.copy(wa); wt.sqrt(hint);
+            ws.copy(wa); ws.inverse(hint);
+            ws.mul(wt);
+            ws.mul(wb);
+
+            this.a.cmove(ws,1-qr);
+            this.b.cmove(wt,1-qr);
+
+
+
+/*
             wb.copy(wt); wb.sub(ws); 
             wb.norm(); wb.div2();
             
-            wa.cmove(wb,wb.qr());
+            wa.cmove(wb,wb.qr(null));
 
-            wa.sqrt();
+            wa.sqrt(null);
             wt.copy(this.b);
             ws.copy(wa); ws.add(wa); ws.norm();
-            ws.inverse();
+            ws.inverse(null);
 
             wt.mul(ws);
             this.a.copy(wa);
             this.b.copy(wt);
+*/
+
 
             var sgn=this.sign();
             var nr=new FP4(this);

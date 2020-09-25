@@ -63,14 +63,15 @@ impl ECP4 {
     /* construct this from x - but set to O if not on curve */
     pub fn new_fp4(ix: &FP4, s:isize) -> ECP4 {
         let mut E = ECP4::new();
+        let mut h = FP::new();
         E.x.copy(&ix);
         E.y.one();
         E.z.one();
         E.x.norm();
 
         let mut rhs = ECP4::rhs(&E.x);
- 	    if rhs.qr() == 1 {
-		    rhs.sqrt();
+ 	    if rhs.qr(Some(&mut h)) == 1 {
+		    rhs.sqrt(Some(&h));
 		    if rhs.sign() != s {
 			    rhs.neg();
 		    }
@@ -174,7 +175,7 @@ impl ECP4 {
         if self.z.equals(&mut one) {
             return;
         }
-        self.z.inverse();
+        self.z.inverse(None);
 
         self.x.mul(&self.z);
         self.x.reduce();
@@ -534,7 +535,7 @@ impl ECP4 {
         f1.copy(&f);
         if ecp::SEXTIC_TWIST == ecp::M_TYPE {
             f1.mul_ip();
-            f1.inverse();
+            f1.inverse(None);
             f0.copy(&f1);
             f0.sqr();
         }
@@ -895,7 +896,7 @@ impl ECP4 {
         let mut A=ECP4::rhs(&X1);
         let mut W=FP4::new_copy(&A);
 
-        W.sqrt();
+        W.sqrt(None);
 
         let s = FP::new_big(&BIG::new_ints(&rom::SQRTM3));
         Z.mul(&s);
@@ -907,7 +908,7 @@ impl ECP4 {
         NY.copy(&T); NY.mul(&Y); 
         
         NY.qmul(&Z);
-        NY.inverse();
+        NY.inverse(None);
 
         W.qmul(&Z);
         if W.sign()==1 {
@@ -927,11 +928,11 @@ impl ECP4 {
         X3.add(&A); X3.norm();
 
         Y.copy(&ECP4::rhs(&X2));
-        X3.cmove(&X2,Y.qr());
+        X3.cmove(&X2,Y.qr(None));
         Y.copy(&ECP4::rhs(&X1));
-        X3.cmove(&X1,Y.qr());
+        X3.cmove(&X1,Y.qr(None));
         Y.copy(&ECP4::rhs(&X3));
-        Y.sqrt();
+        Y.sqrt(None);
 
         let ne=Y.sign()^sgn;
         W.copy(&Y); W.neg(); W.norm();

@@ -48,6 +48,7 @@ extern const BIG_XXX ROI_YYY;	    /**< Root of unity set in rom_field_yyy.c */
 extern const BIG_XXX R2modp_YYY;	/**< Montgomery constant */
 extern const BIG_XXX CRu_YYY;       /**< Cube Root of Unity */
 extern const BIG_XXX SQRTm3_YYY; /**< Square root of -3 */
+extern const BIG_XXX TWK_YYY; /**< Tweak for square roots, pre-calculated from field norm */
 extern const chunk MConst_YYY;		/**< Constant associated with Modulus - for Montgomery = 1/p mod 2^BASEBITS */
 
 

@@ -308,7 +308,7 @@ void YYY::FP2_rawoutput(FP2 *w)
 
 /* Set w=1/x */
 /* SU= 128 */
-void YYY::FP2_inv(FP2 *w, FP2 *x)
+void YYY::FP2_inv(FP2 *w, FP2 *x, FP *h)
 {
     FP w1, w2;
 
@@ -316,7 +316,7 @@ void YYY::FP2_inv(FP2 *w, FP2 *x)
     FP_sqr(&w1, &(x->a));
     FP_sqr(&w2, &(x->b));
     FP_add(&w1, &w1, &w2);
-    FP_inv(&w1, &w1, NULL);
+    FP_inv(&w1, &w1, h);
     FP_mul(&(w->a), &(x->a), &w1);
     FP_neg(&w1, &w1);
     FP_norm(&w1);
@@ -379,7 +379,7 @@ void YYY::FP2_div_ip(FP2 *w)
     FP2 z;
     FP2_norm(w);
     FP2_from_ints(&z, (1 << QNRI_YYY), 1);
-    FP2_inv(&z, &z);
+    FP2_inv(&z, &z, NULL);
     FP2_mul(w, &z, w);
 #if TOWER_YYY == POSITOWER
     FP2_neg(w, w);  // ***
@@ -422,19 +422,19 @@ void YYY::FP2_pow(FP2 *r, FP2* a, BIG b)
 } */
 
 /* test for x a QR */
-int YYY::FP2_qr(FP2 *x)
+int YYY::FP2_qr(FP2 *x,FP *h)
 { /* test x^(p^2-1)/2 = 1 */
 
     FP2 c;
     FP2_conj(&c,x);
     FP2_mul(&c,&c,x);
 
-    return FP_qr(&(c.a),NULL);
+    return FP_qr(&(c.a),h);
 }
 
 /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b))/2+ib/(2*sqrt(a+sqrt(a*a-n*b*b))/2) */
 
-void YYY::FP2_sqrt(FP2 *w, FP2 *u)
+void YYY::FP2_sqrt(FP2 *w, FP2 *u, FP *h)
 {
     FP w1, w2, w3, w4, hint;
     FP2 nw;
@@ -446,7 +446,7 @@ void YYY::FP2_sqrt(FP2 *w, FP2 *u)
     FP_sqr(&w2, &(w->a));  // a^2
     FP_add(&w1, &w1, &w2); FP_norm(&w1);  // a^2+b^2
 
-    FP_sqrt(&w1, &w1, NULL);              // sqrt(a^2+b^2)  - could use an input hint to avoid exp!
+    FP_sqrt(&w1, &w1, h);              // sqrt(a^2+b^2)  - could use an input hint to avoid exp!
 
     FP_add(&w2, &(w->a), &w1);            // a+sqrt(a^2+b^2)
     FP_norm(&w2);

@@ -183,7 +183,7 @@ void PAIR_ZZZ_miller(FP24_YYY *res, FP24_YYY r[])
 static void PAIR_ZZZ_pack(FP8_YYY *T, FP4_YYY* AA, FP4_YYY* BB, FP4_YYY *CC)
 {
     FP4_YYY I, A, B;
-    FP4_YYY_inv(&I, CC);
+    FP4_YYY_inv(&I, CC, NULL);
     FP4_YYY_mul(&A, AA, &I);
     FP4_YYY_mul(&B, BB, &I);
     FP8_YYY_from_FP4s(T, &A, &B);

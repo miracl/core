@@ -193,8 +193,9 @@ extern void FP4_mul(FP4 *x, FP4 *y, FP4 *z);
  *
 	@param x FP4 instance, on exit = 1/y
 	@param y FP4 instance
+    @param h optional input hint
  */
-extern void FP4_inv(FP4 *x, FP4 *y);
+extern void FP4_inv(FP4 *x, FP4 *y, FP *h);
 
 /**	@brief Divide an FP4 by 2
  *
@@ -282,17 +283,19 @@ extern void FP4_xtr_pow2(FP4 *r, FP4 *c, FP4 *d, FP4 *e, FP4 *f, XXX::BIG a, XXX
 /**	@brief Test FP4 for QR
  * 
 	@param r FP4 instance
+    @param h optional generated hint
 	@return 1 x is a QR, otherwise 0
  */
-extern int  FP4_qr(FP4 *r);
+extern int  FP4_qr(FP4 *r, FP *h);
 
 /**	@brief Calculate square root of an FP4
  *
 	Square root
 	@param r FP4 instance, on exit = sqrt(x)
 	@param x FP4 instance
+    @param h optional input hint
  */
-extern void  FP4_sqrt(FP4 *r, FP4 *x);
+extern void  FP4_sqrt(FP4 *r, FP4 *x, FP *h);
 
 
 /**	@brief Conditional copy of FP4 number

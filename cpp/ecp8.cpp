@@ -100,7 +100,7 @@ void ZZZ::ECP8_affine(ECP8 *P)
         return;
     }
 
-    FP8_inv(&iz, &(P->z));
+    FP8_inv(&iz, &(P->z),NULL);
     FP8_mul(&(P->x), &(P->x), &iz);
     FP8_mul(&(P->y), &(P->y), &iz);
 
@@ -360,14 +360,15 @@ int ZZZ::ECP8_set(ECP8 *P, FP8 *x, FP8 *y)
 int ZZZ::ECP8_setx(ECP8 *P, FP8 *x, int s)
 {
     FP8 y;
+    FP hint;
     ECP8_rhs(&y, x);
 
-    if (!FP8_qr(&y))
+    if (!FP8_qr(&y,&hint))
     {
         ECP8_inf(P);
         return 0;
     }
-    FP8_sqrt(&y,&y);
+    FP8_sqrt(&y,&y,&hint);
 
     FP8_copy(&(P->x), x);
     FP8_copy(&(P->y), &y);
@@ -642,7 +643,7 @@ void ZZZ::ECP8_frob_constants(FP2 F[3])
 #if SEXTIC_TWIST_ZZZ == M_TYPE
     FP2_mul_ip(&F[1]);      // u^24/24.u^(p-19)/24 = u^(p+5)/24
     FP2_norm(&F[1]);
-    FP2_inv(&F[1], &F[1]);      // u^-(p+5)/24
+    FP2_inv(&F[1], &F[1], NULL);      // u^-(p+5)/24
     FP2_sqr(&F[0], &F[1]);      // u^-(p+5)/12 - ***
     FP2_mul(&F[1], &F[1], &F[0]); // u^-(p+5)/8  - ***
 #endif
@@ -969,7 +970,7 @@ void ZZZ::ECP8_map2point(ECP8 *Q,FP8 *H)
     FP8_from_FP(&A,&Z);
     ECP8_rhs(&A,&A);  // A=g(Z)
 
-    FP8_sqrt(&W,&A);
+    FP8_sqrt(&W,&A,NULL);
     FP_rcopy(&s,SQRTm3);
 
     FP_mul(&Z,&Z,&s);
@@ -982,7 +983,7 @@ void ZZZ::ECP8_map2point(ECP8 *Q,FP8 *H)
 
     FP8_tmul(&NY,&NY,&Z);
 
-    FP8_inv(&NY,&NY);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
+    FP8_inv(&NY,&NY,NULL);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
     FP8_tmul(&W,&W,&Z); // tv4=Z*sqrt(-3).sqrt(g(Z))
     if (FP8_sign(&W)==1)
     {
@@ -1013,11 +1014,11 @@ void ZZZ::ECP8_map2point(ECP8 *Q,FP8 *H)
     FP8_add(&X3,&X3,&A); FP8_norm(&X3);   
 
     ECP8_rhs(&W,&X2);
-    FP8_cmove(&X3,&X2,FP8_qr(&W));
+    FP8_cmove(&X3,&X2,FP8_qr(&W,NULL));
     ECP8_rhs(&W,&X1);
-    FP8_cmove(&X3,&X1,FP8_qr(&W));
+    FP8_cmove(&X3,&X1,FP8_qr(&W,NULL));
     ECP8_rhs(&W,&X3);
-    FP8_sqrt(&Y,&W);
+    FP8_sqrt(&Y,&W,NULL);
     
     ne=FP8_sign(&Y)^sgn;
     FP8_neg(&W,&Y); FP8_norm(&W);

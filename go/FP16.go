@@ -290,7 +290,7 @@ func (F *FP16) inverse() {
 	t1.sub(t2)
 	t1.norm()
 
-	t1.inverse()
+	t1.inverse(nil)
 
 	F.a.mul(t1)
 	t1.neg()

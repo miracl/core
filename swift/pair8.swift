@@ -187,7 +187,8 @@ public struct PAIR8 {
 
     static private func pack(_ AA: FP8,_ BB: FP8,_ CC: FP8) -> FP16 {
         var i=FP8(CC)
-        i.inverse()
+        let pNIL:FP?=nil   
+        i.inverse(pNIL)
         var a=FP8(AA)
         var b=FP8(BB)
         a.mul(i)

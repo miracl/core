@@ -758,7 +758,7 @@ public final class FP12 {
 
 		f3.add(c);
 		f3.norm();
-		f3.inverse();
+		f3.inverse(null);
 		a.copy(f0); a.mul(f3);
 		b.copy(f1); b.mul(f3);
 		c.copy(f2); c.mul(f3);

@@ -236,6 +236,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             os.system(copytext+"MPIN192.go "+fpath+"MPIN192.go")
             os.system(copytext+"BLS192.go "+fpath+"BLS192.go")
 
+            replace(fpath+"FP4.go","PFGE24S","*/")
+            replace(fpath+"FP4.go","PFGE24F","/*")
             replace(fpath+"FP24.go","XXX",tc)
             replace(fpath+"FP8.go","XXX",tc)
             replace(fpath+"ECP4.go","XXX",tc)
@@ -253,6 +255,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             os.system(copytext+"MPIN256.go "+fpath+"MPIN256.go")
             os.system(copytext+"BLS256.go "+fpath+"BLS256.go")
 
+            replace(fpath+"FP4.go","PFGE24S","*/")
+            replace(fpath+"FP4.go","PFGE24F","/*")
+            replace(fpath+"FP8.go","PFGE48S","*/")
+            replace(fpath+"FP8.go","PFGE48F","/*")
             replace(fpath+"FP48.go","XXX",tc)
             replace(fpath+"FP16.go","XXX",tc)
             replace(fpath+"FP8.go","XXX",tc)

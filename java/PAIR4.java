@@ -157,7 +157,7 @@ public final class PAIR4 {
 // Store precomputed line details in an FP4
     private static FP8 pack(FP4 AA, FP4 BB, FP4 CC) {
         FP4 i = new FP4(CC);
-        i.inverse();
+        i.inverse(null);
         FP4 a = new FP4(AA);
         a.mul(i);
         FP4 b = new FP4(BB);

@@ -766,7 +766,7 @@ var FP12 = function(ctx) {
 
             f3.add(this.c);
             f3.norm();
-            f3.inverse();
+            f3.inverse(null);
             this.a.copy(f0);
             this.a.mul(f3);
             this.b.copy(f1);

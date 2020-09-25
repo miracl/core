@@ -128,7 +128,7 @@ public final class ECP2 {
 			y.reduce();
 			return;
 		}
-		z.inverse();
+		z.inverse(null);
 
 		x.mul(z); x.reduce();               // *****
 		y.mul(z); y.reduce();
@@ -269,11 +269,12 @@ public final class ECP2 {
 		x=new FP2(ix);
 		y=new FP2(1);
 		z=new FP2(1);
+        FP h=new FP();
 		x.norm();
 		FP2 rhs=RHS(x);
-		if (rhs.qr()==1)
+		if (rhs.qr(h)==1)
 		{
-            rhs.sqrt();
+            rhs.sqrt(h);
             if (rhs.sign() != s)
                 rhs.neg();
             rhs.reduce();
@@ -608,7 +609,7 @@ public final class ECP2 {
             { // special case for BLS12381
                 W.copy(new FP2(2,1));
             } else {
-                W.sqrt();
+                W.sqrt(null);
             }
             FP s=new FP(new BIG(ROM.SQRTm3));
             Z.mul(s);
@@ -620,7 +621,7 @@ public final class ECP2 {
             NY.copy(T); NY.mul(Y); 
 
             NY.pmul(Z);
-            NY.inverse();
+            NY.inverse(null);
 
             W.pmul(Z);
             if (W.sign()==1)
@@ -642,11 +643,11 @@ public final class ECP2 {
             X3.add(A); X3.norm();
 
             Y.copy(RHS(X2));
-            X3.cmove(X2,Y.qr());
+            X3.cmove(X2,Y.qr(null));
             Y.copy(RHS(X1));
-            X3.cmove(X1,Y.qr());
+            X3.cmove(X1,Y.qr(null));
             Y.copy(RHS(X3));
-            Y.sqrt();
+            Y.sqrt(null);
 
             ne=Y.sign()^sgn;
             W.copy(Y); W.neg(); W.norm();
@@ -668,7 +669,7 @@ public final class ECP2 {
             W.mul(T);
             FP2 A=new FP2(Ad);
             A.mul(W);
-            A.inverse();
+            A.inverse(null);
             W.add(NY); W.norm();
             W.mul(Bd);
             W.neg(); W.norm();
@@ -679,10 +680,10 @@ public final class ECP2 {
             X3.mul(X2);
 
             W.copy(X3); W.sqr(); W.add(Ad); W.norm(); W.mul(X3); W.add(Bd); W.norm(); // x^3+Ax+b
-            X2.cmove(X3,W.qr());
+            X2.cmove(X3,W.qr(null));
             W.copy(X2); W.sqr(); W.add(Ad); W.norm(); W.mul(X2); W.add(Bd); W.norm(); // x^3+Ax+b
             FP2 Y=new FP2(W);
-            Y.sqrt();
+            Y.sqrt(null);
 
             ne=Y.sign()^sgn;
             W.copy(Y); W.neg(); W.norm();
@@ -758,7 +759,7 @@ CAHCZF */
 
 		if (CONFIG_CURVE.SEXTIC_TWIST==CONFIG_CURVE.M_TYPE)
 		{
-			X.inverse();
+			X.inverse(null);
 			X.norm();
 		}
 

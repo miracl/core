@@ -131,7 +131,7 @@ func (E *ECP4) Affine() {
 		E.y.reduce()
 		return
 	}
-	E.z.inverse()
+	E.z.inverse(nil)
 
 	E.x.mul(E.z)
 	E.x.reduce()
@@ -335,13 +335,14 @@ func NewECP4fp4s(ix *FP4, iy *FP4) *ECP4 {
 /* construct this from x - but set to O if not on curve */
 func NewECP4fp4(ix *FP4, s int) *ECP4 {
 	E := new(ECP4)
+	h:=NewFP()
 	E.x = NewFP4copy(ix)
 	E.y = NewFP4int(1)
 	E.z = NewFP4int(1)
 	E.x.norm()
 	rhs := RHS4(E.x)
-	if rhs.qr() == 1 {
-		rhs.sqrt()
+	if rhs.qr(h) == 1 {
+		rhs.sqrt(h)
 		if rhs.sign() != s {
 			rhs.neg()
 		}
@@ -535,7 +536,7 @@ func ECP4_frob_constants() [3]*FP2 {
 	F1.copy(X)
 	if SEXTIC_TWIST == M_TYPE {
 		F1.mul_ip()
-		F1.inverse()
+		F1.inverse(nil)
 		F0.copy(F1)
 		F0.sqr()
 	}
@@ -722,7 +723,7 @@ func ECP4_map2point(H *FP4) *ECP4 {
 	X3:=NewFP4copy(X1)
 	A:=RHS4(X1)
 	W:=NewFP4copy(A)
-	W.sqrt()
+	W.sqrt(nil)
 
 	s:=NewFPbig(NewBIGints(SQRTm3))
 	Z.mul(s)
@@ -734,7 +735,7 @@ func ECP4_map2point(H *FP4) *ECP4 {
 	NY.copy(T); NY.mul(Y)
 	
 	NY.qmul(Z)
-	NY.inverse()
+	NY.inverse(nil)
 
 	W.qmul(Z)
     if (W.sign()==1) {
@@ -754,11 +755,11 @@ func ECP4_map2point(H *FP4) *ECP4 {
 	X3.add(A); X3.norm()	
 
     Y.copy(RHS4(X2))
-    X3.cmove(X2,Y.qr())
+    X3.cmove(X2,Y.qr(nil))
     Y.copy(RHS4(X1))
-    X3.cmove(X1,Y.qr())
+    X3.cmove(X1,Y.qr(nil))
     Y.copy(RHS4(X3))
-    Y.sqrt()
+    Y.sqrt(nil)
 
     ne:=Y.sign()^sgn
     W.copy(Y); W.neg(); W.norm()

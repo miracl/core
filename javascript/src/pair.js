@@ -153,7 +153,7 @@ var PAIR = function(ctx) {
 // Store precomputed line details in an FP4
 		pack: function(AA,BB,CC) {
 			var i=new ctx.FP2(CC);
-			i.inverse();
+			i.inverse(null);
 			var a=new ctx.FP2(AA);
 			a.mul(i);
 			var b=new ctx.FP2(BB);
@@ -200,7 +200,7 @@ var PAIR = function(ctx) {
                 f = new ctx.FP2(fa, fb); 
 				if (ctx.ECP.SEXTIC_TWIST==ctx.ECP.M_TYPE)
 				{
-					f.inverse();
+					f.inverse(null);
 					f.norm();
 				}
 			}
@@ -313,7 +313,7 @@ var PAIR = function(ctx) {
                 f = new ctx.FP2(fa, fb); 
 				if (ctx.ECP.SEXTIC_TWIST==ctx.ECP.M_TYPE)
 				{
-					f.inverse();
+					f.inverse(null);
 					f.norm();
 				}
 			}
@@ -386,7 +386,7 @@ var PAIR = function(ctx) {
                 f = new ctx.FP2(fa, fb); 
 
                 if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) {
-                    f.inverse();
+                    f.inverse(null);
                     f.norm();
                 }
             }
@@ -469,7 +469,7 @@ var PAIR = function(ctx) {
                 f = new ctx.FP2(fa, fb);
 
                 if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) {
-                    f.inverse();
+                    f.inverse(null);
                     f.norm();
                 }
             } 
@@ -929,7 +929,7 @@ var PAIR = function(ctx) {
             f = new ctx.FP2(fa, fb);
 
             if (ctx.ECP.SEXTIC_TWIST == ctx.ECP.M_TYPE) {
-                f.inverse();
+                f.inverse(null);
                 f.norm();
             }
 

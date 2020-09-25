@@ -333,7 +333,7 @@ public struct FP4 {
         return ("["+a.toRawString()+","+b.toRawString()+"]")
     }
     /* self=1/self */
-    mutating func inverse()
+    mutating func inverse(_ h: FP?)
     {
         //norm();
     
@@ -344,7 +344,7 @@ public struct FP4 {
         t2.sqr()
         t2.mul_ip(); t2.norm()
         t1.sub(t2)
-        t1.inverse()
+        t1.inverse(h)
         a.mul(t1)
         t1.neg(); t1.norm()
         b.mul(t1)
@@ -640,23 +640,25 @@ public struct FP4 {
         r.reduce()
         copy(r)
     } */
-
-    func qr() -> Int
+/* PFGE24S
+    func qr(_ h:inout FP?) -> Int
     {
         var c=FP4(self) 
         c.conj()
         c.mul(self)
-        return c.geta().qr()
+        return c.geta().qr(&h)
     }
 
-/* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-/* returns true if this is QR */
-    mutating func sqrt() {
+// sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) 
+// returns true if this is QR 
+    mutating func sqrt(_ h: FP?) {
         if iszilch() {return}
         var wa=FP2(a)
         var wb=FP2(a)
         var ws=FP2(b)
         var wt=FP2(a)
+        var hint:FP?=FP()
+//        var pNIL:FP?=nil
 
         ws.sqr()
         wa.sqr()
@@ -665,28 +667,50 @@ public struct FP4 {
         wa.sub(ws)
 
         ws.copy(wa); ws.norm()
-        ws.sqrt()
+        ws.sqrt(h)
 
         wa.copy(wt); wa.add(ws); 
         wa.norm(); wa.div2()
         
-        wb.copy(wt); wb.sub(ws); 
-        wb.norm(); wb.div2()
+        wb.copy(b); wb.div2()
+        let qr=wa.qr(&hint)
+//print("qr: \(qr)\n")
+        a.copy(wa); a.sqrt(hint)
+        ws.copy(wa); ws.inverse(hint)
+        ws.mul(a)
+        b.copy(ws); b.mul(wb)
+
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+        let twk=FP(BIG(ROM.TWK))
+        hint!.mul(twk)
+        wa.div_ip(); wa.norm()
+
+        wt.copy(wa); wt.sqrt(hint)
+        ws.copy(wa); ws.inverse(hint)
+        ws.mul(wt)
+        ws.mul(wb)
+
+        a.cmove(ws,1-qr)
+        b.cmove(wt,1-qr)
+
+//        wb.copy(wt); wb.sub(ws); 
+//        wb.norm(); wb.div2()
         
-        wa.cmove(wb,wb.qr())
-        wa.sqrt()
+//        wa.cmove(wb,wb.qr(&pNIL))
+//        wa.sqrt(pNIL)
 
-        wt.copy(b)
-        ws.copy(wa); ws.add(wa); ws.norm()
-        ws.inverse()
+//        wt.copy(b)
+//        ws.copy(wa); ws.add(wa); ws.norm()
+//        ws.inverse(pNIL)
 
-        wt.mul(ws)
-        a.copy(wa)
-        b.copy(wt)
+//        wt.mul(ws)
+//        a.copy(wa)
+//        b.copy(wt)
 
         let sgn=self.sign()
         var nr=FP4(self)
         nr.neg(); nr.norm()
         self.cmove(nr,sgn)  
     }
+PFGE24F */
 }

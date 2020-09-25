@@ -55,7 +55,7 @@ extern const XXX::BIG CRu;    /**< Cube Root of Unity */
 //extern const int BTset;			/**< Set Bit in Generalised Mersenne */
 extern const XXX::BIG Fra; /**< real part of Pairing-friendly curve Frobenius Constant */
 extern const XXX::BIG Frb; /**< imaginary part of Pairing-friendly curve Frobenius Constant */
-
+extern const XXX::BIG TWK; /**< Tweak for square roots, pre-calculated from field norm */
 //#define FUSED_MODMUL
 //#define DEBUG_REDUCE
 

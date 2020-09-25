@@ -128,7 +128,7 @@ public final class ECP4 {
 			y.reduce();
 			return;
 		}
-		z.inverse();
+		z.inverse(null);
 
 		x.mul(z); x.reduce();               // *****
 		y.mul(z); y.reduce();
@@ -301,11 +301,12 @@ public final class ECP4 {
 		x=new FP4(ix);
 		y=new FP4(1);
 		z=new FP4(1);
+        FP h=new FP();
 		x.norm();
 		FP4 rhs=RHS(x);
-		if (rhs.qr()==1) 
+		if (rhs.qr(h)==1) 
 		{
-            rhs.sqrt();
+            rhs.sqrt(h);
             if (rhs.sign() != s)
                 rhs.neg();
             rhs.reduce();
@@ -463,7 +464,7 @@ public final class ECP4 {
 			if (CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE)
 			{
 				F1.mul_ip();
-				F1.inverse();
+				F1.inverse(null);
 				F0.copy(F1); F0.sqr();
 			}
 			F0.mul_ip(); F0.norm();
@@ -706,7 +707,7 @@ public final class ECP4 {
         FP4 X1=new FP4(Z);
         FP4 A=RHS(X1);
         FP4 W=new FP4(A);
-        W.sqrt();
+        W.sqrt(null);
         FP s=new FP(new BIG(ROM.SQRTm3));
         Z.mul(s);
 
@@ -717,7 +718,7 @@ public final class ECP4 {
         NY.copy(T); NY.mul(Y); 
 
         NY.qmul(Z);
-        NY.inverse();
+        NY.inverse(null);
 
         W.qmul(Z);
         if (W.sign()==1)
@@ -739,11 +740,11 @@ public final class ECP4 {
         X3.add(A); X3.norm();
 
         Y.copy(RHS(X2));
-        X3.cmove(X2,Y.qr());
+        X3.cmove(X2,Y.qr(null));
         Y.copy(RHS(X1));
-        X3.cmove(X1,Y.qr());
+        X3.cmove(X1,Y.qr(null));
         Y.copy(RHS(X3));
-        Y.sqrt();
+        Y.sqrt(null);
 
         ne=Y.sign()^sgn;
         W.copy(Y); W.neg(); W.norm();

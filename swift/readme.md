@@ -42,7 +42,7 @@ and
 
 and
 
-    swift -I. -L. -lcore -lbn254 -lbls383 -lbls24 -lbls48 TestBLS.swift 
+    swift -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestBLS.swift 
 
 and 
 

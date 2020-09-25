@@ -125,7 +125,7 @@ func (E *ECP2) Affine() {
 		E.y.reduce()
 		return
 	}
-	E.z.inverse()
+	E.z.inverse(nil)
 
 	E.x.mul(E.z)
 	E.x.reduce()
@@ -286,13 +286,14 @@ func NewECP2fp2s(ix *FP2, iy *FP2) *ECP2 {
 /* construct this from x - but set to O if not on curve */
 func NewECP2fp2(ix *FP2, s int) *ECP2 {
 	E := new(ECP2)
+	h:=NewFP()
 	E.x = NewFP2copy(ix)
 	E.y = NewFP2int(1)
 	E.z = NewFP2int(1)
 	E.x.norm()
 	rhs := RHS2(E.x)
-	if rhs.qr() == 1 {
-		rhs.sqrt()
+	if rhs.qr(h) == 1 {
+		rhs.sqrt(h)
 		if rhs.sign() != s {
 			rhs.neg()
 		}
@@ -568,7 +569,7 @@ func (E *ECP2) Cfp() {
 	Frb := NewBIGints(Frb)
 	X := NewFP2bigs(Fra, Frb)
 	if SEXTIC_TWIST == M_TYPE {
-		X.inverse()
+		X.inverse(nil)
 		X.norm()
 	}
 
@@ -746,7 +747,7 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 		if (RIADZG2A==-1 && RIADZG2B==0 && SEXTIC_TWIST==M_TYPE && CURVE_B_I==4) { // special case for BLS12381
 			W.copy(NewFP2ints(2,1))
 		} else {
-			W.sqrt()
+			W.sqrt(nil)
 		}
 		s:=NewFPbig(NewBIGints(SQRTm3))
 		Z.mul(s)
@@ -758,7 +759,7 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 		NY.copy(T); NY.mul(Y); 
 	
 		NY.pmul(Z)
-		NY.inverse()
+		NY.inverse(nil)
 
 		W.pmul(Z)
 		if (W.sign()==1) {
@@ -778,11 +779,11 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 		X3.add(A); X3.norm()
 
 		Y.copy(RHS2(X2))
-		X3.cmove(X2,Y.qr())
+		X3.cmove(X2,Y.qr(nil))
 		Y.copy(RHS2(X1))
-		X3.cmove(X1,Y.qr())
+		X3.cmove(X1,Y.qr(nil))
 		Y.copy(RHS2(X3))
-		Y.sqrt()
+		Y.sqrt(nil)
 
 		ne:=Y.sign()^sgn
 		W.copy(Y); W.neg(); W.norm()
@@ -804,7 +805,7 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 		W.mul(T)
 		A:=NewFP2copy(Ad)
 		A.mul(W)
-		A.inverse()
+		A.inverse(nil)
 		W.add(NY); W.norm()
 		W.mul(Bd); 
 		W.neg(); W.norm()
@@ -815,10 +816,10 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 		X3.mul(X2)
 
 		W.copy(X3); W.sqr(); W.add(Ad); W.norm(); W.mul(X3); W.add(Bd); W.norm() // x^3+Ax+b
-		X2.cmove(X3,W.qr())
+		X2.cmove(X3,W.qr(nil))
 		W.copy(X2); W.sqr(); W.add(Ad); W.norm(); W.mul(X2); W.add(Bd); W.norm() // x^3+Ax+b
 		Y:=NewFP2copy(W)
-		Y.sqrt()
+		Y.sqrt(nil)
 
 		ne:=Y.sign()^sgn
 		W.copy(Y); W.neg(); W.norm()

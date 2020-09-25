@@ -210,7 +210,7 @@ void ZZZ::PAIR_miller(FP12 *res, FP12 r[])
 static void ZZZ::PAIR_pack(FP4 *T, FP2* AA, FP2* BB, FP2 *CC)
 {
     FP2 I, A, B;
-    FP2_inv(&I, CC);
+    FP2_inv(&I, CC, NULL);
     FP2_mul(&A, AA, &I);
     FP2_mul(&B, BB, &I);
     FP4_from_FP2s(T, &A, &B);
@@ -253,7 +253,7 @@ void ZZZ::PAIR_precomp(FP4 T[], ECP2* GV)
     FP_rcopy(&Qy, Frb);
     FP2_from_FPs(&X, &Qx, &Qy);
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_inv(&X, &X);
+    FP2_inv(&X, &X, NULL);
     FP2_norm(&X);
 #endif
 #endif
@@ -364,7 +364,7 @@ void ZZZ::PAIR_another(FP12 r[], ECP2* PV, ECP* QV)
     FP_rcopy(&Qy, Frb);
     FP2_from_FPs(&X, &Qx, &Qy);
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_inv(&X, &X);
+    FP2_inv(&X, &X, NULL);
     FP2_norm(&X);
 #endif
 #endif
@@ -439,7 +439,7 @@ void ZZZ::PAIR_ate(FP12 *r, ECP2 *P1, ECP *Q1)
     FP2_from_FPs(&X, &Qx, &Qy);
 
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_inv(&X, &X);
+    FP2_inv(&X, &X, NULL);
     FP2_norm(&X);
 #endif
 
@@ -523,7 +523,7 @@ void ZZZ::PAIR_double_ate(FP12 *r, ECP2 *P1, ECP *Q1, ECP2 *R1, ECP *S1)
     FP2_from_FPs(&X, &Qx, &Qy);
 
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_inv(&X, &X);
+    FP2_inv(&X, &X, NULL);
     FP2_norm(&X);
 #endif
 
@@ -968,7 +968,7 @@ void ZZZ::PAIR_G2mul(ECP2 *P, BIG e)
     FP2_from_FPs(&X, &fx, &fy);
 
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_inv(&X, &X);
+    FP2_inv(&X, &X, NULL);
     FP2_norm(&X);
 #endif
 

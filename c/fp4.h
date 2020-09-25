@@ -195,8 +195,9 @@ extern void FP4_YYY_mul(FP4_YYY *x, FP4_YYY *y, FP4_YYY *z);
  *
 	@param x FP4 instance, on exit = 1/y
 	@param y FP4 instance
+    @param h optional input hint
  */
-extern void FP4_YYY_inv(FP4_YYY *x, FP4_YYY *y);
+extern void FP4_YYY_inv(FP4_YYY *x, FP4_YYY *y, FP_YYY *h);
 /**	@brief Formats and outputs an FP4 to the console
  *
 	@param x FP4 instance to be printed
@@ -284,18 +285,19 @@ extern void FP4_YYY_cmove(FP4_YYY *x, FP4_YYY *y, int s);
 /**	@brief Test FP4 for QR
  * 
 	@param r FP4 instance
+    @param h optional generated hint
 	@return 1 x is a QR, otherwise 0
  */
-extern int  FP4_YYY_qr(FP4_YYY *r);
+extern int  FP4_YYY_qr(FP4_YYY *r, FP_YYY *h);
 
 /**	@brief Calculate square root of an FP4
  *
 	Square root
 	@param r FP4 instance, on exit = sqrt(x)
 	@param x FP4 instance
-	@return 1 x is a QR, otherwise 0
+	@param h optional input hint
  */
-extern void  FP4_YYY_sqrt(FP4_YYY *r, FP4_YYY *x);
+extern void  FP4_YYY_sqrt(FP4_YYY *r, FP4_YYY *x, FP_YYY *h);
 
 
 /**	@brief Divide FP4 number by QNR

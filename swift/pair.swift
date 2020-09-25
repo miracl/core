@@ -198,7 +198,8 @@ public struct PAIR {
 
     static private func pack(_ AA: FP2,_ BB: FP2,_ CC: FP2) -> FP4 {
         var i=FP2(CC)
-        i.inverse()
+        let pNIL:FP?=nil
+        i.inverse(pNIL)
         var a=FP2(AA)
         var b=FP2(BB)
         a.mul(i)
@@ -239,8 +240,9 @@ public struct PAIR {
         var P=ECP2(); P.copy(GV);            
 
         if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
-            if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {  
-                f.inverse()
+            if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE { 
+                let pNIL:FP?=nil            
+                f.inverse(pNIL)
                 f.norm()
             }
         }
@@ -334,7 +336,8 @@ public struct PAIR {
 
         if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
             if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {  
-                f.inverse()
+                let pNIL:FP?=nil   
+                f.inverse(pNIL)
                 f.norm()
             }
         }
@@ -398,7 +401,8 @@ public struct PAIR {
 
         if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
             if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {  
-                f.inverse()
+                let pNIL:FP?=nil   
+                f.inverse(pNIL)
                 f.norm()
             }
         }
@@ -478,7 +482,8 @@ public struct PAIR {
 
         if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
             if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {  
-                f.inverse()
+                let pNIL:FP?=nil   
+                f.inverse(pNIL)
                 f.norm()
             }
         }
@@ -901,7 +906,8 @@ PFBNF */
             var u=PAIR.gs(e);
     
             if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {  
-                f.inverse()
+                let pNIL:FP?=nil   
+                f.inverse(pNIL)
                 f.norm()
             }
 

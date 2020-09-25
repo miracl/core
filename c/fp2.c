@@ -306,7 +306,7 @@ void FP2_YYY_rawoutput(FP2_YYY *w)
 
 /* Set w=1/x */
 /* SU= 128 */
-void FP2_YYY_inv(FP2_YYY *w, FP2_YYY *x)
+void FP2_YYY_inv(FP2_YYY *w, FP2_YYY *x, FP_YYY *h)
 {
     BIG_XXX m, b;
     FP_YYY w1, w2;
@@ -316,7 +316,7 @@ void FP2_YYY_inv(FP2_YYY *w, FP2_YYY *x)
     FP_YYY_sqr(&w2, &(x->b));
     FP_YYY_add(&w1, &w1, &w2);
 
-    FP_YYY_inv(&w1, &w1, NULL);
+    FP_YYY_inv(&w1, &w1, h);
 
     FP_YYY_mul(&(w->a), &(x->a), &w1);
     FP_YYY_neg(&w1, &w1);
@@ -369,7 +369,7 @@ void FP2_YYY_div_ip(FP2_YYY *w)
     FP2_YYY z;
     FP2_YYY_norm(w);
     FP2_YYY_from_ints(&z, (1 << QNRI_YYY), 1);
-    FP2_YYY_inv(&z, &z);
+    FP2_YYY_inv(&z, &z, NULL);
     FP2_YYY_mul(w, &z, w);
 #if TOWER_YYY == POSITOWER
     FP2_YYY_neg(w, w);  // ***
@@ -413,18 +413,18 @@ void FP2_YYY_pow(FP2_YYY *r, FP2_YYY* a, BIG_XXX b)
 */
 /* test for x a QR */
 
-int FP2_YYY_qr(FP2_YYY *x)
+int FP2_YYY_qr(FP2_YYY *x, FP_YYY *h)
 { /* test x^(p^2-1)/2 = 1 */
     FP2_YYY c;
     FP2_YYY_conj(&c,x);
     FP2_YYY_mul(&c,&c,x);
 
-    return FP_YYY_qr(&(c.a),NULL);
+    return FP_YYY_qr(&(c.a),h);
 }
 
 /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
 
-void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
+void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u, FP_YYY *h)
 {
     FP_YYY w1, w2, w3, w4, hint;
     FP2_YYY nw;
@@ -437,7 +437,7 @@ void FP2_YYY_sqrt(FP2_YYY *w, FP2_YYY *u)
     FP_YYY_sqr(&w2, &(w->a));
     FP_YYY_add(&w1, &w1, &w2);
     FP_YYY_norm(&w1);
-    FP_YYY_sqrt(&w1, &w1,NULL);
+    FP_YYY_sqrt(&w1, &w1,h);
 
     FP_YYY_add(&w2, &(w->a), &w1);
     FP_YYY_norm(&w2);

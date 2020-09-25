@@ -820,7 +820,7 @@ impl FP24 {
 
         f3.add(&self.c);
         f3.norm();
-        f3.inverse();
+        f3.inverse(None);
         self.a.copy(&f0);
         self.a.mul(&f3);
         self.b.copy(&f1);

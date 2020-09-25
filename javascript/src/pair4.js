@@ -150,7 +150,7 @@ var PAIR4 = function(ctx) {
 // Store precomputed line details in an FP8
 		pack: function(AA,BB,CC) {
 			var i=new ctx.FP4(CC);
-			i.inverse();
+			i.inverse(null);
 			var a=new ctx.FP4(AA);
 			a.mul(i);
 			var b=new ctx.FP4(BB);

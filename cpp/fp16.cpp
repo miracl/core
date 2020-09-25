@@ -278,7 +278,7 @@ void YYY::FP16_inv(FP16 *w, FP16 *x)
     FP8_sub(&t1, &t1, &t2);
     FP8_norm(&t1);
 
-    FP8_inv(&t1, &t1);
+    FP8_inv(&t1, &t1, NULL);
 
     FP8_mul(&(w->a), &t1, &(x->a));
     FP8_neg(&t1, &t1);

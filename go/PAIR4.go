@@ -187,7 +187,7 @@ func Miller(r []*FP24) *FP24 {
 // Store precomputed line details in an FP8
 func pack(AA *FP4, BB *FP4, CC *FP4) *FP8 {
 	i := NewFP4copy(CC)
-	i.inverse()
+	i.inverse(nil)
 	a := NewFP4copy(AA)
 	a.mul(i)
 	b := NewFP4copy(BB)

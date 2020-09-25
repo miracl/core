@@ -208,8 +208,9 @@ extern void FP2_YYY_rawoutput(FP2_YYY *x);
  *
 	@param x FP2 instance, on exit = 1/y
 	@param y FP2 instance
+    @param h optional input hint
  */
-extern void FP2_YYY_inv(FP2_YYY *x, FP2_YYY *y);
+extern void FP2_YYY_inv(FP2_YYY *x, FP2_YYY *y, FP_YYY *h);
 /**	@brief Divide an FP2 by 2
  *
 	@param x FP2 instance, on exit = y/2
@@ -255,16 +256,18 @@ extern void FP2_YYY_pow(FP2_YYY *x, FP2_YYY *y, BIG_XXX b);
 /**	@brief Test FP2 for QR
  *
 	@param x FP2 instance
+    @param h optional generated hint
 	@return true or false
  */
-extern int FP2_YYY_qr(FP2_YYY *x);
+extern int FP2_YYY_qr(FP2_YYY *x, FP_YYY *h);
 
 /**	@brief Square root of an FP2
  *
 	@param x FP2 instance, on exit = sqrt(y)
 	@param y FP2 instance
+    @param h optional input hint
  */
-extern void FP2_YYY_sqrt(FP2_YYY *x, FP2_YYY *y);
+extern void FP2_YYY_sqrt(FP2_YYY *x, FP2_YYY *y, FP_YYY *h);
 
 /**	@brief Multiply an FP2 by sqrt(-1)
  *

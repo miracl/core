@@ -323,15 +323,15 @@ impl FP2 {
         self.copy(&r);
     }*/
 
-    pub fn qr(&mut self) -> isize {
+    pub fn qr(&mut self,h:Option<&mut FP>) -> isize {
         let mut c=FP2::new_copy(self);
         c.conj();
         c.mul(self);
-        return c.getA().qr(None);
+        return c.getA().qr(h);
     }
 
     /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-    pub fn sqrt(&mut self) {
+    pub fn sqrt(&mut self,h:Option<&FP>) {
         if self.iszilch() {
             return;
         }
@@ -345,7 +345,7 @@ impl FP2 {
         w2.sqr();
         w1.add(&w2); w1.norm();
 
-        w2.copy(&w1.sqrt(None));
+        w2.copy(&w1.sqrt(h));
         w1.copy(&w2);
 
         w2.copy(&self.a);
@@ -384,7 +384,7 @@ impl FP2 {
     }
 
     /* self=1/self */
-    pub fn inverse(&mut self) {
+    pub fn inverse(&mut self,h:Option<&FP>) {
         self.norm();
         let mut w1 = FP::new_copy(&self.a);
         let mut w2 = FP::new_copy(&self.b);
@@ -392,7 +392,7 @@ impl FP2 {
         w1.sqr();
         w2.sqr();
         w1.add(&w2);
-        w1.inverse(None);
+        w1.inverse(h);
         self.a.mul(&w1);
         w1.neg();
         w1.norm();
@@ -434,7 +434,7 @@ impl FP2 {
     /* w/=(1+sqrt(-1)) */
     pub fn div_ip(&mut self) {
         let mut z = FP2::new_ints(1 << fp::QNRI, 1);
-        z.inverse();
+        z.inverse(None);
         self.norm();
         self.mul(&z);
         if fp::TOWER == fp::POSITOWER {

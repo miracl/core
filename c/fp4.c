@@ -294,7 +294,7 @@ void FP4_YYY_rawoutput(FP4_YYY *w)
 
 /* Set w=1/x */
 /* SU= 160 */
-void FP4_YYY_inv(FP4_YYY *w, FP4_YYY *x)
+void FP4_YYY_inv(FP4_YYY *w, FP4_YYY *x, FP_YYY *h)
 {
     FP2_YYY t1, t2;
     FP2_YYY_sqr(&t1, &(x->a));
@@ -302,7 +302,7 @@ void FP4_YYY_inv(FP4_YYY *w, FP4_YYY *x)
     FP2_YYY_mul_ip(&t2);
     FP2_YYY_norm(&t2);
     FP2_YYY_sub(&t1, &t1, &t2);
-    FP2_YYY_inv(&t1, &t1);
+    FP2_YYY_inv(&t1, &t1, h);
     FP2_YYY_mul(&(w->a), &t1, &(x->a));
     FP2_YYY_neg(&t1, &t1);
     FP2_YYY_norm(&t1);
@@ -612,22 +612,23 @@ void FP4_YYY_rand(FP4_YYY *x,csprng *rng)
 #if PAIRING_FRIENDLY_ZZZ >= BLS24_CURVE
 
 /* test for x a QR */
-int FP4_YYY_qr(FP4_YYY *x)
+int FP4_YYY_qr(FP4_YYY *x, FP_YYY *h)
 { /* test x^(p^4-1)/2 = 1 */
     FP4_YYY c;
     FP4_YYY_conj(&c,x);
     FP4_YYY_mul(&c,&c,x);
 
-    return FP2_YYY_qr(&(c.a));
+    return FP2_YYY_qr(&(c.a),h);
 }
 
 /* sqrt(a+xb) = sqrt((a+sqrt(a*a-n*b*b))/2)+x.b/(2*sqrt((a+sqrt(a*a-n*b*b))/2)) */
 
-void FP4_YYY_sqrt(FP4_YYY *r, FP4_YYY* x)
+void FP4_YYY_sqrt(FP4_YYY *r, FP4_YYY* x, FP_YYY *h)
 {
     FP2_YYY a, b, s, t;
     FP4_YYY nr;
-    int sgn;
+    FP_YYY hint,twk;
+    int sgn,qr;
 
     FP4_YYY_copy(r, x);
     if (FP4_YYY_iszilch(x)) return;
@@ -641,7 +642,7 @@ void FP4_YYY_sqrt(FP4_YYY *r, FP4_YYY* x)
     FP2_YYY_norm(&s);
     FP2_YYY_sub(&a, &a, &s); // a-=txx(s)
     FP2_YYY_norm(&a);
-    FP2_YYY_sqrt(&s, &a);
+    FP2_YYY_sqrt(&s, &a, h);
 
     FP2_YYY_copy(&t, &(x->a));
 
@@ -649,21 +650,44 @@ void FP4_YYY_sqrt(FP4_YYY *r, FP4_YYY* x)
     FP2_YYY_norm(&a);
     FP2_YYY_div2(&a, &a);
 
+    FP2_YYY_div2(&b,&(r->b));                   // w1=b/2
+    qr=FP2_YYY_qr(&a,&hint);                    // only exp! Cost=+1
+
+    FP2_YYY_sqrt(&(r->a),&a,&hint);             // a=sqrt(w2)  Cost=+1
+    FP2_YYY_inv(&s,&a,&hint);                  // w3=1/w2
+    FP2_YYY_mul(&s,&s,&(r->a));                // w3=1/sqrt(w2)
+    FP2_YYY_mul(&(r->b),&s,&b);                // b=(b/2)*1/sqrt(w2)
+
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+
+    FP_YYY_rcopy(&twk,TWK_YYY);
+    FP_YYY_mul(&hint,&hint,&twk);
+    FP2_YYY_div_ip(&a); FP2_YYY_norm(&a); // switch to other candidate
+
+    FP2_YYY_sqrt(&t,&a,&hint);                 // w4=sqrt(w2)  Cost=+1
+    FP2_YYY_inv(&s,&a,&hint);                  // w3=1/w2    
+    FP2_YYY_mul(&s,&s,&t);                    // w3=1/sqrt(w2)
+    FP2_YYY_mul(&s,&s,&b);                    // w3=(b/2)*1/sqrt(w2)
+
+    FP2_YYY_cmove(&(r->a),&s,1-qr);
+    FP2_YYY_cmove(&(r->b),&t,1-qr);
+
+/*
     FP2_YYY_sub(&b, &t, &s);
     FP2_YYY_norm(&b);
     FP2_YYY_div2(&b, &b);
 
-    FP2_YYY_cmove(&a,&b,FP2_YYY_qr(&b)); // one or the other will be a QR
+    FP2_YYY_cmove(&a,&b,FP2_YYY_qr(&b,NULL)); // one or the other will be a QR
 
-    FP2_YYY_sqrt(&a, &a);
+    FP2_YYY_sqrt(&a, &a, NULL);
     FP2_YYY_copy(&t, &(x->b));
     FP2_YYY_add(&s, &a, &a);
     FP2_YYY_norm(&s);
-    FP2_YYY_inv(&s, &s);
+    FP2_YYY_inv(&s, &s, NULL);
 
     FP2_YYY_mul(&t, &t, &s);
     FP4_YYY_from_FP2s(r, &a, &t);
-
+*/
     sgn=FP4_YYY_sign(r);
     FP4_YYY_neg(&nr,r); FP4_YYY_norm(&nr);
     FP4_YYY_cmove(r,&nr,sgn);

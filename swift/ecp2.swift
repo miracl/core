@@ -121,7 +121,8 @@ public struct ECP2 {
             x.reduce(); y.reduce()
             return
         }
-        z.inverse()
+        let pNIL:FP?=nil
+        z.inverse(pNIL)
 
         x.mul(z); x.reduce()
         y.mul(z); y.reduce()
@@ -256,10 +257,11 @@ public struct ECP2 {
         x=FP2(ix)
         y=FP2(1)
         z=FP2(1)
+        var hint:FP?=FP()
         x.norm()
         var rhs=ECP2.RHS(x)
- 	    if rhs.qr() == 1 {
-		    rhs.sqrt()
+ 	    if rhs.qr(&hint) == 1 {
+		    rhs.sqrt(hint)
 		    if rhs.sign() != s {
 			    rhs.neg()
 		    }
@@ -483,7 +485,8 @@ public struct ECP2 {
         let Frb=BIG(ROM.Frb)
         var X=FP2(Fra,Frb)
         if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
-            X.inverse()
+            let pNIL:FP?=nil
+            X.inverse(pNIL)
             X.norm()
         }
         let x=BIG(ROM.CURVE_Bnx)
@@ -633,6 +636,7 @@ public struct ECP2 {
         var NY=FP2(1)
         var T=FP2(H) /**/
         let sgn=T.sign() /**/
+        var pNIL:FP?=nil
         if CONFIG_CURVE.HTC_ISO_G2 == 0 {
             var Z=FP(CONFIG_FIELD.RIADZG2A)
             var X1=FP2(Z)
@@ -643,7 +647,7 @@ public struct ECP2 {
             { // special case for BLS12381
                 W.copy(FP2(2,1))
             } else {
-                W.sqrt()
+                W.sqrt(pNIL)
             }
             let s=FP(BIG(ROM.SQRTm3))
             Z.mul(s)
@@ -655,7 +659,7 @@ public struct ECP2 {
             NY.copy(T); NY.mul(Y)
         
             NY.pmul(Z)
-            NY.inverse()
+            NY.inverse(pNIL)
 
             W.pmul(Z)
             if W.sign()==1 {
@@ -675,11 +679,11 @@ public struct ECP2 {
             X3.add(A); X3.norm()
 
             Y.copy(ECP2.RHS(X2))
-            X3.cmove(X2,Y.qr())
+            X3.cmove(X2,Y.qr(&pNIL))
             Y.copy(ECP2.RHS(X1))
-            X3.cmove(X1,Y.qr())
+            X3.cmove(X1,Y.qr(&pNIL))
             Y.copy(ECP2.RHS(X3))
-            Y.sqrt()
+            Y.sqrt(pNIL)
 
             let ne=Y.sign()^sgn
             W.copy(Y); W.neg(); W.norm()
@@ -702,7 +706,7 @@ public struct ECP2 {
             W.mul(T)
             var A=FP2(Ad)
             A.mul(W)
-            A.inverse()
+            A.inverse(pNIL)
             W.add(NY); W.norm()
             W.mul(Bd)
             W.neg(); W.norm()
@@ -713,10 +717,10 @@ public struct ECP2 {
             X3.mul(X2)
 
             W.copy(X3); W.sqr(); W.add(Ad); W.norm(); W.mul(X3); W.add(Bd); W.norm() // x^3+Ax+b
-            X2.cmove(X3,W.qr())
+            X2.cmove(X3,W.qr(&pNIL))
             W.copy(X2); W.sqr(); W.add(Ad); W.norm(); W.mul(X2); W.add(Bd); W.norm() // x^3+Ax+b
             var Y=FP2(W)
-            Y.sqrt()
+            Y.sqrt(pNIL)
 
             let ne=Y.sign()^sgn
             W.copy(Y); W.neg(); W.norm()

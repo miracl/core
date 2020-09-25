@@ -186,7 +186,7 @@ pub fn miller(r:&mut [FP48]) -> FP48 {
 
 fn pack(aa: &FP8,bb: &FP8,cc: &FP8) -> FP16 {
     let mut i=FP8::new_copy(cc);
-    i.inverse();
+    i.inverse(None);
     let mut a=FP8::new_copy(aa);
     let mut b=FP8::new_copy(bb);
     a.mul(&i);

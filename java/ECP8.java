@@ -128,7 +128,7 @@ public final class ECP8 {
 			y.reduce();
 			return;
 		}
-		z.inverse();
+		z.inverse(null);
 
 		x.mul(z); x.reduce();               // *****
 		y.mul(z); y.reduce();
@@ -353,11 +353,12 @@ public final class ECP8 {
 		x=new FP8(ix);
 		y=new FP8(1);
 		z=new FP8(1);
+        FP h=new FP();
 		x.norm();
 		FP8 rhs=RHS(x);
-		if (rhs.qr()==1) 
+		if (rhs.qr(h)==1) 
 		{
-            rhs.sqrt();
+            rhs.sqrt(h);
             if (rhs.sign() != s)
                 rhs.neg();
             rhs.reduce();
@@ -516,7 +517,7 @@ public final class ECP8 {
 			if (CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE)
 			{
 				F1.mul_ip();  F1.norm();
-				F1.inverse();
+				F1.inverse(null);
 				F0.copy(F1); F0.sqr();
 	
 				F1.mul(F0);
@@ -855,7 +856,7 @@ public final class ECP8 {
         FP8 X1=new FP8(Z);
         FP8 A=RHS(X1);
         FP8 W=new FP8(A);
-        W.sqrt();
+        W.sqrt(null);
         FP s=new FP(new BIG(ROM.SQRTm3));
         Z.mul(s);
 
@@ -863,10 +864,10 @@ public final class ECP8 {
         FP8 Y=new FP8(A); Y.mul(T);
         T.copy(NY); T.add(Y); T.norm();
         Y.rsub(NY); Y.norm();
-        NY.copy(T); NY.mul(Y); NY.inverse();
+        NY.copy(T); NY.mul(Y); //NY.inverse(null);
 
         NY.tmul(Z);
-        NY.inverse();
+        NY.inverse(null);
 
         W.tmul(Z);
         if (W.sign()==1)
@@ -888,11 +889,11 @@ public final class ECP8 {
         X3.add(A); X3.norm();
 
         Y.copy(RHS(X2));
-        X3.cmove(X2,Y.qr());
+        X3.cmove(X2,Y.qr(null));
         Y.copy(RHS(X1));
-        X3.cmove(X1,Y.qr());
+        X3.cmove(X1,Y.qr(null));
         Y.copy(RHS(X3));
-        Y.sqrt();
+        Y.sqrt(null);
 
         ne=Y.sign()^sgn;
         W.copy(Y); W.neg(); W.norm();

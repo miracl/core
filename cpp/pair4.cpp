@@ -198,7 +198,7 @@ void ZZZ::PAIR_miller(FP24 *res, FP24 r[])
 static void ZZZ::PAIR_pack(FP8 *T, FP4* AA, FP4* BB, FP4 *CC)
 {
     FP4 I, A, B;
-    FP4_inv(&I, CC);
+    FP4_inv(&I, CC, NULL);
     FP4_mul(&A, AA, &I);
     FP4_mul(&B, BB, &I);
     FP8_from_FP4s(T, &A, &B);

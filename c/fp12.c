@@ -653,7 +653,7 @@ void FP12_YYY_inv(FP12_YYY *w, FP12_YYY *x)
     FP4_YYY_add(&f3, &(w->c), &f3);
     FP4_YYY_norm(&f3);
 
-    FP4_YYY_inv(&f3, &f3);
+    FP4_YYY_inv(&f3, &f3, NULL);
 
     FP4_YYY_mul(&(w->a), &f0, &f3);
     FP4_YYY_mul(&(w->b), &f1, &f3);

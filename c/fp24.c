@@ -646,7 +646,7 @@ void FP24_YYY_inv(FP24_YYY *w, FP24_YYY *x)
     FP8_YYY_add(&f3, &(w->c), &f3);
     FP8_YYY_norm(&f3);
 
-    FP8_YYY_inv(&f3, &f3);
+    FP8_YYY_inv(&f3, &f3, NULL);
     FP8_YYY_mul(&(w->a), &f0, &f3);
     FP8_YYY_mul(&(w->b), &f1, &f3);
     FP8_YYY_mul(&(w->c), &f2, &f3);

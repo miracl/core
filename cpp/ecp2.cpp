@@ -119,7 +119,7 @@ void ZZZ::ECP2_affine(ECP2 *P)
         return;
     }
 
-    FP2_inv(&iz, &(P->z));
+    FP2_inv(&iz, &(P->z), NULL);
     FP2_mul(&(P->x), &(P->x), &iz);
     FP2_mul(&(P->y), &(P->y), &iz);
 
@@ -290,15 +290,16 @@ int ZZZ::ECP2_set(ECP2 *P, FP2 *x, FP2 *y)
 int ZZZ::ECP2_setx(ECP2 *P, FP2 *x, int s)
 {
     FP2 y;
+    FP hint;
     ECP2_rhs(&y, x);
 
-    if (!FP2_qr(&y))
+    if (!FP2_qr(&y,&hint))
     {
         ECP2_inf(P);
         return 0;
     }
 
-    FP2_sqrt(&y,&y);
+    FP2_sqrt(&y,&y,&hint);
 
     FP2_copy(&(P->x), x);
     FP2_copy(&(P->y), &y);
@@ -686,7 +687,7 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
 
     FP2_mul(&W,&W,&T);
     FP2_mul(&A,&Ad,&W);
-    FP2_inv(&A,&A);
+    FP2_inv(&A,&A,NULL);
     FP2_add(&W,&W,&NY);
     FP2_norm(&W);
     FP2_mul(&W,&W,&Bd);
@@ -697,9 +698,9 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_mul(&X3,&T,&X2);
 
     FP2_sqr(&W,&X3); FP2_add(&W,&W,&Ad); FP2_norm(&W); FP2_mul(&W,&W,&X3); FP2_add(&W,&W,&Bd); FP2_norm(&W);  // w=x^3+Ax+B
-    FP2_cmove(&X2,&X3,FP2_qr(&W));                    
+    FP2_cmove(&X2,&X3,FP2_qr(&W,NULL));                    
     FP2_sqr(&W,&X2); FP2_add(&W,&W,&Ad); FP2_norm(&W); FP2_mul(&W,&W,&X2); FP2_add(&W,&W,&Bd); FP2_norm(&W);
-    FP2_sqrt(&Y,&W);  
+    FP2_sqrt(&Y,&W,NULL);  
 
     ne=FP2_sign(&Y)^sgn;
     FP2_neg(&NY,&Y); FP2_norm(&NY);
@@ -777,7 +778,7 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     { // special case for BLS12381
         FP2_from_ints(&W,2,1);
     } else {
-        FP2_sqrt(&W,&A);   // sqrt(g(Z))
+        FP2_sqrt(&W,&A,NULL);   // sqrt(g(Z))
     }
     FP_rcopy(&s,SQRTm3);
 
@@ -790,7 +791,7 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_mul(&NY,&T,&Y);
 
     FP2_pmul(&NY,&NY,&Z);
-    FP2_inv(&NY,&NY);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
+    FP2_inv(&NY,&NY,NULL);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
 
     FP2_pmul(&W,&W,&Z); // tv4=Z*sqrt(-3).sqrt(g(Z))
     if (FP2_sign(&W)==1)
@@ -819,11 +820,11 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_add(&X3,&X3,&A); FP2_norm(&X3);
 
     ECP2_rhs(&W,&X2);
-    FP2_cmove(&X3,&X2,FP2_qr(&W));
+    FP2_cmove(&X3,&X2,FP2_qr(&W,NULL));
     ECP2_rhs(&W,&X1);
-    FP2_cmove(&X3,&X1,FP2_qr(&W));
+    FP2_cmove(&X3,&X1,FP2_qr(&W,NULL));
     ECP2_rhs(&W,&X3);
-    FP2_sqrt(&Y,&W);
+    FP2_sqrt(&Y,&W,NULL);
 
     ne=FP2_sign(&Y)^sgn;
     FP2_neg(&W,&Y); FP2_norm(&W);
@@ -866,7 +867,7 @@ void ZZZ::ECP2_cfp(ECP2 *Q)
     FP2_rcopy(&X,Fra,Frb);
 
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_inv(&X, &X);
+    FP2_inv(&X, &X,NULL);
     FP2_norm(&X);
 #endif
 

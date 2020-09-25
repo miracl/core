@@ -125,7 +125,7 @@ func (E *ECP8) Affine() {
 		E.y.reduce()
 		return
 	}
-	E.z.inverse()
+	E.z.inverse(nil)
 
 	E.x.mul(E.z)
 	E.x.reduce()
@@ -417,13 +417,14 @@ func NewECP8fp8s(ix *FP8, iy *FP8) *ECP8 {
 /* construct this from x - but set to O if not on curve */
 func NewECP8fp8(ix *FP8, s int) *ECP8 {
 	E := new(ECP8)
+	h:=NewFP()
 	E.x = NewFP8copy(ix)
 	E.y = NewFP8int(1)
 	E.z = NewFP8int(1)
 	E.x.norm()
 	rhs := RHS8(E.x)
-	if rhs.qr() == 1  {
-		rhs.sqrt()
+	if rhs.qr(h) == 1  {
+		rhs.sqrt(h)
 		if rhs.sign() != s {
 			rhs.neg()
 		}
@@ -620,7 +621,7 @@ func ECP8_frob_constants() [3]*FP2 {
 	if SEXTIC_TWIST == M_TYPE {
 		F1.mul_ip()
 		F1.norm()
-		F1.inverse()
+		F1.inverse(nil)
 		F0.copy(F1)
 		F0.sqr()
 		F1.mul(F0)
@@ -853,7 +854,7 @@ func ECP8_map2point(H *FP8) *ECP8 {
 	X3:=NewFP8copy(X1)
 	A:=RHS8(X1)
 	W:=NewFP8copy(A)
-	W.sqrt();
+	W.sqrt(nil);
 
 	s:=NewFPbig(NewBIGints(SQRTm3))
 	Z.mul(s)
@@ -865,7 +866,7 @@ func ECP8_map2point(H *FP8) *ECP8 {
 	NY.copy(T); NY.mul(Y)
 	
 	NY.tmul(Z)
-	NY.inverse()
+	NY.inverse(nil)
 
 	W.tmul(Z)
     if (W.sign()==1) {
@@ -885,11 +886,11 @@ func ECP8_map2point(H *FP8) *ECP8 {
 	X3.add(A); X3.norm()
 
     Y.copy(RHS8(X2))
-    X3.cmove(X2,Y.qr())
+    X3.cmove(X2,Y.qr(nil))
     Y.copy(RHS8(X1))
-    X3.cmove(X1,Y.qr())
+    X3.cmove(X1,Y.qr(nil))
     Y.copy(RHS8(X3))
-    Y.sqrt()
+    Y.sqrt(nil)
 
     ne:=Y.sign()^sgn
     W.copy(Y); W.neg(); W.norm()

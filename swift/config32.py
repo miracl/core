@@ -206,6 +206,9 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
             os.system(copytext+"pair4.swift "+fpath+"pair4.swift")
             os.system(copytext+"mpin192.swift "+fpath+"mpin192.swift")
             os.system(copytext+"bls192.swift "+fpath+"bls192.swift")
+            replace(fpath+"fp4.swift","PFGE24S","*/")
+            replace(fpath+"fp4.swift","PFGE24F","/*")
+
         if pf == "BLS48" :
             os.system(copytext+"fp8.swift "+fpath+"fp8.swift")
             os.system(copytext+"fp16.swift "+fpath+"fp16.swift")
@@ -214,6 +217,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
             os.system(copytext+"pair8.swift "+fpath+"pair8.swift")
             os.system(copytext+"mpin256.swift "+fpath+"mpin256.swift")
             os.system(copytext+"bls256.swift "+fpath+"bls256.swift")
+            replace(fpath+"fp4.swift","PFGE24S","*/")
+            replace(fpath+"fp4.swift","PFGE24F","/*")
+            replace(fpath+"fp8.swift","PFGE48S","*/")
+            replace(fpath+"fp8.swift","PFGE48F","/*")
     else :
         os.system(copytext+"ecdh.swift "+fpath+"ecdh.swift")
         os.system(copytext+"hpke.swift "+fpath+"hpke.swift")

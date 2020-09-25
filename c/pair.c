@@ -177,7 +177,7 @@ void PAIR_ZZZ_initmp(FP12_YYY r[])
 static void PAIR_ZZZ_pack(FP4_YYY *T, FP2_YYY* AA, FP2_YYY* BB, FP2_YYY *CC)
 {
     FP2_YYY I, A, B;
-    FP2_YYY_inv(&I, CC);
+    FP2_YYY_inv(&I, CC, NULL);
     FP2_YYY_mul(&A, AA, &I);
     FP2_YYY_mul(&B, BB, &I);
     FP4_YYY_from_FP2s(T, &A, &B);
@@ -242,7 +242,7 @@ void PAIR_ZZZ_precomp(FP4_YYY T[], ECP2_ZZZ* GV)
     FP_YYY_rcopy(&Qy, Frb_YYY);
     FP2_YYY_from_FPs(&X, &Qx, &Qy);
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_YYY_inv(&X, &X);
+    FP2_YYY_inv(&X, &X, NULL);
     FP2_YYY_norm(&X);
 #endif
 #endif
@@ -352,7 +352,7 @@ void PAIR_ZZZ_another(FP12_YYY r[], ECP2_ZZZ* PV, ECP_ZZZ* QV)
     FP_YYY_rcopy(&Qy, Frb_YYY);
     FP2_YYY_from_FPs(&X, &Qx, &Qy);
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_YYY_inv(&X, &X);
+    FP2_YYY_inv(&X, &X, NULL);
     FP2_YYY_norm(&X);
 #endif
 #endif
@@ -428,7 +428,7 @@ void PAIR_ZZZ_ate(FP12_YYY *r, ECP2_ZZZ *P1, ECP_ZZZ *Q1)
     FP2_YYY_from_FPs(&X, &Qx, &Qy);
 
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_YYY_inv(&X, &X);
+    FP2_YYY_inv(&X, &X, NULL);
     FP2_YYY_norm(&X);
 #endif
 #endif
@@ -514,7 +514,7 @@ void PAIR_ZZZ_double_ate(FP12_YYY *r, ECP2_ZZZ *P1, ECP_ZZZ *Q1, ECP2_ZZZ *R1, E
     FP2_YYY_from_FPs(&X, &Qx, &Qy);
 
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_YYY_inv(&X, &X);
+    FP2_YYY_inv(&X, &X, NULL);
     FP2_YYY_norm(&X);
 #endif
 #endif
@@ -967,7 +967,7 @@ void PAIR_ZZZ_G2mul(ECP2_ZZZ *P, BIG_XXX e)
     FP2_YYY_from_FPs(&X, &fx, &fy);
 
 #if SEXTIC_TWIST_ZZZ==M_TYPE
-    FP2_YYY_inv(&X, &X);
+    FP2_YYY_inv(&X, &X, NULL);
     FP2_YYY_norm(&X);
 #endif
 

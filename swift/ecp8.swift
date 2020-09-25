@@ -123,7 +123,8 @@ public struct ECP8 {
             x.reduce(); y.reduce()
             return
         }
-        z.inverse()
+        let pNIL:FP?=nil
+        z.inverse(pNIL)
 
         x.mul(z); x.reduce()
         y.mul(z); y.reduce()
@@ -363,9 +364,10 @@ public struct ECP8 {
         x=FP8(ix)
         y=FP8(1)
         z=FP8(1)
+        var hint:FP?=FP()
         var rhs=ECP8.RHS(x)
- 	    if rhs.qr() == 1 {
-		    rhs.sqrt()
+ 	    if rhs.qr(&hint) == 1 {
+		    rhs.sqrt(hint)
 		    if rhs.sign() != s {
 			    rhs.neg()
 		    }
@@ -520,8 +522,9 @@ public struct ECP8 {
 
         f1.copy(X)
         if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {
+            let pNIL:FP?=nil
             f1.mul_ip();  f1.norm()
-            f1.inverse()
+            f1.inverse(pNIL)
             f0.copy(f1); f0.sqr()
 
             f1.mul(f0)
@@ -923,13 +926,13 @@ public struct ECP8 {
         var NY=FP8(1)
         var T=FP8(H)
         let sgn=T.sign()
-
+        var pNIL:FP?=nil
         var Z=FP(CONFIG_FIELD.RIADZG2A)
         var X1=FP8(Z)
         var X3=FP8(X1)
         var A=ECP8.RHS(X1)
         var W=FP8(A)
-        W.sqrt()
+        W.sqrt(pNIL)
 
         let s=FP(BIG(ROM.SQRTm3))
         Z.mul(s)
@@ -941,7 +944,7 @@ public struct ECP8 {
         NY.copy(T); NY.mul(Y)
         
         NY.tmul(Z)
-        NY.inverse()
+        NY.inverse(pNIL)
 
         W.tmul(Z)
         if W.sign()==1 {
@@ -961,11 +964,11 @@ public struct ECP8 {
         X3.add(A); X3.norm()
 
         Y.copy(ECP8.RHS(X2))
-        X3.cmove(X2,Y.qr())
+        X3.cmove(X2,Y.qr(&pNIL))
         Y.copy(ECP8.RHS(X1))
-        X3.cmove(X1,Y.qr())
+        X3.cmove(X1,Y.qr(&pNIL))
         Y.copy(ECP8.RHS(X3))
-        Y.sqrt()
+        Y.sqrt(pNIL)
 
         let ne=Y.sign()^sgn
         W.copy(Y); W.neg(); W.norm()

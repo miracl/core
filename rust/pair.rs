@@ -199,7 +199,7 @@ pub fn miller(r:&mut [FP12]) -> FP12 {
 
 fn pack(aa: &FP2,bb: &FP2,cc: &FP2) -> FP4 {
     let mut i=FP2::new_copy(cc);
-    i.inverse();
+    i.inverse(None);
     let mut a=FP2::new_copy(aa);
     let mut b=FP2::new_copy(bb);
     a.mul(&i);
@@ -243,7 +243,7 @@ pub fn precomp(T: &mut [FP4],GV: &ECP2) {
 
     if ecp::CURVE_PAIRING_TYPE==ecp::BN {
         if ecp::SEXTIC_TWIST==ecp::M_TYPE {
-            f.inverse();
+            f.inverse(None);
             f.norm();
         }
     }
@@ -347,7 +347,7 @@ pub fn another(r:&mut [FP12],P1: &ECP2,Q1: &ECP) {
 
     if ecp::CURVE_PAIRING_TYPE==ecp::BN {
         if ecp::SEXTIC_TWIST==ecp::M_TYPE {
-            f.inverse();
+            f.inverse(None);
             f.norm();
         }
     }
@@ -408,7 +408,7 @@ pub fn ate(P1: &ECP2, Q1: &ECP) -> FP12 {
 
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
         if ecp::SEXTIC_TWIST == ecp::M_TYPE {
-            f.inverse();
+            f.inverse(None);
             f.norm();
         }
     } 
@@ -489,7 +489,7 @@ pub fn ate2(P1: &ECP2, Q1: &ECP, R1: &ECP2, S1: &ECP) -> FP12 {
 
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
         if ecp::SEXTIC_TWIST == ecp::M_TYPE {
-            f.inverse();
+            f.inverse(None);
             f.norm();
         }
     } 
@@ -899,7 +899,7 @@ pub fn g2mul(P: &ECP2, e: &BIG) -> ECP2 {
         let mut T = ECP2::new();
 
         if ecp::SEXTIC_TWIST == ecp::M_TYPE {
-            f.inverse();
+            f.inverse(None);
             f.norm();
         }
 

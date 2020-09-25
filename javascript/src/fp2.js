@@ -289,16 +289,16 @@ var FP2 = function(ctx) {
             this.copy(r);
         }, */
 
-        qr: function() {
+        qr: function(h) {
             var c = new FP2(this);
             c.conj();
             c.mul(this);
 
-            return c.geta().qr(null);
+            return c.geta().qr(h);
         },
 
         /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-        sqrt: function() {
+        sqrt: function(h) {
             var w1, w2, w3, w4, hint;
 
             if (this.iszilch()) {
@@ -315,7 +315,7 @@ var FP2 = function(ctx) {
             w2.sqr();
             w1.add(w2); w1.norm();
 
-            w1 = w1.sqrt(null);
+            w1 = w1.sqrt(h);
 
             w2.copy(this.a);
             w2.add(w1);
@@ -353,7 +353,7 @@ var FP2 = function(ctx) {
         },
 
         /* this=1/this */
-        inverse: function() {
+        inverse: function(h) {
             var w1, w2;
 
             this.norm();
@@ -364,7 +364,7 @@ var FP2 = function(ctx) {
             w1.sqr();
             w2.sqr();
             w1.add(w2);
-            w1.inverse(null);
+            w1.inverse(h);
             this.a.mul(w1);
             w1.neg();
             w1.norm();
@@ -407,7 +407,7 @@ var FP2 = function(ctx) {
         /* w/=(1+sqrt(-1)) */
         div_ip: function() {
 			var z=new FP2(1<<ctx.FP.QNRI,1);
-			z.inverse();
+			z.inverse(null);
 			this.mul(z);
 			if (ctx.FP.TOWER==ctx.FP.POSITOWER) {
 				this.neg();

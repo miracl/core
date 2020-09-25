@@ -660,7 +660,7 @@ void YYY::FP24_inv(FP24 *w, FP24 *x)
     FP8_add(&f3, &(w->c), &f3);
     FP8_norm(&f3);
 
-    FP8_inv(&f3, &f3);
+    FP8_inv(&f3, &f3, NULL);
     FP8_mul(&(w->a), &f0, &f3);
     FP8_mul(&(w->b), &f1, &f3);
     FP8_mul(&(w->c), &f2, &f3);

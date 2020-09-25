@@ -270,6 +270,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             os.system(copytext+"TestBLS192.java "+fpathTest+"TestBLS192.java")    #ms
             os.system(copytext+"TesttimeMPIN192.java "+fpathTest+"TesttimeMPIN192.java")    #ms
 
+            replace(fpath+"FP4.java","PFGE24S","*/")
+            replace(fpath+"FP4.java","PFGE24F","/*")
             replace(fpath+"FP8.java","XXX",tc)
             replace(fpath+"FP24.java","XXX",tc)
             replace(fpath+"ECP4.java","XXX",tc)
@@ -292,6 +294,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             os.system(copytext+"TestBLS256.java "+fpathTest+"TestBLS256.java")    #ms
             os.system(copytext+"TesttimeMPIN256.java "+fpathTest+"TesttimeMPIN256.java")    #ms
 
+            replace(fpath+"FP4.java","PFGE24S","*/")
+            replace(fpath+"FP4.java","PFGE24F","/*")
+            replace(fpath+"FP8.java","PFGE48S","*/")
+            replace(fpath+"FP8.java","PFGE48F","/*")
             replace(fpath+"FP8.java","XXX",tc)
             replace(fpath+"FP16.java","XXX",tc)
             replace(fpath+"FP48.java","XXX",tc)

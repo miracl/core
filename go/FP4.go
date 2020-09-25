@@ -318,7 +318,7 @@ func (F *FP4) toString() string {
 }
 
 /* this=1/this */
-func (F *FP4) inverse() {
+func (F *FP4) inverse(h *FP) {
 	t1 := NewFP2copy(F.a)
 	t2 := NewFP2copy(F.b)
 
@@ -328,7 +328,7 @@ func (F *FP4) inverse() {
 	t2.norm()
 	t1.sub(t2)
 
-	t1.inverse()
+	t1.inverse(h)
 	F.a.mul(t1)
 	t1.neg()
 	t1.norm()
@@ -643,16 +643,18 @@ func (F *FP4) pow(b *BIG) {
 	F.copy(r);
 }
 */
-/* Test for Quadratic Residue */
-func (F *FP4) qr() int {
+
+/* PFGE24S
+// Test for Quadratic Residue 
+func (F *FP4) qr(h *FP) int {
 	c := NewFP4copy(F)
 	c.conj()
 	c.mul(F)
-	return c.a.qr()
+	return c.a.qr(h)
 }
 
-/* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-func (F *FP4) sqrt()  {
+// sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) 
+func (F *FP4) sqrt(h *FP)  {
 	if F.iszilch() {
 		return 
 	}
@@ -661,6 +663,7 @@ func (F *FP4) sqrt()  {
 	b := NewFP2()
 	s := NewFP2copy(F.b)
 	t := NewFP2copy(F.a)
+	hint := NewFP()
 
 	s.sqr()
 	a.sqr()
@@ -669,7 +672,7 @@ func (F *FP4) sqrt()  {
 	a.sub(s)
 
 	s.copy(a); s.norm()
-	s.sqrt();
+	s.sqrt(h);
 
 	a.copy(t)
 	b.copy(t)
@@ -678,24 +681,48 @@ func (F *FP4) sqrt()  {
 	a.norm()
 	a.div2()
 
-	b.sub(s)
-	b.norm()
-	b.div2()
 
-	a.cmove(b,b.qr())
+    b.copy(F.b); b.div2()
+    qr:=a.qr(hint)
 
-	a.sqrt()
-	t.copy(F.b)
-	s.copy(a)
-	s.add(a); s.norm()
-	s.inverse()
+    F.a.copy(a); F.a.sqrt(hint)
+    s.copy(a); s.inverse(hint)
+    s.mul(F.a)
+    F.b.copy(s); F.b.mul(b)
 
-	t.mul(s)
-	F.a.copy(a)
-	F.b.copy(t)
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+
+	twk:=NewFPbig(NewBIGints(TWK))
+    hint.mul(twk)
+    a.div_ip(); a.norm()
+
+    t.copy(a); t.sqrt(hint)
+    s.copy(a); s.inverse(hint)
+    s.mul(t)
+    s.mul(b)
+
+    F.a.cmove(s,1-qr)
+    F.b.cmove(t,1-qr)
+
+//	b.sub(s)
+//	b.norm()
+//	b.div2()
+
+//	a.cmove(b,b.qr(nil))
+
+//	a.sqrt(nil)
+//	t.copy(F.b)
+//	s.copy(a)
+//	s.add(a); s.norm()
+//	s.inverse(nil)
+
+//	t.mul(s)
+//	F.a.copy(a)
+//	F.b.copy(t)
 
 	sgn:=F.sign()
 	nr:=NewFP4copy(F)
 	nr.neg(); nr.norm()
 	F.cmove(nr,sgn)
 }
+PFGE24F */

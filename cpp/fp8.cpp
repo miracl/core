@@ -288,7 +288,7 @@ void YYY::FP8_rawoutput(FP8 *w)
 }
 
 /* Set w=1/x */
-void YYY::FP8_inv(FP8 *w, FP8 *x)
+void YYY::FP8_inv(FP8 *w, FP8 *x, FP *h)
 {
     FP4 t1, t2;
     FP4_sqr(&t1, &(x->a));
@@ -298,7 +298,7 @@ void YYY::FP8_inv(FP8 *w, FP8 *x)
 
     FP4_sub(&t1, &t1, &t2);
     FP4_norm(&t1);
-    FP4_inv(&t1, &t1);
+    FP4_inv(&t1, &t1, h);
 
     FP4_mul(&(w->a), &t1, &(x->a));
     FP4_neg(&t1, &t1);
@@ -626,22 +626,23 @@ void YYY::FP8_rand(FP8 *x,csprng *rng)
 #if PAIRING_FRIENDLY_ZZZ == BLS48_CURVE
 
 /* test for x a QR */
-int YYY::FP8_qr(FP8 *x)
+int YYY::FP8_qr(FP8 *x,FP *h)
 { /* test x^(p^4-1)/2 = 1 */
     FP8 c;
     FP8_conj(&c,x);
     FP8_mul(&c,&c,x);
 
-    return FP4_qr(&(c.a));
+    return FP4_qr(&(c.a),h);
 }
 
 /* sqrt(a+xb) = sqrt((a+sqrt(a*a-n*b*b))/2)+x.b/(2*sqrt((a+sqrt(a*a-n*b*b))/2)) */
 
-void YYY::FP8_sqrt(FP8 *r, FP8* x)
+void YYY::FP8_sqrt(FP8 *r, FP8* x, FP *h)
 {
     FP4 a, b, s, t;
     FP8 nr;
-    int sgn;
+    FP hint,twk;
+    int sgn,qr;
     FP8_copy(r, x);
     if (FP8_iszilch(x)) return;
 
@@ -654,26 +655,50 @@ void YYY::FP8_sqrt(FP8 *r, FP8* x)
     FP4_norm(&s);
     FP4_sub(&a, &a, &s); // a-=txx(s)
     FP4_norm(&a);  // **
-    FP4_sqrt(&s, &a);
+    FP4_sqrt(&s, &a, h);
 
     FP4_copy(&t, &(x->a));
     FP4_add(&a, &t, &s);
     FP4_norm(&a);
     FP4_div2(&a, &a);
+
+    FP4_div2(&b,&(r->b));                   // w1=b/2
+    qr=FP4_qr(&a,&hint);                    // only exp! Cost=+1
+
+    FP4_sqrt(&(r->a),&a,&hint);             // a=sqrt(w2)  Cost=+1
+    FP4_inv(&s,&a,&hint);                  // w3=1/w2
+    FP4_mul(&s,&s,&(r->a));                // w3=1/sqrt(w2)
+    FP4_mul(&(r->b),&s,&b);                // b=(b/2)*1/sqrt(w2)
+
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+
+    FP_rcopy(&twk,TWK);
+    FP_mul(&hint,&hint,&twk);
+    FP4_div_i(&a); FP4_norm(&a); // switch to other candidate
+
+    FP4_sqrt(&t,&a,&hint);                 // w4=sqrt(w2)  Cost=+1
+    FP4_inv(&s,&a,&hint);                  // w3=1/w2    
+    FP4_mul(&s,&s,&t);                    // w3=1/sqrt(w2)
+    FP4_mul(&s,&s,&b);                    // w3=(b/2)*1/sqrt(w2)
+
+    FP4_cmove(&(r->a),&s,1-qr);
+    FP4_cmove(&(r->b),&t,1-qr);
+
+/*
     FP4_sub(&b, &t, &s);
     FP4_norm(&b);
     FP4_div2(&b, &b);
 
-    FP4_cmove(&a,&b,FP4_qr(&b)); // one or the other will be a QR
-    FP4_sqrt(&a, &a);
+    FP4_cmove(&a,&b,FP4_qr(&b,NULL)); // one or the other will be a QR
+    FP4_sqrt(&a, &a, NULL);
     FP4_copy(&t, &(x->b));
     FP4_add(&s, &a, &a);
     FP4_norm(&s); // **
-    FP4_inv(&s, &s);
+    FP4_inv(&s, &s, NULL);
 
     FP4_mul(&t, &t, &s);
     FP8_from_FP4s(r, &a, &t);
-
+*/
     sgn=FP8_sign(r);
     FP8_neg(&nr,r); FP8_norm(&nr);
     FP8_cmove(r,&nr,sgn);

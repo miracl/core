@@ -309,15 +309,15 @@ func (F *FP2) pow(b *BIG)  {
 	F.copy(r)
 }
 */
-func (F *FP2) qr() int {
+func (F *FP2) qr(h *FP) int {
 	c := NewFP2copy(F)
 	c.conj()
 	c.mul(F)
-	return c.a.qr(nil)
+	return c.a.qr(h)
 }
 
 /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-func (F *FP2) sqrt() {
+func (F *FP2) sqrt(h *FP) {
 	if F.iszilch() {
 		return 
 	}
@@ -330,7 +330,7 @@ func (F *FP2) sqrt() {
 	w2.sqr()
 	w1.add(w2); w1.norm()
 
-	w1 = w1.sqrt(nil)
+	w1 = w1.sqrt(h)
 	w2.copy(F.a)
 	w3.copy(F.a)
 
@@ -392,7 +392,7 @@ func (F *FP2) toString() string {
 }
 
 /* this=1/this */
-func (F *FP2) inverse() {
+func (F *FP2) inverse(h *FP) {
 	F.norm()
 	w1 := NewFPcopy(F.a)
 	w2 := NewFPcopy(F.b)
@@ -400,7 +400,7 @@ func (F *FP2) inverse() {
 	w1.sqr()
 	w2.sqr()
 	w1.add(w2)
-	w1.inverse(nil)
+	w1.inverse(h)
 	F.a.mul(w1)
 	w1.neg()
 	w1.norm()
@@ -444,7 +444,7 @@ func (F *FP2) mul_ip() {
 /* w/=(2^i+sqrt(-1)) */
 func (F *FP2) div_ip() {
 	z := NewFP2ints(1<<uint(QNRI), 1)
-	z.inverse()
+	z.inverse(nil)
 	F.norm()
 	F.mul(z)
 	if TOWER == POSITOWER {

@@ -299,7 +299,7 @@ void YYY::FP4_rawoutput(FP4 *w)
 
 /* Set w=1/x */
 /* SU= 160 */
-void YYY::FP4_inv(FP4 *w, FP4 *x)
+void YYY::FP4_inv(FP4 *w, FP4 *x, FP *h)
 {
     FP2 t1, t2;
     FP2_sqr(&t1, &(x->a));
@@ -307,7 +307,7 @@ void YYY::FP4_inv(FP4 *w, FP4 *x)
     FP2_mul_ip(&t2);
     FP2_norm(&t2);
     FP2_sub(&t1, &t1, &t2);
-    FP2_inv(&t1, &t1);
+    FP2_inv(&t1, &t1, h);
     FP2_mul(&(w->a), &t1, &(x->a));
     FP2_neg(&t1, &t1);
     FP2_norm(&t1);
@@ -620,23 +620,24 @@ void YYY::FP4_rand(FP4 *x,csprng *rng)
 #if PAIRING_FRIENDLY_ZZZ >= BLS24_CURVE
 
 /* test for x a QR */
-int YYY::FP4_qr(FP4 *x)
+int YYY::FP4_qr(FP4 *x, FP *h)
 { /* test x^(p^4-1)/2 = 1 */
     
     FP4 c;
     FP4_conj(&c,x);
     FP4_mul(&c,&c,x);
 
-    return FP2_qr(&(c.a));
+    return FP2_qr(&(c.a),h);
 }
 
 /* sqrt(a+xb) = sqrt((a+sqrt(a*a-n*b*b))/2)+x.b/(2*sqrt((a+sqrt(a*a-n*b*b))/2)) */
 
-void YYY::FP4_sqrt(FP4 *r, FP4* x)
+void YYY::FP4_sqrt(FP4 *r, FP4* x, FP *h)
 {
     FP2 a, b, s, t;
+    FP hint,twk;
     FP4 nr;
-    int sgn;
+    int sgn,qr;
 
     FP4_copy(r, x);
     if (FP4_iszilch(x)) return;
@@ -651,27 +652,49 @@ void YYY::FP4_sqrt(FP4 *r, FP4* x)
     FP2_sub(&a, &a, &s); // a-=txx(s)
     FP2_norm(&a); // **
 
-    FP2_sqrt(&s, &a);
+    FP2_sqrt(&s, &a, h);            // Cost = +1
 
-    FP2_copy(&t, &(x->a));
-
-    FP2_add(&a, &t, &s);
+    FP2_add(&a, &(r->a), &s);
     FP2_norm(&a);
     FP2_div2(&a, &a);
 
-    FP2_sub(&b, &t, &s);
+    FP2_div2(&b,&(r->b));                   // w1=b/2
+    qr=FP2_qr(&a,&hint);                    // only exp! Cost=+1
+
+    FP2_sqrt(&(r->a),&a,&hint);             // a=sqrt(w2)  Cost=+1
+    FP2_inv(&s,&a,&hint);                  // w3=1/w2
+    FP2_mul(&s,&s,&(r->a));                // w3=1/sqrt(w2)
+    FP2_mul(&(r->b),&s,&b);                // b=(b/2)*1/sqrt(w2)
+
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+
+    FP_rcopy(&twk,TWK);
+    FP_mul(&hint,&hint,&twk);
+    FP2_div_ip(&a); FP2_norm(&a); // switch to other candidate
+
+    FP2_sqrt(&t,&a,&hint);                 // w4=sqrt(w2)  Cost=+1
+    FP2_inv(&s,&a,&hint);                  // w3=1/w2    
+    FP2_mul(&s,&s,&t);                    // w3=1/sqrt(w2)
+    FP2_mul(&s,&s,&b);                    // w3=(b/2)*1/sqrt(w2)
+
+    FP2_cmove(&(r->a),&s,1-qr);
+    FP2_cmove(&(r->b),&t,1-qr);
+
+/*
+    FP2_sub(&b, &(x->a), &s);
     FP2_norm(&b);
     FP2_div2(&b, &b);
 
-    FP2_cmove(&a,&b,FP2_qr(&b)); // one or the other will be a QR
+    FP2_cmove(&a,&b,FP2_qr(&b,NULL)); // one or the other will be a QR
 
-    FP2_sqrt(&a, &a);
+    FP2_sqrt(&a, &a, NULL);
     FP2_copy(&t, &(x->b));
     FP2_add(&s, &a, &a); FP2_norm(&s);
-    FP2_inv(&s, &s);
+    FP2_inv(&s, &s, NULL);
 
     FP2_mul(&t, &t, &s);
     FP4_from_FP2s(r, &a, &t);
+*/
 
     sgn=FP4_sign(r);
     FP4_neg(&nr,r); FP4_norm(&nr);

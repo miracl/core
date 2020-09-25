@@ -164,7 +164,7 @@ void PAIR_ZZZ_initmp(FP48_YYY r[])
 static void PAIR_ZZZ_pack(FP16_YYY *T, FP8_YYY* AA, FP8_YYY* BB, FP8_YYY *CC)
 {
     FP8_YYY I, A, B;
-    FP8_YYY_inv(&I, CC);
+    FP8_YYY_inv(&I, CC, NULL);
     FP8_YYY_mul(&A, AA, &I);
     FP8_YYY_mul(&B, BB, &I);
     FP16_YYY_from_FP8s(T, &A, &B);

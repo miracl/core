@@ -260,7 +260,7 @@ public final class FP16 {
         t2.norm();
         t1.sub(t2); t1.norm();
 
-        t1.inverse();
+        t1.inverse(null);
         a.mul(t1);
         t1.neg();
         t1.norm();

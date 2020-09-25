@@ -170,7 +170,7 @@ public final class PAIR {
 // Store precomputed line details in an FP4
     private static FP4 pack(FP2 AA, FP2 BB, FP2 CC) {
         FP2 i = new FP2(CC);
-        i.inverse();
+        i.inverse(null);
         FP2 a = new FP2(AA);
         a.mul(i);
         FP2 b = new FP2(BB);
@@ -213,7 +213,7 @@ public final class PAIR {
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
             f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
             if (CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE) {
-                f.inverse();
+                f.inverse(null);
                 f.norm();
             }
         }
@@ -323,7 +323,7 @@ public final class PAIR {
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
             f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
             if (CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE) {
-                f.inverse();
+                f.inverse(null);
                 f.norm();
             }
         }
@@ -390,7 +390,7 @@ public final class PAIR {
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
             f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
             if (CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE) {
-                f.inverse();
+                f.inverse(null);
                 f.norm();
             }
         }
@@ -471,7 +471,7 @@ public final class PAIR {
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
             f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
             if (CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE) {
-                f.inverse();
+                f.inverse(null);
                 f.norm();
             }
         }
@@ -859,7 +859,7 @@ PFBNF */
             FP2 f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
 
             if (CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE) {
-                f.inverse();
+                f.inverse(null);
                 f.norm();
             }
 

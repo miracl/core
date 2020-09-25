@@ -97,7 +97,7 @@ void ECP8_ZZZ_affine(ECP8_ZZZ *P)
         return;
     }
 
-    FP8_YYY_inv(&iz, &(P->z));
+    FP8_YYY_inv(&iz, &(P->z),NULL);
     FP8_YYY_mul(&(P->x), &(P->x), &iz);
     FP8_YYY_mul(&(P->y), &(P->y), &iz);
 
@@ -358,14 +358,15 @@ int ECP8_ZZZ_set(ECP8_ZZZ *P, FP8_YYY *x, FP8_YYY *y)
 int ECP8_ZZZ_setx(ECP8_ZZZ *P, FP8_YYY *x,int s)
 {
     FP8_YYY y;
+    FP_YYY h;
     ECP8_ZZZ_rhs(&y, x);
 
-    if (!FP8_YYY_qr(&y))
+    if (!FP8_YYY_qr(&y,&h))
     {
         ECP8_ZZZ_inf(P);
         return 0;
     }
-    FP8_YYY_sqrt(&y, &y);
+    FP8_YYY_sqrt(&y, &y, &h);
     FP8_YYY_copy(&(P->x), x);
     FP8_YYY_copy(&(P->y), &y);
     FP8_YYY_one(&(P->z));
@@ -641,7 +642,7 @@ void ECP8_ZZZ_frob_constants(FP2_YYY F[3])
 #if SEXTIC_TWIST_ZZZ == M_TYPE
     FP2_YYY_mul_ip(&F[1]);      // (1+i)^24/24.(1+i)^(p-19)/24 = (1+i)^(p+5)/24
     FP2_YYY_norm(&F[1]);
-    FP2_YYY_inv(&F[1], &F[1]);      // (1+i)^-(p+5)/24
+    FP2_YYY_inv(&F[1], &F[1], NULL);      // (1+i)^-(p+5)/24
     FP2_YYY_sqr(&F[0], &F[1]);      // (1+i)^-(p+5)/12
     FP2_YYY_mul(&F[1], &F[1], &F[0]); // (1+i)^-(p+5)/8  - ***
 #endif
@@ -962,7 +963,7 @@ void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,FP8_YYY *H)
     FP8_YYY_from_FP(&A,&Z);
     ECP8_ZZZ_rhs(&A,&A);  // A=g(Z)
 
-    FP8_YYY_sqrt(&W,&A);
+    FP8_YYY_sqrt(&W,&A,NULL);
     FP_YYY_rcopy(&s,SQRTm3_YYY);
 
     FP_YYY_mul(&Z,&Z,&s);
@@ -975,7 +976,7 @@ void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,FP8_YYY *H)
 
     FP8_YYY_tmul(&NY,&NY,&Z);
 
-    FP8_YYY_inv(&NY,&NY);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
+    FP8_YYY_inv(&NY,&NY,NULL);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
     FP8_YYY_tmul(&W,&W,&Z); // tv4=Z*sqrt(-3).sqrt(g(Z))
     if (FP8_YYY_sign(&W)==1)
     {
@@ -1006,11 +1007,11 @@ void ECP8_ZZZ_map2point(ECP8_ZZZ *Q,FP8_YYY *H)
     FP8_YYY_add(&X3,&X3,&A); FP8_YYY_norm(&X3);   
 
     ECP8_ZZZ_rhs(&W,&X2);
-    FP8_YYY_cmove(&X3,&X2,FP8_YYY_qr(&W));
+    FP8_YYY_cmove(&X3,&X2,FP8_YYY_qr(&W,NULL));
     ECP8_ZZZ_rhs(&W,&X1);
-    FP8_YYY_cmove(&X3,&X1,FP8_YYY_qr(&W));
+    FP8_YYY_cmove(&X3,&X1,FP8_YYY_qr(&W,NULL));
     ECP8_ZZZ_rhs(&W,&X3);
-    FP8_YYY_sqrt(&Y,&W);
+    FP8_YYY_sqrt(&Y,&W,NULL);
     
     ne=FP8_YYY_sign(&Y)^sgn;
     FP8_YYY_neg(&W,&Y); FP8_YYY_norm(&W);

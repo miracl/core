@@ -63,13 +63,14 @@ impl ECP2 {
     /* construct this from x - but set to O if not on curve */
     pub fn new_fp2(ix: &FP2, s:isize) -> ECP2 {
         let mut E = ECP2::new();
+        let mut h = FP::new();
         E.x.copy(&ix);
         E.y.one();
         E.z.one();
         E.x.norm();
         let mut rhs = ECP2::rhs(&E.x);
- 	    if rhs.qr() == 1 {
-		    rhs.sqrt();
+ 	    if rhs.qr(Some(&mut h)) == 1 {
+		    rhs.sqrt(Some(&h));
 		    if rhs.sign() != s {
 			    rhs.neg();
 		    }
@@ -173,7 +174,7 @@ impl ECP2 {
         if self.z.equals(&mut one) {
             return;
         }
-        self.z.inverse();
+        self.z.inverse(None);
 
         self.x.mul(&self.z);
         self.x.reduce();
@@ -574,7 +575,7 @@ impl ECP2 {
     pub fn cfp(&mut self)  {
         let mut X = FP2::new_bigs(&BIG::new_ints(&rom::FRA), &BIG::new_ints(&rom::FRB));
         if ecp::SEXTIC_TWIST == ecp::M_TYPE {
-            X.inverse();
+            X.inverse(None);
             X.norm();
         }
         let mut x = BIG::new_ints(&rom::CURVE_BNX);
@@ -771,7 +772,7 @@ impl ECP2 {
             if fp::RIADZG2A==-1 && fp::RIADZG2B==0 && ecp::SEXTIC_TWIST == ecp::M_TYPE && rom::CURVE_B_I==4 {
                 W.copy(&FP2::new_ints(2,1));
             } else {
-                W.sqrt();
+                W.sqrt(None);
             }
             let s = FP::new_big(&BIG::new_ints(&rom::SQRTM3));
             Z.mul(&s);
@@ -783,7 +784,7 @@ impl ECP2 {
             NY.copy(&T); NY.mul(&Y); 
         
             NY.pmul(&Z);
-            NY.inverse();
+            NY.inverse(None);
 
             W.pmul(&Z);
             if W.sign()==1 {
@@ -803,11 +804,11 @@ impl ECP2 {
             X3.add(&A); X3.norm();
 
             Y.copy(&ECP2::rhs(&X2));
-            X3.cmove(&X2,Y.qr());
+            X3.cmove(&X2,Y.qr(None));
             Y.copy(&ECP2::rhs(&X1));
-            X3.cmove(&X1,Y.qr());
+            X3.cmove(&X1,Y.qr(None));
             Y.copy(&ECP2::rhs(&X3));
-            Y.sqrt();
+            Y.sqrt(None);
 
             let ne=Y.sign()^sgn;
             W.copy(&Y); W.neg(); W.norm();
@@ -828,7 +829,7 @@ impl ECP2 {
             W.mul(&T);
             let mut A=FP2::new_copy(&Ad);
             A.mul(&W);
-            A.inverse();
+            A.inverse(None);
             W.add(&NY); W.norm();
             W.mul(&Bd);
             W.neg(); W.norm();
@@ -839,10 +840,10 @@ impl ECP2 {
             X3.mul(&X2);
 
             W.copy(&X3); W.sqr(); W.add(&Ad); W.norm(); W.mul(&X3); W.add(&Bd); W.norm(); // x^3+Ax+b
-            X2.cmove(&X3,W.qr());
+            X2.cmove(&X3,W.qr(None));
             W.copy(&X2); W.sqr(); W.add(&Ad); W.norm(); W.mul(&X2); W.add(&Bd); W.norm(); // x^3+Ax+b
             let mut Y=FP2::new_copy(&W);
-            Y.sqrt();
+            Y.sqrt(None);
 
             let ne=Y.sign()^sgn;
             W.copy(&Y); W.neg(); W.norm();

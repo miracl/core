@@ -64,14 +64,15 @@ impl ECP8 {
     /* construct this from x - but set to O if not on curve */
     pub fn new_fp8(ix: &FP8, s:isize) -> ECP8 {
         let mut E = ECP8::new();
+        let mut h = FP::new();
         E.x.copy(&ix);
         E.y.one();
         E.z.one();
         E.x.norm();
 
         let mut rhs = ECP8::rhs(&E.x);
- 	    if rhs.qr() == 1 {
-		    rhs.sqrt();
+ 	    if rhs.qr(Some(&mut h)) == 1 {
+		    rhs.sqrt(Some(&h));
 		    if rhs.sign() != s {
 			    rhs.neg();
 		    }
@@ -175,7 +176,7 @@ impl ECP8 {
         if self.z.equals(&mut one) {
             return;
         }
-        self.z.inverse();
+        self.z.inverse(None);
 
         self.x.mul(&self.z);
         self.x.reduce();
@@ -627,7 +628,7 @@ impl ECP8 {
         if ecp::SEXTIC_TWIST == ecp::M_TYPE {
             f1.mul_ip();
             f1.norm();
-            f1.inverse();
+            f1.inverse(None);
             f0.copy(&f1);
             f0.sqr();
             f1.mul(&f0);
@@ -1197,7 +1198,7 @@ impl ECP8 {
         let mut A=ECP8::rhs(&X1);
         let mut W=FP8::new_copy(&A);
 
-        W.sqrt();
+        W.sqrt(None);
 
         let s = FP::new_big(&BIG::new_ints(&rom::SQRTM3));
         Z.mul(&s);
@@ -1209,7 +1210,7 @@ impl ECP8 {
         NY.copy(&T); NY.mul(&Y); 
         
         NY.tmul(&Z);
-        NY.inverse();
+        NY.inverse(None);
 
         W.tmul(&Z);
         if W.sign()==1 {
@@ -1229,11 +1230,11 @@ impl ECP8 {
         X3.add(&A); X3.norm();
 
         Y.copy(&ECP8::rhs(&X2));
-        X3.cmove(&X2,Y.qr());
+        X3.cmove(&X2,Y.qr(None));
         Y.copy(&ECP8::rhs(&X1));
-        X3.cmove(&X1,Y.qr());
+        X3.cmove(&X1,Y.qr(None));
         Y.copy(&ECP8::rhs(&X3));
-        Y.sqrt();
+        Y.sqrt(None);
 
         let ne=Y.sign()^sgn;
         W.copy(&Y); W.neg(); W.norm();

@@ -308,17 +308,17 @@ public final class FP2 {
         copy(r);
     }
 */
-    public int qr()
+    public int qr(FP h)
     {
         FP2 c = new FP2(this);
         c.conj();
         c.mul(this);
 
-        return c.geta().qr(null);
+        return c.geta().qr(h);
     }
 
 /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
-	public void sqrt()
+	public void sqrt(FP h)
 	{
 		if (iszilch()) return;
 		FP w1=new FP(b);
@@ -329,7 +329,7 @@ public final class FP2 {
 
 		w1.sqr(); w2.sqr(); w1.add(w2); w1.norm();
 		
-		w1=w1.sqrt(null);
+		w1=w1.sqrt(h);
 		
         w2.copy(a); w2.add(w1); 
 		w2.norm(); w2.div2();
@@ -371,7 +371,7 @@ public final class FP2 {
 	}
 
 /* this=1/this */
-	public void inverse()
+	public void inverse(FP h)
 	{
 		norm();
 		FP w1=new FP(a);
@@ -380,7 +380,7 @@ public final class FP2 {
 		w1.sqr();
 		w2.sqr();
 		w1.add(w2);
-		w1.inverse(null);
+		w1.inverse(h);
 		a.mul(w1);
 		w1.neg();
 		w1.norm();
@@ -427,7 +427,7 @@ public final class FP2 {
 	public void div_ip()
 	{
 		FP2 z=new FP2(1<<CONFIG_FIELD.QNRI,1);
-		z.inverse();
+		z.inverse(null);
 		norm();
 		mul(z);
 		if (CONFIG_FIELD.TOWER==CONFIG_FIELD.POSITOWER) {

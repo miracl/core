@@ -204,8 +204,9 @@ extern void FP8_YYY_mul(FP8_YYY *x, FP8_YYY *y, FP8_YYY *z);
  *
 	@param x FP8 instance, on exit = 1/y
 	@param y FP8 instance
+    @param h optional input hint
  */
-extern void FP8_YYY_inv(FP8_YYY *x, FP8_YYY *y);
+extern void FP8_YYY_inv(FP8_YYY *x, FP8_YYY *y, FP_YYY *h);
 /**	@brief Formats and outputs an FP8 to the console
  *
 	@param x FP8 instance to be printed
@@ -297,20 +298,20 @@ extern void FP8_YYY_xtr_pow2(FP8_YYY *r, FP8_YYY *c, FP8_YYY *d, FP8_YYY *e, FP8
 
 /**	@brief Test FP8 for QR
  *
-	Square root
 	@param r FP8 instance
+    @param h optional generated hint
 	@return 1 r is a QR, otherwise 0
  */
-extern int  FP8_YYY_qr(FP8_YYY *r);
+extern int  FP8_YYY_qr(FP8_YYY *r, FP_YYY *h);
 
 /**	@brief Calculate square root of an FP8
  *
 	Square root
 	@param r FP8 instance, on exit = sqrt(x)
 	@param x FP8 instance
-	@return 1 x is a QR, otherwise 0
+	@param h optional input hint
  */
-extern void  FP8_YYY_sqrt(FP8_YYY *r, FP8_YYY *x);
+extern void  FP8_YYY_sqrt(FP8_YYY *r, FP8_YYY *x, FP_YYY *h);
 
 
 /**	@brief Conditional copy of FP8 number

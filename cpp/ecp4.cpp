@@ -100,7 +100,7 @@ void ZZZ::ECP4_affine(ECP4 *P)
         return;
     }
 
-    FP4_inv(&iz, &(P->z));
+    FP4_inv(&iz, &(P->z),NULL);
     FP4_mul(&(P->x), &(P->x), &iz);
     FP4_mul(&(P->y), &(P->y), &iz);
 
@@ -298,14 +298,15 @@ int ZZZ::ECP4_set(ECP4 *P, FP4 *x, FP4 *y)
 int ZZZ::ECP4_setx(ECP4 *P, FP4 *x, int s)
 {
     FP4 y;
+    FP hint;
     ECP4_rhs(&y, x);
 
-    if (!FP4_qr(&y))
+    if (!FP4_qr(&y,&hint))
     {
         ECP4_inf(P);
         return 0;
     }
-    FP4_sqrt(&y, &y);
+    FP4_sqrt(&y, &y, &hint);
     
     FP4_copy(&(P->x), x);
     FP4_copy(&(P->y), &y);
@@ -576,7 +577,7 @@ void ZZZ::ECP4_frob_constants(FP2 F[3])
 
 #if SEXTIC_TWIST_ZZZ == M_TYPE
     FP2_mul_ip(&F[1]);      // (1+i)^12/12.(1+i)^(p-7)/12 = (1+i)^(p+5)/12
-    FP2_inv(&F[1], &F[1]);      // (1+i)^-(p+5)/12
+    FP2_inv(&F[1], &F[1], NULL);      // (1+i)^-(p+5)/12
     FP2_sqr(&F[0], &F[1]);      // (1+i)^-(p+5)/6
 #endif
 
@@ -796,7 +797,7 @@ void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
     FP4_from_FP(&A,&Z);
     ECP4_rhs(&A,&A);  // A=g(Z)
 
-    FP4_sqrt(&W,&A);
+    FP4_sqrt(&W,&A,NULL);
     FP_rcopy(&s,SQRTm3);
 
     FP_mul(&Z,&Z,&s);
@@ -809,7 +810,7 @@ void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
 
     FP4_qmul(&NY,&NY,&Z);
 
-    FP4_inv(&NY,&NY);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
+    FP4_inv(&NY,&NY,NULL);     // tv3=inv0(tv1*tv2*Z*sqrt(-3))
     FP4_qmul(&W,&W,&Z); // tv4=Z*sqrt(-3).sqrt(g(Z))
     if (FP4_sign(&W)==1)
     {
@@ -840,11 +841,11 @@ void ZZZ::ECP4_map2point(ECP4 *Q,FP4 *H)
     FP4_add(&X3,&X3,&A); FP4_norm(&X3);
 
     ECP4_rhs(&W,&X2);
-    FP4_cmove(&X3,&X2,FP4_qr(&W));
+    FP4_cmove(&X3,&X2,FP4_qr(&W,NULL));
     ECP4_rhs(&W,&X1);
-    FP4_cmove(&X3,&X1,FP4_qr(&W));
+    FP4_cmove(&X3,&X1,FP4_qr(&W,NULL));
     ECP4_rhs(&W,&X3);
-    FP4_sqrt(&Y,&W);
+    FP4_sqrt(&Y,&W,NULL);
     
     ne=FP4_sign(&Y)^sgn;
     FP4_neg(&W,&Y); FP4_norm(&W);
