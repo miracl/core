@@ -496,7 +496,7 @@ int main(int argc, char **argv)
     miracl *mip = &precision;
     Big p, R, B, mc, curve_b, cru, cof, tau[9],ad,bd;
     Big m, x, y, w, t, c, n, r, a, b, gx, gy, r2modp,roi;
-    Big np, PP, TT, FF, htpc, sqrtm3;
+    Big np, PP, TT, FF, htpc, sqrtm3, twk;
     Big pc[60];
     int xt, yt, ncs, ncs2, e;
 
@@ -1751,6 +1751,7 @@ int main(int argc, char **argv)
         pc[52]=(char *)"16112c4c3a9c98b252181140fad0eae9601a6de578980be6eec3232b5be72e7a07f3688ef60c206d01479253b03663c1";
 
         cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
+        // cout << "p%16= " << p%16 << endl;
     }
 
 
@@ -2068,6 +2069,13 @@ int main(int argc, char **argv)
 
         htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ4(curve_b) << endl;
+
+        twk=(Big)((ZZn)1/pow((ZZn)2,(p-3)/4));  // tweak for square root, norm=2
+
+    //ZZn ttt=2;
+    //cout << "ttt= " << (ZZn)1/pow(ttt,(p-3)/4) << endl;
+    //cout << "ttt= " << pow(ttt,(p-3)/4) << endl;
+    
     }
 
 
@@ -2159,6 +2167,9 @@ int main(int argc, char **argv)
             sqrtm3=p-sqrtm3;
         htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
+
+        twk=(Big)((ZZn)1/pow((ZZn)2,(p-3)/4));  // tweak for square root, norm=2
+
     }
 
     if (strcmp(curvename, "BLS48581") == 0)
@@ -2266,6 +2277,8 @@ int main(int argc, char **argv)
             sqrtm3=p-sqrtm3;
         htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
+
+        twk=(Big)((ZZn)1/pow((ZZn)2,(p-3)/4));  // tweak for square root, norm=2
     }
 
 
@@ -2354,6 +2367,8 @@ int main(int argc, char **argv)
             sqrtm3=p-sqrtm3;
         htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
         cout << "Hash to Curve Z for G2= " << findZ8(curve_b) << endl;
+
+        twk=(Big)((ZZn)1/pow((ZZn)2,(p-3)/4));  // tweak for square root, norm=2
     }
 
     if (curve == 0) {help(); return 0;}
@@ -2661,6 +2676,7 @@ int main(int argc, char **argv)
             if (curve == PS+8) set_frobenius_constant(X, 24);
             if (curve == PS+9 || curve == PS+10 || curve == PS+11) set_frobenius_constant(X, 48);
             if (curve == PS+10) X = -X;
+            cout << pre1 << toupperit((char *)"TWK", lang) << post7; output(chunk, words, twk, m); cout << term << endl;
         }
 
 
