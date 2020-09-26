@@ -674,38 +674,24 @@ public struct FP4 {
         
         wb.copy(b); wb.div2()
         let qr=wa.qr(&hint)
-//print("qr: \(qr)\n")
-        a.copy(wa); a.sqrt(hint)
-        ws.copy(wa); ws.inverse(hint)
-        ws.mul(a)
-        b.copy(ws); b.mul(wb)
 
 // tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
-        let twk=FP(BIG(ROM.TWK))
-        hint!.mul(twk)
-        wa.div_ip(); wa.norm()
+        ws.copy(wa)
+        var twk=FP(BIG(ROM.TWK))
+        twk.mul(hint!)
+        ws.div_ip(); ws.norm()
 
-        wt.copy(wa); wt.sqrt(hint)
-        ws.copy(wa); ws.inverse(hint)
-        ws.mul(wt)
-        ws.mul(wb)
+        wa.cmove(ws,1-qr)
+        hint!.cmove(twk,1-qr)
 
-        a.cmove(ws,1-qr)
+        a.copy(wa); a.sqrt(hint!)
+        ws.copy(wa); ws.inverse(hint!)
+        ws.mul(a)
+        b.copy(ws); b.mul(wb)
+        wt.copy(a)
+
+        a.cmove(b,1-qr)
         b.cmove(wt,1-qr)
-
-//        wb.copy(wt); wb.sub(ws); 
-//        wb.norm(); wb.div2()
-        
-//        wa.cmove(wb,wb.qr(&pNIL))
-//        wa.sqrt(pNIL)
-
-//        wt.copy(b)
-//        ws.copy(wa); ws.add(wa); ws.norm()
-//        ws.inverse(pNIL)
-
-//        wt.mul(ws)
-//        a.copy(wa)
-//        b.copy(wt)
 
         let sgn=self.sign()
         var nr=FP4(self)

@@ -34,6 +34,7 @@ extern const XXX::BIG CURVE_B;     /**< Elliptic curve B parameter */
 extern const XXX::BIG CURVE_Order; /**< Elliptic curve group order */
 extern const XXX::BIG CURVE_Cof;   /**< Elliptic curve cofactor */
 extern const XXX::BIG CURVE_HTPC;  /**< Hash to Point precomputation */
+extern const XXX::BIG CURVE_HTPC2;  /**< Hash to Point precomputation for G2 */
 
 extern const XXX::BIG CURVE_Ad;
 extern const XXX::BIG CURVE_Bd;

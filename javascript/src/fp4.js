@@ -651,43 +651,23 @@ var FP4 = function(ctx) {
             wb.copy(this.b); wb.div2();
             var qr=wa.qr(hint);
 
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+            ws.copy(wa);
+            var twk=new ctx.FP(0); twk.rcopy(ctx.ROM_FIELD.TWK);
+            twk.mul(hint);
+            ws.div_ip(); ws.norm();
+
+            wa.cmove(ws,1-qr);
+            hint.cmove(twk,1-qr);
+
             this.a.copy(wa); this.a.sqrt(hint);
             ws.copy(wa); ws.inverse(hint);
             ws.mul(this.a);
             this.b.copy(ws); this.b.mul(wb);
+            wt.copy(this.a);
 
-// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
-
-            var twk=new ctx.FP(0); twk.rcopy(ctx.ROM_FIELD.TWK);
-            hint.mul(twk);
-            wa.div_ip(); wa.norm();
-
-            wt.copy(wa); wt.sqrt(hint);
-            ws.copy(wa); ws.inverse(hint);
-            ws.mul(wt);
-            ws.mul(wb);
-
-            this.a.cmove(ws,1-qr);
+            this.a.cmove(this.b,1-qr);
             this.b.cmove(wt,1-qr);
-
-
-
-/*
-            wb.copy(wt); wb.sub(ws); 
-            wb.norm(); wb.div2();
-            
-            wa.cmove(wb,wb.qr(null));
-
-            wa.sqrt(null);
-            wt.copy(this.b);
-            ws.copy(wa); ws.add(wa); ws.norm();
-            ws.inverse(null);
-
-            wt.mul(ws);
-            this.a.copy(wa);
-            this.b.copy(wt);
-*/
-
 
             var sgn=this.sign();
             var nr=new FP4(this);

@@ -661,40 +661,23 @@ void YYY::FP4_sqrt(FP4 *r, FP4* x, FP *h)
     FP2_div2(&b,&(r->b));                   // w1=b/2
     qr=FP2_qr(&a,&hint);                    // only exp! Cost=+1
 
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+    FP2_copy(&s,&a);
+    FP_rcopy(&twk,TWK);
+    FP_mul(&twk,&twk,&hint);
+    FP2_div_ip(&s); FP2_norm(&s); // switch to other candidate
+
+    FP2_cmove(&a,&s,1-qr);
+    FP_cmove(&hint,&twk,1-qr);
+
     FP2_sqrt(&(r->a),&a,&hint);             // a=sqrt(w2)  Cost=+1
     FP2_inv(&s,&a,&hint);                  // w3=1/w2
     FP2_mul(&s,&s,&(r->a));                // w3=1/sqrt(w2)
     FP2_mul(&(r->b),&s,&b);                // b=(b/2)*1/sqrt(w2)
+    FP2_copy(&t,&(r->a));
 
-// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
-
-    FP_rcopy(&twk,TWK);
-    FP_mul(&hint,&hint,&twk);
-    FP2_div_ip(&a); FP2_norm(&a); // switch to other candidate
-
-    FP2_sqrt(&t,&a,&hint);                 // w4=sqrt(w2)  Cost=+1
-    FP2_inv(&s,&a,&hint);                  // w3=1/w2    
-    FP2_mul(&s,&s,&t);                    // w3=1/sqrt(w2)
-    FP2_mul(&s,&s,&b);                    // w3=(b/2)*1/sqrt(w2)
-
-    FP2_cmove(&(r->a),&s,1-qr);
+    FP2_cmove(&(r->a),&(r->b),1-qr);
     FP2_cmove(&(r->b),&t,1-qr);
-
-/*
-    FP2_sub(&b, &(x->a), &s);
-    FP2_norm(&b);
-    FP2_div2(&b, &b);
-
-    FP2_cmove(&a,&b,FP2_qr(&b,NULL)); // one or the other will be a QR
-
-    FP2_sqrt(&a, &a, NULL);
-    FP2_copy(&t, &(x->b));
-    FP2_add(&s, &a, &a); FP2_norm(&s);
-    FP2_inv(&s, &s, NULL);
-
-    FP2_mul(&t, &t, &s);
-    FP4_from_FP2s(r, &a, &t);
-*/
 
     sgn=FP4_sign(r);
     FP4_neg(&nr,r); FP4_norm(&nr);

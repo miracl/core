@@ -1456,8 +1456,8 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_sqrt(&Y3,&w,&hint);
         FP_mul(&Y3,&Y3,&D2);
 
-        FP_cmove(&X2,&X3,!qr); 
-        FP_cmove(&Y,&Y3,!qr); 
+        FP_cmove(&X2,&X3,1-qr); 
+        FP_cmove(&Y,&Y3,1-qr); 
 
         ne=FP_sign(&Y)^sgn;
         FP_neg(&w,&Y); FP_norm(&w);

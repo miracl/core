@@ -667,9 +667,10 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
 // SSWU plus isogenies method
     int i,k,sgn,ne,isox,isoy,iso=HTC_ISO_G2_ZZZ;
     FP2 X1,X2,X3,W,Y,T,A,NY;
-    FP Z,s;
+    FP s;
 #if HTC_ISO_G2_ZZZ != 0
-    FP2 ZZ,Ad,Bd;
+    FP hint;
+    FP2 ZZ,Ad,Bd,D,D2,GX1;
     FP2 xnum,xden,ynum,yden;
     FP2_from_ints(&ZZ,RIADZG2A_ZZZ,RIADZG2B_ZZZ);
 
@@ -686,21 +687,45 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
     FP2_norm(&W);
 
     FP2_mul(&W,&W,&T);
-    FP2_mul(&A,&Ad,&W);
-    FP2_inv(&A,&A,NULL);
+    FP2_mul(&D,&Ad,&W);
+
     FP2_add(&W,&W,&NY);
     FP2_norm(&W);
     FP2_mul(&W,&W,&Bd);
     FP2_neg(&W,&W);
     FP2_norm(&W);
 
-    FP2_mul(&X2,&W,&A);
+    FP2_copy(&X2,&W);        // Numerators
     FP2_mul(&X3,&T,&X2);
 
-    FP2_sqr(&W,&X3); FP2_add(&W,&W,&Ad); FP2_norm(&W); FP2_mul(&W,&W,&X3); FP2_add(&W,&W,&Bd); FP2_norm(&W);  // w=x^3+Ax+B
-    FP2_cmove(&X2,&X3,FP2_qr(&W,NULL));                    
-    FP2_sqr(&W,&X2); FP2_add(&W,&W,&Ad); FP2_norm(&W); FP2_mul(&W,&W,&X2); FP2_add(&W,&W,&Bd); FP2_norm(&W);
-    FP2_sqrt(&Y,&W,NULL);  
+// x^3+Ad^2x+Bd^3
+    FP2_sqr(&GX1,&X2);
+    FP2_sqr(&D2,&D); FP2_mul(&W,&Ad,&D2); FP2_add(&GX1,&GX1,&W); FP2_norm(&GX1); FP2_mul(&GX1,&GX1,&X2); FP2_mul(&D2,&D2,&D); FP2_mul(&W,&Bd,&D2); FP2_add(&GX1,&GX1,&W); FP2_norm(&GX1);
+
+    FP2_mul(&W,&GX1,&D);
+    int qr=FP2_qr(&W,&hint);   // qr(ad) - only exp happens here
+    FP2_inv(&D,&W,&hint);     // d=1/(ad)
+    FP2_mul(&D,&D,&GX1);     // 1/d
+    FP2_mul(&X2,&X2,&D);     // X2/=D
+    FP2_mul(&X3,&X3,&D);     // X3/=D
+    FP2_mul(&T,&T,H);        // t=Z.u^3
+    FP2_sqr(&D2,&D);
+
+// first solution - X2, W, hint, D2
+
+    FP2_mul(&D,&D2,&T);     // second candidate if X3 is correct
+    FP2_mul(&T,&W,&ZZ); 
+
+    FP_rcopy(&s,CURVE_HTPC2);     
+    FP_mul(&s,&s,&hint); // modify hint
+
+    FP2_cmove(&X2,&X3,1-qr); 
+    FP2_cmove(&W,&T,1-qr);
+    FP2_cmove(&D2,&D,1-qr);
+    FP_cmove(&hint,&s,1-qr);
+
+    FP2_sqrt(&Y,&W,&hint);  // first candidate if X2 is correct
+    FP2_mul(&Y,&Y,&D2);
 
     ne=FP2_sign(&Y)^sgn;
     FP2_neg(&NY,&Y); FP2_norm(&NY);
@@ -766,6 +791,7 @@ void ZZZ::ECP2_map2point(ECP2 *Q,FP2 *H)
 
 #else
 // SVDW - Shallue and van de Woestijne method.
+    FP Z;
     FP2_one(&NY);
     FP2_copy(&T,H);
     sgn=FP2_sign(&T);

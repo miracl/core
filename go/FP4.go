@@ -685,40 +685,23 @@ func (F *FP4) sqrt(h *FP)  {
     b.copy(F.b); b.div2()
     qr:=a.qr(hint)
 
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+    s.copy(a)
+	twk:=NewFPbig(NewBIGints(TWK))
+    twk.mul(hint)
+    s.div_ip(); s.norm()
+
+    a.cmove(s,1-qr)
+    hint.cmove(twk,1-qr)
+
     F.a.copy(a); F.a.sqrt(hint)
     s.copy(a); s.inverse(hint)
     s.mul(F.a)
     F.b.copy(s); F.b.mul(b)
+    t.copy(F.a);
 
-// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
-
-	twk:=NewFPbig(NewBIGints(TWK))
-    hint.mul(twk)
-    a.div_ip(); a.norm()
-
-    t.copy(a); t.sqrt(hint)
-    s.copy(a); s.inverse(hint)
-    s.mul(t)
-    s.mul(b)
-
-    F.a.cmove(s,1-qr)
-    F.b.cmove(t,1-qr)
-
-//	b.sub(s)
-//	b.norm()
-//	b.div2()
-
-//	a.cmove(b,b.qr(nil))
-
-//	a.sqrt(nil)
-//	t.copy(F.b)
-//	s.copy(a)
-//	s.add(a); s.norm()
-//	s.inverse(nil)
-
-//	t.mul(s)
-//	F.a.copy(a)
-//	F.b.copy(t)
+    F.a.cmove(F.b,1-qr);
+    F.b.cmove(t,1-qr);
 
 	sgn:=F.sign()
 	nr:=NewFP4copy(F)

@@ -668,39 +668,24 @@ public final class FP4 {
         wb.copy(b); wb.div2();
         int qr=wa.qr(hint);
 
+
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+        ws.copy(wa);
+        FP twk=new FP(new BIG(ROM.TWK));
+        twk.mul(hint);
+        ws.div_ip(); ws.norm();
+
+        wa.cmove(ws,1-qr);
+        hint.cmove(twk,1-qr);
+
         a.copy(wa); a.sqrt(hint);
         ws.copy(wa); ws.inverse(hint);
         ws.mul(a);
         b.copy(ws); b.mul(wb);
+        wt.copy(a);
 
-// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
-        FP twk=new FP(new BIG(ROM.TWK));
-        hint.mul(twk);
-        wa.div_ip(); wa.norm();
-
-        wt.copy(wa); wt.sqrt(hint);
-        ws.copy(wa); ws.inverse(hint);
-        ws.mul(wt);
-        ws.mul(wb);
-
-        a.cmove(ws,1-qr);
+        a.cmove(b,1-qr);
         b.cmove(wt,1-qr);
-
-
-//		wb.copy(wt); wb.sub(ws); 
-//        wb.norm(); wb.div2();
-
-//        wa.cmove(wb,wb.qr(null));
-//        wa.sqrt(null);
-
-//		wt.copy(b);
-//		ws.copy(wa); ws.add(wa); ws.norm();
-//		ws.inverse(null);
-
-//		wt.mul(ws);
-//		a.copy(wa);
-//		b.copy(wt);
-
 
         int sgn=this.sign();
         FP4 nr=new FP4(this);

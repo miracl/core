@@ -663,9 +663,10 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
 
     int i,k,sgn,ne,isox,isoy,iso=HTC_ISO_G2_ZZZ;
     FP2_YYY X1,X2,X3,W,Y,T,A,NY;
-    FP_YYY Z,s;
+    FP_YYY s;
 #if HTC_ISO_G2_ZZZ != 0
-    FP2_YYY ZZ,Ad,Bd;
+    FP_YYY hint;
+    FP2_YYY ZZ,Ad,Bd,D,D2,GX1;
     FP2_YYY xnum,xden,ynum,yden;
     FP2_YYY_from_ints(&ZZ,RIADZG2A_ZZZ,RIADZG2B_ZZZ);
 
@@ -682,21 +683,45 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
     FP2_YYY_norm(&W);
 
     FP2_YYY_mul(&W,&W,&T);
-    FP2_YYY_mul(&A,&Ad,&W);
-    FP2_YYY_inv(&A,&A,NULL);
+    FP2_YYY_mul(&D,&Ad,&W);
+
     FP2_YYY_add(&W,&W,&NY);
     FP2_YYY_norm(&W);
     FP2_YYY_mul(&W,&W,&Bd);
     FP2_YYY_neg(&W,&W);
     FP2_YYY_norm(&W);
 
-    FP2_YYY_mul(&X2,&W,&A);
+    FP2_YYY_copy(&X2,&W);
     FP2_YYY_mul(&X3,&T,&X2);
 
-    FP2_YYY_sqr(&W,&X3); FP2_YYY_add(&W,&W,&Ad); FP2_YYY_norm(&W); FP2_YYY_mul(&W,&W,&X3); FP2_YYY_add(&W,&W,&Bd); FP2_YYY_norm(&W);  // w=x^3+Ax+B
-    FP2_YYY_cmove(&X2,&X3,FP2_YYY_qr(&W,NULL));                    
-    FP2_YYY_sqr(&W,&X2); FP2_YYY_add(&W,&W,&Ad); FP2_YYY_norm(&W); FP2_YYY_mul(&W,&W,&X2); FP2_YYY_add(&W,&W,&Bd); FP2_YYY_norm(&W);
-    FP2_YYY_sqrt(&Y,&W,NULL);  
+// x^3+Ad^2x+Bd^3
+    FP2_YYY_sqr(&GX1,&X2);
+    FP2_YYY_sqr(&D2,&D); FP2_YYY_mul(&W,&Ad,&D2); FP2_YYY_add(&GX1,&GX1,&W); FP2_YYY_norm(&GX1); FP2_YYY_mul(&GX1,&GX1,&X2); FP2_YYY_mul(&D2,&D2,&D); FP2_YYY_mul(&W,&Bd,&D2); FP2_YYY_add(&GX1,&GX1,&W); FP2_YYY_norm(&GX1);
+
+    FP2_YYY_mul(&W,&GX1,&D);
+    int qr=FP2_YYY_qr(&W,&hint);   // qr(ad) - only exp happens here
+    FP2_YYY_inv(&D,&W,&hint);     // d=1/(ad)
+    FP2_YYY_mul(&D,&D,&GX1);     // 1/d
+    FP2_YYY_mul(&X2,&X2,&D);     // X2/=D
+    FP2_YYY_mul(&X3,&X3,&D);     // X3/=D
+    FP2_YYY_mul(&T,&T,H);        // t=Z.u^3
+    FP2_YYY_sqr(&D2,&D);
+
+// first solution - X2, W, hint, D2
+
+    FP2_YYY_mul(&D,&D2,&T);     // second candidate if X3 is correct
+    FP2_YYY_mul(&T,&W,&ZZ); 
+
+    FP_YYY_rcopy(&s,CURVE_HTPC2_ZZZ);     
+    FP_YYY_mul(&s,&s,&hint); // modify hint
+
+    FP2_YYY_cmove(&X2,&X3,1-qr); 
+    FP2_YYY_cmove(&W,&T,1-qr);
+    FP2_YYY_cmove(&D2,&D,1-qr);
+    FP_YYY_cmove(&hint,&s,1-qr);
+
+    FP2_YYY_sqrt(&Y,&W,&hint);  // first candidate if X2 is correct
+    FP2_YYY_mul(&Y,&Y,&D2);
 
     ne=FP2_YYY_sign(&Y)^sgn;
     FP2_YYY_neg(&NY,&Y); FP2_YYY_norm(&NY);
@@ -763,6 +788,7 @@ void ECP2_ZZZ_map2point(ECP2_ZZZ *Q,FP2_YYY *H)
         FP2_YYY_copy(&(Q->z),&T);
 
 #else
+    FP_YYY Z;
     FP2_YYY_one(&NY);
     FP2_YYY_copy(&T,H);
     sgn=FP2_YYY_sign(&T);

@@ -730,44 +730,23 @@ impl FP8 {
         b.copy(&self.b); b.div2();
         let qr=a.qr(Some(&mut hint));
 
+// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
+        s.copy(&a);
+        let mut twk = FP::new_big(&BIG::new_ints(&rom::TWK));
+        twk.mul(&hint);
+        s.div_i(); s.norm();
+
+        a.cmove(&s,1-qr);
+        hint.cmove(&twk,1-qr);
+
         self.a.copy(&a); self.a.sqrt(Some(&hint));
         s.copy(&a); s.inverse(Some(&hint));
         s.mul(&self.a);
         self.b.copy(&s); self.b.mul(&b);
+        t.copy(&self.a);
 
-// tweak hint - multiply old hint by Norm(1/Beta)^e where Beta is irreducible polynomial
-
-        let twk = FP::new_big(&BIG::new_ints(&rom::TWK));
-        hint.mul(&twk);
-        a.div_i(); a.norm();
-
-        t.copy(&a); t.sqrt(Some(&hint));
-        s.copy(&a); s.inverse(Some(&hint));
-        s.mul(&t);
-        s.mul(&b);
-
-        self.a.cmove(&s,1-qr);
+        self.a.cmove(&self.b,1-qr);
         self.b.cmove(&t,1-qr);
-
-
-
-//        b.copy(&t);
-//        b.sub(&s);
-//        b.norm();
-//        b.div2();
-
-//        let d=b.qr(None);
-//        a.cmove(&b,d);
-
-//        a.sqrt(None);
-//        t.copy(&self.b);
-//        s.copy(&a);
-//        s.add(&a); s.norm();
-//        s.inverse(None);
-
-//        t.mul(&s);
-//        self.a.copy(&a);
-//        self.b.copy(&t);
 
         let sgn=self.sign();
         let mut nr=FP8::new_copy(&self);
