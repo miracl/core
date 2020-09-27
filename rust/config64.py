@@ -194,6 +194,9 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             if hc2 != "0" :
                 replace(fpath+"ecp2.rs","CAHCZS","*/")
                 replace(fpath+"ecp2.rs","CAHCZF","/*")
+            else :
+                replace(fpath+"ecp2.rs","CAHCNZS","*/")
+                replace(fpath+"ecp2.rs","CAHCNZF","/*")
 
             replace(fpath+"fp12.rs","xxx",tc)
             replace(fpath+"ecp2.rs","xxx",tc)

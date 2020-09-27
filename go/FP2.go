@@ -341,6 +341,23 @@ func (F *FP2) sqrt(h *FP) {
 	w1.copy(F.b); w1.div2()
 	qr:=w2.qr(hint)
 
+// tweak hint
+    w3.copy(hint); w3.neg(); w3.norm()
+    w4.copy(w2); w4.neg(); w4.norm()
+
+    w2.cmove(w4,1-qr)
+    hint.cmove(w3,1-qr)
+
+    F.a.copy(w2.sqrt(hint))
+    w3.copy(w2); w3.inverse(hint)
+    w3.mul(F.a)
+    F.b.copy(w3); F.b.mul(w1)
+    w4.copy(F.a)
+
+    F.a.cmove(F.b,1-qr)
+    F.b.cmove(w4,1-qr)
+
+/*
 	F.a.copy(w2.sqrt(hint))
 	w3.copy(w2); w3.inverse(hint)
 	w3.mul(F.a)
@@ -356,25 +373,8 @@ func (F *FP2) sqrt(h *FP) {
 
 	F.a.cmove(w3,1-qr)
 	F.b.cmove(w4,1-qr)
-
-/*
-	w3.sub(w1)
-	w3.norm()
-	w3.div2()
-	
-	w2.cmove(w3,w3.qr(nil))
-
-	w2.invsqrt(w2,F.a)
-	w2.mul(F.a)
-	w2.div2()
-
-//	w2 = w2.sqrt(nil)
-//	F.a.copy(w2)
-//	w2.add(w2); w2.norm()
-//	w2.inverse(nil)
-
-	F.b.mul(w2)
 */
+
 	sgn:=F.sign()
 	nr:=NewFP2copy(F)
 	nr.neg(); nr.norm()

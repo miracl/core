@@ -337,6 +337,27 @@ public final class FP2 {
         w1.copy(b); w1.div2();
         int qr=w2.qr(hint);
 
+// tweak hint
+        w3.copy(hint); w3.neg(); w3.norm();
+        w4.copy(w2); w4.neg(); w4.norm();
+
+        w2.cmove(w4,1-qr);
+        hint.cmove(w3,1-qr);
+
+        a.copy(w2.sqrt(hint));
+        w3.copy(w2); w3.inverse(hint);
+        w3.mul(a);
+        b.copy(w3); b.mul(w1);
+        w4.copy(a);
+
+        a.cmove(b,1-qr);
+        b.cmove(w4,1-qr);
+
+
+
+
+/*
+
         a.copy(w2.sqrt(hint));
         w3.copy(w2); w3.inverse(hint);
         w3.mul(a);
@@ -352,7 +373,7 @@ public final class FP2 {
 
         a.cmove(w3,1-qr);
         b.cmove(w4,1-qr);
-
+*/
         int sgn=this.sign();
         FP2 nr=new FP2(this);
         nr.neg(); nr.norm();

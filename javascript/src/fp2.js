@@ -325,6 +325,23 @@ var FP2 = function(ctx) {
             w1.copy(this.b); w1.div2();
             var qr=w2.qr(hint);
 
+// tweak hint
+            w3.copy(hint); w3.neg(); w3.norm();
+            w4.copy(w2); w4.neg(); w4.norm();
+
+            w2.cmove(w4,1-qr);
+            hint.cmove(w3,1-qr);
+
+            this.a.copy(w2.sqrt(hint));
+            w3.copy(w2); w3.inverse(hint);
+            w3.mul(this.a);
+            this.b.copy(w3); this.b.mul(w1);
+            w4.copy(this.a);
+
+            this.a.cmove(this.b,1-qr);
+            this.b.cmove(w4,1-qr);
+
+/*
             this.a.copy(w2.sqrt(hint));
             w3.copy(w2); w3.inverse(hint);
             w3.mul(this.a);
@@ -340,7 +357,7 @@ var FP2 = function(ctx) {
 
             this.a.cmove(w3,1-qr);
             this.b.cmove(w4,1-qr);
-
+*/
             var sgn=this.sign();
             var nr=new FP2(this);
             nr.neg(); nr.norm();

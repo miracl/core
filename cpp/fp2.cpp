@@ -453,8 +453,26 @@ void YYY::FP2_sqrt(FP2 *w, FP2 *u, FP *h)
     FP_div2(&w2, &w2);                    // w2=(a+sqrt(a^2+b^2))/2
 // **
     FP_div2(&w1,&(w->b));                   // w1=b/2
-
     qr=FP_qr(&w2,&hint);                    // only exp!
+
+// tweak hint
+    FP_neg(&w3,&hint); FP_norm(&w3);    // QNR = -1
+    FP_neg(&w4,&w2); FP_norm(&w4);
+
+    FP_cmove(&w2,&w4,1-qr);
+    FP_cmove(&hint,&w3,1-qr);
+
+    FP_sqrt(&(w->a),&w2,&hint);             // a=sqrt(w2)
+    FP_inv(&w3,&w2,&hint);                  // w3=1/w2
+    FP_mul(&w3,&w3,&(w->a));                // w3=1/sqrt(w2)
+    FP_mul(&(w->b),&w3,&w1);                // b=(b/2)*1/sqrt(w2)
+    FP_copy(&w4,&(w->a));
+
+    FP_cmove(&(w->a),&(w->b),1-qr);
+    FP_cmove(&(w->b),&w4,1-qr);
+
+
+/*
 
     FP_sqrt(&(w->a),&w2,&hint);             // a=sqrt(w2)
     FP_inv(&w3,&w2,&hint);                  // w3=1/w2
@@ -472,6 +490,7 @@ void YYY::FP2_sqrt(FP2 *w, FP2 *u, FP *h)
 
     FP_cmove(&(w->a),&w3,1-qr);
     FP_cmove(&(w->b),&w4,1-qr);
+*/
 // return +ve root
     sgn=FP2_sign(w);
     FP2_neg(&nw,w); FP2_norm(&nw);

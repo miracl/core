@@ -758,11 +758,12 @@ impl ECP2 {
     #[allow(unreachable_code)]
     #[allow(non_snake_case)]
     pub fn map2point(H: &FP2) -> ECP2 {
-        let mut NY=FP2::new_int(1);
         let mut T=FP2::new_copy(H); /**/
         let sgn=T.sign(); /**/
         if ecp::HTC_ISO_G2 == 0 {
     // Shallue and van de Woestijne
+/* CAHCNZS
+            let mut NY=FP2::new_int(1);
             let mut Z=FP::new_int(fp::RIADZG2A);
             let mut X1=FP2::new_fp(&Z);
             let mut X3=FP2::new_copy(&X1);
@@ -815,35 +816,59 @@ impl ECP2 {
             Y.cmove(&W,ne);
 
             return ECP2::new_fp2s(&X3,&Y);
+CAHCNZF */
         } else {
 /* CAHCZS
+            let NY=FP2::new_int(1);
             let Ad=FP2::new_bigs(&BIG::new_ints(&rom::CURVE_ADR),&BIG::new_ints(&rom::CURVE_ADI));
             let Bd=FP2::new_bigs(&BIG::new_ints(&rom::CURVE_BDR),&BIG::new_ints(&rom::CURVE_BDI));  
             let ZZ=FP2::new_ints(fp::RIADZG2A,fp::RIADZG2B);
-           
+            let mut hint=FP::new();
+
             T.sqr();
             T.mul(&ZZ);
             let mut W=FP2::new_copy(&T);
             W.add(&NY); W.norm();
 
             W.mul(&T);
-            let mut A=FP2::new_copy(&Ad);
-            A.mul(&W);
-            A.inverse(None);
+            let mut D=FP2::new_copy(&Ad);
+            D.mul(&W);
+    
             W.add(&NY); W.norm();
             W.mul(&Bd);
             W.neg(); W.norm();
 
             let mut X2=FP2::new_copy(&W);
-            X2.mul(&A);
             let mut X3=FP2::new_copy(&T);
             X3.mul(&X2);
 
-            W.copy(&X3); W.sqr(); W.add(&Ad); W.norm(); W.mul(&X3); W.add(&Bd); W.norm(); // x^3+Ax+b
-            X2.cmove(&X3,W.qr(None));
-            W.copy(&X2); W.sqr(); W.add(&Ad); W.norm(); W.mul(&X2); W.add(&Bd); W.norm(); // x^3+Ax+b
-            let mut Y=FP2::new_copy(&W);
-            Y.sqrt(None);
+            let mut GX1=FP2::new_copy(&X2); GX1.sqr();
+            let mut D2=FP2::new_copy(&D); D2.sqr();
+
+            W.copy(&Ad); W.mul(&D2); GX1.add(&W); GX1.norm(); GX1.mul(&X2); D2.mul(&D); W.copy(&Bd); W.mul(&D2); GX1.add(&W); GX1.norm(); // x^3+Ax+b
+
+            W.copy(&GX1); W.mul(&D);
+            let qr=W.qr(Some(&mut hint));
+            D.copy(&W); D.inverse(Some(&hint));
+            D.mul(&GX1);
+            X2.mul(&D);
+            X3.mul(&D);
+            T.mul(&H);
+            D2.copy(&D); D2.sqr();
+
+            D.copy(&D2); D.mul(&T);
+            T.copy(&W); T.mul(&ZZ);
+
+            let mut s=FP::new_big(&BIG::new_ints(&rom::CURVE_HTPC2));
+            s.mul(&hint);
+
+            X2.cmove(&X3,1-qr);
+            W.cmove(&T,1-qr);
+            D2.cmove(&D,1-qr);
+            hint.cmove(&s,1-qr);
+
+            let mut Y=FP2::new_copy(&W); Y.sqrt(Some(&hint));
+            Y.mul(&D2);
 
             let ne=Y.sign()^sgn;
             W.copy(&Y); W.neg(); W.norm();

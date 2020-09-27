@@ -735,10 +735,12 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 /* Constant time Map to Point */
  func ECP2_map2point(H *FP2) *ECP2 {
     // Shallue and van de Woestijne
+	var Q *ECP2
     NY:=NewFP2int(1)
     T:=NewFP2copy(H) /**/
 	sgn:=T.sign() /**/
 	if HTC_ISO_G2 == 0 {
+/* CAHCNZS
 		Z:=NewFPint(RIADZG2A);
 		X1:=NewFP2fp(Z)
 		X3:=NewFP2copy(X1)
@@ -789,13 +791,16 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 		W.copy(Y); W.neg(); W.norm()
 		Y.cmove(W,ne)
 
-		return NewECP2fp2s(X3,Y)
+		Q=NewECP2fp2s(X3,Y)
+CAHCNZF */
 	} else {
-		Q:=NewECP2()
+
 /* CAHCZS
+		Q=NewECP2()
 		Ad:=NewFP2bigs(NewBIGints(CURVE_Adr), NewBIGints(CURVE_Adi))
 		Bd:=NewFP2bigs(NewBIGints(CURVE_Bdr), NewBIGints(CURVE_Bdi))
 		ZZ:=NewFP2ints(RIADZG2A,RIADZG2B)
+		hint:=NewFP()
 
 		T.sqr()
 		T.mul(ZZ)
@@ -803,23 +808,44 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 		W.add(NY); W.norm()
 
 		W.mul(T)
-		A:=NewFP2copy(Ad)
-		A.mul(W)
-		A.inverse(nil)
+		D:=NewFP2copy(Ad)
+		D.mul(W)
+
 		W.add(NY); W.norm()
 		W.mul(Bd); 
 		W.neg(); W.norm()
 
 		X2:=NewFP2copy(W)
-		X2.mul(A)
 		X3:=NewFP2copy(T)
 		X3.mul(X2)
 
-		W.copy(X3); W.sqr(); W.add(Ad); W.norm(); W.mul(X3); W.add(Bd); W.norm() // x^3+Ax+b
-		X2.cmove(X3,W.qr(nil))
-		W.copy(X2); W.sqr(); W.add(Ad); W.norm(); W.mul(X2); W.add(Bd); W.norm() // x^3+Ax+b
-		Y:=NewFP2copy(W)
-		Y.sqrt(nil)
+		GX1:=NewFP2copy(X2); GX1.sqr()
+		D2:=NewFP2copy(D); D2.sqr()
+
+        W.copy(Ad); W.mul(D2); GX1.add(W); GX1.norm(); GX1.mul(X2); D2.mul(D); W.copy(Bd); W.mul(D2); GX1.add(W); GX1.norm() // x^3+Ax+b
+
+        W.copy(GX1); W.mul(D)
+        qr:=W.qr(hint)
+        D.copy(W); D.inverse(hint)
+        D.mul(GX1)
+        X2.mul(D)
+        X3.mul(D)
+        T.mul(H)
+        D2.copy(D); D2.sqr()
+
+        D.copy(D2); D.mul(T)
+        T.copy(W); T.mul(ZZ)
+
+		s:=NewFPbig(NewBIGints(CURVE_HTPC2))
+        s.mul(hint);
+
+        X2.cmove(X3,1-qr)
+        W.cmove(T,1-qr)
+        D2.cmove(D,1-qr)
+        hint.cmove(s,1-qr)
+
+        Y:=NewFP2copy(W); Y.sqrt(hint)
+        Y.mul(D2)
 
 		ne:=Y.sign()^sgn
 		W.copy(Y); W.neg(); W.norm()
@@ -870,8 +896,9 @@ func ECP2_hap2point(h *BIG) *ECP2 {
 		Q.z.copy(T)
 
 CAHCZF */
-		return Q
+
 	}
+	return Q
 }
 
 /* Map octet string to curve point */

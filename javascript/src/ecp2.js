@@ -858,6 +858,7 @@ var ECP2 = function(ctx) {
             ra.rcopy(ctx.ROM_CURVE.CURVE_Adr); rb.rcopy(ctx.ROM_CURVE.CURVE_Adi); var Ad=new ctx.FP2(ra,rb);
             ra.rcopy(ctx.ROM_CURVE.CURVE_Bdr); rb.rcopy(ctx.ROM_CURVE.CURVE_Bdi); var Bd=new ctx.FP2(ra,rb);
             var ZZ=new ctx.FP2(ctx.FP.RIADZG2A,ctx.FP.RIADZG2B);
+            var hint=new ctx.FP(0);
            
             T.sqr();
             T.mul(ZZ);
@@ -865,23 +866,43 @@ var ECP2 = function(ctx) {
             W.add(NY); W.norm();
 
             W.mul(T);
-            var A=new ctx.FP2(Ad);
-            A.mul(W);
-            A.inverse(null);
+            var D=new ctx.FP2(Ad);
+            D.mul(W);
+          
             W.add(NY); W.norm();
             W.mul(Bd);
             W.neg(); W.norm();
 
             var X2=new ctx.FP2(W);
-            X2.mul(A);
             var X3=new ctx.FP2(T);
             X3.mul(X2);
 
-            W.copy(X3); W.sqr(); W.add(Ad); W.norm(); W.mul(X3); W.add(Bd); W.norm(); // x^3+Ax+b
-            X2.cmove(X3,W.qr(null));
-            W.copy(X2); W.sqr(); W.add(Ad); W.norm(); W.mul(X2); W.add(Bd); W.norm(); // x^3+Ax+b
-            var Y=new ctx.FP2(W);
-            Y.sqrt(null);
+            var GX1=new ctx.FP2(X2); GX1.sqr();
+            var D2=new ctx.FP2(D); D2.sqr();
+            W.copy(Ad); W.mul(D2); GX1.add(W); GX1.norm(); GX1.mul(X2); D2.mul(D); W.copy(Bd); W.mul(D2); GX1.add(W); GX1.norm(); // x^3+Ax+b
+
+            W.copy(GX1); W.mul(D);
+            var qr=W.qr(hint);
+            D.copy(W); D.inverse(hint);
+            D.mul(GX1);
+            X2.mul(D);
+            X3.mul(D);
+            T.mul(H);
+            D2.copy(D); D2.sqr();
+
+            D.copy(D2); D.mul(T);
+            T.copy(W); T.mul(ZZ);
+
+            var s=new ctx.FP(0); s.rcopy(ctx.ROM_CURVE.CURVE_HTPC2); 
+            s.mul(hint);
+
+            X2.cmove(X3,1-qr);
+            W.cmove(T,1-qr);
+            D2.cmove(D,1-qr);
+            hint.cmove(s,1-qr);
+
+            var Y=new ctx.FP2(W); Y.sqrt(hint);
+            Y.mul(D2);
 
             ne=Y.sign()^sgn;
             W.copy(Y); W.neg(); W.norm();

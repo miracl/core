@@ -633,11 +633,13 @@ public struct ECP2 {
 /* Constant time Map to Point */
     static public func map2point(_ H:FP2) -> ECP2
     { // Shallue and van de Woestijne
-        var NY=FP2(1)
+        var Q:ECP2
         var T=FP2(H) /**/
         let sgn=T.sign() /**/
-        var pNIL:FP?=nil
         if CONFIG_CURVE.HTC_ISO_G2 == 0 {
+/* CAHCNZS
+            var pNIL:FP?=nil
+            var NY=FP2(1)
             var Z=FP(CONFIG_FIELD.RIADZG2A)
             var X1=FP2(Z)
             var X3=FP2(X1)
@@ -689,14 +691,18 @@ public struct ECP2 {
             W.copy(Y); W.neg(); W.norm()
             Y.cmove(W,ne)
 
-            return ECP2(X3,Y)
+            Q=ECP2(X3,Y)
+            return Q
+CAHCNZF */
         } else {
 
 /* CAHCZS
-            var Q=ECP2()
+            let NY=FP2(1)
+            Q=ECP2()
             let Ad=FP2(BIG(ROM.CURVE_Adr),BIG(ROM.CURVE_Adi))
             let Bd=FP2(BIG(ROM.CURVE_Bdr),BIG(ROM.CURVE_Bdi))
             let ZZ=FP2(CONFIG_FIELD.RIADZG2A,CONFIG_FIELD.RIADZG2B)
+            var hint:FP?=FP()
 
             T.sqr()
             T.mul(ZZ)
@@ -704,23 +710,44 @@ public struct ECP2 {
             W.add(NY); W.norm()
 
             W.mul(T)
-            var A=FP2(Ad)
-            A.mul(W)
-            A.inverse(pNIL)
+            var D=FP2(Ad)
+            D.mul(W)
+
             W.add(NY); W.norm()
             W.mul(Bd)
             W.neg(); W.norm()
 
             var X2=FP2(W)
-            X2.mul(A)
             var X3=FP2(T)
             X3.mul(X2)
 
-            W.copy(X3); W.sqr(); W.add(Ad); W.norm(); W.mul(X3); W.add(Bd); W.norm() // x^3+Ax+b
-            X2.cmove(X3,W.qr(&pNIL))
-            W.copy(X2); W.sqr(); W.add(Ad); W.norm(); W.mul(X2); W.add(Bd); W.norm() // x^3+Ax+b
-            var Y=FP2(W)
-            Y.sqrt(pNIL)
+            var GX1=FP2(X2); GX1.sqr()
+            var D2=FP2(D); D2.sqr()
+
+            W.copy(Ad); W.mul(D2); GX1.add(W); GX1.norm(); GX1.mul(X2); D2.mul(D); W.copy(Bd); W.mul(D2); GX1.add(W); GX1.norm() // x^3+Ax+b
+
+            W.copy(GX1); W.mul(D)
+            let qr=W.qr(&hint)
+            D.copy(W); D.inverse(hint)
+            D.mul(GX1)
+            X2.mul(D)
+            X3.mul(D)
+            T.mul(H)
+            D2.copy(D); D2.sqr()
+
+            D.copy(D2); D.mul(T)
+            T.copy(W); T.mul(ZZ)
+
+            var s=FP(BIG(ROM.CURVE_HTPC2))
+            s.mul(hint!);
+
+            X2.cmove(X3,1-qr)
+            W.cmove(T,1-qr)
+            D2.cmove(D,1-qr)
+            hint!.cmove(s,1-qr)
+
+            var Y=FP2(W); Y.sqrt(hint)
+            Y.mul(D2)
 
             let ne=Y.sign()^sgn
             W.copy(Y); W.neg(); W.norm()

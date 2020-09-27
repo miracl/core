@@ -496,7 +496,7 @@ int main(int argc, char **argv)
     miracl *mip = &precision;
     Big p, R, B, mc, curve_b, cru, cof, tau[9],ad,bd;
     Big m, x, y, w, t, c, n, r, a, b, gx, gy, r2modp,roi;
-    Big np, PP, TT, FF, htpc, sqrtm3, twk;
+    Big np, PP, TT, FF, htpc, htpc2, sqrtm3, twk;
     Big pc[60];
     int xt, yt, ncs, ncs2, e;
 
@@ -557,6 +557,7 @@ int main(int argc, char **argv)
     //if (bb < 0 || bb >= chunk) {help(); return 0;}
 
     htpc=(Big)0;
+    htpc2=(Big)0;
     sqrtm3=(Big)0;
     cru=(Big)0;
 
@@ -1653,6 +1654,7 @@ int main(int argc, char **argv)
 
 // Use above if using SVDW for hashing, else..
         htpc=pow((Big)11,(p-3)/4,p);
+        htpc2=pow((Big)5,(p-3)/4,p);  // where 5 is the norm of (-2,-1)
 
         adr = 0;
         adi = 240;
@@ -2887,6 +2889,7 @@ int main(int argc, char **argv)
 
     if (curve == PS+3)   // bls12381
     {
+        cout << pre1 << toupperit((char *)"CURVE_HTPC2", lang) << post1; output(chunk, words, htpc2, m); cout << term << endl;
         cout << pre1 << toupperit((char *)"CURVE_Adr", lang) << post1; output(chunk, words, adr, m); cout << term << endl;
         cout << pre1 << toupperit((char *)"CURVE_Adi", lang) << post1; output(chunk, words, adi, m); cout << term << endl;
         cout << pre1 << toupperit((char *)"CURVE_Bdr", lang) << post1; output(chunk, words, bdr, m); cout << term << endl;

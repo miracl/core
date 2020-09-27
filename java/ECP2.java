@@ -598,9 +598,12 @@ public final class ECP2 {
         int sgn,ne;
         FP2 NY=new FP2(1);
         FP2 T=new FP2(H);  /**/
+        ECP2 Q;
         sgn=T.sign(); /**/
+
         if (CONFIG_CURVE.HTC_ISO_G2 == 0)
         {
+/* CAHCNZS
             FP Z=new FP(CONFIG_FIELD.RIADZG2A);
             FP2 X1=new FP2(Z);
             FP2 A=RHS(X1);
@@ -653,37 +656,59 @@ public final class ECP2 {
             W.copy(Y); W.neg(); W.norm();
             Y.cmove(W,ne);
 
-            return new ECP2(X3,Y);
+            Q=new ECP2(X3,Y);
+CAHCNZF */
         } else {
-            ECP2 Q=new ECP2();
 /* CAHCZS
+            Q=new ECP2();
             FP2 Ad=new FP2(new BIG(ROM.CURVE_Adr),new BIG(ROM.CURVE_Adi));
             FP2 Bd=new FP2(new BIG(ROM.CURVE_Bdr),new BIG(ROM.CURVE_Bdi)); 
             FP2 ZZ=new FP2(CONFIG_FIELD.RIADZG2A,CONFIG_FIELD.RIADZG2B);
-           
+            FP hint=new FP();
+
             T.sqr();
             T.mul(ZZ);
             FP2 W=new FP2(T);
             W.add(NY); W.norm();
 
             W.mul(T);
-            FP2 A=new FP2(Ad);
-            A.mul(W);
-            A.inverse(null);
+            FP2 D=new FP2(Ad);
+            D.mul(W);
+
             W.add(NY); W.norm();
             W.mul(Bd);
             W.neg(); W.norm();
 
             FP2 X2=new FP2(W);
-            X2.mul(A);
             FP2 X3=new FP2(T);
             X3.mul(X2);
 
-            W.copy(X3); W.sqr(); W.add(Ad); W.norm(); W.mul(X3); W.add(Bd); W.norm(); // x^3+Ax+b
-            X2.cmove(X3,W.qr(null));
-            W.copy(X2); W.sqr(); W.add(Ad); W.norm(); W.mul(X2); W.add(Bd); W.norm(); // x^3+Ax+b
-            FP2 Y=new FP2(W);
-            Y.sqrt(null);
+            FP2 GX1=new FP2(X2); GX1.sqr();
+            FP2 D2=new FP2(D); D2.sqr();
+            W.copy(Ad); W.mul(D2); GX1.add(W); GX1.norm(); GX1.mul(X2); D2.mul(D); W.copy(Bd); W.mul(D2); GX1.add(W); GX1.norm(); // x^3+Ax+b
+
+            W.copy(GX1); W.mul(D);
+            int qr=W.qr(hint);
+            D.copy(W); D.inverse(hint);
+            D.mul(GX1);
+            X2.mul(D);
+            X3.mul(D);
+            T.mul(H);
+            D2.copy(D); D2.sqr();
+
+            D.copy(D2); D.mul(T);
+            T.copy(W); T.mul(ZZ);
+
+            FP s=new FP(new BIG(ROM.CURVE_HTPC2));
+            s.mul(hint);
+
+            X2.cmove(X3,1-qr);
+            W.cmove(T,1-qr);
+            D2.cmove(D,1-qr);
+            hint.cmove(s,1-qr);
+
+            FP2 Y=new FP2(W); Y.sqrt(hint);
+            Y.mul(D2);
 
             ne=Y.sign()^sgn;
             W.copy(Y); W.neg(); W.norm();
@@ -734,8 +759,9 @@ public final class ECP2 {
             T.copy(xden); T.mul(yden);
             Q.z.copy(T);
 CAHCZF */
-            return Q;
+
         }
+        return Q;
     }
 
 /* Map octet string to curve point

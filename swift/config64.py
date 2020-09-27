@@ -193,6 +193,9 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
             if hc2!="0" :
                 replace(fpath+"ecp2.swift","CAHCZS","*/")
                 replace(fpath+"ecp2.swift","CAHCZF","/*")
+            else :
+                replace(fpath+"ecp2.swift","CAHCNZS","*/")
+                replace(fpath+"ecp2.swift","CAHCNZF","/*")
 
             if pf == "BN" :
                 replace(fpath+"pair.swift","PFBNS","*/")
