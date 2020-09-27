@@ -1394,7 +1394,7 @@ var ECP = function(ctx) {
             var K=new ctx.FP(0);
             var D = new ctx.FP(0);   
             var hint=new ctx.FP(0);
-            var Y3 = new ctx.FP(0);   
+            //var Y3 = new ctx.FP(0);   
            
             var qres,qnr,rfc=0;
 
@@ -1477,6 +1477,21 @@ var ECP = function(ctx) {
             X2.mul(D);
             D.sqr();
 
+            w1.copy(B); w1.imul(qnr);
+            w.rcopy(ctx.ROM_CURVE.CURVE_HTPC);
+            w.mul(hint);
+            w2.copy(D); w2.mul(h);
+
+            X1.cmove(X2,1-qres);
+            B.cmove(w1,1-qres);
+            hint.cmove(w,1-qres);
+            D.cmove(w2,1-qres);
+
+            Y.copy(B.sqrt(hint));
+            Y.mul(D);
+
+
+/*
             Y.copy(B.sqrt(hint));
             Y.mul(D);
 
@@ -1490,7 +1505,7 @@ var ECP = function(ctx) {
 
             X1.cmove(X2,1-qres);
             Y.cmove(Y3,1-qres);
-
+*/
             w.copy(Y); w.neg(); w.norm();
             Y.cmove(w,qres^Y.sign());
 
@@ -1560,7 +1575,7 @@ var ECP = function(ctx) {
             var D2=new ctx.FP(0);
             var hint=new ctx.FP(0);
             var GX1=new ctx.FP(0);
-            var Y3=new ctx.FP(0);
+            //var Y3=new ctx.FP(0);
             var sgn=t.sign();
 
             if (ECP.CURVE_A!=0 || ECP.HTC_ISO!=0)
@@ -1601,6 +1616,20 @@ var ECP = function(ctx) {
                 t.mul(h);
                 D2.copy(D); D2.sqr();
 
+                D.copy(D2); D.mul(t);
+                t.copy(w); t.imul(ctx.FP.RIADZ);
+                X1.rcopy(ctx.ROM_CURVE.CURVE_HTPC);
+                X1.mul(hint);
+
+                X2.cmove(X3,1-qr);
+                D2.cmove(D,1-qr);
+                w.cmove(t,1-qr);
+                hint.cmove(X1,1-qr);
+
+                Y.copy(w.sqrt(hint));
+                Y.mul(D2);
+
+/*
                 Y.copy(w.sqrt(hint));
                 Y.mul(D2);
 
@@ -1615,7 +1644,7 @@ var ECP = function(ctx) {
 
                 X2.cmove(X3,1-qr);
                 Y.cmove(Y3,1-qr);
-
+*/
                 var ne=Y.sign()^sgn;
                 w.copy(Y); w.neg(); w.norm();
                 Y.cmove(w,ne);

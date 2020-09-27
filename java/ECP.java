@@ -1057,7 +1057,7 @@ public final class ECP {
             FP K=new FP();
             FP D=new FP();
             FP hint=new FP();
-            FP Y3=new FP();
+        //    FP Y3=new FP();
 
             int qres,qnr;
             int rfc=0;
@@ -1143,6 +1143,20 @@ public final class ECP {
             X2.mul(D);
             D.sqr();
 
+            w1.copy(B); w1.imul(qnr);
+            w.copy(new FP(new BIG(ROM.CURVE_HTPC)));
+            w.mul(hint);
+            w2.copy(D); w2.mul(h);
+
+            X1.cmove(X2,1-qres);
+            B.cmove(w1,1-qres);
+            hint.cmove(w,1-qres);
+            D.cmove(w2,1-qres);
+
+            Y.copy(B.sqrt(hint));
+            Y.mul(D);
+
+/*
             Y.copy(B.sqrt(hint));
             Y.mul(D);
 
@@ -1156,7 +1170,7 @@ public final class ECP {
 
             X1.cmove(X2,1-qres);
             Y.cmove(Y3,1-qres);
-
+*/
             w.copy(Y); w.neg(); w.norm();
             Y.cmove(w,qres^Y.sign());
 
@@ -1228,7 +1242,7 @@ public final class ECP {
             FP D2=new FP();
             FP hint=new FP();
             FP GX1=new FP();
-            FP Y3=new FP();
+          //  FP Y3=new FP();
             int sgn=t.sign();
 
             if (CONFIG_CURVE.CURVE_A!=0 || CONFIG_CURVE.HTC_ISO!=0)
@@ -1270,6 +1284,20 @@ CAHCZF */
                 t.mul(h);
                 D2.copy(D); D2.sqr();
 
+                D.copy(D2); D.mul(t);
+                t.copy(w); t.imul(CONFIG_FIELD.RIADZ);
+                X1.copy(new FP(new BIG(ROM.CURVE_HTPC)));
+                X1.mul(hint);
+
+                X2.cmove(X3,1-qr);
+                D2.cmove(D,1-qr);
+                w.cmove(t,1-qr);
+                hint.cmove(X1,1-qr);
+
+                Y.copy(w.sqrt(hint));
+                Y.mul(D2);
+
+/*
                 Y.copy(w.sqrt(hint));
                 Y.mul(D2);
 
@@ -1284,7 +1312,7 @@ CAHCZF */
 
                 X2.cmove(X3,1-qr);
                 Y.cmove(Y3,1-qr);
-
+*/
                 int ne=Y.sign()^sgn;
                 w.copy(Y); w.neg(); w.norm();
                 Y.cmove(w,ne);

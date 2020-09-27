@@ -1221,7 +1221,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 // Elligator 2 - map to Montgomery, place point, map back
     int qres,ne,rfc,qnr;
     BIG x,y;
-    FP X1,X2,t,w,one,A,w1,w2,B,Y,K,D,hint,Y3;
+    FP X1,X2,t,w,one,A,w1,w2,B,Y,K,D,hint;
     FP_one(&one);
 
 #if MODTYPE_YYY != GENERALISED_MERSENNE
@@ -1311,6 +1311,21 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_mul(&X2,&X2,&D);    // get X2
     FP_sqr(&D,&D);
 
+    FP_imul(&w1,&B,qnr);       // now for gx2 = Z.u^2.gx1
+    FP_rcopy(&w,CURVE_HTPC);   // qnr^C3  
+    FP_mul(&w,&w,&hint);    // modify hint for gx2
+    FP_mul(&w2,&D,h);
+
+    FP_cmove(&X1,&X2,1-qres);  // pick correct one
+    FP_cmove(&B,&w1,1-qres);
+    FP_cmove(&hint,&w,1-qres);
+    FP_cmove(&D,&w2,1-qres);
+     
+    FP_sqrt(&Y,&B,&hint);   // sqrt(num*den)
+    FP_mul(&Y,&Y,&D);       // sqrt(num/den^3)
+
+/*
+
     FP_sqrt(&Y,&B,&hint);   // sqrt(num*den)
     FP_mul(&Y,&Y,&D);       // sqrt(num/den^3)
 
@@ -1324,7 +1339,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
     FP_cmove(&X1,&X2,1-qres);  // pick correct one
     FP_cmove(&Y,&Y3,1-qres);
-
+*/
 // correct sign of Y
     FP_neg(&w,&Y); FP_norm(&w);
     FP_cmove(&Y,&w,qres^FP_sign(&Y));
@@ -1395,7 +1410,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     int sgn,ne;
     BIG a,x,y;
     FP X1,X2,X3,t,w,one,A,B,Y,D;
-    FP D2,hint,GX1,Y3;
+    FP D2,hint,GX1;
 
 #if HTC_ISO_ZZZ != 0
 // Map to point on isogenous curve
@@ -1444,9 +1459,19 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_mul(&t,&t,h);        // t=Z.u^3
         FP_sqr(&D2,&D);
 
+        FP_mul(&D,&D2,&t);
+        FP_imul(&t,&w,RIADZ_YYY);
+        FP_rcopy(&X1,CURVE_HTPC);     
+        FP_mul(&X1,&X1,&hint); // modify hint
+
+        FP_cmove(&X2,&X3,1-qr); 
+        FP_cmove(&D2,&D,1-qr);
+        FP_cmove(&w,&t,1-qr);
+        FP_cmove(&hint,&X1,1-qr);
+
         FP_sqrt(&Y,&w,&hint);  // first candidate if X2 is correct
         FP_mul(&Y,&Y,&D2);
-
+/*
         FP_mul(&D2,&D2,&t);     // second candidate if X3 is correct
         FP_imul(&w,&w,RIADZ_YYY); 
 
@@ -1458,7 +1483,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
         FP_cmove(&X2,&X3,1-qr); 
         FP_cmove(&Y,&Y3,1-qr); 
-
+*/
         ne=FP_sign(&Y)^sgn;
         FP_neg(&w,&Y); FP_norm(&w);
         FP_cmove(&Y,&w,ne);

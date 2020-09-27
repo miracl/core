@@ -434,7 +434,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 // Elligator 2 - map to Montgomery, place point, map back
     int qres,ne,rfc,qnr;
     BIG_XXX x,y;
-    FP_YYY X1,X2,t,w,one,A,w1,w2,B,Y,K,D,hint,Y3;
+    FP_YYY X1,X2,t,w,one,A,w1,w2,B,Y,K,D,hint;
     FP_YYY_one(&one);
 
 #if MODTYPE_YYY != GENERALISED_MERSENNE
@@ -523,6 +523,20 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     FP_YYY_mul(&X2,&X2,&D);    // get X2
     FP_YYY_sqr(&D,&D);
 
+    FP_YYY_imul(&w1,&B,qnr);       // now for gx2 = Z.u^2.gx1
+    FP_YYY_rcopy(&w,CURVE_HTPC_ZZZ);   // qnr^C3  
+    FP_YYY_mul(&w,&w,&hint);    // modify hint for gx2
+    FP_YYY_mul(&w2,&D,h);
+
+    FP_YYY_cmove(&X1,&X2,1-qres);  // pick correct one
+    FP_YYY_cmove(&B,&w1,1-qres);
+    FP_YYY_cmove(&hint,&w,1-qres);
+    FP_YYY_cmove(&D,&w2,1-qres);
+     
+    FP_YYY_sqrt(&Y,&B,&hint);   // sqrt(num*den)
+    FP_YYY_mul(&Y,&Y,&D);       // sqrt(num/den^3)
+
+/*
     FP_YYY_sqrt(&Y,&B,&hint);   // sqrt(num*den)
     FP_YYY_mul(&Y,&Y,&D);       // sqrt(num/den^3)
 
@@ -536,7 +550,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 
     FP_YYY_cmove(&X1,&X2,1-qres);  // pick correct one
     FP_YYY_cmove(&Y,&Y3,1-qres);
-
+*/
 // correct sign of Y
     FP_YYY_neg(&w,&Y); FP_YYY_norm(&w);
     FP_YYY_cmove(&Y,&w,qres^FP_YYY_sign(&Y));
@@ -606,7 +620,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
     int sgn,ne;
     BIG_XXX a,x,y;
     FP_YYY X1,X2,X3,t,w,one,A,B,Y,D;
-    FP_YYY D2,hint,GX1,Y3;
+    FP_YYY D2,hint,GX1;
 
 #if HTC_ISO_ZZZ != 0
 // Map to point on isogenous curve
@@ -655,6 +669,20 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
         FP_YYY_mul(&t,&t,h);        // t=Z.u^3
         FP_YYY_sqr(&D2,&D);
 
+        FP_YYY_mul(&D,&D2,&t);
+        FP_YYY_imul(&t,&w,RIADZ_YYY);
+        FP_YYY_rcopy(&X1,CURVE_HTPC_ZZZ);     
+        FP_YYY_mul(&X1,&X1,&hint); // modify hint
+
+        FP_YYY_cmove(&X2,&X3,1-qr); 
+        FP_YYY_cmove(&D2,&D,1-qr);
+        FP_YYY_cmove(&w,&t,1-qr);
+        FP_YYY_cmove(&hint,&X1,1-qr);
+
+        FP_YYY_sqrt(&Y,&w,&hint);  // first candidate if X2 is correct
+        FP_YYY_mul(&Y,&Y,&D2);
+
+/*
         FP_YYY_sqrt(&Y,&w,&hint);  // first candidate if X2 is correct
         FP_YYY_mul(&Y,&Y,&D2);
 
@@ -669,7 +697,7 @@ void ECP_ZZZ_map2point(ECP_ZZZ *P,FP_YYY *h)
 
         FP_YYY_cmove(&X2,&X3,!qr); 
         FP_YYY_cmove(&Y,&Y3,!qr); 
-
+*/
         ne=FP_YYY_sign(&Y)^sgn;
         FP_YYY_neg(&w,&Y); FP_YYY_norm(&w);
         FP_YYY_cmove(&Y,&w,ne);

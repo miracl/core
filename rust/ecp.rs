@@ -1308,7 +1308,7 @@ impl ECP {
             let mut K=FP::new();
             let mut D=FP::new();
             let mut hint=FP::new();
-            let mut Y3=FP::new();
+            //let mut Y3=FP::new();
             let rfc: isize;
 
             if fp::MODTYPE != fp::GENERALISED_MERSENNE {
@@ -1388,6 +1388,19 @@ impl ECP {
             X2.mul(&D);                         // get X2
             D.sqr();
 
+            w1.copy(&B); w1.imul(qnr);
+            w.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_HTPC)));
+            w.mul(&hint);
+            w2.copy(&D); w2.mul(&h);
+
+            X1.cmove(&X2,1-qres);
+            B.cmove(&w1,1-qres);
+            hint.cmove(&w,1-qres);
+            D.cmove(&w2,1-qres);
+
+            Y.copy(&B.sqrt(Some(&hint)));
+            Y.mul(&D);
+/*
             Y.copy(&B.sqrt(Some(&hint)));       // sqrt(num*den)
             Y.mul(&D);                          // sqrt(num/den^3)
 
@@ -1401,7 +1414,7 @@ impl ECP {
 
             X1.cmove(&X2,1-qres);               // pick correct one
             Y.cmove(&Y3,1-qres);
-
+*/
 // correct sign of Y
             w.copy(&Y); w.neg(); w.norm();
             Y.cmove(&w,qres^Y.sign());
@@ -1469,7 +1482,7 @@ impl ECP {
             let mut D2=FP::new();
             let mut hint=FP::new();
             let mut GX1=FP::new();
-            let mut Y3=FP::new();
+            //let mut Y3=FP::new();
 
             let sgn=t.sign();
 
@@ -1512,6 +1525,19 @@ CAHCZF */
                 t.mul(h);
                 D2.copy(&D); D2.sqr();
 
+                D.copy(&D2); D.mul(&t);
+                t.copy(&w); t.imul(fp::RIADZ);
+                X1.copy(&FP::new_big(&BIG::new_ints(&rom::CURVE_HTPC)));
+                X1.mul(&hint);
+
+                X2.cmove(&X3,1-qr);
+                D2.cmove(&D,1-qr);
+                w.cmove(&t,1-qr);
+                hint.cmove(&X1,1-qr);
+
+                Y.copy(&w.sqrt(Some(&hint)));
+                Y.mul(&D2);
+/*
                 Y.copy(&w.sqrt(Some(&hint)));
                 Y.mul(&D2);
 
@@ -1526,7 +1552,7 @@ CAHCZF */
 
                 X2.cmove(&X3,1-qr);
                 Y.cmove(&Y3,1-qr);
-
+*/
                 let ne=Y.sign()^sgn;
                 w.copy(&Y); w.neg(); w.norm();
                 Y.cmove(&w,ne);

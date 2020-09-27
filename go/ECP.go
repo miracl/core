@@ -1254,7 +1254,7 @@ func ECP_map2point(h *FP) *ECP {
             K:=NewFP()
 			D:=NewFP()
 			hint:=NewFP()
-			Y3:=NewFP()
+			//Y3:=NewFP()
 			rfc:=0
 
 			if MODTYPE !=  GENERALISED_MERSENNE {
@@ -1336,6 +1336,20 @@ func ECP_map2point(h *FP) *ECP {
             X2.mul(D)
             D.sqr()
 
+            w1.copy(B); w1.imul(qnr)
+            w.copy(NewFPbig(NewBIGints(CURVE_HTPC)))
+            w.mul(hint)
+            w2.copy(D); w2.mul(h)
+
+            X1.cmove(X2,1-qres)
+            B.cmove(w1,1-qres)
+            hint.cmove(w,1-qres)
+            D.cmove(w2,1-qres)
+
+            Y.copy(B.sqrt(hint))
+            Y.mul(D)
+
+/*
             Y.copy(B.sqrt(hint))
             Y.mul(D)
 
@@ -1349,7 +1363,7 @@ func ECP_map2point(h *FP) *ECP {
 
             X1.cmove(X2,1-qres)
             Y.cmove(Y3,1-qres)
-
+*/
             w.copy(Y); w.neg(); w.norm()
             Y.cmove(w,qres^Y.sign())
 
@@ -1415,7 +1429,7 @@ func ECP_map2point(h *FP) *ECP {
 			D2:=NewFP()
 			hint:=NewFP()
 			GX1:=NewFP()
-			Y3:=NewFP()
+			//Y3:=NewFP()
             sgn:=t.sign()
 
             if CURVE_A != 0 || HTC_ISO != 0{
@@ -1456,6 +1470,20 @@ CAHCZF */
                 t.mul(h)
                 D2.copy(D); D2.sqr()
 
+
+                D.copy(D2); D.mul(t)
+                t.copy(w); t.imul(RIADZ)
+                X1.copy(NewFPbig(NewBIGints(CURVE_HTPC)))
+                X1.mul(hint)
+
+                X2.cmove(X3,1-qr)
+                D2.cmove(D,1-qr)
+                w.cmove(t,1-qr)
+                hint.cmove(X1,1-qr)
+
+                Y.copy(w.sqrt(hint))
+                Y.mul(D2)
+/*
                 Y.copy(w.sqrt(hint))
                 Y.mul(D2)
 
@@ -1470,7 +1498,7 @@ CAHCZF */
 
                 X2.cmove(X3,1-qr)
                 Y.cmove(Y3,1-qr)
-
+*/
 				ne:=Y.sign()^sgn
 				w.copy(Y); w.neg(); w.norm()
 				Y.cmove(w,ne)

@@ -1069,7 +1069,7 @@ public struct ECP {
             var K=FP()
             var D=FP()
             var hint:FP?=FP()
-            var Y3=FP()
+            //var Y3=FP()
             var rfc=0
 
             if CONFIG_FIELD.MODTYPE != CONFIG_FIELD.GENERALISED_MERSENNE {
@@ -1151,6 +1151,20 @@ public struct ECP {
             X2.mul(D)
             D.sqr()
 
+            w1.copy(B); w1.imul(qnr)
+            w.copy(FP(BIG(ROM.CURVE_HTPC)))
+            w.mul(hint!)
+            w2.copy(D); w2.mul(h)
+
+            X1.cmove(X2,1-qres)
+            B.cmove(w1,1-qres)
+            hint!.cmove(w,1-qres)
+            D.cmove(w2,1-qres)
+
+            Y.copy(B.sqrt(hint))
+            Y.mul(D);
+
+/*
             Y.copy(B.sqrt(hint))
             Y.mul(D)
 
@@ -1164,7 +1178,7 @@ public struct ECP {
 
             X1.cmove(X2,1-qres)
             Y.cmove(Y3,1-qres)
-
+*/
             w.copy(Y); w.neg(); w.norm()
             Y.cmove(w,qres^Y.sign())
 
@@ -1231,7 +1245,7 @@ public struct ECP {
             var D2=FP()
             var hint:FP?=FP()
             var GX1=FP()
-            var Y3=FP()
+            //var Y3=FP()
             let sgn=t.sign()
 
             if CONFIG_CURVE.CURVE_A != 0 || CONFIG_CURVE.HTC_ISO != 0
@@ -1273,6 +1287,19 @@ CAHCZF */
                 t.mul(h)
                 D2.copy(D); D2.sqr()
 
+                D.copy(D2); D.mul(t)
+                t.copy(w); t.imul(CONFIG_FIELD.RIADZ)
+                X1.copy(FP(BIG(ROM.CURVE_HTPC)))
+                X1.mul(hint!)
+
+                X2.cmove(X3,1-qr)
+                D2.cmove(D,1-qr)
+                w.cmove(t,1-qr)
+                hint!.cmove(X1,1-qr)
+
+                Y.copy(w.sqrt(hint))
+                Y.mul(D2)
+/*
                 Y.copy(w.sqrt(hint))
                 Y.mul(D2)
 
@@ -1287,7 +1314,7 @@ CAHCZF */
 
                 X2.cmove(X3,1-qr)
                 Y.cmove(Y3,1-qr)
-
+*/
                 let ne=Y.sign()^sgn
                 w.copy(Y); w.neg(); w.norm()
                 Y.cmove(w,ne)
