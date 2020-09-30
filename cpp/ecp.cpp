@@ -263,18 +263,13 @@ int ZZZ::ECP_get(BIG x, ECP *P)
 /* SU=16 */
 int ZZZ::ECP_get(BIG x, BIG y, ECP *P)
 {
-    int s;
     ECP W;
     ECP_copy(&W, P);
     ECP_affine(&W);
     if (ECP_isinf(&W)) return -1;
-
     FP_redc(y, &(W.y));
-    s = BIG_parity(y);
-
     FP_redc(x, &(W.x));
-
-    return s;
+    return FP_sign(&(W.y));
 }
 
 /* Set P=(x,{y}) */
@@ -307,8 +302,6 @@ int ZZZ::ECP_set(ECP *P, BIG x, BIG y)
 int ZZZ::ECP_setx(ECP *P, BIG x, int s)
 {
     FP rhs,hint;
-    BIG t;
-
     FP_nres(&rhs, x);
 
     ECP_rhs(&rhs, &rhs);
@@ -322,9 +315,7 @@ int ZZZ::ECP_setx(ECP *P, BIG x, int s)
     FP_nres(&(P->x), x);
     FP_sqrt(&(P->y), &rhs, &hint);
 
-    FP_redc(t, &(P->y));
-
-    if (BIG_parity(t) != s)
+    if (FP_sign(&(P->y))!=s)
         FP_neg(&(P->y), &(P->y));
     FP_reduce(&(P->y));
     FP_one(&(P->z));
@@ -457,24 +448,43 @@ void ZZZ::ECP_toOctet(octet *W, ECP *P, bool compress)
     BIG x;
     ECP_get(x, P);
     W->len = MODBYTES_XXX; // + 1;
-    //W->val[0] = 0x06;
     BIG_toBytes(&(W->val[0]), x);
 #else
     BIG x, y;
+    bool alt=false;
+    ECP_affine(P);
     ECP_get(x, y, P);
-    if (compress)
+
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
+
+    if (alt)
     {
-        W->val[0] = 0x02;
-        if (BIG_parity(y) == 1) W->val[0] = 0x03;
-        W->len = MODBYTES_XXX + 1;
+        BIG_toBytes(&(W->val[0]), x);
+        if (compress)
+        {
+            W->len = MODBYTES_XXX;
+            W->val[0]|=0x80;
+            if (FP_islarger(&(P->y))==1) W->val[0]|=0x20;
+        } else {
+            W->len = 2 * MODBYTES_XXX;
+            BIG_toBytes(&(W->val[MODBYTES_XXX]), y);
+        }
+    } else {
         BIG_toBytes(&(W->val[1]), x);
-    }
-    else
-    {
-        W->val[0] = 0x04;
-        W->len = 2 * MODBYTES_XXX + 1;
-        BIG_toBytes(&(W->val[1]), x);
-        BIG_toBytes(&(W->val[MODBYTES_XXX + 1]), y);
+        if (compress)
+        {
+            W->val[0] = 0x02;
+            if (FP_sign(&(P->y)) == 1) W->val[0] = 0x03;
+            W->len = MODBYTES_XXX + 1;
+        } else {
+            W->val[0] = 0x04;
+            W->len = 2 * MODBYTES_XXX + 1;
+            BIG_toBytes(&(W->val[MODBYTES_XXX + 1]), y);
+        }
     }
 #endif
 }
@@ -490,17 +500,44 @@ int ZZZ::ECP_fromOctet(ECP *P, octet *W)
     return 0;
 #else
     BIG x, y;
-    int typ = W->val[0];
-    BIG_fromBytes(x, &(W->val[1]));
+    bool alt=false;
+    int sgn,cmp,typ = W->val[0];
 
-    if (typ == 0x04)
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
+
+    if (alt)
     {
-        BIG_fromBytes(y, &(W->val[MODBYTES_XXX + 1]));
-        if (ECP_set(P, x, y)) return 1;
-    }
-    if (typ == 0x02 || typ == 0x03)
-    {
-        if (ECP_setx(P, x, typ & 1)) return 1;
+        W->val[0]&=0x1f;
+        BIG_fromBytes(x, &(W->val[0]));
+        W->val[0]=typ;
+        if (typ&0x80==0)
+        {
+            BIG_fromBytes(y, &(W->val[MODBYTES_XXX]));
+            if (ECP_set(P, x, y)) return 1;
+            return 0;
+        } else {
+            if (!ECP_setx(P,x,0)) return 0;
+            sgn=(typ&0x20)>>5;
+            cmp=FP_islarger(&(P->y));
+            if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) ECP_neg(P);
+            return 1;
+        }
+
+    } else {
+        BIG_fromBytes(x, &(W->val[1]));
+        if (typ == 0x04)
+        {
+            BIG_fromBytes(y, &(W->val[MODBYTES_XXX + 1]));
+            if (ECP_set(P, x, y)) return 1;
+        }
+        if (typ == 0x02 || typ == 0x03)
+        {
+            if (ECP_setx(P, x, typ & 1)) return 1;
+        }
     }
     return 0;
 #endif

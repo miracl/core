@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+use crate::xxx::big;
 use crate::xxx::big::BIG;
 use crate::xxx::dbig::DBIG;
 use crate::xxx::fp;
@@ -107,6 +108,44 @@ impl FP2 {
     /* test self=0 ? */
     pub fn iszilch(&self) -> bool {
         return self.a.iszilch() && self.b.iszilch();
+    }
+
+    pub fn islarger(&self) -> isize {
+        if self.iszilch() {
+            return 0;
+        }
+        let cmp=self.b.islarger();
+        if cmp!=0 {
+            return cmp;
+        }
+        return self.a.islarger()
+    }
+
+    pub fn tobytes(&self,bf: &mut [u8]) {
+        const MB:usize = big::MODBYTES as usize;
+        let mut t: [u8; MB] = [0; MB];
+        self.b.tobytes(&mut t);
+        for i in 0..MB {
+            bf[i]=t[i];
+        }
+        self.a.tobytes(&mut t);
+        for i in 0..MB {
+            bf[i+MB]=t[i];
+        }       
+    }
+
+    pub fn frombytes(bf: &[u8]) -> FP2 {
+        const MB:usize = big::MODBYTES as usize;
+        let mut t: [u8; MB] = [0; MB];
+        for i in 0..MB {
+            t[i]=bf[i];
+        }
+        let tb=FP::frombytes(&t);
+        for i in 0..MB {
+            t[i]=bf[i+MB];
+        }
+        let ta=FP::frombytes(&t);
+        return FP2::new_fps(&ta,&tb);
     }
 
     pub fn cmove(&mut self, g: &FP2, d: isize) {

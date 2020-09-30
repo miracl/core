@@ -173,116 +173,100 @@ func (E *ECP4) getz() *FP4 {
 
 /* convert to byte array */
 func (E *ECP4) ToBytes(b []byte, compress bool) {
-	var t [int(MODBYTES)]byte
-	MB := int(MODBYTES)
-
+	var t [4*int(MODBYTES)]byte
+	MB := 4*int(MODBYTES)
+	alt:=false
 	W := NewECP4()
 	W.Copy(E)
 	W.Affine()
-	b[0]=0x06
+	W.x.ToBytes(t[:])
 
-	W.x.geta().GetA().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		b[i+1] = t[i]
-	}
-	W.x.geta().GetB().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		b[i+MB+1] = t[i]
-	}
-	W.x.getb().GetA().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		b[i+2*MB+1] = t[i]
-	}
-	W.x.getb().GetB().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		b[i+3*MB+1] = t[i]
+	if (MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
+		alt=true
 	}
 
-	if !compress {
-		b[0]=0x04
-		W.y.geta().GetA().ToBytes(t[:])
-		for i := 0; i < MB; i++ {
-			b[i+4*MB+1] = t[i]
+    if alt {
+		for i:=0;i<MB;i++ {
+			b[i]=t[i]
 		}
-		W.y.geta().GetB().ToBytes(t[:])
-		for i := 0; i < MB; i++ {
-			b[i+5*MB+1] = t[i]
-		}
-		W.y.getb().GetA().ToBytes(t[:])
-		for i := 0; i < MB; i++ {
-			b[i+6*MB+1] = t[i]
-		}
-		W.y.getb().GetB().ToBytes(t[:])
-		for i := 0; i < MB; i++ {
-			b[i+7*MB+1] = t[i]
-		}
+        if !compress {
+            W.y.ToBytes(t[:]);
+            for i:=0;i<MB;i++ {
+				b[i+MB]=t[i]
+			}
+        } else {
+            b[0]|=0x80
+            if W.y.islarger()==1 {
+				b[0]|=0x20
+			}
+        }
+		
 	} else {
-		b[0]=0x02
-		if W.y.sign() == 1 {
-			b[0]=0x03
+		for i:=0;i<MB;i++ {
+			b[i+1]=t[i]
 		}
+        if !compress {
+            b[0]=0x04
+            W.y.ToBytes(t[:])
+	        for i:=0;i<MB;i++ {
+			    b[i+MB+1]=t[i]
+			}
+        } else {
+            b[0]=0x02
+            if W.y.sign() == 1 {
+                b[0]=0x03
+			}
+        }
 	}
-
 }
 
 /* convert from byte array to point */
 func ECP4_fromBytes(b []byte) *ECP4 {
-	var t [int(MODBYTES)]byte
-	MB := int(MODBYTES)
+	var t [4*int(MODBYTES)]byte
+	MB := 4*int(MODBYTES)
 	typ := int(b[0])
+	alt:=false
 
-	for i := 0; i < MB; i++ {
-		t[i] = b[i+1]
+	if (MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
+		alt=true
 	}
-	ra := FromBytes(t[:])
-	for i := 0; i < MB; i++ {
-		t[i] = b[i+MB+1]
-	}
-	rb := FromBytes(t[:])
 
-	ra4 := NewFP2bigs(ra, rb)
-
-	for i := 0; i < MB; i++ {
-		t[i] = b[i+2*MB+1]
-	}
-	ra = FromBytes(t[:])
-	for i := 0; i < MB; i++ {
-		t[i] = b[i+3*MB+1]
-	}
-	rb = FromBytes(t[:])
-
-	rb4 := NewFP2bigs(ra, rb)
-	rx := NewFP4fp2s(ra4, rb4)
-
-	if typ == 0x04 {
-
-		for i := 0; i < MB; i++ {
-			t[i] = b[i+4*MB+1]
+	if alt {
+        for i:=0;i<MB;i++  {
+			t[i]=b[i]
 		}
-		ra = FromBytes(t[:])
-		for i := 0; i < MB; i++ {
-			t[i] = b[i+5*MB+1]
+        t[0]&=0x1f
+        rx:=FP4_fromBytes(t[:]);
+        if (b[0]&0x80)==0 {
+            for i:=0;i<MB;i++ {
+				t[i]=b[i+MB]
+			}
+            ry:=FP4_fromBytes(t[:])
+            return NewECP4fp4s(rx,ry)
+        } else {
+            sgn:=(b[0]&0x20)>>5
+            P:=NewECP4fp4(rx,0)
+            cmp:=P.y.islarger()
+            if (sgn==1 && cmp!=1) || (sgn==0 && cmp==1) {
+				P.neg()
+			}
+            return P;
+        }
+    } else {
+		for i:=0;i<MB;i++ {
+			t[i]=b[i+1]
 		}
-		rb = FromBytes(t[:])
-
-		ra4 = NewFP2bigs(ra, rb)
-
-		for i := 0; i < MB; i++ {
-			t[i] = b[i+6*MB+1]
-		}
-		ra = FromBytes(t[:])
-		for i := 0; i < MB; i++ {
-			t[i] = b[i+7*MB+1]
-		}
-		rb = FromBytes(t[:])
-
-		rb4 = NewFP2bigs(ra, rb)
-		ry := NewFP4fp2s(ra4, rb4)
-
-		return NewECP4fp4s(rx, ry)
-	} else {
-		return NewECP4fp4(rx,typ&1)
-	}
+        rx:=FP4_fromBytes(t[:])
+        if typ == 0x04 {
+		    for i:=0;i<MB;i++ {
+				t[i]=b[i+MB+1]
+			}
+		    ry:=FP4_fromBytes(t[:])
+		    return NewECP4fp4s(rx,ry)
+        } else {
+            return NewECP4fp4(rx,typ&1)
+        }
+    }
 }
 
 /* convert this to hex string */

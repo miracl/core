@@ -51,6 +51,30 @@ int FP4_YYY_equals(FP4_YYY *x, FP4_YYY *y)
     return (FP2_YYY_equals(&(x->a), &(y->a)) & FP2_YYY_equals(&(x->b), &(y->b)));
 }
 
+// Is x lexically larger than p-x?
+// return -1 for no, 0 if x=0, 1 for yes
+int FP4_YYY_islarger(FP4_YYY *x)
+{
+    int cmp;
+    if (FP4_YYY_iszilch(x)) return 0;
+    cmp=FP2_YYY_islarger(&(x->b));
+    if (cmp!=0) return cmp;
+    return FP2_YYY_islarger(&(x->a));
+}
+
+void FP4_YYY_toBytes(char *b,FP4_YYY *x)
+{
+    FP2_YYY_toBytes(b,&(x->b));
+    FP2_YYY_toBytes(&b[2*MODBYTES_XXX],&(x->a));
+}
+
+void FP4_YYY_fromBytes(FP4_YYY *x,char *b)
+{
+    FP2_YYY_fromBytes(&(x->b),b);
+    FP2_YYY_fromBytes(&(x->a),&b[2*MODBYTES_XXX]);
+}
+
+
 /* set FP4 from two FP2s */
 /* SU= 16 */
 void FP4_YYY_from_FP2s(FP4_YYY *w, FP2_YYY * x, FP2_YYY* y)

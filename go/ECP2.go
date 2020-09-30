@@ -167,72 +167,100 @@ func (E *ECP2) getz() *FP2 {
 
 /* convert to byte array */
 func (E *ECP2) ToBytes(b []byte,compress bool) {
-	var t [int(MODBYTES)]byte
-	MB := int(MODBYTES)
-
+	var t [2*int(MODBYTES)]byte
+	MB := 2*int(MODBYTES)
+	alt:=false
 	W := NewECP2()
 	W.Copy(E)
 	W.Affine()
+	W.x.ToBytes(t[:])
 
-	W.x.GetA().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		b[i+1] = t[i]
-	}
-	W.x.GetB().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		b[i+MB+1] = t[i]
+	if (MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
+		alt=true
 	}
 
-	if !compress {
-		b[0]=0x04
-		W.y.GetA().ToBytes(t[:])
-		for i := 0; i < MB; i++ {
-			b[i+2*MB+1] = t[i]
+    if alt {
+		for i:=0;i<MB;i++ {
+			b[i]=t[i]
 		}
-		W.y.GetB().ToBytes(t[:])
-		for i := 0; i < MB; i++ {
-			b[i+3*MB+1] = t[i]
-		}
+        if !compress {
+            W.y.ToBytes(t[:]);
+            for i:=0;i<MB;i++ {
+				b[i+MB]=t[i]
+			}
+        } else {
+            b[0]|=0x80
+            if W.y.islarger()==1 {
+				b[0]|=0x20
+			}
+        }
+		
 	} else {
-		b[0]=0x02
-		if W.y.sign() == 1 {
-			b[0]=0x03
+		for i:=0;i<MB;i++ {
+			b[i+1]=t[i]
 		}
+        if !compress {
+            b[0]=0x04
+            W.y.ToBytes(t[:])
+	        for i:=0;i<MB;i++ {
+			    b[i+MB+1]=t[i]
+			}
+        } else {
+            b[0]=0x02
+            if W.y.sign() == 1 {
+                b[0]=0x03
+			}
+        }
 	}
-
 }
 
 /* convert from byte array to point */
 func ECP2_fromBytes(b []byte) *ECP2 {
-	var t [int(MODBYTES)]byte
-	MB := int(MODBYTES)
+	var t [2*int(MODBYTES)]byte
+	MB := 2*int(MODBYTES)
 	typ := int(b[0])
+	alt:=false
 
-	for i := 0; i < MB; i++ {
-		t[i] = b[i+1]
+	if (MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
+		alt=true
 	}
-	ra := FromBytes(t[:])
-	for i := 0; i < MB; i++ {
-		t[i] = b[i+MB+1]
-	}
-	rb := FromBytes(t[:])
-	rx := NewFP2bigs(ra, rb)
 
-	if typ == 0x04 {
-		for i := 0; i < MB; i++ {
-			t[i] = b[i+2*MB+1]
+	if alt {
+        for i:=0;i<MB;i++  {
+			t[i]=b[i]
 		}
-		ra = FromBytes(t[:])
-		for i := 0; i < MB; i++ {
-			t[i] = b[i+3*MB+1]
+        t[0]&=0x1f
+        rx:=FP2_fromBytes(t[:]);
+        if (b[0]&0x80)==0 {
+            for i:=0;i<MB;i++ {
+				t[i]=b[i+MB]
+			}
+            ry:=FP2_fromBytes(t[:])
+            return NewECP2fp2s(rx,ry)
+        } else {
+            sgn:=(b[0]&0x20)>>5
+            P:=NewECP2fp2(rx,0)
+            cmp:=P.y.islarger()
+            if (sgn==1 && cmp!=1) || (sgn==0 && cmp==1) {
+				P.neg()
+			}
+            return P;
+        }
+    } else {
+		for i:=0;i<MB;i++ {
+			t[i]=b[i+1]
 		}
-		rb = FromBytes(t[:])
-		ry := NewFP2bigs(ra, rb)
-
-		return NewECP2fp2s(rx, ry)
-	} else {
-		return NewECP2fp2(rx,typ&1)
-	}
+        rx:=FP2_fromBytes(t[:])
+        if typ == 0x04 {
+		    for i:=0;i<MB;i++ {
+				t[i]=b[i+MB+1]
+			}
+		    ry:=FP2_fromBytes(t[:])
+		    return NewECP2fp2s(rx,ry)
+        } else {
+            return NewECP2fp2(rx,typ&1)
+        }
+    }
 }
 
 /* convert this to hex string */

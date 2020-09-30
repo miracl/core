@@ -44,6 +44,35 @@ public final class FP4 {
 		return (a.iszilch() && b.iszilch());
 	}
 
+    public int islarger() {
+        if (iszilch()) return 0;
+        int cmp=b.islarger();
+        if (cmp!=0) return cmp;
+        return a.islarger();
+    }
+
+    public void toBytes(byte[] bf) {
+		byte[] t=new byte[2*CONFIG_BIG.MODBYTES];
+        b.toBytes(t);
+		for (int i=0;i<2*CONFIG_BIG.MODBYTES;i++)
+            bf[i]=t[i];
+        a.toBytes(t);
+		for (int i=0;i<2*CONFIG_BIG.MODBYTES;i++)
+            bf[i+2*CONFIG_BIG.MODBYTES]=t[i];
+    }
+
+    public static FP4 fromBytes(byte[] bf) {
+		byte[] t=new byte[2*CONFIG_BIG.MODBYTES];
+		for (int i=0;i<2*CONFIG_BIG.MODBYTES;i++)
+            t[i]=bf[i];
+        FP2 tb=FP2.fromBytes(t);
+		for (int i=0;i<2*CONFIG_BIG.MODBYTES;i++)
+            t[i]=bf[i+2*CONFIG_BIG.MODBYTES];
+        FP2 ta=FP2.fromBytes(t);
+        return new FP4(ta,tb);
+    }
+
+
 	public void cmove(FP4 g,int d)
 	{
 		a.cmove(g.a,d);

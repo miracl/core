@@ -333,6 +333,32 @@ int YYY::FP_equals(FP *x, FP *y)
     return 0;
 }
 
+// Is x lexically larger than p-x?
+// return -1 for no, 0 if x=0, 1 for yes
+int YYY::FP_islarger(FP *x)
+{
+    BIG p,fx,sx;
+    if (FP_iszilch(x)) return 0;
+    BIG_rcopy(p,Modulus);
+    FP_redc(fx,x);
+    BIG_sub(sx,p,fx);  BIG_norm(sx); 
+    return BIG_comp(fx,sx);
+}
+
+void YYY::FP_toBytes(char *b,FP *x)
+{
+    BIG t;
+    FP_redc(t, x);
+    BIG_toBytes(b, t);
+}
+
+void YYY::FP_fromBytes(FP *x,char *b)
+{
+    BIG t;
+    BIG_fromBytes(t, b);
+    FP_nres(x, t);
+}
+
 /* output FP */
 /* SU= 48 */
 void YYY::FP_output(FP *r)

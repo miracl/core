@@ -165,53 +165,39 @@ var ECP4 = function(ctx) {
 
         /* convert this to byte array */
         toBytes: function(b,compress) {
-            var t = [],
-                i;
+            var t = [];
+            var alt=false;
 			var W=new ECP4(); W.copy(this);
             W.affine();
-            b[0] = 0x06;
+		    W.x.toBytes(t);
 
-            W.x.geta().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                b[i+1] = t[i];
-            }
-            W.x.geta().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                b[i + ctx.BIG.MODBYTES+1] = t[i];
-            }
-            W.x.getb().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                b[i + 2*ctx.BIG.MODBYTES+1] = t[i];
-            }
-            W.x.getb().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                b[i + 3*ctx.BIG.MODBYTES+1] = t[i];
-            }
+            if ((ctx.FP.MODBITS-1)%8<=4 && ECP.ALLOW_ALT_COMPRESS) alt=true;
 
-            if (!compress)
+            if (alt)
             {
-                b[0] = 0x04;
-                W.y.geta().getA().toBytes(t);
-                for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                    b[i + 4 * ctx.BIG.MODBYTES+1] = t[i];
-                }
-                W.y.geta().getB().toBytes(t);
-                for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                    b[i + 5 * ctx.BIG.MODBYTES+1] = t[i];
-                }
-                W.y.getb().getA().toBytes(t);
-                for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                    b[i + 6 * ctx.BIG.MODBYTES+1] = t[i];
-                }
-                W.y.getb().getB().toBytes(t);
-                for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                    b[i + 7 * ctx.BIG.MODBYTES+1] = t[i];
+		        for (var i=0;i<4*ctx.BIG.MODBYTES;i++) b[i]=t[i];
+                if (!compress)
+                {
+                    W.y.toBytes(t);
+                    for (var i=0;i<4*ctx.BIG.MODBYTES;i++) b[i+4*ctx.BIG.MODBYTES]=t[i];
+                } else {
+                    b[0]|=0x80;
+                    if (W.y.islarger()==1) b[0]|=0x20;
                 }
             } else {
-                b[0]=0x02;
-                if (W.y.sign() == 1)
-                    b[0]=0x03;
-            }
+
+		        for (var i=0;i<4*ctx.BIG.MODBYTES;i++) b[i+1]=t[i];
+                if (!compress)
+                {
+                    b[0]=0x04;
+                    W.y.toBytes(t);
+		            for (var i=0;i<4*ctx.BIG.MODBYTES;i++) b[i+4*ctx.BIG.MODBYTES+1]=t[i];
+                } else {
+                    b[0]=0x02;
+                    if (W.y.sign() == 1)
+                        b[0]=0x03;
+                }
+	        }
         },
 
         /* convert this to hex string */
@@ -599,61 +585,41 @@ var ECP4 = function(ctx) {
 
     /* convert from byte array to point */
     ECP4.fromBytes = function(b) {
-        var t = [],
-            ra, rb, ra4, rb4, i, rx, ry, P;
+        var t = [];
+        var alt=false;
         var typ= b[0];
-        P = new ECP4();
+        var P = new ECP4();
 
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = b[i+1];
-        }
-        ra = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = b[i + ctx.BIG.MODBYTES+1];
-        }
-        rb = ctx.BIG.fromBytes(t);
-        ra4=new ctx.FP2(ra,rb);
+        if ((ctx.FP.MODBITS-1)%8<=4 && ECP.ALLOW_ALT_COMPRESS) alt=true;
 
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = b[i  + 2*ctx.BIG.MODBYTES+1];
-        }
-        ra = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = b[i + 3*ctx.BIG.MODBYTES+1];
-        }
-        rb = ctx.BIG.fromBytes(t);
-        rb4=new ctx.FP2(ra,rb);
-
-        rx = new ctx.FP4(ra4, rb4); //rx.bset(ra,rb);
-
-        if (typ == 0x04)
+        if (alt)
         {
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                t[i] = b[i + 4 * ctx.BIG.MODBYTES+1];
+            for (var i=0;i<4*ctx.BIG.MODBYTES;i++) t[i]=b[i];
+            t[0]&=0x1f;
+            var rx=ctx.FP4.fromBytes(t);
+            if ((b[0]&0x80)==0)
+            {
+                for (var i=0;i<4*ctx.BIG.MODBYTES;i++) t[i]=b[i+4*ctx.BIG.MODBYTES];
+                var ry=ctx.FP4.fromBytes(t);
+                P.setxy(rx,ry);
+            } else {
+                var sgn=(b[0]&0x20)>>5;
+                P.setx(rx,0);
+                var cmp=P.y.islarger();
+                if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) P.neg();
             }
-            ra = ctx.BIG.fromBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                t[i] = b[i + 5 * ctx.BIG.MODBYTES+1];
-            }
-            rb = ctx.BIG.fromBytes(t);
-            ra4=new ctx.FP2(ra,rb);
-
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                t[i] = b[i + 6 * ctx.BIG.MODBYTES+1];
-            }
-            ra = ctx.BIG.fromBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                t[i] = b[i + 7 * ctx.BIG.MODBYTES+1];
-            }
-            rb = ctx.BIG.fromBytes(t);
-            rb4=new ctx.FP2(ra,rb);
-
-
-            ry = new ctx.FP4(ra4, rb4); //ry.bset(ra,rb);
-            P.setxy(rx, ry);
         } else {
-            P.setx(rx,typ&1);
-        }   
+		    for (var i=0;i<4*ctx.BIG.MODBYTES;i++) t[i]=b[i+1];
+            var rx=ctx.FP4.fromBytes(t);
+            if (typ == 0x04)
+            {
+		        for (var i=0;i<4*ctx.BIG.MODBYTES;i++) t[i]=b[i+4*ctx.BIG.MODBYTES+1];
+		        var ry=ctx.FP4.fromBytes(t);
+                P.setxy(rx,ry);
+            } else {
+                P.setx(rx,typ&1);
+            }
+        }
         return P;
     };
 

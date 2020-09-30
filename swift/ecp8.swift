@@ -164,156 +164,98 @@ public struct ECP8 {
     /* convert to byte array */
     func toBytes(_ b:inout [UInt8],_ compress: Bool)
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=8*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
+        var alt=false
         var W=ECP8(); W.copy(self)
         W.affine()
-        b[0]=0x06
+	    W.x.toBytes(&t)
 
-        W.x.geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM
-            {b[i+1]=t[i]}
-        W.x.geta().geta().getB().toBytes(&t);
-        for i in 0 ..< RM
-            {b[i+RM+1]=t[i]}
-
-        W.x.geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM
-            {b[i+2*RM+1]=t[i]}
-        W.x.geta().getb().getB().toBytes(&t);
-        for i in 0 ..< RM
-            {b[i+3*RM+1]=t[i]}
-
-        W.x.getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM
-            {b[i+4*RM+1]=t[i]}
-        W.x.getb().geta().getB().toBytes(&t);
-        for i in 0 ..< RM
-            {b[i+5*RM+1]=t[i]}
-
-        W.x.getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM
-            {b[i+6*RM+1]=t[i]}
-        W.x.getb().getb().getB().toBytes(&t);
-        for i in 0 ..< RM
-            {b[i+7*RM+1]=t[i]}
-
-        if !compress {
-            b[0]=0x04
-            W.y.geta().geta().getA().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+8*RM+1]=t[i]}
-            W.y.geta().geta().getB().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+9*RM+1]=t[i]}
-
-            W.y.geta().getb().getA().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+10*RM+1]=t[i]}
-            W.y.geta().getb().getB().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+11*RM+1]=t[i]}
-
-            W.y.getb().geta().getA().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+12*RM+1]=t[i]}
-            W.y.getb().geta().getB().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+13*RM+1]=t[i]}
-
-            W.y.getb().getb().getA().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+14*RM+1]=t[i]}
-            W.y.getb().getb().getB().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+15*RM+1]=t[i]}
-         } else {
-            b[0]=0x02
-            if W.y.sign() == 1 {
-                b[0]=0x03;
-            }
+        if (CONFIG_FIELD.MODBITS-1)%8 <= 4 && CONFIG_CURVE.ALLOW_ALT_COMPRESS {
+            alt=true
         }
+        if alt {
+		    for i in 0 ..< RM {
+			    b[i]=t[i]
+		    }
+            if !compress {
+                W.y.toBytes(&t);
+                for i in 0 ..< RM {
+				    b[i+RM]=t[i]
+			    }
+            } else {
+                b[0]|=0x80
+                if W.y.islarger()==1 {
+				    b[0]|=0x20
+			    }
+            }
+
+	    } else {
+		    for i in 0 ..< RM {
+			    b[i+1]=t[i]
+		    }
+            if !compress {
+                b[0]=0x04
+                W.y.toBytes(&t)
+	            for i in 0 ..< RM {
+			        b[i+RM+1]=t[i]
+			    }
+            } else {
+                b[0]=0x02
+                if W.y.sign() == 1 {
+                    b[0]=0x03
+			    }
+            }
+	    }
     }
 
     /* convert from byte array to point */
     static func fromBytes(_ b:[UInt8]) -> ECP8
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=8*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
+        var alt=false
         let typ = Int(b[0])
 
-        for i in 0 ..< RM {t[i]=b[i+1]}
-        var ra=BIG.fromBytes(t);
-        for i in 0 ..< RM {t[i]=b[i+RM+1]}
-        var rb=BIG.fromBytes(t);
+        if (CONFIG_FIELD.MODBITS-1)%8 <= 4 && CONFIG_CURVE.ALLOW_ALT_COMPRESS {
+            alt=true
+        }
 
-        var ra2=FP2(ra,rb)
-
-        for i in 0 ..< RM {t[i]=b[i+2*RM+1]}
-        ra.copy(BIG.fromBytes(t));
-        for i in 0 ..< RM {t[i]=b[i+3*RM+1]}
-        rb.copy(BIG.fromBytes(t));
-
-        var rb2=FP2(ra,rb)
-
-        var ra4=FP4(ra2,rb2)
-
-        for i in 0 ..< RM {t[i]=b[i+4*RM+1]}
-        ra.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=b[i+5*RM+1]}
-        rb.copy(BIG.fromBytes(t))
-
-        ra2.copy(FP2(ra,rb))
-
-        for i in 0 ..< RM {t[i]=b[i+6*RM+1]}
-        ra.copy(BIG.fromBytes(t));
-        for i in 0 ..< RM {t[i]=b[i+7*RM+1]}
-        rb.copy(BIG.fromBytes(t));
-
-        rb2.copy(FP2(ra,rb))
-
-        var rb4=FP4(ra2,rb2)
-
-        let rx=FP8(ra4,rb4)
-
-        if typ == 0x04 {
-            for i in 0 ..< RM {t[i]=b[i+8*RM+1]}
-            ra.copy(BIG.fromBytes(t))
-            for i in 0 ..< RM {t[i]=b[i+9*RM+1]}
-            rb.copy(BIG.fromBytes(t))
-
-            ra2.copy(FP2(ra,rb))
-
-            for i in 0 ..< RM {t[i]=b[i+10*RM+1]}
-            ra.copy(BIG.fromBytes(t))
-            for i in 0 ..< RM {t[i]=b[i+11*RM+1]}
-            rb.copy(BIG.fromBytes(t))
-
-            rb2.copy(FP2(ra,rb))
-
-            ra4.copy(FP4(ra2,rb2))
-
-            for i in 0 ..< RM {t[i]=b[i+12*RM+1]}
-            ra.copy(BIG.fromBytes(t))
-            for i in 0 ..< RM {t[i]=b[i+13*RM+1]}
-            rb.copy(BIG.fromBytes(t))
-
-            ra2.copy(FP2(ra,rb))
-
-            for i in 0 ..< RM {t[i]=b[i+14*RM+1]}
-            ra.copy(BIG.fromBytes(t))
-            for i in 0 ..< RM {t[i]=b[i+15*RM+1]}
-            rb.copy(BIG.fromBytes(t))
-
-            rb2.copy(FP2(ra,rb))
-
-            rb4.copy(FP4(ra2,rb2))
-
-            let ry=FP8(ra4,rb4)
-
-            return ECP8(rx,ry)
+	    if alt {
+            for i in 0 ..< RM  {
+			    t[i]=b[i]
+		    }
+            t[0]&=0x1f
+            let rx=FP8.fromBytes(t)
+            if (b[0]&0x80)==0 {
+                for i in 0 ..< RM {
+				    t[i]=b[i+RM]
+			    }
+                let ry=FP8.fromBytes(t)
+                return ECP8(rx,ry)
+            } else {
+                let sgn=(b[0]&0x20)>>5
+                var P=ECP8(rx,0)
+                let cmp=P.y.islarger()
+                if (sgn == 1 && cmp != 1) || (sgn == 0 && cmp == 1) {
+				    P.neg()
+			    }
+                return P;
+            }
         } else {
-            return ECP8(rx,typ&1)
+		    for i in 0 ..< RM {
+			    t[i]=b[i+1]
+		    }
+            let rx=FP8.fromBytes(t)
+            if typ == 0x04 {
+		        for i in 0 ..< RM {
+				    t[i]=b[i+RM+1]
+			    }
+		        let ry=FP8.fromBytes(t)
+		        return ECP8(rx,ry)
+            } else {
+                return ECP8(rx,typ&1)
+            }
         }
     }
 

@@ -154,86 +154,82 @@ void ECP4_ZZZ_output(ECP4_ZZZ *P)
 /* Convert Q to octet string */
 void ECP4_ZZZ_toOctet(octet *W, ECP4_ZZZ *Q,bool compress)
 {
-    BIG_XXX b;
     FP4_YYY qx, qy;
-    FP2_YYY pa, pb;
-
-    W->val[0]=0x06;
+    bool alt=false;
     ECP4_ZZZ_get(&qx, &qy, Q);
+  
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
 
-    FP2_YYY_copy(&pa, &(qx.a));
-    FP2_YYY_copy(&pb, &(qx.b));
-
-    FP_YYY_redc(b, &(pa.a));
-    BIG_XXX_toBytes(&(W->val[1]), b);
-    FP_YYY_redc(b, &(pa.b));
-    BIG_XXX_toBytes(&(W->val[MODBYTES_XXX+1]), b);
-    FP_YYY_redc(b, &(pb.a));
-    BIG_XXX_toBytes(&(W->val[2 * MODBYTES_XXX+1]), b);
-    FP_YYY_redc(b, &(pb.b));
-    BIG_XXX_toBytes(&(W->val[3 * MODBYTES_XXX+1]), b);
-
-    if (!compress)
+    if (alt)
     {
-        W->val[0] = 0x04;
-        FP2_YYY_copy(&pa, &(qy.a));
-        FP2_YYY_copy(&pb, &(qy.b));
-
-        FP_YYY_redc(b, &(pa.a));
-        BIG_XXX_toBytes(&(W->val[4 * MODBYTES_XXX+1]), b);
-        FP_YYY_redc(b, &(pa.b));
-        BIG_XXX_toBytes(&(W->val[5 * MODBYTES_XXX+1]), b);
-        FP_YYY_redc(b, &(pb.a));
-        BIG_XXX_toBytes(&(W->val[6 * MODBYTES_XXX+1]), b);
-        FP_YYY_redc(b, &(pb.b));
-        BIG_XXX_toBytes(&(W->val[7 * MODBYTES_XXX+1]), b);
-
-        W->len = 8 * MODBYTES_XXX+1;
+        FP4_YYY_toBytes(&(W->val[0]),&qx);
+        if (!compress)
+        {
+            W->len=8*MODBYTES_XXX;
+            FP4_YYY_toBytes(&(W->val[4*MODBYTES_XXX]), &qy);
+        } else {
+            W->val[0]|=0x80;
+            if (FP4_YYY_islarger(&qy)==1) W->val[0]|=0x20;
+            W->len=4*MODBYTES_XXX;
+        }
     } else {
-        W->val[0]=0x02;
-        if (FP4_YYY_sign(&qy)==1) W->val[0] = 0x03;
-        W->len = 4 * MODBYTES_XXX+1;
+        FP4_YYY_toBytes(&(W->val[1]),&qx);
+        if (!compress)
+        {
+            W->val[0] = 0x04;
+            FP4_YYY_toBytes(&(W->val[4 * MODBYTES_XXX+1]), &qy);
+            W->len = 8 * MODBYTES_XXX+1;
+        } else {
+            W->val[0]=0x02;
+            if (FP4_YYY_sign(&qy)==1) W->val[0] = 0x03;
+            W->len = 4 * MODBYTES_XXX+1;
+        }
     }
 }
 
 /* restore Q from octet string */
 int ECP4_ZZZ_fromOctet(ECP4_ZZZ *Q, octet *W)
 {
-    BIG_XXX b;
     FP4_YYY qx, qy;
-    FP2_YYY pa, pb;
-    int typ = W->val[0];
+    bool alt=false;
+    int sgn,cmp,typ = W->val[0];
 
-    BIG_XXX_fromBytes(b, &(W->val[1]));
-    FP_YYY_nres(&(pa.a), b);
-    BIG_XXX_fromBytes(b, &(W->val[MODBYTES_XXX+1]));
-    FP_YYY_nres(&(pa.b), b);
-    BIG_XXX_fromBytes(b, &(W->val[2 * MODBYTES_XXX+1]));
-    FP_YYY_nres(&(pb.a), b);
-    BIG_XXX_fromBytes(b, &(W->val[3 * MODBYTES_XXX+1]));
-    FP_YYY_nres(&(pb.b), b);
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
 
-    FP2_YYY_copy(&(qx.a), &pa);
-    FP2_YYY_copy(&(qx.b), &pb);
-
-    if (typ == 0x04)
+    if (alt)
     {
-        BIG_XXX_fromBytes(b, &(W->val[4 * MODBYTES_XXX+1]));
-        FP_YYY_nres(&(pa.a), b);
-        BIG_XXX_fromBytes(b, &(W->val[5 * MODBYTES_XXX+1]));
-        FP_YYY_nres(&(pa.b), b);
-        BIG_XXX_fromBytes(b, &(W->val[6 * MODBYTES_XXX+1]));
-        FP_YYY_nres(&(pb.a), b);
-        BIG_XXX_fromBytes(b, &(W->val[7 * MODBYTES_XXX+1]));
-        FP_YYY_nres(&(pb.b), b);
-
-        FP2_YYY_copy(&(qy.a), &pa);
-        FP2_YYY_copy(&(qy.b), &pb);
-
-
-        if (ECP4_ZZZ_set(Q, &qx, &qy)) return 1;
+        W->val[0]&=0x1f;
+        FP4_YYY_fromBytes(&qx,&(W->val[0]));
+        W->val[0]=typ;
+        if (typ&0x80==0)
+        {
+            FP4_YYY_fromBytes(&qy,&(W->val[4*MODBYTES_XXX]));
+            if (ECP4_ZZZ_set(Q, &qx, &qy)) return 1;
+            return 0;
+        } else {
+            if (!ECP4_ZZZ_setx(Q,&qx,0)) return 0;
+            sgn=(typ&0x20)>>5;
+            cmp=FP4_YYY_islarger(&(Q->y));
+            if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) ECP4_ZZZ_neg(Q);
+            return 1;
+        }
     } else {
-        if (ECP4_ZZZ_setx(Q, &qx, typ&1)) return 1;
+        FP4_YYY_fromBytes(&qx,&(W->val[1]));
+        if (typ == 0x04)
+        {
+            FP4_YYY_fromBytes(&qy,&(W->val[4 * MODBYTES_XXX+1]));
+            if (ECP4_ZZZ_set(Q, &qx, &qy)) return 1;
+        } else {
+            if (ECP4_ZZZ_setx(Q, &qx, typ&1)) return 1;
+        }
     }
     return 0;
 }

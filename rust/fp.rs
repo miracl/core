@@ -236,6 +236,25 @@ impl FP {
         return a.x.iszilch();
     }
 
+    pub fn islarger(&self) -> isize {
+        if self.iszilch() {
+            return 0;
+        }
+        let mut sx = BIG::new_ints(&rom::MODULUS);
+        let fx=self.redc();
+        sx.sub(&fx); sx.norm();
+        return BIG::comp(&fx,&sx);
+    }
+
+    pub fn tobytes(&self,b: &mut [u8]) {
+        self.redc().tobytes(b)
+    }
+
+    pub fn frombytes(b: &[u8]) -> FP {
+        let t=BIG::frombytes(b);
+        return FP::new_big(&t);
+    }
+
     /* test this=0? */
     pub fn isunity(&self) -> bool {
         let mut a = FP::new_copy(self);

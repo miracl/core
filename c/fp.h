@@ -80,6 +80,29 @@ extern void FP_YYY_from_int(FP_YYY *x,int a);
 extern int FP_YYY_iszilch(FP_YYY *x);
 
 
+/**	@brief Tests for lexically largest 
+ *
+	@param x FP number to be tested if larger than -x
+	@return 1 if larger, else returns 0
+ */
+extern int FP_YYY_islarger(FP_YYY *x);
+
+/**	@brief Serialize out FP  
+ *
+    @param b buffer for output
+	@param x FP number to be serialized
+ */
+extern void FP_YYY_toBytes(char *b,FP_YYY *x);
+
+/**	@brief Serialize in FP  
+ *
+	@param x FP number to be serialized
+    @param b buffer for input
+ */
+extern void FP_YYY_fromBytes(FP_YYY *x,char *b);
+
+
+
 /**	@brief Tests for FP equal to one mod Modulus
  *
 	@param x FP number to be tested

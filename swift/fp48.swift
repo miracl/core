@@ -781,321 +781,41 @@ public struct FP48
     /* convert from byte array to FP48 */
     static func fromBytes(_ w:[UInt8]) -> FP48
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=16*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
-
-        for i in 0 ..< RM {t[i]=w[i]}
-        var a=BIG.fromBytes(t)
-        for i in 0 ..< RM {t[i]=w[i+RM]}
-        var b=BIG.fromBytes(t)
-        var c=FP2(a,b)
-
-        for i in 0 ..< RM {t[i]=w[i+2*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+3*RM]}
-        b.copy(BIG.fromBytes(t))
-        var d=FP2(a,b)
-
-        var ea=FP4(c,d)
-
-        for i in 0 ..< RM {t[i]=w[i+4*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+5*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+6*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+7*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        var eb=FP4(c,d)
-
-        var ea4=FP8(ea,eb);
-
-        for i in 0 ..< RM {t[i]=w[i+8*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+9*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+10*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+11*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        ea.copy(FP4(c,d))
-
-        for i in 0 ..< RM {t[i]=w[i+12*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+13*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+14*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+15*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        eb.copy(FP4(c,d))
-
-        var eb4=FP8(ea,eb);
-
-        let e=FP16(ea4,eb4)
-
-
-
-        for i in 0 ..< RM {t[i]=w[i+16*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+17*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+18*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+19*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        ea.copy(FP4(c,d))
-
-
-        for i in 0 ..< RM {t[i]=w[i+20*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+21*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+22*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+23*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        eb.copy(FP4(c,d))
-
-        ea4.copy(FP8(ea,eb))
-
-        for i in 0 ..< RM {t[i]=w[i+24*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+25*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+26*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+27*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        ea.copy(FP4(c,d))
-
-
-        for i in 0 ..< RM {t[i]=w[i+28*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+29*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+30*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+31*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        eb.copy(FP4(c,d))
-
-        eb4.copy(FP8(ea,eb))
-
-        let f=FP16(ea4,eb4)
-
-
-
-        for i in 0 ..< RM {t[i]=w[i+32*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+33*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+34*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+35*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        ea.copy(FP4(c,d))
-
-
-        for i in 0 ..< RM {t[i]=w[i+36*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+37*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+38*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+39*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        eb.copy(FP4(c,d))
-
-        ea4.copy(FP8(ea,eb))
-
-        for i in 0 ..< RM {t[i]=w[i+40*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+41*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+42*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+43*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        ea.copy(FP4(c,d))
-
-
-        for i in 0 ..< RM {t[i]=w[i+44*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+45*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+46*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+47*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        eb.copy(FP4(c,d))
-
-        eb4.copy(FP8(ea,eb))
-
-        let g=FP16(ea4,eb4)
-
-        return FP48(e,f,g)
+    
+	    for i in 0 ..< RM {
+		    t[i]=w[i]
+	    }
+        let c=FP16.fromBytes(t)
+	    for i in 0 ..< RM {
+		    t[i]=w[i+RM]
+	    }
+        let b=FP16.fromBytes(t)
+	    for i in 0 ..< RM {
+		    t[i]=w[i+2*RM]
+	    }
+        let a=FP16.fromBytes(t)
+	    return FP48(a,b,c)
     }
 
     /* convert this to byte array */
     func toBytes(_ w:inout [UInt8])
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=16*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
-
-        a.geta().geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i]=t[i]}
-        a.geta().geta().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+RM]=t[i]}
-        a.geta().geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+2*RM]=t[i]}
-        a.geta().geta().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+3*RM]=t[i]}
-
-        a.geta().getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+4*RM]=t[i]}
-        a.geta().getb().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+5*RM]=t[i]}
-        a.geta().getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+6*RM]=t[i]}
-        a.geta().getb().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+7*RM]=t[i]}
-
-        a.getb().geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+8*RM]=t[i]}
-        a.getb().geta().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+9*RM]=t[i]}
-        a.getb().geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+10*RM]=t[i]}
-        a.getb().geta().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+11*RM]=t[i]}
-
-        a.getb().getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+12*RM]=t[i]}
-        a.getb().getb().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+13*RM]=t[i]}
-        a.getb().getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+14*RM]=t[i]}
-        a.getb().getb().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+15*RM]=t[i]}
-
-
-        b.geta().geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+16*RM]=t[i]}
-        b.geta().geta().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+17*RM]=t[i]}
-        b.geta().geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+18*RM]=t[i]}
-        b.geta().geta().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+19*RM]=t[i]}
-        b.geta().getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+20*RM]=t[i]}
-        b.geta().getb().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+21*RM]=t[i]}
-        b.geta().getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+22*RM]=t[i]}
-        b.geta().getb().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+23*RM]=t[i]}
-
-
-        b.getb().geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+24*RM]=t[i]}
-        b.getb().geta().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+25*RM]=t[i]}
-        b.getb().geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+26*RM]=t[i]}
-        b.getb().geta().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+27*RM]=t[i]}
-        b.getb().getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+28*RM]=t[i]}
-        b.getb().getb().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+29*RM]=t[i]}
-        b.getb().getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+30*RM]=t[i]}
-        b.getb().getb().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+31*RM]=t[i]}
-
-
-
-        c.geta().geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+32*RM]=t[i]}
-        c.geta().geta().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+33*RM]=t[i]}
-        c.geta().geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+34*RM]=t[i]}
-        c.geta().geta().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+35*RM]=t[i]}
-        c.geta().getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+36*RM]=t[i]}
-        c.geta().getb().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+37*RM]=t[i]}
-        c.geta().getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+38*RM]=t[i]}
-        c.geta().getb().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+39*RM]=t[i]}
-
-
-        c.getb().geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+40*RM]=t[i]}
-        c.getb().geta().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+41*RM]=t[i]}
-        c.getb().geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+42*RM]=t[i]}
-        c.getb().geta().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+43*RM]=t[i]}
-        c.getb().getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+44*RM]=t[i]}
-        c.getb().getb().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+45*RM]=t[i]}
-        c.getb().getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+46*RM]=t[i]}
-        c.getb().getb().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+47*RM]=t[i]}
-
+        c.toBytes(&t)
+	    for i in 0 ..< RM { 
+		    w[i]=t[i]
+	    }
+        b.toBytes(&t)
+	    for i in 0 ..< RM {
+		    w[i+RM]=t[i]
+	    }
+        a.toBytes(&t)
+	    for i in 0 ..< RM {
+		    w[i+2*RM]=t[i]
+	    }
     }
 
     /* convert to hex string */
@@ -1118,6 +838,10 @@ public struct FP48
         e3.norm();
 
         var w=FP48(sf)
+        if e3.iszilch() {
+            w.one()
+            return w
+        }
         let nb=e3.nbits()
 
         for i in (1...nb-2).reversed()

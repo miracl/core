@@ -168,140 +168,78 @@ public final class ECP8 {
 /* convert to byte array */
 	public void toBytes(byte[] b, boolean compress)
 	{
-		byte[] t=new byte[CONFIG_BIG.MODBYTES];
+		byte[] t=new byte[8*CONFIG_BIG.MODBYTES];
+        boolean alt=false;
 		ECP8 W=new ECP8(this);
 		W.affine();
-		int MB=CONFIG_BIG.MODBYTES;
-        b[0]=0x06;
+		W.x.toBytes(t);
 
-		W.x.geta().geta().getA().toBytes(t);
-		for (int i=0;i<MB;i++) { b[i+1]=t[i];}
-		W.x.geta().geta().getB().toBytes(t);
-		for (int i=0;i<MB;i++) { b[i+MB+1]=t[i];}
-		W.x.geta().getb().getA().toBytes(t);
-		for (int i=0;i<MB;i++) { b[i+2*MB+1]=t[i];}
-		W.x.geta().getb().getB().toBytes(t);
-		for (int i=0;i<MB;i++) { b[i+3*MB+1]=t[i];}
+        if ((CONFIG_FIELD.MODBITS-1)%8<=4 && CONFIG_CURVE.ALLOW_ALT_COMPRESS) alt=true;
 
-		W.x.getb().geta().getA().toBytes(t);
-		for (int i=0;i<MB;i++) { b[i+4*MB+1]=t[i];}
-		W.x.getb().geta().getB().toBytes(t);
-		for (int i=0;i<MB;i++) { b[i+5*MB+1]=t[i];}
-		W.x.getb().getb().getA().toBytes(t);
-		for (int i=0;i<MB;i++) { b[i+6*MB+1]=t[i];}
-		W.x.getb().getb().getB().toBytes(t);
-		for (int i=0;i<MB;i++) { b[i+7*MB+1]=t[i];}
-
-        if (!compress)
+        if (alt)
         {
-            b[0]=0x04;
-		    W.y.geta().geta().getA().toBytes(t);
-		    for (int i=0;i<MB;i++) { b[i+8*MB+1]=t[i];}
-		    W.y.geta().geta().getB().toBytes(t);
-		    for (int i=0;i<MB;i++) { b[i+9*MB+1]=t[i];}
-		    W.y.geta().getb().getA().toBytes(t);
-		    for (int i=0;i<MB;i++) { b[i+10*MB+1]=t[i];}
-		    W.y.geta().getb().getB().toBytes(t);
-		    for (int i=0;i<MB;i++) { b[i+11*MB+1]=t[i];}
-	
-		    W.y.getb().geta().getA().toBytes(t);
-		    for (int i=0;i<MB;i++) { b[i+12*MB+1]=t[i];}
-		    W.y.getb().geta().getB().toBytes(t);
-		    for (int i=0;i<MB;i++) { b[i+13*MB+1]=t[i];}
-		    W.y.getb().getb().getA().toBytes(t);
-		    for (int i=0;i<MB;i++) { b[i+14*MB+1]=t[i];}
-		    W.y.getb().getb().getB().toBytes(t);
-		    for (int i=0;i<MB;i++) { b[i+15*MB+1]=t[i];}
+		    for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++) b[i]=t[i];
+            if (!compress)
+            {
+                W.y.toBytes(t);
+                for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++) b[i+8*CONFIG_BIG.MODBYTES]=t[i];
+            } else {
+                b[0]|=0x80;
+                if (W.y.islarger()==1) b[0]|=0x20;
+            }
         } else {
-            b[0]=0x02;
-            if (W.y.sign() == 1)
-                b[0]=0x03;
-        }
+		    for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++) b[i+1]=t[i];
+            if (!compress)
+            {
+                b[0]=0x04;
+                W.y.toBytes(t);
+		        for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++)
+			        b[i+8*CONFIG_BIG.MODBYTES+1]=t[i];
+            } else {
+                b[0]=0x02;
+                if (W.y.sign() == 1)
+                    b[0]=0x03;
+            }
+	    }
 	}
 
 /* convert from byte array to point */
 	public static ECP8 fromBytes(byte[] b)
 	{
-		byte[] t=new byte[CONFIG_BIG.MODBYTES];
-		BIG ra;
-		BIG rb;
-		int MB=CONFIG_BIG.MODBYTES;
+		byte[] t=new byte[8*CONFIG_BIG.MODBYTES];
+        boolean alt=false;
         int typ=(int)b[0];
 
-		for (int i=0;i<MB;i++) {t[i]=b[i+1];}
-		ra=BIG.fromBytes(t);
-		for (int i=0;i<MB;i++) {t[i]=b[i+MB+1];}
-		rb=BIG.fromBytes(t);
+        if ((CONFIG_FIELD.MODBITS-1)%8<=4 && CONFIG_CURVE.ALLOW_ALT_COMPRESS) alt=true;
 
-		FP2 ra4=new FP2(ra,rb);
-
-		for (int i=0;i<MB;i++) {t[i]=b[i+2*MB+1];}
-		ra=BIG.fromBytes(t);
-		for (int i=0;i<MB;i++) {t[i]=b[i+3*MB+1];}
-		rb=BIG.fromBytes(t);
-
-		FP2 rb4=new FP2(ra,rb);
-
-		FP4 ra8=new FP4(ra4,rb4);
-
-		for (int i=0;i<MB;i++) {t[i]=b[i+4*MB+1];}
-		ra=BIG.fromBytes(t);
-		for (int i=0;i<MB;i++) {t[i]=b[i+5*MB+1];}
-		rb=BIG.fromBytes(t);
-
-		ra4=new FP2(ra,rb);
-
-		for (int i=0;i<MB;i++) {t[i]=b[i+6*MB+1];}
-		ra=BIG.fromBytes(t);
-		for (int i=0;i<MB;i++) {t[i]=b[i+7*MB+1];}
-		rb=BIG.fromBytes(t);
-
-		rb4=new FP2(ra,rb);
-
-		FP4 rb8=new FP4(ra4,rb4);
-
-		FP8 rx=new FP8(ra8,rb8);
-
-
-        if (typ==0x04)
+        if (alt)
         {
-		    for (int i=0;i<MB;i++) {t[i]=b[i+8*MB+1];}
-		    ra=BIG.fromBytes(t);
-		    for (int i=0;i<MB;i++) {t[i]=b[i+9*MB+1];}
-		    rb=BIG.fromBytes(t);
-
-		    ra4=new FP2(ra,rb);
-
-		    for (int i=0;i<MB;i++) {t[i]=b[i+10*MB+1];}
-		    ra=BIG.fromBytes(t);
-		    for (int i=0;i<MB;i++) {t[i]=b[i+11*MB+1];}
-		    rb=BIG.fromBytes(t);
-
-		    rb4=new FP2(ra,rb);
-
-		    ra8=new FP4(ra4,rb4);
-
-		    for (int i=0;i<MB;i++) {t[i]=b[i+12*MB+1];}
-		    ra=BIG.fromBytes(t);
-		    for (int i=0;i<MB;i++) {t[i]=b[i+13*MB+1];}
-		    rb=BIG.fromBytes(t);
-
-		    ra4=new FP2(ra,rb);
-
-		    for (int i=0;i<MB;i++) {t[i]=b[i+14*MB+1];}
-		    ra=BIG.fromBytes(t);
-		    for (int i=0;i<MB;i++) {t[i]=b[i+15*MB+1];}
-		    rb=BIG.fromBytes(t);
-
-		    rb4=new FP2(ra,rb);
-
-		    rb8=new FP4(ra4,rb4);
-
-		    FP8 ry=new FP8(ra8,rb8);
-
-		    return new ECP8(rx,ry);
+            for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++) t[i]=b[i];
+            t[0]&=0x1f;
+            FP8 rx=FP8.fromBytes(t);
+            if ((b[0]&0x80)==0)
+            {
+                for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++) t[i]=b[i+8*CONFIG_BIG.MODBYTES];
+                FP8 ry=FP8.fromBytes(t);
+                return new ECP8(rx,ry);
+            } else {
+                int sgn=(b[0]&0x20)>>5;
+                ECP8 P=new ECP8(rx,0);
+                int cmp=P.y.islarger();
+                if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) P.neg();
+                return P;
+            }
         } else {
-            return new ECP8(rx,typ&1);
+		    for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++) t[i]=b[i+1];
+            FP8 rx=FP8.fromBytes(t);
+            if (typ == 0x04)
+            {
+		        for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++) t[i]=b[i+8*CONFIG_BIG.MODBYTES+1];
+		        FP8 ry=FP8.fromBytes(t);
+		        return new ECP8(rx,ry);
+            } else {
+                return new ECP8(rx,typ&1);
+            }
         } 
 	}
 

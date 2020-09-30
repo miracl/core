@@ -71,7 +71,7 @@ static void BLS_HASH_TO_POINT(ECP *P, octet *M)
     char dst[50];
     octet DST = {0,sizeof(dst),dst};
 
-    OCT_jstring(&DST,(char *)"BLS_SIG_ZZZG1_XMD:SHA384-SVDW-RO-_NUL_");
+    OCT_jstring(&DST,(char *)"BLS_SIG_ZZZG1_XMD:SHA-384_SVDW_RO_NUL_");
     hash_to_field(MC_SHA2,HASH_TYPE_ZZZ,u,&DST,M,2);
 
     ECP_map2point(P,&u[0]);

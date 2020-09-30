@@ -160,54 +160,97 @@ public struct ECP2 {
     /* convert to byte array */
     func toBytes(_ b:inout [UInt8],_ compress: Bool)
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=2*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
+        var alt=false
         var W=ECP2(); W.copy(self)
         W.affine()
+	    W.x.toBytes(&t)
 
-        W.x.getA().toBytes(&t)
-        for i in 0 ..< RM
-            {b[i+1]=t[i]}
-        W.x.getB().toBytes(&t);
-        for i in 0 ..< RM
-            {b[i+RM+1]=t[i]}
-        if !compress {
-            b[0]=0x04
-            W.y.getA().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+2*RM+1]=t[i]}
-            W.y.getB().toBytes(&t);
-            for i in 0 ..< RM
-                {b[i+3*RM+1]=t[i]}
-        } else {
-            b[0]=0x02
-            if W.y.sign() == 1 {
-                b[0]=0x03;
-            }
+        if (CONFIG_FIELD.MODBITS-1)%8 <= 4 && CONFIG_CURVE.ALLOW_ALT_COMPRESS {
+            alt=true
         }
+        if alt {
+		    for i in 0 ..< RM {
+			    b[i]=t[i]
+		    }
+            if !compress {
+                W.y.toBytes(&t);
+                for i in 0 ..< RM {
+				    b[i+RM]=t[i]
+			    }
+            } else {
+                b[0]|=0x80
+                if W.y.islarger()==1 {
+				    b[0]|=0x20
+			    }
+            }
+
+	    } else {
+		    for i in 0 ..< RM {
+			    b[i+1]=t[i]
+		    }
+            if !compress {
+                b[0]=0x04
+                W.y.toBytes(&t)
+	            for i in 0 ..< RM {
+			        b[i+RM+1]=t[i]
+			    }
+            } else {
+                b[0]=0x02
+                if W.y.sign() == 1 {
+                    b[0]=0x03
+			    }
+            }
+	    }
     }
     /* convert from byte array to point */
     static func fromBytes(_ b:[UInt8]) -> ECP2
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=2*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
+        var alt=false
         let typ = Int(b[0])
 
-        for i in 0 ..< RM {t[i]=b[i+1]}
-        var ra=BIG.fromBytes(t);
-        for i in 0 ..< RM {t[i]=b[i+RM+1]}
-        var rb=BIG.fromBytes(t);
-        let rx=FP2(ra,rb)
-        if typ == 0x04 {
-            for i in 0 ..< RM {t[i]=b[i+2*RM+1]}
-            ra=BIG.fromBytes(t)
-            for i in 0 ..< RM {t[i]=b[i+3*RM+1]}
-            rb=BIG.fromBytes(t)
-            let ry=FP2(ra,rb)
+        if (CONFIG_FIELD.MODBITS-1)%8 <= 4 && CONFIG_CURVE.ALLOW_ALT_COMPRESS {
+            alt=true
+        }
 
-            return ECP2(rx,ry)
+	    if alt {
+            for i in 0 ..< RM  {
+			    t[i]=b[i]
+		    }
+            t[0]&=0x1f
+            let rx=FP2.fromBytes(t)
+            if (b[0]&0x80)==0 {
+                for i in 0 ..< RM {
+				    t[i]=b[i+RM]
+			    }
+                let ry=FP2.fromBytes(t)
+                return ECP2(rx,ry)
+            } else {
+                let sgn=(b[0]&0x20)>>5
+                var P=ECP2(rx,0)
+                let cmp=P.y.islarger()
+                if (sgn == 1 && cmp != 1) || (sgn == 0 && cmp == 1) {
+				    P.neg()
+			    }
+                return P;
+            }
         } else {
-            return ECP2(rx,typ&1)
+		    for i in 0 ..< RM {
+			    t[i]=b[i+1]
+		    }
+            let rx=FP2.fromBytes(t)
+            if typ == 0x04 {
+		        for i in 0 ..< RM {
+				    t[i]=b[i+RM+1]
+			    }
+		        let ry=FP2.fromBytes(t)
+		        return ECP2(rx,ry)
+            } else {
+                return ECP2(rx,typ&1)
+            }
         }
     }
 /* convert self to hex string */

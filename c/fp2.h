@@ -47,6 +47,30 @@ typedef struct
 	@return 1 if zero, else returns 0
  */
 extern int FP2_YYY_iszilch(FP2_YYY *x);
+
+/**	@brief Tests for lexically larger 
+ *
+	@param x FP2 number to be tested if larger than -x
+	@return 1 if larger, else returns 0
+ */
+extern int FP2_YYY_islarger(FP2_YYY *x);
+
+
+/**	@brief Serialize out FP2  
+ *
+    @param b buffer for output
+	@param x FP2 number to be serialized
+ */
+extern void FP2_YYY_toBytes(char *b,FP2_YYY *x);
+
+/**	@brief Serialize in FP2  
+ *
+	@param x FP2 number to be serialized
+    @param b buffer for input
+ */
+extern void FP2_YYY_fromBytes(FP2_YYY *x,char *b);
+
+
 /**	@brief Conditional copy of FP2 number
  *
 	Conditionally copies second parameter to the first (without branching)

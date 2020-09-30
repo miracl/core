@@ -772,87 +772,41 @@ public struct FP12
     /* convert from byte array to FP12 */
     static func fromBytes(_ w:[UInt8]) -> FP12
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=4*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
     
-        for i in 0 ..< RM {t[i]=w[i]}
-        var a=BIG.fromBytes(t)
-        for i in 0 ..< RM {t[i]=w[i+RM]}
-        var b=BIG.fromBytes(t)
-        var c=FP2(a,b)
-    
-        for i in 0 ..< RM {t[i]=w[i+2*RM]}
-        a=BIG.fromBytes(t)
-        for i in 0 ..< RM {t[i]=w[i+3*RM]}
-        b=BIG.fromBytes(t)
-        var d=FP2(a,b)
-    
-        let e=FP4(c,d)
-    
-        for i in 0 ..< RM {t[i]=w[i+4*RM]}
-        a=BIG.fromBytes(t)
-        for i in 0 ..< RM {t[i]=w[i+5*RM]}
-        b=BIG.fromBytes(t)
-        c=FP2(a,b)
-    
-        for i in 0 ..< RM {t[i]=w[i+6*RM]}
-        a=BIG.fromBytes(t)
-        for i in 0 ..< RM {t[i]=w[i+7*RM]}
-        b=BIG.fromBytes(t)
-        d=FP2(a,b)
-    
-        let f=FP4(c,d)
-    
-    
-        for i in 0 ..< RM {t[i]=w[i+8*RM]}
-        a=BIG.fromBytes(t)
-        for i in 0 ..< RM {t[i]=w[i+9*RM]}
-        b=BIG.fromBytes(t)
-        c=FP2(a,b)
-    
-        for i in 0 ..< RM {t[i]=w[i+10*RM]}
-        a=BIG.fromBytes(t)
-        for i in 0 ..< RM {t[i]=w[i+11*RM]}
-        b=BIG.fromBytes(t);
-        d=FP2(a,b)
-    
-        let g=FP4(c,d)
-    
-        return FP12(e,f,g)
+	    for i in 0 ..< RM {
+		    t[i]=w[i]
+	    }
+        let c=FP4.fromBytes(t)
+	    for i in 0 ..< RM {
+		    t[i]=w[i+RM]
+	    }
+        let b=FP4.fromBytes(t)
+	    for i in 0 ..< RM {
+		    t[i]=w[i+2*RM]
+	    }
+        let a=FP4.fromBytes(t)
+	    return FP12(a,b,c)
     }
     
     /* convert this to byte array */
     func toBytes(_ w:inout [UInt8])
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=4*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
-
-        a.geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i]=t[i]}
-        a.geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+RM]=t[i]}
-        a.getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+2*RM]=t[i]}
-        a.getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+3*RM]=t[i]}
-    
-        b.geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+4*RM]=t[i]}
-        b.geta().getB().toBytes(&t);
-        for i in 0 ..< RM {w[i+5*RM]=t[i]}
-        b.getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+6*RM]=t[i]}
-        b.getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+7*RM]=t[i]}
-    
-        c.geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+8*RM]=t[i]}
-        c.geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+9*RM]=t[i]}
-        c.getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+10*RM]=t[i]}
-        c.getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+11*RM]=t[i]}
+        c.toBytes(&t)
+	    for i in 0 ..< RM { 
+		    w[i]=t[i]
+	    }
+        b.toBytes(&t)
+	    for i in 0 ..< RM {
+		    w[i+RM]=t[i]
+	    }
+        a.toBytes(&t)
+	    for i in 0 ..< RM {
+		    w[i+2*RM]=t[i]
+	    }
     }
     /* convert to hex string */
     public func toString() -> String
@@ -874,6 +828,10 @@ public struct FP12
         e3.norm();
 
         var w=FP12(sf)
+        if e3.iszilch() {
+            w.one()
+            return w
+        }
         let nb=e3.nbits()
  
         for i in (1...nb-2).reversed()

@@ -31,8 +31,6 @@ using namespace core;
 #define FEXCESS_YYY (((sign32)1<<MAXXES_YYY)-1)		    /**< 2^(BASEBITS*NLEN-MODBITS) - normalised BIG can be multiplied by less than this before reduction */
 #define OMASK_YYY (-((chunk)(1)<<TBITS_YYY))            /**<  for masking out overflow bits */
 
-//#define BIG_ENDIAN_SIGN_YYY 
-
 namespace YYY {
 
 /**
@@ -76,6 +74,26 @@ extern void FP_from_int(FP *x,int a);
  */
 extern int FP_iszilch(FP *x);
 
+/**	@brief Tests for lexically largest 
+ *
+	@param x FP number to be tested if larger than -x
+	@return 1 if larger, else returns 0
+ */
+extern int FP_islarger(FP *x);
+
+/**	@brief Serialize out FP  
+ *
+    @param b buffer for output
+	@param x FP number to be serialized
+ */
+extern void FP_toBytes(char *b,FP *x);
+
+/**	@brief Serialize in FP  
+ *
+	@param x FP number to be serialized
+    @param b buffer for input
+ */
+extern void FP_fromBytes(FP *x,char *b);
 
 /**	@brief Tests for FP equal to one mod Modulus
  *

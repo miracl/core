@@ -54,6 +54,7 @@ pub const G2_TABLE:usize=@G2@;
 pub const HTC_ISO:usize=@HC@;
 pub const HTC_ISO_G2:usize=@HC2@;
 
+pub const ALLOW_ALT_COMPRESS:bool=true;
 pub const HASH_TYPE:usize=@HT@;
 pub const AESKEY:usize=@AK@;
 
@@ -109,7 +110,7 @@ impl ECP {
 
         if rhs.qr(Some(&mut hint)) == 1 {
             let mut ny = rhs.sqrt(Some(&hint));
-            if ny.redc().parity() != s {
+            if ny.sign() != s {
                 ny.neg(); ny.norm()
             }
             E.y.copy(&ny);
@@ -346,8 +347,10 @@ impl ECP {
 
     /* get sign of Y */
     pub fn gets(&self) -> isize {
-        let y = self.gety();
-        return y.parity();
+        let mut W = ECP::new();
+        W.copy(self);
+        W.affine();
+        return W.y.sign();
     }
 
     /* extract x as an FP */
@@ -369,52 +372,69 @@ impl ECP {
 
     /* convert to byte array */
     pub fn tobytes(&self, b: &mut [u8], compress: bool) {
-        let mb = big::MODBYTES as usize;
-        let mut t: [u8; big::MODBYTES as usize] = [0; big::MODBYTES as usize];
+        const MB:usize = big::MODBYTES as usize;
+        let mut t: [u8; MB] = [0; MB];
+        let mut alt=false;
         let mut W = ECP::new();
         W.copy(self);
-
         W.affine();
         W.x.redc().tobytes(&mut t);
 
-
         if CURVETYPE == MONTGOMERY {
-            for i in 0..mb {
+            for i in 0..MB {
                 b[i] = t[i]
             }
-            //b[0] = 0x06;
             return;
         }
 
-        for i in 0..mb {
-            b[i + 1] = t[i]
+        if (fp::MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
+            alt=true;
         }
 
-        if compress {
-            b[0] = 0x02;
-            if W.y.redc().parity() == 1 {
-                b[0] = 0x03
+        if alt {
+            for i in 0..MB {
+			    b[i]=t[i];
+		    }
+            if compress {
+                b[0]|=0x80;
+                if W.y.islarger()==1 {
+				    b[0]|=0x20;
+			    }
+            } else {
+                W.y.redc().tobytes(&mut t);
+                for i in 0..MB {
+				    b[i+MB]=t[i];
+			    }
+		    }		
+        } else {
+            for i in 0..MB {
+                b[i + 1] = t[i];
             }
-            return;
-        }
-
-        b[0] = 0x04;
-
-        W.y.redc().tobytes(&mut t);
-        for i in 0..mb {
-            b[i + mb + 1] = t[i]
+            if compress {
+                b[0] = 0x02;
+                if W.y.sign() == 1 {
+                    b[0] = 0x03;
+                }
+                return;
+            }
+            b[0] = 0x04;
+            W.y.redc().tobytes(&mut t);
+            for i in 0..MB {
+                b[i + MB + 1] = t[i];
+            }
         }
     }
 
     /* convert from byte array to point */
     pub fn frombytes(b: &[u8]) -> ECP {
-        let mut t: [u8; big::MODBYTES as usize] = [0; big::MODBYTES as usize];
-        let mb = big::MODBYTES as usize;
+        const MB:usize = big::MODBYTES as usize;
+        let mut t: [u8; MB] = [0; MB];
+        let mut alt=false;
         let p = BIG::new_ints(&rom::MODULUS);
 
         if CURVETYPE == MONTGOMERY {
-            for i in 0..mb {
-                t[i] = b[i]
+            for i in 0..MB {
+                t[i] = b[i];
             }
             let px = BIG::frombytes(&t);
             if BIG::comp(&px, &p) >= 0 {
@@ -423,27 +443,52 @@ impl ECP {
             return ECP::new_big(&px);
         }
 
-        for i in 0..mb {
-            t[i] = b[i + 1]
-        }
-        let px = BIG::frombytes(&t);
-        if BIG::comp(&px, &p) >= 0 {
-            return ECP::new();
+        if (fp::MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
+            alt=true;
         }
 
-        if b[0] == 0x04 {
-            for i in 0..mb {
-                t[i] = b[i + mb + 1]
+        if alt {
+            for i in 0..MB {
+			    t[i]=b[i];
+		    }
+            t[0]&=0x1f;
+            let px=BIG::frombytes(&t);
+            if (b[0]&0x80)==0 {
+                for i in 0 ..MB {
+				    t[i]=b[i+MB];
+			    }
+                let py=BIG::frombytes(&t);
+                return ECP::new_bigs(&px, &py);
+            } else {
+                let sgn=(b[0]&20)>>5;
+                let mut P=ECP::new_bigint(&px,0);
+                let cmp=P.y.islarger();
+                if (sgn == 1 && cmp != 1) || (sgn == 0 && cmp == 1) {
+				    P.neg();
+			    }
+                return P;
             }
-            let py = BIG::frombytes(&t);
-            if BIG::comp(&py, &p) >= 0 {
+        } else {
+            for i in 0..MB {
+                t[i] = b[i + 1];
+            }
+            let px = BIG::frombytes(&t);
+            if BIG::comp(&px, &p) >= 0 {
                 return ECP::new();
             }
-            return ECP::new_bigs(&px, &py);
-        }
-
-        if b[0] == 0x02 || b[0] == 0x03 {
-            return ECP::new_bigint(&px, (b[0] & 1) as isize);
+            if b[0] == 0x04 {
+                for i in 0..MB {
+                    t[i] = b[i + MB + 1];
+                }
+                let py = BIG::frombytes(&t);
+                if BIG::comp(&py, &p) >= 0 {
+                    return ECP::new();
+                }
+                return ECP::new_bigs(&px, &py);
+            }
+            if b[0] == 0x02 || b[0] == 0x03 {
+                return ECP::new_bigint(&px, (b[0] & 1) as isize);
+            }
         }
 
         return ECP::new();

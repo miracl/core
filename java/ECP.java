@@ -230,7 +230,7 @@ public final class ECP {
 		if (rhs.qr(hint)==1)
 		{
 			FP ny=rhs.sqrt(hint);
-			if (ny.redc().parity()!=s) {
+			if (ny.sign()!=s) {
                 ny.neg();
                 ny.norm();
             }
@@ -285,8 +285,9 @@ public final class ECP {
 /* get sign of Y */
 	public int getS()
 	{
-		BIG y=getY();
-		return y.parity();
+        ECP W=new ECP(this);
+		W.affine();
+        return W.y.sign();
 	}
 /* extract x as an FP */
 	public FP getx()
@@ -307,36 +308,49 @@ public final class ECP {
 	public void toBytes(byte[] b,boolean compress)
 	{
 		byte[] t=new byte[CONFIG_BIG.MODBYTES];
+        boolean alt=false;
 		ECP W=new ECP(this);
 		W.affine();
-
 		W.x.redc().toBytes(t);
 
 		if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.MONTGOMERY)
 		{
 		    for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i]=t[i];
-			//b[0]=0x06;
-			return;
-		}
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i+1]=t[i];
-		if (compress)
-		{
-			b[0]=0x02;
-			if (W.y.redc().parity()==1) b[0]=0x03;
 			return;
 		}
 
-		b[0]=0x04;
+        if ((CONFIG_FIELD.MODBITS-1)%8<=4 && CONFIG_CURVE.ALLOW_ALT_COMPRESS) alt=true;
 
-		W.y.redc().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i+CONFIG_BIG.MODBYTES+1]=t[i];
+        if (alt)
+        {
+            for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i]=t[i];
+            if (compress)
+            {
+                b[0]|=0x80;
+                if (W.y.islarger()==1) b[0]|=0x20;
+            } else {
+                W.y.redc().toBytes(t);
+                for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i+CONFIG_BIG.MODBYTES]=t[i];
+            }
+        } else {
+		    for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i+1]=t[i];
+		    if (compress)
+		    {
+			    b[0]=0x02;
+			    if (W.y.sign()==1) b[0]=0x03;
+			    return;
+		    }
+		    b[0]=0x04;
+		    W.y.redc().toBytes(t);
+		    for (int i=0;i<CONFIG_BIG.MODBYTES;i++) b[i+CONFIG_BIG.MODBYTES+1]=t[i];
+        }
 	}
 /* convert from byte array to point */
 	public static ECP fromBytes(byte[] b)
 	{
 		byte[] t=new byte[CONFIG_BIG.MODBYTES];
 		BIG p=new BIG(ROM.Modulus);
-
+        boolean alt=false;
 
 		if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.MONTGOMERY)
 		{
@@ -347,22 +361,42 @@ public final class ECP {
 			return new ECP(px);
 		}
 
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=b[i+1];
-		BIG px=BIG.fromBytes(t);
-		if (BIG.comp(px,p)>=0) return new ECP();
+        if ((CONFIG_FIELD.MODBITS-1)%8<=4 && CONFIG_CURVE.ALLOW_ALT_COMPRESS) alt=true;
 
-		if (b[0]==0x04)
-		{
-			for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=b[i+CONFIG_BIG.MODBYTES+1];
-			BIG py=BIG.fromBytes(t);
-			if (BIG.comp(py,p)>=0) return new ECP();
-			return new ECP(px,py);
-		}
+        if (alt)
+        {
+            for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=b[i];
+            t[0]&=0x1f;
+            BIG px=BIG.fromBytes(t);
+            if ((b[0]&0x80)==0)
+            {
+                for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=b[i+CONFIG_BIG.MODBYTES];
+                BIG py=BIG.fromBytes(t);
+                return new ECP(px,py);
+            } else {
+                int sgn=(b[0]&20)>>5;
+                ECP P=new ECP(px,0);
+                int cmp=P.y.islarger();
+                if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) P.neg();
+                return P;
+            }
+        } else {
+		    for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=b[i+1];
+		    BIG px=BIG.fromBytes(t);
+		    if (BIG.comp(px,p)>=0) return new ECP();
+		    if (b[0]==0x04)
+		    {
+			    for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=b[i+CONFIG_BIG.MODBYTES+1];
+			    BIG py=BIG.fromBytes(t);
+			    if (BIG.comp(py,p)>=0) return new ECP();
+			    return new ECP(px,py);
+		    }
 
-		if (b[0]==0x02 || b[0]==0x03)
-		{
-			return new ECP(px,(int)(b[0]&1));
-		}
+		    if (b[0]==0x02 || b[0]==0x03)
+		    {
+			    return new ECP(px,(int)(b[0]&1));
+		    }
+        }
 		return new ECP();
 	}
 /* convert to hex string */

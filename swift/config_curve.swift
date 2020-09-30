@@ -43,6 +43,8 @@ public struct CONFIG_CURVE{
     static public let HASH_TYPE = @HT@
     static public let AESKEY = @AK@
 
+    static let ALLOW_ALT_COMPRESS = false
+
     static let USE_GLV = true
     static let USE_GS_G2 = true
     static let USE_GS_GT = true    

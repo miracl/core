@@ -74,7 +74,7 @@ func NewECPbigint(ix *BIG, s int) *ECP {
 	hint := NewFP()
 	if rhs.qr(hint) == 1 {
 		ny := rhs.sqrt(hint)
-		if ny.redc().parity() != s {
+		if ny.sign() != s {
 			ny.neg()
 			ny.norm()
 		}
@@ -312,8 +312,10 @@ func (E *ECP) GetY() *BIG {
 
 /* get sign of Y */
 func (E *ECP) GetS() int {
-	y := E.GetY()
-	return y.parity()
+	W := NewECP()
+	W.Copy(E)
+	W.Affine()
+	return W.y.sign()
 }
 
 /* extract x as an FP */
@@ -335,11 +337,11 @@ func (E *ECP) getz() *FP {
 func (E *ECP) ToBytes(b []byte, compress bool) {
 	var t [int(MODBYTES)]byte
 	MB := int(MODBYTES)
+	alt:=false
 	W := NewECP()
 	W.Copy(E)
 	W.Affine()
 	W.x.redc().ToBytes(t[:])
-
 
 	if CURVETYPE == MONTGOMERY {
 		for i := 0; i < MB; i++ {
@@ -349,23 +351,41 @@ func (E *ECP) ToBytes(b []byte, compress bool) {
 		return
 	}
 
-	for i := 0; i < MB; i++ {
-		b[i+1] = t[i]
+	if (MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
+		alt=true
 	}
 
-	if compress {
-		b[0] = 0x02
-		if W.y.redc().parity() == 1 {
-			b[0] = 0x03
+	if alt {
+        for i:=0;i<MB;i++ {
+			b[i]=t[i]
 		}
-		return
-	}
-
-	b[0] = 0x04
-
-	W.y.redc().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		b[i+MB+1] = t[i]
+        if compress {
+            b[0]|=0x80
+            if W.y.islarger()==1 {
+				b[0]|=0x20
+			}
+        } else {
+            W.y.redc().ToBytes(t[:]);
+            for i:=0;i<MB;i++ {
+				b[i+MB]=t[i]
+			}
+		}		
+	} else {
+		for i := 0; i < MB; i++ {
+			b[i+1] = t[i]
+		}
+		if compress {
+			b[0] = 0x02
+			if W.y.sign() == 1 {
+				b[0] = 0x03
+			}
+			return
+		}
+		b[0] = 0x04
+		W.y.redc().ToBytes(t[:])
+		for i := 0; i < MB; i++ {
+			b[i+MB+1] = t[i]
+		}
 	}
 }
 
@@ -374,6 +394,7 @@ func ECP_fromBytes(b []byte) *ECP {
 	var t [int(MODBYTES)]byte
 	MB := int(MODBYTES)
 	p := NewBIGints(Modulus)
+	alt:=false
 
 	if CURVETYPE == MONTGOMERY {
 		for i := 0; i < MB; i++ {
@@ -386,30 +407,55 @@ func ECP_fromBytes(b []byte) *ECP {
 		return NewECPbig(px)
 	}
 
-	for i := 0; i < MB; i++ {
-		t[i] = b[i+1]
-	}
-	px := FromBytes(t[:])
-	if Comp(px, p) >= 0 {
-		return NewECP()
+	if (MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
+		alt=true
 	}
 
-	if b[0] == 0x04 {
-		for i := 0; i < MB; i++ {
-			t[i] = b[i+MB+1]
+	if alt {
+        for i:=0;i<MB;i++ {
+			t[i]=b[i]
 		}
-		py := FromBytes(t[:])
-		if Comp(py, p) >= 0 {
+        t[0]&=0x1f
+        px:=FromBytes(t[:])
+        if (b[0]&0x80)==0 {
+            for i:=0;i<MB;i++ {
+				t[i]=b[i+MB]
+			}
+            py:=FromBytes(t[:])
+            return NewECPbigs(px,py)
+        } else {
+            sgn:=(b[0]&20)>>5
+            P:=NewECPbigint(px,0)
+            cmp:=P.y.islarger()
+            if (sgn==1 && cmp!=1) || (sgn==0 && cmp==1) {
+				P.Neg()
+			}
+            return P
+        }
+	} else {
+		for i := 0; i < MB; i++ {
+			t[i] = b[i+1]
+		}
+		px := FromBytes(t[:])
+		if Comp(px, p) >= 0 {
 			return NewECP()
 		}
 
-		return NewECPbigs(px, py)
-	}
+		if b[0] == 0x04 {
+			for i := 0; i < MB; i++ {
+				t[i] = b[i+MB+1]
+			}
+			py := FromBytes(t[:])
+			if Comp(py, p) >= 0 {
+				return NewECP()
+			}
+			return NewECPbigs(px, py)
+		}
 
-	if b[0] == 0x02 || b[0] == 0x03 {
-		return NewECPbigint(px, int(b[0]&1))
+		if b[0] == 0x02 || b[0] == 0x03 {
+			return NewECPbigint(px, int(b[0]&1))
+		}
 	}
-
 	return NewECP()
 }
 

@@ -778,169 +778,41 @@ public struct FP24
     /* convert from byte array to FP24 */
     static func fromBytes(_ w:[UInt8]) -> FP24
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=8*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
-
-        for i in 0 ..< RM {t[i]=w[i]}
-        var a=BIG.fromBytes(t)
-        for i in 0 ..< RM {t[i]=w[i+RM]}
-        var b=BIG.fromBytes(t)
-        var c=FP2(a,b)
-
-        for i in 0 ..< RM {t[i]=w[i+2*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+3*RM]}
-        b.copy(BIG.fromBytes(t))
-        var d=FP2(a,b)
-
-        var ea=FP4(c,d)
-
-        for i in 0 ..< RM {t[i]=w[i+4*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+5*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+6*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+7*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        var eb=FP4(c,d)
-
-        let e=FP8(ea,eb)
-
-        for i in 0 ..< RM {t[i]=w[i+8*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+9*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+10*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+11*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        ea.copy(FP4(c,d))
-
-
-        for i in 0 ..< RM {t[i]=w[i+12*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+13*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+14*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+15*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        eb.copy(FP4(c,d))
-
-
-        let f=FP8(ea,eb)
-
-
-        for i in 0 ..< RM {t[i]=w[i+16*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+17*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+18*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+19*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        ea.copy(FP4(c,d))
-
-
-        for i in 0 ..< RM {t[i]=w[i+20*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+21*RM]}
-        b.copy(BIG.fromBytes(t))
-        c.copy(FP2(a,b))
-
-        for i in 0 ..< RM {t[i]=w[i+22*RM]}
-        a.copy(BIG.fromBytes(t))
-        for i in 0 ..< RM {t[i]=w[i+23*RM]}
-        b.copy(BIG.fromBytes(t))
-        d.copy(FP2(a,b))
-
-        eb.copy(FP4(c,d))
-
-        let g=FP8(ea,eb)
-
-        return FP24(e,f,g)
+    
+	    for i in 0 ..< RM {
+		    t[i]=w[i]
+	    }
+        let c=FP8.fromBytes(t)
+	    for i in 0 ..< RM {
+		    t[i]=w[i+RM]
+	    }
+        let b=FP8.fromBytes(t)
+	    for i in 0 ..< RM {
+		    t[i]=w[i+2*RM]
+	    }
+        let a=FP8.fromBytes(t)
+	    return FP24(a,b,c)
     }
 
     /* convert this to byte array */
     func toBytes(_ w:inout [UInt8])
     {
-        let RM=Int(CONFIG_BIG.MODBYTES)
+        let RM=8*Int(CONFIG_BIG.MODBYTES)
         var t=[UInt8](repeating: 0,count: RM)
-
-        a.geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i]=t[i]}
-        a.geta().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+RM]=t[i]}
-        a.geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+2*RM]=t[i]}
-        a.geta().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+3*RM]=t[i]}
-
-        a.getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+4*RM]=t[i]}
-        a.getb().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+5*RM]=t[i]}
-        a.getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+6*RM]=t[i]}
-        a.getb().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+7*RM]=t[i]}
-
-
-
-        b.geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+8*RM]=t[i]}
-        b.geta().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+9*RM]=t[i]}
-        b.geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+10*RM]=t[i]}
-        b.geta().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+11*RM]=t[i]}
-
-        b.getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+12*RM]=t[i]}
-        b.getb().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+13*RM]=t[i]}
-        b.getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+14*RM]=t[i]}
-        b.getb().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+15*RM]=t[i]}
-
-
-
-        c.geta().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+16*RM]=t[i]}
-        c.geta().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+17*RM]=t[i]}
-        c.geta().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+18*RM]=t[i]}
-        c.geta().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+19*RM]=t[i]}
-
-        c.getb().geta().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+20*RM]=t[i]}
-        c.getb().geta().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+21*RM]=t[i]}
-        c.getb().getb().getA().toBytes(&t)
-        for i in 0 ..< RM {w[i+22*RM]=t[i]}
-        c.getb().getb().getB().toBytes(&t)
-        for i in 0 ..< RM {w[i+23*RM]=t[i]}
+        c.toBytes(&t)
+	    for i in 0 ..< RM { 
+		    w[i]=t[i]
+	    }
+        b.toBytes(&t)
+	    for i in 0 ..< RM {
+		    w[i+RM]=t[i]
+	    }
+        a.toBytes(&t)
+	    for i in 0 ..< RM {
+		    w[i+2*RM]=t[i]
+	    }
     }
 
     /* convert to hex string */
@@ -963,6 +835,10 @@ public struct FP24
         e3.norm();
 
         var w=FP24(sf)
+        if e3.iszilch() {
+            w.one()
+            return w
+        }
         let nb=e3.nbits()
 
         for i in (1...nb-2).reversed()

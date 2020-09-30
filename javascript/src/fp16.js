@@ -53,6 +53,16 @@ var FP16 = function(ctx) {
             return (this.a.iszilch() && this.b.iszilch());
         },
 
+        toBytes: function(bf) {
+            var t = [];
+            this.b.toBytes(t);
+            for (var i=0;i<8*ctx.BIG.MODBYTES;i++)
+                bf[i]=t[i];
+            this.a.toBytes(t);
+            for (var i=0;i<8*ctx.BIG.MODBYTES;i++)
+                bf[i+2*ctx.BIG.MODBYTES]=t[i];            
+        },
+
         /* test this==1 ? */
         isunity: function() {
             var one = new ctx.FP8(1);
@@ -566,6 +576,17 @@ var FP16 = function(ctx) {
             return r;
         }
 */
+    };
+
+    FP16.fromBytes = function(bf) {
+        var t=[];
+        for (var i=0;i<8*ctx.BIG.MODBYTES;i++)
+            t[i]=bf[i];
+        var tb=ctx.FP8.fromBytes(t);
+        for (var i=0;i<8*ctx.BIG.MODBYTES;i++)
+            t[i]=bf[i+8*ctx.BIG.MODBYTES];
+        var ta=ctx.FP8.fromBytes(t);
+        return new FP16(ta,tb);
     };
 
     return FP16;

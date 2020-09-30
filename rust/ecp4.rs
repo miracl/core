@@ -215,115 +215,98 @@ impl ECP4 {
 
     /* convert to byte array */
     pub fn tobytes(&self, b: &mut [u8], compress: bool) {
-        let mut t: [u8; big::MODBYTES as usize] = [0; big::MODBYTES as usize];
-        let mb = big::MODBYTES as usize;
-
+        const MB:usize = 4*(big::MODBYTES as usize);
+        let mut t: [u8; MB] = [0; MB];
+        let mut alt=false;
         let mut W = ECP4::new();
         W.copy(self);
         W.affine();
-        b[0]=0x06;
+        W.x.tobytes(&mut t);
 
-        W.x.geta().geta().tobytes(&mut t);
-        for i in 0..mb {
-            b[i+1] = t[i]
+        if (fp::MODBITS-1)%8 <= 4 && ecp::ALLOW_ALT_COMPRESS {
+            alt=true;
         }
-        W.x.geta().getb().tobytes(&mut t);
-        for i in 0..mb {
-            b[i + mb +1] = t[i]
-        }
-
-        W.x.getb().geta().tobytes(&mut t);
-        for i in 0..mb {
-            b[i + 2 * mb +1] = t[i]
-        }
-        W.x.getb().getb().tobytes(&mut t);
-        for i in 0..mb {
-            b[i + 3 * mb +1] = t[i]
-        }
-        if !compress {
-            b[0]=0x04;
-            W.y.geta().geta().tobytes(&mut t);
-            for i in 0..mb {
-                b[i + 4 * mb +1] = t[i]
-            }
-            W.y.geta().getb().tobytes(&mut t);
-            for i in 0..mb {
-                b[i + 5 * mb +1] = t[i]
+        if alt {
+		    for i in 0..MB {
+			    b[i]=t[i]
+		    }
+            if !compress {
+                W.y.tobytes(&mut t);
+                for i in 0..MB {
+				    b[i+MB]=t[i];
+			    }
+            } else {
+                b[0]|=0x80;
+                if W.y.islarger()==1 {
+				    b[0]|=0x20;
+			    }
             }
 
-            W.y.getb().geta().tobytes(&mut t);
-            for i in 0..mb {
-                b[i + 6 * mb +1] = t[i]
+	    } else {
+		    for i in 0..MB {
+			    b[i+1]=t[i];
+		    }
+            if !compress {
+                b[0]=0x04;
+                W.y.tobytes(&mut t);
+	            for i in 0..MB {
+			        b[i+MB+1]=t[i];
+			    }
+            } else {
+                b[0]=0x02;
+                if W.y.sign() == 1 {
+                    b[0]=0x03;
+			    }
             }
-            W.y.getb().getb().tobytes(&mut t);
-            for i in 0..mb {
-                b[i + 7 * mb +1] = t[i]
-            }
-        } else {
-            b[0]=0x02;
-            if W.y.sign() == 1 {
-                b[0]=0x03;
-            }
-        }
+	    }
     }
 
     /* convert from byte array to point */
     pub fn frombytes(b: &[u8]) -> ECP4 {
-        let mut t: [u8; big::MODBYTES as usize] = [0; big::MODBYTES as usize];
-        let mb = big::MODBYTES as usize;
+        const MB:usize = 4*(big::MODBYTES as usize);
+        let mut t: [u8; MB] = [0; MB];
         let typ=b[0] as isize;
+        let mut alt=false;
 
-        for i in 0..mb {
-            t[i] = b[i + 1]
+        if (fp::MODBITS-1)%8 <= 4 && ecp::ALLOW_ALT_COMPRESS {
+            alt=true;
         }
-        let mut ra = BIG::frombytes(&t);
-        for i in 0..mb {
-            t[i] = b[i + mb + 1]
-        }
-        let mut rb = BIG::frombytes(&t);
 
-        let mut ra4 = FP2::new_bigs(&ra, &rb);
-
-        for i in 0..mb {
-            t[i] = b[i + 2 * mb + 1]
-        }
-        ra.copy(&BIG::frombytes(&t));
-        for i in 0..mb {
-            t[i] = b[i + 3 * mb + 1]
-        }
-        rb.copy(&BIG::frombytes(&t));
-
-        let mut rb4 = FP2::new_bigs(&ra, &rb);
-
-        let rx = FP4::new_fp2s(&ra4, &rb4);
-        if typ==0x04 {
-            for i in 0..mb {
-                t[i] = b[i + 4 * mb + 1]
+	    if alt {
+            for i in 0..MB  {
+			    t[i]=b[i];
+		    }
+            t[0]&=0x1f;
+            let rx=FP4::frombytes(&t);
+            if (b[0]&0x80)==0 {
+                for i in 0..MB {
+				    t[i]=b[i+MB];
+			    }
+                let ry=FP4::frombytes(&t);
+                return ECP4::new_fp4s(&rx,&ry);
+            } else {
+                let sgn=(b[0]&0x20)>>5;
+                let mut P=ECP4::new_fp4(&rx,0);
+                let cmp=P.y.islarger();
+                if (sgn == 1 && cmp != 1) || (sgn == 0 && cmp == 1) {
+				    P.neg();
+			    }
+                return P;
             }
-            ra.copy(&BIG::frombytes(&t));
-            for i in 0..mb {
-                t[i] = b[i + 5 * mb + 1]
-            }
-            rb.copy(&BIG::frombytes(&t));
-
-            ra4.copy(&FP2::new_bigs(&ra, &rb));
-
-            for i in 0..mb {
-                t[i] = b[i + 6 * mb + 1]
-            }
-            ra.copy(&BIG::frombytes(&t));
-            for i in 0..mb {
-                t[i] = b[i + 7 * mb + 1]
-            }
-            rb.copy(&BIG::frombytes(&t));
-
-            rb4.copy(&FP2::new_bigs(&ra, &rb));
-
-            let ry = FP4::new_fp2s(&ra4, &rb4);
-
-            return ECP4::new_fp4s(&rx, &ry);
         } else {
-            return ECP4::new_fp4(&rx,typ&1);
+		    for i in 0..MB {
+			    t[i]=b[i+1];
+		    }
+            let rx=FP4::frombytes(&t);
+            if typ == 0x04 {
+		        for i in 0..MB {
+				    t[i]=b[i+MB+1];
+			    }
+		        let ry=FP4::frombytes(&t);
+		        return ECP4::new_fp4s(&rx,&ry)
+            } else {
+                return ECP4::new_fp4(&rx,typ&1)
+            }
         }
     }
 

@@ -53,6 +53,23 @@ var FP2 = function(ctx) {
             return (this.a.iszilch() && this.b.iszilch());
         },
 
+        islarger: function() {
+            if (this.iszilch()) return 0;
+            var cmp=this.b.larger();
+            if (cmp!=0) return cmp;
+            return this.a.larger();
+        },
+        
+        toBytes: function(bf) {
+            var t = [];
+            this.b.toBytes(t);
+            for (var i=0;i<ctx.BIG.MODBYTES;i++)
+                bf[i]=t[i];
+            this.a.toBytes(t);
+            for (var i=0;i<ctx.BIG.MODBYTES;i++)
+                bf[i+ctx.BIG.MODBYTES]=t[i];            
+        },
+
         /* test this=1 ? */
         isunity: function() {
             var one = new ctx.FP(1);
@@ -431,12 +448,21 @@ var FP2 = function(ctx) {
 				this.norm();
 			}
         }
-
-
     };
 
     FP2.rand = function(rng) {
         return new FP2(ctx.FP.rand(rng),ctx.FP.rand(rng));
+    };
+
+    FP2.fromBytes = function(bf) {
+        var t=[];
+        for (var i=0;i<ctx.BIG.MODBYTES;i++)
+            t[i]=bf[i];
+        var tb=ctx.FP.fromBytes(t);
+        for (var i=0;i<ctx.BIG.MODBYTES;i++)
+            t[i]=bf[i+ctx.BIG.MODBYTES];
+        var ta=ctx.FP.fromBytes(t);
+        return new FP2(ta,tb);
     };
 
     return FP2;

@@ -53,6 +53,20 @@ int YYY::FP16_equals(FP16 *x, FP16 *y)
     return 0;
 }
 
+
+void YYY::FP16_toBytes(char *b,FP16 *x)
+{
+    FP8_toBytes(b,&(x->b));
+    FP8_toBytes(&b[8*MODBYTES_XXX],&(x->a));
+}
+
+void YYY::FP16_fromBytes(FP16 *x,char *b)
+{
+    FP8_fromBytes(&(x->b),b);
+    FP8_fromBytes(&(x->a),&b[8*MODBYTES_XXX]);
+}
+
+
 /* set FP16 from two FP8s */
 void YYY::FP16_from_FP8s(FP16 *w, FP8 * x, FP8* y)
 {

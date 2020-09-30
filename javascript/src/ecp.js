@@ -57,6 +57,7 @@ var ECP = function(ctx) {
 
     ECP.HASH_TYPE = ctx.config["@HT"];
     ECP.AESKEY = ctx.config["@AK"];
+    ECP.ALLOW_ALT_COMPRESS = false;
 
     ECP.prototype = {
         /* test this=O point-at-infinity */
@@ -227,7 +228,7 @@ var ECP = function(ctx) {
             var hint=new ctx.FP(0);
             if (rhs.qr(hint) == 1) {
                 ny = rhs.sqrt(hint);
-                if (ny.redc().parity() != s) {
+                if (ny.sign() != s) {
                     ny.neg();
                     ny.norm();
                 }
@@ -301,8 +302,8 @@ var ECP = function(ctx) {
 
         /* get sign of Y */
         getS: function() {
-            var y = this.getY();
-            return y.parity();
+			var W=new ECP(); W.copy(this); W.affine();
+            return W.y.sign();
         },
 
         /* extract x as ctx.FP */
@@ -322,38 +323,42 @@ var ECP = function(ctx) {
 
         /* convert to byte array */
         toBytes: function(b,compress) {
-            var t = [],
-                i;
+            var t = [];
+            var alt=false;
 			var W=new ECP(); W.copy(this);
             W.affine();
             W.x.redc().toBytes(t);
-
 
             if (ECP.CURVETYPE == ECP.MONTGOMERY) {
                 for (i = 0; i < ctx.BIG.MODBYTES; i++) {
                     b[i] = t[i];
                 }
-                //b[0] = 0x06;
                 return;
             }
 
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                b[i + 1] = t[i];
-            }
+            if ((ctx.FP.MODBITS-1)%8<=4 && ECP.ALLOW_ALT_COMPRESS) alt=true;
 
-            if (compress) {
-                b[0]=0x02;
-                if (W.y.redc().parity()==1) {
-                    b[0]=0x03;
+            if (alt)
+            {
+                for (var i=0;i<ctx.BIG.MODBYTES;i++) b[i]=t[i];
+                if (compress)
+                {
+                    b[0]|=0x80;
+                    if (W.y.islarger()==1) b[0]|=0x20;
+                } else {
+                    W.y.redc().toBytes(t);
+                    for (var i=0;i<ctx.BIG.MODBYTES;i++) b[i+ctx.BIG.MODBYTES]=t[i];
                 }
-                return;
-            }
-
-            b[0]=0x04;
-
-            W.y.redc().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                b[i + ctx.BIG.MODBYTES + 1] = t[i];
+            } else {
+                for (var i = 0; i < ctx.BIG.MODBYTES; i++) b[i + 1] = t[i];
+                if (compress) {
+                    b[0]=0x02;
+                    if (W.y.sign()==1) b[0]=0x03;
+                    return;
+                }
+                b[0]=0x04;
+                W.y.redc().toBytes(t);
+                for (var i = 0; i < ctx.BIG.MODBYTES; i++) b[i + ctx.BIG.MODBYTES + 1] = t[i];
             }
         },
         /* convert to hex string */

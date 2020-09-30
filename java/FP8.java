@@ -44,6 +44,35 @@ public final class FP8 {
 		return (a.iszilch() && b.iszilch());
 	}
 
+    public int islarger() {
+        if (iszilch()) return 0;
+        int cmp=b.islarger();
+        if (cmp!=0) return cmp;
+        return a.islarger();
+    }
+
+    public void toBytes(byte[] bf) {
+		byte[] t=new byte[4*CONFIG_BIG.MODBYTES];
+        b.toBytes(t);
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++)
+            bf[i]=t[i];
+        a.toBytes(t);
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++)
+            bf[i+4*CONFIG_BIG.MODBYTES]=t[i];
+    }
+
+    public static FP8 fromBytes(byte[] bf) {
+		byte[] t=new byte[4*CONFIG_BIG.MODBYTES];
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++)
+            t[i]=bf[i];
+        FP4 tb=FP4.fromBytes(t);
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++)
+            t[i]=bf[i+4*CONFIG_BIG.MODBYTES];
+        FP4 ta=FP4.fromBytes(t);
+        return new FP8(ta,tb);
+    }
+
+
 	public void cmove(FP8 g,int d)
 	{
 		a.cmove(g.a,d);

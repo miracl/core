@@ -83,6 +83,33 @@ func (F *FP16) iszilch() bool {
 	return F.a.iszilch() && F.b.iszilch()
 }
 
+func (F *FP16) ToBytes(bf []byte) {
+	var t [8*int(MODBYTES)]byte
+	MB := 8*int(MODBYTES)
+	F.b.ToBytes(t[:]);
+	for i:=0;i<MB;i++ {
+		bf[i]=t[i];
+	}
+	F.a.ToBytes(t[:]);
+	for i:=0;i<MB;i++ {
+		bf[i+MB]=t[i];
+	}
+}
+
+func FP16_fromBytes(bf []byte) *FP16 {
+	var t [8*int(MODBYTES)]byte
+	MB := 8*int(MODBYTES)
+	for i:=0;i<MB;i++ {
+        t[i]=bf[i];
+	}
+    tb:=FP8_fromBytes(t[:])
+	for i:=0;i<MB;i++ {
+        t[i]=bf[i+MB]
+	}
+    ta:=FP8_fromBytes(t[:])
+	return NewFP16fp8s(ta,tb)
+}
+
 /* Conditional move */
 func (F *FP16) cmove(g *FP16, d int) {
 	F.a.cmove(g.a, d)

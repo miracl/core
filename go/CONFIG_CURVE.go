@@ -67,6 +67,7 @@ const HTC_ISO_G2 int = @HC2@
 const HASH_TYPE int = @HT@
 const AESKEY int = @AK@
 
+const ALLOW_ALT_COMPRESS bool = false
 // These are manually decided policy decisions. To block any potential patent issues set to false.
 
 const USE_GLV bool = true

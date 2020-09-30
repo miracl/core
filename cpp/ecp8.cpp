@@ -157,147 +157,84 @@ void ZZZ::ECP8_output(ECP8 *P)
 /* Convert Q to octet string */
 void ZZZ::ECP8_toOctet(octet *W, ECP8 *Q,bool compress)
 {
-    BIG b;
     FP8 qx, qy;
-    FP4 qa, qb;
-    FP2 pa, pb;
-
-    W->val[0]=0x06;
+    bool alt=false;
     ECP8_get(&qx, &qy, Q);
+  
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
 
-    FP4_copy(&qa, &(qx.a));
-    FP4_copy(&qb, &(qx.b));
-
-    FP2_copy(&pa, &(qa.a));
-    FP2_copy(&pb, &(qa.b));
-
-    FP_redc(b, &(pa.a));
-    BIG_toBytes(&(W->val[1]), b);
-    FP_redc(b, &(pa.b));
-    BIG_toBytes(&(W->val[MODBYTES_XXX+1]), b);
-    FP_redc(b, &(pb.a));
-    BIG_toBytes(&(W->val[2 * MODBYTES_XXX+1]), b);
-    FP_redc(b, &(pb.b));
-    BIG_toBytes(&(W->val[3 * MODBYTES_XXX+1]), b);
-
-    FP2_copy(&pa, &(qb.a));
-    FP2_copy(&pb, &(qb.b));
-
-    FP_redc(b, &(pa.a));
-    BIG_toBytes(&(W->val[4 * MODBYTES_XXX+1]), b);
-    FP_redc(b, &(pa.b));
-    BIG_toBytes(&(W->val[5 * MODBYTES_XXX+1]), b);
-    FP_redc(b, &(pb.a));
-    BIG_toBytes(&(W->val[6 * MODBYTES_XXX+1]), b);
-    FP_redc(b, &(pb.b));
-    BIG_toBytes(&(W->val[7 * MODBYTES_XXX+1]), b);
-
-    if (!compress)
+    if (alt)
     {
-        W->val[0] = 0x04;
-        FP4_copy(&qa, &(qy.a));
-        FP4_copy(&qb, &(qy.b));
-
-        FP2_copy(&pa, &(qa.a));
-        FP2_copy(&pb, &(qa.b));
-
-        FP_redc(b, &(pa.a));
-        BIG_toBytes(&(W->val[8 * MODBYTES_XXX+1]), b);
-        FP_redc(b, &(pa.b));
-        BIG_toBytes(&(W->val[9 * MODBYTES_XXX+1]), b);
-        FP_redc(b, &(pb.a));
-        BIG_toBytes(&(W->val[10 * MODBYTES_XXX+1]), b);
-        FP_redc(b, &(pb.b));
-        BIG_toBytes(&(W->val[11 * MODBYTES_XXX+1]), b);
-
-        FP2_copy(&pa, &(qb.a));
-        FP2_copy(&pb, &(qb.b));
-
-        FP_redc(b, &(pa.a));
-        BIG_toBytes(&(W->val[12 * MODBYTES_XXX+1]), b);
-        FP_redc(b, &(pa.b));
-        BIG_toBytes(&(W->val[13 * MODBYTES_XXX+1]), b);
-        FP_redc(b, &(pb.a));
-        BIG_toBytes(&(W->val[14 * MODBYTES_XXX+1]), b);
-        FP_redc(b, &(pb.b));
-        BIG_toBytes(&(W->val[15 * MODBYTES_XXX+1]), b);
-
-        W->len = 16 * MODBYTES_XXX+1;
+        FP8_toBytes(&(W->val[0]),&qx);
+        if (!compress)
+        {
+            W->len=16*MODBYTES_XXX;
+            FP8_toBytes(&(W->val[8*MODBYTES_XXX]), &qy);
+        } else {
+            W->val[0]|=0x80;
+            if (FP8_islarger(&qy)==1) W->val[0]|=0x20;
+            W->len=8*MODBYTES_XXX;
+        }
     } else {
-        W->val[0]=0x02;
-        if (FP8_sign(&qy)==1) W->val[0] = 0x03;
-        W->len = 8 * MODBYTES_XXX+1;
+        FP8_toBytes(&(W->val[1]),&qx);
+        if (!compress)
+        {
+            W->val[0] = 0x04;
+
+            FP8_toBytes(&(W->val[8 * MODBYTES_XXX+1]), &qy);
+            W->len = 16 * MODBYTES_XXX+1;
+        } else {
+            W->val[0]=0x02;
+            if (FP8_sign(&qy)==1) W->val[0] = 0x03;
+            W->len = 8 * MODBYTES_XXX+1;
+        }
     }
 }
 
 /* restore Q from octet string */
 int ZZZ::ECP8_fromOctet(ECP8 *Q, octet *W)
 {
-    BIG b;
     FP8 qx, qy;
-    FP4 qa, qb;
-    FP2 pa, pb;
-    int typ = W->val[0];
+    bool alt=false;
+    int sgn,cmp,typ = W->val[0];
 
-    BIG_fromBytes(b, &(W->val[1]));
-    FP_nres(&(pa.a), b);
-    BIG_fromBytes(b, &(W->val[MODBYTES_XXX+1]));
-    FP_nres(&(pa.b), b);
-    BIG_fromBytes(b, &(W->val[2 * MODBYTES_XXX+1]));
-    FP_nres(&(pb.a), b);
-    BIG_fromBytes(b, &(W->val[3 * MODBYTES_XXX+1]));
-    FP_nres(&(pb.b), b);
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
 
-    FP2_copy(&(qa.a), &pa);
-    FP2_copy(&(qa.b), &pb);
-
-    BIG_fromBytes(b, &(W->val[4 * MODBYTES_XXX+1]));
-    FP_nres(&(pa.a), b);
-    BIG_fromBytes(b, &(W->val[5 * MODBYTES_XXX+1]));
-    FP_nres(&(pa.b), b);
-    BIG_fromBytes(b, &(W->val[6 * MODBYTES_XXX+1]));
-    FP_nres(&(pb.a), b);
-    BIG_fromBytes(b, &(W->val[7 * MODBYTES_XXX+1]));
-    FP_nres(&(pb.b), b);
-
-    FP2_copy(&(qb.a), &pa);
-    FP2_copy(&(qb.b), &pb);
-
-    FP4_copy(&(qx.a), &qa);
-    FP4_copy(&(qx.b), &qb);
-
-    if (typ == 0x04)
+    if (alt)
     {
-        BIG_fromBytes(b, &(W->val[8 * MODBYTES_XXX+1]));
-        FP_nres(&(pa.a), b);
-        BIG_fromBytes(b, &(W->val[9 * MODBYTES_XXX+1]));
-        FP_nres(&(pa.b), b);
-        BIG_fromBytes(b, &(W->val[10 * MODBYTES_XXX+1]));
-        FP_nres(&(pb.a), b);
-        BIG_fromBytes(b, &(W->val[11 * MODBYTES_XXX+1]));
-        FP_nres(&(pb.b), b);
-
-        FP2_copy(&(qa.a), &pa);
-        FP2_copy(&(qa.b), &pb);
-
-        BIG_fromBytes(b, &(W->val[12 * MODBYTES_XXX+1]));
-        FP_nres(&(pa.a), b);
-        BIG_fromBytes(b, &(W->val[13 * MODBYTES_XXX+1]));
-        FP_nres(&(pa.b), b);
-        BIG_fromBytes(b, &(W->val[14 * MODBYTES_XXX+1]));
-        FP_nres(&(pb.a), b);
-        BIG_fromBytes(b, &(W->val[15 * MODBYTES_XXX+1]));
-        FP_nres(&(pb.b), b);
-
-        FP2_copy(&(qb.a), &pa);
-        FP2_copy(&(qb.b), &pb);
-
-        FP4_copy(&(qy.a), &qa);
-        FP4_copy(&(qy.b), &qb);
-
-        if (ECP8_set(Q, &qx, &qy)) return 1;
+        W->val[0]&=0x1f;
+        FP8_fromBytes(&qx,&(W->val[0]));
+        W->val[0]=typ;
+        if (typ&0x80==0)
+        {
+            FP8_fromBytes(&qy,&(W->val[8*MODBYTES_XXX]));
+            if (ECP8_set(Q, &qx, &qy)) return 1;
+            return 0;
+        } else {
+            if (!ECP8_setx(Q,&qx,0)) return 0;
+            sgn=(typ&0x20)>>5;
+            cmp=FP8_islarger(&(Q->y));
+            if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) ECP8_neg(Q);
+            return 1;
+        }
     } else {
-        if (ECP8_setx(Q, &qx, typ&1)) return 1;
+        FP8_fromBytes(&qx,&(W->val[1]));
+
+        if (typ == 0x04)
+        {
+            FP8_fromBytes(&qy,&(W->val[8 * MODBYTES_XXX+1]));
+            if (ECP8_set(Q, &qx, &qy)) return 1;
+        } else {
+            if (ECP8_setx(Q, &qx, typ&1)) return 1;
+        }
     }
     return 0;
 }

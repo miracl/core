@@ -50,6 +50,7 @@ public class CONFIG_CURVE {
     public static final int HASH_TYPE = @HT@;
     public static final int AESKEY = @AK@;
 
+    public static final boolean ALLOW_ALT_COMPRESS = false;
     public static final boolean USE_GLV = true;
     public static final boolean USE_GS_G2 = true;
     public static final boolean USE_GS_GT = true;

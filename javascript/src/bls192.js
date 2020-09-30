@@ -98,7 +98,7 @@ var BLS192 = function(ctx) {
 
         /* hash a message to an ECP point, using SHA2 */
         bls_hash_to_point: function(M) {
-            var dst= "BLS_SIG_ZZZG1_XMD:SHA384-SVDW-RO-_NUL_";
+            var dst= "BLS_SIG_ZZZG1_XMD:SHA-384_SVDW_RO_NUL_";
             var u=this.hash_to_field(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,this.asciitobytes(dst),M,2);
 
             var P=ctx.ECP.map2point(u[0]);

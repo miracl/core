@@ -60,7 +60,7 @@ func hash_to_field(hash int,hlen int ,DST []byte,M []byte,ctr int) []*FP {
 
 /* hash a message to an ECP point, using SHA2, random oracle method */
 func bls_hash_to_point(M []byte) *ECP {
-	DST := []byte("BLS_SIG_ZZZG1_XMD:SHA256-SVDW-RO-_NUL_")
+	DST := []byte("BLS_SIG_ZZZG1_XMD:SHA-256_SVDW_RO_NUL_")
 	u := hash_to_field(core.MC_SHA2,HASH_TYPE,DST,M,2)
 
 	P:=ECP_map2point(u[0])

@@ -221,6 +221,25 @@ func (F *FP) iszilch() bool {
 	return W.x.iszilch()
 }
 
+func (F *FP) islarger() int {
+    if F.iszilch() {
+		return 0;
+	}
+	sx:= NewBIGints(Modulus)
+    fx:=F.redc();
+    sx.sub(fx); sx.norm()
+    return Comp(fx,sx)
+}
+
+func (F *FP) ToBytes(b []byte) {
+	F.redc().ToBytes(b)
+}
+
+func FP_fromBytes(b []byte) *FP {
+	t:=FromBytes(b)
+	return NewFPbig(t)
+}
+
 func (F *FP) isunity() bool {
 	W:=NewFPcopy(F)
 	W.reduce()

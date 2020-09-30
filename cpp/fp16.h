@@ -58,6 +58,20 @@ extern int FP16_isunity(FP16 *x);
 	@return 1 if x=y, else returns 0
  */
 extern int FP16_equals(FP16 *x, FP16 *y);
+
+/**	@brief Serialize in FP16  
+ *
+    @param b buffer for output
+	@param x FP16 number to be serialized
+ */
+extern void FP16_toBytes(char *b,FP16 *x);
+/**	@brief Serialize out FP16  
+ *
+	@param x FP16 number to be serialized
+    @param b buffer for input
+ */
+extern void FP16_fromBytes(FP16 *x,char *b);
+
 /**	@brief Tests for FP16 having only a real part and no imaginary part
  *
 	@param x FP16 number to be tested

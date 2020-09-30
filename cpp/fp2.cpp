@@ -69,6 +69,29 @@ int YYY::FP2_equals(FP2 *x, FP2 *y)
     return (FP_equals(&(x->a), &(y->a)) & FP_equals(&(x->b), &(y->b)));
 }
 
+// Is x lexically larger than p-x?
+// return -1 for no, 0 if x=0, 1 for yes
+int YYY::FP2_islarger(FP2 *x)
+{
+    int cmp;
+    if (FP2_iszilch(x)) return 0;
+    cmp=FP_islarger(&(x->b));
+    if (cmp!=0) return cmp;
+    return FP_islarger(&(x->a));
+}
+
+void YYY::FP2_toBytes(char *b,FP2 *x)
+{
+    FP_toBytes(b,&(x->b));
+    FP_toBytes(&b[MODBYTES_XXX],&(x->a));
+}
+
+void YYY::FP2_fromBytes(FP2 *x,char *b)
+{
+    FP_fromBytes(&(x->b),b);
+    FP_fromBytes(&(x->a),&b[MODBYTES_XXX]);
+}
+
 /* Create FP2 from two FPs */
 /* SU= 16 */
 void YYY::FP2_from_FPs(FP2 *w, FP *x, FP *y)

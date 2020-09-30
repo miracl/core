@@ -102,6 +102,48 @@ public struct FP4 {
         return a.iszilch() && b.iszilch()
     }
 
+    func islarger() -> Int
+    {
+        if iszilch() {
+            return 0
+        }
+        let cmp=b.islarger()
+        if cmp != 0 {
+            return cmp
+        }
+        return a.islarger()
+    }
+
+    func toBytes(_ bf:inout [UInt8])
+    {
+        let RM=2*Int(CONFIG_BIG.MODBYTES)
+        var t=[UInt8](repeating: 0,count: RM) 
+	    b.toBytes(&t)
+	    for i in 0 ..< RM {
+	    	bf[i]=t[i]
+	    }
+	    a.toBytes(&t)
+	    for i in 0 ..< RM {
+		    bf[i+RM]=t[i]
+	    }        
+    }
+
+    static func fromBytes(_ bf: [UInt8]) -> FP4
+    {
+        let RM=2*Int(CONFIG_BIG.MODBYTES)
+        var t=[UInt8](repeating: 0,count: RM) 
+	    for i in 0 ..< RM {
+            t[i]=bf[i]
+        }
+        let tb=FP2.fromBytes(t)
+	    for i in 0 ..< RM {
+            t[i]=bf[i+RM]
+	    }
+        let ta=FP2.fromBytes(t)
+	    return FP4(ta,tb)
+    }
+
+
     mutating func cmove(_ g:FP4,_ d:Int)
     {
         a.cmove(g.a,d)

@@ -832,132 +832,39 @@ func (F *FP12) trace() *FP4 {
 
 /* convert from byte array to FP12 */
 func FP12_fromBytes(w []byte) *FP12 {
-	var t [int(MODBYTES)]byte
-	MB := int(MODBYTES)
+	var t [4*int(MODBYTES)]byte
+	MB := 4*int(MODBYTES)
 
-	for i := 0; i < MB; i++ {
-		t[i] = w[i]
+	for i:=0;i<MB;i++ {
+		t[i]=w[i]
 	}
-	a := FromBytes(t[:])
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+MB]
+    c:=FP4_fromBytes(t[:])
+	for i:=0;i<MB;i++ {
+		t[i]=w[i+MB]
 	}
-	b := FromBytes(t[:])
-	c := NewFP2bigs(a, b)
-
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+2*MB]
+    b:=FP4_fromBytes(t[:])
+	for i:=0;i<MB;i++ {
+		t[i]=w[i+2*MB]
 	}
-	a = FromBytes(t[:])
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+3*MB]
-	}
-	b = FromBytes(t[:])
-	d := NewFP2bigs(a, b)
-
-	e := NewFP4fp2s(c, d)
-
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+4*MB]
-	}
-	a = FromBytes(t[:])
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+5*MB]
-	}
-	b = FromBytes(t[:])
-	c = NewFP2bigs(a, b)
-
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+6*MB]
-	}
-	a = FromBytes(t[:])
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+7*MB]
-	}
-	b = FromBytes(t[:])
-	d = NewFP2bigs(a, b)
-
-	f := NewFP4fp2s(c, d)
-
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+8*MB]
-	}
-	a = FromBytes(t[:])
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+9*MB]
-	}
-	b = FromBytes(t[:])
-
-	c = NewFP2bigs(a, b)
-
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+10*MB]
-	}
-	a = FromBytes(t[:])
-	for i := 0; i < MB; i++ {
-		t[i] = w[i+11*MB]
-	}
-	b = FromBytes(t[:])
-	d = NewFP2bigs(a, b)
-
-	g := NewFP4fp2s(c, d)
-
-	return NewFP12fp4s(e, f, g)
+    a:=FP4_fromBytes(t[:])
+	return NewFP12fp4s(a,b,c)
 }
 
 /* convert this to byte array */
 func (F *FP12) ToBytes(w []byte) {
-	var t [int(MODBYTES)]byte
-	MB := int(MODBYTES)
-	F.a.geta().GetA().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i] = t[i]
+	var t [4*int(MODBYTES)]byte
+	MB := 4*int(MODBYTES)
+    F.c.ToBytes(t[:])
+	for i:=0;i<MB;i++ { 
+		w[i]=t[i]
 	}
-	F.a.geta().GetB().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+MB] = t[i]
+    F.b.ToBytes(t[:])
+	for i:=0;i<MB;i++ {
+		w[i+MB]=t[i]
 	}
-	F.a.getb().GetA().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+2*MB] = t[i]
-	}
-	F.a.getb().GetB().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+3*MB] = t[i]
-	}
-
-	F.b.geta().GetA().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+4*MB] = t[i]
-	}
-	F.b.geta().GetB().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+5*MB] = t[i]
-	}
-	F.b.getb().GetA().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+6*MB] = t[i]
-	}
-	F.b.getb().GetB().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+7*MB] = t[i]
-	}
-
-	F.c.geta().GetA().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+8*MB] = t[i]
-	}
-	F.c.geta().GetB().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+9*MB] = t[i]
-	}
-	F.c.getb().GetA().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+10*MB] = t[i]
-	}
-	F.c.getb().GetB().ToBytes(t[:])
-	for i := 0; i < MB; i++ {
-		w[i+11*MB] = t[i]
+    F.a.ToBytes(t[:])
+	for i:=0;i<MB;i++ {
+		w[i+2*MB]=t[i]
 	}
 }
 
@@ -977,7 +884,10 @@ func (F *FP12) Pow(e *BIG) *FP12 {
 	sf := NewFP12copy(F)
 	sf.norm()
 	w := NewFP12copy(sf)
-
+    if e3.iszilch() {
+        w.one()
+        return w
+    }
 	nb := e3.nbits()
 	for i := nb - 2; i >= 1; i-- {
 		w.usqr()

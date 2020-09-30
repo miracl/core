@@ -79,6 +79,35 @@ public struct FP16 {
         return a.iszilch() && b.iszilch()
     }
 
+    func toBytes(_ bf:inout [UInt8])
+    {
+        let RM=8*Int(CONFIG_BIG.MODBYTES)
+        var t=[UInt8](repeating: 0,count: RM) 
+	    b.toBytes(&t)
+	    for i in 0 ..< RM {
+	    	bf[i]=t[i]
+	    }
+	    a.toBytes(&t)
+	    for i in 0 ..< RM {
+		    bf[i+RM]=t[i]
+	    }        
+    }
+
+    static func fromBytes(_ bf: [UInt8]) -> FP16
+    {
+        let RM=8*Int(CONFIG_BIG.MODBYTES)
+        var t=[UInt8](repeating: 0,count: RM) 
+	    for i in 0 ..< RM {
+            t[i]=bf[i]
+        }
+        let tb=FP8.fromBytes(t)
+	    for i in 0 ..< RM {
+            t[i]=bf[i+RM]
+	    }
+        let ta=FP8.fromBytes(t)
+	    return FP16(ta,tb)
+    }
+
     mutating func cmove(_ g:FP16,_ d:Int)
     {
         a.cmove(g.a,d)

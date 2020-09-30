@@ -266,18 +266,15 @@ int ECP_ZZZ_get(BIG_XXX x, ECP_ZZZ *P)
 int ECP_ZZZ_get(BIG_XXX x, BIG_XXX y, ECP_ZZZ *P)
 {
     ECP_ZZZ W;
-    int s;
     ECP_ZZZ_copy(&W, P);
     ECP_ZZZ_affine(&W);
 
     if (ECP_ZZZ_isinf(&W)) return -1;
 
     FP_YYY_redc(y, &(W.y));
-    s = BIG_XXX_parity(y);
-
     FP_YYY_redc(x, &(W.x));
 
-    return s;
+    return FP_YYY_sign(&(W.x));
 }
 
 /* Set P=(x,{y}) */
@@ -310,15 +307,10 @@ int ECP_ZZZ_set(ECP_ZZZ *P, BIG_XXX x, BIG_XXX y)
 int ECP_ZZZ_setx(ECP_ZZZ *P, BIG_XXX x, int s)
 {
     FP_YYY rhs,hint;
-    BIG_XXX t;//, m;
-    //BIG_XXX_rcopy(m, Modulus_YYY);
-
     FP_YYY_nres(&rhs, x);
 
     ECP_ZZZ_rhs(&rhs, &rhs);
 
-    //FP_YYY_redc(t, &rhs);
-    //if (BIG_XXX_jacobi(t, m) != 1)
     if (!FP_YYY_qr(&rhs,&hint))
     {
         ECP_ZZZ_inf(P);
@@ -328,9 +320,7 @@ int ECP_ZZZ_setx(ECP_ZZZ *P, BIG_XXX x, int s)
     FP_YYY_nres(&(P->x), x);
     FP_YYY_sqrt(&(P->y), &rhs,&hint);
 
-    FP_YYY_redc(t, &(P->y));
-
-    if (BIG_XXX_parity(t) != s)
+    if (FP_YYY_sign(&(P->y))!=s)
         FP_YYY_neg(&(P->y), &(P->y));
     FP_YYY_reduce(&(P->y));
     FP_YYY_one(&(P->z));
@@ -975,20 +965,39 @@ void ECP_ZZZ_toOctet(octet *W, ECP_ZZZ *P, bool compress)
     BIG_XXX_toBytes(&(W->val[0]), x);
 #else
     BIG_XXX x, y;
+    bool alt=false;
+    ECP_ZZZ_affine(P);
     ECP_ZZZ_get(x, y, P);
-    if (compress)
+
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
+    if (alt)
     {
-        W->val[0] = 0x02;
-        if (BIG_XXX_parity(y) == 1) W->val[0] = 0x03;
-        W->len = MODBYTES_XXX + 1;
+        BIG_XXX_toBytes(&(W->val[0]), x);
+        if (compress)
+        {
+            W->len = MODBYTES_XXX;
+            W->val[0]|=0x80;
+            if (FP_YYY_islarger(&(P->y))==1) W->val[0]|=0x20;
+        } else {
+            W->len = 2 * MODBYTES_XXX;
+            BIG_XXX_toBytes(&(W->val[MODBYTES_XXX]), y);
+        }
+    } else {
         BIG_XXX_toBytes(&(W->val[1]), x);
-    }
-    else
-    {
-        W->val[0] = 0x04;
-        W->len = 2 * MODBYTES_XXX + 1;
-        BIG_XXX_toBytes(&(W->val[1]), x);
-        BIG_XXX_toBytes(&(W->val[MODBYTES_XXX + 1]), y);
+        if (compress)
+        {
+            W->val[0] = 0x02;
+            if (FP_YYY_sign(&(P->y)) == 1) W->val[0] = 0x03;
+            W->len = MODBYTES_XXX + 1;
+        } else {
+            W->val[0] = 0x04;
+            W->len = 2 * MODBYTES_XXX + 1;
+            BIG_XXX_toBytes(&(W->val[MODBYTES_XXX + 1]), y);
+        }
     }
 #endif
 }
@@ -1004,16 +1013,44 @@ int ECP_ZZZ_fromOctet(ECP_ZZZ *P, octet *W)
     return 0;
 #else
     BIG_XXX x, y;
-    int typ = W->val[0];
-    BIG_XXX_fromBytes(x, &(W->val[1]));
-    if (typ == 0x04)
+    bool alt=false;
+    int sgn,cmp,typ = W->val[0];
+
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
+
+    if (alt)
     {
-        BIG_XXX_fromBytes(y, &(W->val[MODBYTES_XXX + 1]));
-        if (ECP_ZZZ_set(P, x, y)) return 1;
-    }
-    if (typ == 0x02 || typ == 0x03)
-    {
-        if (ECP_ZZZ_setx(P, x, typ & 1)) return 1;
+        W->val[0]&=0x1f;
+        BIG_XXX_fromBytes(x, &(W->val[0]));
+        W->val[0]=typ;
+        if (typ&0x80==0)
+        {
+            BIG_XXX_fromBytes(y, &(W->val[MODBYTES_XXX]));
+            if (ECP_ZZZ_set(P, x, y)) return 1;
+            return 0;
+        } else {
+            if (!ECP_ZZZ_setx(P,x,0)) return 0;
+            sgn=(typ&0x20)>>5;
+            cmp=FP_YYY_islarger(&(P->y));
+            if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) ECP_ZZZ_neg(P);
+            return 1;
+        }
+
+    } else {
+        BIG_XXX_fromBytes(x, &(W->val[1]));
+        if (typ == 0x04)
+        {
+            BIG_XXX_fromBytes(y, &(W->val[MODBYTES_XXX + 1]));
+            if (ECP_ZZZ_set(P, x, y)) return 1;
+        }
+        if (typ == 0x02 || typ == 0x03)
+        {
+            if (ECP_ZZZ_setx(P, x, typ & 1)) return 1;
+        }
     }
     return 0;
 #endif

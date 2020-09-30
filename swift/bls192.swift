@@ -69,7 +69,7 @@ public struct BLS192
 /* hash a message to an ECP point, using SHA2, random oracle method */
     static public func bls_hash_to_point(_ M: [UInt8]) -> ECP
     {
-        let dst = "BLS_SIG_ZZZG1_XMD:SHA384-SVDW-RO-_NUL_".uppercased()
+        let dst = "BLS_SIG_ZZZG1_XMD:SHA-384_SVDW_RO_NUL_".uppercased()
         let u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,[UInt8](dst.utf8),M,2)
 
         var P=ECP.map2point(u[0])

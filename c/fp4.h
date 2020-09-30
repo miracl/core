@@ -48,6 +48,29 @@ typedef struct
 	@return 1 if zero, else returns 0
  */
 extern int FP4_YYY_iszilch(FP4_YYY *x);
+
+/**	@brief Tests for lexically larger 
+ *
+	@param x FP4 number to be tested if larger than -x
+	@return 1 if larger, else returns 0
+ */
+extern int FP4_YYY_islarger(FP4_YYY *x);
+
+/**	@brief Serialize out FP4  
+ *
+    @param b buffer for output
+	@param x FP4 number to be serialized
+ */
+extern void FP4_YYY_toBytes(char *b,FP4_YYY *x);
+
+/**	@brief Serialize in FP4  
+ *
+	@param x FP4 number to be serialized
+    @param b buffer for input
+ */
+extern void FP4_YYY_fromBytes(FP4_YYY *x,char *b);
+
+
 /**	@brief Tests for FP4 equal to unity
  *
 	@param x FP4 number to be tested

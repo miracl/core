@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-
+use crate::xxx::big;
 use crate::xxx::fp;
 use crate::xxx::fp::FP;
 use crate::xxx::fp2::FP2;
@@ -123,6 +123,44 @@ impl FP8 {
     /* test self=0 ? */
     pub fn iszilch(&self) -> bool {
         return self.a.iszilch() && self.b.iszilch();
+    }
+
+    pub fn islarger(&self) -> isize {
+        if self.iszilch() {
+            return 0;
+        }
+        let cmp=self.b.islarger();
+        if cmp!=0 {
+            return cmp;
+        }
+        return self.a.islarger()
+    }
+
+    pub fn tobytes(&self,bf: &mut [u8]) {
+        const MB:usize = 4*(big::MODBYTES as usize);
+        let mut t: [u8; MB] = [0; MB];
+        self.b.tobytes(&mut t);
+        for i in 0..MB {
+            bf[i]=t[i];
+        }
+        self.a.tobytes(&mut t);
+        for i in 0..MB {
+            bf[i+MB]=t[i];
+        }       
+    }
+
+    pub fn frombytes(bf: &[u8]) -> FP8 {
+        const MB:usize = 4*(big::MODBYTES as usize);
+        let mut t: [u8; MB] = [0; MB];
+        for i in 0..MB {
+            t[i]=bf[i];
+        }
+        let tb=FP4::frombytes(&t);
+        for i in 0..MB {
+            t[i]=bf[i+MB];
+        }
+        let ta=FP4::frombytes(&t);
+        return FP8::new_fp4s(&ta,&tb);
     }
 
     /* test self=1 ? */

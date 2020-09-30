@@ -43,6 +43,29 @@ int YYY::FP8_isreal(FP8 *w)
     return FP4_iszilch(&(w->b));
 }
 
+// Is x lexically larger than p-x?
+// return -1 for no, 0 if x=0, 1 for yes
+int YYY::FP8_islarger(FP8 *x)
+{
+    int cmp;
+    if (FP8_iszilch(x)) return 0;
+    cmp=FP4_islarger(&(x->b));
+    if (cmp!=0) return cmp;
+    return FP4_islarger(&(x->a));
+}
+
+void YYY::FP8_toBytes(char *b,FP8 *x)
+{
+    FP4_toBytes(b,&(x->b));
+    FP4_toBytes(&b[4*MODBYTES_XXX],&(x->a));
+}
+
+void YYY::FP8_fromBytes(FP8 *x,char *b)
+{
+    FP4_fromBytes(&(x->b),b);
+    FP4_fromBytes(&(x->a),&b[4*MODBYTES_XXX]);
+}
+
 /* return 1 if x==y, else 0 */
 int YYY::FP8_equals(FP8 *x, FP8 *y)
 {

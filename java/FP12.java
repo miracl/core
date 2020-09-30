@@ -796,86 +796,28 @@ public final class FP12 {
 /* convert from byte array to FP12 */
 	public static FP12 fromBytes(byte[] w)
 	{
-		BIG a,b;
-		FP2 c,d;
-		FP4 e,f,g;
-		byte[] t=new byte[CONFIG_BIG.MODBYTES];
+		FP4 a,b,c;
+		byte[] t=new byte[4*CONFIG_BIG.MODBYTES];
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++) t[i]=w[i];
+        c=FP4.fromBytes(t);
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++) t[i]=w[i+4*CONFIG_BIG.MODBYTES];
+        b=FP4.fromBytes(t);
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++) t[i]=w[i+8*CONFIG_BIG.MODBYTES];
+        a=FP4.fromBytes(t);
 
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i];
-		a=BIG.fromBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+CONFIG_BIG.MODBYTES];
-		b=BIG.fromBytes(t);
-		c=new FP2(a,b);
-
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+2*CONFIG_BIG.MODBYTES];
-		a=BIG.fromBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+3*CONFIG_BIG.MODBYTES];
-		b=BIG.fromBytes(t);
-		d=new FP2(a,b);
-
-		e=new FP4(c,d);
-
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+4*CONFIG_BIG.MODBYTES];
-		a=BIG.fromBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+5*CONFIG_BIG.MODBYTES];
-		b=BIG.fromBytes(t);
-		c=new FP2(a,b);
-
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+6*CONFIG_BIG.MODBYTES];
-		a=BIG.fromBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+7*CONFIG_BIG.MODBYTES];
-		b=BIG.fromBytes(t);
-		d=new FP2(a,b);
-
-		f=new FP4(c,d);
-
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+8*CONFIG_BIG.MODBYTES];
-		a=BIG.fromBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+9*CONFIG_BIG.MODBYTES];
-		b=BIG.fromBytes(t);
-		c=new FP2(a,b);
-
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+10*CONFIG_BIG.MODBYTES];
-		a=BIG.fromBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) t[i]=w[i+11*CONFIG_BIG.MODBYTES];
-		b=BIG.fromBytes(t);
-		d=new FP2(a,b);
-
-		g=new FP4(c,d);
-
-		return new FP12(e,f,g);
+		return new FP12(a,b,c);
 	}
 
 /* convert this to byte array */
 	public void toBytes(byte[] w)
 	{
-		byte[] t=new byte[CONFIG_BIG.MODBYTES];
-		a.geta().getA().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i]=t[i];
-		a.geta().getB().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+CONFIG_BIG.MODBYTES]=t[i];
-		a.getb().getA().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+2*CONFIG_BIG.MODBYTES]=t[i];
-		a.getb().getB().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+3*CONFIG_BIG.MODBYTES]=t[i];
-
-		b.geta().getA().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+4*CONFIG_BIG.MODBYTES]=t[i];
-		b.geta().getB().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+5*CONFIG_BIG.MODBYTES]=t[i];
-		b.getb().getA().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+6*CONFIG_BIG.MODBYTES]=t[i];
-		b.getb().getB().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+7*CONFIG_BIG.MODBYTES]=t[i];
-
-		c.geta().getA().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+8*CONFIG_BIG.MODBYTES]=t[i];
-		c.geta().getB().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+9*CONFIG_BIG.MODBYTES]=t[i];
-		c.getb().getA().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+10*CONFIG_BIG.MODBYTES]=t[i];
-		c.getb().getB().toBytes(t);
-		for (int i=0;i<CONFIG_BIG.MODBYTES;i++) w[i+11*CONFIG_BIG.MODBYTES]=t[i];
+        byte[] t=new byte[4*CONFIG_BIG.MODBYTES];
+        c.toBytes(t);
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++) w[i]=t[i];
+        b.toBytes(t);
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++) w[i+4*CONFIG_BIG.MODBYTES]=t[i];
+        a.toBytes(t);
+		for (int i=0;i<4*CONFIG_BIG.MODBYTES;i++) w[i+8*CONFIG_BIG.MODBYTES]=t[i];
 	}
 
 /* convert to hex string */
@@ -897,7 +839,10 @@ public final class FP12 {
 		FP12 sf=new FP12(this);
 		sf.norm();
 		FP12 w=new FP12(sf);
-
+        if (e3.iszilch()) {
+            w.one();
+            return w;
+        }
 		int nb=e3.nbits();
 		for (int i=nb-2;i>=1;i--)
 		{

@@ -41,6 +41,29 @@ public final class FP16 {
         return (a.iszilch() && b.iszilch());
     }
 
+    public void toBytes(byte[] bf) {
+		byte[] t=new byte[8*CONFIG_BIG.MODBYTES];
+        b.toBytes(t);
+		for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++)
+            bf[i]=t[i];
+        a.toBytes(t);
+		for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++)
+            bf[i+8*CONFIG_BIG.MODBYTES]=t[i];
+    }
+
+    public static FP16 fromBytes(byte[] bf) {
+		byte[] t=new byte[8*CONFIG_BIG.MODBYTES];
+		for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++)
+            t[i]=bf[i];
+        FP8 tb=FP8.fromBytes(t);
+		for (int i=0;i<8*CONFIG_BIG.MODBYTES;i++)
+            t[i]=bf[i+8*CONFIG_BIG.MODBYTES];
+        FP8 ta=FP8.fromBytes(t);
+        return new FP16(ta,tb);
+    }
+
+
+
     public void cmove(FP16 g, int d) {
         a.cmove(g.a, d);
         b.cmove(g.b, d);

@@ -736,6 +736,11 @@ void FP24_YYY_pow(FP24_YYY *r, FP24_YYY *a, BIG_XXX b)
     FP24_YYY_norm(&sf);
     FP24_YYY_copy(&w, &sf);
 
+    if (BIG_XXX_iszilch(b3))
+    {
+        FP24_YYY_one(r);
+        return;
+    }
 
     nb = BIG_XXX_nbits(b3);
     for (i = nb - 2; i >= 1; i--)
@@ -957,117 +962,19 @@ void FP24_YYY_output(FP24_YYY *w)
 /* Convert g to octet string w */
 void FP24_YYY_toOctet(octet *W, FP24_YYY *g)
 {
-    BIG_XXX a;
     W->len = 24 * MODBYTES_XXX;
-
-    FP_YYY_redc(a, &(g->a.a.a.a));
-    BIG_XXX_toBytes(&(W->val[0]), a);
-    FP_YYY_redc(a, &(g->a.a.a.b));
-    BIG_XXX_toBytes(&(W->val[MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->a.a.b.a));
-    BIG_XXX_toBytes(&(W->val[2 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->a.a.b.b));
-    BIG_XXX_toBytes(&(W->val[3 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->a.b.a.a));
-    BIG_XXX_toBytes(&(W->val[4 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->a.b.a.b));
-    BIG_XXX_toBytes(&(W->val[5 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->a.b.b.a));
-    BIG_XXX_toBytes(&(W->val[6 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->a.b.b.b));
-    BIG_XXX_toBytes(&(W->val[7 * MODBYTES_XXX]), a);
-
-    FP_YYY_redc(a, &(g->b.a.a.a));
-    BIG_XXX_toBytes(&(W->val[8 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->b.a.a.b));
-    BIG_XXX_toBytes(&(W->val[9 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->b.a.b.a));
-    BIG_XXX_toBytes(&(W->val[10 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->b.a.b.b));
-    BIG_XXX_toBytes(&(W->val[11 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->b.b.a.a));
-    BIG_XXX_toBytes(&(W->val[12 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->b.b.a.b));
-    BIG_XXX_toBytes(&(W->val[13 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->b.b.b.a));
-    BIG_XXX_toBytes(&(W->val[14 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->b.b.b.b));
-    BIG_XXX_toBytes(&(W->val[15 * MODBYTES_XXX]), a);
-
-    FP_YYY_redc(a, &(g->c.a.a.a));
-    BIG_XXX_toBytes(&(W->val[16 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->c.a.a.b));
-    BIG_XXX_toBytes(&(W->val[17 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->c.a.b.a));
-    BIG_XXX_toBytes(&(W->val[18 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->c.a.b.b));
-    BIG_XXX_toBytes(&(W->val[19 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->c.b.a.a));
-    BIG_XXX_toBytes(&(W->val[20 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->c.b.a.b));
-    BIG_XXX_toBytes(&(W->val[21 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->c.b.b.a));
-    BIG_XXX_toBytes(&(W->val[22 * MODBYTES_XXX]), a);
-    FP_YYY_redc(a, &(g->c.b.b.b));
-    BIG_XXX_toBytes(&(W->val[23 * MODBYTES_XXX]), a);
+    FP8_YYY_toBytes(&(W->val[0]),&(g->c));
+    FP8_YYY_toBytes(&(W->val[8 * MODBYTES_XXX]),&(g->b));
+    FP8_YYY_toBytes(&(W->val[16 * MODBYTES_XXX]),&(g->a));
 }
 
 /* SU= 24 */
 /* Restore g from octet string w */
 void FP24_YYY_fromOctet(FP24_YYY *g, octet *W)
 {
-    BIG_XXX b;
-
-    BIG_XXX_fromBytes(b, &W->val[0]);
-    FP_YYY_nres(&(g->a.a.a.a), b);
-    BIG_XXX_fromBytes(b, &W->val[MODBYTES_XXX]);
-    FP_YYY_nres(&(g->a.a.a.b), b);
-    BIG_XXX_fromBytes(b, &W->val[2 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->a.a.b.a), b);
-    BIG_XXX_fromBytes(b, &W->val[3 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->a.a.b.b), b);
-    BIG_XXX_fromBytes(b, &W->val[4 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->a.b.a.a), b);
-    BIG_XXX_fromBytes(b, &W->val[5 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->a.b.a.b), b);
-    BIG_XXX_fromBytes(b, &W->val[6 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->a.b.b.a), b);
-    BIG_XXX_fromBytes(b, &W->val[7 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->a.b.b.b), b);
-
-    BIG_XXX_fromBytes(b, &W->val[8 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->b.a.a.a), b);
-    BIG_XXX_fromBytes(b, &W->val[9 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->b.a.a.b), b);
-    BIG_XXX_fromBytes(b, &W->val[10 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->b.a.b.a), b);
-    BIG_XXX_fromBytes(b, &W->val[11 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->b.a.b.b), b);
-    BIG_XXX_fromBytes(b, &W->val[12 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->b.b.a.a), b);
-    BIG_XXX_fromBytes(b, &W->val[13 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->b.b.a.b), b);
-    BIG_XXX_fromBytes(b, &W->val[14 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->b.b.b.a), b);
-    BIG_XXX_fromBytes(b, &W->val[15 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->b.b.b.b), b);
-
-    BIG_XXX_fromBytes(b, &W->val[16 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->c.a.a.a), b);
-    BIG_XXX_fromBytes(b, &W->val[17 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->c.a.a.b), b);
-    BIG_XXX_fromBytes(b, &W->val[18 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->c.a.b.a), b);
-    BIG_XXX_fromBytes(b, &W->val[19 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->c.a.b.b), b);
-    BIG_XXX_fromBytes(b, &W->val[20 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->c.b.a.a), b);
-    BIG_XXX_fromBytes(b, &W->val[21 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->c.b.a.b), b);
-    BIG_XXX_fromBytes(b, &W->val[22 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->c.b.b.a), b);
-    BIG_XXX_fromBytes(b, &W->val[23 * MODBYTES_XXX]);
-    FP_YYY_nres(&(g->c.b.b.b), b);
+    FP8_YYY_fromBytes(&(g->c),&(W->val[0]));
+    FP8_YYY_fromBytes(&(g->b),&(W->val[8 * MODBYTES_XXX]));
+    FP8_YYY_fromBytes(&(g->a),&(W->val[16 * MODBYTES_XXX]));
 }
 
 /* Move b to a if d=1 */

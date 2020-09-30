@@ -176,6 +176,18 @@ var FP = function(ctx) {
             return c.f.iszilch();
         },
 
+        islarger: function() {
+            if (this.iszilch()) return;
+            var sx = new ctx.BIG(0);
+            sx.rcopy(ctx.ROM_FIELD.Modulus);
+            sx.sub(fx); sx.norm();
+            return ctx.BIG.comp(fx,sx);
+        },
+
+        toBytes: function(b) {
+            this.redc().toBytes(b)
+        },
+
         /* test this=1 */
         isunity: function() {
 			var c=new FP(0); c.copy(this);
@@ -666,6 +678,11 @@ var FP = function(ctx) {
         i.mul(w);
         s.mul(i);
         return qr;
+    };
+
+    FP.fromBytes = function(b) {
+        var t=ctx.BIG.fromBytes(b);
+        return new FP(t);
     };
 
     FP.rand = function(rng) {

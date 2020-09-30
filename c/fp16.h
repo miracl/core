@@ -49,6 +49,21 @@ typedef struct
 	@return 1 if zero, else returns 0
  */
 extern int FP16_YYY_iszilch(FP16_YYY *x);
+
+
+/**	@brief Serialize in FP16  
+ *
+    @param b buffer for output
+	@param x FP16 number to be serialized
+ */
+extern void FP16_YYY_toBytes(char *b,FP16_YYY *x);
+/**	@brief Serialize out FP16  
+ *
+	@param x FP16 number to be serialized
+    @param b buffer for input
+ */
+extern void FP16_YYY_fromBytes(FP16_YYY *x,char *b);
+
 /**	@brief Tests for FP16 equal to unity
  *
 	@param x FP16 number to be tested

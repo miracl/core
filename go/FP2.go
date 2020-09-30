@@ -109,6 +109,44 @@ func (F *FP2) iszilch() bool {
 	return (F.a.iszilch() && F.b.iszilch())
 }
 
+func (F *FP2) islarger() int {
+    if F.iszilch() {
+		return 0;
+	}
+	cmp:=F.b.islarger()
+	if cmp!=0 {
+		return cmp
+	}
+	return F.a.islarger()
+}
+
+func (F *FP2) ToBytes(bf []byte) {
+	var t [int(MODBYTES)]byte
+	MB := int(MODBYTES)
+	F.b.ToBytes(t[:]);
+	for i:=0;i<MB;i++ {
+		bf[i]=t[i];
+	}
+	F.a.ToBytes(t[:]);
+	for i:=0;i<MB;i++ {
+		bf[i+MB]=t[i];
+	}
+}
+
+func FP2_fromBytes(bf []byte) *FP2 {
+	var t [int(MODBYTES)]byte
+	MB := int(MODBYTES)
+	for i:=0;i<MB;i++ {
+        t[i]=bf[i];
+	}
+    tb:=FP_fromBytes(t[:])
+	for i:=0;i<MB;i++ {
+        t[i]=bf[i+MB]
+	}
+    ta:=FP_fromBytes(t[:])
+	return NewFP2fps(ta,tb)
+}
+
 func (F *FP2) cmove(g *FP2, d int) {
 	F.a.cmove(g.a, d)
 	F.b.cmove(g.b, d)

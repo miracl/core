@@ -183,52 +183,83 @@ void ZZZ::ECP2_outputxyz(ECP2 *P)
 /* Convert Q to octet string */
 void ZZZ::ECP2_toOctet(octet *W, ECP2 *Q, bool compress)
 {
-    BIG b;
     FP2 qx, qy;
+    bool alt=false;
     ECP2_get(&qx, &qy, Q);
 
-    FP_redc(b, &(qx.a));
-    BIG_toBytes(&(W->val[1]), b);
-    FP_redc(b, &(qx.b));
-    BIG_toBytes(&(W->val[MODBYTES_XXX+1]), b);
-    if (!compress)
-    {
-        W->val[0] = 0x04;
-        FP_redc(b, &(qy.a));
-        BIG_toBytes(&(W->val[2 * MODBYTES_XXX+1]), b);
-        FP_redc(b, &(qy.b));
-        BIG_toBytes(&(W->val[3 * MODBYTES_XXX+1]), b);
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
 
-        W->len = 4 * MODBYTES_XXX + 1;
+    if (alt)
+    {
+        FP2_toBytes(&(W->val[0]),&qx);
+        if (!compress)
+        {
+            W->len=4*MODBYTES_XXX;
+            FP2_toBytes(&(W->val[2*MODBYTES_XXX]), &qy);
+        } else {
+            W->val[0]|=0x80;
+            if (FP2_islarger(&qy)==1) W->val[0]|=0x20;
+            W->len=2*MODBYTES_XXX;
+        }
     } else {
-        W->val[0]=0x02;
-        if (FP2_sign(&qy)==1) W->val[0] = 0x03;
-        W->len = 2 * MODBYTES_XXX + 1;
+        FP2_toBytes(&(W->val[1]),&qx);
+        if (!compress)
+        {
+            W->val[0] = 0x04;
+            FP2_toBytes(&(W->val[2 * MODBYTES_XXX+1]), &qy);
+            W->len = 4 * MODBYTES_XXX + 1;
+        } else {
+            W->val[0]=0x02;
+            if (FP2_sign(&qy)==1) W->val[0] = 0x03;
+            W->len = 2 * MODBYTES_XXX + 1;
+        }
     }
 }
-
 /* SU= 176 */
 /* restore Q from octet string */
 int ZZZ::ECP2_fromOctet(ECP2 *Q, octet *W)
 {
-    BIG b;
     FP2 qx, qy;
-    int typ = W->val[0];
+    bool alt=false;
+    int sgn,cmp,typ = W->val[0];
 
-    BIG_fromBytes(b, &(W->val[1]));
-    FP_nres(&(qx.a), b);
-    BIG_fromBytes(b, &(W->val[MODBYTES_XXX+1]));
-    FP_nres(&(qx.b), b);
-    if (typ == 0x04)
+#if (MBITS-1)%8 <= 4
+#ifdef ALLOW_ALT_COMPRESS_ZZZ
+    alt=true;
+#endif
+#endif
+
+    if (alt)
     {
-        BIG_fromBytes(b, &(W->val[2 * MODBYTES_XXX+1]));
-        FP_nres(&(qy.a), b);
-        BIG_fromBytes(b, &(W->val[3 * MODBYTES_XXX+1]));
-        FP_nres(&(qy.b), b);
+        W->val[0]&=0x1f;
+        FP2_fromBytes(&qx,&(W->val[0]));
+        W->val[0]=typ;
+        if (typ&0x80==0)
+        {
+            FP2_fromBytes(&qy,&(W->val[2*MODBYTES_XXX]));
+            if (ECP2_set(Q, &qx, &qy)) return 1;
+            return 0;
+        } else {
+            if (!ECP2_setx(Q,&qx,0)) return 0;
+            sgn=(typ&0x20)>>5;
+            cmp=FP2_islarger(&(Q->y));
+            if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) ECP2_neg(Q);
+            return 1;
+        }
 
-        if (ECP2_set(Q, &qx, &qy)) return 1;
     } else {
-        if (ECP2_setx(Q, &qx, typ&1)) return 1;
+        FP2_fromBytes(&qx,&(W->val[1]));
+        if (typ == 0x04)
+        {
+            FP2_fromBytes(&qy,&(W->val[2 * MODBYTES_XXX+1]));
+            if (ECP2_set(Q, &qx, &qy)) return 1;
+        } else {
+            if (ECP2_setx(Q, &qx, typ&1)) return 1;
+        }
     }
     return 0;
 }

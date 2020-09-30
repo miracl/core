@@ -818,110 +818,13 @@ var FP24 = function(ctx) {
 
         /* convert this to byte array */
         toBytes: function(w) {
-            var t = [],
-                i;
-
-            this.a.geta().geta().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i] = t[i];
-            }
-            this.a.geta().geta().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + ctx.BIG.MODBYTES] = t[i];
-            }
-            this.a.geta().getb().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 2 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.a.geta().getb().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 3 * ctx.BIG.MODBYTES] = t[i];
-            }
-
-            this.a.getb().geta().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 4 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.a.getb().geta().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 5 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.a.getb().getb().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 6 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.a.getb().getb().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 7 * ctx.BIG.MODBYTES] = t[i];
-            }
-
-            this.b.geta().geta().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 8 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.b.geta().geta().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 9 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.b.geta().getb().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 10 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.b.geta().getb().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 11 * ctx.BIG.MODBYTES] = t[i];
-            }
-
-            this.b.getb().geta().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 12 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.b.getb().geta().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 13 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.b.getb().getb().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 14 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.b.getb().getb().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 15 * ctx.BIG.MODBYTES] = t[i];
-            }
-
-            this.c.geta().geta().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 16 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.c.geta().geta().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 17 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.c.geta().getb().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 18 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.c.geta().getb().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 19 * ctx.BIG.MODBYTES] = t[i];
-            }
-
-            this.c.getb().geta().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 20 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.c.getb().geta().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 21 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.c.getb().getb().getA().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 22 * ctx.BIG.MODBYTES] = t[i];
-            }
-            this.c.getb().getb().getB().toBytes(t);
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                w[i + 23 * ctx.BIG.MODBYTES] = t[i];
-            }
+            var t = [];
+            this.c.toBytes(t);
+		    for (var i=0;i<4*ctx.BIG.MODBYTES;i++) w[i]=t[i];
+            this.b.toBytes(t);
+		    for (var i=0;i<4*ctx.BIG.MODBYTES;i++) w[i+8*ctx.BIG.MODBYTES]=t[i];
+            this.a.toBytes(t);
+		    for (var i=0;i<4*CONFIG_BIG.MODBYTES;i++) w[i+16*ctx.BIG.MODBYTES]=t[i];
         },
 
         /* set this=this^e */
@@ -938,6 +841,10 @@ var FP24 = function(ctx) {
             e3.norm();
 
             w = new FP24(sf);
+            if (e3.iszilch()) {
+                w.one();
+                return w;
+            }
             nb = e3.nbits();
 
             for (i = nb - 2; i >= 1; i--) {
@@ -1026,150 +933,15 @@ var FP24 = function(ctx) {
 
     /* convert from byte array to FP12 */
     FP24.fromBytes = function(w) {
-        var t = [],
-            i, a, b, c, d, e, f, g, r, ea, eb;
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        c = new ctx.FP2(a, b); //c.bset(a,b);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 2 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 3 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        d = new ctx.FP2(a, b); //d.bset(a,b);
-
-        ea = new ctx.FP4(c, d); //e.set(c,d);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 4 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 5 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        c = new ctx.FP2(a, b); //c.bset(a,b);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 6 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 7 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        d = new ctx.FP2(a, b); //d.bset(a,b);
-
-        eb = new ctx.FP4(c, d); //e.set(c,d);
-
-        e = new ctx.FP8(ea,eb);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 8 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 9 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        c = new ctx.FP2(a, b); //c.bset(a,b);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 10 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 11 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        d = new ctx.FP2(a, b);
-
-        ea = new ctx.FP4(c, d); //e.set(c,d);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 12 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 13 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        c = new ctx.FP2(a, b); //c.bset(a,b);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 14 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 15 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        d = new ctx.FP2(a, b);
-
-        eb = new ctx.FP4(c, d); //e.set(c,d);
-
-        f = new ctx.FP8(ea, eb); //f.set(c,d);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 16 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 17 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        c = new ctx.FP2(a, b); //c.bset(a,b);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 18 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 19 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        d = new ctx.FP2(a, b); //d.bset(a,b);
-
-        ea = new ctx.FP4(c, d); //e.set(c,d);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 20 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 21 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        c = new ctx.FP2(a, b); //c.bset(a,b);
-
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 22 * ctx.BIG.MODBYTES];
-        }
-        a = ctx.BIG.fromBytes(t);
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = w[i + 23 * ctx.BIG.MODBYTES];
-        }
-        b = ctx.BIG.fromBytes(t);
-        d = new ctx.FP2(a, b); //d.bset(a,b);
-
-        eb = new ctx.FP4(c, d); //e.set(c,d);
-
-        g = new ctx.FP8(ea, eb); //g.set(c,d);
-
-        r = new FP24(e, f, g); //r.set(e,f,g);
-
-        return r;
+		var a,b,c;
+        var t=[];
+		for (var i=0;i<8*ctx.BIG.MODBYTES;i++) t[i]=w[i];
+        c=ctx.FP8.fromBytes(t);
+		for (var i=0;i<8*ctx.BIG.MODBYTES;i++) t[i]=w[i+8*ctx.BIG.MODBYTES];
+        b=ctx.FP8.fromBytes(t);
+		for (var i=0;i<8*ctx.BIG.MODBYTES;i++) t[i]=w[i+16*ctx.BIG.MODBYTES];
+        a=ctx.FP8.fromBytes(t);
+		return new FP24(a,b,c);
     };
 
     /* return 1 if b==c, no branching */

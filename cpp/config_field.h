@@ -35,4 +35,6 @@
 #define RIADZG2B_YYY @RZ2B@
 #define TOWER_YYY @TW@
 
+//#define BIG_ENDIAN_SIGN_YYY 
+
 #endif
