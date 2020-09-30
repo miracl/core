@@ -394,7 +394,7 @@ impl FP8 {
         self.b.times_i();
     }
 
-    /* self=self^e */
+    /* return this^e */
 /*
     pub fn pow(&self, e: &BIG) -> FP8 {
         let mut w = FP8::new_copy(self);

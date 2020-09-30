@@ -352,7 +352,7 @@ impl FP16 {
         self.b.times_i();
     }
 
-    /* self=self^e */
+    /* return this^e */
     pub fn pow(&self, e: &BIG) -> FP16 {
         let mut w = FP16::new_copy(self);
         w.norm();

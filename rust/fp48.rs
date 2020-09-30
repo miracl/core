@@ -1383,7 +1383,7 @@ impl FP48 {
         );
     }
 
-    /* self=self^e */
+    /* return this^e */
     pub fn pow(&self, e: &BIG) -> FP48 {
         let mut r = FP48::new_copy(self);
         r.norm();

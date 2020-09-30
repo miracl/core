@@ -1000,7 +1000,7 @@ impl FP12 {
         );
     }
 
-    /* self=self^e */
+    /* return this^e */
     pub fn pow(&self, e: &BIG) -> FP12 {
         let mut r = FP12::new_copy(self);
         r.norm();
