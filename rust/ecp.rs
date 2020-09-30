@@ -54,7 +54,7 @@ pub const G2_TABLE:usize=@G2@;
 pub const HTC_ISO:usize=@HC@;
 pub const HTC_ISO_G2:usize=@HC2@;
 
-pub const ALLOW_ALT_COMPRESS:bool=true;
+pub const ALLOW_ALT_COMPRESS:bool=false;
 pub const HASH_TYPE:usize=@HT@;
 pub const AESKEY:usize=@AK@;
 
