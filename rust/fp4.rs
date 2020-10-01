@@ -418,7 +418,7 @@ impl FP4 {
         self.b.mul(f);
     }
 
-    /* self=self^e */
+    /* return this^e */
 /*
     pub fn pow(&self, e: &BIG) -> FP4 {
         let mut w = FP4::new_copy(self);

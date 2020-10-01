@@ -918,6 +918,7 @@ impl FP48 {
 
 /* Note this is simple square and multiply, so not side-channel safe */
 /* But fast for final exponentiation where exponent is not a secret */
+/* return this^e */
     pub fn pow(&self, e: &BIG) -> FP48 {
         let mut r = FP48::new_copy(self);
         r.norm();
