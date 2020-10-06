@@ -20,7 +20,7 @@
 /* CORE X.509 Functions */
 
 // To run test program, define HAS_MAIN
-// gcc -std=c99 x509.c  core.a -o x509.exe
+// gcc -std=c99 x509.c  core.a -o x509
 
 //#define HAS_MAIN
 
@@ -898,7 +898,7 @@ int main()
             printf("Curve is not supported\n");
             return 0;
         }
-        res = ECP_NIST256_PUBLIC_KEY_VALIDATE(1, &CAKEY);
+        res = ECP_NIST256_PUBLIC_KEY_VALIDATE(&CAKEY);
         if (res != 0)
         {
             printf("ECP Public Key is invalid!\n");
@@ -946,7 +946,7 @@ int main()
             printf("Hash Function not supported\n");
             return 0;
         }
-        PKCS15(sha, &H, &HP);
+        PKCS15_2048(sha, &H, &HP);
 
         RSA_2048_ENCRYPT(&PK, &SIG, &HH);
 
@@ -1042,7 +1042,7 @@ int main()
     if (ca.type == ECC)
     {
         printf("Checking CA's ECC Signature on Cert\n");
-        res = ECP_NIST256_PUBLIC_KEY_VALIDATE(1, &CAKEY);
+        res = ECP_NIST256_PUBLIC_KEY_VALIDATE(&CAKEY);
         if (res != 0)
             printf("ECP Public Key is invalid!\n");
         else printf("ECP Public Key is Valid\n");
@@ -1080,7 +1080,7 @@ int main()
             printf("Hash Function not supported\n");
             return 0;
         }
-        PKCS15(sha, &H, &HP);
+        PKCS15_2048(sha, &H, &HP);
 
         RSA_2048_ENCRYPT(&PK, &SIG, &HH);
 

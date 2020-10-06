@@ -67,6 +67,8 @@ void core::OCT_reverse(octet *w)
     } 
 }
 
+//#define PUT_IN_SPACES
+
 /* SU= 16 */
 void core::OCT_output_string(octet *w)
 {
@@ -78,10 +80,18 @@ void core::OCT_output_string(octet *w)
         ch = w->val[i];
 #ifdef CORE_ARDUINO
         char my_data[3];
+#ifdef PUT_IN_SPACES
+        sprintf(my_data, "%c ", ch);
+#else
         sprintf(my_data, "%c", ch);
+#endif
         Serial.print(my_data);
 #else
+#ifdef PUT_IN_SPACES
+        printf("%c ", ch);
+#else
         printf("%c", ch);
+#endif
 #endif
     }
 }

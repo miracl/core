@@ -20,7 +20,7 @@
 /* CORE X.509 Functions */
 
 // To run test program, define HAS_MAIN
-// gcc -std=c99 x509.c  core.a -o x509.exe
+// g++ -O2 x509.cpp  core.a -o x509
 
 //#define HAS_MAIN
 
@@ -58,12 +58,12 @@
 
 // Supported Curves
 
-#define NIST256 0    /**< For the NIST 256-bit standard curve - WEIERSTRASS only */
-#define C25519 1     /**< Bernstein's Modulus 2^255-19 - EDWARDS or MONTGOMERY only */
-#define BRAINPOOL 2  /**< For Brainpool 256-bit curve - WEIERSTRASS only */
-#define ANSSI 3      /**< For French 256-bit standard curve - WEIERSTRASS only */
-#define NIST384 10   /**< For the NIST 384-bit standard curve - WEIERSTRASS only */
-#define NIST521 12   /**< For the NIST 521-bit standard curve - WEIERSTRASS only */
+#define USE_NIST256 0    /**< For the NIST 256-bit standard curve - WEIERSTRASS only */
+#define USE_C25519 1     /**< Bernstein's Modulus 2^255-19 - EDWARDS or MONTGOMERY only */
+#define USE_BRAINPOOL 2  /**< For Brainpool 256-bit curve - WEIERSTRASS only */
+#define USE_ANSSI 3      /**< For French 256-bit standard curve - WEIERSTRASS only */
+#define USE_NIST384 10   /**< For the NIST 384-bit standard curve - WEIERSTRASS only */
+#define USE_NIST521 12   /**< For the NIST 521-bit standard curve - WEIERSTRASS only */
 
 
 // Define some OIDs
@@ -358,9 +358,9 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
             sig->val[i++] = sc->val[j];
 
     }
-    if (ret.hash == H256) ret.curve = NIST256;
-    if (ret.hash == H384) ret.curve = NIST384;
-    if (ret.hash == H512) ret.curve = NIST521;
+    if (ret.hash == H256) ret.curve = USE_NIST256;
+    if (ret.hash == H384) ret.curve = USE_NIST384;
+    if (ret.hash == H512) ret.curve = USE_NIST521;
 
     return ret;
 }
@@ -477,10 +477,10 @@ pktype X509_extract_public_key(octet *c, octet *key)
         for (i = 0; j < fin; j++)
             KOID.val[i++] = c->val[j];
 
-        if (OCT_comp(&PRIME25519, &KOID)) ret.curve = C25519; /*****/
-        if (OCT_comp(&PRIME256V1, &KOID)) ret.curve = NIST256;
-        if (OCT_comp(&SECP384R1, &KOID)) ret.curve = NIST384;
-        if (OCT_comp(&SECP521R1, &KOID)) ret.curve = NIST521;
+        if (OCT_comp(&PRIME25519, &KOID)) ret.curve = USE_C25519; /*****/
+        if (OCT_comp(&PRIME256V1, &KOID)) ret.curve = USE_NIST256;
+        if (OCT_comp(&SECP384R1, &KOID)) ret.curve = USE_NIST384;
+        if (OCT_comp(&SECP521R1, &KOID)) ret.curve = USE_NIST521;
     }
 
     j = sj; // skip to actual Public Key
@@ -704,7 +704,7 @@ void print_date(char *des, octet *c, int index)
    are suppported by the library. Of course a more elaborate program could support
    muliple curves simultaneously */
 
-#define CHOICE NIST256
+#define CHOICE USE_NIST256
 
 
 
@@ -713,10 +713,10 @@ void print_date(char *des, octet *c, int index)
 // Sample Certs all created using OpenSSL - see http://blog.didierstevens.com/2008/12/30/howto-make-your-own-cert-with-openssl/
 // Note - SSL currently only supports NIST curves. Howevever version 1.1.0 of OpenSSL now supports C25519
 
-#if CHOICE==NIST256
+#if CHOICE==USE_NIST256
 
 #include "ecdh_NIST256.h"
-#include "rsa_2048.h"
+#include "rsa_RSA2048.h"
 
 // ** CA is RSA 2048-bit based - for use with NIST256 build of library - assumes use of SHA256 in Certs
 // RSA 2048 Self-Signed CA cert
@@ -736,10 +736,10 @@ char cert_b64[] = "MIICojCCAYoCAQMwDQYJKoZIhvcNAQELBQAwdDELMAkGA1UEBhMCSUUxEDAOB
 
 #endif
 
-#if CHOICE==NIST384
+#if CHOICE==USE_NIST384
 
 #include "ecdh_NIST384.h"
-#include "rsa_3072.h"
+#include "rsa_RSA3072.h"
 
 // ** CA is RSA 3072-bit based  - for use with NIST384 build of library - assumes use of SHA384 in Certs
 // RSA 3072 Self-Signed CA cert
@@ -759,10 +759,10 @@ char cert_b64[] = "MIIDCDCCAXACAQcwDQYJKoZIhvcNAQEMBQAwYjELMAkGA1UEBhMCSUUxEDAOB
 
 #endif
 
-#if CHOICE==NIST521
+#if CHOICE==USE_NIST521
 
 #include "ecdh_NIST521.h"
-#include "rsa_4096.h"
+#include "rsa_RSA4096.h"
 
 // ** CA is ECC 521 based - - for use with NIST521 build of library - assumes use of SHA512 in Certs
 // ECC 521 Self-Signed CA Cert
@@ -799,7 +799,7 @@ octet H = {0, sizeof(h), h};
 char hh[5000];
 octet HH = {0, sizeof(hh), hh};
 
-char hp[RFS_2048];
+char hp[RFS_RSA2048];
 octet HP = {0, sizeof(hp), hp};
 
 
@@ -807,7 +807,7 @@ int main()
 {
     int res, len, sha;
     int c, ic;
-    rsa_public_key_2048 PK;
+    RSA2048::rsa_public_key PK;
     pktype st, ca, pt;
 
     printf("First check signature on self-signed cert and extract CA public key\n");
@@ -857,11 +857,11 @@ int main()
     printf("Issuer Details\n");
     ic = X509_find_issuer(&H);
     c = X509_find_entity_property(&H, &ON, ic, &len);
-    print_out("owner=", &H, c, len);
+    print_out((char *)"owner=", &H, c, len);
     c = X509_find_entity_property(&H, &CN, ic, &len);
-    print_out("country=", &H, c, len);
+    print_out((char *)"country=", &H, c, len);
     c = X509_find_entity_property(&H, &EN, ic, &len);
-    print_out("email=", &H, c, len);
+    print_out((char *)"email=", &H, c, len);
     printf("\n");
 
     ca = X509_extract_public_key(&H, &CAKEY);
@@ -898,7 +898,7 @@ int main()
             printf("Curve is not supported\n");
             return 0;
         }
-        res = ECP_NIST256_PUBLIC_KEY_VALIDATE(1, &CAKEY);
+        res = NIST256::ECP_PUBLIC_KEY_VALIDATE(&CAKEY);
         if (res != 0)
         {
             printf("ECP Public Key is invalid!\n");
@@ -917,7 +917,7 @@ int main()
             return 0;
         }
 
-        if (ECP_NIST256_VP_DSA(sha, &CAKEY, &H, &R, &S) != 0)
+        if (NIST256::ECP_VP_DSA(sha, &CAKEY, &H, &R, &S) != 0)
         {
             printf("***ECDSA Verification Failed\n");
             return 0;
@@ -934,7 +934,7 @@ int main()
             return 0;
         }
         PK.e = 65537; // assuming this!
-        RSA_2048_fromOctet(PK.n, &CAKEY);
+        RSA2048::RSA_fromOctet(PK.n, &CAKEY);
 
         sha = 0;
 
@@ -946,9 +946,9 @@ int main()
             printf("Hash Function not supported\n");
             return 0;
         }
-        PKCS15(sha, &H, &HP);
+        RSA2048::PKCS15(sha, &H, &HP);
 
-        RSA_2048_ENCRYPT(&PK, &SIG, &HH);
+        RSA2048::RSA_ENCRYPT(&PK, &SIG, &HH);
 
         if (OCT_comp(&HP, &HH))
             printf("RSA Signature/Verification succeeded \n");
@@ -1002,18 +1002,18 @@ int main()
     printf("Subject Details\n");
     ic = X509_find_subject(&H);
     c = X509_find_entity_property(&H, &ON, ic, &len);
-    print_out("owner=", &H, c, len);
+    print_out((char *)"owner=", &H, c, len);
     c = X509_find_entity_property(&H, &CN, ic, &len);
-    print_out("country=", &H, c, len);
+    print_out((char *)"country=", &H, c, len);
     c = X509_find_entity_property(&H, &EN, ic, &len);
-    print_out("email=", &H, c, len);
+    print_out((char *)"email=", &H, c, len);
     printf("\n");
 
     ic = X509_find_validity(&H);
     c = X509_find_start_date(&H, ic);
-    print_date("start date= ", &H, c);
+    print_date((char *)"start date= ", &H, c);
     c = X509_find_expiry_date(&H, ic);
-    print_date("expiry date=", &H, c);
+    print_date((char *)"expiry date=", &H, c);
     printf("\n");
 
     pt = X509_extract_public_key(&H, &CERTKEY);
@@ -1042,7 +1042,7 @@ int main()
     if (ca.type == ECC)
     {
         printf("Checking CA's ECC Signature on Cert\n");
-        res = ECP_NIST256_PUBLIC_KEY_VALIDATE(1, &CAKEY);
+        res = NIST256::ECP_PUBLIC_KEY_VALIDATE(&CAKEY);
         if (res != 0)
             printf("ECP Public Key is invalid!\n");
         else printf("ECP Public Key is Valid\n");
@@ -1058,7 +1058,7 @@ int main()
             return 0;
         }
 
-        if (ECP_NIST256_VP_DSA(sha, &CAKEY, &H, &R, &S) != 0)
+        if (NIST256::ECP_VP_DSA(sha, &CAKEY, &H, &R, &S) != 0)
             printf("***ECDSA Verification Failed\n");
         else
             printf("ECDSA Signature/Verification succeeded \n");
@@ -1068,7 +1068,7 @@ int main()
     {
         printf("Checking CA's RSA Signature on Cert\n");
         PK.e = 65537; // assuming this!
-        RSA_2048_fromOctet(PK.n, &CAKEY);
+        RSA2048::RSA_fromOctet(PK.n, &CAKEY);
 
         sha = 0;
 
@@ -1080,9 +1080,9 @@ int main()
             printf("Hash Function not supported\n");
             return 0;
         }
-        PKCS15(sha, &H, &HP);
+        RSA2048::PKCS15(sha, &H, &HP);
 
-        RSA_2048_ENCRYPT(&PK, &SIG, &HH);
+        RSA_ENCRYPT(&PK, &SIG, &HH);
 
         if (OCT_comp(&HP, &HH))
             printf("RSA Signature/Verification succeeded \n");
