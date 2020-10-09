@@ -52,10 +52,10 @@ impl ECP8 {
         E.z.one();
         E.x.norm();
 
-        let mut rhs = ECP8::rhs(&E.x);
+        let rhs = ECP8::rhs(&E.x);
         let mut y2 = FP8::new_copy(&E.y);
         y2.sqr();
-        if !y2.equals(&mut rhs) {
+        if !y2.equals(&rhs) {
             E.inf();
         }
         return E;
@@ -147,20 +147,20 @@ impl ECP8 {
     }
 
     /* Test if P == Q */
-    pub fn equals(&mut self, Q: &mut ECP8) -> bool {
+    pub fn equals(&self, Q: &ECP8) -> bool {
         let mut a = FP8::new_copy(&self.x);
         let mut b = FP8::new_copy(&Q.x);
 
         a.mul(&Q.z);
         b.mul(&self.z);
-        if !a.equals(&mut b) {
+        if !a.equals(&b) {
             return false;
         }
         a.copy(&self.y);
         a.mul(&Q.z);
         b.copy(&Q.y);
         b.mul(&self.z);
-        if !a.equals(&mut b) {
+        if !a.equals(&b) {
             return false;
         }
 
@@ -172,8 +172,8 @@ impl ECP8 {
         if self.is_infinity() {
             return;
         }
-        let mut one = FP8::new_int(1);
-        if self.z.equals(&mut one) {
+        let one = FP8::new_int(1);
+        if self.z.equals(&one) {
             return;
         }
         self.z.inverse(None);

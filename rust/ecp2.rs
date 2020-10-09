@@ -51,10 +51,10 @@ impl ECP2 {
         E.z.one();
         E.x.norm();
 
-        let mut rhs = ECP2::rhs(&E.x);
+        let rhs = ECP2::rhs(&E.x);
         let mut y2 = FP2::new_copy(&E.y);
         y2.sqr();
-        if !y2.equals(&mut rhs) {
+        if !y2.equals(&rhs) {
             E.inf();
         }
         return E;
@@ -145,20 +145,20 @@ impl ECP2 {
     }
 
     /* Test if P == Q */
-    pub fn equals(&mut self, Q: &mut ECP2) -> bool {
+    pub fn equals(&self, Q: &ECP2) -> bool {
         let mut a = FP2::new_copy(&self.x);
         let mut b = FP2::new_copy(&Q.x);
 
         a.mul(&Q.z);
         b.mul(&self.z);
-        if !a.equals(&mut b) {
+        if !a.equals(&b) {
             return false;
         }
         a.copy(&self.y);
         a.mul(&Q.z);
         b.copy(&Q.y);
         b.mul(&self.z);
-        if !a.equals(&mut b) {
+        if !a.equals(&b) {
             return false;
         }
 
@@ -170,8 +170,8 @@ impl ECP2 {
         if self.is_infinity() {
             return;
         }
-        let mut one = FP2::new_int(1);
-        if self.z.equals(&mut one) {
+        let one = FP2::new_int(1);
+        if self.z.equals(&one) {
             return;
         }
         self.z.inverse(None);

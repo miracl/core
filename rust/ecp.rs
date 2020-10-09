@@ -83,7 +83,7 @@ impl ECP {
         E.y.bcopy(iy);
         E.z.one();
         E.x.norm();
-        let mut rhs = ECP::rhs(&E.x);
+        let rhs = ECP::rhs(&E.x);
         if CURVETYPE == MONTGOMERY {
             if rhs.qr(None) != 1 {
                 E.inf();
@@ -91,7 +91,7 @@ impl ECP {
         } else {
             let mut y2 = FP::new_copy(&E.y);
             y2.sqr();
-            if !y2.equals(&mut rhs) {
+            if !y2.equals(&rhs) {
                 E.inf();
             }
         }
@@ -287,14 +287,14 @@ impl ECP {
     }
 
     /* Test P == Q */
-    pub fn equals(&mut self, Q: &mut ECP) -> bool {
+    pub fn equals(&self, Q: &ECP) -> bool {
         let mut a = FP::new();
         let mut b = FP::new();
         a.copy(&self.x);
         a.mul(&Q.z);
         b.copy(&Q.x);
         b.mul(&self.z);
-        if !a.equals(&mut b) {
+        if !a.equals(&b) {
             return false;
         }
         if CURVETYPE != MONTGOMERY {
@@ -302,7 +302,7 @@ impl ECP {
             a.mul(&Q.z);
             b.copy(&Q.y);
             b.mul(&self.z);
-            if !a.equals(&mut b) {
+            if !a.equals(&b) {
                 return false;
             }
         }
@@ -314,8 +314,8 @@ impl ECP {
         if self.is_infinity() {
             return;
         }
-        let mut one = FP::new_int(1);
-        if self.z.equals(&mut one) {
+        let one = FP::new_int(1);
+        if self.z.equals(&one) {
             return;
         }
         self.z.inverse(None);
