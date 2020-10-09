@@ -1091,6 +1091,46 @@ void ZZZ::ECP_mul(ECP *P, BIG e)
 }
 
 #if CURVETYPE_ZZZ!=MONTGOMERY
+
+// Generic multi-multiplication, fixed 4-bit window, P=Sigma e_i*X_i
+void ZZZ::ECP_muln(ECP *P,int n,ECP X[],BIG e[])
+{
+    int i,j,k,nb;
+    BIG t,mt;
+    ECP S,R,B[16];
+    ECP_inf(P);
+
+    BIG_copy(mt,e[0]); BIG_norm(mt);
+    for (i=1;i<n;i++)
+    { // find biggest
+        BIG_copy(t,e[i]); BIG_norm(t);
+        k=BIG_comp(t,mt);
+        BIG_cmove(mt,t,(k+1)/2);
+    }
+    nb=(BIG_nbits(mt)+3)/4;
+    for (int i=nb-1;i>=0;i--)
+    { // Pippenger's algorithm
+        for (j=0;j<16;j++)
+            ECP_inf(&B[j]);
+        for (j=0;j<n;j++)
+        { 
+            BIG_copy(mt,e[j]); BIG_norm(mt);
+            BIG_shr(mt,4*i);
+            k=BIG_lastbits(mt,4);
+            ECP_add(&B[k],&X[j]);
+        }
+        ECP_inf(&R); ECP_inf(&S);
+        for (j=15;j>=1;j--)
+        {
+            ECP_add(&R,&B[j]);
+            ECP_add(&S,&R);
+        }
+        for (j=0;j<4;j++)
+            ECP_dbl(P);
+        ECP_add(P,&S);
+    }
+}
+
 /* Set P=eP+fQ double multiplication */
 /* constant time - as useful for GLV method in pairings */
 /* SU=456 */

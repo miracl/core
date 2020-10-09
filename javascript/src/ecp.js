@@ -1315,6 +1315,53 @@ var ECP = function(ctx) {
         return r;
     };
 
+// Generic multi-multiplication, fixed 4-bit window, P=Sigma e_i*X_i
+    ECP.muln = function(n,X,e) {
+        var B = [];
+        var P=new ECP();
+        var R=new ECP();
+        var S=new ECP();
+        var t=new ctx.BIG();
+        var mr=new ctx.BIG();
+
+        for (var i=0;i<16;i++) {
+            B[i]=new ECP();
+        }
+        var mt=new ctx.BIG(); mt.copy(e[0]); mt.norm();
+        for (var i=1;i<n;i++)
+        { // find biggest
+            t.copy(e[i]); t.norm();
+            var k=ctx.BIG.comp(t,mt);
+            mt.cmove(t,(k+1)>>1);
+        }
+        var nb=(mt.nbits()+3)>>2;
+        for (var i=nb-1;i>=0;i--)
+        {
+            for (var j=0;j<16;j++) {
+                B[j].inf();
+            }
+            for (var j=0;j<n;j++)
+            {    
+                mt.copy(e[j]); mt.norm();
+                mt.shr(4*i);
+                var k=mt.lastbits(4);
+                B[k].add(X[j]);
+            }
+            R.inf(); S.inf();
+            for (var j=15;j>=1;j--)
+            {
+                R.add(B[j]);
+                S.add(R);
+            }
+            for (var j=0;j<4;j++) {
+                P.dbl();
+            }
+            P.add(S);
+        }
+        return P;
+    };
+
+
 /* Hunt and Peck a BIG to a curve point
     ECP.hap2point = function(h) {
         var P = new ECP();

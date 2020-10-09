@@ -937,6 +937,47 @@ public struct ECP {
         return P;
     }
 
+// Generic multi-multiplication, fixed 4-bit window, P=Sigma e_i*X_i
+    static public func muln(_ n:Int,_ X:[ECP],_ e:[BIG]) -> ECP
+    {
+        var mt=BIG()    
+        var t=BIG()  
+        var P=ECP()
+        var S=ECP()
+        var R=ECP()
+        var B=[ECP]()
+        for _ in 0 ..< 16 {B.append(ECP())}
+
+        mt.copy(e[0]); mt.norm()
+        for i in 0 ..< n { // find biggest
+            t.copy(e[i]); t.norm()
+            let k=BIG.comp(t,mt)
+            mt.cmove(t,(k+1)/2)
+        }
+        let nb=(mt.nbits()+3)/4
+        for i in (0...nb-1).reversed() {
+            for j in 0 ..< 16 {
+                B[j].inf()
+            }
+            for j in 0 ..< n { 
+                mt.copy(e[j]); mt.norm()
+                mt.shr(UInt(i*4))
+                let k=mt.lastbits(4)
+                B[k].add(X[j])
+            }
+            R.inf(); S.inf()
+            for j in (0...15).reversed() {
+                R.add(B[j])
+                S.add(R)
+            }
+            for _ in 0 ..< 4 {
+                P.dbl()
+            }
+            P.add(S)
+        }
+        return P
+    }
+
     /* Return e.this+f.Q */
 
     public func mul2(_ e:BIG,_ Q:ECP,_ f:BIG) -> ECP

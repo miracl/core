@@ -1132,6 +1132,62 @@ impl ECP {
         return P;
     }
 
+// Generic multi-multiplication, fixed 4-bit window, P=Sigma e_i*X_i
+    pub fn muln(n: usize, X: &[ECP], e: &[BIG]) -> ECP {
+        let mut B: [ECP; 16] = [
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+            ECP::new(),
+        ];    
+        let mut mt = BIG::new();
+        let mut t = BIG::new();
+        let mut P = ECP::new();
+        let mut S = ECP::new();
+        let mut R = ECP::new();
+
+        mt.copy(&e[0]); mt.norm();
+        for i in 0..n { // find biggest
+            t.copy(&e[i]); t.norm();
+            let k=BIG::comp(&t,&mt);
+            mt.cmove(&t,(k+1)/2);
+        }
+        let nb=(mt.nbits()+3)/4;
+        for i in (0..nb).rev() { // Pippenger's algorithm
+            for j in 0..16 {
+                B[j].inf();
+            }
+            for j in 0..n { 
+                mt.copy(&e[j]); mt.norm();
+                mt.shr((i*4) as usize);
+                let k=mt.lastbits(4) as usize;
+                B[k].add(&X[j]);
+            }
+            R.inf(); S.inf();
+            for j in (0..16).rev() {
+                R.add(&B[j]);
+                S.add(&R);
+            }
+            for _ in 0..4 {
+                P.dbl();
+            }
+            P.add(&S);
+        }
+        return P;
+    }
+
     /* Return e.this+f.Q */
 
     pub fn mul2(&self, e: &BIG, Q: &ECP, f: &BIG) -> ECP {

@@ -267,6 +267,14 @@ var ECDH = function(ctx) {
                     res = this.ERROR;
                 } else {
                     P = new ctx.ECP();
+/*
+    var X=[]; X[0]=new ctx.ECP(); X[1]=new ctx.ECP();
+    var e=[]; e[0]=new ctx.BIG(); e[1]=new ctx.BIG();
+    X[0].copy(WP); X[1].copy(G);
+    e[0].copy(h2); e[1].copy(f);
+    P=ctx.ECP.muln(2,X,e);
+*/
+
                     P.copy(WP);
                     P = P.mul2(h2, G, f);
 

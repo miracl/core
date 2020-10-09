@@ -301,6 +301,15 @@ extern void ECP_mul(ECP *P, XXX::BIG b);
  */
 extern void ECP_mul2(ECP *P, ECP *Q, XXX::BIG e, XXX::BIG f);
 
+/**	@brief Calculates multi-multiplication P=Sigma e_i*X_i, side-channel resistant
+ *
+	@param P ECP instance, on exit = Sigma e_i*X_i
+    @param n Number of multiplications
+	@param X array of n ECPs
+	@param e array of n BIG multipliers
+ */
+extern void ECP_muln(ECP *P,int n,ECP X[],XXX::BIG e[]);
+
 /**	@brief Multiplies random point by co-factor
  *
 	@param Q ECP multiplied by co-factor

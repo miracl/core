@@ -332,6 +332,17 @@ extern void ECP_ZZZ_mul(ECP_ZZZ *P, BIG_XXX b);
 	@param f BIG number multiplier
  */
 extern void ECP_ZZZ_mul2(ECP_ZZZ *P, ECP_ZZZ *Q, BIG_XXX e, BIG_XXX f);
+
+/**	@brief Calculates multi-multiplication P=Sigma e_i*X_i, side-channel resistant
+ *
+	@param P ECP instance, on exit = Sigma e_i*X_i
+    @param n Number of multiplications
+	@param X array of n ECPs
+	@param e array of n BIG multipliers
+ */
+extern void ECP_ZZZ_muln(ECP_ZZZ *P,int n,ECP_ZZZ X[],BIG_XXX e[]);
+
+
 /**	@brief Get Group Generator from ROM
  *
 	@param G ECP instance

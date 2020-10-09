@@ -715,7 +715,7 @@ impl ECP8 {
     // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
     // Side channel attack secure
 
-    pub fn mul16(Q: &mut [ECP8], u: &[BIG]) -> ECP8 {
+    pub fn mul16(Q: &[ECP8], u: &[BIG]) -> ECP8 {
         let mut W = ECP8::new();
         let mut P = ECP8::new();
 
@@ -799,90 +799,90 @@ impl ECP8 {
         T1[0].copy(&Q[0]);
         W.copy(&T1[0]);
         T1[1].copy(&W);
-        T1[1].add(&mut Q[1]); // Q[0]+Q[1]
+        T1[1].add(&Q[1]); // Q[0]+Q[1]
         T1[2].copy(&W);
-        T1[2].add(&mut Q[2]);
+        T1[2].add(&Q[2]);
         W.copy(&T1[1]); // Q[0]+Q[2]
         T1[3].copy(&W);
-        T1[3].add(&mut Q[2]);
+        T1[3].add(&Q[2]);
         W.copy(&T1[0]); // Q[0]+Q[1]+Q[2]
         T1[4].copy(&W);
-        T1[4].add(&mut Q[3]);
+        T1[4].add(&Q[3]);
         W.copy(&T1[1]); // Q[0]+Q[3]
         T1[5].copy(&W);
-        T1[5].add(&mut Q[3]);
+        T1[5].add(&Q[3]);
         W.copy(&T1[2]); // Q[0]+Q[1]+Q[3]
         T1[6].copy(&W);
-        T1[6].add(&mut Q[3]);
+        T1[6].add(&Q[3]);
         W.copy(&T1[3]); // Q[0]+Q[2]+Q[3]
         T1[7].copy(&W);
-        T1[7].add(&mut Q[3]); // Q[0]+Q[1]+Q[2]+Q[3]
+        T1[7].add(&Q[3]); // Q[0]+Q[1]+Q[2]+Q[3]
 
         T2[0].copy(&Q[4]);
         W.copy(&T2[0]);
         T2[1].copy(&W);
-        T2[1].add(&mut Q[5]); // Q[0]+Q[1]
+        T2[1].add(&Q[5]); // Q[0]+Q[1]
         T2[2].copy(&W);
-        T2[2].add(&mut Q[6]);
+        T2[2].add(&Q[6]);
         W.copy(&T2[1]); // Q[0]+Q[2]
         T2[3].copy(&W);
-        T2[3].add(&mut Q[6]);
+        T2[3].add(&Q[6]);
         W.copy(&T2[0]); // Q[0]+Q[1]+Q[2]
         T2[4].copy(&W);
-        T2[4].add(&mut Q[7]);
+        T2[4].add(&Q[7]);
         W.copy(&T2[1]); // Q[0]+Q[3]
         T2[5].copy(&W);
-        T2[5].add(&mut Q[7]);
+        T2[5].add(&Q[7]);
         W.copy(&T2[2]); // Q[0]+Q[1]+Q[3]
         T2[6].copy(&W);
-        T2[6].add(&mut Q[7]);
+        T2[6].add(&Q[7]);
         W.copy(&T2[3]); // Q[0]+Q[2]+Q[3]
         T2[7].copy(&W);
-        T2[7].add(&mut Q[7]); // Q[0]+Q[1]+Q[2]+Q[3]
+        T2[7].add(&Q[7]); // Q[0]+Q[1]+Q[2]+Q[3]
 
         T3[0].copy(&Q[8]);
         W.copy(&T3[0]);
         T3[1].copy(&W);
-        T3[1].add(&mut Q[9]); // Q[0]+Q[1]
+        T3[1].add(&Q[9]); // Q[0]+Q[1]
         T3[2].copy(&W);
-        T3[2].add(&mut Q[10]);
+        T3[2].add(&Q[10]);
         W.copy(&T3[1]); // Q[0]+Q[2]
         T3[3].copy(&W);
-        T3[3].add(&mut Q[10]);
+        T3[3].add(&Q[10]);
         W.copy(&T3[0]); // Q[0]+Q[1]+Q[2]
         T3[4].copy(&W);
-        T3[4].add(&mut Q[11]);
+        T3[4].add(&Q[11]);
         W.copy(&T3[1]); // Q[0]+Q[3]
         T3[5].copy(&W);
-        T3[5].add(&mut Q[11]);
+        T3[5].add(&Q[11]);
         W.copy(&T3[2]); // Q[0]+Q[1]+Q[3]
         T3[6].copy(&W);
-        T3[6].add(&mut Q[11]);
+        T3[6].add(&Q[11]);
         W.copy(&T3[3]); // Q[0]+Q[2]+Q[3]
         T3[7].copy(&W);
-        T3[7].add(&mut Q[11]); // Q[0]+Q[1]+Q[2]+Q[3]
+        T3[7].add(&Q[11]); // Q[0]+Q[1]+Q[2]+Q[3]
 
         T4[0].copy(&Q[12]);
         W.copy(&T4[0]);
         T4[1].copy(&W);
-        T4[1].add(&mut Q[13]); // Q[0]+Q[1]
+        T4[1].add(&Q[13]); // Q[0]+Q[1]
         T4[2].copy(&W);
-        T4[2].add(&mut Q[14]);
+        T4[2].add(&Q[14]);
         W.copy(&T4[1]); // Q[0]+Q[2]
         T4[3].copy(&W);
-        T4[3].add(&mut Q[14]);
+        T4[3].add(&Q[14]);
         W.copy(&T4[0]); // Q[0]+Q[1]+Q[2]
         T4[4].copy(&W);
-        T4[4].add(&mut Q[15]);
+        T4[4].add(&Q[15]);
         W.copy(&T4[1]); // Q[0]+Q[3]
         T4[5].copy(&W);
-        T4[5].add(&mut Q[15]);
+        T4[5].add(&Q[15]);
         W.copy(&T4[2]); // Q[0]+Q[1]+Q[3]
         T4[6].copy(&W);
-        T4[6].add(&mut Q[15]);
+        T4[6].add(&Q[15]);
         W.copy(&T4[3]); // Q[0]+Q[2]+Q[3]
         T4[7].copy(&W);
-        T4[7].add(&mut Q[15]); // Q[0]+Q[1]+Q[2]+Q[3]
+        T4[7].add(&Q[15]); // Q[0]+Q[1]+Q[2]+Q[3]
 
         // Make it odd
         let pb1 = 1 - t[0].parity();
@@ -973,38 +973,38 @@ impl ECP8 {
         // Main loop
         P.selector(&T1, (2 * w1[nb - 1] + 1) as i32);
         W.selector(&T2, (2 * w2[nb - 1] + 1) as i32);
-        P.add(&mut W);
+        P.add(&W);
         W.selector(&T3, (2 * w3[nb - 1] + 1) as i32);
-        P.add(&mut W);
+        P.add(&W);
         W.selector(&T4, (2 * w4[nb - 1] + 1) as i32);
-        P.add(&mut W);
+        P.add(&W);
         for i in (0..nb - 1).rev() {
             P.dbl();
             W.selector(&T1, (2 * w1[i] + s1[i]) as i32);
-            P.add(&mut W);
+            P.add(&W);
             W.selector(&T2, (2 * w2[i] + s2[i]) as i32);
-            P.add(&mut W);
+            P.add(&W);
             W.selector(&T3, (2 * w3[i] + s3[i]) as i32);
-            P.add(&mut W);
+            P.add(&W);
             W.selector(&T4, (2 * w4[i] + s4[i]) as i32);
-            P.add(&mut W);
+            P.add(&W);
         }
 
         // apply correction
         W.copy(&P);
-        W.sub(&mut Q[0]);
+        W.sub(&Q[0]);
         P.cmove(&W, pb1);
 
         W.copy(&P);
-        W.sub(&mut Q[4]);
+        W.sub(&Q[4]);
         P.cmove(&W, pb2);
 
         W.copy(&P);
-        W.sub(&mut Q[8]);
+        W.sub(&Q[8]);
         P.cmove(&W, pb3);
 
         W.copy(&P);
-        W.sub(&mut Q[12]);
+        W.sub(&Q[12]);
         P.cmove(&W, pb4);
 
         P.affine();

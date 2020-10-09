@@ -1097,6 +1097,46 @@ func (E *ECP) Mul(e *BIG) *ECP {
 	return E.mul(e)
 }
 
+// Generic multi-multiplication, fixed 4-bit window, P=Sigma e_i*X_i
+func ECP_muln(n int, X []*ECP, e []*BIG )  *ECP {
+    P:=NewECP()
+    R:=NewECP()
+    S:=NewECP()
+	var B []*ECP
+	t := NewBIG()
+    for i:=0;i<16;i++ {
+		B = append(B,NewECP())
+    }
+    mt:=NewBIGcopy(e[0]); mt.norm();
+    for i:=1;i<n;i++ { // find biggest
+        t.copy(e[i]); t.norm()
+        k:=Comp(t,mt)
+        mt.cmove(t,(k+1)/2)
+    }
+    nb:=(mt.nbits()+3)/4
+    for i:=nb-1;i>=0;i-- {
+        for j:=0;j<16;j++ {
+            B[j].inf()
+        }
+        for j:=0;j<n;j++ { 
+            mt.copy(e[j]); mt.norm()
+            mt.shr(uint(i * 4))
+            k:=mt.lastbits(4)
+            B[k].Add(X[j])
+        }
+        R.inf(); S.inf()
+        for j:=15;j>=1;j-- {
+            R.Add(B[j])
+            S.Add(R)
+        }
+        for j:=0;j<4;j++ {
+            P.dbl()
+        }
+        P.Add(S)
+    }
+    return P
+}
+
 /* Return e.this+f.Q */
 
 func (E *ECP) Mul2(e *BIG, Q *ECP, f *BIG) *ECP {

@@ -286,6 +286,17 @@ int ZZZ::ECP_VP_DSA(int hlen, octet *W, octet *F, octet *C, octet *D)
         if (!valid) res = ECDH_ERROR;
         else
         {
+/*
+            ECP VT[2];
+            BIG e[2];
+            ECP_copy(&VT[0],&WP);
+            ECP_copy(&VT[1],&G);
+            BIG_copy(e[0],h2);
+            BIG_copy(e[1],f);
+
+            ECP_muln(&WP,2,VT,e);
+*/
+
             ECP_mul2(&WP, &G, h2, f);
             if (ECP_isinf(&WP)) res = ECDH_ERROR;
             else

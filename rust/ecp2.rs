@@ -661,7 +661,7 @@ impl ECP2 {
     // Faz-Hernandez & Longa & Sanchez  https://eprint.iacr.org/2013/158.pdf
     // Side channel attack secure
 
-    pub fn mul4(Q: &mut [ECP2], u: &[BIG]) -> ECP2 {
+    pub fn mul4(Q: &[ECP2], u: &[BIG]) -> ECP2 {
         let mut W = ECP2::new();
         let mut P = ECP2::new();
 
@@ -696,24 +696,24 @@ impl ECP2 {
         T[0].copy(&Q[0]);
         W.copy(&T[0]);
         T[1].copy(&W);
-        T[1].add(&mut Q[1]); // Q[0]+Q[1]
+        T[1].add(&Q[1]); // Q[0]+Q[1]
         T[2].copy(&W);
-        T[2].add(&mut Q[2]);
+        T[2].add(&Q[2]);
         W.copy(&T[1]); // Q[0]+Q[2]
         T[3].copy(&W);
-        T[3].add(&mut Q[2]);
+        T[3].add(&Q[2]);
         W.copy(&T[0]); // Q[0]+Q[1]+Q[2]
         T[4].copy(&W);
-        T[4].add(&mut Q[3]);
+        T[4].add(&Q[3]);
         W.copy(&T[1]); // Q[0]+Q[3]
         T[5].copy(&W);
-        T[5].add(&mut Q[3]);
+        T[5].add(&Q[3]);
         W.copy(&T[2]); // Q[0]+Q[1]+Q[3]
         T[6].copy(&W);
-        T[6].add(&mut Q[3]);
+        T[6].add(&Q[3]);
         W.copy(&T[3]); // Q[0]+Q[2]+Q[3]
         T[7].copy(&W);
-        T[7].add(&mut Q[3]); // Q[0]+Q[1]+Q[2]+Q[3]
+        T[7].add(&Q[3]); // Q[0]+Q[1]+Q[2]+Q[3]
 
         // Make it odd
         let pb = 1 - t[0].parity();
@@ -755,12 +755,12 @@ impl ECP2 {
         for i in (0..nb - 1).rev() {
             P.dbl();
             W.selector(&T, (2 * w[i] + s[i]) as i32);
-            P.add(&mut W);
+            P.add(&W);
         }
 
         // apply correction
         W.copy(&P);
-        W.sub(&mut Q[0]);
+        W.sub(&Q[0]);
         P.cmove(&W, pb);
 
         return P;

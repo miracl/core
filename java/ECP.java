@@ -914,6 +914,53 @@ public final class ECP {
 		return P;
 	}
 
+
+// Generic multi-multiplication, fixed 4-bit window, P=Sigma e_i*X_i
+
+    public ECP muln(int n,ECP X[],BIG e[]) {
+        ECP P=new ECP();
+        ECP R=new ECP();
+        ECP S=new ECP();
+		ECP[] B=new ECP[16];
+        BIG t=new BIG();
+
+        for (int i=0;i<16;i++) {
+            B[i]=new ECP();
+        }
+        BIG mt=new BIG(e[0]); mt.norm();
+        for (int i=1;i<n;i++)
+        { // find biggest
+            t.copy(e[i]); t.norm();
+            int k=BIG.comp(t,mt);
+            mt.cmove(t,(k+1)/2);
+        }
+        int nb=(mt.nbits()+3)/4;
+        for (int i=nb-1;i>=0;i--)
+        {
+            for (int j=0;j<16;j++) {
+                B[j].inf();
+            }
+            for (int j=0;j<n;j++)
+            { 
+                mt.copy(e[j]); mt.norm();
+                mt.shr(4*i);
+                int k=mt.lastbits(4);
+                B[k].add(X[j]);
+            }
+            R.inf(); S.inf();
+            for (int j=15;j>=1;j--)
+            {
+                R.add(B[j]);
+                S.add(R);
+            }
+            for (int j=0;j<4;j++) {
+                P.dbl();
+            }
+            P.add(S);
+        }
+        return P;
+    }
+
 /* Return e.this+f.Q */
 
 	public ECP mul2(BIG e,ECP Q,BIG f) {
