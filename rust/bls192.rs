@@ -115,7 +115,7 @@ pub fn key_pair_generate(ikm: &[u8], s: &mut [u8], w: &mut [u8]) -> isize {
     hmac::hkdf_expand(hmac::MC_SHA2,hlen,&mut okm,el,&prk[0 .. hlen],&len);
 
     let mut dx = DBIG::frombytes(&okm[0 .. el]);
-    let mut sc = dx.dmod(&r);
+    let sc = dx.dmod(&r);
     sc.tobytes(s);
 // SkToPk
     pair4::g2mul(&g, &sc).tobytes(w,true);  // true for public key compression

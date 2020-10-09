@@ -373,7 +373,7 @@ impl BIG {
     }
 
     /* convert this BIG to byte array */
-    pub fn tobytearray(&mut self, b: &mut [u8], n: usize) {
+    pub fn tobytearray(&self, b: &mut [u8], n: usize) {
         let mut c = BIG::new_copy(self);
         c.norm();
 
@@ -393,7 +393,7 @@ impl BIG {
         return m;
     }
 
-    pub fn tobytes(&mut self, b: &mut [u8]) {
+    pub fn tobytes(&self, b: &mut [u8]) {
         self.tobytearray(b, 0)
     }
 
