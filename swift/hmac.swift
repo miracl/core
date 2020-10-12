@@ -30,6 +30,9 @@ public struct HMAC
 {
     static public let MC_SHA2=2
     static public let MC_SHA3=3
+    static public let SHA256=32
+    static public let SHA384=48
+    static public let SHA512=64
 
     static func ceil(_ a: Int,_ b:Int) -> Int {
         return (((a)-1)/(b)+1)
@@ -337,6 +340,313 @@ public struct HMAC
             }
         }     
         return OKM
+    }
+
+    /* Mask Generation Function */
+
+    static func MGF1(_ sha: Int,_ Z: [UInt8],_ olen:Int,_ K:inout [UInt8])
+    {
+        let hlen=sha
+
+        var k=0;
+        for i in 0 ..< K.count {K[i]=0}
+
+        var cthreshold=Int32(olen/hlen); if (olen%hlen != 0) {cthreshold += 1}
+        for counter:Int32 in 0 ..< cthreshold
+        {
+            let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,0,0,Z,counter,nil)
+
+            if (k+hlen>olen) {for i in 0 ..< olen%hlen {K[k]=B[i]; k+=1}}
+            else {for i in 0 ..< hlen {K[k]=B[i]; k+=1}}
+        }
+    }
+
+    static func MGF1XOR(_ sha: Int,_ Z: [UInt8],_ olen:Int,_ K:inout [UInt8])
+    {
+        let hlen=sha
+
+        var k=0;
+
+        var cthreshold=Int32(olen/hlen); if (olen%hlen != 0) {cthreshold += 1}
+        for counter:Int32 in 0 ..< cthreshold
+        {
+            let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,0,0,Z,counter,nil)
+
+            if (k+hlen>olen) {for i in 0 ..< olen%hlen {K[k] ^= B[i]; k+=1}}
+            else {for i in 0 ..< hlen {K[k] ^= B[i]; k+=1}}
+        }
+    }
+
+    static let SHA256ID:[UInt8]=[0x30,0x31,0x30,0x0d,0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x01,0x05,0x00,0x04,0x20]
+    static let SHA384ID:[UInt8]=[0x30,0x41,0x30,0x0d,0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x02,0x05,0x00,0x04,0x30]
+    static let SHA512ID:[UInt8]=[0x30,0x51,0x30,0x0d,0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x03,0x05,0x00,0x04,0x40]
+
+    /* PKCS 1.5 padding of a message to be signed */
+    @discardableResult static public func PKCS15(_ sha:Int,_ m:[UInt8],_ w:inout [UInt8],_ RFS:Int)->Bool
+    {
+        let hlen=sha
+        let olen=RFS
+        let idlen=19;
+
+        if olen<idlen+hlen+10 {return false}
+        let H=HMAC.SPhashit(HMAC.MC_SHA2,sha,m)
+
+        for i in 0 ..< w.count {w[i]=0}
+
+        w[0]=0
+        w[1]=1
+        var i=2
+        var j=0
+
+        while j<olen-idlen-hlen-3
+        {
+            w[i]=0xff
+            i+=1; j+=1
+        }
+        w[i]=0; i+=1;
+
+        if hlen==HMAC.SHA256
+        {
+            for j in 0 ..< idlen {w[i]=SHA256ID[j]; i+=1}
+        }
+        if hlen==HMAC.SHA384
+        {
+            for j in 0 ..< idlen {w[i]=SHA384ID[j]; i+=1}
+        }
+        if hlen==HMAC.SHA512
+        {
+            for j in 0 ..< idlen {w[i]=SHA512ID[j]; i+=1}
+        }
+
+        for j in 0 ..< hlen {w[i]=H[j];i+=1}
+
+        return true
+    }
+
+
+    static public func PSS_ENCODE(_ sha:Int,_ m:[UInt8],_ rng: inout RAND,_ RFS:Int) -> [UInt8]
+    {
+        let emlen=RFS
+        let embits=8*emlen-1
+        let hlen=sha
+        var SALT=[UInt8](repeating: 0,count: hlen)
+        for i in 0 ..< hlen {SALT[i]=rng.getByte()}
+        var H=HMAC.SPhashit(HMAC.MC_SHA2,sha,m)
+        let mask=(0xff as UInt8)>>(8*emlen-embits)
+
+        if emlen < hlen + hlen +  2  {
+            return [UInt8]()
+        }
+        var MD=[UInt8](repeating: 0,count: 8+hlen+hlen)
+        for i in 0 ..< 8 {
+            MD[i]=0
+        }
+        for i in 0 ..< hlen {
+            MD[8+i]=H[i];
+        }
+        for i in 0 ..< hlen {
+            MD[8+hlen+i]=SALT[i]
+        }
+        H=HMAC.SPhashit(HMAC.MC_SHA2,sha,MD)
+        var f=[UInt8](repeating: 0,count: RFS)
+        for i in 0 ..< emlen-hlen-hlen-2 {
+            f[i]=0
+        }
+        f[emlen-hlen-hlen-2]=0x01
+        for i in 0 ..< hlen {
+            f[emlen+i-hlen-hlen-1]=SALT[i]
+        }
+        HMAC.MGF1XOR(sha,H,emlen-hlen-1,&f);
+        f[0]&=mask;
+        for i in 0 ..< hlen {
+            f[emlen+i-hlen-1]=H[i]
+        }
+        f[emlen-1]=0xbc as UInt8
+        return f
+    }
+
+    static public func PSS_VERIFY(_ sha:Int,_ m:[UInt8],_ f:[UInt8]) -> Bool
+    {
+        let emlen=f.count
+        let embits=8*emlen-1
+        let hlen=sha
+        var SALT=[UInt8](repeating: 0,count: hlen)
+        let mask=(0xff as UInt8)>>(8*emlen-embits)
+
+        var HMASK=HMAC.SPhashit(HMAC.MC_SHA2,sha,m)
+        if emlen < hlen + hlen +  2  {
+            return false
+        }
+        if f[emlen-1] != 0xbc as UInt8 {
+            return false
+        }
+        if f[0]&(~mask) != 0 {
+            return false
+        }
+        var DB=[UInt8](repeating: 0,count: emlen-hlen-1)
+        for i in 0 ..< emlen-hlen-1 {
+            DB[i]=f[i]
+        }
+        var H=[UInt8](repeating: 0,count: hlen)
+        for i in 0 ..< hlen {
+            H[i]=f[emlen+i-hlen-1]
+        }
+
+        HMAC.MGF1XOR(sha,H,emlen-hlen-1,&DB)
+        DB[0] &= mask
+
+        var k = 0 as UInt8
+        for i in 0 ..< emlen-hlen-hlen-2 {
+            k |= DB[i]
+        }
+        if k != 0 {
+            return false
+        }
+        if DB[emlen-hlen-hlen-2] != 0x01 {
+            return false
+        }
+        for i in 0 ..< hlen {
+            SALT[i]=DB[emlen+i-hlen-hlen-1]
+        }
+        var MD=[UInt8](repeating: 0,count: 8+hlen+hlen)
+        for i in 0 ..< 8 {
+            MD[i]=0
+        }
+        for i in 0 ..< hlen {
+            MD[8+i]=HMASK[i]
+        }
+        for i in 0 ..< hlen {
+            MD[8+hlen+i]=SALT[i]
+        } 
+        HMASK=HMAC.SPhashit(HMAC.MC_SHA2,sha,MD)  
+        
+        k=0
+        for i in 0 ..< hlen {
+            k |= (H[i]-HMASK[i])
+        }
+        if k != 0 {
+            return false;
+        }
+        return true
+    }
+
+    /* OAEP Message Encoding for Encryption */
+    static public func OAEP_ENCODE(_ sha:Int,_ m:[UInt8],_ rng: inout RAND,_ p:[UInt8]?,_ RFS:Int) -> [UInt8]
+    {
+        let olen=RFS-1
+        let mlen=m.count
+        var f=[UInt8](repeating: 0,count: RFS)
+
+        let hlen=sha
+        var SEED=[UInt8](repeating: 0,count: hlen)
+        let seedlen=hlen
+        if (mlen>olen-hlen-seedlen-1) {return [UInt8]()}
+
+        var DBMASK=[UInt8](repeating: 0,count: olen-seedlen)
+
+        let h=HMAC.SPhashit(HMAC.MC_SHA2,sha,p)
+
+        for i in 0 ..< hlen {f[i]=h[i]}
+
+        let slen=olen-mlen-hlen-seedlen-1
+
+        for i in 0 ..< slen {f[hlen+i]=0}
+        f[hlen+slen]=1
+        for i in 0 ..< mlen {f[hlen+slen+1+i]=m[i]}
+
+        for i in 0 ..< seedlen {SEED[i]=rng.getByte()}
+        HMAC.MGF1(sha,SEED,olen-seedlen,&DBMASK)
+
+        for i in 0 ..< olen-seedlen {DBMASK[i]^=f[i]}
+        HMAC.MGF1(sha,DBMASK,seedlen,&f)
+
+        for i in 0 ..< seedlen {f[i]^=SEED[i]}
+
+        for i in 0 ..< olen-seedlen {f[i+seedlen]=DBMASK[i]}
+
+    /* pad to length RFS */
+        let d:Int=1;
+        for i in (d...RFS-1).reversed()
+            {f[i]=f[i-d]}
+        for i in 0...d-1
+            {f[i]=0}
+
+        return f;
+    }
+
+    /* OAEP Message Decoding for Decryption */
+    static public func OAEP_DECODE(_ sha: Int,_ p: [UInt8]?,_ f:inout [UInt8],_ RFS:Int) -> [UInt8]
+    {
+        let olen=RFS-1
+        var k:Int
+        let hlen=sha
+        var SEED=[UInt8](repeating: 0,count: hlen)
+        let seedlen=hlen
+        var CHASH=[UInt8](repeating: 0,count: hlen)
+
+        if olen<seedlen+hlen+1 {return [UInt8()]}
+        var DBMASK=[UInt8](repeating: 0,count: olen-seedlen)
+        for i in 0 ..< olen-seedlen {DBMASK[i]=0}
+
+        if (f.count<RFS)
+        {
+            let d=RFS-f.count;
+            for i in (d...RFS-1).reversed()
+                {f[i]=f[i-d]}
+            for i in 0...d-1
+                {f[i]=0}
+
+        }
+
+        let h=HMAC.SPhashit(HMAC.MC_SHA2,sha,p)
+
+        for i in 0 ..< hlen {CHASH[i]=h[i]}
+
+        let x=f[0];
+
+        for i in seedlen ..< olen
+            {DBMASK[i-seedlen]=f[i+1]}
+
+        HMAC.MGF1(sha,DBMASK,seedlen,&SEED);
+        for i in 0 ..< seedlen {SEED[i]^=f[i+1]}
+        HMAC.MGF1(sha,SEED,olen-seedlen,&f);
+        for i in 0 ..< olen-seedlen {DBMASK[i]^=f[i]}
+
+        var comp=true;
+        for i in 0 ..< hlen
+        {
+            if (CHASH[i] != DBMASK[i]) {comp=false}
+        }
+
+        for i in 0 ..< olen-seedlen-hlen
+        {DBMASK[i]=DBMASK[i+hlen]}
+
+        for i in 0 ..< hlen
+            {SEED[i]=0;CHASH[i]=0;}
+
+        k=0
+        while (true)
+        {
+            if (k>=olen-seedlen-hlen) {return [UInt8]()}
+            if (DBMASK[k] != 0) {break}
+            k+=1
+        }
+
+        let t=DBMASK[k];
+        if (!comp || x != 0 || t != 0x01)
+        {
+            for i in 0 ..< olen-seedlen {DBMASK[i]=0}
+            return [UInt8]()
+        }
+
+        var r=[UInt8](repeating: 0,count: olen-seedlen-hlen-k-1)
+
+        for i in 0 ..< olen-seedlen-hlen-k-1
+            {r[i]=DBMASK[i+k+1]}
+
+        for i in 0 ..< olen-seedlen {DBMASK[i]=0}
+
+        return r;
     }
 }
 

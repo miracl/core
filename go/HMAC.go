@@ -406,6 +406,393 @@ func XMD_Expand(hash int,hlen int,olen int,DST []byte,MSG []byte) []byte {
 }
 
 
+/* Mask Generation Function */
+
+func MGF1(sha int, Z []byte, olen int, K []byte) {
+	hlen := sha
+
+	var k int = 0
+	for i := 0; i < len(K); i++ {
+		K[i] = 0
+	}
+
+	cthreshold := olen / hlen
+	if olen%hlen != 0 {
+		cthreshold++
+	}
+	for counter := 0; counter < cthreshold; counter++ {
+		B := GPhashit(MC_SHA2,sha,0,0,Z,int32(counter),nil)
+		//B := hashit(sha, Z, counter)
+
+		if k+hlen > olen {
+			for i := 0; i < olen%hlen; i++ {
+				K[k] = B[i]
+				k++
+			}
+		} else {
+			for i := 0; i < hlen; i++ {
+				K[k] = B[i]
+				k++
+			}
+		}
+	}
+}
+
+
+func MGF1XOR(sha int, Z []byte, olen int, K []byte) {
+	hlen := sha
+
+	var k int = 0
+
+	cthreshold := olen / hlen
+	if olen%hlen != 0 {
+		cthreshold++
+	}
+	for counter := 0; counter < cthreshold; counter++ {
+		B := GPhashit(MC_SHA2,sha,0,0,Z,int32(counter),nil)
+		//B := hashit(sha, Z, counter)
+
+		if k+hlen > olen {
+			for i := 0; i < olen%hlen; i++ {
+				K[k] ^= B[i]
+				k++
+			}
+		} else {
+			for i := 0; i < hlen; i++ {
+				K[k] ^= B[i]
+				k++
+			}
+		}
+	}
+}
+
+/* SHAXXX identifier strings */
+var SHA256ID = [...]byte{0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20}
+var SHA384ID = [...]byte{0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00, 0x04, 0x30}
+var SHA512ID = [...]byte{0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40}
+
+func RSA_PKCS15(sha int, m []byte, w []byte, RFS int) bool {
+	olen := RFS
+	hlen := sha
+	idlen := 19
+
+	if olen < idlen+hlen+10 {
+		return false
+	}
+	H := SPhashit(MC_SHA2,sha,m)
+	//H := hashit(sha, m, -1)
+
+	for i := 0; i < len(w); i++ {
+		w[i] = 0
+	}
+	i := 0
+	w[i] = 0
+	i++
+	w[i] = 1
+	i++
+	for j := 0; j < olen-idlen-hlen-3; j++ {
+		w[i] = 0xff
+		i++
+	}
+	w[i] = 0
+	i++
+
+	if hlen == SHA256 {
+		for j := 0; j < idlen; j++ {
+			w[i] = SHA256ID[j]
+			i++
+		}
+	}
+	if hlen == SHA384 {
+		for j := 0; j < idlen; j++ {
+			w[i] = SHA384ID[j]
+			i++
+		}
+	}
+	if hlen == SHA512 {
+		for j := 0; j < idlen; j++ {
+			w[i] = SHA512ID[j]
+			i++
+		}
+	}
+	for j := 0; j < hlen; j++ {
+		w[i] = H[j]
+		i++
+	}
+
+	return true
+}
+
+func RSA_PSS_ENCODE(sha int, m []byte, rng *RAND, RFS int) []byte {
+	emlen:=RFS
+	embits:=8*emlen-1
+
+	hlen:=sha
+	SALT := make([]byte,hlen)
+	for i := 0; i < hlen; i++ {
+		SALT[i] = rng.GetByte()
+	}
+	mask:=byte(0xff>>(8*emlen-embits))
+
+	H := SPhashit(MC_SHA2,sha,m)
+	if emlen < hlen+hlen+2 {
+		return nil
+	}
+
+	MD := make([]byte,8+hlen+hlen)
+	for i:=0;i<8;i++ {
+		MD[i]=0;
+	}
+	for i:=0;i<hlen;i++ {
+		MD[8+i]=H[i]
+	}
+	for i:=0;i<hlen;i++ {
+		MD[8+hlen+i]=SALT[i]
+	}
+	H=SPhashit(MC_SHA2,sha,MD)
+	f:= make([]byte,RFS)
+	for i:=0;i<emlen-hlen-hlen-2;i++ {
+		f[i]=0;
+	}
+	f[emlen-hlen-hlen-2]=0x1
+	for i:=0;i<hlen;i++ {
+		f[emlen+i-hlen-hlen-1]=SALT[i]
+	}
+
+	MGF1XOR(sha,H,emlen-hlen-1,f)
+	f[0]&=mask;
+	for i:=0;i<hlen;i++ {
+		f[emlen+i-hlen-1]=H[i]
+	}
+	f[emlen-1]=byte(0xbc)
+	return f
+}
+
+func RSA_PSS_VERIFY(sha int, m []byte, f []byte) bool {
+	emlen:=len(f)
+	embits:=8*emlen-1
+	hlen:=sha
+	SALT := make([]byte,hlen)
+	mask:=byte(0xff>>(8*emlen-embits))
+
+	HMASK := SPhashit(MC_SHA2,sha,m)
+    if emlen < hlen + hlen +  2 {
+		return false
+	}
+    if (f[emlen-1]!=byte(0xbc)) {
+		return false
+	}
+    if (f[0]&(^mask))!=0 {
+		return false
+	}
+	DB:=make([]byte,emlen-hlen-1)
+	for i:=0;i<emlen-hlen-1;i++ {
+		DB[i]=f[i]
+	}
+	H:=make([]byte,hlen)
+	for i:=0;i<hlen;i++ {
+		H[i]=f[emlen+i-hlen-1]
+	}
+	MGF1XOR(sha,H,emlen-hlen-1,DB)
+	DB[0]&=mask;
+	k:=byte(0);
+	for i:=0;i<emlen-hlen-hlen-2;i++ {
+		k|=DB[i]
+	}
+	if k!=0 {
+		return false
+	}
+    if DB[emlen-hlen-hlen-2]!=0x01 {
+		return false
+	}
+
+	for i:=0;i<hlen;i++ {
+		SALT[i]=DB[emlen+i-hlen-hlen-1]
+	}
+	MD:=make([]byte,8+hlen+hlen)
+    for i:=0;i<8;i++ {
+        MD[i]=0
+	}
+    for i:=0;i<hlen;i++ {
+        MD[8+i]=HMASK[i]
+	}
+    for i:=0;i<hlen;i++ {
+        MD[8+hlen+i]=SALT[i]
+	}
+	HMASK=SPhashit(MC_SHA2,sha,MD)
+	k=0
+    for i:=0;i<hlen;i++ {
+		k|=(H[i]-HMASK[i])
+	}
+	if k!=0 {
+		return false
+	}
+	return true
+}
+
+/* OAEP Message Encoding for Encryption */
+func RSA_OAEP_ENCODE(sha int, m []byte, rng *RAND, p []byte, RFS int) []byte {
+	olen := RFS - 1
+	mlen := len(m)
+	//var f [RFS]byte
+	f := make([]byte,RFS)
+
+	hlen := sha
+
+	SEED := make([]byte, hlen)
+
+	seedlen := hlen
+	if mlen > olen-hlen-seedlen-1 {
+		return nil
+	}
+
+	DBMASK := make([]byte, olen-seedlen)
+
+	h := SPhashit(MC_SHA2,sha,p)
+	//h := hashit(sha, p, -1)
+
+	for i := 0; i < hlen; i++ {
+		f[i] = h[i]
+	}
+
+	slen := olen - mlen - hlen - seedlen - 1
+
+	for i := 0; i < slen; i++ {
+		f[hlen+i] = 0
+	}
+	f[hlen+slen] = 1
+	for i := 0; i < mlen; i++ {
+		f[hlen+slen+1+i] = m[i]
+	}
+
+	for i := 0; i < seedlen; i++ {
+		SEED[i] = rng.GetByte()
+	}
+	MGF1(sha, SEED, olen-seedlen, DBMASK)
+
+	for i := 0; i < olen-seedlen; i++ {
+		DBMASK[i] ^= f[i]
+	}
+
+	MGF1(sha, DBMASK, seedlen, f[:])
+
+	for i := 0; i < seedlen; i++ {
+		f[i] ^= SEED[i]
+	}
+
+	for i := 0; i < olen-seedlen; i++ {
+		f[i+seedlen] = DBMASK[i]
+	}
+
+	/* pad to length RFS */
+	d := 1
+	for i := RFS - 1; i >= d; i-- {
+		f[i] = f[i-d]
+	}
+	for i := d - 1; i >= 0; i-- {
+		f[i] = 0
+	}
+	return f[:]
+}
+
+/* OAEP Message Decoding for Decryption */
+func RSA_OAEP_DECODE(sha int, p []byte, f []byte, RFS int) []byte {
+	olen := RFS - 1
+
+	hlen := sha
+	SEED := make([]byte, hlen)
+	seedlen := hlen
+	CHASH := make([]byte, hlen)
+
+	if olen < seedlen+hlen+1 {
+		return nil
+	}
+	DBMASK := make([]byte, olen-seedlen)
+	for i := 0; i < olen-seedlen; i++ {
+		DBMASK[i] = 0
+	}
+
+	if len(f) < RFS {
+		d := RFS - len(f)
+		for i := RFS - 1; i >= d; i-- {
+			f[i] = f[i-d]
+		}
+		for i := d - 1; i >= 0; i-- {
+			f[i] = 0
+		}
+	}
+
+	h := SPhashit(MC_SHA2,sha,p)
+	//h := hashit(sha, p, -1)
+	for i := 0; i < hlen; i++ {
+		CHASH[i] = h[i]
+	}
+
+	x := f[0]
+
+	for i := seedlen; i < olen; i++ {
+		DBMASK[i-seedlen] = f[i+1]
+	}
+
+	MGF1(sha, DBMASK, seedlen, SEED)
+	for i := 0; i < seedlen; i++ {
+		SEED[i] ^= f[i+1]
+	}
+	MGF1(sha, SEED, olen-seedlen, f)
+	for i := 0; i < olen-seedlen; i++ {
+		DBMASK[i] ^= f[i]
+	}
+
+	comp := true
+	for i := 0; i < hlen; i++ {
+		if CHASH[i] != DBMASK[i] {
+			comp = false
+		}
+	}
+
+	for i := 0; i < olen-seedlen-hlen; i++ {
+		DBMASK[i] = DBMASK[i+hlen]
+	}
+
+	for i := 0; i < hlen; i++ {
+		SEED[i] = 0
+		CHASH[i] = 0
+	}
+
+	var k int
+	for k = 0; ; k++ {
+		if k >= olen-seedlen-hlen {
+			return nil
+		}
+		if DBMASK[k] != 0 {
+			break
+		}
+	}
+
+	t := DBMASK[k]
+	if !comp || x != 0 || t != 0x01 {
+		for i := 0; i < olen-seedlen; i++ {
+			DBMASK[i] = 0
+		}
+		return nil
+	}
+
+	var r = make([]byte, olen-seedlen-hlen-k-1)
+
+	for i := 0; i < olen-seedlen-hlen-k-1; i++ {
+		r[i] = DBMASK[i+k+1]
+	}
+
+	for i := 0; i < olen-seedlen; i++ {
+		DBMASK[i] = 0
+	}
+
+	return r
+}
+
+
+
+
 /*
 
 

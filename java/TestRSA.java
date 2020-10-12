@@ -23,6 +23,7 @@ package org.miracl.core.XXX;
 import java.util.Scanner;
 import junit.framework.TestCase;
 import org.miracl.core.RAND;
+import org.miracl.core.HMAC;
 
 public class TestRSA extends TestCase {
     private static void printBinary(byte[] array) {
@@ -65,7 +66,7 @@ public class TestRSA extends TestCase {
         System.out.print("Encrypting test string\n");
 
 
-        byte[] E = RSA.OAEP_ENCODE(sha, M, rng, null); /* OAEP encode message M to E  */
+        byte[] E = HMAC.OAEP_ENCODE(sha, M, rng, null, RFS); /* OAEP encode message M to E  */
 
         if (E.length == 0) {
             fail("Encoding failed");
@@ -76,13 +77,21 @@ public class TestRSA extends TestCase {
 
         System.out.print("Decrypting test string\n");
         RSA.DECRYPT(priv, C, ML);
-        byte[] MS = RSA.OAEP_DECODE(sha, null, ML); /* OAEP decode message  */
+        byte[] MS = HMAC.OAEP_DECODE(sha, null, ML, RFS); /* OAEP decode message  */
 
         message = new String(MS);
         System.out.print(message);
 
+        //System.out.print("M= 0x"); printBinary(M);
+        byte [] T=HMAC.PSS_ENCODE(sha,M,rng,RFS);
+        //System.out.print("T= 0x"); printBinary(T);
+        if (HMAC.PSS_VERIFY(sha,M,T))
+            System.out.println("PSS Encoding OK");
+        else
+            fail("PSS Encoding FAILED");
+
         System.out.println("Signing message");
-        RSA.PKCS15(sha, M, C);
+        HMAC.PKCS15(sha, M, C, RFS);
 
         RSA.DECRYPT(priv, C, S); /* create signature in S */
 

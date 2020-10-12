@@ -513,7 +513,7 @@ fn rsa_2048(mut rng: &mut RAND) {
     rsa::key_pair(&mut rng, 65537, &mut prv, &mut pbc);
 
     println!("Encrypting test string\n");
-    rsa::oaep_encode(sha, &message, &mut rng, None, &mut e); /* OAEP encode message M to E  */
+    hmac::oaep_encode(sha, &message, &mut rng, None, &mut e, RFS); /* OAEP encode message M to E  */
 
     rsa::encrypt(&pbc, &e, &mut c); /* encrypt encoded message */
     print!("Ciphertext= 0x");
@@ -521,13 +521,22 @@ fn rsa_2048(mut rng: &mut RAND) {
 
     println!("Decrypting test string");
     rsa::decrypt(&prv, &c, &mut ml);
-    let mlen = rsa::oaep_decode(sha, None, &mut ml); /* OAEP decode message  */
+    let mlen = hmac::oaep_decode(sha, None, &mut ml, RFS); /* OAEP decode message  */
 
     let mess = str::from_utf8(&ml[0..mlen]).unwrap();
     print!("{}", &mess);
 
+//    print!("M= 0x"); printbinary(&message);
+    hmac::pss_encode(sha,&message,&mut rng,&mut c,RFS);
+//    print!("T= 0x"); printbinary(&c);
+    if hmac::pss_verify(sha,&message,&c) {
+        println!("PSS Encoding OK");
+    } else {
+        println!("PSS Encoding FAILED");
+    }
+
     println!("Signing message");
-    rsa::pkcs15(sha, message, &mut c);
+    hmac::pkcs15(sha, message, &mut c, RFS);
 
     rsa::decrypt(&prv, &c, &mut s); /* create signature in S */
 

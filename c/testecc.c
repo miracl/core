@@ -520,7 +520,7 @@ int rsa_2048(csprng *RNG)
     printf("Encrypting test string\n");
     OCT_jstring(&M, (char *)"Hello World\n");
 
-    OAEP_ENCODE_2048(HASH_TYPE_RSA_2048, &M, RNG, NULL, &E); // OAEP encode message m to e
+    OAEP_ENCODE(HASH_TYPE_RSA_2048, &M, RNG, NULL, &E); // OAEP encode message m to e
 
     RSA_2048_ENCRYPT(&pub, &E, &C);   // encrypt encoded message
     printf("Ciphertext= ");
@@ -529,11 +529,18 @@ int rsa_2048(csprng *RNG)
     printf("Decrypting test string\n");
     RSA_2048_DECRYPT(&priv, &C, &ML); // ... and then decrypt it
 
-    OAEP_DECODE_2048(HASH_TYPE_RSA_2048, NULL, &ML);  // decode it
+    OAEP_DECODE(HASH_TYPE_RSA_2048, NULL, &ML);  // decode it
     OCT_output_string(&ML);
 
+    PSS_ENCODE(HASH_TYPE_RSA_2048, &M, RNG, &C);
+//    printf("T= 0x");OCT_output(&C);
+    if (PSS_VERIFY(HASH_TYPE_RSA_2048, &M, &C))
+        printf("PSS encoding OK\n");
+    else
+        printf("PSS Encoding FAILED\n");
+
     printf("Signing message\n");
-    PKCS15_2048(HASH_TYPE_RSA_2048, &M, &C);
+    PKCS15(HASH_TYPE_RSA_2048, &M, &C);
 
     RSA_2048_DECRYPT(&priv, &C, &S); // create signature in S
 

@@ -405,7 +405,7 @@ function RSA2048() {
 	var M=ctx.RSA.stringtobytes(message);
 	console.log("Encrypting test string ");
 
-	var E=ctx.RSA.OAEP_ENCODE(sha,M,rng,null); // OAEP encode message m to e
+	var E=ctx.HMAC.OAEP_ENCODE(sha,M,rng,null,ctx.RSA.RFS); // OAEP encode message m to e
 	console.log("Encoding= 0x" + ctx.RSA.bytestohex(E) );
 
 	console.log("Public key= 0x"+pub.n.toString() );
@@ -435,14 +435,19 @@ function RSA2048() {
 	if (cmp) console.log("Decryption is OK ");
 	else console.log("Decryption Failed ");
 
-	var MS=ctx.RSA.OAEP_DECODE(sha,null,ML); // OAEP decode message
+	var MS=ctx.HMAC.OAEP_DECODE(sha,null,ML,ctx.RSA.RFS); // OAEP decode message
 	console.log("Decoding= 0x" + ctx.RSA.bytestohex(MS) );
 
 	console.log("message= "+ctx.RSA.bytestostring(MS) );
 
+    var T=ctx.HMAC.PSS_ENCODE(sha,M,rng,ctx.RSA.RFS);
+    if (ctx.HMAC.PSS_VERIFY(sha,M,T))
+        console.log("PSS Encoding OK");
+    else
+        console.log("PSS Encoding FAILED");
 
 	console.log("Signing message ");
-	ctx.RSA.PKCS15(sha,M,C);
+	ctx.HMAC.PKCS15(sha,M,C,ctx.RSA.RFS);
 
 	ctx.RSA.DECRYPT(priv,C,S); // create signature in S
 

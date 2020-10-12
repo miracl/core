@@ -22,6 +22,7 @@ use crate::hash256::HASH256;
 use crate::hash384::HASH384;
 use crate::hash512::HASH512;
 use crate::sha3::SHA3;
+use crate::rand::RAND;
 
 pub const MC_SHA2: usize = 2;
 pub const MC_SHA3: usize = 3;
@@ -380,6 +381,394 @@ pub fn xmd_expand(hash: usize,hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],
         }
     }        
 
+}
+
+/* Mask Generation Function */
+
+pub fn mgf1(sha: usize, z: &[u8], olen: usize, k: &mut [u8]) {
+    let hlen = sha;
+
+    let mut j = 0;
+    for i in 0..k.len() {
+        k[i] = 0
+    }
+
+    let mut cthreshold = olen / hlen;
+    if olen % hlen != 0 {
+        cthreshold += 1
+    }
+    for counter in 0..cthreshold {
+        let mut b: [u8; 64] = [0; 64];
+        GPhashit(MC_SHA2,sha,&mut b,0,0,Some(z),counter as isize,None);
+        //hashit(sha, Some(z), counter as isize, &mut b);
+
+        if j + hlen > olen {
+            for i in 0..(olen % hlen) {
+                k[j] = b[i];
+                j += 1
+            }
+        } else {
+            for i in 0..hlen {
+                k[j] = b[i];
+                j += 1
+            }
+        }
+    }
+}
+
+pub fn mgf1xor(sha: usize, z: &[u8], olen: usize, k: &mut [u8]) {
+    let hlen = sha;
+    let mut j = 0;
+
+    let mut cthreshold = olen / hlen;
+    if olen % hlen != 0 {
+        cthreshold += 1
+    }
+    for counter in 0..cthreshold {
+        let mut b: [u8; 64] = [0; 64];
+        GPhashit(MC_SHA2,sha,&mut b,0,0,Some(z),counter as isize,None);
+
+        if j + hlen > olen {
+            for i in 0..(olen % hlen) {
+                k[j] ^= b[i];
+                j += 1
+            }
+        } else {
+            for i in 0..hlen {
+                k[j] ^= b[i];
+                j += 1
+            }
+        }
+    }
+}
+
+
+/* SHAXXX identifier strings */
+const SHA256ID: [u8; 19] = [
+    0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05,
+    0x00, 0x04, 0x20,
+];
+const SHA384ID: [u8; 19] = [
+    0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05,
+    0x00, 0x04, 0x30,
+];
+const SHA512ID: [u8; 19] = [
+    0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05,
+    0x00, 0x04, 0x40,
+];
+
+pub fn pkcs15(sha: usize, m: &[u8], w: &mut [u8],rfs: usize) -> bool {
+    let olen = rfs;
+    let hlen = sha;
+    let idlen = 19;
+    let mut b: [u8; 64] = [0; 64]; /* Not good */
+
+    if olen < idlen + hlen + 10 {
+        return false;
+    }
+    SPhashit(MC_SHA2,sha,&mut b,Some(m));
+    //hashit(sha, Some(m), -1, &mut b);
+
+    for i in 0..w.len() {
+        w[i] = 0
+    }
+    let mut i = 0;
+    w[i] = 0;
+    i += 1;
+    w[i] = 1;
+    i += 1;
+    for _ in 0..olen - idlen - hlen - 3 {
+        w[i] = 0xff;
+        i += 1
+    }
+    w[i] = 0;
+    i += 1;
+
+    if hlen == SHA256 {
+        for j in 0..idlen {
+            w[i] = SHA256ID[j];
+            i += 1
+        }
+    }
+    if hlen == SHA384 {
+        for j in 0..idlen {
+            w[i] = SHA384ID[j];
+            i += 1
+        }
+    }
+    if hlen == SHA512 {
+        for j in 0..idlen {
+            w[i] = SHA512ID[j];
+            i += 1
+        }
+    }
+    for j in 0..hlen {
+        w[i] = b[j];
+        i += 1
+    }
+
+    return true;
+}
+/*
+pub fn printbinary(array: &[u8]) {
+    for i in 0..array.len() {
+        print!("{:02X}", array[i])
+    }
+    println!("")
+}
+*/
+pub fn pss_encode(sha: usize, m: &[u8], rng: &mut RAND, f: &mut [u8], rfs: usize) -> bool {
+    let emlen=rfs;
+    let embits=8*emlen-1;
+    let hlen=sha;
+    let mut h:[u8;64]=[0;64];
+    let mut salt: [u8; 64] = [0; 64];
+    let mut md: [u8;136]=[0;136];
+    for i in 0..hlen {
+        salt[i] = rng.getbyte()
+    }
+    let mask=(0xff as u8)>> (8*emlen-embits);
+    SPhashit(MC_SHA2,sha,&mut h,Some(m));
+    if emlen<hlen+hlen+2 {
+        return false;
+    }
+    for i in 0..8 {
+        md[i]=0;
+    }
+    for i in 0..hlen {
+        md[8+i]=h[i];
+    }
+    for i in 0..hlen {
+        md[8+hlen+i]=salt[i];
+    }
+
+//    print!("MD= 0x"); printbinary(&md[0..8+hlen+hlen]);
+
+    SPhashit(MC_SHA2,sha,&mut h,Some(&md[0..8+hlen+hlen]));
+
+    for i in 0..emlen-hlen-hlen-2 {
+        f[i]=0;
+    }
+    f[emlen-hlen-hlen-2]=0x01;
+    for i in 0..hlen {
+        f[emlen+i-hlen-hlen-1]=salt[i];
+    }
+//    print!("f= 0x"); printbinary(&f[0..emlen-hlen-1]);
+    mgf1xor(sha,&h[0..hlen],emlen-hlen-1,f);
+    f[0]&=mask;
+    for i in 0..hlen {
+        f[emlen+i-hlen-1]=h[i];
+    }
+    f[emlen-1]=0xbc as u8;
+    return true;
+}
+
+pub fn pss_verify(sha: usize, m: &[u8],f: &[u8]) -> bool {
+    let emlen=f.len();
+    let embits=8*emlen-1;
+    let hlen=sha;
+    let mut db:[u8;512]=[0;512];
+    let mut hmask:[u8;64]=[0;64];
+    let mut h:[u8;64]=[0;64];
+    let mut salt: [u8; 64] = [0; 64];
+    let mut md: [u8;136]=[0;136];
+    let mask=(0xff as u8)>> (8*emlen-embits);
+
+    SPhashit(MC_SHA2,sha,&mut hmask,Some(m));
+    if emlen<hlen+hlen+2 {
+        return false;
+    }
+    if f[emlen-1]!=0xbc as u8 {
+        return false
+    }
+    if (f[0]&(!mask))!=0 {
+        return false
+    }
+    for i in 0..emlen-hlen-1 {
+        db[i]=f[i]
+    }
+    for i in 0..hlen {
+        h[i]=f[emlen+i-hlen-1]
+    }
+    mgf1xor(sha,&h[0..hlen],emlen-hlen-1,&mut db);
+    db[0]&=mask;
+
+    let mut k=0 as u8;
+    for i in 0..emlen-hlen-hlen-2 {
+        k|=db[i]
+    }
+    if k!=0 {
+        return false
+    }
+    if db[emlen-hlen-hlen-2]!=0x01 {
+        return false
+    }
+    for i in 0..hlen {
+        salt[i]=db[emlen+i-hlen-hlen-1]
+    }
+    for i in 0..8 {
+        md[i]=0
+    }
+    for i in 0..hlen {
+        md[8+i]=hmask[i]
+    }
+    for i in 0..hlen {
+        md[8+hlen+i]=salt[i]
+    }
+    SPhashit(MC_SHA2,sha,&mut hmask,Some(&md[0..8+hlen+hlen]));
+    k=0;
+    for i in 0..hlen {
+        k|=h[i]-hmask[i];
+    }
+    if k!=0 {
+        return false;
+    }
+    return true;
+}
+/* OAEP Message Encoding for Encryption */
+pub fn oaep_encode(sha: usize, m: &[u8], rng: &mut RAND, p: Option<&[u8]>, f: &mut [u8], rfs: usize) -> bool {
+    let olen = rfs - 1;
+    let mlen = m.len();
+
+    let hlen = sha;
+
+    let mut seed: [u8; 64] = [0; 64];
+
+    let seedlen = hlen;
+    if mlen > olen - hlen - seedlen - 1 {
+        return false;
+    }
+
+    let mut dbmask: [u8; 512] = [0; 512];
+
+    SPhashit(MC_SHA2,sha,f,p);
+    //hashit(sha, p, -1, f);
+    let slen = olen - mlen - hlen - seedlen - 1;
+
+    for i in 0..slen {
+        f[hlen + i] = 0
+    }
+    f[hlen + slen] = 1;
+    for i in 0..mlen {
+        f[hlen + slen + 1 + i] = m[i]
+    }
+
+    for i in 0..seedlen {
+        seed[i] = rng.getbyte()
+    }
+
+    mgf1(sha, &seed, olen - seedlen, &mut dbmask);
+
+    for i in 0..olen - seedlen {
+        dbmask[i] ^= f[i]
+    }
+
+    mgf1(sha, &dbmask[0..olen - seedlen], seedlen, f);
+
+    for i in 0..seedlen {
+        f[i] ^= seed[i]
+    }
+
+    for i in 0..olen - seedlen {
+        f[i + seedlen] = dbmask[i]
+    }
+
+    /* pad to length rfs */
+    let d = 1;
+    for i in (d..rfs).rev() {
+        f[i] = f[i - d];
+    }
+    for i in (0..d).rev() {
+        f[i] = 0;
+    }
+    return true;
+}
+
+/* OAEP Message Decoding for Decryption */
+pub fn oaep_decode(sha: usize, p: Option<&[u8]>, f: &mut [u8],rfs :usize) -> usize {
+    let olen = rfs - 1;
+
+    let hlen = sha;
+    let mut seed: [u8; 64] = [0; 64];
+    let seedlen = hlen;
+    let mut chash: [u8; 64] = [0; 64];
+
+    if olen < seedlen + hlen + 1 {
+        return 0;
+    }
+    let mut dbmask: [u8; 512] = [0; 512];
+
+    if f.len() < rfs {
+        let d = rfs - f.len();
+        for i in (d..rfs).rev() {
+            f[i] = f[i - d];
+        }
+        for i in (0..d).rev() {
+            f[i] = 0;
+        }
+    }
+    SPhashit(MC_SHA2,sha,&mut chash,p);
+    //hashit(sha, p, -1, &mut chash);
+
+    let x = f[0];
+
+    for i in seedlen..olen {
+        dbmask[i - seedlen] = f[i + 1];
+    }
+
+    mgf1(sha, &dbmask[0..olen - seedlen], seedlen, &mut seed);
+    for i in 0..seedlen {
+        seed[i] ^= f[i + 1]
+    }
+    mgf1(sha, &seed, olen - seedlen, f);
+    for i in 0..olen - seedlen {
+        dbmask[i] ^= f[i]
+    }
+
+    let mut comp = true;
+    for i in 0..hlen {
+        if chash[i] != dbmask[i] {
+            comp = false
+        }
+    }
+
+    for i in 0..olen - seedlen - hlen {
+        dbmask[i] = dbmask[i + hlen]
+    }
+
+    for i in 0..hlen {
+        seed[i] = 0;
+        chash[i] = 0
+    }
+
+    let mut k = 0;
+    loop {
+        if k >= olen - seedlen - hlen {
+            return 0;
+        }
+        if dbmask[k] != 0 {
+            break;
+        }
+        k += 1;
+    }
+
+    let t = dbmask[k];
+    if !comp || x != 0 || t != 0x01 {
+        for i in 0..olen - seedlen {
+            dbmask[i] = 0
+        }
+        return 0;
+    }
+
+    for i in 0..olen - seedlen - hlen - k - 1 {
+        f[i] = dbmask[i + k + 1];
+    }
+
+    for i in 0..olen - seedlen {
+        dbmask[i] = 0
+    }
+
+    return olen - seedlen - hlen - k - 1;
 }
 
 /*

@@ -62,14 +62,14 @@ public func TestRSA_2048(_ rng: inout RAND)
 
     let M=[UInt8](message.utf8)
     print("Encrypting test string\n");
-    let E=RSA.OAEP_ENCODE(RSA.HASH_TYPE,M,&rng,nil); /* OAEP encode message m to e  */
+    let E=HMAC.OAEP_ENCODE(RSA.HASH_TYPE,M,&rng,nil,RFS); /* OAEP encode message m to e  */
 
     RSA.ENCRYPT(pub,E,&C);     /* encrypt encoded message */
     print("Ciphertext= 0x", terminator: ""); printBinary(C)
 
     print("Decrypting test string\n");
     RSA.DECRYPT(priv,C,&ML)
-    let MS=RSA.OAEP_DECODE(RSA.HASH_TYPE,nil,&ML) /* OAEP encode message m to e  */
+    let MS=HMAC.OAEP_DECODE(RSA.HASH_TYPE,nil,&ML,RFS) /* OAEP encode message m to e  */
 
     message=""
     for i in 0 ..< MS.count
@@ -78,8 +78,16 @@ public func TestRSA_2048(_ rng: inout RAND)
     }
     print(message);
 
+    let T=HMAC.PSS_ENCODE(RSA.HASH_TYPE,M,&rng,RFS)
+    print("T= 0x",terminator: ""); printBinary(T)
+    if HMAC.PSS_VERIFY(RSA.HASH_TYPE,M,T) {
+        print("PSS Encoding OK\n");
+    } else {
+        print("PSS Encoding FAILED\n");
+    }
+
     print("Signing message")
-    RSA.PKCS15(RSA.HASH_TYPE,M,&C)
+    HMAC.PKCS15(RSA.HASH_TYPE,M,&C,RFS)
 
     RSA.DECRYPT(priv,C,&S); //  create signature in S
     print("Signature= 0x",terminator: ""); printBinary(S)

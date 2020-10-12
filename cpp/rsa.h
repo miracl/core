@@ -69,39 +69,6 @@ typedef struct
     XXX::BIG c[FFLEN_WWW / 2]; /**< 1/p mod q */
 } rsa_private_key;
 
-/* RSA Auxiliary Functions */
-
-#define MAX_RSA_BYTES 512 /**< Maximum of 4096 */
-
-
-/** @brief PKCS V1.5 padding of a message prior to RSA signature
- *
-    @param h is the hash type
-    @param M is the input message
-    @param W is the output encoding, ready for RSA signature
-    @return 1 if OK, else 0
- */
-extern int PKCS15(int h, octet *M, octet *W);
-/** @brief OAEP padding of a message prior to RSA encryption
- *
-    @param h is the hash type
-    @param M is the input message
-    @param R is a pointer to a cryptographically secure random number generator
-    @param P are input encoding parameter string (could be NULL)
-    @param F is the output encoding, ready for RSA encryption
-    @return 1 if OK, else 0
- */
-extern int  OAEP_ENCODE(int h, octet *M, csprng *R, octet *P, octet *F);
-/** @brief OAEP unpadding of a message after RSA decryption
- *
-    Unpadding is done in-place
-    @param h is the hash type
-    @param P are input encoding parameter string (could be NULL)
-    @param F is input padded message, unpadded on output
-    @return 1 if OK, else 0
- */
-extern int  OAEP_DECODE(int h, octet *P, octet *F);
-
 /** @brief RSA Key Pair Generator
  *
     @param R is a pointer to a cryptographically secure random number generator

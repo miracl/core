@@ -565,6 +565,56 @@ extern void XOF_Expand(int hlen,octet *E,int olen,octet *P,octet *S);
  */
 extern void XMD_Expand(int hash,int hlen,octet *E,int olen,octet *P,octet *S);
 
+
+/** @brief PKCS V1.5 padding of a message prior to RSA signature
+ *
+    @param h is the hash type
+    @param M is the input message
+    @param W is the output encoding, ready for RSA signature
+    @return 1 if OK, else 0
+ */
+extern int PKCS15(int h, octet *M, octet *W);
+
+/** @brief PSS padding of a message prior to RSA signature
+ *
+    @param h is the hash type
+    @param M is the input message
+    @param R is a pointer to a cryptographically secure random number generator
+    @param W is the output encoding, ready for RSA signature
+    @return 1 if OK, else 0
+ */
+extern int PSS_ENCODE(int h, octet *M, csprng *R, octet *W);
+
+/** @brief PSS verification
+ *
+    @param h is the hash type
+    @param M is the message
+    @param W is the message encoding
+    @return 1 if OK, else 0
+ */
+extern int PSS_VERIFY(int h, octet *M, octet *W);
+
+
+/** @brief OAEP padding of a message prior to RSA encryption
+ *
+    @param h is the hash type
+    @param M is the input message
+    @param R is a pointer to a cryptographically secure random number generator
+    @param P are input encoding parameter string (could be NULL)
+    @param F is the output encoding, ready for RSA encryption
+    @return 1 if OK, else 0
+ */
+extern int  OAEP_ENCODE(int h, octet *M, csprng *R, octet *P, octet *F);
+/** @brief OAEP unpadding of a message after RSA decryption
+ *
+    Unpadding is done in-place
+    @param h is the hash type
+    @param P are input encoding parameter string (could be NULL)
+    @param F is input padded message, unpadded on output
+    @return 1 if OK, else 0
+ */
+extern int  OAEP_DECODE(int h, octet *P, octet *F);
+
 /**	@brief Key Derivation Function - generates key K from inputs Z and P
  *
 	IEEE-1363 KDF2 Key Derivation Function. 

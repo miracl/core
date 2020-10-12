@@ -1093,6 +1093,7 @@ void ZZZ::ECP_mul(ECP *P, BIG e)
 #if CURVETYPE_ZZZ!=MONTGOMERY
 
 // Generic multi-multiplication, fixed 4-bit window, P=Sigma e_i*X_i
+// m point doublings
 void ZZZ::ECP_muln(ECP *P,int n,ECP X[],BIG e[])
 {
     int i,j,k,nb;

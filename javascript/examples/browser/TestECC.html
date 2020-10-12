@@ -462,7 +462,7 @@ function RSA2048() {
 	var M=ctx.RSA.stringtobytes(message);  
 	mywindow.document.write("Encrypting test string <br>");
 
-	var E=ctx.RSA.OAEP_ENCODE(sha,M,rng,null); // OAEP encode message m to e  
+	var E=ctx.HMAC.OAEP_ENCODE(sha,M,rng,null,ctx.RSA.RFS); // OAEP encode message m to e  
 	mywindow.document.write("Encoding= 0x" + ctx.RSA.bytestohex(E) + "<br>");  
 
 	mywindow.document.write("Public key= 0x"+pub.n.toString() + "<br>"); 
@@ -492,14 +492,23 @@ function RSA2048() {
 	if (cmp) mywindow.document.write("Decryption is OK <br>");
 	else mywindow.document.write("Decryption Failed <br>");
 
-	var MS=ctx.RSA.OAEP_DECODE(sha,null,ML); // OAEP decode message  
+	var MS=ctx.HMAC.OAEP_DECODE(sha,null,ML,ctx.RSA.RFS); // OAEP decode message  
 	mywindow.document.write("Decoding= 0x" + ctx.RSA.bytestohex(MS) + "<br>");  
 
 	mywindow.document.write("message= "+ctx.RSA.bytestostring(MS) + "<br>");  
 
 
+   var T=ctx.HMAC.PSS_ENCODE(sha,M,rng,ctx.RSA.RFS);
+   //mywindow.document.write("T= 0x"+ctx.RSA.bytestohex(T) + "<br>"); 
+
+   if (ctx.HMAC.PSS_VERIFY(sha,M,T))
+        mywindow.document.write("PSS Encoding OK <br>");
+    else
+        mywindow.document.write("PSS Encoding FAILED <br>");
+
+
 	mywindow.document.write("Signing message <br>");
-	ctx.RSA.PKCS15(sha,M,C);
+	ctx.HMAC.PKCS15(sha,M,C,ctx.RSA.RFS);
 
 	ctx.RSA.DECRYPT(priv,C,S); // create signature in S  
 

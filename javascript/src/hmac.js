@@ -368,6 +368,364 @@ var HMAC = function(ctx) {
             }
         
             return OKM;
+        },
+
+        SHA256: 32,
+        SHA384: 48,
+        SHA512: 64,
+
+        /* SHAXXX identifier strings */
+        SHA256ID: [0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20],
+        SHA384ID: [0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00, 0x04, 0x30],
+        SHA512ID: [0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40],
+
+        /* Mask Generation Function */
+        MGF1: function(sha, Z, olen, K) {
+            var hlen = sha,
+                B = [],
+                k = 0,
+                counter, cthreshold, i;
+
+            for (i = 0; i < K.length; i++) {
+                K[i] = 0;
+            }
+
+            cthreshold = Math.floor(olen / hlen);
+            if (olen % hlen !== 0) {
+                cthreshold++;
+            }
+
+            for (counter = 0; counter < cthreshold; counter++) {
+                B = this.GPhashit(this.MC_SHA2, sha,0,0,Z,counter,null);
+                //B = this.hashit(sha, Z, counter);
+
+                if (k + hlen > olen) {
+                    for (i = 0; i < olen % hlen; i++) {
+                        K[k++] = B[i];
+                    }
+                } else {
+                    for (i = 0; i < hlen; i++) {
+                        K[k++] = B[i];
+                    }
+                }
+            }
+        },
+
+        MGF1XOR: function(sha, Z, K) {
+            var hlen = sha,
+                B = [],
+                k = 0,
+                counter, cthreshold, i;
+            var olen=K.length;
+
+            cthreshold = Math.floor(olen / hlen);
+            if (olen % hlen !== 0) {
+                cthreshold++;
+            }
+
+            for (counter = 0; counter < cthreshold; counter++) {
+                B = this.GPhashit(this.MC_SHA2, sha,0,0,Z,counter,null);
+                //B = this.hashit(sha, Z, counter);
+
+                if (k + hlen > olen) {
+                    for (i = 0; i < olen % hlen; i++) {
+                        K[k++]^=B[i];
+                    }
+                } else {
+                    for (i = 0; i < hlen; i++) {
+                        K[k++]^=B[i];
+                    }
+                }
+            }
+        },
+
+        PKCS15: function(sha, m, w, RFS) {
+            var olen = RFS,
+                hlen = sha,
+                idlen = 19,
+                H, i, j;
+
+            if (olen < idlen + hlen + 10) {
+                return false;
+            }
+            H = this.SPhashit(this.MC_SHA2, sha, m);
+            //H = this.hashit(sha, m, -1);
+
+            for (i = 0; i < w.length; i++) {
+                w[i] = 0;
+            }
+
+            i = 0;
+            w[i++] = 0;
+            w[i++] = 1;
+            for (j = 0; j < olen - idlen - hlen - 3; j++) {
+                w[i++] = 0xFF;
+            }
+            w[i++] = 0;
+
+            if (hlen == this.SHA256) {
+                for (j = 0; j < idlen; j++) {
+                    w[i++] = this.SHA256ID[j];
+                }
+            } else if (hlen == this.SHA384) {
+                for (j = 0; j < idlen; j++) {
+                    w[i++] = this.SHA384ID[j];
+                }
+            } else if (hlen == this.SHA512) {
+                for (j = 0; j < idlen; j++) {
+                    w[i++] = this.SHA512ID[j];
+                }
+            }
+
+            for (j = 0; j < hlen; j++) {
+                w[i++] = H[j];
+            }
+
+            return true;
+        },
+
+        PSS_ENCODE: function(sha,m,rng,RFS) {
+            var emlen=RFS;
+            var embits=8*emlen-1;
+            var hlen=sha;
+            var SALT=[];
+            for (i = 0; i < hlen; i++) {
+                SALT[i] = rng.getByte();
+            }
+            var mask=(0xff)>>(8*emlen-embits);
+
+            var H = this.SPhashit(this.MC_SHA2, sha, m);
+
+            if (emlen < hlen+hlen+2) return null;
+
+            var MD=[];
+
+            for (var i=0;i<8;i++)
+                MD[i]=0;
+            for (var i=0;i<hlen;i++)
+                MD[8+i]=H[i];
+            for (var i=0;i<hlen;i++)
+                MD[8+hlen+i]=SALT[i];
+
+            H=this.SPhashit(this.MC_SHA2, sha, MD);
+
+            var f=[];
+            for (var i=0;i<emlen-hlen-hlen-2;i++)
+                f[i]=0;
+            f[emlen-hlen-hlen-2]=0x1;
+            for (var i=0;i<hlen;i++)
+                f[emlen+i-hlen-hlen-1]=SALT[i];
+            this.MGF1XOR(sha,H,f);
+            f[0]&=mask;
+            for (var i=0;i<hlen;i++)
+                f[emlen+i-hlen-1]=H[i];
+            f[emlen-1]=0xbc;
+            return f;
+        },
+
+        PSS_VERIFY: function(sha,m,f) {
+            var emlen=f.length;
+            var embits=8*emlen-1;
+            var hlen=sha;
+            var SALT=[];
+            var mask=(0xff)>>(8*emlen-embits);
+
+            var HMASK = this.SPhashit(this.MC_SHA2, sha, m);
+            if (emlen < hlen+hlen+2) return false;
+            if (f[emlen-1]!=0xbc) return false;
+            if ((f[0]&(~mask))!=0) return false;
+
+            var DB=[];
+            for (var i=0;i<emlen-hlen-1;i++)
+                DB[i]=f[i];
+            var H=[];
+            for (var i=0;i<hlen;i++)
+                H[i]=f[emlen+i-hlen-1];
+            this.MGF1XOR(sha,H,DB);
+            DB[0]&=mask;
+            var k=0;
+            for (var i=0;i<emlen-hlen-hlen-2;i++)
+                k|=DB[i];
+            if (k!=0) return false;
+            if (DB[emlen-hlen-hlen-2]!=0x01) return false;
+
+            for (var i=0;i<hlen;i++)
+                SALT[i]=DB[emlen+i-hlen-hlen-1];
+
+            var MD=[];
+            for (var i=0;i<8;i++)
+                MD[i]=0;
+            for (var i=0;i<hlen;i++)
+                MD[8+i]=HMASK[i];
+            for (var i=0;i<hlen;i++)
+                MD[8+hlen+i]=SALT[i];
+
+            HMASK=this.SPhashit(this.MC_SHA2, sha, MD);
+
+            k=0;
+            for (var i=0;i<hlen;i++)
+                k|=(H[i]-HMASK[i]);
+            if (k!=0) return false;
+                return true; 
+        },
+        /* OAEP Message Encoding for Encryption */
+        OAEP_ENCODE: function(sha, m, rng, p, RFS) {
+            var olen = RFS - 1,
+                mlen = m.length,
+                SEED = [],
+                DBMASK = [],
+                f = [],
+                hlen,
+                seedlen,
+                slen,
+                i, d, h;
+
+            seedlen = hlen = sha;
+
+            if (mlen > olen - hlen - seedlen - 1) {
+                return null;
+            }
+
+            h = this.SPhashit(this.MC_SHA2, sha, p);
+            //h = this.hashit(sha, p, -1);
+            for (i = 0; i < hlen; i++) {
+                f[i] = h[i];
+            }
+
+            slen = olen - mlen - hlen - seedlen - 1;
+
+            for (i = 0; i < slen; i++) {
+                f[hlen + i] = 0;
+            }
+            f[hlen + slen] = 1;
+            for (i = 0; i < mlen; i++) {
+                f[hlen + slen + 1 + i] = m[i];
+            }
+
+            for (i = 0; i < seedlen; i++) {
+                SEED[i] = rng.getByte();
+            }
+            this.MGF1(sha, SEED, olen - seedlen, DBMASK);
+
+            for (i = 0; i < olen - seedlen; i++) {
+                DBMASK[i] ^= f[i];
+            }
+            this.MGF1(sha, DBMASK, seedlen, f);
+
+            for (i = 0; i < seedlen; i++) {
+                f[i] ^= SEED[i];
+            }
+
+            for (i = 0; i < olen - seedlen; i++) {
+                f[i + seedlen] = DBMASK[i];
+            }
+
+            /* pad to length RFS */
+            d = 1;
+            for (i = RFS - 1; i >= d; i--) {
+                f[i] = f[i - d];
+            }
+            for (i = d - 1; i >= 0; i--) {
+                f[i] = 0;
+            }
+
+            return f;
+        },
+
+        /* OAEP Message Decoding for Decryption */
+        OAEP_DECODE: function(sha, p, f, RFS) {
+
+            var olen = RFS - 1,
+                SEED = [],
+                CHASH = [],
+                DBMASK = [],
+                comp,
+                hlen,
+                seedlen,
+                x, t, d, i, k, h, r;
+
+            seedlen = hlen = sha;
+            if (olen < seedlen + hlen + 1) {
+                return null;
+            }
+
+            for (i = 0; i < olen - seedlen; i++) {
+                DBMASK[i] = 0;
+            }
+
+            if (f.length < RFS) {
+                d = RFS - f.length;
+                for (i = RFS - 1; i >= d; i--) {
+                    f[i] = f[i - d];
+                }
+                for (i = d - 1; i >= 0; i--) {
+                    f[i] = 0;
+                }
+            }
+            h = this.SPhashit(this.MC_SHA2, sha, p);
+            //h = this.hashit(sha, p, -1);
+            for (i = 0; i < hlen; i++) {
+                CHASH[i] = h[i];
+            }
+
+            x = f[0];
+
+            for (i = seedlen; i < olen; i++) {
+                DBMASK[i - seedlen] = f[i + 1];
+            }
+
+            this.MGF1(sha, DBMASK, seedlen, SEED);
+            for (i = 0; i < seedlen; i++) {
+                SEED[i] ^= f[i + 1];
+            }
+            this.MGF1(sha, SEED, olen - seedlen, f);
+            for (i = 0; i < olen - seedlen; i++) {
+                DBMASK[i] ^= f[i];
+            }
+
+            comp = true;
+            for (i = 0; i < hlen; i++) {
+                if (CHASH[i] != DBMASK[i]) {
+                    comp = false;
+                }
+            }
+
+            for (i = 0; i < olen - seedlen - hlen; i++) {
+                DBMASK[i] = DBMASK[i + hlen];
+            }
+
+            for (i = 0; i < hlen; i++) {
+                SEED[i] = CHASH[i] = 0;
+            }
+
+            for (k = 0;; k++) {
+                if (k >= olen - seedlen - hlen) {
+                    return null;
+                }
+
+                if (DBMASK[k] !== 0) {
+                    break;
+                }
+            }
+
+            t = DBMASK[k];
+            if (!comp || x !== 0 || t != 0x01) {
+                for (i = 0; i < olen - seedlen; i++) {
+                    DBMASK[i] = 0;
+                }
+                return null;
+            }
+            r = [];
+
+            for (i = 0; i < olen - seedlen - hlen - k - 1; i++) {
+                r[i] = DBMASK[i + k + 1];
+            }
+
+            for (i = 0; i < olen - seedlen; i++) {
+                DBMASK[i] = 0;
+            }
+
+            return r;
         }
     };
 

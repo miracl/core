@@ -542,6 +542,14 @@ int rsa_2048(csprng *RNG)
     printf("Decoded\n");
     OCT_output_string(&ML);
 
+
+    PSS_ENCODE(HASH_TYPE_RSA_RSA2048, &M, RNG, &C);
+    //printf("T= 0x");OCT_output(&C);
+    if (PSS_VERIFY(HASH_TYPE_RSA_RSA2048, &M, &C))
+        printf("PSS encoding OK\n");
+    else
+        printf("PSS Encoding FAILED\n");
+
     printf("Signing message\n");
     PKCS15(HASH_TYPE_RSA_RSA2048, &M, &C);
 
