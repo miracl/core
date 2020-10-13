@@ -1118,7 +1118,7 @@ void ZZZ::ECP_muln(ECP *P,int n,ECP X[],BIG e[])
             BIG_copy(mt,e[j]); BIG_norm(mt);
             BIG_shr(mt,4*i);
             k=BIG_lastbits(mt,4);
-            ECP_add(&B[k],&X[j]);
+            ECP_add(&B[k],&X[j]);  // side channel risky
         }
         ECP_inf(&R); ECP_inf(&S);
         for (j=15;j>=1;j--)

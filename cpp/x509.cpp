@@ -946,7 +946,7 @@ int main()
             printf("Hash Function not supported\n");
             return 0;
         }
-        RSA2048::PKCS15(sha, &H, &HP);
+        core::PKCS15(sha, &H, &HP);
 
         RSA2048::RSA_ENCRYPT(&PK, &SIG, &HH);
 
@@ -1080,7 +1080,7 @@ int main()
             printf("Hash Function not supported\n");
             return 0;
         }
-        RSA2048::PKCS15(sha, &H, &HP);
+        core::PKCS15(sha, &H, &HP);
 
         RSA_ENCRYPT(&PK, &SIG, &HH);
 
