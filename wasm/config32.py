@@ -992,6 +992,7 @@ os.system("emcc -O2 -c share.c -o share.bc")
 os.system("emcc -O2 -c aes.c -o aes.bc")
 os.system("emcc -O2 -c gcm.c -o gcm.bc")
 os.system("emcc -O2 -c newhope.c -o newhope.bc")
+os.system("emcc -O2 -c x509.c -o x509.bc")
 
 if sys.platform.startswith("win") :
     os.system("for %i in (*.bc) do @echo %~nxi >> f.list")

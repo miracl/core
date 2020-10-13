@@ -29,6 +29,34 @@
 #ifndef X509_H
 #define X509_H
 
+// Supported Encryption Methods
+
+#define X509_ECC 1
+#define X509_RSA 2
+
+// Supported Hash functions
+
+#define X509_H256 2
+#define X509_H384 3
+#define X509_H512 4
+
+// Supported Curves
+
+#define USE_NIST256 0    /**< For the NIST 256-bit standard curve - WEIERSTRASS only */
+#define USE_C25519 1     /**< Bernstein's Modulus 2^255-19 - EDWARDS or MONTGOMERY only */
+#define USE_BRAINPOOL 2  /**< For Brainpool 256-bit curve - WEIERSTRASS only */
+#define USE_ANSSI 3      /**< For French 256-bit standard curve - WEIERSTRASS only */
+#define USE_NIST384 10   /**< For the NIST 384-bit standard curve - WEIERSTRASS only */
+#define USE_NIST521 12   /**< For the NIST 521-bit standard curve - WEIERSTRASS only */
+
+extern octet X509_CN;
+extern octet X509_ON;
+extern octet X509_EN;
+extern octet X509_LN;
+extern octet X509_UN;
+extern octet X509_MN;
+extern octet X509_SN;
+
 /**
  * @brief Public key type
  */

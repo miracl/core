@@ -966,6 +966,7 @@ os.system("gcc -O3 -std=c99 -c share.c")
 os.system("gcc -O3 -std=c99 -c aes.c")
 os.system("gcc -O3 -std=c99 -c gcm.c")
 os.system("gcc -O3 -std=c99 -c newhope.c")
+os.system("gcc -O3 -std=c99 -c x509.c")
 
 if sys.platform.startswith("win") :
     os.system("for %i in (*.o) do @echo %~nxi >> f.list")

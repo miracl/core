@@ -987,6 +987,7 @@ os.system("g++ -O3 -c share.cpp")
 os.system("g++ -O3 -c aes.cpp")
 os.system("g++ -O3 -c gcm.cpp")
 os.system("g++ -O3 -c newhope.cpp")
+os.system("g++ -O3 -c x509.cpp")
 
 if sys.platform.startswith("win") :
     os.system("for %i in (*.o) do @echo %~nxi >> f.list")
