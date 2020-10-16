@@ -564,6 +564,23 @@ int X509_find_subject(octet *c)
     return j;
 }
 
+int X509_self_signed(octet *c)
+{
+    int i,m;
+    int ksub=X509_find_subject(c);
+    int kiss=X509_find_issuer(c);
+
+    int sublen=getalen(SEQ,c->val,ksub);
+    int isslen=getalen(SEQ,c->val,kiss);
+    if (isslen!=sublen) return 0;
+    ksub+=skip(sublen);
+    kiss+=skip(isslen);
+    for (i=m=0;i<sublen;i++)
+        m|=c->val[i+ksub] - c->val[i+kiss];
+    if (m!=0) return 0;
+    return 1;
+}
+
 // NOTE: When extracting cert information, we actually return just an index to the data inside the cert, and maybe its length
 // So no memory is assigned to store cert info. It is the callers responsibility to allocate such memory if required, and copy
 // cert information into it.

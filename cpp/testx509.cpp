@@ -215,7 +215,8 @@ int main()
         printf("Not supported by library\n");
         return 0;
     }
-    if (ca.type != st.type)
+    //if (ca.type != st.type)
+    if (!X509_self_signed(&H))
     {
         printf("Not self-signed\n");
     }

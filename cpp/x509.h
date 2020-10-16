@@ -116,6 +116,14 @@ extern int X509_find_validity(octet *c);
 	@return 0 on failure, or pointer to subject field in cert
 */
 extern int X509_find_subject(octet *c);
+
+/** @brief
+ *
+	@param c an X.509 certificate
+	@return true if self-signed, else false
+*/
+extern int X509_self_signed(octet *c);
+
 /** @brief
  *
 	@param c an X.509 certificate
