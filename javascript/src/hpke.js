@@ -36,7 +36,7 @@ var HPKE = function(ctx) {
         },
 
         LabeledExtract: function(SALT,SUITE_ID,label,IKM) {
-            var rfc="HPKE-05 ";
+            var rfc="HPKE-06";
             var RFC=ctx.ECDH.asciitobytes(rfc);
             var LABEL=ctx.ECDH.asciitobytes(label);
             var LIKM = [];
@@ -56,7 +56,7 @@ var HPKE = function(ctx) {
 
         LabeledExpand: function(PRK,SUITE_ID,label,INFO,L) {
             var AR = ctx.HMAC.inttobytes(L, 2);
-            var rfc="HPKE-05 ";
+            var rfc="HPKE-06";
             var RFC=ctx.ECDH.asciitobytes(rfc);
             var LABEL=ctx.ECDH.asciitobytes(label);
             var LINFO = [];
@@ -154,7 +154,7 @@ var HPKE = function(ctx) {
 		        this.reverse(pkR);
 		        this.reverse(DH);
 	        } else {
-	            ctx.ECDH.ECPSVDP_DH(skE, pkR, DH, 2);
+	            ctx.ECDH.ECPSVDP_DH(skE, pkR, DH, 0);
             }
             var k=0;
             for (var i=0;i<pkE.length;i++)
@@ -177,7 +177,7 @@ var HPKE = function(ctx) {
 		        this.reverse(pkE);
 		        this.reverse(DH);
 	        } else{ 
-                ctx.ECDH.ECPSVDP_DH(skR, pkE, DH, 2);
+                ctx.ECDH.ECPSVDP_DH(skR, pkE, DH, 0);
             }
 
             var k=0;
@@ -205,13 +205,13 @@ var HPKE = function(ctx) {
 		        this.reverse(DH);
 		        this.reverse(DH1);
 	        } else {
-	            ctx.ECDH.ECPSVDP_DH(skE, pkR, DH,2);
-	            ctx.ECDH.ECPSVDP_DH(skS, pkR, DH1,2);
+	            ctx.ECDH.ECPSVDP_DH(skE, pkR, DH,0);
+	            ctx.ECDH.ECPSVDP_DH(skS, pkR, DH1,0);
             }
 	        var ZZ = [];
-	        for (var i=0;i<pklen;i++) {
+	        for (var i=0;i<ctx.ECDH.EFS;i++) {
 		        ZZ[i] = DH[i];
-                ZZ[pklen+i]= DH1[i];
+                ZZ[ctx.ECDH.EFS+i]= DH1[i];
 	        }
 
 	        for (var i=0;i<pklen;i++) {
@@ -241,14 +241,14 @@ var HPKE = function(ctx) {
 		        this.reverse(DH);
 		        this.reverse(DH1);
 	        } else {
-	            ctx.ECDH.ECPSVDP_DH(skR, pkE, DH,2);
-	            ctx.ECDH.ECPSVDP_DH(skR, pkS, DH1,2);
+	            ctx.ECDH.ECPSVDP_DH(skR, pkE, DH,0);
+	            ctx.ECDH.ECPSVDP_DH(skR, pkS, DH1,0);
             }    
 
 	        var ZZ = [];
-	        for (var i=0;i<pklen;i++) {
+	        for (var i=0;i<ctx.ECDH.EFS;i++) {
 		        ZZ[i] = DH[i];
-                ZZ[pklen+i]= DH1[i];
+                ZZ[ctx.ECDH.EFS+i]= DH1[i];
 	        }
             
 	        for (var i=0;i<pklen;i++) {
@@ -293,13 +293,15 @@ var HPKE = function(ctx) {
             for (var i=0;i<ctx.ECP.HASH_TYPE;i++)
                 context[k++]=H[i];
 
-            H=this.LabeledExtract(null,SUITE_ID,"psk_hash",psk);
-            var secret=this.LabeledExtract(H,SUITE_ID,"secret",Z);
+            //H=this.LabeledExtract(null,SUITE_ID,"psk_hash",psk);
+            //var secret=this.LabeledExtract(H,SUITE_ID,"secret",Z);
+
+            var secret=this.LabeledExtract(Z,SUITE_ID,"secret",psk);
 
             var ex=this.LabeledExpand(secret,SUITE_ID,"key",context,ctx.ECP.AESKEY);
             for (var i=0;i<ex.length;i++) key[i]=ex[i];
 
-            ex=this.LabeledExpand(secret,SUITE_ID,"nonce",context,12);
+            ex=this.LabeledExpand(secret,SUITE_ID,"base_nonce",context,12);
             for (var i=0;i<ex.length;i++) nonce[i]=ex[i];
 
             if (exp_secret!=null)

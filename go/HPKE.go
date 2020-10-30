@@ -37,7 +37,7 @@ func reverse(X []byte) {
 
 
 func labeledExtract(SALT []byte,SUITE_ID []byte,label string,IKM []byte) []byte {
-	rfc:="HPKE-05 "
+	rfc:="HPKE-06"
 	RFC:=[]byte(rfc)
 	LABEL:=[]byte(label)
 	var LIKM []byte
@@ -59,7 +59,7 @@ func labeledExtract(SALT []byte,SUITE_ID []byte,label string,IKM []byte) []byte 
 }
 
 func labeledExpand(PRK []byte,SUITE_ID []byte,label string,INFO []byte,L int) []byte {
-	rfc:="HPKE-05 "
+	rfc:="HPKE-06"
 	RFC:=[]byte(rfc)
 	LABEL:=[]byte(label)
 	AR := core.InttoBytes(L,2)
@@ -158,7 +158,7 @@ func DeriveKeyPair(config_id int,SK []byte,PK []byte,SEED []byte) bool {
 }
 
 func Encap(config_id int,skE []byte,pkE []byte,pkR []byte) []byte {
-	DH:=make([]byte,len(pkE))
+	DH:=make([]byte,EFS)
 	var kemcontext []byte
 	kem := config_id&255
 
@@ -168,7 +168,7 @@ func Encap(config_id int,skE []byte,pkE []byte,pkR []byte) []byte {
 		reverse(pkR)
 		reverse(DH[:])
 	} else {
-		ECDH_ECPSVDP_DH(skE, pkR, DH[:], 2)
+		ECDH_ECPSVDP_DH(skE, pkR, DH[:], 0)
 	}
 	for i:=0;i<len(pkE);i++ {
 		kemcontext=append(kemcontext,pkE[i]);
@@ -180,7 +180,7 @@ func Encap(config_id int,skE []byte,pkE []byte,pkR []byte) []byte {
 }
 		
 func Decap(config_id int,skR []byte,pkE []byte,pkR []byte) []byte {
-	DH:=make([]byte,len(pkE))
+	DH:=make([]byte,EFS)
 	var kemcontext [] byte
 	kem := config_id&255
 
@@ -190,7 +190,7 @@ func Decap(config_id int,skR []byte,pkE []byte,pkR []byte) []byte {
 		reverse(pkE)
 		reverse(DH[:])
 	} else {
-		ECDH_ECPSVDP_DH(skR, pkE, DH[:], 2)
+		ECDH_ECPSVDP_DH(skR, pkE, DH[:], 0)
 	}
 
 	for i:=0;i<len(pkE);i++ {
@@ -204,8 +204,8 @@ func Decap(config_id int,skR []byte,pkE []byte,pkR []byte) []byte {
 
 func AuthEncap(config_id int,skE []byte,skS []byte,pkE []byte,pkR []byte,pkS []byte) []byte {
 	pklen:=len(pkE)
-	DH:=make([]byte,pklen)
-	DH1:=make([]byte,pklen)
+	DH:=make([]byte,EFS)
+	DH1:=make([]byte,EFS)
 
 	kemcontext:=make([] byte,3*pklen)
 	kem := config_id&255
@@ -218,13 +218,13 @@ func AuthEncap(config_id int,skE []byte,skS []byte,pkE []byte,pkR []byte,pkS []b
 		reverse(DH[:])
 		reverse(DH1[:])
 	} else {
-		ECDH_ECPSVDP_DH(skE, pkR, DH[:], 2)
-		ECDH_ECPSVDP_DH(skS, pkR, DH1[:], 2)
+		ECDH_ECPSVDP_DH(skE, pkR, DH[:], 0)
+		ECDH_ECPSVDP_DH(skS, pkR, DH1[:], 0)
 	}
-	ZZ:=make([]byte,2*pklen)
-	for i:=0;i<pklen;i++ {
+	ZZ:=make([]byte,2*EFS)
+	for i:=0;i<EFS;i++ {
 		ZZ[i]=DH[i]
-		ZZ[pklen+i]=DH1[i]
+		ZZ[EFS+i]=DH1[i]
 	}
 
 	for i:=0;i<pklen;i++ {
@@ -237,8 +237,8 @@ func AuthEncap(config_id int,skE []byte,skS []byte,pkE []byte,pkR []byte,pkS []b
 
 func AuthDecap(config_id int,skR []byte,pkE []byte,pkR []byte,pkS []byte) []byte  {
 	pklen:=len(pkE)
-	DH:=make([]byte,pklen)
-	DH1:=make([]byte,pklen)
+	DH:=make([]byte,EFS)
+	DH1:=make([]byte,EFS)
 	kemcontext:=make([] byte,3*pklen)
 
 	kem := config_id&255
@@ -253,13 +253,13 @@ func AuthDecap(config_id int,skR []byte,pkE []byte,pkR []byte,pkS []byte) []byte
 		reverse(DH[:])
 		reverse(DH1[:])
 	} else {
-		ECDH_ECPSVDP_DH(skR[:], pkE, DH[:], 2)
-		ECDH_ECPSVDP_DH(skR[:], pkS, DH1[:], 2)
+		ECDH_ECPSVDP_DH(skR[:], pkE, DH[:], 0)
+		ECDH_ECPSVDP_DH(skR[:], pkS, DH1[:], 0)
 	}
-	ZZ:=make([]byte,2*pklen)
-	for i:=0;i<pklen;i++ {
+	ZZ:=make([]byte,2*EFS)
+	for i:=0;i<EFS;i++ {
 		ZZ[i]=DH[i];
-		ZZ[pklen+i]=DH1[i];
+		ZZ[EFS+i]=DH1[i];
 	}
 
 	for i:=0;i<pklen;i++ {
@@ -315,11 +315,13 @@ func KeySchedule(config_id int,mode int,Z []byte,info []byte,psk []byte,pskID []
 	for i:=0;i<HASH_TYPE;i++ {
 		context=append(context,H[i])
 	}
-	H=labeledExtract(nil,SUITE_ID,"psk_hash",psk)
-	secret:=labeledExtract(H,SUITE_ID,"secret",Z)
+	//H=labeledExtract(nil,SUITE_ID,"psk_hash",psk)
+	//secret:=labeledExtract(H,SUITE_ID,"secret",Z)
+
+	secret:=labeledExtract(Z,SUITE_ID,"secret",psk);
 
 	key:=labeledExpand(secret,SUITE_ID,"key",context,AESKEY)
-	nonce:=labeledExpand(secret,SUITE_ID,"nonce",context,12)
+	nonce:=labeledExpand(secret,SUITE_ID,"base_nonce",context,12)
 	exp_secret:=labeledExpand(secret,SUITE_ID,"exp",context,HASH_TYPE)
 
 	return key,nonce,exp_secret

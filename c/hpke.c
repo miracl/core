@@ -35,7 +35,7 @@ static void LabeledExtract(octet *PRK,octet *SALT,octet *SUITE_ID,char *label,oc
 {
     char likm[8+MAX_LABEL+2*POINT];
     octet LIKM={0,sizeof(likm),likm};
-    OCT_jstring(&LIKM,(char *)"HPKE-05 ");
+    OCT_jstring(&LIKM,(char *)"HPKE-06");
     OCT_joctet(&LIKM,SUITE_ID);
     OCT_jstring(&LIKM,label);
     if (IKM!=NULL)
@@ -48,7 +48,7 @@ static void LabeledExpand(octet *OKM,octet *PRK,octet *SUITE_ID,char *label,octe
     char linfo[10+MAX_LABEL+3*POINT];
     octet LINFO={0,sizeof(linfo),linfo};
     OCT_jint(&LINFO,L,2);    
-    OCT_jstring(&LINFO,(char *)"HPKE-05 ");
+    OCT_jstring(&LINFO,(char *)"HPKE-06");
     OCT_joctet(&LINFO,SUITE_ID);
     OCT_jstring(&LINFO,label);
     if (INFO!=NULL)
@@ -136,7 +136,7 @@ void HPKE_ZZZ_Encap(int config_id,octet *skE,octet *Z,octet *pkE,octet *pkR)
         OCT_reverse(pkR);
         OCT_reverse(&DH);
     } else {
-        res=ECP_ZZZ_SVDP_DH(skE, pkR, &DH, 2);
+        res=ECP_ZZZ_SVDP_DH(skE, pkR, &DH, 0);
     }
 
     OCT_copy(&KEMCONTEXT,pkE);
@@ -160,7 +160,7 @@ void HPKE_ZZZ_Decap(int config_id,octet *skR,octet *Z,octet *pkE,octet *pkR)
         OCT_reverse(pkE);
         OCT_reverse(&DH);
     } else {
-        ECP_ZZZ_SVDP_DH(skR, pkE, &DH, 2);
+        ECP_ZZZ_SVDP_DH(skR, pkE, &DH, 0);
     }
 
     OCT_copy(&KEMCONTEXT,pkE);
@@ -190,8 +190,8 @@ void HPKE_ZZZ_AuthEncap(int config_id,octet *skE,octet *skS,octet *Z,octet *pkE,
         OCT_reverse(&DH);
         OCT_reverse(&DH1);
     } else {
-        ECP_ZZZ_SVDP_DH(skE, pkR, &DH, 2);
-        ECP_ZZZ_SVDP_DH(skS, pkR, &DH1,2);
+        ECP_ZZZ_SVDP_DH(skE, pkR, &DH, 0);
+        ECP_ZZZ_SVDP_DH(skS, pkR, &DH1,0);
     }
 
     OCT_joctet(&DH,&DH1);
@@ -224,8 +224,8 @@ void HPKE_ZZZ_AuthDecap(int config_id,octet *skR,octet *Z,octet *pkE,octet *pkR,
         OCT_reverse(&DH);
         OCT_reverse(&DH1);
     } else {
-        ECP_ZZZ_SVDP_DH(skR, pkE, &DH, 2);
-        ECP_ZZZ_SVDP_DH(skR, pkS, &DH1, 2);
+        ECP_ZZZ_SVDP_DH(skR, pkE, &DH, 0);
+        ECP_ZZZ_SVDP_DH(skR, pkS, &DH1, 0);
     }
     OCT_joctet(&DH,&DH1);
 
@@ -264,11 +264,12 @@ void HPKE_ZZZ_KeySchedule(int config_id,octet *key,octet *nonce,octet *exp_secre
     LabeledExtract(&H,NULL,&SUITE_ID,(char *)"info_hash",info);
     OCT_joctet(&CONTEXT,&H);
 
-    LabeledExtract(&H,NULL,&SUITE_ID,(char *)"psk_hash",psk);
-    LabeledExtract(&secret,&H,&SUITE_ID,(char *)"secret",Z);
+    LabeledExtract(&secret,Z,&SUITE_ID,(char *)"secret",psk);
+    //LabeledExtract(&H,NULL,&SUITE_ID,(char *)"psk_hash",psk);
+    //LabeledExtract(&secret,&H,&SUITE_ID,(char *)"secret",Z);
 
     LabeledExpand(key,&secret,&SUITE_ID,(char *)"key",&CONTEXT,AESKEY_ZZZ);
-    LabeledExpand(nonce,&secret,&SUITE_ID,(char *)"nonce",&CONTEXT,12);
+    LabeledExpand(nonce,&secret,&SUITE_ID,(char *)"base_nonce",&CONTEXT,12);
     if (exp_secret!=NULL)
         LabeledExpand(exp_secret,&secret,&SUITE_ID,(char *)"exp",&CONTEXT,HASH_TYPE_ZZZ);
 }

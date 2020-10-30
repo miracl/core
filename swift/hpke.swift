@@ -42,7 +42,7 @@ public struct HPKE
 {
 
     static func LabeledExtract(_ salt:[UInt8]?,_ suite_ID:[UInt8],_ label:String,_ ikm:[UInt8]?) -> [UInt8] {
-        let rfc="HPKE-05 "
+        let rfc="HPKE-06"
         let RFC=[UInt8](rfc.utf8)
         let LABEL=[UInt8](label.utf8)
         var likm=[UInt8]();
@@ -64,7 +64,7 @@ public struct HPKE
     }
 
     static func LabeledExpand(_ prk:[UInt8],_ suite_ID:[UInt8],_ label:String,_ info:[UInt8]?,_ L:Int) -> [UInt8] {
-        let rfc="HPKE-05 "
+        let rfc="HPKE-06"
         let RFC=[UInt8](rfc.utf8)
         let LABEL=[UInt8](label.utf8)
         let ar = HMAC.inttoBytes(L, 2)
@@ -162,13 +162,11 @@ public struct HPKE
         return false
     }
 
+        var T=[UInt8](repeating: 0,count: ECDH.EFS)
+
     static public func ENCAP(_ config_id: Int,_ skE:[UInt8],_ pkE:[UInt8],_ pkR:[UInt8]) -> [UInt8] {
-        let pklen=pkE.count
-        var dh=[UInt8]()
+        var dh=[UInt8](repeating: 0,count: ECDH.EFS)
         var kemcontext=[UInt8]()
-        for _ in 0..<pklen {
-            dh.append(0)
-        }
 
         let kem = config_id&255
   
@@ -176,7 +174,7 @@ public struct HPKE
             ECDH.ECPSVDP_DH(skE, pkR.reversed(), &dh, 0)
             dh.reverse()
         } else {
-            ECDH.ECPSVDP_DH(skE, pkR, &dh, 2)
+            ECDH.ECPSVDP_DH(skE, pkR, &dh, 0)
         }
 
         kemcontext.append(contentsOf: pkE)
@@ -186,12 +184,8 @@ public struct HPKE
     }
 
     static public func DECAP(_ config_id: Int,_ skR: [UInt8],_ pkE:[UInt8],_ pkR:[UInt8]) -> [UInt8] {
-        let pklen=pkE.count
-        var dh=[UInt8]()
+        var dh=[UInt8](repeating: 0,count: ECDH.EFS)
         var kemcontext=[UInt8]()
-        for _ in 0..<pklen {
-            dh.append(0)
-        }
 
         let kem = config_id&255
 
@@ -199,7 +193,7 @@ public struct HPKE
             ECDH.ECPSVDP_DH(skR, pkE.reversed(), &dh, 0)
             dh.reverse()
         } else {
-            ECDH.ECPSVDP_DH(skR, pkE, &dh, 2)
+            ECDH.ECPSVDP_DH(skR, pkE, &dh, 0)
         }
  
         kemcontext.append(contentsOf: pkE)
@@ -209,14 +203,9 @@ public struct HPKE
     }
 
     static public func AUTHENCAP(_ config_id: Int,_ skE:[UInt8],_ skS:[UInt8],_ pkE:[UInt8],_ pkR:[UInt8],_ pkS:[UInt8]) -> [UInt8] {
-        let pklen=pkE.count
-        var dh=[UInt8]()
-        var dh1=[UInt8]()
+        var dh=[UInt8](repeating: 0,count: ECDH.EFS)
+        var dh1=[UInt8](repeating: 0,count: ECDH.EFS)
         var kemcontext=[UInt8]()
-        for _ in 0..<pklen {
-            dh.append(0)
-            dh1.append(0)
-        }
         let kem = config_id&255
 
         if kem==32 || kem==33 {
@@ -225,8 +214,8 @@ public struct HPKE
             dh.reverse()
             dh1.reverse()
         } else {
-            ECDH.ECPSVDP_DH(skE, pkR, &dh, 2)
-            ECDH.ECPSVDP_DH(skS, pkR, &dh1, 2)
+            ECDH.ECPSVDP_DH(skE, pkR, &dh, 0)
+            ECDH.ECPSVDP_DH(skS, pkR, &dh1, 0)
         }
 
         dh.append(contentsOf: dh1)
@@ -238,14 +227,9 @@ public struct HPKE
     }
 
     static public func AUTHDECAP(_ config_id: Int,_ skR:[UInt8],_ pkE: [UInt8],_ pkR:[UInt8],_ pkS: [UInt8]) -> [UInt8]  {
-        let pklen=pkE.count
-        var dh=[UInt8]()
-        var dh1=[UInt8]()
+        var dh=[UInt8](repeating: 0,count: ECDH.EFS)
+        var dh1=[UInt8](repeating: 0,count: ECDH.EFS)
         var kemcontext=[UInt8]()
-        for _ in 0..<pklen {
-            dh.append(0)
-            dh1.append(0)
-        }
 
         let kem = config_id&255
 
@@ -255,8 +239,8 @@ public struct HPKE
             dh.reverse() 
             dh1.reverse()
         } else {
-            ECDH.ECPSVDP_DH(skR, pkE, &dh, 2)
-            ECDH.ECPSVDP_DH(skR, pkS, &dh1, 2)
+            ECDH.ECPSVDP_DH(skR, pkE, &dh, 0)
+            ECDH.ECPSVDP_DH(skR, pkS, &dh1, 0)
         }
 
         dh.append(contentsOf: dh1)
@@ -296,12 +280,13 @@ public struct HPKE
         context.append(contentsOf: H)
         H=LabeledExtract(nil,suite_ID,"info_hash",info)
         context.append(contentsOf: H)
-        H=LabeledExtract(nil,suite_ID,"psk_hash",psk!);
+        //H=LabeledExtract(nil,suite_ID,"psk_hash",psk!);
         
-        let secret=LabeledExtract(H,suite_ID,"secret",Z)
+        //let secret=LabeledExtract(H,suite_ID,"secret",Z)
+        let secret=LabeledExtract(Z,suite_ID,"secret",psk!);
 
         let key=LabeledExpand(secret,suite_ID,"key",context,CONFIG_CURVE.AESKEY)
-        let nonce=LabeledExpand(secret,suite_ID,"nonce",context,12)
+        let nonce=LabeledExpand(secret,suite_ID,"base_nonce",context,12)
         let exp_secret=LabeledExpand(secret,suite_ID,"exp",context,CONFIG_CURVE.HASH_TYPE)
 
         return (key,nonce,exp_secret)

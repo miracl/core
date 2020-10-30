@@ -50,7 +50,7 @@ public final class HPKE {
     }
 
     static byte[] LabeledExtract(byte[] SALT,byte[] SUITE_ID,String label,byte[] IKM) {
-        String rfc="HPKE-05 ";
+        String rfc="HPKE-06";
 
         byte[] RFC=rfc.getBytes();
         byte[] LABEL=label.getBytes();
@@ -77,7 +77,7 @@ public final class HPKE {
 
     static byte[] LabeledExpand(byte[] PRK,byte[] SUITE_ID,String label,byte[] INFO,int L) {
         byte[] AR = HMAC.inttoBytes(L, 2);
-        String rfc="HPKE-05 ";
+        String rfc="HPKE-06";
         byte[] RFC=rfc.getBytes();
         byte[] LABEL=label.getBytes();
         int INFOlen;
@@ -169,7 +169,7 @@ public final class HPKE {
     }
 
     public static byte[] encap(int config_id,byte[] skE,byte[] pkE,byte[] pkR) {
-        byte[] DH = new byte[pkE.length];
+        byte[] DH = new byte[ECDH.EFS/*pkE.length*/];
         byte[] kemcontext = new byte[2*pkE.length];
 	    int kem = config_id&255;
 
@@ -179,7 +179,7 @@ public final class HPKE {
             reverse(pkR);
             reverse(DH);
 		} else {
-	        ECDH.SVDP_DH(skE, pkR, DH, 2);
+	        ECDH.SVDP_DH(skE, pkR, DH, 0);
         }
 	 
         int k=0;
@@ -192,7 +192,7 @@ public final class HPKE {
     }
 
     public static byte[] decap(int config_id,byte[] skR,byte[] pkE,byte[] pkR) {
-        byte[] DH = new byte[pkE.length];
+        byte[] DH = new byte[ECDH.EFS/*pkE.length*/];
         byte[] kemcontext = new byte[2*pkE.length];
 	    int kem = config_id&255;
 
@@ -202,7 +202,7 @@ public final class HPKE {
             reverse(pkE);
             reverse(DH);
 	    } else {
-            ECDH.SVDP_DH(skR, pkE, DH, 2);
+            ECDH.SVDP_DH(skR, pkE, DH, 0);
         }
 
         int k=0;
@@ -216,8 +216,8 @@ public final class HPKE {
 
     public static byte[] authEncap(int config_id,byte[] skE,byte[] skS,byte[] pkE,byte[] pkR,byte[] pkS) {
         int pklen=pkE.length;
-        byte[] DH = new byte[pklen];
-        byte[] DH1 = new byte[pklen];
+        byte[] DH = new byte[ECDH.EFS];
+        byte[] DH1 = new byte[ECDH.EFS];
         byte[] kemcontext = new byte[3*pklen];
 	
 	    int kem = config_id&255;
@@ -230,14 +230,14 @@ public final class HPKE {
             reverse(DH);
             reverse(DH1);
 		} else {
-	        ECDH.SVDP_DH(skE, pkR, DH, 2);
-	        ECDH.SVDP_DH(skS, pkR, DH1, 2);
+	        ECDH.SVDP_DH(skE, pkR, DH, 0);
+	        ECDH.SVDP_DH(skS, pkR, DH1, 0);
         }
 
-	    byte[] ZZ = new byte[2*pklen];
-	    for (int i=0;i<pklen;i++) {
+	    byte[] ZZ = new byte[2*ECDH.EFS];
+	    for (int i=0;i<ECDH.EFS;i++) {
 		    ZZ[i] = DH[i];
-            ZZ[pklen+i]= DH1[i];
+            ZZ[ECDH.EFS+i]= DH1[i];
 	    }
 
 	    for (int i=0;i<pklen;i++) {
@@ -251,8 +251,8 @@ public final class HPKE {
 
     public static byte[] authDecap(int config_id,byte[] skR,byte[] pkE,byte[] pkR,byte[] pkS) {
         int pklen=pkE.length;
-        byte[] DH = new byte[pklen];
-        byte[] DH1 = new byte[pklen];
+        byte[] DH = new byte[ECDH.EFS];
+        byte[] DH1 = new byte[ECDH.EFS];
         byte[] kemcontext = new byte[3*pklen];
 
 		int kem = config_id&255;
@@ -267,14 +267,14 @@ public final class HPKE {
             reverse(DH);
             reverse(DH1);
 	    } else {
-	        ECDH.SVDP_DH(skR, pkE, DH, 2);
-	        ECDH.SVDP_DH(skR, pkS, DH1, 2);
+	        ECDH.SVDP_DH(skR, pkE, DH, 0);
+	        ECDH.SVDP_DH(skR, pkS, DH1, 0);
         }
 
-	    byte[] ZZ = new byte[2*pklen];
-	    for (int i=0;i<pklen;i++) {
+	    byte[] ZZ = new byte[2*ECDH.EFS];
+	    for (int i=0;i<ECDH.EFS;i++) {
 		    ZZ[i] = DH[i];
-            ZZ[pklen+i]= DH1[i];
+            ZZ[ECDH.EFS+i]= DH1[i];
 	    }
 
 	    for (int i=0;i<pklen;i++) {
@@ -320,13 +320,16 @@ public final class HPKE {
         for (int i=0;i<CONFIG_CURVE.HASH_TYPE;i++)
             context[k++]=H[i];
 //System.out.print("context= 0x"); printBinary(context);
-        H=LabeledExtract(null,SUITE_ID,"psk_hash",psk);
-        byte[] secret=LabeledExtract(H,SUITE_ID,"secret",Z);
+//        H=LabeledExtract(null,SUITE_ID,"psk_hash",psk);
+//        byte[] secret=LabeledExtract(H,SUITE_ID,"secret",Z);
+
+        byte[] secret=LabeledExtract(Z,SUITE_ID,"secret",psk);
+
 //System.out.print("secret= 0x"); printBinary(secret);
         byte[] ex=LabeledExpand(secret,SUITE_ID,"key",context,CONFIG_CURVE.AESKEY);
         for (int i=0;i<ex.length;i++) key[i]=ex[i];
 
-        ex=LabeledExpand(secret,SUITE_ID,"nonce",context,12);
+        ex=LabeledExpand(secret,SUITE_ID,"base_nonce",context,12);
         for (int i=0;i<ex.length;i++) nonce[i]=ex[i];
 
         if (exp_secret!=null)

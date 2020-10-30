@@ -45,7 +45,7 @@ func hpke_C25519(rng *core.RAND) {
 	var pkS [C25519.EFS]byte
 
 	INFO,_:=hex.DecodeString("4f6465206f6e2061204772656369616e2055726e")
-	psk,_:=hex.DecodeString("5db3b80a81cb63ca59470c83414ef70a")
+	psk,_:=hex.DecodeString("0247fd33b913760fa1fa51e1892d9f307fbe65eb171e8132c2af18555a738b82")
 	pskID,_:=hex.DecodeString("456e6e796e20447572696e206172616e204d6f726961")
 	PLAIN,_:=hex.DecodeString("4265617574792069732074727574682c20747275746820626561757479")
 	AAD,_:=hex.DecodeString("436f756e742d30")
@@ -53,8 +53,8 @@ func hpke_C25519(rng *core.RAND) {
 // Mode 0
     mode:=0;
     fmt.Printf("\nMode 0\n");
-	seedE,_:=hex.DecodeString("a77ae3e14cc2ec9e603a9049423d48e66a5e3139e896e95cf19919430657adc7")
-	seedR,_:=hex.DecodeString("1289f0db1d8f68d0c531b5e53a40911a2a2347059355d7c267717033fef2b08c")
+	seedE,_:=hex.DecodeString("591c66abd531b9c8287cf76ac053efba38d61e994e7f656c30dab6723a8af9ce")
+	seedR,_:=hex.DecodeString("8a219e9a42233826f165d2c1036399fa84cfb3bcb93872bc49287dfbe6f1fec9")
 	C25519.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
 	C25519.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 
@@ -77,8 +77,8 @@ func hpke_C25519(rng *core.RAND) {
 // Mode 1
     mode=1;
     fmt.Printf("\nMode 1\n");
-	seedE,_=hex.DecodeString("0fa1407ccee05de0cceb2f2d2381d2df0602dbd43be90eefd288ce4ad0b3ba32")
-	seedR,_=hex.DecodeString("326ee379f778718e6cb343f55668fbb9d0098ba0503cd4414a8f1ce252605c39")
+	seedE,_=hex.DecodeString("f39542a6e45dc0e6225de671455fea9d918d4fa241c7fb301895a138ce7c2f52")
+	seedR,_=hex.DecodeString("5aa0335739cb3dbafce48d5d9cccd7d499b0727b445522e1408aba8171aabfae")
 	C25519.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
 	C25519.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 
@@ -102,9 +102,9 @@ func hpke_C25519(rng *core.RAND) {
 
     mode=2;
     fmt.Printf("\nMode 2\n");
-	seedE,_=hex.DecodeString("02900cb4856b5f222293a9bd7bda2f1f81c562dc3002336ad1c39f6572402b7d")
-	seedR,_=hex.DecodeString("518df90f0f5044ce653180c700e4902d37a7ba1cd23482a76e18b300fecaac4e")
-	seedS,_:=hex.DecodeString("262a05ad0c08030cdbbaafc03d64f33b95bf8089f216c62ac39b72064a4b4dcb")
+	seedE,_=hex.DecodeString("0b119a7a132355f3c2a0ad03e10e252d7292fcde480e726d03a81f127d02c050")
+	seedR,_=hex.DecodeString("874ba77ded181cd1cb4f2b4f37386a5b2b86c84c57d2a6d1b93a05fb5edd69f0")
+	seedS,_:=hex.DecodeString("2e369ba803dcee17dba926e4252b8dd9a47417a35bcf90f0e55e4af85c83153b")
 	C25519.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
 	C25519.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 	C25519.DeriveKeyPair(config_id,skS[:],pkS[:],seedS)
@@ -129,9 +129,9 @@ func hpke_C25519(rng *core.RAND) {
 
     mode=3;
     fmt.Printf("\nMode 3\n");
-	seedE,_=hex.DecodeString("c1d1028243a951dbf6469025f3a1304407b08fb932104e61c7aab42ab4f1995c")
-	seedR,_=hex.DecodeString("02a965d8f53bbdcc11cc618d4f31f69277500b75959ca97fd533058315511d1b")
-	seedS,_=hex.DecodeString("e9c09a3e50073935e75d3846007a26088a93ebf58ad0bb30ad6c42a9d4d2419e")
+	seedE,_=hex.DecodeString("96360b18f7822f85f4a0a1dd200d00ab82ad0032b05a1f34cb120a0cbda4865a")
+	seedR,_=hex.DecodeString("48710faa5c8b8b2a4447c9ccf1cc232fb49f6c0fd04b151949757e15b414eea8")
+	seedS,_=hex.DecodeString("dd413f8d2d4b195a7cd0793453d04660203a51db65a57d16c2a720e6d44e526c")
 	C25519.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
 	C25519.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 	C25519.DeriveKeyPair(config_id,skS[:],pkS[:],seedS)
@@ -164,7 +164,7 @@ func hpke_NIST521(rng *core.RAND) {
 	var pkS [2*NIST521.EFS+1]byte
 
 	INFO,_:=hex.DecodeString("4f6465206f6e2061204772656369616e2055726e")
-	psk,_:=hex.DecodeString("5db3b80a81cb63ca59470c83414ef70a")
+	psk,_:=hex.DecodeString("0247fd33b913760fa1fa51e1892d9f307fbe65eb171e8132c2af18555a738b82")
 	pskID,_:=hex.DecodeString("456e6e796e20447572696e206172616e204d6f726961")
 	PLAIN,_:=hex.DecodeString("4265617574792069732074727574682c20747275746820626561757479")
 	AAD,_:=hex.DecodeString("436f756e742d30")
@@ -172,8 +172,8 @@ func hpke_NIST521(rng *core.RAND) {
 // Mode 0
     mode:=0;
     fmt.Printf("\nMode 0\n");
-	seedE,_:=hex.DecodeString("1ed3768f499b5b3c2beda3166528b649d4b117a0bd450f0e9e19815c2597d1777ac67ea367415fb28c8819c94b383a0a8a15c9f03b4835330e3e6c8bc8319202e473")
-	seedR,_:=hex.DecodeString("62641514bccd2858f3d6513305288d6ca0e443f00a86eb33ccd519d1803aebc5d07bbad0e1013ce61d9c9d713b3c90c8e79a1af01d6c69750f67cbbd1d9d4afeedfa")
+	seedE,_:=hex.DecodeString("3fdb7eab3a6a99de8abbcb507be5704ae6a8994008b8a8e6b63fbd97fa8619c66bd8665c22079939f3f63f978c5806802b22ba5bb396da9cf252ee67068bf57461bf")
+	seedR,_:=hex.DecodeString("2e99ac709379c7eb15ca068253bbae4dd6297c2397f47a89b8cb3ef4e83f235f83cb1ce3d2f754c47431ff0d0d8d2c429a7b6768d9524c3be60b9fb7749c49cb816b")
 	NIST521.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
 	NIST521.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 
@@ -196,8 +196,8 @@ func hpke_NIST521(rng *core.RAND) {
 // Mode 1
     mode=1;
     fmt.Printf("\nMode 1\n");
-	seedE,_=hex.DecodeString("64463def238f309f1e9d1f28c15dc126cffa4ded911a4c527eeb71ba593847fb405756239d2c694ce4effa3996cafb5cc0b3736dd988deb7289210ec92bf6b339302")
-	seedR,_=hex.DecodeString("41b782c18c14986c9d7a636152f13677aeddf479c1c7791ea46e0ebbe35ca9dd524c23d730eef443741d7d965415833d6c549c8c1b31ad05f2b9a88f916b2930528e")
+	seedE,_=hex.DecodeString("ae300665d34d5ab7c0508a94a741ba2cb285966106ba9cefbe1f9c24c3eb626108d0c9ccc8291d90c50c6d04ac181ccd8efc2cc52383eb205637a84d2be5362bf247")
+	seedR,_=hex.DecodeString("dbbda5e5a54ee85cfe076e4746ceb971bed338a7fe0b625d6c7c28b3c82c8128258906a52543655ecb62889e9dbe8feec747d06e4216f88ca4adba200179e0e75276")
 	NIST521.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
 	NIST521.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 
@@ -220,9 +220,9 @@ func hpke_NIST521(rng *core.RAND) {
 // Mode 2
     mode=2;
     fmt.Printf("\nMode 2\n");
-	seedE,_=hex.DecodeString("81dc51e31ef8e9b33fefcdf00bd3b0ff585b941fe76cf39a86c269e2f53be7edb3db0be1a58b6cb8d8e6020fe8a2018c59d47cacb35b2b8c61bd4155438b5eda5c0d")
-	seedR,_=hex.DecodeString("54af23ea93c8fc34deb6a7cd70e657ea8990fc4e9a18656d5764b62f7a33a9e0212adeae1585ad2ef28688c1b558866c1975973c4dff08955c1f9fd7939b10b5fbfc")
-	seedS,_:=hex.DecodeString("b65599d814192278ab826ef197a61b77db50f40495f77502dfaa03acd1f3565a3cefebd59de2328ece0638c90d8a89f9ca58f2850e39e9a4c9c339290d66da12fdf0")
+	seedE,_=hex.DecodeString("11c0c7337b294452826e14a7f6c9e7981a03c467a08f47a8b478b37f3e9c90266898e3c3f8e84235a6a2837269c84b355d7f5ca133085172a08f00c3857da8a1410b")
+	seedR,_=hex.DecodeString("bb56b3452a80ad82b2d48c19ce76194a198eefdb67040959bc9e479db0682a4b5b46d7d020df66864d374b25deb5927144e3f08f2f9eacdd5f54b8b5c65d91ee211f")
+	seedS,_:=hex.DecodeString("bab663b9c05f680f401a494ae8c8714fd95cbcd56a01e9e8194b4b3da863a5e8313d4916dc58f6d3aaa2dafe420ae81b2a6c0075223afc6b13f3734a26ca30da5e38")
 	NIST521.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
 	NIST521.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 	NIST521.DeriveKeyPair(config_id,skS[:],pkS[:],seedS)
@@ -246,9 +246,9 @@ func hpke_NIST521(rng *core.RAND) {
 // Mode 3
     mode=3;
     fmt.Printf("\nMode 3\n");
-	seedE,_=hex.DecodeString("dc1fda9b21a1af6925ecf9ad79d2422f698b4168587c7908b36f5f58352181b9506554d8d8c9427e0dd2cfda25f0eabf58e9f5597e1b76ac12c799fe96e3cc03dc59")
-	seedR,_=hex.DecodeString("46592c2b171b8cdcce89601fab103f63ed43badadcf9df62a928ae3b7fa91f269eff3485f6401c374e19a8bb988005626b9c26d39795282b1095bcc4f62a67255e15")
-	seedS,_=hex.DecodeString("d02446c344c10cd162486caa69aa1156ac3066e0fd668fa7faaf13bdbc944edbc0cd68ee36e4c30ecc36c2c5ab0978473eb1b5dcfff27985c9328877e85fd48b657d")
+	seedE,_=hex.DecodeString("4ebb461a5c46330d6de3a40d19ac499cc206733cf1a4fb3ba922d976aa1c45848668f04a3b5a4845a0d1c83755967d8914a9824fbb8823d161c16c93c51636e1ad89")
+	seedR,_=hex.DecodeString("1ae2f1008c46c7a6e9275b1e29c906475c6bc019b1dfc38cbce68c5233de9d33ba93fe9d7b9ea5beb04f4adc5a3b72238f6e3d904d29eb0680ea240103d3335a3c47")
+	seedS,_=hex.DecodeString("e0f2ada4f2a900fded767dc9868119ee3e4767afac667a780b68e5e2b4d7d363dbf02717ab314369c45f34dcec3de384a65e8453a971ad0353a507f34dc1d5d9b8f5")
 	NIST521.DeriveKeyPair(config_id,skE[:],pkE[:],seedE)
 	NIST521.DeriveKeyPair(config_id,skR[:],pkR[:],seedR)
 	NIST521.DeriveKeyPair(config_id,skS[:],pkS[:],seedS)

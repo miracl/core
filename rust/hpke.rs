@@ -47,7 +47,7 @@ fn printbinary(array: &[u8]) {
 
 #[allow(non_snake_case)]
 fn labeledExtract(prk: &mut [u8],salt: Option<&[u8]>,suite_id: &[u8],label: &str,ikm: Option<&[u8]>) {
-    let rfc="HPKE-05 ";
+    let rfc="HPKE-06";
     let prefix1=rfc.as_bytes();
     let prefix2=label.as_bytes();
     let mut likm: [u8; 18+MAX_LABEL+2*POINT] = [0; 18+MAX_LABEL+2*POINT];
@@ -76,7 +76,7 @@ fn labeledExtract(prk: &mut [u8],salt: Option<&[u8]>,suite_id: &[u8],label: &str
 #[allow(non_snake_case)]
 fn labeledExpand(okm: &mut [u8],prk: &[u8],suite_id: &[u8],label: &str,info: Option<&[u8]>,el: usize) {
     let mut ar: [u8; 2] = [0; 2];
-    let rfc="HPKE-05 ";
+    let rfc="HPKE-06";
     let prefix1=rfc.as_bytes();
     let prefix2=label.as_bytes();
     hmac::inttobytes(el,&mut ar);
@@ -186,7 +186,7 @@ pub fn deriveKeyPair(config_id: usize,mut sk: &mut [u8],mut pk: &mut [u8],seed: 
 #[allow(non_snake_case)]
 pub fn encap(config_id: usize,skE: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8]) {
     let pklen=pkE.len();
-    let mut dh: [u8; POINT] = [0; POINT];
+    let mut dh: [u8; ecdh::EFS] = [0; ecdh::EFS];
     let mut kemcontext: [u8; 2*POINT] = [0;2*POINT];
     let kem = config_id&255;
     let mut rev: [u8; POINT]=[0; POINT];
@@ -199,7 +199,7 @@ pub fn encap(config_id: usize,skE: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8]) {
 	    ecdh::ecpsvdp_dh(&skE, &rev[0..pklen], &mut dh, 0);
 		reverse(&mut dh[0..pklen]);
 	} else {
-	    ecdh::ecpsvdp_dh(&skE, &pkR, &mut dh, 2);
+	    ecdh::ecpsvdp_dh(&skE, &pkR, &mut dh, 0);
     }
     let mut k=0;
     for i in 0..pklen {
@@ -211,13 +211,13 @@ pub fn encap(config_id: usize,skE: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8]) {
         k+=1;
     }
 //print!("e dh= "); printbinary(&dh[0..pklen]);
-    extractAndExpand(config_id,z,&dh[0..pklen],&kemcontext[0..k]);
+    extractAndExpand(config_id,z,&dh,&kemcontext[0..k]);
 }
 
 #[allow(non_snake_case)]
 pub fn decap(config_id: usize,skR: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8]) {
     let pklen=pkE.len();
-    let mut dh: [u8; POINT] = [0; POINT];
+    let mut dh: [u8; ecdh::EFS] = [0; ecdh::EFS];
     let mut kemcontext: [u8; 2*POINT] = [0;2*POINT];
     let mut rev: [u8; POINT]=[0; POINT];
 	let kem = config_id&255;
@@ -230,7 +230,7 @@ pub fn decap(config_id: usize,skR: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8]) {
 	    ecdh::ecpsvdp_dh(&skR, &rev[0..pklen], &mut dh, 0);
 		reverse(&mut dh[0..pklen]);
 	} else {
-	    ecdh::ecpsvdp_dh(&skR, &pkE, &mut dh, 2);
+	    ecdh::ecpsvdp_dh(&skR, &pkE, &mut dh, 0);
     }
 
     let mut k=0;
@@ -243,13 +243,13 @@ pub fn decap(config_id: usize,skR: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8]) {
         k+=1;
     }
 //print!("d dh= "); printbinary(&dh[0..pklen]);
-    extractAndExpand(config_id,z,&dh[0..pklen],&kemcontext[0..k]);
+    extractAndExpand(config_id,z,&dh,&kemcontext[0..k]);
 }
 
 #[allow(non_snake_case)]
 pub fn authencap(config_id: usize,skE: &[u8],skS: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8],pkS: &[u8]) {
-    let mut dh: [u8; 2*POINT] = [0; 2*POINT];
-    let mut dh1: [u8; POINT] = [0; POINT];
+    let mut dh: [u8; 2*ecdh::EFS] = [0; 2*ecdh::EFS];
+    let mut dh1: [u8; ecdh::EFS] = [0; ecdh::EFS];
 
     let mut kemcontext: [u8; 3*POINT] = [0;3*POINT];
 	let kem = config_id&255;
@@ -267,12 +267,12 @@ pub fn authencap(config_id: usize,skE: &[u8],skS: &[u8],z: &mut [u8],pkE: &[u8],
 		reverse(&mut dh[0..pklen]);
 		reverse(&mut dh1[0..pklen]);
 	} else {
-        ecdh::ecpsvdp_dh(&skE, &pkR, &mut dh, 2);
-        ecdh::ecpsvdp_dh(&skS, &pkR, &mut dh1, 2);
+        ecdh::ecpsvdp_dh(&skE, &pkR, &mut dh, 0);
+        ecdh::ecpsvdp_dh(&skS, &pkR, &mut dh1, 0);
     }
 
-	for i in 0..pklen {
-		dh[i+pklen] = dh1[i];
+	for i in 0..ecdh::EFS {
+		dh[i+ecdh::EFS] = dh1[i];
 	}
 
     for i in 0..pklen {
@@ -282,13 +282,13 @@ pub fn authencap(config_id: usize,skE: &[u8],skS: &[u8],z: &mut [u8],pkE: &[u8],
     }
 //print!("e dh= "); printbinary(&dh[0..pklen]);
 //print!("e kemcontext= "); printbinary(&kemcontext[0..3*pklen]);
-    extractAndExpand(config_id,z,&dh[0..2*pklen],&kemcontext[0..3*pklen]);
+    extractAndExpand(config_id,z,&dh,&kemcontext[0..3*pklen]);
 }
 
 #[allow(non_snake_case)]
 pub fn authdecap(config_id: usize,skR: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8],pkS: &[u8]) {
-    let mut dh: [u8; 2*POINT] = [0; 2*POINT];
-    let mut dh1: [u8; POINT] = [0; POINT];
+    let mut dh: [u8; 2*ecdh::EFS] = [0; 2*ecdh::EFS];
+    let mut dh1: [u8; ecdh::EFS] = [0; ecdh::EFS];
     let mut kemcontext: [u8; 3*POINT] = [0;3*POINT];
 	let kem = config_id&255;
     let pklen=pkE.len();
@@ -308,12 +308,12 @@ pub fn authdecap(config_id: usize,skR: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8],
 		reverse(&mut dh[0..pklen]);
 		reverse(&mut dh1[0..pklen]);
 	} else {
-        ecdh::ecpsvdp_dh(&skR, &pkE, &mut dh, 2);
-        ecdh::ecpsvdp_dh(&skR, &pkS, &mut dh1, 2);
+        ecdh::ecpsvdp_dh(&skR, &pkE, &mut dh, 0);
+        ecdh::ecpsvdp_dh(&skR, &pkS, &mut dh1, 0);
     }
 
-	for i in 0..pklen {
-		dh[i+pklen] = dh1[i];
+	for i in 0..ecdh::EFS {
+		dh[i+ecdh::EFS] = dh1[i];
 	}
 
     for i in 0..pklen {
@@ -323,7 +323,7 @@ pub fn authdecap(config_id: usize,skR: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8],
     }
 //print!("d dh= "); printbinary(&dh[0..pklen]);
 //print!("d kemcontext= "); printbinary(&kemcontext[0..3*pklen]);
-    extractAndExpand(config_id,z,&dh[0..2*pklen],&kemcontext[0..3*pklen]);
+    extractAndExpand(config_id,z,&dh,&kemcontext[0..3*pklen]);
 }
 
 #[allow(non_snake_case)]
@@ -369,10 +369,13 @@ pub fn keyschedule(config_id: usize,key: &mut [u8],nonce: &mut [u8],exp_secret: 
 		context[k] = h[i]; k+=1;
     }
 
-    labeledExtract(&mut h,None,&suite_id,"psk_hash",psk);
+    //labeledExtract(&mut h,None,&suite_id,"psk_hash",psk);
     
-    labeledExtract(&mut secret,Some(&h),&suite_id,"secret",Some(z));
+    //labeledExtract(&mut secret,Some(&h),&suite_id,"secret",Some(z));
+
+    labeledExtract(&mut secret,Some(z),&suite_id,"secret",psk);
+
     labeledExpand(key,&secret,&suite_id,"key",Some(&context[0..k]),ecp::AESKEY);
-    labeledExpand(nonce,&secret,&suite_id,"nonce",Some(&context[0..k]),12);
+    labeledExpand(nonce,&secret,&suite_id,"base_nonce",Some(&context[0..k]),12);
     labeledExpand(exp_secret,&secret,&suite_id,"exp",Some(&context[0..k]),ecp::HASH_TYPE);
 }
