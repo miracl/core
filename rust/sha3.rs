@@ -154,6 +154,24 @@ impl SHA3 {
         return nh;
     }
 
+    pub fn new_copy(hh: &SHA3) -> SHA3 {
+        let mut nh = SHA3 {
+            length: 0,
+            rate: 0,
+            len: 0,
+            s: [[0; 5]; 5],
+        };
+        nh.length=hh.length;
+        nh.len=hh.len;
+        nh.rate=hh.rate;
+        for i in 0..5 {
+            for j in 0..5 {
+                nh.s[i][j] = hh.s[i][j];
+            }
+        }
+        return nh;
+    }
+
     /* process a single byte */
     pub fn process(&mut self, byt: u8) {
         /* process the next message byte */
@@ -235,6 +253,11 @@ impl SHA3 {
         self.squeeze(digest, hlen);
     }
 
+    pub fn continuing_hash(&mut self, digest: &mut [u8]) {
+        let mut sh=SHA3::new_copy(self);    
+        sh.hash(digest)
+    }
+
     pub fn shake(&mut self, digest: &mut [u8], olen: usize) {
         let q = self.rate - (self.length % (self.rate as u64)) as usize;
         if q == 1 {
@@ -247,6 +270,11 @@ impl SHA3 {
             self.process(0x80);
         }
         self.squeeze(digest, olen);
+    }
+
+    pub fn continuing_shake(&mut self, digest: &mut [u8], olen: usize) {
+        let mut sh=SHA3::new_copy(self); 
+        sh.shake(digest,olen);
     }
 }
 

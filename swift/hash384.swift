@@ -149,6 +149,18 @@ public struct HASH384{
         init_it()
     }
     
+    public init(_ hc: HASH384)
+    {
+        for i in 0 ..< 80 {
+            w[i]=hc.w[i]
+        }
+        length[0]=hc.length[0]
+        length[1]=hc.length[1]
+        for i in 0 ..< 8 {
+            h[i]=hc.h[i]
+        }
+    }
+
     /* process a single byte */
     public mutating func process(_ byt: UInt8)
     { /* process the next message byte */
@@ -194,5 +206,10 @@ public struct HASH384{
         init_it();
         return digest;
     }
-    
+
+    public mutating func continuing_hash() -> [UInt8]
+    {
+        var sh=HASH384(self)
+        return sh.hash()
+    }    
 }

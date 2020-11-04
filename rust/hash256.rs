@@ -145,6 +145,23 @@ impl HASH256 {
         return nh;
     }
 
+    pub fn new_copy(hh: &HASH256) -> HASH256 {
+        let mut nh = HASH256 {
+            length: [0; 2],
+            h: [0; 8],
+            w: [0; 64],
+        };
+        nh.length[0]=hh.length[0];
+        nh.length[1]=hh.length[1];
+        for i in 0..64 {
+            nh.w[i] = hh.w[i];
+        }
+        for i in 0..8 {
+            nh.h[i] = hh.h[i];
+        }
+        return nh;        
+    }
+
     /* process a single byte */
     pub fn process(&mut self, byt: u8) {
         /* process the next message byte */
@@ -196,6 +213,11 @@ impl HASH256 {
         }
         self.init();
         return digest;
+    }
+
+    pub fn continuing_hash(&self) -> [u8; 32] {
+        let mut sh=HASH256::new_copy(self);
+        return sh.hash();
     }
 }
 

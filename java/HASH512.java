@@ -144,9 +144,17 @@ public class HASH512 {
         h[7] = H7;
     }
 
-    /* Constructor */
+    /* Constructors */
     public HASH512() {
         init();
+    }
+
+    public HASH512(HASH512 hh) {
+        int i;
+        for (i = 0; i < 80; i++) w[i] = hh.w[i];
+        length[0] = hh.length[0]; 
+        length[1] = hh.length[1];
+        for (i=0;i<8;i++) h[i]=hh.h[i];
     }
 
     /* process a single byte */
@@ -194,6 +202,11 @@ public class HASH512 {
         }
         init();
         return digest;
+    }
+
+    public byte[] continuing_hash() {
+        HASH512 sh=new HASH512(this);
+        return sh.hash();
     }
 
     /* test program: should produce digest */

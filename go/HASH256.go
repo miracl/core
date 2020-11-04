@@ -146,6 +146,19 @@ func NewHASH256() *HASH256 {
 	return H
 }
 
+func NewHASH256copy(HC *HASH256) *HASH256 {
+	H := new(HASH256)
+	for i:=0;i<64;i++ {
+		H.w[i]=HC.w[i]
+	}
+	for i:=0;i<8;i++ {
+		H.h[i]=HC.h[i]
+	}
+	H.length[0]=HC.length[0]
+	H.length[1]=HC.length[1]
+	return H
+}
+
 /* process a single byte */
 func (H *HASH256) Process(byt byte) { /* process the next message byte */
 	cnt := (H.length[0] / 32) % 16
@@ -194,6 +207,11 @@ func (H *HASH256) Hash() []byte { /* pad message and finish - supply digest */
 	}
 	H.Init()
 	return digest[0:32]
+}
+
+func (H *HASH256) Continuing_Hash() []byte {
+	sh := NewHASH256copy(H)
+	return sh.Hash()
 }
 
 /* test program: should produce digest */

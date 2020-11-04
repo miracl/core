@@ -218,6 +218,23 @@ impl HASH512 {
         return nh;
     }
 
+    pub fn new_copy(hh: &HASH512) -> HASH512 {
+        let mut nh = HASH512 {
+            length: [0; 2],
+            h: [0; 8],
+            w: [0; 80],
+        };
+        nh.length[0]=hh.length[0];
+        nh.length[1]=hh.length[1];
+        for i in 0..80 {
+            nh.w[i] = hh.w[i];
+        }
+        for i in 0..8 {
+            nh.h[i] = hh.h[i];
+        }
+        return nh;        
+    }
+
     /* process a single byte */
     pub fn process(&mut self, byt: u8) {
         /* process the next message byte */
@@ -269,6 +286,10 @@ impl HASH512 {
         }
         self.init();
         return digest;
+    }
+    pub fn continuing_hash(&self) -> [u8; 64] {
+        let mut sh=HASH512::new_copy(self);
+        return sh.hash();
     }
 }
 

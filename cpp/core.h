@@ -405,13 +405,19 @@ extern void HASH256_init(hash256 *H);
 	@param b byte to be included in hash
  */
 extern void HASH256_process(hash256 *H, int b);
-/**	@brief Generate 32-byte hash
+/**	@brief Generate 32-byte final hash
  *
 	@param H an instance SHA256
 	@param h is the output 32-byte hash
  */
 extern void HASH256_hash(hash256 *H, char *h);
 
+/**	@brief Generate 32-byte intermediate hash
+ *
+	@param H an instance SHA256
+	@param h is the output 32-byte hash
+ */
+extern void HASH256_continuing_hash(hash256 *H, char *h);
 
 /**	@brief Initialise an instance of SHA384
  *
@@ -424,13 +430,19 @@ extern void HASH384_init(hash384 *H);
 	@param b byte to be included in hash
  */
 extern void HASH384_process(hash384 *H, int b);
-/**	@brief Generate 48-byte hash
+/**	@brief Generate 48-byte final hash
  *
 	@param H an instance SHA384
 	@param h is the output 48-byte hash
  */
 extern void HASH384_hash(hash384 *H, char *h);
 
+/**	@brief Generate 48-byte intermediate hash
+ *
+	@param H an instance SHA384
+	@param h is the output 48-byte hash
+ */
+extern void HASH384_continuing_hash(hash384 *H, char *h);
 
 /**	@brief Initialise an instance of SHA512
  *
@@ -443,13 +455,19 @@ extern void HASH512_init(hash512 *H);
 	@param b byte to be included in hash
  */
 extern void HASH512_process(hash512 *H, int b);
-/**	@brief Generate 64-byte hash
+/**	@brief Generate 64-byte final hash
  *
 	@param H an instance SHA512
 	@param h is the output 64-byte hash
  */
 extern void HASH512_hash(hash512 *H, char *h);
 
+/**	@brief Generate 64-byte intermediate hash
+ *
+	@param H an instance SHA512
+	@param h is the output 64-byte hash
+ */
+extern void HASH512_continuing_hash(hash512 *H, char *h);
 
 /**	@brief Initialise an instance of SHA3
  *
@@ -463,19 +481,36 @@ extern void  SHA3_init(sha3 *H, int t);
 	@param b a byte of date to be processed
  */
 extern void  SHA3_process(sha3 *H, int b);
-/**	@brief create fixed length hash output of SHA3
+/**	@brief create fixed length final hash output of SHA3
  *
 	@param H an instance SHA3
 	@param h a byte array to take hash
  */
 extern void  SHA3_hash(sha3 *H, char *h);
-/**	@brief create variable length hash output of SHA3
+
+/**	@brief create fixed length intermediate hash output of SHA3
+ *
+	@param H an instance SHA3
+	@param h a byte array to take hash
+ */
+extern void  SHA3_continuing_hash(sha3 *H, char *h);
+
+/**	@brief create variable length final hash output of SHA3
  *
 	@param H an instance SHA3
 	@param h a byte array to take hash
 	@param len is the length of the hash
  */
 extern void  SHA3_shake(sha3 *H, char *h, int len);
+
+/**	@brief create variable length intermediate hash output of SHA3
+ *
+	@param H an instance SHA3
+	@param h a byte array to take hash
+	@param len is the length of the hash
+ */
+extern void  SHA3_continuing_shake(sha3 *H, char *h, int len);
+
 /**	@brief generate further hash output of SHA3
  *
 	@param H an instance SHA3

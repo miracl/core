@@ -106,6 +106,16 @@ var SHA3 = function(ctx) {
             }
         },
 
+        copy: function(b) {
+            var i,j;
+            this.length=b.length;
+            this.len=b.len;
+            this.rate=b.rate;
+            for (i=0;i<5;i++)
+                for (j=0;j<5;j++)
+                    this.S[i][j]=b.S[i][j].copy();
+        },
+
         /* Initialise Hash function */
         init: function(olen) { /* initialise */
             var i, j;
@@ -214,6 +224,12 @@ var SHA3 = function(ctx) {
             return buff;
         },
 
+        continuing_hash() {
+            var sh=new SHA3();
+            sh.copy(this);
+            return sh.hash();
+        },
+
         shake: function(buff, olen) { /* pad message and finish - supply digest */
             var q = this.rate - (this.length % this.rate);
             if (q == 1) {
@@ -226,6 +242,12 @@ var SHA3 = function(ctx) {
                 this.process(0x80); /* this will force a final transform */
             }
             this.squeeze(buff, olen);
+        },
+
+        continuing_shake(buff,olen) {
+            var sh=new SHA3();
+            sh.copy(this);
+            sh.shake(buff,olen);
         }
     };
 

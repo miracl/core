@@ -122,22 +122,34 @@ public struct SHA3{
     /* Re-Initialise Hash function */
     	mutating func init_it(_ olen: Int)
     	{ /* initialise */
-		len=olen
-		rate=200-2*olen
+		    len=olen
+		    rate=200-2*olen
     	}
 
     	public init(_ olen: Int)
     	{
       		for i in 0 ..< 5 {
-			for j in 0..<5 {
-				s[i][j]=0
-			}
-		}
+			    for j in 0..<5 {
+				    s[i][j]=0
+			    }
+		    }
         	length=0
-		len=0
-		rate=0
+		    len=0
+		    rate=0
         	init_it(olen)
     	}
+
+        public init(_ hc: SHA3)
+        {
+      		for i in 0 ..< 5 {
+			    for j in 0..<5 {
+				    s[i][j]=hc.s[i][j]
+			    }
+		    }
+            length=hc.length
+            len=hc.len
+            rate=hc.rate
+        }
 
     /* process a single byte */
     public mutating func process(_ byt: UInt8)
@@ -213,6 +225,12 @@ public struct SHA3{
         return digest
 	}
 
+    public mutating func continuing_hash() -> [UInt8]
+    {
+        var sh=SHA3(self)
+        return sh.hash()
+    }    
+
     public mutating func shake(_ digest:inout [UInt8],_ olen: Int)
 	{
 		let q=rate-Int(length%UInt64(rate))
@@ -224,6 +242,12 @@ public struct SHA3{
 		}
  		squeeze(&digest,olen)
 	}
+
+    public mutating func continuing_shake(_ digest:inout [UInt8],_ olen: Int)
+    {
+        var sh=SHA3(self)
+        sh.shake(&digest,olen)
+    }   
 }
 
 //916f6061fe879741ca6469b43971dfdb28b1a32dc36cb3254e812be27aad1d18

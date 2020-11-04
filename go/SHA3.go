@@ -145,6 +145,19 @@ func NewSHA3(olen int) *SHA3 {
 	return H
 }
 
+func NewSHA3copy(HC *SHA3) *SHA3 {
+	H := new(SHA3)
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 5; j++ {
+			H.s[i][j] = HC.s[i][j]
+		}
+	}
+	H.length=HC.length
+	H.len=HC.len
+	H.rate=HC.rate
+	return H
+}
+
 /* process a single byte */
 func (H *SHA3) Process(byt byte) { /* process the next message byte */
 	cnt := int(H.length % uint64(H.rate))
@@ -228,6 +241,11 @@ func (H *SHA3) Hash()  []byte  { /* generate a SHA3 hash of appropriate size */
 	return digest[0:H.len]
 }
 
+func (H *SHA3) Continuing_Hash() [] byte {
+	sh := NewSHA3copy(H)
+	return sh.Hash()
+}
+
 func (H *SHA3) Shake(hash []byte, olen int) { /* generate a SHA3 hash of appropriate size */
 	q := H.rate - int(H.length%uint64(H.rate))
 	if q == 1 {
@@ -240,6 +258,11 @@ func (H *SHA3) Shake(hash []byte, olen int) { /* generate a SHA3 hash of appropr
 		H.Process(0x80)
 	}
 	H.Squeeze(hash, olen)
+}
+
+func (H *SHA3) Continuing_Shake(hash []byte, olen int) {
+	sh := NewSHA3copy(H)
+	sh.Shake(hash,olen)
 }
 
 /* test program: should produce digest */

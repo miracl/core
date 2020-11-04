@@ -176,6 +176,12 @@ void HASH256_hash(hash256 *sh, char *digest)
     HASH256_init(sh);
 }
 
+/* return 32-byte intermediate hash */
+void HASH256_continuing_hash(hash256 *sh,char *digest)
+{
+    hash256 cp=*sh;
+    HASH256_hash(&cp,digest);
+}
 
 #define H0_512 0x6a09e667f3bcc908
 #define H1_512 0xbb67ae8584caa73b
@@ -294,6 +300,13 @@ void HASH384_hash(hash384 *sh, char *hash)
     HASH512_hash(sh, hash);
 }
 
+/* return intermediate hash */
+void HASH384_continuing_hash(hash384 *sh,char *digest)
+{
+    hash384 cp=*sh;
+    HASH384_hash(&cp,digest);
+}
+
 void HASH512_init(hash512 *sh)
 {
     /* re-initialise */
@@ -352,7 +365,12 @@ void HASH512_hash(hash512 *sh, char *hash)
     HASH512_init(sh);
 }
 
-
+/* return intermediate hash */
+void HASH512_continuing_hash(hash512 *sh,char *digest)
+{
+    hash512 cp=*sh;
+    HASH512_hash(&cp,digest);
+}
 
 /* SHA3 */
 
@@ -511,6 +529,13 @@ void SHA3_hash(sha3 *sh, char *hash)
     SHA3_squeeze(sh, hash, sh->len);
 }
 
+/* return intermediate hash */
+void SHA3_continuing_hash(sha3 *sh,char *digest)
+{
+    sha3 cp=*sh;
+    SHA3_hash(&cp,digest);
+}
+
 void SHA3_shake(sha3 *sh, char *buff, int len)
 {
     /* SHAKE out a buffer of variable length len */
@@ -525,6 +550,12 @@ void SHA3_shake(sha3 *sh, char *buff, int len)
     SHA3_squeeze(sh, buff, len);
 }
 
+/* return intermediate hash */
+void SHA3_continuing_shake(sha3 *sh,char *digest,int len)
+{
+    sha3 cp=*sh;
+    SHA3_shake(&cp,digest,len);
+}
 
 /* test program: should produce digest
 

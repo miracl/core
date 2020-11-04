@@ -34,11 +34,21 @@ public class SHA3 {
 	private int rate,len;
 	private long[][] S=new long[5][5];
 
-/* Constructor */
+/* Constructors */
 	public SHA3(int olen)
 	{
 		init(olen);
 	}
+
+    public SHA3(SHA3 s)
+    {
+        length=s.length;
+        rate=s.rate;
+        len=s.len;
+		for (int i=0;i<5;i++) 
+			for (int j=0;j<5;j++)
+                S[i][j]=s.S[i][j];
+    }
 
 	public static final int HASH224=28; 
 	public static final int HASH256=32;
@@ -216,6 +226,13 @@ public class SHA3 {
         return digest;
 	}
 
+    public byte[] continuing_hash()
+    {
+        SHA3 sh=new SHA3(this);
+        return sh.hash();
+
+    }
+
 	public void shake(byte[] digest,int olen)
 	{ /* SHAKE out a buffer of variable length olen */
 		int q=rate-(int)(length%rate);
@@ -228,6 +245,12 @@ public class SHA3 {
 		}
 		squeeze(digest,olen);
 	}
+
+    public void continuing_shake(byte[] digest,int olen)
+    {
+        SHA3 sh=new SHA3(this);
+        sh.shake(digest,olen);
+    }
 
 /* test program: should produce digests */
 

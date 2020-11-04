@@ -140,9 +140,17 @@ public class HASH384 {
         h[7] = H7;
     }
 
-    /* Constructor */
+    /* Constructors */
     public HASH384() {
         init();
+    }
+
+    public HASH384(HASH384 hh) {
+        int i;
+        for (i = 0; i < 80; i++) w[i] = hh.w[i];
+        length[0] = hh.length[0]; 
+        length[1] = hh.length[1];
+        for (i=0;i<8;i++) h[i]=hh.h[i];
     }
 
     /* process a single byte */
@@ -190,6 +198,11 @@ public class HASH384 {
         }
         init();
         return digest;
+    }
+
+    public byte[] continuing_hash() {
+        HASH384 sh=new HASH384(this);
+        return sh.hash();
     }
 
     /* test program: should produce digest */

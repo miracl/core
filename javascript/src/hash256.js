@@ -86,6 +86,17 @@ var HASH256 = function() {
             this.h[7] = HASH256.H[7];
         },
 
+        copy: function(b) {
+            for (var i = 0; i < 64; i++) {
+                this.w[i] = b.w[i];
+            }
+            this.length[0]=b.length[0];
+            this.length[1]=b.length[1];
+            for (var i = 0;i < 8;i++) {
+                this.h[i]=b.h[i];
+            }
+        },
+
         /* process a single byte */
         process: function(byt) { /* process the next message byte */
             var cnt;
@@ -142,6 +153,12 @@ var HASH256 = function() {
             this.init();
 
             return digest;
+        },
+
+        continuing_hash() {
+            var sh=new HASH256();
+            sh.copy(this);
+            return sh.hash();
         }
     };
 

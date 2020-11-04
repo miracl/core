@@ -156,7 +156,7 @@ void core::HASH256_process(hash256 *sh, int byt)
 }
 
 /* SU= 24 */
-/* Generate 32-byte Hash */
+/* Generate 32-byte final Hash */
 void core::HASH256_hash(hash256 *sh, char *digest)
 {
     /* pad message and finish - supply digest */
@@ -175,6 +175,13 @@ void core::HASH256_hash(hash256 *sh, char *digest)
         digest[i] = (char)((sh->h[i / 4] >> (8 * (3 - i % 4))) & 0xffL);
     }
     HASH256_init(sh);
+}
+
+/* return 32-byte intermediate hash */
+void core::HASH256_continuing_hash(hash256 *sh,char *digest)
+{
+    hash256 cp=*sh;
+    HASH256_hash(&cp,digest);
 }
 
 
@@ -289,10 +296,17 @@ void core::HASH384_process(hash384 *sh, int byt)
     HASH512_process(sh, byt);
 }
 
-void core::HASH384_hash(hash384 *sh, char *hash)
+void core::HASH384_hash(hash384 *sh, char *digest)
 {
     /* pad message and finish - supply digest */
-    HASH512_hash(sh, hash);
+    HASH512_hash(sh, digest);
+}
+
+/* return intermediate hash */
+void core::HASH384_continuing_hash(hash384 *sh,char *digest)
+{
+    hash384 cp=*sh;
+    HASH384_hash(&cp,digest);
 }
 
 void core::HASH512_init(hash512 *sh)
@@ -333,7 +347,7 @@ void core::HASH512_process(hash512 *sh, int byt)
     if ((sh->length[0] % 1024) == 0) HASH512_transform(sh);
 }
 
-void core::HASH512_hash(hash512 *sh, char *hash)
+void core::HASH512_hash(hash512 *sh, char *digest)
 {
     /* pad message and finish - supply digest */
     int i;
@@ -348,12 +362,17 @@ void core::HASH512_hash(hash512 *sh, char *hash)
     for (i = 0; i < sh->hlen; i++)
     {
         /* convert to bytes */
-        hash[i] = (char)((sh->h[i / 8] >> (8 * (7 - i % 8))) & 0xffL);
+        digest[i] = (char)((sh->h[i / 8] >> (8 * (7 - i % 8))) & 0xffL);
     }
     HASH512_init(sh);
 }
 
-
+/* return intermediate hash */
+void core::HASH512_continuing_hash(hash512 *sh,char *digest)
+{
+    hash512 cp=*sh;
+    HASH512_hash(&cp,digest);
+}
 
 /* SHA3 */
 
@@ -492,7 +511,7 @@ void core::SHA3_squeeze(sha3 *sh, char *buff, int len)
     }
 }
 
-void core::SHA3_hash(sha3 *sh, char *hash)
+void core::SHA3_hash(sha3 *sh, char *digest)
 {   /* generate a SHA3 hash of appropriate size */
     int q = sh->rate - (sh->length % sh->rate);
     if (q == 1) SHA3_process(sh, 0x86);
@@ -502,10 +521,17 @@ void core::SHA3_hash(sha3 *sh, char *hash)
         while (sh->length % sh->rate != sh->rate - 1) SHA3_process(sh, 0x00);
         SHA3_process(sh, 0x80); /* this will force a final transform */
     }
-    SHA3_squeeze(sh, hash, sh->len);
+    SHA3_squeeze(sh, digest, sh->len);
 }
 
-void core::SHA3_shake(sha3 *sh, char *buff, int len)
+/* return intermediate hash */
+void core::SHA3_continuing_hash(sha3 *sh,char *digest)
+{
+    sha3 cp=*sh;
+    SHA3_hash(&cp,digest);
+}
+
+void core::SHA3_shake(sha3 *sh, char *digest, int len)
 {   /* SHAKE out a buffer of variable length len */
     int q = sh->rate - (sh->length % sh->rate);
     if (q == 1) SHA3_process(sh, 0x9f);
@@ -515,9 +541,15 @@ void core::SHA3_shake(sha3 *sh, char *buff, int len)
         while (sh->length % sh->rate != sh->rate - 1) SHA3_process(sh, 0x00);
         SHA3_process(sh, 0x80); /* this will force a final transform */
     }
-    SHA3_squeeze(sh, buff, len);
+    SHA3_squeeze(sh, digest, len);
 }
 
+/* return intermediate hash */
+void core::SHA3_continuing_shake(sha3 *sh,char *digest,int len)
+{
+    sha3 cp=*sh;
+    SHA3_shake(&cp,digest,len);
+}
 
 /* test program: should produce digest
 

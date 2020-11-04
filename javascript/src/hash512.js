@@ -74,6 +74,17 @@ var HASH512 = function(ctx) {
             this.h[7].add(hh);
         },
 
+        copy: function(b) {
+            for (var i = 0; i < 80; i++) {
+                this.w[i] = b.w[i].copy();
+            }
+            this.length[0]=b.length[0].copy();
+            this.length[1]=b.length[1].copy();
+            for (var i = 0;i < 8;i++) {
+                this.h[i]=b.h[i].copy();
+            }
+        },
+
         /* Initialise Hash function */
         init: function() { /* initialise */
             var i;
@@ -153,6 +164,12 @@ var HASH512 = function(ctx) {
             this.init();
 
             return digest;
+        },
+
+        continuing_hash() {
+            var sh=new HASH256();
+            sh.copy(this);
+            return sh.hash();
         }
     };
 
