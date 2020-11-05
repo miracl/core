@@ -55,9 +55,9 @@ var FP2 = function(ctx) {
 
         islarger: function() {
             if (this.iszilch()) return 0;
-            var cmp=this.b.larger();
+            var cmp=this.b.islarger();
             if (cmp!=0) return cmp;
-            return this.a.larger();
+            return this.a.islarger();
         },
         
         toBytes: function(bf) {

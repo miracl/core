@@ -56,7 +56,7 @@ var BLS = function(ctx) {
             return b;
         },
 
-        stringtobytes: function(str) { 
+        stringtobytes: function(s) { 
             var b = [],
                 i;
 

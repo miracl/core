@@ -179,7 +179,7 @@ var ECP2 = function(ctx) {
             W.affine();
 		    W.x.toBytes(t);
 
-            if ((ctx.FP.MODBITS-1)%8<=4 && ECP.ALLOW_ALT_COMPRESS) alt=true;
+            if ((ctx.FP.MODBITS-1)%8<=4 && ctx.ECP.ALLOW_ALT_COMPRESS) alt=true;
 
             if (alt)
             {
@@ -628,7 +628,7 @@ var ECP2 = function(ctx) {
         var typ= b[0];
         var P = new ECP2();
 
-        if ((ctx.FP.MODBITS-1)%8<=4 && ECP.ALLOW_ALT_COMPRESS) alt=true;
+        if ((ctx.FP.MODBITS-1)%8<=4 && ctx.ECP.ALLOW_ALT_COMPRESS) alt=true;
 
         if (alt)
         {

@@ -180,6 +180,7 @@ var FP = function(ctx) {
             if (this.iszilch()) return;
             var sx = new ctx.BIG(0);
             sx.rcopy(ctx.ROM_FIELD.Modulus);
+            var fx = this.redc();
             sx.sub(fx); sx.norm();
             return ctx.BIG.comp(fx,sx);
         },
