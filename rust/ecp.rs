@@ -31,6 +31,17 @@ pub struct ECP {
     z: FP,
 }
 
+impl std::fmt::Debug for ECP {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for ECP {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 pub const WEIERSTRASS: usize = 0;
 pub const EDWARDS: usize = 1;
 pub const MONTGOMERY: usize = 2;

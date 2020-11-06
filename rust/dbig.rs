@@ -26,6 +26,17 @@ pub struct DBIG {
     pub w: [Chunk; big::DNLEN],
 }
 
+impl std::fmt::Debug for DBIG {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for DBIG {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 impl DBIG {
     pub fn new() -> DBIG {
         DBIG {
@@ -251,7 +262,7 @@ impl DBIG {
     }
 
     /* return number of bits */
-    pub fn nbits(&mut self) -> usize {
+    pub fn nbits(&self) -> usize {
         let mut k = big::DNLEN - 1;
         let mut s = DBIG::new_copy(&self);
         s.norm();
@@ -271,7 +282,7 @@ impl DBIG {
     }
 
     /* Convert to Hex String */
-    pub fn tostring(&mut self) -> String {
+    pub fn tostring(&self) -> String {
         let mut s = String::new();
         let mut len = self.nbits();
 

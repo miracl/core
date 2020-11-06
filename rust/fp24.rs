@@ -40,6 +40,17 @@ pub struct FP24 {
     stype: usize,
 }
 
+impl std::fmt::Debug for FP24 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for FP24 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 impl FP24 {
     pub fn new() -> FP24 {
         FP24 {

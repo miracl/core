@@ -47,6 +47,17 @@ impl Clone for BIG {
     }
 }
 
+impl std::fmt::Debug for BIG {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for BIG {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 impl BIG {
     pub const fn new() -> BIG {
         BIG { w: [0; NLEN] }

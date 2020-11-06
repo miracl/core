@@ -34,6 +34,17 @@ pub struct ECP8 {
     z: FP8,
 }
 
+impl std::fmt::Debug for ECP8 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for ECP8 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 #[allow(non_snake_case)]
 impl ECP8 {
     pub fn new() -> ECP8 {

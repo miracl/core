@@ -34,6 +34,17 @@ pub struct FP8 {
     b: FP4,
 }
 
+impl std::fmt::Debug for FP8 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for FP8 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 impl FP8 {
     pub const fn new() -> FP8 {
         FP8 {

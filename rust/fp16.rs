@@ -29,6 +29,17 @@ pub struct FP16 {
     b: FP8,
 }
 
+impl std::fmt::Debug for FP16 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for FP16 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 impl FP16 {
     pub const fn new() -> FP16 {
         FP16 {
