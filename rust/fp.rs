@@ -32,6 +32,17 @@ pub struct FP {
     pub xes: i32,
 }
 
+impl std::fmt::Debug for FP {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for FP {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 pub const NOT_SPECIAL: usize = 0;
 pub const PSEUDO_MERSENNE: usize = 1;
 pub const MONTGOMERY_FRIENDLY: usize = 2;

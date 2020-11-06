@@ -43,6 +43,17 @@ pub struct FF {
     length: usize,
 }
 
+impl std::fmt::Debug for FF {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for FF {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 impl FF {
     pub fn excess(a: &BIG) -> Chunk {
         return ((a.w[big::NLEN - 1] & P_OMASK) >> (P_TBITS)) + 1;

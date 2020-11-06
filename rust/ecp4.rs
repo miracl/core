@@ -33,6 +33,17 @@ pub struct ECP4 {
     z: FP4,
 }
 
+impl std::fmt::Debug for ECP4 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}    
+impl std::fmt::Display for ECP4 {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "{}", self.tostring())
+    }
+}
+
 #[allow(non_snake_case)]
 impl ECP4 {
     pub fn new() -> ECP4 {
