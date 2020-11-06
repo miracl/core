@@ -320,12 +320,15 @@ impl FF {
     }
 
     /* Convert to Hex String */
-    pub fn tostring(&mut self) -> String {
-        self.norm();
+    pub fn tostring(&self) -> String {
+    //    self.norm();
+        let n=self.length;
+        let mut cs = FF::new_int(n);
+        cs.copy(self); cs.norm();
         let mut s = String::new();
-        let mut i: usize = self.length - 1;
+        let mut i: usize = cs.length - 1;
         loop {
-            s = s + self.v[i].tostring().as_ref();
+            s = s + cs.v[i].tostring().as_ref();
             if i == 0 {
                 break;
             }
