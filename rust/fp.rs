@@ -475,9 +475,9 @@ impl FP {
     }
     /* return jacobi symbol (this/Modulus) */
     pub fn jacobi(&mut self) -> isize {
-        let mut p = BIG::new_ints(&rom::MODULUS);
+        let p = BIG::new_ints(&rom::MODULUS);
         let mut w = self.redc();
-        return w.jacobi(&mut p);
+        return w.jacobi(&p);
     }
     /* return TRUE if self==a */
     pub fn equals(&self, a: &FP) -> bool {

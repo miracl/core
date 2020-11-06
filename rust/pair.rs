@@ -840,9 +840,9 @@ PFBNF */
         u[3].copy(&w);
         if ecp::SIGN_OF_X == ecp::NEGATIVEX {
             let mut t = BIG::new();
-            t.copy(&BIG::modneg(&mut u[1], &q));
+            t.copy(&BIG::modneg(&u[1], &q));
             u[1].copy(&t);
-            t.copy(&BIG::modneg(&mut u[3], &q));
+            t.copy(&BIG::modneg(&u[3], &q));
             u[3].copy(&t);
         }
     }
@@ -864,7 +864,7 @@ pub fn g1mul(P: &ECP, e: &BIG) -> ECP {
         Q.mulx(&mut cru);
 
         let mut np = u[0].nbits();
-        let mut t: BIG = BIG::modneg(&mut u[0], &q);
+        let mut t: BIG = BIG::modneg(&u[0], &q);
         let mut nn = t.nbits();
         if nn < np {
             u[0].copy(&t);
@@ -872,7 +872,7 @@ pub fn g1mul(P: &ECP, e: &BIG) -> ECP {
         }
 
         np = u[1].nbits();
-        t = BIG::modneg(&mut u[1], &q);
+        t = BIG::modneg(&u[1], &q);
         nn = t.nbits();
         if nn < np {
             u[1].copy(&t);
@@ -880,7 +880,7 @@ pub fn g1mul(P: &ECP, e: &BIG) -> ECP {
         }
         u[0].norm();
         u[1].norm();
-        R = R.mul2(&u[0], &mut Q, &u[1]);
+        R = R.mul2(&u[0], &Q, &u[1]);
     } else {
         R = P.mul(e);
     }
@@ -912,7 +912,7 @@ pub fn g2mul(P: &ECP2, e: &BIG) -> ECP2 {
         }
         for i in 0..4 {
             let np = u[i].nbits();
-            t.copy(&BIG::modneg(&mut u[i], &q));
+            t.copy(&BIG::modneg(&u[i], &q));
             let nn = t.nbits();
             if nn < np {
                 u[i].copy(&t);
@@ -921,7 +921,7 @@ pub fn g2mul(P: &ECP2, e: &BIG) -> ECP2 {
             u[i].norm();
         }
 
-        R.copy(&ECP2::mul4(&mut Q, &u));
+        R.copy(&ECP2::mul4(&Q, &u));
     } else {
         R.copy(&P.mul(e));
     }
@@ -948,7 +948,7 @@ pub fn gtpow(d: &FP12, e: &BIG) -> FP12 {
         }
         for i in 0..4 {
             let np = u[i].nbits();
-            t.copy(&BIG::modneg(&mut u[i], &q));
+            t.copy(&BIG::modneg(&u[i], &q));
             let nn = t.nbits();
             if nn < np {
                 u[i].copy(&t);
@@ -956,7 +956,7 @@ pub fn gtpow(d: &FP12, e: &BIG) -> FP12 {
             }
             u[i].norm();
         }
-        r.copy(&FP12::pow4(&mut g, &u));
+        r.copy(&FP12::pow4(&g, &u));
     } else {
         r.copy(&d.pow(e));
     }

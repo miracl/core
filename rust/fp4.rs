@@ -678,7 +678,7 @@ impl FP4 {
         for _ in 0..f2 {
             r.xtr_d()
         }
-        r = r.xtr_pow(&mut d);
+        r = r.xtr_pow(&d);
         return r;
     }
 
