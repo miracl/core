@@ -55,46 +55,46 @@ impl FP4 {
         let mut f = FP4::new();
         f.a.copy(&FP2::new_int(a));
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_ints(a: isize,b: isize) -> FP4 {
         let mut f = FP4::new();
         f.a.copy(&FP2::new_int(a));
         f.b.copy(&FP2::new_int(b));
-        return f;
+        f
     }
 
     pub fn new_copy(x: &FP4) -> FP4 {
         let mut f = FP4::new();
         f.a.copy(&x.a);
         f.b.copy(&x.b);
-        return f;
+        f
     }
 
     pub fn new_fp2s(c: &FP2, d: &FP2) -> FP4 {
         let mut f = FP4::new();
         f.a.copy(c);
         f.b.copy(d);
-        return f;
+        f
     }
 
     pub fn new_fp2(c: &FP2) -> FP4 {
         let mut f = FP4::new();
         f.a.copy(c);
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_fp(c: &FP) -> FP4 {
         let mut f = FP4::new();
         f.a.set_fp(c);
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_rand(rng: &mut RAND) -> FP4 {
-        return FP4::new_fp2s(&FP2::new_rand(rng),&FP2::new_rand(rng));
+       FP4::new_fp2s(&FP2::new_rand(rng),&FP2::new_rand(rng))
     }
 
     pub fn set_fp2s(&mut self, c: &FP2, d: &FP2) {
@@ -136,18 +136,20 @@ impl FP4 {
 
     /* test self=0 ? */
     pub fn iszilch(&self) -> bool {
-        return self.a.iszilch() && self.b.iszilch();
+        self.a.iszilch() && self.b.iszilch()
     }
 
     pub fn islarger(&self) -> isize {
         if self.iszilch() {
-            return 0;
+            0
+        } else {
+            let cmp=self.b.islarger();
+            if cmp!=0 {
+                cmp
+            } else {
+                self.a.islarger()
+            }
         }
-        let cmp=self.b.islarger();
-        if cmp!=0 {
-            return cmp;
-        }
-        return self.a.islarger()
     }
 
     pub fn tobytes(&self,bf: &mut [u8]) {
@@ -174,7 +176,7 @@ impl FP4 {
             t[i]=bf[i+MB];
         }
         let ta=FP2::frombytes(&t);
-        return FP4::new_fp2s(&ta,&tb);
+        FP4::new_fp2s(&ta,&tb)
     }
 
 
@@ -182,32 +184,29 @@ impl FP4 {
     /* test self=1 ? */
     pub fn isunity(&self) -> bool {
         let one = FP2::new_int(1);
-        return self.a.equals(&one) && self.b.iszilch();
+        self.a.equals(&one) && self.b.iszilch()
     }
 
     /* test is w real? That is in a+ib test b is zero */
     pub fn isreal(&mut self) -> bool {
-        return self.b.iszilch();
+        self.b.iszilch()
     }
     /* extract real part a */
     pub fn real(&self) -> FP2 {
-        let f = FP2::new_copy(&self.a);
-        return f;
+        FP2::new_copy(&self.a)
     }
 
     pub fn geta(&self) -> FP2 {
-        let f = FP2::new_copy(&self.a);
-        return f;
+        FP2::new_copy(&self.a)
     }
     /* extract imaginary part b */
     pub fn getb(&self) -> FP2 {
-        let f = FP2::new_copy(&self.b);
-        return f;
+        FP2::new_copy(&self.b)
     }
 
     /* test self=x */
     pub fn equals(&self, x: &FP4) -> bool {
-        return self.a.equals(&x.a) && self.b.equals(&x.b);
+        self.a.equals(&x.a) && self.b.equals(&x.b)
     }
     /* copy self=x */
     pub fn copy(&mut self, x: &FP4) {
@@ -233,11 +232,11 @@ impl FP4 {
         if fp::BIG_ENDIAN_SIGN {
             let u=self.b.iszilch() as isize;
 	        p2^=(p1^p2)&u;
-	        return p2;
+	        p2
         } else {
             let u=self.a.iszilch() as isize;
 	        p1^=(p1^p2)&u;
-	        return p1;
+	        p1
         }
     }
 
@@ -387,7 +386,7 @@ impl FP4 {
 
     /* output to hex string */
     pub fn tostring(&self) -> String {
-        return format!("[{},{}]", self.a.tostring(), self.b.tostring());
+        format!("[{},{}]", self.a.tostring(), self.b.tostring())
     }
 
     /* self=1/self */
@@ -449,7 +448,7 @@ impl FP4 {
             w.sqr();
         }
         r.reduce();
-        return r;
+        r
     }
 */
     /* XTR xtr_a function */
@@ -528,7 +527,7 @@ impl FP4 {
             r.copy(&b)
         }
         r.reduce();
-        return r;
+        r
     }
 
     /* r=ck^a.cl^n using XTR double exponentiation method on traces of FP12s. See Stam thesis. */
@@ -679,7 +678,7 @@ impl FP4 {
             r.xtr_d()
         }
         r = r.xtr_pow(&d);
-        return r;
+        r
     }
 
     /* this/=2 */
@@ -726,7 +725,7 @@ impl FP4 {
         let mut c=FP4::new_copy(self);
         c.conj();
         c.mul(self);
-        return c.geta().qr(h);
+        c.geta().qr(h)
     }
 
     // sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) 

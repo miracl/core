@@ -34,7 +34,7 @@ fn decode_hex(s: &str) -> Vec<u8> {
         let n2=cv[j+1] as usize;
 	    x.push(((n1 % 32 + 9) % 25 * 16 + (n2 % 32 + 9) % 25) as u8); j+=2;
     }
-    return x;
+    x
 }
 
 fn printbinary(array: &[u8]) {

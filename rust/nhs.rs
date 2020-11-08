@@ -212,28 +212,28 @@ const IROOTS: [i32; 1024] = [
 ];
 
 fn round(a: i32, b: i32) -> i32 {
-    return (a + b / 2) / b;
+    (a + b / 2) / b
 }
 
 /* Constant time absolute value */
 fn nabs(x: i32) -> i32 {
     let mask = x >> 31;
-    return (x + mask) ^ mask;
+    (x + mask) ^ mask
 }
 
 /* Montgomery stuff */
 
 fn redc(t: u64) -> i32 {
     let m = (t as u32).wrapping_mul(ND);
-    return (((m as u64) * (PRIME as u64) + t) >> WL) as i32;
+    (((m as u64) * (PRIME as u64) + t) >> WL) as i32
 }
 
 fn nres(x: i32) -> i32 {
-    return redc((x as u64) * R2MODP);
+    redc((x as u64) * R2MODP)
 }
 
 fn modmul(a: i32, b: i32) -> i32 {
-    return redc((a as u64) * (b as u64));
+    redc((a as u64) * (b as u64))
 }
 
 /* Cooley-Tukey NTT */

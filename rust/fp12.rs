@@ -66,7 +66,7 @@ impl FP12 {
     }
 
     pub fn gettype(&self) -> usize {
-        return self.stype;
+        self.stype
     }
 
     pub fn new_int(a: isize) -> FP12 {
@@ -79,7 +79,7 @@ impl FP12 {
         } else {
             f.stype = SPARSEST;
         }
-        return f;
+        f
     }
 
     pub fn new_copy(x: &FP12) -> FP12 {
@@ -88,7 +88,7 @@ impl FP12 {
         f.b.copy(&x.b);
         f.c.copy(&x.c);
         f.stype = x.stype;
-        return f;
+        f
     }
 
     pub fn new_fp4s(d: &FP4, e: &FP4, f: &FP4) -> FP12 {
@@ -97,7 +97,7 @@ impl FP12 {
         g.b.copy(e);
         g.c.copy(f);
         g.stype = DENSE;
-        return g;
+        g
     }
 
     pub fn new_fp4(d: &FP4) -> FP12 {
@@ -106,7 +106,7 @@ impl FP12 {
         g.b.zero();
         g.c.zero();
         g.stype = SPARSEST;
-        return g;
+        g
     }
 
     /* reduce components mod Modulus */
@@ -126,7 +126,7 @@ impl FP12 {
     /* test self=0 ? */
     pub fn iszilch(&self) -> bool {
         //self.reduce();
-        return self.a.iszilch() && self.b.iszilch() && self.c.iszilch();
+        self.a.iszilch() && self.b.iszilch() && self.c.iszilch()
     }
 
     /* Conditional move of g to self dependant on d */
@@ -143,7 +143,7 @@ impl FP12 {
     fn teq(b: i32, c: i32) -> isize {
         let mut x = b ^ c;
         x -= 1; // if x=0, x now -1
-        return ((x >> 31) & 1) as isize;
+        ((x >> 31) & 1) as isize
     }
 
     /* Constant time select from pre-computed table */
@@ -170,28 +170,28 @@ impl FP12 {
     /* test self=1 ? */
     pub fn isunity(&self) -> bool {
         let one = FP4::new_int(1);
-        return self.a.equals(&one) && self.b.iszilch() && self.c.iszilch();
+        self.a.equals(&one) && self.b.iszilch() && self.c.iszilch()
     }
 
     /* test self=x */
     pub fn equals(&self, x: &FP12) -> bool {
-        return self.a.equals(&x.a) && self.b.equals(&x.b) && self.c.equals(&x.c);
+        self.a.equals(&x.a) && self.b.equals(&x.b) && self.c.equals(&x.c)
     }
 
     pub fn geta(&mut self) -> FP4 {
-        return self.a;
+        self.a
         //        let f = FP4::new_copy(&self.a);
         //        return f;
     }
 
     pub fn getb(&mut self) -> FP4 {
-        return self.b;
+        self.b
         //        let f = FP4::new_copy(&self.b);
         //        return f;
     }
 
     pub fn getc(&mut self) -> FP4 {
-        return self.c;
+        self.c
         //        let f = FP4::new_copy(&self.c);
         //        return f;
     }
@@ -866,7 +866,7 @@ impl FP12 {
         t.copy(&self.a);
         t.imul(3);
         t.reduce();
-        return t;
+        t
     }
 
     /* convert from byte array to FP12 */
@@ -885,7 +885,7 @@ impl FP12 {
 		    t[i]=w[i+2*MB];
 	    }
         let a=FP4::frombytes(&t);
-	    return FP12::new_fp4s(&a,&b,&c);
+	    FP12::new_fp4s(&a,&b,&c)
     }
 
     /* convert this to byte array */
@@ -909,12 +909,12 @@ impl FP12 {
 
     /* output to hex string */
     pub fn tostring(&self) -> String {
-        return format!(
+        format!(
             "[{},{},{}]",
             self.a.tostring(),
             self.b.tostring(),
             self.c.tostring()
-        );
+        )
     }
 
 /* Note this is simple square and multiply, so not side-channel safe */
@@ -949,7 +949,7 @@ impl FP12 {
         }
 
         w.reduce();
-        return w;
+        w
     }
 
     /* constant time powering by small integer of max length bts */
@@ -997,9 +997,7 @@ impl FP12 {
         g2.mul(&g1);
         let cpm2 = g2.trace();
 
-        c = c.xtr_pow2(&cp, &cpm1, &cpm2, &a, &b);
-
-        return c;
+        c.xtr_pow2(&cp, &cpm1, &cpm2, &a, &b)
     }
 
     /* p=q0^u0.q1^u1.q2^u2.q3^u3 */
@@ -1108,6 +1106,6 @@ impl FP12 {
         r.mul(&p);
         p.cmove(&r, pb);
         p.reduce();
-        return p;
+        p
     }
 }

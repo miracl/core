@@ -49,7 +49,7 @@ impl DBIG {
         for i in 0..big::DNLEN {
             s.w[i] = y.w[i]
         }
-        return s;
+        s
     }
 
     pub fn new_scopy(x: &BIG) -> DBIG {
@@ -63,7 +63,7 @@ impl DBIG {
         for i in big::NLEN + 1..big::DNLEN {
             b.w[i] = 0
         }
-        return b;
+        b
     }
 
     /* split DBIG at position n, return higher half, keep lower half */
@@ -78,7 +78,7 @@ impl DBIG {
             t.set(i + 1 - big::NLEN, nw);
         }
         self.w[big::NLEN - 1] &= ((1 as Chunk) << m) - 1;
-        return t;
+        t
     }
 
     /* general shift left */
@@ -164,7 +164,7 @@ impl DBIG {
   		    gt |= ((b.w[i]-a.w[i]) >> big::BASEBITS) & eq;
 		    eq &= ((b.w[i]^a.w[i])-1) >> big::BASEBITS;
         }
-        return (gt+gt+eq-1) as isize;
+        (gt+gt+eq-1) as isize
     }
 
     /* convert from byte array to BIG */
@@ -174,7 +174,7 @@ impl DBIG {
             m.shl(8);
             m.w[0] += (b[i] & 0xff) as Chunk;
         }
-        return m;
+        m
     }
 
     /* normalise BIG - force all digits < 2^big::BASEBITS */
@@ -222,8 +222,7 @@ impl DBIG {
 
             k -= 1;
         }
-        let r = BIG::new_dcopy(self);
-        return r;
+        BIG::new_dcopy(self)
     }
 
     /* return this/c */
@@ -258,7 +257,7 @@ impl DBIG {
 
             k -= 1;
         }
-        return a;
+        a
     }
 
     /* return number of bits */
@@ -278,7 +277,7 @@ impl DBIG {
             c /= 2;
             bts += 1;
         }
-        return bts;
+       bts
     }
 
     /* Convert to Hex String */
@@ -298,6 +297,6 @@ impl DBIG {
             b.shr(i * 4);
             s = s + &format!("{:X}", b.w[0] & 15);
         }
-        return s;
+        s
     }
 }

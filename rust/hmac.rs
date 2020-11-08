@@ -232,7 +232,7 @@ fn blksize(hash: usize, sha: usize) -> usize {
     if hash == MC_SHA3 {
         lb=200-2*sha;
     }
-    return lb;
+    lb
 }
 
 /* Calculate HMAC of m using key k. HMAC is tag of length olen (which is length of tag) */
@@ -274,7 +274,7 @@ pub fn hmac1(hash: usize, sha: usize, tag: &mut [u8], olen: usize, k: &[u8], m: 
     }
     GPhashit(hash, sha, tag,olen,0,Some(&mut k0[0..lb]), -1, Some(&b[0..sha]));
 
-    return true;
+    true
 }
 
 pub fn hkdf_extract(hash: usize, hlen: usize, prk: &mut [u8],salt: Option<&[u8]>,ikm: &[u8]) {
@@ -320,7 +320,7 @@ pub fn hkdf_expand(hash: usize, hlen: usize, okm: &mut [u8], olen: usize, prk: &
 }
 
 fn ceil(a: usize,b: usize) -> usize {
-    return (a-1)/b+1;
+    (a-1)/b+1
 }
 
 pub fn xof_expand(hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],msg: &[u8]) {
@@ -507,7 +507,7 @@ pub fn pkcs15(sha: usize, m: &[u8], w: &mut [u8],rfs: usize) -> bool {
         i += 1
     }
 
-    return true;
+    true
 }
 /*
 pub fn printbinary(array: &[u8]) {
@@ -560,7 +560,7 @@ pub fn pss_encode(sha: usize, m: &[u8], rng: &mut RAND, f: &mut [u8], rfs: usize
         f[emlen+i-hlen-1]=h[i];
     }
     f[emlen-1]=0xbc as u8;
-    return true;
+    true
 }
 
 pub fn pss_verify(sha: usize, m: &[u8],f: &[u8]) -> bool {
@@ -623,7 +623,7 @@ pub fn pss_verify(sha: usize, m: &[u8],f: &[u8]) -> bool {
     if k!=0 {
         return false;
     }
-    return true;
+    true
 }
 /* OAEP Message Encoding for Encryption */
 pub fn oaep_encode(sha: usize, m: &[u8], rng: &mut RAND, p: Option<&[u8]>, f: &mut [u8], rfs: usize) -> bool {
@@ -681,7 +681,7 @@ pub fn oaep_encode(sha: usize, m: &[u8], rng: &mut RAND, p: Option<&[u8]>, f: &m
     for i in (0..d).rev() {
         f[i] = 0;
     }
-    return true;
+    true
 }
 
 /* OAEP Message Decoding for Decryption */
@@ -768,7 +768,7 @@ pub fn oaep_decode(sha: usize, p: Option<&[u8]>, f: &mut [u8],rfs :usize) -> usi
         dbmask[i] = 0
     }
 
-    return olen - seedlen - hlen - k - 1;
+    olen - seedlen - hlen - k - 1
 }
 
 /*

@@ -120,7 +120,7 @@ fn linedbl(A: &mut ECP8, qx: &FP, qy: &FP) -> FP48 {
   
     let mut res= FP48::new_fp16s(&a, &b, &c);
     res.settype(fp48::SPARSER);
-    return res;
+    res
 }
 
 #[allow(non_snake_case)]
@@ -148,7 +148,7 @@ fn lineadd(A: &mut ECP8, B: &ECP8, qx: &FP, qy: &FP) -> FP48 {
   
     let mut res= FP48::new_fp16s(&a, &b, &c);
     res.settype(fp48::SPARSER);
-    return res;
+    res
 }
 
 /* prepare ate parameter, n=6u+2 (BN) or n=u (BLS), n3=3*n */
@@ -158,7 +158,7 @@ fn lbits(n3: &mut BIG,n: &mut BIG) -> usize {
     n3.copy(&n);
     n3.pmul(3);
     n3.norm();
-    return n3.nbits();
+    n3.nbits()
 }
 
 /* prepare for multi-pairing */
@@ -181,7 +181,7 @@ pub fn miller(r:&mut [FP48]) -> FP48 {
     }
     res.ssmul(&r[0]);
     r[0].zero();
-    return res;
+    res
 }
 
 fn pack(aa: &FP8,bb: &FP8,cc: &FP8) -> FP16 {
@@ -191,7 +191,7 @@ fn pack(aa: &FP8,bb: &FP8,cc: &FP8) -> FP16 {
     let mut b=FP8::new_copy(bb);
     a.mul(&i);
     b.mul(&i);
-    return FP16::new_fp8s(&a,&b);
+    FP16::new_fp8s(&a,&b)
 }
 
 fn unpack(t: &FP16, qx: &FP, qy: &FP) -> FP48 {
@@ -213,7 +213,7 @@ fn unpack(t: &FP16, qx: &FP, qy: &FP) -> FP48 {
     }
     let mut v=FP48::new_fp16s(&a,&b,&c);
     v.settype(fp48::SPARSEST);
-    return v;
+    v
 }
 
 #[allow(non_snake_case)]
@@ -379,7 +379,7 @@ pub fn ate(P1: &ECP8, Q1: &ECP) -> FP48 {
         r.conj();
     }
 
-    return r;
+    r
 }
 
 #[allow(non_snake_case)]
@@ -455,7 +455,7 @@ pub fn ate2(P1: &ECP8, Q1: &ECP, R1: &ECP8, S1: &ECP) -> FP48 {
         r.conj();
     }
 
-    return r;
+    r
 }
 
 /* final exponentiation - keep separate for multi-pairings and to avoid thrashing stack */
@@ -712,7 +712,7 @@ pub fn fexp(m: &FP48) -> FP48 {
     r.mul(&t2);
 
     r.reduce(); */
-    return r;
+    r
 }
 
 #[allow(non_snake_case)]
@@ -730,7 +730,7 @@ fn glv(e: &BIG) -> [BIG; 2] {
     u[1].div(&x2);
     u[1].rsub(&q);
 
-    return u;
+    u
 }
 
 #[allow(non_snake_case)]
@@ -782,7 +782,7 @@ pub fn gs(e: &BIG) -> [BIG; 16] {
         t.copy(&BIG::modneg(&mut u[15], &q));
         u[15].copy(&t);
     }
-    return u;
+    u
 }
 
 #[allow(non_snake_case)]
@@ -820,7 +820,7 @@ pub fn g1mul(P: &ECP, e: &BIG) -> ECP {
     } else {
         R = P.mul(e);
     }
-    return R;
+    R
 }
 
 #[allow(non_snake_case)]
@@ -877,7 +877,7 @@ pub fn g2mul(P: &ECP8, e: &BIG) -> ECP8 {
     } else {
         R.copy(&P.mul(e));
     }
-    return R;
+    R
 }
 
 /* f=f^e */
@@ -929,7 +929,7 @@ pub fn gtpow(d: &FP48, e: &BIG) -> FP48 {
     } else {
         r.copy(&d.pow(e));
     }
-    return r;
+    r
 }
 
 /* test G1 group membership */
@@ -943,7 +943,7 @@ pub fn g1member(P: &ECP) -> bool {
     if !W.is_infinity() {
         return false;
     }
-    return true;
+    true
 }
 
 /* test G2 group membership */
@@ -957,7 +957,7 @@ pub fn g2member(P: &ECP8) -> bool {
     if !W.is_infinity() {
         return false;
     }
-    return true;
+    true
 }
 
 /* test GT group membership */
@@ -985,6 +985,6 @@ pub fn gtmember(m: &FP48) -> bool {
     if !r.isunity() {
         return false;
     }
-    return true;
+    true
 }
 

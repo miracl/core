@@ -51,7 +51,7 @@ pub const MAXPIN: i32 = 10000; /* PIN less than this */
 pub const PBLEN: i32 = 14; /* Number of bits in PIN */
 
 fn ceil(a: usize,b: usize) -> usize {
-    return (a-1)/b+1;
+    (a-1)/b+1
 }
 
 #[allow(non_snake_case)]
@@ -80,7 +80,7 @@ pub fn random_generate(mut rng: &mut RAND, s: &mut [u8]) -> isize {
     let r = BIG::new_ints(&rom::CURVE_ORDER);
     let sc = BIG::randtrunc(&r, 16 * ecp::AESKEY, &mut rng);
     sc.tobytes(s);
-    return 0;
+    0
 }
 
 /* Extract PIN from TOKEN for identity CID */
@@ -98,7 +98,7 @@ pub fn extract_pin(cid: &[u8], pin: i32, token: &mut [u8]) -> isize {
     R = R.pinmul(pin%MAXPIN, PBLEN);
     P.sub(&mut R);
     P.tobytes(token, false);
-    return 0;
+    0
 }
 
 /* Implement step 2 on client side of MPin protocol */
@@ -118,7 +118,7 @@ pub fn client_2(x: &[u8], y: &[u8], sec: &mut [u8]) -> isize {
     P = pair4::g1mul(&P, &px);
     P.neg();
     P.tobytes(sec, false);
-    return 0;
+    0
 }
 
 /* Client secret CST=S*H(CID) where CID is client ID and S is master secret */
@@ -130,7 +130,7 @@ pub fn get_client_secret(s: &mut [u8], idhtc: &[u8], cst: &mut [u8]) -> isize {
         return INVALID_POINT;
     }
     pair4::g1mul(&P, &sx).tobytes(cst, false);
-    return 0;
+    0
 }
 
 /* Implement step 1 on client side of MPin protocol */
@@ -170,7 +170,7 @@ pub fn client_1(
     P.tobytes(xid, false);
 
     T.tobytes(sec, false);
-    return 0;
+    0
 }
 
 
@@ -181,7 +181,7 @@ pub fn get_server_secret(s: &[u8], sst: &mut [u8]) -> isize {
     let sc = BIG::frombytes(s);
     Q = pair4::g2mul(&Q, &sc);
     Q.tobytes(sst,false);
-    return 0;
+    0
 }
 
 /* Implement step 2 of MPin protocol on server side */
@@ -223,5 +223,5 @@ pub fn server(
     if !g.isunity() {
         return BAD_PIN;
     }
-    return 0;
+    0
 }

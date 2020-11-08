@@ -68,7 +68,7 @@ impl ECP2 {
         if !y2.equals(&rhs) {
             E.inf();
         }
-        return E;
+        E
     }
 
     /* construct this from x - but set to O if not on curve */
@@ -90,12 +90,12 @@ impl ECP2 {
         } else {
             E.inf();
         }
-        return E;
+        E
     }
 
     /* Test this=O? */
     pub fn is_infinity(&self) -> bool {
-        return self.x.iszilch() && self.z.iszilch();
+        self.x.iszilch() && self.z.iszilch()
     }
 
     /* copy self=P */
@@ -130,7 +130,7 @@ impl ECP2 {
     fn teq(b: i32, c: i32) -> isize {
         let mut x = b ^ c;
         x -= 1; // if x=0, x now -1
-        return ((x >> 31) & 1) as isize;
+        ((x >> 31) & 1) as isize
     }
 
     /* Constant time select from pre-computed table */
@@ -173,7 +173,7 @@ impl ECP2 {
             return false;
         }
 
-        return true;
+        true
     }
 
     /* set to Affine - (x,y,z) to (x,y) */
@@ -199,7 +199,7 @@ impl ECP2 {
         let mut W = ECP2::new();
         W.copy(self);
         W.affine();
-        return FP2::new_copy(&W.x);
+        FP2::new_copy(&W.x)
     }
 
     /* extract affine y as FP2 */
@@ -207,20 +207,20 @@ impl ECP2 {
         let mut W = ECP2::new();
         W.copy(self);
         W.affine();
-        return FP2::new_copy(&W.y);
+        FP2::new_copy(&W.y)
     }
 
     /* extract projective x */
     pub fn getpx(&self) -> FP2 {
-        return FP2::new_copy(&self.x);
+        FP2::new_copy(&self.x)
     }
     /* extract projective y */
     pub fn getpy(&self) -> FP2 {
-        return FP2::new_copy(&self.y);
+        FP2::new_copy(&self.y)
     }
     /* extract projective z */
     pub fn getpz(&self) -> FP2 {
-        return FP2::new_copy(&self.z);
+        FP2::new_copy(&self.z)
     }
 
     /* convert to byte array */
@@ -282,7 +282,7 @@ impl ECP2 {
             alt=true;
         }
 
-	    if alt {
+	if alt {
             for i in 0..MB  {
 			    t[i]=b[i];
 		    }
@@ -293,7 +293,7 @@ impl ECP2 {
 				    t[i]=b[i+MB];
 			    }
                 let ry=FP2::frombytes(&t);
-                return ECP2::new_fp2s(&rx,&ry);
+                ECP2::new_fp2s(&rx,&ry)
             } else {
                 let sgn=(b[0]&0x20)>>5;
                 let mut P=ECP2::new_fp2(&rx,0);
@@ -301,21 +301,21 @@ impl ECP2 {
                 if (sgn == 1 && cmp != 1) || (sgn == 0 && cmp == 1) {
 				    P.neg();
 			    }
-                return P;
+                P
             }
         } else {
-		    for i in 0..MB {
-			    t[i]=b[i+1];
-		    }
+            for i in 0..MB {
+                 t[i]=b[i+1];
+            }
             let rx=FP2::frombytes(&t);
             if typ == 0x04 {
 		        for i in 0..MB {
 				    t[i]=b[i+MB+1];
 			    }
 		        let ry=FP2::frombytes(&t);
-		        return ECP2::new_fp2s(&rx,&ry)
+		        ECP2::new_fp2s(&rx,&ry)
             } else {
-                return ECP2::new_fp2(&rx,typ&1)
+                ECP2::new_fp2(&rx,typ&1)
             }
         }
     }
@@ -326,9 +326,10 @@ impl ECP2 {
         W.copy(self);
         W.affine();
         if W.is_infinity() {
-            return String::from("infinity");
+            String::from("infinity")
+        } else {
+            format!("({},{})", W.x.tostring(), W.y.tostring())
         }
-        return format!("({},{})", W.x.tostring(), W.y.tostring());
     }
 
     /* Calculate RHS of twisted curve equation x^3+B/i */
@@ -349,7 +350,7 @@ impl ECP2 {
         r.add(&b);
 
         r.reduce();
-        return r;
+        r
     }
 
     /* self+=self */
@@ -409,7 +410,7 @@ impl ECP2 {
         self.y.copy(&y3);
         self.y.norm();
 
-        return 1;
+        1
     }
 
     /* self+=Q - return 0 for add, 1 for double, -1 for O */
@@ -511,7 +512,7 @@ impl ECP2 {
         self.z.copy(&z3);
         self.z.norm();
 
-        return 0;
+        0
     }
 
     /* set this-=Q */
@@ -519,8 +520,7 @@ impl ECP2 {
         let mut NQ = ECP2::new();
         NQ.copy(Q);
         NQ.neg();
-        let d = self.add(&NQ);
-        return d;
+        self.add(&NQ)
     }
 
     /* set this*=q, where q is Modulus, using Frobenius */
@@ -609,7 +609,7 @@ impl ECP2 {
             P.add(&Q);
         }
         P.sub(&C);
-        return P;
+        P
     }
 
     #[allow(non_snake_case)]
@@ -774,7 +774,7 @@ impl ECP2 {
         W.sub(&Q[0]);
         P.cmove(&W, pb);
 
-        return P;
+        P
     }
 
 /* Hunt and Peck a BIG to a curve point */
@@ -792,7 +792,7 @@ impl ECP2 {
             x.inc(1);
             x.norm();
         }
-        return Q;
+        Q
     }
 
 /* Constant time Map to Point */
@@ -964,7 +964,7 @@ CAHCNZF */
 CAHCZF */
 
         }
-        return ECP2::new();
+        ECP2::new()
     }
 
 /* Map byte string to curve point */
@@ -975,11 +975,11 @@ CAHCZF */
         let x=dx.dmod(&q);
         let mut P=ECP2::hap2point(&x);
         P.cfp();
-        return P;
+        P
     }
 
     pub fn generator() -> ECP2 {
-        return ECP2::new_fp2s(
+        ECP2::new_fp2s(
             &FP2::new_bigs(
                 &BIG::new_ints(&rom::CURVE_PXA),
                 &BIG::new_ints(&rom::CURVE_PXB),
@@ -988,6 +988,6 @@ CAHCZF */
                 &BIG::new_ints(&rom::CURVE_PYA),
                 &BIG::new_ints(&rom::CURVE_PYB),
             ),
-        );
+        )
     }
 }

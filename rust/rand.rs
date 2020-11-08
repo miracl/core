@@ -80,7 +80,7 @@ impl RAND {
             self.ira[i] = pdiff;
             k += 1;
         }
-        return self.ira[0];
+        self.ira[0]
     }
 
     fn sirand(&mut self, seed: u32) {
@@ -158,7 +158,7 @@ impl RAND {
         if self.pool_ptr >= 32 {
             self.fill_pool()
         }
-        return (r & 0xff) as u8;
+        (r & 0xff) as u8
     }
 }
 

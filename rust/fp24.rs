@@ -66,7 +66,7 @@ impl FP24 {
     }
 
     pub fn gettype(&self) -> usize {
-        return self.stype;
+        self.stype
     }
 
     pub fn new_int(a: isize) -> FP24 {
@@ -79,7 +79,7 @@ impl FP24 {
         } else {
             f.stype = SPARSEST;
         }
-        return f;
+        f
     }
 
     pub fn new_copy(x: &FP24) -> FP24 {
@@ -88,7 +88,7 @@ impl FP24 {
         f.b.copy(&x.b);
         f.c.copy(&x.c);
         f.stype = x.stype;
-        return f;
+        f
     }
 
     pub fn new_fp8s(d: &FP8, e: &FP8, f: &FP8) -> FP24 {
@@ -97,7 +97,7 @@ impl FP24 {
         g.b.copy(e);
         g.c.copy(f);
         g.stype = DENSE;
-        return g;
+        g
     }
 
     pub fn new_fp8(d: &FP8) -> FP24 {
@@ -106,7 +106,7 @@ impl FP24 {
         g.b.zero();
         g.c.zero();
         g.stype = SPARSEST;
-        return g;
+        g
     }
 
     /* reduce components mod Modulus */
@@ -125,7 +125,7 @@ impl FP24 {
 
     /* test self=0 ? */
     pub fn iszilch(&self) -> bool {
-        return self.a.iszilch() && self.b.iszilch() && self.c.iszilch();
+        self.a.iszilch() && self.b.iszilch() && self.c.iszilch()
     }
 
     /* Conditional move of g to self dependant on d */
@@ -142,7 +142,7 @@ impl FP24 {
     fn teq(b: i32, c: i32) -> isize {
         let mut x = b ^ c;
         x -= 1; // if x=0, x now -1
-        return ((x >> 31) & 1) as isize;
+        ((x >> 31) & 1) as isize
     }
 
     /* Constant time select from pre-computed table */
@@ -169,28 +169,28 @@ impl FP24 {
     /* test self=1 ? */
     pub fn isunity(&self) -> bool {
         let one = FP8::new_int(1);
-        return self.a.equals(&one) && self.b.iszilch() && self.c.iszilch();
+        self.a.equals(&one) && self.b.iszilch() && self.c.iszilch()
     }
 
     /* test self=x */
     pub fn equals(&self, x: &FP24) -> bool {
-        return self.a.equals(&x.a) && self.b.equals(&x.b) && self.c.equals(&x.c);
+        self.a.equals(&x.a) && self.b.equals(&x.b) && self.c.equals(&x.c)
     }
 
     pub fn geta(&mut self) -> FP8 {
-        return self.a;
+        self.a
         //        let f = FP8::new_copy(&self.a);
         //        return f;
     }
 
     pub fn getb(&mut self) -> FP8 {
-        return self.b;
+        self.b
         //	let f = FP8::new_copy(&self.b);
         //        return f;
     }
 
     pub fn getc(&mut self) -> FP8 {
-        return self.c;
+        self.c
         //        let f = FP8::new_copy(&self.c);
         //        return f;
     }
@@ -872,7 +872,7 @@ impl FP24 {
         t.copy(&self.a);
         t.imul(3);
         t.reduce();
-        return t;
+        t
     }
 
     /* convert from byte array to FP24 */
@@ -891,7 +891,7 @@ impl FP24 {
 		    t[i]=w[i+2*MB];
 	    }
         let a=FP8::frombytes(&t);
-	    return FP24::new_fp8s(&a,&b,&c);
+        FP24::new_fp8s(&a,&b,&c)
     }
 
     /* convert this to byte array */
@@ -915,12 +915,12 @@ impl FP24 {
 
     /* output to hex string */
     pub fn tostring(&self) -> String {
-        return format!(
+        format!(
             "[{},{},{}]",
             self.a.tostring(),
             self.b.tostring(),
             self.c.tostring()
-        );
+        )
     }
 
 /* Note this is simple square and multiply, so not side-channel safe */
@@ -954,7 +954,7 @@ impl FP24 {
         }
 
         w.reduce();
-        return w;
+        w
     }
 
     /* constant time powering by small integer of max length bts */
@@ -1179,6 +1179,6 @@ impl FP24 {
         p.cmove(&r, pb2);
 
         p.reduce();
-        return p;
+        p
     }
 }
