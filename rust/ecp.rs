@@ -1236,24 +1236,24 @@ impl ECP {
         S.dbl();
         C.copy(&W[1]);
         W[0].copy(&C);
-        W[0].sub(&mut S); // copy to C is stupid Rust thing..
+        W[0].sub(&S); // copy to C is stupid Rust thing..
         C.copy(&W[2]);
         W[3].copy(&C);
-        W[3].add(&mut S);
+        W[3].add(&S);
         T.copy(&self);
         T.dbl();
         C.copy(&W[1]);
         W[5].copy(&C);
-        W[5].add(&mut T);
+        W[5].add(&T);
         C.copy(&W[2]);
         W[6].copy(&C);
-        W[6].add(&mut T);
+        W[6].add(&T);
         C.copy(&W[5]);
         W[4].copy(&C);
-        W[4].sub(&mut S);
+        W[4].sub(&S);
         C.copy(&W[6]);
         W[7].copy(&C);
-        W[7].add(&mut S);
+        W[7].add(&S);
 
         // if multiplier is odd, add 2, else add 1 to multiplier, and add 2P or P to correction
 
@@ -1277,7 +1277,7 @@ impl ECP {
         mt.norm();
         tf.cmove(&mt, s);
         S.cmove(&Q, ns);
-        C.add(&mut S);
+        C.add(&S);
 
         mt.copy(&te);
         mt.add(&tf);
@@ -1303,9 +1303,9 @@ impl ECP {
             T.selector(&W, w[i] as i32);
             S.dbl();
             S.dbl();
-            S.add(&mut T);
+            S.add(&T);
         }
-        S.sub(&mut C); /* apply correction */
+        S.sub(&C); /* apply correction */
         return S;
     }
 
@@ -1786,8 +1786,8 @@ CAISZF */
     pub fn mapit(h: &[u8]) -> ECP {
         let q = BIG::new_ints(&rom::MODULUS);
         let mut dx = DBIG::frombytes(h);
-        let mut x=dx.dmod(&q);
-        let mut P=ECP::hap2point(&mut x);
+        let x=dx.dmod(&q);
+        let mut P=ECP::hap2point(&x);
         P.cfp();
         return P;
     }

@@ -321,7 +321,7 @@ impl FP12 {
     pub fn mul(&mut self, y: &FP12) {
         let mut z0 = FP4::new_copy(&self.a);
         let mut z1 = FP4::new();
-        let mut z2 = FP4::new_copy(&mut self.b);
+        let mut z2 = FP4::new_copy(&self.b);
         let mut z3 = FP4::new();
         let mut t0 = FP4::new_copy(&self.a);
         let mut t1 = FP4::new_copy(&y.a);
@@ -977,15 +977,15 @@ impl FP12 {
         m.rmod(&r);
 
         let mut a = BIG::new_copy(&e);
-        a.rmod(&mut m);
+        a.rmod(&m);
 
         let mut b = BIG::new_copy(&e);
-        b.div(&mut m);
+        b.div(&m);
 
         let mut c = g1.trace();
 
         if b.iszilch() {
-            c = c.xtr_pow(&mut a);
+            c = c.xtr_pow(&a);
             return c;
         }
 
@@ -997,7 +997,7 @@ impl FP12 {
         g2.mul(&g1);
         let cpm2 = g2.trace();
 
-        c = c.xtr_pow2(&cp, &cpm1, &cpm2, &mut a, &mut b);
+        c = c.xtr_pow2(&cp, &cpm1, &cpm2, &a, &b);
 
         return c;
     }

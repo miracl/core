@@ -572,7 +572,7 @@ impl ECP2 {
         for i in 1..8 {
             C.copy(&W[i - 1]);
             W[i].copy(&C);
-            W[i].add(&mut Q);
+            W[i].add(&Q);
         }
 
         /* make exponent odd - add 2P if even, P if odd */
@@ -606,9 +606,9 @@ impl ECP2 {
             P.dbl();
             P.dbl();
             P.dbl();
-            P.add(&mut Q);
+            P.add(&Q);
         }
-        P.sub(&mut C);
+        P.sub(&C);
         return P;
     }
 
@@ -619,11 +619,11 @@ impl ECP2 {
             X.inverse(None);
             X.norm();
         }
-        let mut x = BIG::new_ints(&rom::CURVE_BNX);
+        let x = BIG::new_ints(&rom::CURVE_BNX);
     // Faster Hashing to G2 - Fuentes-Castaneda, Knapp and Rodriguez-Henriquez
     // Q -> xQ + F(3xQ) + F(F(xQ)) + F(F(F(Q))).
         if ecp::CURVE_PAIRING_TYPE == ecp::BN {
-            let mut T = self.mul(&mut x);
+            let mut T = self.mul(&x);
             if ecp::SIGN_OF_X == ecp::NEGATIVEX {
                 T.neg();
             }
@@ -645,8 +645,8 @@ impl ECP2 {
     // Efficient hash maps to G2 on BLS curves - Budroni, Pintore
     // Q -> x2Q -xQ -Q +F(xQ -Q) +F(F(2Q))
         if ecp::CURVE_PAIRING_TYPE > ecp::BN {
-            let mut xQ = self.mul(&mut x);
-            let mut x2Q = xQ.mul(&mut x);
+            let mut xQ = self.mul(&x);
+            let mut x2Q = xQ.mul(&x);
 
             if ecp::SIGN_OF_X == ecp::NEGATIVEX {
                 xQ.neg();
@@ -972,8 +972,8 @@ CAHCZF */
     pub fn mapit(h: &[u8]) -> ECP2 {
         let q = BIG::new_ints(&rom::MODULUS);
         let mut dx = DBIG::frombytes(h);
-        let mut x=dx.dmod(&q);
-        let mut P=ECP2::hap2point(&mut x);
+        let x=dx.dmod(&q);
+        let mut P=ECP2::hap2point(&x);
         P.cfp();
         return P;
     }
