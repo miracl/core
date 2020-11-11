@@ -650,14 +650,12 @@ impl FP12 {
                     let mut t = FP::new_copy(&self.b.geta().getA());
                     t.mul(&y.b.geta().getA());
                     w3 = FP2::new_fp(&t);
+                } else if y.stype != SPARSEST {
+                    w3 = FP2::new_copy(&y.b.geta());
+                    w3.pmul(&self.b.geta().getA());
                 } else {
-                    if y.stype != SPARSEST {
-                        w3 = FP2::new_copy(&y.b.geta());
-                        w3.pmul(&self.b.geta().getA());
-                    } else {
-                        w3 = FP2::new_copy(&self.b.geta());
-                        w3.pmul(&y.b.geta().getA());
-                    }
+                    w3 = FP2::new_copy(&self.b.geta());
+                    w3.pmul(&y.b.geta().getA());
                 }
             } else {
                 w3 = FP2::new_copy(&self.b.geta());
@@ -725,14 +723,12 @@ impl FP12 {
                     let mut t = FP::new_copy(&self.c.getb().getA());
                     t.mul(&y.c.getb().getA());
                     w3 = FP2::new_fp(&t);
+                } else if y.stype != SPARSEST {
+                    w3 = FP2::new_copy(&y.c.getb());
+                    w3.pmul(&self.c.getb().getA());
                 } else {
-                    if y.stype != SPARSEST {
-                        w3 = FP2::new_copy(&y.c.getb());
-                        w3.pmul(&self.c.getb().getA());
-                    } else {
-                        w3 = FP2::new_copy(&self.c.getb());
-                        w3.pmul(&y.c.getb().getA());
-                    }
+                    w3 = FP2::new_copy(&self.c.getb());
+                    w3.pmul(&y.c.getb().getA());
                 }
             } else {
                 w3 = FP2::new_copy(&self.c.getb());
@@ -1088,7 +1084,7 @@ impl FP12 {
                 t[j].dec((bt >> 1) as isize);
                 t[j].norm();
                 w[i] += bt * (k as i8);
-                k = 2 * k;
+                k *= 2;
             }
         }
 

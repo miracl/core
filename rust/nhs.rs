@@ -399,13 +399,13 @@ fn nhs_unpack(array: &[u8], poly: &mut [i32]) {
     let mut j = 0;
     let mut i = 0;
     while i < DEGREE {
-        let a = ((array[j]) & 0xff) as i32;
-        let b = ((array[j + 1]) & 0xff) as i32;
-        let c = ((array[j + 2]) & 0xff) as i32;
-        let d = ((array[j + 3]) & 0xff) as i32;
-        let e = ((array[j + 4]) & 0xff) as i32;
-        let f = ((array[j + 5]) & 0xff) as i32;
-        let g = ((array[j + 6]) & 0xff) as i32;
+        let a = array[j] as i32;
+        let b = array[j + 1] as i32;
+        let c = array[j + 2] as i32;
+        let d = array[j + 3] as i32;
+        let e = array[j + 4] as i32;
+        let f = array[j + 5] as i32;
+        let g = array[j + 6] as i32;
         j += 7;
         poly[i] = a | ((b & 0x3f) << 8);
         poly[i + 1] = (b >> 6) | (c << 2) | ((d & 0xf) << 10);
@@ -488,7 +488,7 @@ fn poly_mul(p1: &mut [i32], p3: &[i32]) {
 
 fn poly_add(p1: &mut [i32], p3: &[i32]) {
     for i in 0..DEGREE {
-        p1[i] = p1[i] + p3[i];
+        p1[i] += p3[i];
     }
 }
 
@@ -510,7 +510,7 @@ fn poly_soft_reduce(poly: &mut [i32]) {
 fn poly_hard_reduce(poly: &mut [i32]) {
     for i in 0..DEGREE {
         let mut e = modmul(poly[i], ONE);
-        e = e - PRIME;
+        e -= PRIME;
         poly[i] = e + ((e >> (WL - 1)) & PRIME);
     }
 }

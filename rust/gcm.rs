@@ -42,10 +42,10 @@ pub struct GCM {
 impl GCM {
     fn pack(b: [u8; 4]) -> u32 {
         /* pack bytes into a 32-bit Word */
-        ((((b[0]) & 0xff) as u32) << 24)
-            | ((((b[1]) & 0xff) as u32) << 16)
-            | ((((b[2]) & 0xff) as u32) << 8)
-            | (((b[3]) & 0xff) as u32)
+        ((b[0] as u32) << 24)
+            | ((b[1] as u32) << 16)
+            | ((b[2] as u32) << 8)
+            | (b[3] as u32)
     }
 
     fn unpack(a: u32) -> [u8; 4] {

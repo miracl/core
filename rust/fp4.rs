@@ -570,46 +570,42 @@ impl FP4 {
                     cumv.copy(&cv);
                     cv.copy(&cu);
                     cu.copy(&t);
+                } else if d.parity() == 0 {
+                    d.fshr(1);
+                    r.copy(&cum2v);
+                    r.conj();
+                    t.copy(&cumv);
+                    t.xtr_a(&cu, &cv, &r);
+                    cum2v.copy(&cumv);
+                    cum2v.xtr_d();
+                    cumv.copy(&t);
+                    cu.xtr_d();
+                } else if e.parity() == 1 {
+                    d.sub(&e);
+                    d.norm();
+                    d.fshr(1);
+                    t.copy(&cv);
+                    t.xtr_a(&cu, &cumv, &cum2v);
+                    cu.xtr_d();
+                    cum2v.copy(&cv);
+                    cum2v.xtr_d();
+                    cum2v.conj();
+                    cv.copy(&t);
                 } else {
-                    if d.parity() == 0 {
-                        d.fshr(1);
-                        r.copy(&cum2v);
-                        r.conj();
-                        t.copy(&cumv);
-                        t.xtr_a(&cu, &cv, &r);
-                        cum2v.copy(&cumv);
-                        cum2v.xtr_d();
-                        cumv.copy(&t);
-                        cu.xtr_d();
-                    } else {
-                        if e.parity() == 1 {
-                            d.sub(&e);
-                            d.norm();
-                            d.fshr(1);
-                            t.copy(&cv);
-                            t.xtr_a(&cu, &cumv, &cum2v);
-                            cu.xtr_d();
-                            cum2v.copy(&cv);
-                            cum2v.xtr_d();
-                            cum2v.conj();
-                            cv.copy(&t);
-                        } else {
-                            w.copy(&d);
-                            d.copy(&e);
-                            d.fshr(1);
-                            e.copy(&w);
-                            t.copy(&cumv);
-                            t.xtr_d();
-                            cumv.copy(&cum2v);
-                            cumv.conj();
-                            cum2v.copy(&t);
-                            cum2v.conj();
-                            t.copy(&cv);
-                            t.xtr_d();
-                            cv.copy(&cu);
-                            cu.copy(&t);
-                        }
-                    }
+                    w.copy(&d);
+                    d.copy(&e);
+                    d.fshr(1);
+                    e.copy(&w);
+                    t.copy(&cumv);
+                    t.xtr_d();
+                    cumv.copy(&cum2v);
+                    cumv.conj();
+                    cum2v.copy(&t);
+                    cum2v.conj();
+                    t.copy(&cv);
+                    t.xtr_d();
+                    cv.copy(&cu);
+                    cu.copy(&t);
                 }
             }
             if BIG::comp(&d, &e) < 0 {
@@ -624,51 +620,47 @@ impl FP4 {
                     cum2v.copy(&cumv);
                     cumv.copy(&cu);
                     cu.copy(&t);
+                } else if e.parity() == 0 {
+                    w.copy(&d);
+                    d.copy(&e);
+                    d.fshr(1);
+                    e.copy(&w);
+                    t.copy(&cumv);
+                    t.xtr_d();
+                    cumv.copy(&cum2v);
+                    cumv.conj();
+                    cum2v.copy(&t);
+                    cum2v.conj();
+                    t.copy(&cv);
+                    t.xtr_d();
+                    cv.copy(&cu);
+                    cu.copy(&t);
+                } else if d.parity() == 1 {
+                    w.copy(&e);
+                    e.copy(&d);
+                    w.sub(&d);
+                    w.norm();
+                    d.copy(&w);
+                    d.fshr(1);
+                    t.copy(&cv);
+                    t.xtr_a(&cu, &cumv, &cum2v);
+                    cumv.conj();
+                    cum2v.copy(&cu);
+                    cum2v.xtr_d();
+                    cum2v.conj();
+                    cu.copy(&cv);
+                    cu.xtr_d();
+                    cv.copy(&t);
                 } else {
-                    if e.parity() == 0 {
-                        w.copy(&d);
-                        d.copy(&e);
-                        d.fshr(1);
-                        e.copy(&w);
-                        t.copy(&cumv);
-                        t.xtr_d();
-                        cumv.copy(&cum2v);
-                        cumv.conj();
-                        cum2v.copy(&t);
-                        cum2v.conj();
-                        t.copy(&cv);
-                        t.xtr_d();
-                        cv.copy(&cu);
-                        cu.copy(&t);
-                    } else {
-                        if d.parity() == 1 {
-                            w.copy(&e);
-                            e.copy(&d);
-                            w.sub(&d);
-                            w.norm();
-                            d.copy(&w);
-                            d.fshr(1);
-                            t.copy(&cv);
-                            t.xtr_a(&cu, &cumv, &cum2v);
-                            cumv.conj();
-                            cum2v.copy(&cu);
-                            cum2v.xtr_d();
-                            cum2v.conj();
-                            cu.copy(&cv);
-                            cu.xtr_d();
-                            cv.copy(&t);
-                        } else {
-                            d.fshr(1);
-                            r.copy(&cum2v);
-                            r.conj();
-                            t.copy(&cumv);
-                            t.xtr_a(&cu, &cv, &r);
-                            cum2v.copy(&cumv);
-                            cum2v.xtr_d();
-                            cumv.copy(&t);
-                            cu.xtr_d();
-                        }
-                    }
+                    d.fshr(1);
+                    r.copy(&cum2v);
+                    r.conj();
+                    t.copy(&cumv);
+                    t.xtr_a(&cu, &cv, &r);
+                    cum2v.copy(&cumv);
+                    cum2v.xtr_d();
+                    cumv.copy(&t);
+                    cu.xtr_d();
                 }
             }
         }

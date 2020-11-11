@@ -267,7 +267,6 @@ impl ECP {
             self.x.neg();
             self.x.norm();
         }
-        return;
     }
     /* multiply x coordinate */
     pub fn mulx(&mut self, c: &mut FP) {
@@ -366,19 +365,16 @@ impl ECP {
 
     /* extract x as an FP */
     pub fn getpx(&self) -> FP {
-        let w = FP::new_copy(&self.x);
-        w
+        FP::new_copy(&self.x)
     }
     /* extract y as an FP */
     pub fn getpy(&self) -> FP {
-        let w = FP::new_copy(&self.y);
-        w
+        FP::new_copy(&self.y)
     }
 
     /* extract z as an FP */
     pub fn getpz(&self) -> FP {
-        let w = FP::new_copy(&self.z);
-        w
+        FP::new_copy(&self.z)
     }
 
     /* convert to byte array */
@@ -713,7 +709,6 @@ impl ECP {
             self.z.copy(&bb);
             self.z.mul(&c);
         }
-        return;
     }
 
     /* self+=Q */
@@ -969,7 +964,6 @@ impl ECP {
             self.z.copy(&f);
             self.z.mul(&g);
         }
-        return;
     }
 
     /* Differential Add for Montgomery curves. this+=Q where W is this-Q and is affine. */
@@ -1024,7 +1018,7 @@ impl ECP {
     /* constant time multiply by small integer of length bts - use ladder */
     pub fn pinmul(&self, e: i32, bts: i32) -> ECP {
         if CURVETYPE == MONTGOMERY {
-            return self.mul(&mut BIG::new_int(e as isize));
+            self.mul(&BIG::new_int(e as isize))
         } else {
             let mut P = ECP::new();
             let mut R0 = ECP::new();
@@ -1034,14 +1028,14 @@ impl ECP {
             for i in (0..bts).rev() {
                 let b = ((e >> i) & 1) as isize;
                 P.copy(&R1);
-                P.add(&mut R0);
+                P.add(&R0);
                 R0.cswap(&mut R1, b);
                 R1.copy(&P);
                 R0.dbl();
                 R0.cswap(&mut R1, b);
             }
             P.copy(&R0);
-            return P;
+            P
         }
     }
 
@@ -1066,7 +1060,7 @@ impl ECP {
             for i in (0..nb - 1).rev() {
                 let b = e.bit(i);
                 P.copy(&R1);
-                P.dadd(&mut R0, &D);
+                P.dadd(&R0, &D);
                 R0.cswap(&mut R1, b);
                 R1.copy(&P);
                 R0.dbl();
@@ -1102,7 +1096,7 @@ impl ECP {
             for i in 1..8 {
                 C.copy(&W[i - 1]);
                 W[i].copy(&C);
-                W[i].add(&mut Q);
+                W[i].add(&Q);
             }
 
             // make exponent odd - add 2P if even, P if odd
@@ -1136,9 +1130,9 @@ impl ECP {
                 P.dbl();
                 P.dbl();
                 P.dbl();
-                P.add(&mut Q);
+                P.add(&Q);
             }
-            P.sub(&mut C); /* apply correction */
+            P.sub(&C); /* apply correction */
         }
         P
     }

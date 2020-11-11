@@ -240,7 +240,7 @@ impl HASH512 {
         /* process the next message byte */
         let cnt = ((self.length[0] / 64) % 16) as usize;
         self.w[cnt] <<= 8;
-        self.w[cnt] |= (byt & 0xFF) as u64;
+        self.w[cnt] |= byt as u64;
         self.length[0] += 8;
         if self.length[0] == 0 {
             self.length[1] += 1;

@@ -180,7 +180,7 @@ impl SHA3 {
         let ind = cnt / 8;
         let i = ind % 5;
         let j = ind / 5;
-        self.s[i][j] ^= ((byt & 0xff) as u64) << (8 * b);
+        self.s[i][j] ^= (byt as u64) << (8 * b);
         self.length += 1;
         if cnt + 1 == self.rate {
             self.transform();

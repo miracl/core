@@ -167,7 +167,7 @@ impl HASH256 {
         /* process the next message byte */
         let cnt = ((self.length[0] / 32) % 16) as usize;
         self.w[cnt] <<= 8;
-        self.w[cnt] |= (byt & 0xFF) as u32;
+        self.w[cnt] |= byt as u32;
         self.length[0] += 8;
         if self.length[0] == 0 {
             self.length[1] += 1;

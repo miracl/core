@@ -240,11 +240,9 @@ pub fn precomp(T: &mut [FP4],GV: &ECP2) {
 
     let mut P=ECP2::new(); P.copy(GV);
 
-    if ecp::CURVE_PAIRING_TYPE==ecp::BN {
-        if ecp::SEXTIC_TWIST==ecp::M_TYPE {
-            f.inverse(None);
-            f.norm();
-        }
+    if (ecp::CURVE_PAIRING_TYPE==ecp::BN) && (ecp::SEXTIC_TWIST==ecp::M_TYPE) {
+        f.inverse(None);
+        f.norm();
     }
 
     let mut A = ECP2::new();
@@ -344,11 +342,9 @@ pub fn another(r:&mut [FP12],P1: &ECP2,Q1: &ECP) {
     Q.copy(Q1);
     Q.affine();
 
-    if ecp::CURVE_PAIRING_TYPE==ecp::BN {
-        if ecp::SEXTIC_TWIST==ecp::M_TYPE {
-            f.inverse(None);
-            f.norm();
-        }
+    if (ecp::CURVE_PAIRING_TYPE==ecp::BN) && (ecp::SEXTIC_TWIST==ecp::M_TYPE) {
+        f.inverse(None);
+        f.norm();
     }
 
     let qx = FP::new_copy(&Q.getpx());
@@ -405,11 +401,9 @@ pub fn ate(P1: &ECP2, Q1: &ECP) -> FP12 {
         return FP12::new_int(1);
     }
 
-    if ecp::CURVE_PAIRING_TYPE == ecp::BN {
-        if ecp::SEXTIC_TWIST == ecp::M_TYPE {
-            f.inverse(None);
-            f.norm();
-        }
+    if (ecp::CURVE_PAIRING_TYPE == ecp::BN) && (ecp::SEXTIC_TWIST == ecp::M_TYPE) {
+        f.inverse(None);
+        f.norm();
     } 
     let mut P = ECP2::new();
     P.copy(P1);
@@ -486,11 +480,9 @@ pub fn ate2(P1: &ECP2, Q1: &ECP, R1: &ECP2, S1: &ECP) -> FP12 {
         return ate(P1,Q1);
     }
 
-    if ecp::CURVE_PAIRING_TYPE == ecp::BN {
-        if ecp::SEXTIC_TWIST == ecp::M_TYPE {
-            f.inverse(None);
-            f.norm();
-        }
+    if (ecp::CURVE_PAIRING_TYPE == ecp::BN) && (ecp::SEXTIC_TWIST == ecp::M_TYPE) {
+        f.inverse(None);
+        f.norm();
     } 
 
     let mut P = ECP2::new();

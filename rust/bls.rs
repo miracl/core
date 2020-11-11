@@ -67,7 +67,7 @@ fn hash_to_field(hash: usize,hlen: usize ,u: &mut [FP], dst: &[u8],m: &[u8],ctr:
 /* hash a message to an ECP point, using SHA2, random oracle method */
 #[allow(non_snake_case)]
 pub fn bls_hash_to_point(m: &[u8]) -> ECP {
-    let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA-256_SVDW_RO_NUL_".to_ascii_uppercase());
+    let dst= "BLS_SIG_ZZZG1_XMD:SHA-256_SVDW_RO_NUL_".to_ascii_uppercase();
 //    let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA-256_SSWU_RO_NUL_".to_ascii_uppercase());
 
     let mut u: [FP; 2] = [

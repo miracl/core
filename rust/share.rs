@@ -151,7 +151,6 @@ impl<'a> SHARE<'a> {
             }
             m[j]=interpolate(nsr,&x,&y);
         }
-        return;    
     }
 }
 

@@ -197,10 +197,10 @@ fn rotl24(x: u32) -> u32 {
 
 fn pack(b: [u8; 4]) -> u32 {
     /* pack bytes into a 32-bit Word */
-    ((((b[3]) & 0xff) as u32) << 24)
-        | ((((b[2]) & 0xff) as u32) << 16)
-        | ((((b[1]) & 0xff) as u32) << 8)
-        | (((b[0]) & 0xff) as u32)
+    ((b[3] as u32) << 24)
+        | ((b[2] as u32) << 16)
+        | ((b[1] as u32) << 8)
+        | (b[0] as u32)
 }
 
 fn unpack(a: u32) -> [u8; 4] {
@@ -258,8 +258,7 @@ fn invmixcol(x: u32) -> u32 {
     b[1] = product(m, x);
     m = rotl24(m);
     b[0] = product(m, x);
-    let y = pack(b);
-    y
+    pack(b)
 }
 
 fn increment(f: &mut [u8; 16]) {
@@ -802,7 +801,7 @@ pub fn cbc_iv0_decrypt(k: &[u8], c: &[u8]) -> Option<Vec<u8>> {
     let mut ipt = 0;
     let mut i;
 
-    if c.len() == 0 {
+    if c.is_empty() {
         return None;
     }
     let mut ch = c[ipt];

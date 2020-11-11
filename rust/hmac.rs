@@ -34,6 +34,7 @@ pub const SHA512: usize = 64;
 
 /* General Purpose Hash function */
 
+#[allow(clippy::too_many_arguments)]
 pub fn GPhashit(hash: usize, sha: usize,w: &mut [u8],pad: usize,zpad: usize,a: Option<&[u8]>, n: isize, b: Option<&[u8]>) {
     let mut r: [u8; 64] = [0; 64];
 
@@ -117,18 +118,16 @@ pub fn GPhashit(hash: usize, sha: usize,w: &mut [u8],pad: usize,zpad: usize,a: O
         for i in 0..sha {
             w[i] = r[i]
         }
+    } else if pad <= sha {
+        for i in 0..pad {
+            w[i] = r[i]
+        }
     } else {
-        if pad <= sha {
-            for i in 0..pad {
-                w[i] = r[i]
-            }
-        } else {
-            for i in 0..sha {
-                w[i + pad - sha] = r[i]
-            }
-            for i in 0..(pad - sha) {
-                w[i] = 0
-            }
+        for i in 0..sha {
+            w[i + pad - sha] = r[i]
+        }
+        for i in 0..(pad - sha) {
+            w[i] = 0
         }
     }
 }
@@ -206,7 +205,7 @@ pub fn pbkdf2(hash: usize, sha: usize, pass: &[u8], salt: &[u8], rep: usize, ole
             u[j] = f[j]
         }
         for _ in 1..rep {
-            hmac1(hash, sha, &mut ku, sha, pass, &mut u);
+            hmac1(hash, sha, &mut ku, sha, pass, &u);
             for k in 0..sha {
                 u[k] = ku[k];
                 f[k] ^= u[k]
@@ -267,12 +266,12 @@ pub fn hmac1(hash: usize, sha: usize, tag: &mut [u8], olen: usize, k: &[u8], m: 
     for i in 0..lb {
         k0[i] ^= 0x36
     }
-    GPhashit(hash, sha, &mut b,0,0,Some(&mut k0[0..lb]), -1, Some(m));
+    GPhashit(hash, sha, &mut b,0,0,Some(&k0[0..lb]), -1, Some(m));
 
     for i in 0..lb {
         k0[i] ^= 0x6a
     }
-    GPhashit(hash, sha, tag,olen,0,Some(&mut k0[0..lb]), -1, Some(&b[0..sha]));
+    GPhashit(hash, sha, tag,olen,0,Some(&k0[0..lb]), -1, Some(&b[0..sha]));
 
     true
 }
@@ -297,24 +296,24 @@ pub fn hkdf_expand(hash: usize, hlen: usize, okm: &mut [u8], olen: usize, prk: &
     let mut m=0;
     for i in 1..=n {
         for j in 0..info.len() {
-            t[l]=info[j]; l=l+1;
+            t[l]=info[j]; l+=1;
         }
-        t[l]=i as u8; l=l+1;
+        t[l]=i as u8; l+=1;
         hmac1(hash,hlen,&mut k,hlen,prk,&t[0..l]);
         l=0;
         for j in 0..hlen {
-            okm[m]=k[j]; m=m+1;
-            t[l]=k[j]; l=l+1;
+            okm[m]=k[j]; m+=1;
+            t[l]=k[j]; l+=1;
         }
     }
     if flen>0 {
         for j in 0..info.len() {
-            t[l]=info[j]; l=l+1;
+            t[l]=info[j]; l+=1;
         }
-        t[l]=(n+1) as u8; l=l+1;
+        t[l]=(n+1) as u8; l+=1;
         hmac1(hash,hlen,&mut k,flen,prk,&t[0..l]);
         for j in 0..flen {
-            okm[m]=k[j]; m=m+1;
+            okm[m]=k[j]; m+=1;
         }
     }
 }

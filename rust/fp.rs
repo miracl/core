@@ -106,8 +106,7 @@ impl FP {
     pub fn new_rand(rng: &mut RAND) -> FP {
         let m = BIG::new_ints(&rom::MODULUS);
         let w = BIG::randomnum(&m,rng);
-        let f = FP::new_big(&w);
-        f
+        FP::new_big(&w)
     }
 
     pub fn nres(&mut self) {
@@ -232,7 +231,7 @@ impl FP {
         while sb > 0 {
             let sr = BIG::ssn(&mut r, &self.x, &mut m);
             self.x.cmove(&r, 1 - sr);
-            sb = sb - 1;
+            sb -= 1;
         }
 
         self.xes = 1;
@@ -383,7 +382,7 @@ impl FP {
 
         p.fshl(sb);
         self.x.rsub(&p);
-        self.xes = 1 << (sb as i32) + 1;
+        self.xes = 1 << ((sb as i32) + 1);
         if self.xes > FEXCESS {
             self.reduce()
         }
@@ -402,14 +401,12 @@ impl FP {
             let mut d = self.x.pxmul(cc);
             self.x.copy(&FP::modulo(&mut d));
             self.xes = 2
+        } else if self.xes * (cc as i32) <= FEXCESS {
+            self.x.pmul(cc);
+            self.xes *= cc as i32;
         } else {
-            if self.xes * (cc as i32) <= FEXCESS {
-                self.x.pmul(cc);
-                self.xes *= cc as i32;
-            } else {
-                let n = FP::new_int(cc);
-                self.mul(&n);
-            }
+            let n = FP::new_int(cc);
+            self.mul(&n);
         }
 
         if s {

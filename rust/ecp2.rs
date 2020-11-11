@@ -757,7 +757,7 @@ impl ECP2 {
                 t[j].dec((bt >> 1) as isize);
                 t[j].norm();
                 w[i] += bt * (k as i8);
-                k = 2 * k;
+                k *= 2;
             }
         }
 

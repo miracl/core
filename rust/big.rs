@@ -209,7 +209,7 @@ impl BIG {
         for i in 0..NLEN - 1 {
             self.w[i] = (self.w[i] >> k) | ((self.w[i + 1] << (BASEBITS - n)) & BMASK);
         }
-        self.w[NLEN - 1] = self.w[NLEN - 1] >> k;
+        self.w[NLEN - 1] >>= k;
         w as isize
     }
 
@@ -399,7 +399,7 @@ impl BIG {
         let mut m = BIG::new();
         for i in 0..(MODBYTES as usize) {
             m.fshl(8);
-            m.w[0] += (b[i + n] & 0xff) as Chunk;
+            m.w[0] += b[i + n] as Chunk;
         }
         m
     }
@@ -694,8 +694,7 @@ impl BIG {
             j += 1;
             j &= 7;
         }
-        let m = d.dmod(q);
-        m
+        d.dmod(q)
     }
 
 /* create randum BIG less than r and less than trunc bits */
@@ -941,7 +940,7 @@ impl BIG {
         }
 
         for k in NLEN..2 * NLEN - 1 {
-            t = t + s;
+            t += s;
             let mut i = 1 + k / 2;
             while i < NLEN {
                 t += ((v[k - i] - v[i]) as DChunk) * ((md.w[i] - md.w[k - i]) as DChunk);
@@ -1028,7 +1027,7 @@ impl BIG {
             if z.iszilch() {
                 break;
             }
-            s = BIG::modsqr(&mut s, m);
+            s = BIG::modsqr(&s, m);
         }
         a
     }

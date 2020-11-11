@@ -172,7 +172,7 @@ impl DBIG {
         let mut m = DBIG::new();
         for i in 0..(b.len()) {
             m.shl(8);
-            m.w[0] += (b[i] & 0xff) as Chunk;
+            m.w[0] += b[i] as Chunk;
         }
         m
     }
