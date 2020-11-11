@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![allow(clippy::many_single_char_names)]
 pub mod arch;
 pub mod aes;
 pub mod gcm;
