@@ -397,7 +397,7 @@ public struct ECP {
                 let py=BIG.fromBytes(t)
                 return ECP(px,py)
             } else {
-                let sgn=(b[0]&20)>>5
+                let sgn=(b[0]&0x20)>>5
                 var P=ECP(px,0)
                 let cmp=P.y.islarger()
                 if (sgn == 1 && cmp != 1) || (sgn == 0 && cmp == 1) {

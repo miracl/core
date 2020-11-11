@@ -424,7 +424,7 @@ func ECP_fromBytes(b []byte) *ECP {
             py:=FromBytes(t[:])
             return NewECPbigs(px,py)
         } else {
-            sgn:=(b[0]&20)>>5
+            sgn:=(b[0]&0x20)>>5
             P:=NewECPbigint(px,0)
             cmp:=P.y.islarger()
             if (sgn==1 && cmp!=1) || (sgn==0 && cmp==1) {

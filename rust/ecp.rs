@@ -471,7 +471,7 @@ impl ECP {
                 let py=BIG::frombytes(&t);
                 return ECP::new_bigs(&px, &py);
             } else {
-                let sgn=(b[0]&20)>>5;
+                let sgn=(b[0]&0x20)>>5;
                 let mut P=ECP::new_bigint(&px,0);
                 let cmp=P.y.islarger();
                 if (sgn == 1 && cmp != 1) || (sgn == 0 && cmp == 1) {

@@ -49,7 +49,7 @@ fn bls_bn254(rng: &mut RAND) {
 
     let mut s: [u8; BGS] = [0; BGS];
 
-    const G1S: usize = BFS + 1; /* Group 1 Size - compressed */
+    const G1S: usize =  BFS + 1; /* Group 1 Size - compressed */
     const G2S: usize = 2 * BFS + 1; /* Group 2 Size - compressed*/
 
     let mut w: [u8; G2S] = [0; G2S];
@@ -101,7 +101,7 @@ fn bls_bls12383(rng: &mut RAND) {
     let mut s: [u8; BGS] = [0; BGS];
 
     const G1S: usize = BFS + 1; /* Group 1 Size  - compressed */
-    const G2S: usize = 2 * BFS + 1; /* Group 2 Size  - compressed */
+    const G2S: usize = 2 * BFS +1 ; /* Group 2 Size  - compressed */
 
     let mut w: [u8; G2S] = [0; G2S];
     let mut sig: [u8; G1S] = [0; G1S];
@@ -150,7 +150,7 @@ fn bls_bls24479(rng: &mut RAND) {
     let mut s: [u8; BGS] = [0; BGS];
 
     const G1S: usize = BFS + 1; /* Group 1 Size  - compressed */
-    const G2S: usize = 4 * BFS + 1; /* Group 2 Size  - compressed */
+    const G2S: usize = 4*  BFS + 1; /* Group 2 Size  - compressed */
 
     let mut w: [u8; G2S] = [0; G2S];
     let mut sig: [u8; G1S] = [0; G1S];

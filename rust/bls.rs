@@ -68,6 +68,7 @@ fn hash_to_field(hash: usize,hlen: usize ,u: &mut [FP], dst: &[u8],m: &[u8],ctr:
 #[allow(non_snake_case)]
 pub fn bls_hash_to_point(m: &[u8]) -> ECP {
     let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA-256_SVDW_RO_NUL_".to_ascii_uppercase());
+//    let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA-256_SSWU_RO_NUL_".to_ascii_uppercase());
 
     let mut u: [FP; 2] = [
         FP::new(),
@@ -140,8 +141,8 @@ pub fn core_sign(sig: &mut [u8], m: &[u8], s: &[u8]) -> isize {
 
 pub fn core_verify(sig: &[u8], m: &[u8], w: &[u8]) -> isize {
     let hm = bls_hash_to_point(m);
-
     let mut d = ECP::frombytes(&sig);
+
     if !pair::g1member(&d) {
         return BLS_FAIL;
     }

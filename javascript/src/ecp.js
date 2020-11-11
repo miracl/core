@@ -1216,6 +1216,7 @@ var ECP = function(ctx) {
             P = new ECP(),
             p = new ctx.BIG(0),
             px, py, i;
+        var alt=false;
 
         p.rcopy(ctx.ROM_FIELD.Modulus);
 
@@ -1231,33 +1232,56 @@ var ECP = function(ctx) {
             return P;
         }
 
-        for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-            t[i] = b[i + 1];
-        }
-        px = ctx.BIG.fromBytes(t);
-        if (ctx.BIG.comp(px, p) >= 0) {
-            return P;
-        }
+        if ((ctx.FP.MODBITS-1)%8<=4 && ECP.ALLOW_ALT_COMPRESS) alt=true;
 
-        if (b[0] == 0x04) {
-            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
-                t[i] = b[i + ctx.BIG.MODBYTES + 1];
+        if (alt)
+        {
+            for (i=0;i<ctx.BIG.MODBYTES;i++) t[i]=b[i];
+            t[0]&=0x1f;
+            px=ctx.BIG.fromBytes(t);
+            if ((b[0]&0x80)==0)
+            {
+                for (i=0;i<ctx.BIG.MODBYTES;i++) t[i]=b[i+ctx.BIG.MODBYTES];
+                py=ctx.BIG.fromBytes(t);
+                P.setxy(px, py);
+                return P;
+            } else {
+                var sgn=(b[0]&0x20)>>5;
+                P.setxi(px,0);
+                var cmp=P.y.islarger();
+                if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) P.neg();
+                return P;
             }
+        } else {
 
-            py = ctx.BIG.fromBytes(t);
-
-            if (ctx.BIG.comp(py, p) >= 0) {
+            for (i = 0; i < ctx.BIG.MODBYTES; i++) {
+                t[i] = b[i + 1];
+            }
+            px = ctx.BIG.fromBytes(t);
+            if (ctx.BIG.comp(px, p) >= 0) {
                 return P;
             }
 
-            P.setxy(px, py);
+            if (b[0] == 0x04) {
+                for (i = 0; i < ctx.BIG.MODBYTES; i++) {
+                    t[i] = b[i + ctx.BIG.MODBYTES + 1];
+                }
 
-            return P;
-        }
+                py = ctx.BIG.fromBytes(t);
 
-        if (b[0]==0x02 || b[0]==0x03) {
-            P.setxi(px,b[0]&1);
-            return P;
+                if (ctx.BIG.comp(py, p) >= 0) {
+                    return P;
+                }
+
+                P.setxy(px, py);
+
+                return P;
+            }
+
+            if (b[0]==0x02 || b[0]==0x03) {
+                P.setxi(px,b[0]&1);
+                return P;
+            }
         }
 
         return P;

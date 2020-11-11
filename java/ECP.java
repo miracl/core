@@ -374,7 +374,7 @@ public final class ECP {
                 BIG py=BIG.fromBytes(t);
                 return new ECP(px,py);
             } else {
-                int sgn=(b[0]&20)>>5;
+                int sgn=(b[0]&0x20)>>5;
                 ECP P=new ECP(px,0);
                 int cmp=P.y.islarger();
                 if ((sgn==1 && cmp!=1) || (sgn==0 && cmp==1)) P.neg();
