@@ -44,7 +44,7 @@ pub const BLS_FAIL: isize = -1;
 static mut G2_TAB: [FP4; ecp::G2_TABLE] = [FP4::new(); ecp::G2_TABLE];
 
 fn ceil(a: usize,b: usize) -> usize {
-    return (a-1)/b+1;
+    (a-1)/b+1
 }
 
 /* output u \in F_p */
@@ -67,7 +67,7 @@ fn hash_to_field(hash: usize,hlen: usize ,u: &mut [FP], dst: &[u8],m: &[u8],ctr:
 /* hash a message to an ECP point, using SHA2, random oracle method */
 #[allow(non_snake_case)]
 pub fn bls_hash_to_point(m: &[u8]) -> ECP {
-    let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA-256_SVDW_RO_NUL_".to_ascii_uppercase());
+    let dst= "BLS_SIG_ZZZG1_XMD:SHA-256_SVDW_RO_NUL_".to_ascii_uppercase();
 //    let dst= String::from("BLS_SIG_ZZZG1_XMD:SHA-256_SSWU_RO_NUL_".to_ascii_uppercase());
 
     let mut u: [FP; 2] = [
@@ -82,7 +82,7 @@ pub fn bls_hash_to_point(m: &[u8]) -> ECP {
     P.add(&P1);
     P.cfp();
     P.affine();
-    return P;
+    P
 }
 
 pub fn init() -> isize {
@@ -93,7 +93,7 @@ pub fn init() -> isize {
     unsafe {
         pair::precomp(&mut G2_TAB, &g);
     }
-    return BLS_OK;
+    BLS_OK
 }
 
 /* generate key pair, private key s, public key w */
@@ -125,7 +125,7 @@ pub fn key_pair_generate(ikm: &[u8], s: &mut [u8], w: &mut [u8]) -> isize {
     sc.tobytes(s);
 // SkToPk
     pair::g2mul(&g, &sc).tobytes(w,true);  // true for public key compression
-    return BLS_OK;
+    BLS_OK
 }
 
 /* Sign message m using private key s to produce signature sig */
@@ -134,7 +134,7 @@ pub fn core_sign(sig: &mut [u8], m: &[u8], s: &[u8]) -> isize {
     let d = bls_hash_to_point(m);
     let sc = BIG::frombytes(&s);
     pair::g1mul(&d, &sc).tobytes(sig, true);
-    return BLS_OK;
+    BLS_OK
 }
 
 /* Verify signature given message m, the signature sig, and the public key w */
@@ -170,5 +170,5 @@ pub fn core_verify(sig: &[u8], m: &[u8], w: &[u8]) -> isize {
     if v.isunity() {
         return BLS_OK;
     }
-    return BLS_FAIL;
+    BLS_FAIL
 }

@@ -80,7 +80,7 @@ impl RAND {
             self.ira[i] = pdiff;
             k += 1;
         }
-        return self.ira[0];
+        self.ira[0]
     }
 
     fn sirand(&mut self, seed: u32) {
@@ -116,10 +116,10 @@ impl RAND {
 
     fn pack(b: [u8; 4]) -> u32 {
         /* pack 4 bytes into a 32-bit Word */
-        return (((b[3] as u32) & 0xff) << 24)
+        (((b[3] as u32) & 0xff) << 24)
             | (((b[2] as u32) & 0xff) << 16)
             | (((b[1] as u32) & 0xff) << 8)
-            | ((b[0] as u32) & 0xff);
+            | ((b[0] as u32) & 0xff)
     }
 
     /* Initialize RNG with some real entropy from some external source */
@@ -158,7 +158,7 @@ impl RAND {
         if self.pool_ptr >= 32 {
             self.fill_pool()
         }
-        return (r & 0xff) as u8;
+        r
     }
 }
 

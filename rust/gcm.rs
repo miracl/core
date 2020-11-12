@@ -42,21 +42,20 @@ pub struct GCM {
 impl GCM {
     fn pack(b: [u8; 4]) -> u32 {
         /* pack bytes into a 32-bit Word */
-        return ((((b[0]) & 0xff) as u32) << 24)
-            | ((((b[1]) & 0xff) as u32) << 16)
-            | ((((b[2]) & 0xff) as u32) << 8)
-            | (((b[3]) & 0xff) as u32);
+        ((b[0] as u32) << 24)
+            | ((b[1] as u32) << 16)
+            | ((b[2] as u32) << 8)
+            | (b[3] as u32)
     }
 
     fn unpack(a: u32) -> [u8; 4] {
         /* unpack bytes from a word */
-        let b: [u8; 4] = [
+        [
             ((a >> 24) & 0xff) as u8,
             ((a >> 16) & 0xff) as u8,
             ((a >> 8) & 0xff) as u8,
             (a & 0xff) as u8,
-        ];
-        return b;
+        ]
     }
 
     fn precompute(&mut self, h: &[u8]) {
@@ -168,7 +167,7 @@ impl GCM {
         if len % 16 != 0 {
             self.status = GCM_NOT_ACCEPTING_MORE
         }
-        return true;
+        true
     }
 
     /* Initialize GCM mode */
@@ -257,7 +256,7 @@ impl GCM {
         if len % 16 != 0 {
             self.status = GCM_ACCEPTING_CIPHER
         }
-        return true;
+        true
     }
 
     /* Add Plaintext - included and encrypted */
@@ -308,7 +307,7 @@ impl GCM {
         if len % 16 != 0 {
             self.status = GCM_NOT_ACCEPTING_MORE
         }
-        return true;
+        true
     }
 
     /* Add Ciphertext - decrypts to plaintext */
@@ -360,7 +359,7 @@ impl GCM {
         if len % 16 != 0 {
             self.status = GCM_NOT_ACCEPTING_MORE
         }
-        return true;
+        true
     }
 
     /* Finish and extract Tag */

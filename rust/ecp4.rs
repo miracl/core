@@ -68,7 +68,7 @@ impl ECP4 {
         if !y2.equals(&rhs) {
             E.inf();
         }
-        return E;
+        E
     }
 
     /* construct this from x - but set to O if not on curve */
@@ -91,12 +91,12 @@ impl ECP4 {
         } else {
             E.inf();
         }
-        return E;
+        E
     }
 
     /* Test this=O? */
     pub fn is_infinity(&self) -> bool {
-        return self.x.iszilch() && self.z.iszilch();
+        self.x.iszilch() && self.z.iszilch()
     }
 
     /* copy self=P */
@@ -131,7 +131,7 @@ impl ECP4 {
     fn teq(b: i32, c: i32) -> isize {
         let mut x = b ^ c;
         x -= 1; // if x=0, x now -1
-        return ((x >> 31) & 1) as isize;
+        ((x >> 31) & 1) as isize
     }
 
     /* Constant time select from pre-computed table */
@@ -174,7 +174,7 @@ impl ECP4 {
             return false;
         }
 
-        return true;
+        true
     }
 
     /* set to Affine - (x,y,z) to (x,y) */
@@ -200,7 +200,7 @@ impl ECP4 {
         let mut W = ECP4::new();
         W.copy(self);
         W.affine();
-        return FP4::new_copy(&self.x);
+        FP4::new_copy(&self.x)
     }
 
     /* extract affine y as FP4 */
@@ -208,20 +208,20 @@ impl ECP4 {
         let mut W = ECP4::new();
         W.copy(self);
         W.affine();
-        return FP4::new_copy(&W.y);
+        FP4::new_copy(&W.y)
     }
 
     /* extract projective x */
     pub fn getpx(&self) -> FP4 {
-        return FP4::new_copy(&self.x);
+        FP4::new_copy(&self.x)
     }
     /* extract projective y */
     pub fn getpy(&self) -> FP4 {
-        return FP4::new_copy(&self.y);
+        FP4::new_copy(&self.y)
     }
     /* extract projective z */
     pub fn getpz(&self) -> FP4 {
-        return FP4::new_copy(&self.z);
+        FP4::new_copy(&self.z)
     }
 
     /* convert to byte array */
@@ -294,7 +294,7 @@ impl ECP4 {
 				    t[i]=b[i+MB];
 			    }
                 let ry=FP4::frombytes(&t);
-                return ECP4::new_fp4s(&rx,&ry);
+                ECP4::new_fp4s(&rx,&ry)
             } else {
                 let sgn=(b[0]&0x20)>>5;
                 let mut P=ECP4::new_fp4(&rx,0);
@@ -302,7 +302,7 @@ impl ECP4 {
                 if (sgn == 1 && cmp != 1) || (sgn == 0 && cmp == 1) {
 				    P.neg();
 			    }
-                return P;
+                P
             }
         } else {
 		    for i in 0..MB {
@@ -314,9 +314,9 @@ impl ECP4 {
 				    t[i]=b[i+MB+1];
 			    }
 		        let ry=FP4::frombytes(&t);
-		        return ECP4::new_fp4s(&rx,&ry)
+		        ECP4::new_fp4s(&rx,&ry)
             } else {
-                return ECP4::new_fp4(&rx,typ&1)
+                ECP4::new_fp4(&rx,typ&1)
             }
         }
     }
@@ -327,9 +327,10 @@ impl ECP4 {
         W.copy(self);
         W.affine();
         if W.is_infinity() {
-            return String::from("infinity");
+            String::from("infinity")
+        } else {
+            format!("({},{})", W.x.tostring(), W.y.tostring())
         }
-        return format!("({},{})", W.x.tostring(), W.y.tostring());
     }
 
     /* Calculate RHS of twisted curve equation x^3+B/i */
@@ -349,7 +350,7 @@ impl ECP4 {
         r.add(&b);
 
         r.reduce();
-        return r;
+        r
     }
 
     /* self+=self */
@@ -407,7 +408,7 @@ impl ECP4 {
         self.y.copy(&y3);
         self.y.norm();
 
-        return 1;
+        1
     }
 
     /* self+=Q - return 0 for add, 1 for double, -1 for O */
@@ -503,7 +504,7 @@ impl ECP4 {
         self.z.copy(&z3);
         self.z.norm();
 
-        return 0;
+        0
     }
 
     /* set this-=Q */
@@ -511,8 +512,7 @@ impl ECP4 {
         let mut NQ = ECP4::new();
         NQ.copy(Q);
         NQ.neg();
-        let d = self.add(&NQ);
-        return d;
+        self.add(&NQ)
     }
 
     pub fn frob_constants() -> [FP2; 3] {
@@ -537,8 +537,7 @@ impl ECP4 {
         f0.norm();
         f1.mul(&f0);
 
-        let F: [FP2; 3] = [f0, f1, f2];
-        return F;
+        [f0, f1, f2]
     }
 
     /* set this*=q, where q is Modulus, using Frobenius */
@@ -629,7 +628,7 @@ impl ECP4 {
         }
         P.sub(&mut C);
         P.affine();
-        return P;
+        P
     }
 
     // Efficient hash maps to G2 on BLS curves - Budroni, Pintore
@@ -830,11 +829,11 @@ impl ECP4 {
 
         P.affine();
 
-        return P;
+        P
     }
 
     pub fn generator() -> ECP4 {
-        return ECP4::new_fp4s(
+        ECP4::new_fp4s(
             &FP4::new_fp2s(
                 &FP2::new_bigs(
                     &BIG::new_ints(&rom::CURVE_PXAA),
@@ -855,7 +854,7 @@ impl ECP4 {
                     &BIG::new_ints(&rom::CURVE_PYBB),
                 ),
             ),
-        );
+        )
     }
 
 /* Hunt and Peck a BIG to a curve point */
@@ -868,12 +867,11 @@ impl ECP4 {
             let X = FP4::new_fp2(&FP2::new_bigs(&one, &x));
             Q = ECP4::new_fp4(&X,0);
             if !Q.is_infinity() {
-                break;
+                break Q;
             }
             x.inc(1);
             x.norm();
         }
-        return Q;
     }
 
 /* Constant time Map to Point */
@@ -932,7 +930,7 @@ impl ECP4 {
         W.copy(&Y); W.neg(); W.norm();
         Y.cmove(&W,ne);
 
-        return ECP4::new_fp4s(&X3,&Y);
+        ECP4::new_fp4s(&X3,&Y)
     }
 
 /* Map byte string to curve point */
@@ -943,7 +941,7 @@ impl ECP4 {
         let mut x=dx.dmod(&q);
         let mut P=ECP4::hap2point(&mut x);
         P.cfp();
-        return P;
+        P
     }
 
 

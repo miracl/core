@@ -57,46 +57,46 @@ impl FP8 {
         let mut f = FP8::new();
         f.a.copy(&FP4::new_int(a));
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_ints(a: isize,b: isize) -> FP8 {
         let mut f = FP8::new();
         f.a.copy(&FP4::new_int(a));
         f.b.copy(&FP4::new_int(b));
-        return f;
+        f
     }
 
     pub fn new_copy(x: &FP8) -> FP8 {
         let mut f = FP8::new();
         f.a.copy(&x.a);
         f.b.copy(&x.b);
-        return f;
+        f
     }
 
     pub fn new_fp4s(c: &FP4, d: &FP4) -> FP8 {
         let mut f = FP8::new();
         f.a.copy(c);
         f.b.copy(d);
-        return f;
+        f
     }
 
     pub fn new_fp4(c: &FP4) -> FP8 {
         let mut f = FP8::new();
         f.a.copy(c);
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_fp(c: &FP) -> FP8 {
         let mut f = FP8::new();
         f.a.set_fp(c);
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_rand(rng: &mut RAND) -> FP8 {
-        return FP8::new_fp4s(&FP4::new_rand(rng),&FP4::new_rand(rng));
+        FP8::new_fp4s(&FP4::new_rand(rng),&FP4::new_rand(rng))
     }
 
     pub fn set_fp4s(&mut self, c: &FP4, d: &FP4) {
@@ -133,7 +133,7 @@ impl FP8 {
 
     /* test self=0 ? */
     pub fn iszilch(&self) -> bool {
-        return self.a.iszilch() && self.b.iszilch();
+        self.a.iszilch() && self.b.iszilch()
     }
 
     pub fn islarger(&self) -> isize {
@@ -144,7 +144,7 @@ impl FP8 {
         if cmp!=0 {
             return cmp;
         }
-        return self.a.islarger()
+        self.a.islarger()
     }
 
     pub fn tobytes(&self,bf: &mut [u8]) {
@@ -171,38 +171,35 @@ impl FP8 {
             t[i]=bf[i+MB];
         }
         let ta=FP4::frombytes(&t);
-        return FP8::new_fp4s(&ta,&tb);
+        FP8::new_fp4s(&ta,&tb)
     }
 
     /* test self=1 ? */
     pub fn isunity(&self) -> bool {
         let one = FP4::new_int(1);
-        return self.a.equals(&one) && self.b.iszilch();
+        self.a.equals(&one) && self.b.iszilch()
     }
 
     /* test is w real? That is in a+ib test b is zero */
     pub fn isreal(&mut self) -> bool {
-        return self.b.iszilch();
+        self.b.iszilch()
     }
     /* extract real part a */
     pub fn real(&self) -> FP4 {
-        let f = FP4::new_copy(&self.a);
-        return f;
+        FP4::new_copy(&self.a)
     }
 
     pub fn geta(&self) -> FP4 {
-        let f = FP4::new_copy(&self.a);
-        return f;
+        FP4::new_copy(&self.a)
     }
     /* extract imaginary part b */
     pub fn getb(&self) -> FP4 {
-        let f = FP4::new_copy(&self.b);
-        return f;
+        FP4::new_copy(&self.b)
     }
 
     /* test self=x */
     pub fn equals(&self, x: &FP8) -> bool {
-        return self.a.equals(&x.a) && self.b.equals(&x.b);
+        self.a.equals(&x.a) && self.b.equals(&x.b)
     }
     /* copy self=x */
     pub fn copy(&mut self, x: &FP8) {
@@ -389,7 +386,7 @@ impl FP8 {
 
     /* output to hex string */
     pub fn tostring(&self) -> String {
-        return format!("[{},{}]", self.a.tostring(), self.b.tostring());
+        format!("[{},{}]", self.a.tostring(), self.b.tostring())
     }
 
     /* self=1/self */

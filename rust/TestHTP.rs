@@ -24,7 +24,7 @@ extern crate core;
 use core::hmac;
 
 fn ceil(a: usize,b: usize) -> usize {
-    return (a-1)/b+1;
+    (a-1)/b+1
 }
 
 fn hash_to_field_ed25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::ed25519::fp::FP;2] {
@@ -53,7 +53,7 @@ fn hash_to_field_ed25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usiz
 		u[i].copy(&w);
     }
 
-    return u;
+    u
 }
 
 fn htp_ed25519(mess: &str) {
@@ -110,7 +110,7 @@ fn hash_to_field_c25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize
 		u[i].copy(&w);
     }
 
-    return u;
+    u
 }
 
 fn htp_c25519(mess: &str) {
@@ -155,7 +155,7 @@ fn hash_to_field_nist256(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usiz
 		u[i].copy(&w);
     }
 
-    return u;
+    u
 }
 
 fn htp_nist256(mess: &str) {
@@ -213,7 +213,7 @@ fn hash_to_field_goldilocks(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: u
 		u[i].copy(&w);
     }
 
-    return u;
+    u
 }
 
 fn htp_goldilocks(mess: &str) {
@@ -271,7 +271,7 @@ fn hash_to_field_secp256k1(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: us
 		u[i].copy(&w);
     }
 
-    return u;
+    u
 }
 
 fn htp_secp256k1(mess: &str) {
@@ -329,7 +329,7 @@ fn hash_to_field_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usi
 		u[i].copy(&w);
     }
 
-    return u;
+    u
 }
 
 fn htp_bls12381(mess: &str) {
@@ -394,7 +394,7 @@ fn hash_to_field2_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: us
 		u[i].copy(&FP2::new_fps(&w1,&w2));
     }
 
-    return u;
+    u
 }
 
 fn htp2_bls12381(mess: &str) {

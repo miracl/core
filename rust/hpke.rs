@@ -177,10 +177,7 @@ pub fn deriveKeyPair(config_id: usize,mut sk: &mut [u8],mut pk: &mut [u8],seed: 
     if kem==32 || kem==33 {
         reverse(&mut pk);
     }
-    if counter<256 {
-        return true;
-    }
-    return false;
+    counter<256
 }
 
 #[allow(non_snake_case)]

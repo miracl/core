@@ -86,28 +86,27 @@ impl FP {
             f.x.inc(a);
         }
         f.nres();
-        return f;
+        f
     }
 
     pub fn new_copy(y: &FP) -> FP {
         let mut f = FP::new();
         f.x.copy(&(y.x));
         f.xes = y.xes;
-        return f;
+        f
     }
 
     pub fn new_big(y: &BIG) -> FP {
         let mut f = FP::new();
         f.x.copy(y);
         f.nres();
-        return f;
+        f
     }
 
     pub fn new_rand(rng: &mut RAND) -> FP {
         let m = BIG::new_ints(&rom::MODULUS);
         let w = BIG::randomnum(&m,rng);
-        let f = FP::new_big(&w);
-        return f;
+        FP::new_big(&w)
     }
 
     pub fn nres(&mut self) {
@@ -127,10 +126,9 @@ impl FP {
     pub fn redc(&self) -> BIG {
         if MODTYPE != PSEUDO_MERSENNE && MODTYPE != GENERALISED_MERSENNE {
             let mut d = DBIG::new_scopy(&(self.x));
-            return FP::modulo(&mut d);
+            FP::modulo(&mut d)
         } else {
-            let r = BIG::new_copy(&(self.x));
-            return r;
+            BIG::new_copy(&(self.x))
         }
     }
 
@@ -204,13 +202,12 @@ impl FP {
             let m = BIG::new_ints(&rom::MODULUS);
             return BIG::monty(&m, rom::MCONST, d);
         }
-        return BIG::new();
+        BIG::new()
     }
 
     /* convert to string */
     pub fn tostring(&self) -> String {
-        let s = self.redc().tostring();
-        return s;
+        self.redc().tostring()
     }
 
     /* reduce this mod Modulus */
@@ -234,7 +231,7 @@ impl FP {
         while sb > 0 {
             let sr = BIG::ssn(&mut r, &self.x, &mut m);
             self.x.cmove(&r, 1 - sr);
-            sb = sb - 1;
+            sb -= 1;
         }
 
         self.xes = 1;
@@ -244,7 +241,7 @@ impl FP {
     pub fn iszilch(&self) -> bool {
         let mut a = FP::new_copy(self);
         a.reduce();
-        return a.x.iszilch();
+        a.x.iszilch()
     }
 
     pub fn islarger(&self) -> isize {
@@ -254,7 +251,7 @@ impl FP {
         let mut sx = BIG::new_ints(&rom::MODULUS);
         let fx=self.redc();
         sx.sub(&fx); sx.norm();
-        return BIG::comp(&fx,&sx);
+        BIG::comp(&fx,&sx)
     }
 
     pub fn tobytes(&self,b: &mut [u8]) {
@@ -263,14 +260,14 @@ impl FP {
 
     pub fn frombytes(b: &[u8]) -> FP {
         let t=BIG::frombytes(b);
-        return FP::new_big(&t);
+        FP::new_big(&t)
     }
 
     /* test this=0? */
     pub fn isunity(&self) -> bool {
         let mut a = FP::new_copy(self);
         a.reduce();
-        return a.redc().isunity();
+        a.redc().isunity()
     }
 
     pub fn sign(&self) -> isize {
@@ -282,11 +279,11 @@ impl FP {
             n.reduce();
             let w=n.redc();
             let cp=BIG::comp(&w,&m);
-            return ((cp+1)&2)>>1;
+            ((cp+1)&2)>>1
         } else {
             let mut a = FP::new_copy(self);
             a.reduce();
-            return a.redc().parity();
+            a.redc().parity()
         }
     }
 
@@ -357,8 +354,7 @@ impl FP {
 
         v = v - ((v >> 1) & 0x55555555);
         v = (v & 0x33333333) + ((v >> 2) & 0x33333333);
-        let r = ((((v + (v >> 4)) & 0xF0F0F0F).wrapping_mul(0x1010101)) >> 24) as usize;
-        return r;
+        ((((v + (v >> 4)) & 0xF0F0F0F).wrapping_mul(0x1010101)) >> 24) as usize
     }
 
     // find appoximation to quotient of a/m
@@ -371,11 +367,11 @@ impl FP {
             let sh = hb - TBITS;
             let num = (n.w[big::NLEN - 1] << sh) | (n.w[big::NLEN - 2] >> (big::BASEBITS - sh));
             let den = (m.w[big::NLEN - 1] << sh) | (m.w[big::NLEN - 2] >> (big::BASEBITS - sh));
-            return (num / (den + 1)) as isize;
+            (num / (den + 1)) as isize
         } else {
             let num = n.w[big::NLEN - 1];
             let den = m.w[big::NLEN - 1];
-            return (num / (den + 1)) as isize;
+            (num / (den + 1)) as isize
         }
     }
 
@@ -386,7 +382,7 @@ impl FP {
 
         p.fshl(sb);
         self.x.rsub(&p);
-        self.xes = 1 << (sb as i32) + 1;
+        self.xes = 1 << ((sb as i32) + 1);
         if self.xes > FEXCESS {
             self.reduce()
         }
@@ -405,14 +401,12 @@ impl FP {
             let mut d = self.x.pxmul(cc);
             self.x.copy(&FP::modulo(&mut d));
             self.xes = 2
+        } else if self.xes * (cc as i32) <= FEXCESS {
+            self.x.pmul(cc);
+            self.xes *= cc as i32;
         } else {
-            if self.xes * (cc as i32) <= FEXCESS {
-                self.x.pmul(cc);
-                self.xes *= cc as i32;
-            } else {
-                let n = FP::new_int(cc);
-                self.mul(&n);
-            }
+            let n = FP::new_int(cc);
+            self.mul(&n);
         }
 
         if s {
@@ -477,7 +471,7 @@ impl FP {
     pub fn jacobi(&mut self) -> isize {
         let p = BIG::new_ints(&rom::MODULUS);
         let mut w = self.redc();
-        return w.jacobi(&p);
+        w.jacobi(&p)
     }
     /* return TRUE if self==a */
     pub fn equals(&self, a: &FP) -> bool {
@@ -485,10 +479,7 @@ impl FP {
         let mut s = FP::new_copy(a);
         f.reduce();
         s.reduce();
-        if BIG::comp(&(f.x), &(s.x)) == 0 {
-            return true;
-        }
-        return false;
+        BIG::comp(&(f.x), &(s.x)) == 0
     }
 
     /* return self^e mod Modulus */
@@ -545,7 +536,7 @@ impl FP {
             r.mul(&tb[w[i] as usize])
         }
         r.reduce();
-        return r;
+        r
     }
 
     // See eprint paper https://eprint.iacr.org/2018/1038
@@ -705,7 +696,7 @@ impl FP {
             r.sqr();
             nd-=1;
         }
-        return r;
+        r
     }
 
     /* Pseudo_inverse square root */
@@ -760,7 +751,7 @@ impl FP {
             r.sqr();
         }
 
-        return r.isunity() as isize;
+        r.isunity() as isize
     }
 
     pub fn invsqrt(&self,i: &mut FP,s: &mut FP) -> isize {
@@ -769,7 +760,7 @@ impl FP {
         s.copy(&self.sqrt(Some(&h)));
         i.copy(self);
         i.inverse(Some(&h));
-        return qr;
+        qr
     }
 
 // Two for the price of One  - See Hamburg https://eprint.iacr.org/2012/309.pdf
@@ -782,7 +773,7 @@ impl FP {
         let qr=t.invsqrt(&mut i,&mut s);
         i.mul(&w);
         s.mul(&i);
-        return qr;
+        qr
     }
 
     /* return sqrt(this) mod Modulus */
@@ -822,7 +813,7 @@ impl FP {
         let mut nr=FP::new_copy(&r);
         nr.neg(); nr.norm();
         r.cmove(&nr,sgn);
-        return r;
+        r
     }
 
 }

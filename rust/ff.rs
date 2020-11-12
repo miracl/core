@@ -56,24 +56,18 @@ impl std::fmt::Display for FF {
 
 impl FF {
     pub fn excess(a: &BIG) -> Chunk {
-        return ((a.w[big::NLEN - 1] & P_OMASK) >> (P_TBITS)) + 1;
+        ((a.w[big::NLEN - 1] & P_OMASK) >> (P_TBITS)) + 1
     }
 
     pub fn pexceed(a: &BIG, b: &BIG) -> bool {
         let ea = FF::excess(a);
         let eb = FF::excess(b);
-        if ((ea + 1) as DChunk) * ((eb + 1) as DChunk) > P_FEXCESS as DChunk {
-            return true;
-        }
-        return false;
+        ((ea + 1) as DChunk) * ((eb + 1) as DChunk) > P_FEXCESS as DChunk
     }
 
     pub fn sexceed(a: &BIG) -> bool {
         let ea = FF::excess(a);
-        if ((ea + 1) as DChunk) * ((ea + 1) as DChunk) > P_FEXCESS as DChunk {
-            return true;
-        }
-        return false;
+        ((ea + 1) as DChunk) * ((ea + 1) as DChunk) > P_FEXCESS as DChunk
     }
 
     /* Constructors */
@@ -86,7 +80,7 @@ impl FF {
             f.v.push(BIG::new());
         }
         f.length = n;
-        return f;
+        f
     }
 
     pub fn zero(&mut self) {
@@ -96,7 +90,7 @@ impl FF {
     }
 
     pub fn getlen(&self) -> usize {
-        return self.length;
+        self.length
     }
 
     /* set to integer */
@@ -149,7 +143,7 @@ impl FF {
                 return false;
             }
         }
-        return true;
+        true
     }
 
     /* shift right by BIGBITS-bit words */
@@ -174,11 +168,11 @@ impl FF {
 
     /* extract last bit */
     pub fn parity(&self) -> isize {
-        return self.v[0].parity();
+        self.v[0].parity()
     }
 
     pub fn lastbits(&mut self, m: usize) -> isize {
-        return self.v[0].lastbits(m);
+        self.v[0].lastbits(m)
     }
 
     /* compare x and y - must be normalised, and of same length */
@@ -191,11 +185,10 @@ impl FF {
                 return j;
             }
             if i == 0 {
-                break;
+                return 0;
             }
             i -= 1;
         }
-        return 0;
     }
 
     /* recursive add */
@@ -334,7 +327,7 @@ impl FF {
             }
             i -= 1;
         }
-        return s;
+        s
     }
 
     /* Convert FFs to/from byte arrays */
@@ -480,7 +473,7 @@ impl FF {
         let mut z = FF::new_int(2 * n);
         let mut t = FF::new_int(2 * n);
         z.karmul(0, &x, 0, &y, 0, &mut t, 0, n);
-        return z;
+        z
     }
 
     /* return low part of product this*y */
@@ -526,7 +519,7 @@ impl FF {
         let mut z = FF::new_int(2 * n);
         let mut t = FF::new_int(2 * n);
         z.karsqr(0, &x, 0, &mut t, 0, n);
-        return z;
+        z
     }
 
     /* return This mod modulus, ms is modulus, md is Montgomery Constant */
@@ -546,7 +539,7 @@ impl FF {
         r.sub(&m);
         r.norm();
 
-        return r;
+        r
     }
 
     /* Set r=this mod b */
@@ -580,7 +573,7 @@ impl FF {
 
         r.copy(&x);
         r.rmod(b);
-        return r;
+        r
     }
 
     /* Set return=1/this mod p. Binary method - a<p on entry */
@@ -727,7 +720,7 @@ impl FF {
             i <<= 1;
         }
         u.norm();
-        return u;
+        u
     }
 
     pub fn random(&mut self, rng: &mut RAND) {
@@ -974,7 +967,7 @@ impl FF {
             xx = yy;
             yy = r;
         }
-        return yy;
+        yy
     }
 
     /* quick and dirty check for common factor with n */
@@ -1005,10 +998,7 @@ impl FF {
 
         let g = x.v[0].get(0) as isize;
         let r = FF::igcd(s, g);
-        if r > 1 {
-            return true;
-        }
-        return false;
+        r > 1
     }
 
     /* Miller-Rabin test for primality. Slow. */
@@ -1066,6 +1056,6 @@ impl FF {
             return false;
         }
 
-        return true;
+        true
     }
 }

@@ -45,7 +45,7 @@ pub fn in_range(s: &[u8]) -> bool {
     if BIG::comp(&sc, &r) >= 0 {
         return false;
     }
-    return true;
+    true
 }
 
 /* Calculate a public/private EC GF(p) key pair w,s where W=s.G mod EC(p),
@@ -74,7 +74,7 @@ pub fn key_pair_generate(rng: Option<&mut RAND>, s: &mut [u8], w: &mut [u8]) -> 
 
     WP.tobytes(w, false); // To use point compression on public keys, change to true
 
-    return res;
+    res
 }
 
 /* validate public key */
@@ -109,7 +109,7 @@ pub fn public_key_validate(w: &[u8]) -> isize {
             res = INVALID_PUBLIC_KEY
         }
     }
-    return res;
+    res
 }
 
 /* IEEE-1363 Diffie-Hellman online calculation Z=S.WD */
@@ -147,7 +147,7 @@ pub fn ecpsvdp_dh(s: &[u8], wd: &[u8], z: &mut [u8], typ: isize) -> isize {
             }
         }
     }
-    return res;
+    res
 }
 
 /* IEEE ECDSA Signature, C and D are signature on F using private key S */
@@ -212,7 +212,7 @@ pub fn ecpsp_dsa(
     for i in 0..EFS {
         d[i] = t[i]
     }
-    return 0;
+    0
 }
 
 /* IEEE1363 ECDSA Signature Verification. Signature C and D on F is verified using public key W */
@@ -265,7 +265,7 @@ pub fn ecpvp_dsa(sha: usize, w: &[u8], f: &[u8], c: &[u8], d: &[u8]) -> isize {
         }
     }
 
-    return res;
+    res
 }
 
 /* IEEE1363 ECIES encryption. Encryption of plaintext M uses public key W and produces ciphertext V,C,T */
@@ -328,7 +328,7 @@ pub fn ecies_encrypt(
         c.pop();
     }
 
-    return Some(c);
+    Some(c)
 }
 
 /* constant time n-byte compare */
@@ -340,7 +340,7 @@ fn ncomp(t1: &[u8], t2: &[u8], n: usize) -> bool {
     if res == 0 {
         return true;
     }
-    return false;
+    false
 }
 
 /* IEEE1363 ECIES decryption. Decryption of ciphertext V,C,T using private key U outputs plaintext M */
@@ -413,5 +413,5 @@ pub fn ecies_decrypt(
         return None;
     }
 
-    return m;
+    m
 }

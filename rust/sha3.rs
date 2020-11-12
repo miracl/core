@@ -62,7 +62,7 @@ pub struct SHA3 {
 
 impl SHA3 {
     fn rotl(x: u64, n: u64) -> u64 {
-        return ((x) << n) | ((x) >> (64 - n));
+        ((x) << n) | ((x) >> (64 - n))
     }
 
     fn transform(&mut self) {
@@ -151,7 +151,7 @@ impl SHA3 {
             s: [[0; 5]; 5],
         };
         nh.init(olen);
-        return nh;
+        nh
     }
 
     pub fn new_copy(hh: &SHA3) -> SHA3 {
@@ -169,7 +169,7 @@ impl SHA3 {
                 nh.s[i][j] = hh.s[i][j];
             }
         }
-        return nh;
+        nh
     }
 
     /* process a single byte */
@@ -180,7 +180,7 @@ impl SHA3 {
         let ind = cnt / 8;
         let i = ind % 5;
         let j = ind / 5;
-        self.s[i][j] ^= ((byt & 0xff) as u64) << (8 * b);
+        self.s[i][j] ^= (byt as u64) << (8 * b);
         self.length += 1;
         if cnt + 1 == self.rate {
             self.transform();

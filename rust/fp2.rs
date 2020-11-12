@@ -55,53 +55,53 @@ impl FP2 {
         let mut f = FP2::new();
         f.a.copy(&FP::new_int(a));
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_ints(a: isize, b: isize) -> FP2 {
         let mut f = FP2::new();
         f.a.copy(&FP::new_int(a));
         f.b.copy(&FP::new_int(b));
-        return f;
+        f
     }
 
     pub fn new_copy(x: &FP2) -> FP2 {
         let mut f = FP2::new();
         f.a.copy(&x.a);
         f.b.copy(&x.b);
-        return f;
+        f
     }
 
     pub fn new_fps(c: &FP, d: &FP) -> FP2 {
         let mut f = FP2::new();
         f.a.copy(c);
         f.b.copy(d);
-        return f;
+        f
     }
 
     pub fn new_bigs(c: &BIG, d: &BIG) -> FP2 {
         let mut f = FP2::new();
         f.a.copy(&FP::new_big(c));
         f.b.copy(&FP::new_big(d));
-        return f;
+        f
     }
 
     pub fn new_fp(c: &FP) -> FP2 {
         let mut f = FP2::new();
         f.a.copy(c);
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_big(c: &BIG) -> FP2 {
         let mut f = FP2::new();
         f.a.copy(&FP::new_big(c));
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_rand(rng: &mut RAND) -> FP2 {
-        return FP2::new_fps(&FP::new_rand(rng),&FP::new_rand(rng));
+        FP2::new_fps(&FP::new_rand(rng),&FP::new_rand(rng))
     }
 
     /* reduce components mod Modulus */
@@ -118,7 +118,7 @@ impl FP2 {
 
     /* test self=0 ? */
     pub fn iszilch(&self) -> bool {
-        return self.a.iszilch() && self.b.iszilch();
+        self.a.iszilch() && self.b.iszilch()
     }
 
     pub fn islarger(&self) -> isize {
@@ -129,7 +129,7 @@ impl FP2 {
         if cmp!=0 {
             return cmp;
         }
-        return self.a.islarger()
+        self.a.islarger()
     }
 
     pub fn tobytes(&self,bf: &mut [u8]) {
@@ -156,7 +156,7 @@ impl FP2 {
             t[i]=bf[i+MB];
         }
         let ta=FP::frombytes(&t);
-        return FP2::new_fps(&ta,&tb);
+        FP2::new_fps(&ta,&tb)
     }
 
     pub fn cmove(&mut self, g: &FP2, d: isize) {
@@ -167,34 +167,34 @@ impl FP2 {
     /* test self=1 ? */
     pub fn isunity(&self) -> bool {
         let one = FP::new_int(1);
-        return self.a.equals(&one) && self.b.iszilch();
+        self.a.equals(&one) && self.b.iszilch()
     }
 
     /* test self=x */
     pub fn equals(&self, x: &FP2) -> bool {
-        return self.a.equals(&x.a) && self.b.equals(&x.b);
+        self.a.equals(&x.a) && self.b.equals(&x.b)
     }
 
     /* extract a */
     #[allow(non_snake_case)]
     pub fn getA(&mut self) -> FP {
-        return self.a;
+        self.a
     }
 
     /* extract b */
     #[allow(non_snake_case)]
     pub fn getB(&mut self) -> FP {
-        return self.b;
+        self.b
     }
 
     /* extract a */
     pub fn geta(&mut self) -> BIG {
-        return self.a.redc();
+        self.a.redc()
     }
 
     /* extract b */
     pub fn getb(&mut self) -> BIG {
-        return self.b.redc();
+        self.b.redc()
     }
 
     /* copy self=x */
@@ -226,11 +226,11 @@ impl FP2 {
         if fp::BIG_ENDIAN_SIGN {
             let u=self.b.iszilch() as isize;
 	        p2^=(p1^p2)&u;
-	        return p2;
+	        p2
         } else {
             let u=self.a.iszilch() as isize;
 	        p1^=(p1^p2)&u;
-	        return p1;
+	        p1
         }
     }
 
@@ -377,7 +377,7 @@ impl FP2 {
         let mut c=FP2::new_copy(self);
         c.conj();
         c.mul(self);
-        return c.getA().qr(h);
+        c.getA().qr(h)
     }
 
     /* sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) */
@@ -447,7 +447,7 @@ impl FP2 {
 
     /* output to hex string */
     pub fn tostring(&self) -> String {
-        return format!("[{},{}]", self.a.tostring(), self.b.tostring());
+        format!("[{},{}]", self.a.tostring(), self.b.tostring())
     }
 
     /* self=1/self */

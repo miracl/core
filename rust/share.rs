@@ -71,20 +71,20 @@ fn mul(x: u8, y: u8) -> u8 {
     let ly = (LTAB[iy] as usize) & 0xff;
 
     if x != 0 && y != 0 {
-        return PTAB[(lx + ly) % 255];
+        PTAB[(lx + ly) % 255]
     } else {
-        return 0;
+        0
     }
 }
 
 fn add(x: u8,y: u8) -> u8 {
-    return x^y;
+    x^y
 }
 
 fn inv(x: u8) -> u8 {
    let ix = (x as usize) & 0xff;
    let lx = (LTAB[ix] as usize) & 0xff; 
-   return PTAB[255-lx];
+   PTAB[255-lx]
 }
 
 /* Lagrange interpolation */
@@ -99,7 +99,7 @@ fn interpolate(n: usize, x: &[u8], y: &[u8]) -> u8 {
         }
         yp=add(yp,mul(p,y[i]));
     }
-    return yp;
+    yp
 }
 
 impl<'a> SHARE<'a> {
@@ -127,7 +127,7 @@ impl<'a> SHARE<'a> {
                 x=mul(x,ident as u8);
             }
         }        
-        return SHARE{id: ident as u8,nsr: numshare as u8,b:s};
+        SHARE{id: ident as u8,nsr: numshare as u8,b:s}
     } 
 /* recover M from shares */
     pub fn recover(m: &mut [u8],s: &[SHARE]) {
@@ -151,7 +151,6 @@ impl<'a> SHARE<'a> {
             }
             m[j]=interpolate(nsr,&x,&y);
         }
-        return;    
     }
 }
 

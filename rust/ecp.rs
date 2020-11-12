@@ -84,7 +84,7 @@ impl ECP {
         if CURVETYPE == EDWARDS {
             E.z.one();
         }
-        return E;
+        E
     }
 
     /* set (x,y) from two BIGs */
@@ -106,7 +106,7 @@ impl ECP {
                 E.inf();
             }
         }
-        return E;
+        E
     }
 
     /* set (x,y) from BIG and a bit */
@@ -128,7 +128,7 @@ impl ECP {
         } else {
             E.inf()
         }
-        return E;
+        E
     }
 
     #[allow(non_snake_case)]
@@ -147,7 +147,7 @@ impl ECP {
         } else {
             E.inf();
         }
-        return E;
+        E
     }
 
     /* set this=O */
@@ -206,7 +206,7 @@ impl ECP {
             r.add(&x);
         }
         r.reduce();
-        return r;
+        r
     }
 
     /* test for O point-at-infinity */
@@ -220,7 +220,7 @@ impl ECP {
         if CURVETYPE == MONTGOMERY {
             return self.z.iszilch();
         }
-        return true;
+        true
     }
 
     /* Conditional swap of P and Q dependant on d */
@@ -245,7 +245,7 @@ impl ECP {
     fn teq(b: i32, c: i32) -> isize {
         let mut x = b ^ c;
         x -= 1; // if x=0, x now -1
-        return ((x >> 31) & 1) as isize;
+        ((x >> 31) & 1) as isize
     }
 
     /* this=P */
@@ -267,7 +267,6 @@ impl ECP {
             self.x.neg();
             self.x.norm();
         }
-        return;
     }
     /* multiply x coordinate */
     pub fn mulx(&mut self, c: &mut FP) {
@@ -317,7 +316,7 @@ impl ECP {
                 return false;
             }
         }
-        return true;
+        true
     }
 
     /* set to affine - from (x,y,z) to (x,y) */
@@ -345,7 +344,7 @@ impl ECP {
         let mut W = ECP::new();
         W.copy(self);
         W.affine();
-        return W.x.redc();
+        W.x.redc()
     }
 
     /* extract y as a BIG */
@@ -353,7 +352,7 @@ impl ECP {
         let mut W = ECP::new();
         W.copy(self);
         W.affine();
-        return W.y.redc();
+        W.y.redc()
     }
 
     /* get sign of Y */
@@ -361,24 +360,21 @@ impl ECP {
         let mut W = ECP::new();
         W.copy(self);
         W.affine();
-        return W.y.sign();
+        W.y.sign()
     }
 
     /* extract x as an FP */
     pub fn getpx(&self) -> FP {
-        let w = FP::new_copy(&self.x);
-        return w;
+        FP::new_copy(&self.x)
     }
     /* extract y as an FP */
     pub fn getpy(&self) -> FP {
-        let w = FP::new_copy(&self.y);
-        return w;
+        FP::new_copy(&self.y)
     }
 
     /* extract z as an FP */
     pub fn getpz(&self) -> FP {
-        let w = FP::new_copy(&self.z);
-        return w;
+        FP::new_copy(&self.z)
     }
 
     /* convert to byte array */
@@ -502,7 +498,7 @@ impl ECP {
             }
         }
 
-        return ECP::new();
+        ECP::new()
     }
 
     /* convert to hex string */
@@ -713,7 +709,6 @@ impl ECP {
             self.z.copy(&bb);
             self.z.mul(&c);
         }
-        return;
     }
 
     /* self+=Q */
@@ -969,7 +964,6 @@ impl ECP {
             self.z.copy(&f);
             self.z.mul(&g);
         }
-        return;
     }
 
     /* Differential Add for Montgomery curves. this+=Q where W is this-Q and is affine. */
@@ -1024,7 +1018,7 @@ impl ECP {
     /* constant time multiply by small integer of length bts - use ladder */
     pub fn pinmul(&self, e: i32, bts: i32) -> ECP {
         if CURVETYPE == MONTGOMERY {
-            return self.mul(&mut BIG::new_int(e as isize));
+            self.mul(&BIG::new_int(e as isize))
         } else {
             let mut P = ECP::new();
             let mut R0 = ECP::new();
@@ -1034,14 +1028,14 @@ impl ECP {
             for i in (0..bts).rev() {
                 let b = ((e >> i) & 1) as isize;
                 P.copy(&R1);
-                P.add(&mut R0);
+                P.add(&R0);
                 R0.cswap(&mut R1, b);
                 R1.copy(&P);
                 R0.dbl();
                 R0.cswap(&mut R1, b);
             }
             P.copy(&R0);
-            return P;
+            P
         }
     }
 
@@ -1066,7 +1060,7 @@ impl ECP {
             for i in (0..nb - 1).rev() {
                 let b = e.bit(i);
                 P.copy(&R1);
-                P.dadd(&mut R0, &D);
+                P.dadd(&R0, &D);
                 R0.cswap(&mut R1, b);
                 R1.copy(&P);
                 R0.dbl();
@@ -1102,7 +1096,7 @@ impl ECP {
             for i in 1..8 {
                 C.copy(&W[i - 1]);
                 W[i].copy(&C);
-                W[i].add(&mut Q);
+                W[i].add(&Q);
             }
 
             // make exponent odd - add 2P if even, P if odd
@@ -1136,11 +1130,11 @@ impl ECP {
                 P.dbl();
                 P.dbl();
                 P.dbl();
-                P.add(&mut Q);
+                P.add(&Q);
             }
-            P.sub(&mut C); /* apply correction */
+            P.sub(&C); /* apply correction */
         }
-        return P;
+        P
     }
 
 // Generic multi-multiplication, fixed 4-bit window, P=Sigma e_i*X_i
@@ -1196,7 +1190,7 @@ impl ECP {
             }
             P.add(&S);
         }
-        return P;
+        P
     }
 
     /* Return e.this+f.Q */
@@ -1306,7 +1300,7 @@ impl ECP {
             S.add(&T);
         }
         S.sub(&C); /* apply correction */
-        return S;
+        S
     }
 
     pub fn cfp(&mut self) {
@@ -1347,7 +1341,7 @@ impl ECP {
                 break;
             }
         }
-        return P;
+        P
     }
 
 /* Constant time Map to Point */
@@ -1778,7 +1772,7 @@ CAHCZF */
 CAISZF */
             }
         }
-        return P;
+        P
     }
 
 /* Map byte string to curve point */
@@ -1789,7 +1783,7 @@ CAISZF */
         let x=dx.dmod(&q);
         let mut P=ECP::hap2point(&x);
         P.cfp();
-        return P;
+        P
     }
 
     pub fn generator() -> ECP {
@@ -1801,6 +1795,6 @@ CAISZF */
         } else {
             G = ECP::new_big(&gx);
         }
-        return G;
+        G
     }
 }

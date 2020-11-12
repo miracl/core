@@ -117,34 +117,34 @@ pub struct HASH512 {
 
 impl HASH512 {
     fn s(n: u64, x: u64) -> u64 {
-        return ((x) >> n) | ((x) << (64 - n));
+        ((x) >> n) | ((x) << (64 - n))
     }
     fn r(n: u64, x: u64) -> u64 {
-        return (x) >> n;
+        (x) >> n
     }
 
     fn ch(x: u64, y: u64, z: u64) -> u64 {
-        return (x & y) ^ (!(x) & z);
+        (x & y) ^ (!(x) & z)
     }
 
     fn maj(x: u64, y: u64, z: u64) -> u64 {
-        return (x & y) ^ (x & z) ^ (y & z);
+        (x & y) ^ (x & z) ^ (y & z)
     }
 
     fn sig0(x: u64) -> u64 {
-        return HASH512::s(28, x) ^ HASH512::s(34, x) ^ HASH512::s(39, x);
+        HASH512::s(28, x) ^ HASH512::s(34, x) ^ HASH512::s(39, x)
     }
 
     fn sig1(x: u64) -> u64 {
-        return HASH512::s(14, x) ^ HASH512::s(18, x) ^ HASH512::s(41, x);
+        HASH512::s(14, x) ^ HASH512::s(18, x) ^ HASH512::s(41, x)
     }
 
     fn theta0(x: u64) -> u64 {
-        return HASH512::s(1, x) ^ HASH512::s(8, x) ^ HASH512::r(7, x);
+        HASH512::s(1, x) ^ HASH512::s(8, x) ^ HASH512::r(7, x)
     }
 
     fn theta1(x: u64) -> u64 {
-        return HASH512::s(19, x) ^ HASH512::s(61, x) ^ HASH512::r(6, x);
+        HASH512::s(19, x) ^ HASH512::s(61, x) ^ HASH512::r(6, x)
     }
 
     fn transform(&mut self) {
@@ -215,7 +215,7 @@ impl HASH512 {
             w: [0; 80],
         };
         nh.init();
-        return nh;
+        nh
     }
 
     pub fn new_copy(hh: &HASH512) -> HASH512 {
@@ -232,7 +232,7 @@ impl HASH512 {
         for i in 0..8 {
             nh.h[i] = hh.h[i];
         }
-        return nh;        
+        nh        
     }
 
     /* process a single byte */
@@ -240,7 +240,7 @@ impl HASH512 {
         /* process the next message byte */
         let cnt = ((self.length[0] / 64) % 16) as usize;
         self.w[cnt] <<= 8;
-        self.w[cnt] |= (byt & 0xFF) as u64;
+        self.w[cnt] |= byt as u64;
         self.length[0] += 8;
         if self.length[0] == 0 {
             self.length[1] += 1;
@@ -285,11 +285,11 @@ impl HASH512 {
             digest[i] = ((self.h[i / 8] >> (8 * (7 - i % 8))) & 0xff) as u8;
         }
         self.init();
-        return digest;
+        digest
     }
     pub fn continuing_hash(&self) -> [u8; 64] {
         let mut sh=HASH512::new_copy(self);
-        return sh.hash();
+        sh.hash()
     }
 }
 

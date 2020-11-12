@@ -45,33 +45,33 @@ pub struct HASH256 {
 
 impl HASH256 {
     fn s(n: u32, x: u32) -> u32 {
-        return ((x) >> n) | ((x) << (32 - n));
+        ((x) >> n) | ((x) << (32 - n))
     }
     fn r(n: u32, x: u32) -> u32 {
-        return (x) >> n;
+        (x) >> n
     }
 
     fn ch(x: u32, y: u32, z: u32) -> u32 {
-        return (x & y) ^ (!(x) & z);
+        (x & y) ^ (!(x) & z)
     }
 
     fn maj(x: u32, y: u32, z: u32) -> u32 {
-        return (x & y) ^ (x & z) ^ (y & z);
+        (x & y) ^ (x & z) ^ (y & z)
     }
     fn sig0(x: u32) -> u32 {
-        return HASH256::s(2, x) ^ HASH256::s(13, x) ^ HASH256::s(22, x);
+        HASH256::s(2, x) ^ HASH256::s(13, x) ^ HASH256::s(22, x)
     }
 
     fn sig1(x: u32) -> u32 {
-        return HASH256::s(6, x) ^ HASH256::s(11, x) ^ HASH256::s(25, x);
+        HASH256::s(6, x) ^ HASH256::s(11, x) ^ HASH256::s(25, x)
     }
 
     fn theta0(x: u32) -> u32 {
-        return HASH256::s(7, x) ^ HASH256::s(18, x) ^ HASH256::r(3, x);
+        HASH256::s(7, x) ^ HASH256::s(18, x) ^ HASH256::r(3, x)
     }
 
     fn theta1(x: u32) -> u32 {
-        return HASH256::s(17, x) ^ HASH256::s(19, x) ^ HASH256::r(10, x);
+        HASH256::s(17, x) ^ HASH256::s(19, x) ^ HASH256::r(10, x)
     }
 
     fn transform(&mut self) {
@@ -142,7 +142,7 @@ impl HASH256 {
             w: [0; 64],
         };
         nh.init();
-        return nh;
+        nh
     }
 
     pub fn new_copy(hh: &HASH256) -> HASH256 {
@@ -159,7 +159,7 @@ impl HASH256 {
         for i in 0..8 {
             nh.h[i] = hh.h[i];
         }
-        return nh;        
+        nh        
     }
 
     /* process a single byte */
@@ -167,7 +167,7 @@ impl HASH256 {
         /* process the next message byte */
         let cnt = ((self.length[0] / 32) % 16) as usize;
         self.w[cnt] <<= 8;
-        self.w[cnt] |= (byt & 0xFF) as u32;
+        self.w[cnt] |= byt as u32;
         self.length[0] += 8;
         if self.length[0] == 0 {
             self.length[1] += 1;
@@ -212,12 +212,12 @@ impl HASH256 {
             digest[i] = ((self.h[i / 4] >> (8 * (3 - i % 4))) & 0xff) as u8;
         }
         self.init();
-        return digest;
+        digest
     }
 
     pub fn continuing_hash(&self) -> [u8; 32] {
         let mut sh=HASH256::new_copy(self);
-        return sh.hash();
+        sh.hash()
     }
 }
 

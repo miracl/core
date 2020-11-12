@@ -184,34 +184,33 @@ pub struct AES {
 
 
 fn rotl8(x: u32) -> u32 {
-    return ((x) << 8) | ((x) >> 24);
+    ((x) << 8) | ((x) >> 24)
 }
 
 fn rotl16(x: u32) -> u32 {
-    return ((x) << 16) | ((x) >> 16);
+    ((x) << 16) | ((x) >> 16)
 }
 
 fn rotl24(x: u32) -> u32 {
-    return ((x) << 24) | ((x) >> 8);
+    ((x) << 24) | ((x) >> 8)
 }
 
 fn pack(b: [u8; 4]) -> u32 {
     /* pack bytes into a 32-bit Word */
-    return ((((b[3]) & 0xff) as u32) << 24)
-        | ((((b[2]) & 0xff) as u32) << 16)
-        | ((((b[1]) & 0xff) as u32) << 8)
-        | (((b[0]) & 0xff) as u32);
+    ((b[3] as u32) << 24)
+        | ((b[2] as u32) << 16)
+        | ((b[1] as u32) << 8)
+        | (b[0] as u32)
 }
 
 fn unpack(a: u32) -> [u8; 4] {
     /* unpack bytes from a word */
-    let b: [u8; 4] = [
+    [
         (a & 0xff) as u8,
         ((a >> 8) & 0xff) as u8,
         ((a >> 16) & 0xff) as u8,
         ((a >> 24) & 0xff) as u8,
-    ];
-    return b;
+    ]
 }
 
 fn bmul(x: u8, y: u8) -> u8 {
@@ -222,9 +221,9 @@ fn bmul(x: u8, y: u8) -> u8 {
     let ly = (LTAB[iy] as usize) & 0xff;
 
     if x != 0 && y != 0 {
-        return PTAB[(lx + ly) % 255];
+        PTAB[(lx + ly) % 255]
     } else {
-        return 0;
+        0
     }
 }
 
@@ -234,7 +233,7 @@ fn subbyte(a: u32) -> u32 {
     b[1] = FBSUB[b[1] as usize];
     b[2] = FBSUB[b[2] as usize];
     b[3] = FBSUB[b[3] as usize];
-    return pack(b);
+    pack(b)
 }
 
 fn product(x: u32, y: u32) -> u8 {
@@ -242,10 +241,10 @@ fn product(x: u32, y: u32) -> u8 {
     let xb = unpack(x);
     let yb = unpack(y);
 
-    return bmul(xb[0], yb[0])
+    bmul(xb[0], yb[0])
         ^ bmul(xb[1], yb[1])
         ^ bmul(xb[2], yb[2])
-        ^ bmul(xb[3], yb[3]);
+        ^ bmul(xb[3], yb[3])
 }
 
 fn invmixcol(x: u32) -> u32 {
@@ -259,8 +258,7 @@ fn invmixcol(x: u32) -> u32 {
     b[1] = product(m, x);
     m = rotl24(m);
     b[0] = product(m, x);
-    let y = pack(b);
-    return y;
+    pack(b)
 }
 
 fn increment(f: &mut [u8; 16]) {
@@ -378,7 +376,7 @@ impl AES {
         for j in n - 4..n {
             self.rkey[j + 4 - n] = self.fkey[j]
         }
-        return true;
+        true
     }
 
     pub fn getreg(&mut self) -> [u8; 16] {
@@ -386,7 +384,7 @@ impl AES {
         for i in 0..16 {
             ir[i] = self.f[i]
         }
-        return ir;
+        ir
     }
 
     /* Encrypt a single block */
@@ -576,7 +574,7 @@ impl AES {
         match self.mode {
             ECB => {
                 self.ecb_encrypt(buff);
-                return 0;
+                0
             }
             CBC => {
                 for j in 0..16 {
@@ -586,7 +584,7 @@ impl AES {
                 for j in 0..16 {
                     self.f[j] = buff[j]
                 }
-                return 0;
+                0
             }
 
             CFB1 | CFB2 | CFB4 => {
@@ -605,7 +603,7 @@ impl AES {
                     buff[j] ^= st[j];
                     self.f[16 - bytes + j] = buff[j];
                 }
-                return fell_off;
+                fell_off
             }
 
             OFB1 | OFB2 | OFB4 | OFB8 | OFB16 => {
@@ -623,7 +621,7 @@ impl AES {
 
                 //self.ecb_encrypt(&mut (self.f));
                 //for j in 0..bytes {buff[j]^=self.f[j]}
-                return 0;
+                0
             }
 
             CTR1 | CTR2 | CTR4 | CTR8 | CTR16 => {
@@ -636,11 +634,11 @@ impl AES {
                     buff[j] ^= st[j]
                 }
                 increment(&mut (self.f));
-                return 0;
+                0
             }
 
             _ => {
-                return 0;
+                0
             }
         }
     }
@@ -656,7 +654,7 @@ impl AES {
         match self.mode {
             ECB => {
                 self.ecb_decrypt(buff);
-                return 0;
+                0
             }
             CBC => {
                 for j in 0..16 {
@@ -668,7 +666,7 @@ impl AES {
                     buff[j] ^= st[j];
                     st[j] = 0;
                 }
-                return 0;
+                0
             }
             CFB1 | CFB2 | CFB4 => {
                 let bytes = self.mode - CFB1 + 1;
@@ -686,7 +684,7 @@ impl AES {
                     self.f[16 - bytes + j] = buff[j];
                     buff[j] ^= st[j];
                 }
-                return fell_off;
+                fell_off
             }
             OFB1 | OFB2 | OFB4 | OFB8 | OFB16 => {
                 let bytes = self.mode - OFB1 + 1;
@@ -702,7 +700,7 @@ impl AES {
                 }
                 //  self.ecb_encrypt(A.f[:]);
                 //  for j in 0..bytes {buff[j]^=self.f[j]}
-                return 0;
+                0
             }
 
             CTR1 | CTR2 | CTR4 | CTR8 | CTR16 => {
@@ -715,11 +713,11 @@ impl AES {
                     buff[j] ^= st[j]
                 }
                 increment(&mut (self.f));
-                return 0;
+                0
             }
 
             _ => {
-                return 0;
+                0
             }
         }
     }
@@ -786,7 +784,7 @@ pub fn cbc_iv0_encrypt(k: &[u8], m: &[u8]) -> Vec<u8> {
         c.push(buff[j]);
     }
     a.end();
-    return c;
+    c
 }
 
 /* returns plaintext if all consistent, else returns null string */
@@ -803,7 +801,7 @@ pub fn cbc_iv0_decrypt(k: &[u8], c: &[u8]) -> Option<Vec<u8>> {
     let mut ipt = 0;
     let mut i;
 
-    if c.len() == 0 {
+    if c.is_empty() {
         return None;
     }
     let mut ch = c[ipt];
@@ -852,9 +850,10 @@ pub fn cbc_iv0_decrypt(k: &[u8], c: &[u8]) -> Option<Vec<u8>> {
     }
 
     if bad {
-        return None;
+        None
+    } else {
+        Some(m)
     }
-    return Some(m);
 }
 
 /*

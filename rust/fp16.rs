@@ -52,28 +52,28 @@ impl FP16 {
         let mut f = FP16::new();
         f.a.copy(&FP8::new_int(a));
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn new_copy(x: &FP16) -> FP16 {
         let mut f = FP16::new();
         f.a.copy(&x.a);
         f.b.copy(&x.b);
-        return f;
+        f
     }
 
     pub fn new_fp8s(c: &FP8, d: &FP8) -> FP16 {
         let mut f = FP16::new();
         f.a.copy(c);
         f.b.copy(d);
-        return f;
+        f
     }
 
     pub fn new_fp8(c: &FP8) -> FP16 {
         let mut f = FP16::new();
         f.a.copy(c);
         f.b.zero();
-        return f;
+        f
     }
 
     pub fn set_fp8s(&mut self, c: &FP8, d: &FP8) {
@@ -110,7 +110,7 @@ impl FP16 {
 
     /* test self=0 ? */
     pub fn iszilch(&self) -> bool {
-        return self.a.iszilch() && self.b.iszilch();
+        self.a.iszilch() && self.b.iszilch()
     }
 
     pub fn tobytes(&self,bf: &mut [u8]) {
@@ -137,38 +137,35 @@ impl FP16 {
             t[i]=bf[i+MB];
         }
         let ta=FP8::frombytes(&t);
-        return FP16::new_fp8s(&ta,&tb);
+        FP16::new_fp8s(&ta,&tb)
     }
 
     /* test self=1 ? */
     pub fn isunity(&self) -> bool {
         let one = FP8::new_int(1);
-        return self.a.equals(&one) && self.b.iszilch();
+        self.a.equals(&one) && self.b.iszilch()
     }
 
     /* test is w real? That is in a+ib test b is zero */
     pub fn isreal(&mut self) -> bool {
-        return self.b.iszilch();
+        self.b.iszilch()
     }
     /* extract real part a */
     pub fn real(&self) -> FP8 {
-        let f = FP8::new_copy(&self.a);
-        return f;
+        FP8::new_copy(&self.a)
     }
 
     pub fn geta(&self) -> FP8 {
-        let f = FP8::new_copy(&self.a);
-        return f;
+        FP8::new_copy(&self.a)
     }
     /* extract imaginary part b */
     pub fn getb(&self) -> FP8 {
-        let f = FP8::new_copy(&self.b);
-        return f;
+        FP8::new_copy(&self.b)
     }
 
     /* test self=x */
     pub fn equals(&self, x: &FP16) -> bool {
-        return self.a.equals(&x.a) && self.b.equals(&x.b);
+        self.a.equals(&x.a) && self.b.equals(&x.b)
     }
     /* copy self=x */
     pub fn copy(&mut self, x: &FP16) {
@@ -338,7 +335,7 @@ impl FP16 {
 
     /* output to hex string */
     pub fn tostring(&self) -> String {
-        return format!("[{},{}]", self.a.tostring(), self.b.tostring());
+        format!("[{},{}]", self.a.tostring(), self.b.tostring())
     }
 
     /* self=1/self */
@@ -410,7 +407,7 @@ impl FP16 {
             w.sqr();
         }
         r.reduce();
-        return r;
+        r
     }
 
     /* XTR xtr_a function */
