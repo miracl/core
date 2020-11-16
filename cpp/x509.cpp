@@ -316,6 +316,9 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
         for (; j < fin; j++)
             sig->val[i++] = sc->val[j];
 
+        if (ret.hash == X509_H256) ret.curve = USE_NIST256;
+        if (ret.hash == X509_H384) ret.curve = USE_NIST384;
+        if (ret.hash == X509_H512) ret.curve = USE_NIST521;
     }
     if (ret.type == X509_RSA)
     {
@@ -331,10 +334,8 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
         for (; j < fin; j++)
             sig->val[i++] = sc->val[j];
 
+        ret.curve = 8*rlen;
     }
-    if (ret.hash == X509_H256) ret.curve = USE_NIST256;
-    if (ret.hash == X509_H384) ret.curve = USE_NIST384;
-    if (ret.hash == X509_H512) ret.curve = USE_NIST521;
 
     return ret;
 }
