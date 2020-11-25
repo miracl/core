@@ -949,7 +949,7 @@ public struct ECP {
         for _ in 0 ..< 16 {B.append(ECP())}
 
         mt.copy(e[0]); mt.norm()
-        for i in 0 ..< n { // find biggest
+        for i in 1 ..< n { // find biggest
             t.copy(e[i]); t.norm()
             let k=BIG.comp(t,mt)
             mt.cmove(t,(k+1)/2)
@@ -966,7 +966,7 @@ public struct ECP {
                 B[k].add(X[j])
             }
             R.inf(); S.inf()
-            for j in (0...15).reversed() {
+            for j in (1...15).reversed() {
                 R.add(B[j])
                 S.add(R)
             }

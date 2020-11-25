@@ -452,6 +452,8 @@ fn bls12383(mut rng: &mut RAND) {
     use core::bls12383::fp2;
     use core::bls12383::pair;
     use core::bls12383::rom;
+    use core::bls12383::ecp::ECP;
+    use core::bls12383::big::BIG;
 
     let mut fail = false;
     println!("\nTesting/Timing bls12383 Pairings");
@@ -467,6 +469,25 @@ fn bls12383(mut rng: &mut RAND) {
     println!("{:} bit build", arch::CHUNK);
 
     let G = ecp::ECP::generator();
+/*
+    println!("g1= {} ",G.tostring()); 
+    let mut T: [ECP; 4] = [
+        ECP::new(),
+        ECP::new(),
+        ECP::new(),
+        ECP::new(),
+    ];
+    let mut e: [BIG; 4] = [
+        BIG::new(),
+        BIG::new(),
+        BIG::new(),
+        BIG::new(),
+    ];
+    T[0].copy(&G);
+    e[0].one();
+    let R=ECP::muln(1,&T,&e);
+    println!("g1= {} ",R.tostring()); 
+*/
 
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
     let s = big::BIG::randomnum(&r, &mut rng);

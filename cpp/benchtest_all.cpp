@@ -198,6 +198,7 @@ int nist256(csprng *RNG)
 #endif
 
     ECP_generator(&EG);
+
     BIG_rcopy(r, CURVE_Order);
 
     FP_rand(&rw,RNG);
@@ -606,6 +607,7 @@ int bls383(csprng *RNG)
     printf("\nTesting/Timing BLS12383 Pairings\n");
 
     ECP_generator(&G);
+
     BIG_rcopy(r, CURVE_Order);
     FP_rand(&rz,RNG);
     ECP_map2point(&P,&rz);
