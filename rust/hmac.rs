@@ -282,7 +282,7 @@ pub fn hkdf_extract(hash: usize, hlen: usize, prk: &mut [u8],salt: Option<&[u8]>
     } else {
         let h: [u8; 64] = [0; 64];
         hmac1(hash,hlen,prk,hlen,&h[0..hlen],ikm);
-    }   
+    }
 }
 
 pub fn hkdf_expand(hash: usize, hlen: usize, okm: &mut [u8], olen: usize, prk: &[u8], info: &[u8]) {
@@ -362,7 +362,7 @@ pub fn xmd_expand(hash: usize,hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],
 		for j in 0..hlen {
 			h1[j]^=h0[j];
             h2[j]=h1[j];
-		}          
+		}
 		tmp[0]=i as u8;
 
 		for j in 0..dst.len() {
@@ -378,7 +378,7 @@ pub fn xmd_expand(hash: usize,hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],
                 break;
             }
         }
-    }        
+    }
 
 }
 
@@ -516,7 +516,7 @@ pub fn printbinary(array: &[u8]) {
     println!("")
 }
 */
-pub fn pss_encode(sha: usize, m: &[u8], rng: &mut RAND, f: &mut [u8], rfs: usize) -> bool {
+pub fn pss_encode(sha: usize, m: &[u8], rng: &mut impl RAND, f: &mut [u8], rfs: usize) -> bool {
     let emlen=rfs;
     let embits=8*emlen-1;
     let hlen=sha;
@@ -625,7 +625,7 @@ pub fn pss_verify(sha: usize, m: &[u8],f: &[u8]) -> bool {
     true
 }
 /* OAEP Message Encoding for Encryption */
-pub fn oaep_encode(sha: usize, m: &[u8], rng: &mut RAND, p: Option<&[u8]>, f: &mut [u8], rfs: usize) -> bool {
+pub fn oaep_encode(sha: usize, m: &[u8], rng: &mut impl RAND, p: Option<&[u8]>, f: &mut [u8], rfs: usize) -> bool {
     let olen = rfs - 1;
     let mlen = m.len();
 

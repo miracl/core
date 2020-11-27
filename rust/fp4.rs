@@ -36,7 +36,7 @@ impl std::fmt::Debug for FP4 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
-}    
+}
 impl std::fmt::Display for FP4 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -93,7 +93,7 @@ impl FP4 {
         f
     }
 
-    pub fn new_rand(rng: &mut RAND) -> FP4 {
+    pub fn new_rand(rng: &mut impl RAND) -> FP4 {
        FP4::new_fp2s(&FP2::new_rand(rng),&FP2::new_rand(rng))
     }
 
@@ -162,7 +162,7 @@ impl FP4 {
         self.a.tobytes(&mut t);
         for i in 0..MB {
             bf[i+MB]=t[i];
-        }       
+        }
     }
 
     pub fn frombytes(bf: &[u8]) -> FP4 {
@@ -720,8 +720,8 @@ impl FP4 {
         c.geta().qr(h)
     }
 
-    // sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) 
-    // returns true if this is QR 
+    // sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2))
+    // returns true if this is QR
     pub fn sqrt(&mut self,h:Option<&FP>)  {
         if self.iszilch() {
             return;
@@ -774,7 +774,7 @@ impl FP4 {
         let sgn=self.sign();
         let mut nr=FP4::new_copy(&self);
         nr.neg(); nr.norm();
-        self.cmove(&nr,sgn); 
+        self.cmove(&nr,sgn);
     }
 PFGE24F */
 }

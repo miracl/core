@@ -83,7 +83,7 @@ fn add(x: u8,y: u8) -> u8 {
 
 fn inv(x: u8) -> u8 {
    let ix = (x as usize) & 0xff;
-   let lx = (LTAB[ix] as usize) & 0xff; 
+   let lx = (LTAB[ix] as usize) & 0xff;
    PTAB[255-lx]
 }
 
@@ -93,7 +93,7 @@ fn interpolate(n: usize, x: &[u8], y: &[u8]) -> u8 {
     for i in 0..n {
         let mut p=1 as u8;
         for j in 0..n {
-            if i!=j { 
+            if i!=j {
                 p=mul(p,mul(x[j],inv(add(x[i],x[j]))));
             }
         }
@@ -108,17 +108,14 @@ impl<'a> SHARE<'a> {
 /* input id - Unique share ID */
 /* input nsr - Number of shares required for recovery */
 /* input Message M to be shared */
-/* input Random seed R */
+/* input Random number generator rng to be used */
 /* return share structure */
 // must bind lifetime of the byte array stored by structure, to lifetime of s
-    pub fn new(ident: usize,numshare: usize,s: &'a mut [u8],m: &[u8], r:&[u8]) -> SHARE<'a> {
+    pub fn new(ident: usize,numshare: usize,s: &'a mut [u8],m: &[u8], rng: &mut impl RAND) -> SHARE<'a> {
         if ident<1 || ident>=256 || numshare<2 || numshare>=256 {
             return SHARE{id:0,nsr:0,b:s};
         }
         let len=m.len();
-        let mut rng = RAND::new();
-        rng.clean();
-        rng.seed(r.len(),r);
         for j in 0..len {
             let mut x=ident as u8;
             s[j]=m[j];
@@ -126,9 +123,9 @@ impl<'a> SHARE<'a> {
                 s[j]=add(s[j],mul(rng.getbyte(),x));
                 x=mul(x,ident as u8);
             }
-        }        
+        }
         SHARE{id: ident as u8,nsr: numshare as u8,b:s}
-    } 
+    }
 /* recover M from shares */
     pub fn recover(m: &mut [u8],s: &[SHARE]) {
         let len=s[0].b.len();

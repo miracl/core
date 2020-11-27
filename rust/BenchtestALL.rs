@@ -23,14 +23,14 @@ extern crate core;
 //use std::io;
 
 use core::arch;
-use core::rand::RAND;
+use core::rand::{RAND, RAND_impl};
 
 use std::time::Instant;
 
 const MIN_ITERS: isize = 10;
 const MIN_TIME: isize = 10;
 
-fn ed25519(mut rng: &mut RAND) {
+fn ed25519(rng: &mut impl RAND) {
     //use core::ed25519;
     use core::ed25519::big;
     use core::ed25519::ecp;
@@ -69,11 +69,11 @@ fn ed25519(mut rng: &mut RAND) {
     let G = ecp::ECP::generator();
 
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    
+
     let mut P = ecp::ECP::new();
-    let s = big::BIG::randomnum(&r, &mut rng);
+    let s = big::BIG::randomnum(&r, rng);
     for _ in 0..10 {
-        P.copy(&ecp::ECP::map2point(&fp::FP::new_rand(&mut rng)));
+        P.copy(&ecp::ECP::map2point(&fp::FP::new_rand(rng)));
         if P.is_infinity() {
             println!("HASH FAILURE - P=O");
             fail = true;
@@ -103,7 +103,7 @@ fn ed25519(mut rng: &mut RAND) {
     }
 }
 
-fn nist256(mut rng: &mut RAND) {
+fn nist256(rng: &mut impl RAND) {
     //use core::nist256;
     use core::nist256::big;
     use core::nist256::ecp;
@@ -143,15 +143,15 @@ fn nist256(mut rng: &mut RAND) {
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
 
     let mut P = ecp::ECP::new();
-    let s = big::BIG::randomnum(&r, &mut rng);
+    let s = big::BIG::randomnum(&r, rng);
     for _ in 0..10 {
-        P.copy(&ecp::ECP::map2point(&fp::FP::new_rand(&mut rng)));
+        P.copy(&ecp::ECP::map2point(&fp::FP::new_rand(rng)));
         if P.is_infinity() {
             println!("HASH FAILURE - P=O");
             fail = true;
         }
     }
-    
+
     P = G.mul(&r);
     if !P.is_infinity() {
         println!("FAILURE - rG!=O");
@@ -175,7 +175,7 @@ fn nist256(mut rng: &mut RAND) {
     }
 }
 
-fn goldilocks(mut rng: &mut RAND) {
+fn goldilocks(rng: &mut impl RAND) {
     //use core::goldilocks;
     use core::goldilocks::big;
     use core::goldilocks::ecp;
@@ -215,9 +215,9 @@ fn goldilocks(mut rng: &mut RAND) {
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
 
     let mut P = ecp::ECP::new();
-    let s = big::BIG::randomnum(&r, &mut rng);
+    let s = big::BIG::randomnum(&r, rng);
     for _ in 0..10 {
-        P.copy(&ecp::ECP::map2point(&fp::FP::new_rand(&mut rng)));
+        P.copy(&ecp::ECP::map2point(&fp::FP::new_rand(rng)));
         if P.is_infinity() {
             println!("HASH FAILURE - P=O");
             fail = true;
@@ -247,7 +247,7 @@ fn goldilocks(mut rng: &mut RAND) {
     }
 }
 
-fn bn254(mut rng: &mut RAND) {
+fn bn254(rng: &mut impl RAND) {
     //use core::bn254;
     use core::bn254::big;
     use core::bn254::ecp;
@@ -272,14 +272,14 @@ fn bn254(mut rng: &mut RAND) {
     let G = ecp::ECP::generator();
 
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let s = big::BIG::randomnum(&r, &mut rng);
+    let s = big::BIG::randomnum(&r, rng);
 
-    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(&mut rng));
+    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(rng));
     if P.is_infinity() {
         println!("HASH FAILURE - P=O");
         fail = true;
-    } 
-    
+    }
+
     P = pair::g1mul(&G, &r);
 
     if !P.is_infinity() {
@@ -302,7 +302,7 @@ fn bn254(mut rng: &mut RAND) {
 
     let mut Q = ecp2::ECP2::generator();
 
-    let mut W = ecp2::ECP2::map2point(&fp2::FP2::new_rand(&mut rng));
+    let mut W = ecp2::ECP2::map2point(&fp2::FP2::new_rand(rng));
     W.cfp();
     if W.is_infinity() {
         println!("HASHING FAILURE - P=O");
@@ -443,7 +443,7 @@ fn bn254(mut rng: &mut RAND) {
     }
 }
 
-fn bls12383(mut rng: &mut RAND) {
+fn bls12383(rng: &mut impl RAND) {
     //use core::bls12383;
     use core::bls12383::big;
     use core::bls12383::ecp;
@@ -452,8 +452,6 @@ fn bls12383(mut rng: &mut RAND) {
     use core::bls12383::fp2;
     use core::bls12383::pair;
     use core::bls12383::rom;
-    use core::bls12383::ecp::ECP;
-    use core::bls12383::big::BIG;
 
     let mut fail = false;
     println!("\nTesting/Timing bls12383 Pairings");
@@ -470,7 +468,7 @@ fn bls12383(mut rng: &mut RAND) {
 
     let G = ecp::ECP::generator();
 /*
-    println!("g1= {} ",G.tostring()); 
+    println!("g1= {} ",G.tostring());
     let mut T: [ECP; 4] = [
         ECP::new(),
         ECP::new(),
@@ -486,18 +484,18 @@ fn bls12383(mut rng: &mut RAND) {
     T[0].copy(&G);
     e[0].one();
     let R=ECP::muln(1,&T,&e);
-    println!("g1= {} ",R.tostring()); 
+    println!("g1= {} ",R.tostring());
 */
 
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let s = big::BIG::randomnum(&r, &mut rng);
+    let s = big::BIG::randomnum(&r, rng);
 
-    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(&mut rng));
+    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(rng));
     if P.is_infinity() {
         println!("HASH FAILURE - P=O");
         fail = true;
     }
-    
+
     P = pair::g1mul(&G, &r);
 
     if !P.is_infinity() {
@@ -520,7 +518,7 @@ fn bls12383(mut rng: &mut RAND) {
 
     let mut Q = ecp2::ECP2::generator();
 
-    let mut W = ecp2::ECP2::map2point(&fp2::FP2::new_rand(&mut rng));
+    let mut W = ecp2::ECP2::map2point(&fp2::FP2::new_rand(rng));
     W.cfp();
     if W.is_infinity() {
         println!("HASHING FAILURE - P=O");
@@ -660,7 +658,7 @@ fn bls12383(mut rng: &mut RAND) {
     }
 }
 
-fn bls24479(mut rng: &mut RAND) {
+fn bls24479(rng: &mut impl RAND) {
     //use core::bls24479;
     use core::bls24479::big;
     use core::bls24479::ecp;
@@ -685,14 +683,14 @@ fn bls24479(mut rng: &mut RAND) {
     let G = ecp::ECP::generator();
 
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let s = big::BIG::randomnum(&r, &mut rng);
+    let s = big::BIG::randomnum(&r, rng);
 
-    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(&mut rng));
+    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(rng));
     if P.is_infinity() {
         println!("HASH FAILURE - P=O");
         fail = true;
     }
-    
+
     P = pair4::g1mul(&G, &r);
 
     if !P.is_infinity() {
@@ -715,7 +713,7 @@ fn bls24479(mut rng: &mut RAND) {
 
     let mut Q = ecp4::ECP4::generator();
 
-    let mut W = ecp4::ECP4::map2point(&fp4::FP4::new_rand(&mut rng));
+    let mut W = ecp4::ECP4::map2point(&fp4::FP4::new_rand(rng));
     W.cfp();
     if W.is_infinity() {
         println!("HASHING FAILURE - P=O");
@@ -842,7 +840,7 @@ fn bls24479(mut rng: &mut RAND) {
     }
 }
 
-fn bls48556(mut rng: &mut RAND) {
+fn bls48556(rng: &mut impl RAND) {
     //use core::bls48556;
     use core::bls48556::big;
     use core::bls48556::ecp;
@@ -867,14 +865,14 @@ fn bls48556(mut rng: &mut RAND) {
     let G = ecp::ECP::generator();
 
     let r = big::BIG::new_ints(&rom::CURVE_ORDER);
-    let s = big::BIG::randomnum(&r, &mut rng);
+    let s = big::BIG::randomnum(&r, rng);
 
-    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(&mut rng));
+    let mut P = ecp::ECP::map2point(&fp::FP::new_rand(rng));
     if P.is_infinity() {
         println!("HASH FAILURE - P=O");
         fail = true;
     }
-    
+
     P = pair8::g1mul(&G, &r);
 
     if !P.is_infinity() {
@@ -897,7 +895,7 @@ fn bls48556(mut rng: &mut RAND) {
 
     let mut Q = ecp8::ECP8::generator();
 
-    let mut W = ecp8::ECP8::map2point(&fp8::FP8::new_rand(&mut rng));
+    let mut W = ecp8::ECP8::map2point(&fp8::FP8::new_rand(rng));
     W.cfp();
     if W.is_infinity() {
         println!("HASHING FAILURE - P=O");
@@ -1024,7 +1022,7 @@ fn bls48556(mut rng: &mut RAND) {
     }
 }
 
-fn rsa2048(mut rng: &mut RAND) {
+fn rsa2048(rng: &mut impl RAND) {
     use core::rsa2048::ff;
     use core::rsa2048::rsa;
     let mut pbc = rsa::new_public_key(ff::FFLEN);
@@ -1041,7 +1039,7 @@ fn rsa2048(mut rng: &mut RAND) {
     let mut iterations = 0;
     let mut dur = 0 as u64;
     while dur < (MIN_TIME as u64) * 1000 || iterations < MIN_ITERS {
-        rsa::key_pair(&mut rng, 65537, &mut prv, &mut pbc);
+        rsa::key_pair(rng, 65537, &mut prv, &mut pbc);
         iterations += 1;
         let elapsed = start.elapsed();
         dur = (elapsed.as_secs() * 1_000) + (elapsed.subsec_nanos() / 1_000_000) as u64;
@@ -1101,7 +1099,7 @@ fn rsa2048(mut rng: &mut RAND) {
 fn main() {
     let mut raw: [u8; 100] = [0; 100];
 
-    let mut rng = RAND::new();
+    let mut rng = RAND_impl::new();
     rng.clean();
     for i in 0..100 {
         raw[i] = i as u8

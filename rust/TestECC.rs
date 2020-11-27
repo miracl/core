@@ -23,7 +23,7 @@ extern crate core;
 
 use std::str;
 
-use core::rand::RAND;
+use core::rand::{RAND, RAND_impl};
 use core::hmac;
 
 pub fn printbinary(array: &[u8]) {
@@ -33,7 +33,7 @@ pub fn printbinary(array: &[u8]) {
     println!("")
 }
 
-fn ecdh_ed25519(mut rng: &mut RAND) {
+fn ecdh_ed25519(rng: &mut impl RAND) {
     //use core::ed25519;
     use core::ed25519::ecdh;
     use core::ed25519::ecp;
@@ -75,7 +75,7 @@ fn ecdh_ed25519(mut rng: &mut RAND) {
     printbinary(&s0);
 
     /* Generate Key pair S/W */
-    ecdh::key_pair_generate(None, &mut s0, &mut w0);
+    ecdh::key_pair_generate(None::<&mut RAND_impl>, &mut s0, &mut w0);
 
     print!("Alice's public key= 0x");
     printbinary(&w0);
@@ -87,7 +87,7 @@ fn ecdh_ed25519(mut rng: &mut RAND) {
     }
 
     /* Random private key for other party */
-    ecdh::key_pair_generate(Some(&mut rng), &mut s1, &mut w1);
+    ecdh::key_pair_generate(Some(rng), &mut s1, &mut w1);
 
     print!("Servers private key= 0x");
     printbinary(&s1);
@@ -139,7 +139,7 @@ fn ecdh_ed25519(mut rng: &mut RAND) {
         p2[2] = 0x2;
         p2[3] = 0x3;
 
-        let cc = ecdh::ecies_encrypt(sha, &p1, &p2, &mut rng, &w1, &m[0..17], &mut v, &mut t);
+        let cc = ecdh::ecies_encrypt(sha, &p1, &p2, rng, &w1, &m[0..17], &mut v, &mut t);
 
         if let Some(mut c) = cc {
             println!("Ciphertext= ");
@@ -166,7 +166,7 @@ fn ecdh_ed25519(mut rng: &mut RAND) {
 
         println!("Testing ECDSA");
 
-        if ecdh::ecpsp_dsa(sha, &mut rng, &s0, &m[0..17], &mut cs, &mut ds) != 0 {
+        if ecdh::ecpsp_dsa(sha, rng, &s0, &m[0..17], &mut cs, &mut ds) != 0 {
             println!("***ECDSA Signature Failed");
             return;
         }
@@ -185,7 +185,7 @@ fn ecdh_ed25519(mut rng: &mut RAND) {
     }
 }
 
-fn ecdh_nist256(mut rng: &mut RAND) {
+fn ecdh_nist256(rng: &mut impl RAND) {
     //use core::nist256;
     use core::nist256::ecdh;
     use core::nist256::ecp;
@@ -227,7 +227,7 @@ fn ecdh_nist256(mut rng: &mut RAND) {
     printbinary(&s0);
 
     /* Generate Key pair S/W */
-    ecdh::key_pair_generate(None, &mut s0, &mut w0);
+    ecdh::key_pair_generate(None::<&mut RAND_impl>, &mut s0, &mut w0);
 
     print!("Alice's public key= 0x");
     printbinary(&w0);
@@ -239,7 +239,7 @@ fn ecdh_nist256(mut rng: &mut RAND) {
     }
 
     /* Random private key for other party */
-    ecdh::key_pair_generate(Some(&mut rng), &mut s1, &mut w1);
+    ecdh::key_pair_generate(Some(rng), &mut s1, &mut w1);
 
     print!("Servers private key= 0x");
     printbinary(&s1);
@@ -291,7 +291,7 @@ fn ecdh_nist256(mut rng: &mut RAND) {
         p2[2] = 0x2;
         p2[3] = 0x3;
 
-        let cc = ecdh::ecies_encrypt(sha, &p1, &p2, &mut rng, &w1, &m[0..17], &mut v, &mut t);
+        let cc = ecdh::ecies_encrypt(sha, &p1, &p2, rng, &w1, &m[0..17], &mut v, &mut t);
 
         if let Some(mut c) = cc {
             println!("Ciphertext= ");
@@ -318,7 +318,7 @@ fn ecdh_nist256(mut rng: &mut RAND) {
 
         println!("Testing ECDSA");
 
-        if ecdh::ecpsp_dsa(sha, &mut rng, &s0, &m[0..17], &mut cs, &mut ds) != 0 {
+        if ecdh::ecpsp_dsa(sha, rng, &s0, &m[0..17], &mut cs, &mut ds) != 0 {
             println!("***ECDSA Signature Failed");
             return;
         }
@@ -337,12 +337,12 @@ fn ecdh_nist256(mut rng: &mut RAND) {
     }
 }
 
-fn ecdh_goldilocks(mut rng: &mut RAND) {
+fn ecdh_goldilocks(rng: &mut impl RAND) {
     //use core::goldilocks;
     use core::goldilocks::ecdh;
     use core::goldilocks::ecp;
 
-    
+
     let pw = "M0ng00se";
     let pp: &[u8] = b"M0ng00se";
     const EFS: usize = ecdh::EFS;
@@ -380,7 +380,7 @@ fn ecdh_goldilocks(mut rng: &mut RAND) {
     printbinary(&s0);
 
     /* Generate Key pair S/W */
-    ecdh::key_pair_generate(None, &mut s0, &mut w0);
+    ecdh::key_pair_generate(None::<&mut RAND_impl>, &mut s0, &mut w0);
 
     print!("Alice's public key= 0x");
     printbinary(&w0);
@@ -392,7 +392,7 @@ fn ecdh_goldilocks(mut rng: &mut RAND) {
     }
 
     /* Random private key for other party */
-    ecdh::key_pair_generate(Some(&mut rng), &mut s1, &mut w1);
+    ecdh::key_pair_generate(Some(rng), &mut s1, &mut w1);
 
     print!("Servers private key= 0x");
     printbinary(&s1);
@@ -444,7 +444,7 @@ fn ecdh_goldilocks(mut rng: &mut RAND) {
         p2[2] = 0x2;
         p2[3] = 0x3;
 
-        let cc = ecdh::ecies_encrypt(sha, &p1, &p2, &mut rng, &w1, &m[0..17], &mut v, &mut t);
+        let cc = ecdh::ecies_encrypt(sha, &p1, &p2, rng, &w1, &m[0..17], &mut v, &mut t);
 
         if let Some(mut c) = cc {
             println!("Ciphertext= ");
@@ -471,7 +471,7 @@ fn ecdh_goldilocks(mut rng: &mut RAND) {
 
         println!("Testing ECDSA");
 
-        if ecdh::ecpsp_dsa(sha, &mut rng, &s0, &m[0..17], &mut cs, &mut ds) != 0 {
+        if ecdh::ecpsp_dsa(sha, rng, &s0, &m[0..17], &mut cs, &mut ds) != 0 {
             println!("***ECDSA Signature Failed");
             return;
         }
@@ -490,7 +490,7 @@ fn ecdh_goldilocks(mut rng: &mut RAND) {
     }
 }
 
-fn rsa_2048(mut rng: &mut RAND) {
+fn rsa_2048(rng: &mut impl RAND) {
     //use core::rsa2048;
     use core::rsa2048::ff;
     use core::rsa2048::rsa;
@@ -510,10 +510,10 @@ fn rsa_2048(mut rng: &mut RAND) {
 
     println!("\nTesting RSA");
     println!("Generating public/private key pair");
-    rsa::key_pair(&mut rng, 65537, &mut prv, &mut pbc);
+    rsa::key_pair(rng, 65537, &mut prv, &mut pbc);
 
     println!("Encrypting test string\n");
-    hmac::oaep_encode(sha, &message, &mut rng, None, &mut e, RFS); /* OAEP encode message M to E  */
+    hmac::oaep_encode(sha, &message, rng, None, &mut e, RFS); /* OAEP encode message M to E  */
 
     rsa::encrypt(&pbc, &e, &mut c); /* encrypt encoded message */
     print!("Ciphertext= 0x");
@@ -527,7 +527,7 @@ fn rsa_2048(mut rng: &mut RAND) {
     print!("{}", &mess);
 
 //    print!("M= 0x"); printbinary(&message);
-    hmac::pss_encode(sha,&message,&mut rng,&mut c,RFS);
+    hmac::pss_encode(sha,&message,rng,&mut c,RFS);
 //    print!("T= 0x"); printbinary(&c);
     if hmac::pss_verify(sha,&message,&c) {
         println!("PSS Encoding OK");
@@ -567,7 +567,7 @@ fn rsa_2048(mut rng: &mut RAND) {
 fn main() {
     let mut raw: [u8; 100] = [0; 100];
 
-    let mut rng = RAND::new();
+    let mut rng = RAND_impl::new();
     rng.clean();
     for i in 0..100 {
         raw[i] = i as u8
