@@ -32,7 +32,7 @@ Swap G1S and G2S in this program
 
 extern crate core;
 
-use core::rand::RAND;
+use core::rand::{RAND, RAND_impl};
 
 pub fn printbinary(array: &[u8]) {
     for i in 0..array.len() {
@@ -41,7 +41,7 @@ pub fn printbinary(array: &[u8]) {
     println!("")
 }
 
-fn bls_bn254(rng: &mut RAND) {
+fn bls_bn254(rng: &mut impl RAND) {
     use core::bn254::bls;
 
     const BFS: usize = bls::BFS;
@@ -92,7 +92,7 @@ fn bls_bn254(rng: &mut RAND) {
     }
 }
 
-fn bls_bls12383(rng: &mut RAND) {
+fn bls_bls12383(rng: &mut impl RAND) {
     use core::bls12383::bls;
 
     const BFS: usize = bls::BFS;
@@ -141,7 +141,7 @@ fn bls_bls12383(rng: &mut RAND) {
     }
 }
 
-fn bls_bls24479(rng: &mut RAND) {
+fn bls_bls24479(rng: &mut impl RAND) {
     use core::bls24479::bls192;
 
     const BFS: usize = bls192::BFS;
@@ -189,7 +189,7 @@ fn bls_bls24479(rng: &mut RAND) {
     }
 }
 
-fn bls_bls48556(rng: &mut RAND) {
+fn bls_bls48556(rng: &mut impl RAND) {
     use core::bls48556::bls256;
 
     const BFS: usize = bls256::BFS;
@@ -242,7 +242,7 @@ fn main() {
 
     let mut raw: [u8; 100] = [0; 100];
 
-    let mut rng = RAND::new();
+    let mut rng = RAND_impl::new();
     rng.clean();
     for i in 0..100 {
         raw[i] = i as u8

@@ -36,7 +36,7 @@ impl std::fmt::Debug for FP2 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
-}    
+}
 impl std::fmt::Display for FP2 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -100,7 +100,7 @@ impl FP2 {
         f
     }
 
-    pub fn new_rand(rng: &mut RAND) -> FP2 {
+    pub fn new_rand(rng: &mut impl RAND) -> FP2 {
         FP2::new_fps(&FP::new_rand(rng),&FP::new_rand(rng))
     }
 
@@ -142,7 +142,7 @@ impl FP2 {
         self.a.tobytes(&mut t);
         for i in 0..MB {
             bf[i+MB]=t[i];
-        }       
+        }
     }
 
     pub fn frombytes(bf: &[u8]) -> FP2 {
@@ -442,7 +442,7 @@ impl FP2 {
         let sgn=self.sign();
         let mut nr=FP2::new_copy(&self);
         nr.neg(); nr.norm();
-        self.cmove(&nr,sgn);   
+        self.cmove(&nr,sgn);
     }
 
     /* output to hex string */

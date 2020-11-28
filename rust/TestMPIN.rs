@@ -21,7 +21,7 @@ extern crate core;
 
 use std::io;
 
-use core::rand::RAND;
+use core::rand::{RAND, RAND_impl};
 use core::share::SHARE;
 
 pub fn printbinary(array: &[u8]) {
@@ -32,14 +32,14 @@ pub fn printbinary(array: &[u8]) {
 }
 
 #[allow(unused_variables)]
-fn mpin_bn254(mut rng: &mut RAND) {
+fn mpin_bn254(rng: &mut impl RAND) {
 
     use core::bn254::mpin;
 
     const EFS: usize = mpin::EFS;
     const EGS: usize = mpin::EGS;
-    const G1S: usize = 2 * EFS + 1; // Group 1 Size 
-    const G2S: usize = 4 * EFS + 1; // Group 2 Size 
+    const G1S: usize = 2 * EFS + 1; // Group 1 Size
+    const G2S: usize = 4 * EFS + 1; // Group 2 Size
 
     let mut s: [u8; EGS] = [0; EGS];
     let mut sst: [u8; G2S] = [0; G2S];
@@ -56,12 +56,12 @@ fn mpin_bn254(mut rng: &mut RAND) {
 
     println!("\nTesting MPIN 2-factor authentication protocol on curve bn254");
 
-// Trusted Authority (TA) set-up 
-    mpin::random_generate(&mut rng, &mut s);
+// Trusted Authority (TA) set-up
+    mpin::random_generate(rng, &mut s);
     print!("Master Secret s: 0x");
     printbinary(&s);
 
-// Create Client Identity 
+// Create Client Identity
         let name = "testUser@miracl.com";
         let client_id = name.as_bytes();
 
@@ -82,7 +82,7 @@ fn mpin_bn254(mut rng: &mut RAND) {
 //   print!("Server Secret SS: 0x");
 //   printbinary(&sst);
 
-// Client extracts PIN from secret to create Token 
+// Client extracts PIN from secret to create Token
         let pin: i32 = 1234;
         println!("Client extracts PIN= {}", pin);
         let mut rtn = mpin::extract_pin(&hcid, pin, &mut token);
@@ -103,14 +103,24 @@ fn mpin_bn254(mut rng: &mut RAND) {
         for i in 0..128 {
             r[i]=rng.getbyte();
         }
+    let mut rng2 = RAND_impl::new();
+
     // create 4 unique shares of TOKEN
-        let sh1 = SHARE::new(1,3,&mut s1b,&token,&r);  // indicate 3 shares required for recovery
-        let sh2 = SHARE::new(2,3,&mut s2b,&token,&r);
-        let sh3 = SHARE::new(3,3,&mut s3b,&token,&r);
-        let sh4 = SHARE::new(4,3,&mut s4b,&token,&r);
+        rng2.clean();
+        rng2.seed(128, &r);
+        let sh1 = SHARE::new(1,3,&mut s1b,&token, &mut rng2);  // indicate 3 shares required for recovery
+        rng2.clean();
+        rng2.seed(128, &r);
+        let sh2 = SHARE::new(2,3,&mut s2b,&token, &mut rng2);
+        rng2.clean();
+        rng2.seed(128, &r);
+        let sh3 = SHARE::new(3,3,&mut s3b,&token, &mut rng2);
+        rng2.clean();
+        rng2.seed(128, &r);
+        let sh4 = SHARE::new(4,3,&mut s4b,&token, &mut rng2);
 
         let shares: [SHARE;3]=[sh1,sh2,sh4]; // any 3 shares to recover TOKEN
-       
+
         SHARE::recover(&mut token,&shares);  // recover token
 
 // MPin Protocol
@@ -127,7 +137,7 @@ fn mpin_bn254(mut rng: &mut RAND) {
 // Client First pass: Inputs H(CLIENT_ID), RNG, pin, and TOKEN. Output x and U = x.H(CLIENT_ID) and re-combined secret SEC
         rtn = mpin::client_1(
             &hcid,
-            Some(&mut rng),
+            Some(rng),
             &mut x,
             pin,
             &token,
@@ -144,7 +154,7 @@ fn mpin_bn254(mut rng: &mut RAND) {
                 mpin::encode_to_curve(&dst,&client_id, &mut hsid);
 
 // Server generates Random number Y and sends it to Client
-                mpin::random_generate(&mut rng, &mut y);
+                mpin::random_generate(rng, &mut y);
 
 // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC */
         rtn = mpin::client_2(&x, &y, &mut sec);
@@ -162,7 +172,7 @@ fn mpin_bn254(mut rng: &mut RAND) {
                     &xid,
                     &sec
                 );
-    
+
                 if rtn != 0 {
                     if rtn == mpin::BAD_PIN {
                         println!("Server says - Bad Pin. I don't know you. Feck off.\n");
@@ -174,14 +184,14 @@ fn mpin_bn254(mut rng: &mut RAND) {
                 }
 }
 
-fn mpin_bls12383(mut rng: &mut RAND) {
+fn mpin_bls12383(rng: &mut impl RAND) {
     use core::bls12383::mpin;
 
     const EFS: usize = mpin::EFS;
     const EGS: usize = mpin::EGS;
 
-    const G1S: usize = 2 * EFS + 1; // Group 1 Size 
-    const G2S: usize = 4 * EFS + 1; // Group 2 Size 
+    const G1S: usize = 2 * EFS + 1; // Group 1 Size
+    const G2S: usize = 4 * EFS + 1; // Group 2 Size
 
     let mut s: [u8; EGS] = [0; EGS];
     let mut sst: [u8; G2S] = [0; G2S];
@@ -198,12 +208,12 @@ fn mpin_bls12383(mut rng: &mut RAND) {
 
     println!("\nTesting MPIN 2-factor authentication protocol on curve bls12383");
 
-// Trusted Authority (TA) set-up 
-    mpin::random_generate(&mut rng, &mut s);
+// Trusted Authority (TA) set-up
+    mpin::random_generate(rng, &mut s);
     print!("Master Secret s: 0x");
     printbinary(&s);
 
-// Create Client Identity 
+// Create Client Identity
         let name = "testUser@miracl.com";
         let client_id = name.as_bytes();
 
@@ -224,7 +234,7 @@ fn mpin_bls12383(mut rng: &mut RAND) {
 //   print!("Server Secret SS: 0x");
 //   printbinary(&sst);
 
-// Client extracts PIN from secret to create Token 
+// Client extracts PIN from secret to create Token
         let pin: i32 = 1234;
         println!("Client extracts PIN= {}", pin);
         let mut rtn = mpin::extract_pin(&hcid, pin, &mut token);
@@ -249,7 +259,7 @@ fn mpin_bls12383(mut rng: &mut RAND) {
 // Client First pass: Inputs H(CLIENT_ID), RNG, pin, and TOKEN. Output x and U = x.H(CLIENT_ID) and re-combined secret SEC
         rtn = mpin::client_1(
             &hcid,
-            Some(&mut rng),
+            Some(rng),
             &mut x,
             pin,
             &token,
@@ -266,7 +276,7 @@ fn mpin_bls12383(mut rng: &mut RAND) {
                 mpin::encode_to_curve(&dst,&client_id, &mut hsid);
 
 // Server generates Random number Y and sends it to Client
-                mpin::random_generate(&mut rng, &mut y);
+                mpin::random_generate(rng, &mut y);
 
 // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC */
         rtn = mpin::client_2(&x, &y, &mut sec);
@@ -284,7 +294,7 @@ fn mpin_bls12383(mut rng: &mut RAND) {
                     &xid,
                     &sec
                 );
-    
+
                 if rtn != 0 {
                     if rtn == mpin::BAD_PIN {
                         println!("Server says - Bad Pin. I don't know you. Feck off.\n");
@@ -296,13 +306,13 @@ fn mpin_bls12383(mut rng: &mut RAND) {
                 }
 }
 
-fn mpin_bls24479(mut rng: &mut RAND) {
+fn mpin_bls24479(rng: &mut impl RAND) {
     use core::bls24479::mpin192;
 
     const EFS: usize = mpin192::EFS;
     const EGS: usize = mpin192::EGS;
-    const G1S: usize = 2 * EFS + 1; // Group 1 Size 
-    const G2S: usize = 8 * EFS + 1; // Group 2 Size 
+    const G1S: usize = 2 * EFS + 1; // Group 1 Size
+    const G2S: usize = 8 * EFS + 1; // Group 2 Size
 
     let mut s: [u8; EGS] = [0; EGS];
     let mut sst: [u8; G2S] = [0; G2S];
@@ -319,12 +329,12 @@ fn mpin_bls24479(mut rng: &mut RAND) {
 
     println!("\nTesting MPIN 2-factor authentication protocol on curve bls24479");
 
-// Trusted Authority (TA) set-up 
-    mpin192::random_generate(&mut rng, &mut s);
+// Trusted Authority (TA) set-up
+    mpin192::random_generate(rng, &mut s);
     print!("Master Secret s: 0x");
     printbinary(&s);
 
-// Create Client Identity 
+// Create Client Identity
         let name = "testUser@miracl.com";
         let client_id = name.as_bytes();
 
@@ -345,7 +355,7 @@ fn mpin_bls24479(mut rng: &mut RAND) {
 //   print!("Server Secret SS: 0x");
 //   printbinary(&sst);
 
-// Client extracts PIN from secret to create Token 
+// Client extracts PIN from secret to create Token
         let pin: i32 = 1234;
         println!("Client extracts PIN= {}", pin);
         let mut rtn = mpin192::extract_pin(&hcid, pin, &mut token);
@@ -370,7 +380,7 @@ fn mpin_bls24479(mut rng: &mut RAND) {
 // Client First pass: Inputs H(CLIENT_ID), RNG, pin, and TOKEN. Output x and U = x.H(CLIENT_ID) and re-combined secret SEC
         rtn = mpin192::client_1(
             &hcid,
-            Some(&mut rng),
+            Some(rng),
             &mut x,
             pin,
             &token,
@@ -387,7 +397,7 @@ fn mpin_bls24479(mut rng: &mut RAND) {
                 mpin192::encode_to_curve(&dst,&client_id, &mut hsid);
 
 // Server generates Random number Y and sends it to Client
-                mpin192::random_generate(&mut rng, &mut y);
+                mpin192::random_generate(rng, &mut y);
 
 // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC */
         rtn = mpin192::client_2(&x, &y, &mut sec);
@@ -405,7 +415,7 @@ fn mpin_bls24479(mut rng: &mut RAND) {
                     &xid,
                     &sec
                 );
-    
+
                 if rtn != 0 {
                     if rtn == mpin192::BAD_PIN {
                         println!("Server says - Bad Pin. I don't know you. Feck off.\n");
@@ -417,13 +427,13 @@ fn mpin_bls24479(mut rng: &mut RAND) {
                 }
 }
 
-fn mpin_bls48556(mut rng: &mut RAND) {
+fn mpin_bls48556(rng: &mut impl RAND) {
     use core::bls48556::mpin256;
 
     const EFS: usize = mpin256::EFS;
     const EGS: usize = mpin256::EGS;
-    const G1S: usize = 2 * EFS + 1; // Group 1 Size 
-    const G2S: usize = 16 * EFS + 1; // Group 2 Size 
+    const G1S: usize = 2 * EFS + 1; // Group 1 Size
+    const G2S: usize = 16 * EFS + 1; // Group 2 Size
 
     let mut s: [u8; EGS] = [0; EGS];
     let mut sst: [u8; G2S] = [0; G2S];
@@ -440,12 +450,12 @@ fn mpin_bls48556(mut rng: &mut RAND) {
 
     println!("\nTesting MPIN 2-factor authentication protocol on curve bls48556");
 
-// Trusted Authority (TA) set-up 
-    mpin256::random_generate(&mut rng, &mut s);
+// Trusted Authority (TA) set-up
+    mpin256::random_generate(rng, &mut s);
     print!("Master Secret s: 0x");
     printbinary(&s);
 
-// Create Client Identity 
+// Create Client Identity
         let name = "testUser@miracl.com";
         let client_id = name.as_bytes();
 
@@ -466,7 +476,7 @@ fn mpin_bls48556(mut rng: &mut RAND) {
 //   print!("Server Secret SS: 0x");
 //   printbinary(&sst);
 
-// Client extracts PIN from secret to create Token 
+// Client extracts PIN from secret to create Token
         let pin: i32 = 1234;
         println!("Client extracts PIN= {}", pin);
         let mut rtn = mpin256::extract_pin(&hcid, pin, &mut token);
@@ -491,7 +501,7 @@ fn mpin_bls48556(mut rng: &mut RAND) {
 // Client First pass: Inputs H(CLIENT_ID), RNG, pin, and TOKEN. Output x and U = x.H(CLIENT_ID) and re-combined secret SEC
         rtn = mpin256::client_1(
             &hcid,
-            Some(&mut rng),
+            Some(rng),
             &mut x,
             pin,
             &token,
@@ -508,7 +518,7 @@ fn mpin_bls48556(mut rng: &mut RAND) {
                 mpin256::encode_to_curve(&dst,&client_id, &mut hsid);
 
 // Server generates Random number Y and sends it to Client
-                mpin256::random_generate(&mut rng, &mut y);
+                mpin256::random_generate(rng, &mut y);
 
 // Client Second Pass: Inputs Client secret SEC, x and y. Outputs -(x+y)*SEC */
         rtn = mpin256::client_2(&x, &y, &mut sec);
@@ -526,7 +536,7 @@ fn mpin_bls48556(mut rng: &mut RAND) {
                     &xid,
                     &sec
                 );
-    
+
                 if rtn != 0 {
                     if rtn == mpin256::BAD_PIN {
                         println!("Server says - Bad Pin. I don't know you. Feck off.\n");
@@ -541,7 +551,7 @@ fn mpin_bls48556(mut rng: &mut RAND) {
 fn main() {
     let mut raw: [u8; 100] = [0; 100];
 
-    let mut rng = RAND::new();
+    let mut rng = RAND_impl::new();
     rng.clean();
     for i in 0..100 {
         raw[i] = i as u8

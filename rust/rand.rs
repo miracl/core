@@ -25,7 +25,17 @@ const RAND_NK: usize = 21;
 const RAND_NJ: usize = 6;
 const RAND_NV: usize = 8;
 
-pub struct RAND {
+pub trait RAND {
+    /* Initialize RNG with some real entropy from some external source */
+    fn seed(&mut self, rawlen: usize, raw: &[u8]);
+    /* get random byte */
+    fn getbyte(&mut self) -> u8;
+}
+
+// Marsaglia-Zaman random generator (https://projecteuclid.org/euclid.aoap/1177005878)
+// Analysis: https://ieeexplore.ieee.org/document/669305
+#[allow(non_camel_case_types)]
+pub struct RAND_impl {
     ira: [u32; RAND_NK], /* random number...   */
     rndptr: usize,
     borrow: u32,
@@ -33,9 +43,9 @@ pub struct RAND {
     pool: [u8; 32],
 }
 
-impl RAND {
-    pub fn new() -> RAND {
-        RAND {
+impl RAND_impl {
+    pub fn new() -> RAND_impl {
+        RAND_impl {
             ira: [0; RAND_NK],
             rndptr: 0,
             borrow: 0,
@@ -44,6 +54,7 @@ impl RAND {
         }
     }
 
+    #[allow(dead_code)]
     pub fn clean(&mut self) {
         self.pool_ptr = 0;
         self.rndptr = 0;
@@ -121,9 +132,10 @@ impl RAND {
             | (((b[1] as u32) & 0xff) << 8)
             | ((b[0] as u32) & 0xff)
     }
+}
 
-    /* Initialize RNG with some real entropy from some external source */
-    pub fn seed(&mut self, rawlen: usize, raw: &[u8]) {
+impl RAND for RAND_impl {
+    fn seed(&mut self, rawlen: usize, raw: &[u8]) {
         /* initialise from at least 128 byte string of raw random entropy */
         let mut b: [u8; 4] = [0; 4];
         let mut sh = HASH256::new();
@@ -145,14 +157,13 @@ impl RAND {
                 b[1] = digest[4 * i + 1];
                 b[2] = digest[4 * i + 2];
                 b[3] = digest[4 * i + 3];
-                self.sirand(RAND::pack(b));
+                self.sirand(RAND_impl::pack(b));
             }
         }
         self.fill_pool();
     }
 
-    /* get random byte */
-    pub fn getbyte(&mut self) -> u8 {
+    fn getbyte(&mut self) -> u8 {
         let r = self.pool[self.pool_ptr];
         self.pool_ptr += 1;
         if self.pool_ptr >= 32 {
@@ -166,7 +177,7 @@ impl RAND {
 /*
 fn main() {
     let mut raw : [u8;100]=[0;100];
-    let mut rng=RAND::new();
+    let mut rng=RAND_impl::new();
 
     rng.clean();
     for i in 0..100 {raw[i]=i as u8}

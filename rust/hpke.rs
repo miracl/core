@@ -21,8 +21,9 @@ use crate::xxx::ecp;
 use crate::xxx::ecdh;
 
 use crate::hmac;
+use crate::rand::RAND_impl;
 
-const GROUP: usize = ecdh::EGS;  
+const GROUP: usize = ecdh::EGS;
 const POINT: usize = 2*ecdh::EFS+1;
 
 const MAX_LABEL: usize = 20;                // may need adjustment
@@ -119,7 +120,7 @@ fn extractAndExpand(config_id: usize,okm: &mut [u8],dh: &[u8],context: &[u8]) {
         k+=1;
     }
     suite_id[k]=kem_id[0]; k+=1;
-    suite_id[k]=kem_id[1]; 
+    suite_id[k]=kem_id[1];
 
     let mut prk: [u8;ecp::HASH_TYPE]=[0;ecp::HASH_TYPE];
     labeledExtract(&mut prk,None,&suite_id,"eae_prk",Some(dh));
@@ -141,7 +142,7 @@ pub fn deriveKeyPair(config_id: usize,mut sk: &mut [u8],mut pk: &mut [u8],seed: 
         k+=1;
     }
     suite_id[k]=kem_id[0]; k+=1;
-    suite_id[k]=kem_id[1]; 
+    suite_id[k]=kem_id[1];
 
     let mut prk: [u8;ecp::HASH_TYPE]=[0;ecp::HASH_TYPE];
     labeledExtract(&mut prk,None,&suite_id,"dkp_prk",Some(&seed));
@@ -173,7 +174,7 @@ pub fn deriveKeyPair(config_id: usize,mut sk: &mut [u8],mut pk: &mut [u8],seed: 
             counter += 1;
         }
     }
-    ecdh::key_pair_generate(None, &mut sk, &mut pk);
+    ecdh::key_pair_generate(None::<&mut RAND_impl>, &mut sk, &mut pk);
     if kem==32 || kem==33 {
         reverse(&mut pk);
     }
@@ -231,7 +232,7 @@ pub fn decap(config_id: usize,skR: &[u8],z: &mut [u8],pkE: &[u8],pkR: &[u8]) {
     }
 
     let mut k=0;
-    for i in 0..pklen {   
+    for i in 0..pklen {
         kemcontext[k]=pkE[i];
         k+=1;
     }
@@ -349,7 +350,7 @@ pub fn keyschedule(config_id: usize,key: &mut [u8],nonce: &mut [u8],exp_secret: 
     suite_id[k]=num[1]; k+=1;
     hmac::inttobytes(aead,&mut num);
     suite_id[k]=num[0]; k+=1;
-    suite_id[k]=num[1]; 
+    suite_id[k]=num[1];
 
     let mut k=0;
     let mut h: [u8; 64] = [0; 64];
@@ -360,14 +361,14 @@ pub fn keyschedule(config_id: usize,key: &mut [u8],nonce: &mut [u8],exp_secret: 
     labeledExtract(&mut h,None,&suite_id,"psk_id_hash",pskID);
     for i in 0..ecp::HASH_TYPE {
 		context[k] = h[i]; k+=1;
-    }  
+    }
     labeledExtract(&mut h,None,&suite_id,"info_hash",Some(&info));
     for i in 0..ecp::HASH_TYPE {
 		context[k] = h[i]; k+=1;
     }
 
     //labeledExtract(&mut h,None,&suite_id,"psk_hash",psk);
-    
+
     //labeledExtract(&mut secret,Some(&h),&suite_id,"secret",Some(z));
 
     labeledExtract(&mut secret,Some(z),&suite_id,"secret",psk);

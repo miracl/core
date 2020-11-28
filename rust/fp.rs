@@ -36,7 +36,7 @@ impl std::fmt::Debug for FP {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
-}    
+}
 impl std::fmt::Display for FP {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -103,7 +103,7 @@ impl FP {
         f
     }
 
-    pub fn new_rand(rng: &mut RAND) -> FP {
+    pub fn new_rand(rng: &mut impl RAND) -> FP {
         let m = BIG::new_ints(&rom::MODULUS);
         let w = BIG::randomnum(&m,rng);
         FP::new_big(&w)
@@ -711,7 +711,7 @@ impl FP {
         m.shr(e);
         m.dec(1);
         m.fshr(1);
-        
+
         self.copy(&self.pow(&m));
     }
 
@@ -795,7 +795,7 @@ impl FP {
         let mut r=FP::new_copy(self);
         r.mul(&g);
         let mut b=FP::new_copy(&t);
-       
+
         for k in (2..=e).rev()   //(int k=e;k>1;k--)
         {
             for _ in 1..k-1 {

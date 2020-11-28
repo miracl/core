@@ -47,7 +47,7 @@ impl std::fmt::Debug for FF {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
-}    
+}
 impl std::fmt::Display for FF {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -723,7 +723,7 @@ impl FF {
         u
     }
 
-    pub fn random(&mut self, rng: &mut RAND) {
+    pub fn random(&mut self, rng: &mut impl RAND) {
         let n = self.length;
         for i in 0..n {
             self.v[i].copy(&BIG::random(rng))
@@ -735,7 +735,7 @@ impl FF {
     }
 
     /* generate random x less than p */
-    pub fn randomnum(&mut self, p: &FF, rng: &mut RAND) {
+    pub fn randomnum(&mut self, p: &FF, rng: &mut impl RAND) {
         let n = self.length;
         let mut d = FF::new_int(2 * n);
 
@@ -1002,7 +1002,7 @@ impl FF {
     }
 
     /* Miller-Rabin test for primality. Slow. */
-    pub fn prime(pp: &FF, rng: &mut RAND) -> bool {
+    pub fn prime(pp: &FF, rng: &mut impl RAND) -> bool {
         let mut s = 0;
         let n = pp.length;
         let mut d = FF::new_int(n);

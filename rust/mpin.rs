@@ -71,14 +71,14 @@ pub fn encode_to_curve(dst: &[u8],id: &[u8],hcid: &mut [u8]) {
     let u=FP::new_big(&dx.dmod(&q));
     let mut P=ECP::map2point(&u);
     P.cfp();
-    P.affine(); 
+    P.affine();
     P.tobytes(hcid,false);
 }
 
 /* create random secret S */
-pub fn random_generate(mut rng: &mut RAND, s: &mut [u8]) -> isize {
+pub fn random_generate(rng: &mut impl RAND, s: &mut [u8]) -> isize {
     let r = BIG::new_ints(&rom::CURVE_ORDER);
-    let sc = BIG::randtrunc(&r, 16 * ecp::AESKEY, &mut rng);
+    let sc = BIG::randtrunc(&r, 16 * ecp::AESKEY, rng);
     sc.tobytes(s);
     0
 }
@@ -137,7 +137,7 @@ pub fn get_client_secret(s: &mut [u8], idhtc: &[u8], cst: &mut [u8]) -> isize {
 #[allow(non_snake_case)]
 pub fn client_1(
     cid: &[u8],
-    rng: Option<&mut RAND>,
+    rng: Option<&mut impl RAND>,
     x: &mut [u8],
     pin: usize,
     token: &[u8],
