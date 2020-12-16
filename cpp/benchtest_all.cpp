@@ -610,8 +610,19 @@ int bls383(csprng *RNG)
 
     BIG_rcopy(r, CURVE_Order);
     FP_rand(&rz,RNG);
-    ECP_map2point(&P,&rz);
-    ECP_cfp(&P);
+
+//    iterations = 0;
+//    start = clock();
+//    do {
+        ECP_map2point(&P,&rz);
+        ECP_cfp(&P);
+//        iterations++;
+//        elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
+//    } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
+//    elapsed = 1000.0 * elapsed / iterations;
+//    printf("G1 hash to point  - %8d iterations  ", iterations);
+//    printf(" %8.2lf ms per iteration\n", elapsed);
+
 
     if (ECP_isinf(&P))
     {

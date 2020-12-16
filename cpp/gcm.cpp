@@ -297,6 +297,7 @@ void core::GCM_finish(gcm *g, char *tag)
             g->Y_0[i] = g->stateX[i] = 0;
         }
     }
+
     g->status = GCM_FINISHED;
     AES_end(&(g->a));
 }

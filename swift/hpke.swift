@@ -42,7 +42,7 @@ public struct HPKE
 {
 
     static func LabeledExtract(_ salt:[UInt8]?,_ suite_ID:[UInt8],_ label:String,_ ikm:[UInt8]?) -> [UInt8] {
-        let rfc="HPKE-06"
+        let rfc="HPKE-07"
         let RFC=[UInt8](rfc.utf8)
         let LABEL=[UInt8](label.utf8)
         var likm=[UInt8]();
@@ -64,7 +64,7 @@ public struct HPKE
     }
 
     static func LabeledExpand(_ prk:[UInt8],_ suite_ID:[UInt8],_ label:String,_ info:[UInt8]?,_ L:Int) -> [UInt8] {
-        let rfc="HPKE-06"
+        let rfc="HPKE-07"
         let RFC=[UInt8](rfc.utf8)
         let LABEL=[UInt8](label.utf8)
         let ar = HMAC.inttoBytes(L, 2)
