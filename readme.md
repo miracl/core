@@ -21,8 +21,7 @@ can be easily translated to other languages (like wasm and C#). It is
 particularly suitable for smaller devices, and those supported by the 
 Arduino infrastructure.
 
-MIRACL Core features several improvements over AMCL. We will still maintain
-AMCL but not develop it further.
+MIRACL Core features several improvements over AMCL. 
 
 MIRACL Core features:-
 

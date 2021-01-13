@@ -200,7 +200,7 @@ void OCT_clear(octet *w)
 
 /* appends int x of length len bytes to OCTET string */
 /* SU= 8 */
-void OCT_jint(octet *y, int x, int len)
+void OCT_jint(octet *y, unsigned int x, int len)
 {
     int i, n;
     n = y->len + len;

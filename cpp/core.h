@@ -354,7 +354,7 @@ extern void OCT_chop(octet *O, octet *P, int n);
 	@param n number of bytes in m
 
  */
-extern void OCT_jint(octet *O, int m, int n);
+extern void OCT_jint(octet *O, unsigned int m, int n);
 /**	@brief Create an Octet from bytes taken from a random number generator
  *
 	Truncates if there is no room
