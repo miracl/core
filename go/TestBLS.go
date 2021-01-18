@@ -32,7 +32,6 @@ See CPP library version for example
 
 */
 
-
 package main
 
 import "fmt"
@@ -54,17 +53,17 @@ func bls_BN254(rng *core.RAND) {
 
 	const BGS = BN254.BGS
 	const BFS = BN254.BFS
-	const G1S = BFS + 1 /* Group 1 Size */
-	const G2S = 2 * BFS + 1 /* Group 2 Size */
+	const G1S = BFS + 1   /* Group 1 Size */
+	const G2S = 2*BFS + 1 /* Group 2 Size */
 
 	var S [BGS]byte
 	var W [G2S]byte
 	var SIG [G1S]byte
 	var IKM [32]byte
 
-    for i:=0;i<len(IKM);i++ {
+	for i := 0; i < len(IKM); i++ {
 		//IKM[i] = byte(i+1)
-        IKM[i]=byte(rng.GetByte())
+		IKM[i] = byte(rng.GetByte())
 	}
 
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature on BN254 curve\n")
@@ -103,17 +102,17 @@ func bls_BLS12383(rng *core.RAND) {
 
 	const BGS = BLS12383.BGS
 	const BFS = BLS12383.BFS
-	const G1S = BFS + 1 /* Group 1 Size */
-	const G2S = 2 * BFS + 1 /* Group 2 Size */
+	const G1S = BFS + 1   /* Group 1 Size */
+	const G2S = 2*BFS + 1 /* Group 2 Size */
 
 	var S [BGS]byte
 	var W [G2S]byte
 	var SIG [G1S]byte
 	var IKM [32]byte
 
-    for i:=0;i<len(IKM);i++ {
+	for i := 0; i < len(IKM); i++ {
 		//IKM[i] = byte(i+1)
-        IKM[i]=byte(rng.GetByte())
+		IKM[i] = byte(rng.GetByte())
 	}
 
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature on BLS12383 curve\n")
@@ -152,17 +151,17 @@ func bls_BLS24479(rng *core.RAND) {
 
 	const BGS = BLS24479.BGS
 	const BFS = BLS24479.BFS
-	const G1S = BFS + 1 /* Group 1 Size */
-	const G2S = 4 * BFS + 1 /* Group 2 Size */
+	const G1S = BFS + 1   /* Group 1 Size */
+	const G2S = 4*BFS + 1 /* Group 2 Size */
 
 	var S [BGS]byte
 	var W [G2S]byte
 	var SIG [G1S]byte
 	var IKM [48]byte
 
-    for i:=0;i<len(IKM);i++ {
+	for i := 0; i < len(IKM); i++ {
 		//IKM[i] = byte(i+1)
-        IKM[i]=byte(rng.GetByte())
+		IKM[i] = byte(rng.GetByte())
 	}
 
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature on BLS24479 curve\n")
@@ -201,17 +200,17 @@ func bls_BLS48556(rng *core.RAND) {
 
 	const BGS = BLS48556.BGS
 	const BFS = BLS48556.BFS
-	const G1S = BFS + 1  /* Group 1 Size */
-	const G2S = 8 * BFS + 1 /* Group 2 Size */
+	const G1S = BFS + 1   /* Group 1 Size */
+	const G2S = 8*BFS + 1 /* Group 2 Size */
 
 	var S [BGS]byte
 	var W [G2S]byte
 	var SIG [G1S]byte
 	var IKM [64]byte
 
-    for i:=0;i<len(IKM);i++ {
+	for i := 0; i < len(IKM); i++ {
 		//IKM[i] = byte(i+1)
-        IKM[i]=byte(rng.GetByte())
+		IKM[i] = byte(rng.GetByte())
 	}
 
 	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature on BLS48556 curve\n")

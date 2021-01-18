@@ -441,7 +441,7 @@ func Fexp(m *FP48) *FP48 {
 	f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
 	x := NewBIGints(CURVE_Bnx)
 	r := NewFP48copy(m)
-//	var t1, t2 *FP48
+	//	var t1, t2 *FP48
 
 	/* Easy part of final exp */
 	lv := NewFP48copy(r)
@@ -455,229 +455,231 @@ func Fexp(m *FP48) *FP48 {
 	r.Mul(lv)
 
 	/* Hard part of final exp */
-// See https://eprint.iacr.org/2020/875.pdf
-		y1:=NewFP48copy(r)
-		y1.usqr()
-		y1.Mul(r) // y1=r^3
+	// See https://eprint.iacr.org/2020/875.pdf
+	y1 := NewFP48copy(r)
+	y1.usqr()
+	y1.Mul(r) // y1=r^3
 
-		y0:=NewFP48copy(r.Pow(x))
-		if SIGN_OF_X == NEGATIVEX {
-			y0.conj()
-		}
-		t0:=NewFP48copy(r); t0.conj()
-		r.Copy(y0)
-		r.Mul(t0)
-
-		y0.Copy(r.Pow(x))
-		if SIGN_OF_X == NEGATIVEX {
-			y0.conj()
-		}
-		t0.Copy(r); t0.conj()
-		r.Copy(y0)
-		r.Mul(t0)
-
-// ^(x+p)
-		y0.Copy(r.Pow(x));
-		if SIGN_OF_X == NEGATIVEX {
-			y0.conj()
-		}
-		t0.Copy(r)
-		t0.frob(f,1)
-		r.Copy(y0)
-		r.Mul(t0);
-
-// ^(x^2+p^2)
-		y0.Copy(r.Pow(x))
-		y0.Copy(y0.Pow(x))
-		t0.Copy(r)
-		t0.frob(f,2)
-		r.Copy(y0)
-		r.Mul(t0)
-
-// ^(x^4+p^4)
-		y0.Copy(r.Pow(x))
-		y0.Copy(y0.Pow(x))
-		y0.Copy(y0.Pow(x))
-		y0.Copy(y0.Pow(x))
-		t0.Copy(r)
-		t0.frob(f,4); 
-		r.Copy(y0)
-		r.Mul(t0)
-
-// ^(x^8+p^8-1)
-		y0.Copy(r.Pow(x))
-		y0.Copy(y0.Pow(x))
-		y0.Copy(y0.Pow(x))
-		y0.Copy(y0.Pow(x))
-		y0.Copy(y0.Pow(x))
-		y0.Copy(y0.Pow(x))
-		y0.Copy(y0.Pow(x))
-		y0.Copy(y0.Pow(x))
-		t0.Copy(r)
-		t0.frob(f,8); 
-		y0.Mul(t0)
-		t0.Copy(r); t0.conj()
-		r.Copy(y0)
-		r.Mul(t0)
-
-
-		r.Mul(y1)
-		r.reduce();
-
-/*
-	// Ghamman & Fouotsa Method
-
-	t7 := NewFP48copy(r)
-	t7.usqr()
-
-	if x.parity() == 1 {
-		t2 = r.Pow(x)
-		t1 = NewFP48copy(t2)
-		t1.usqr()
-		t2 = t2.Pow(x)
-	} else {
-		t1 = t7.Pow(x)
-		x.fshr(1)
-		t2 = t1.Pow(x)
-		x.fshl(1)
-	}
-
+	y0 := NewFP48copy(r.Pow(x))
 	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
+		y0.conj()
 	}
+	t0 := NewFP48copy(r)
+	t0.conj()
+	r.Copy(y0)
+	r.Mul(t0)
 
-	t3 := NewFP48copy(t1)
-	t3.conj()
-	t2.Mul(t3)
-	t2.Mul(r)
-
-	r.Mul(t7)
-
-	t1 = t2.Pow(x)
+	y0.Copy(r.Pow(x))
 	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
+		y0.conj()
 	}
-	t3.Copy(t1)
-	t3.frob(f, 14)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
+	t0.Copy(r)
+	t0.conj()
+	r.Copy(y0)
+	r.Mul(t0)
+
+	// ^(x+p)
+	y0.Copy(r.Pow(x))
 	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
+		y0.conj()
 	}
+	t0.Copy(r)
+	t0.frob(f, 1)
+	r.Copy(y0)
+	r.Mul(t0)
 
-	t3.Copy(t1)
-	t3.frob(f, 13)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
+	// ^(x^2+p^2)
+	y0.Copy(r.Pow(x))
+	y0.Copy(y0.Pow(x))
+	t0.Copy(r)
+	t0.frob(f, 2)
+	r.Copy(y0)
+	r.Mul(t0)
 
-	t3.Copy(t1)
-	t3.frob(f, 12)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
+	// ^(x^4+p^4)
+	y0.Copy(r.Pow(x))
+	y0.Copy(y0.Pow(x))
+	y0.Copy(y0.Pow(x))
+	y0.Copy(y0.Pow(x))
+	t0.Copy(r)
+	t0.frob(f, 4)
+	r.Copy(y0)
+	r.Mul(t0)
 
-	t3.Copy(t1)
-	t3.frob(f, 11)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
+	// ^(x^8+p^8-1)
+	y0.Copy(r.Pow(x))
+	y0.Copy(y0.Pow(x))
+	y0.Copy(y0.Pow(x))
+	y0.Copy(y0.Pow(x))
+	y0.Copy(y0.Pow(x))
+	y0.Copy(y0.Pow(x))
+	y0.Copy(y0.Pow(x))
+	y0.Copy(y0.Pow(x))
+	t0.Copy(r)
+	t0.frob(f, 8)
+	y0.Mul(t0)
+	t0.Copy(r)
+	t0.conj()
+	r.Copy(y0)
+	r.Mul(t0)
 
-	t3.Copy(t1)
-	t3.frob(f, 10)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	t3.Copy(t1)
-	t3.frob(f, 9)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	t3.Copy(t1)
-	t3.frob(f, 8)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	t3.Copy(t2)
-	t3.conj()
-	t1.Mul(t3)
-	t3.Copy(t1)
-	t3.frob(f, 7)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	t3.Copy(t1)
-	t3.frob(f, 6)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	t3.Copy(t1)
-	t3.frob(f, 5)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	t3.Copy(t1)
-	t3.frob(f, 4)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	t3.Copy(t1)
-	t3.frob(f, 3)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	t3.Copy(t1)
-	t3.frob(f, 2)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	t3.Copy(t1)
-	t3.frob(f, 1)
-	r.Mul(t3)
-	t1 = t1.Pow(x)
-	if SIGN_OF_X == NEGATIVEX {
-		t1.conj()
-	}
-
-	r.Mul(t1)
-	t2.frob(f, 15)
-	r.Mul(t2)
-
+	r.Mul(y1)
 	r.reduce()
-*/
+
+	/*
+		// Ghamman & Fouotsa Method
+
+		t7 := NewFP48copy(r)
+		t7.usqr()
+
+		if x.parity() == 1 {
+			t2 = r.Pow(x)
+			t1 = NewFP48copy(t2)
+			t1.usqr()
+			t2 = t2.Pow(x)
+		} else {
+			t1 = t7.Pow(x)
+			x.fshr(1)
+			t2 = t1.Pow(x)
+			x.fshl(1)
+		}
+
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3 := NewFP48copy(t1)
+		t3.conj()
+		t2.Mul(t3)
+		t2.Mul(r)
+
+		r.Mul(t7)
+
+		t1 = t2.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+		t3.Copy(t1)
+		t3.frob(f, 14)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 13)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 12)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 11)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 10)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 9)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 8)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t2)
+		t3.conj()
+		t1.Mul(t3)
+		t3.Copy(t1)
+		t3.frob(f, 7)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 6)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 5)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 4)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 3)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 2)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		t3.Copy(t1)
+		t3.frob(f, 1)
+		r.Mul(t3)
+		t1 = t1.Pow(x)
+		if SIGN_OF_X == NEGATIVEX {
+			t1.conj()
+		}
+
+		r.Mul(t1)
+		t2.frob(f, 15)
+		r.Mul(t2)
+
+		r.reduce()
+	*/
 	return r
 }
 
@@ -852,6 +854,8 @@ func GTpow(d *FP48, e *BIG) *FP48 {
 		if !W.Is_infinity() {return false}
 		return true
 	}
+	return true
+}
 
 /* test G2 group membership */
 	func G2member(P *ECP8) bool {
@@ -861,28 +865,39 @@ func GTpow(d *FP48, e *BIG) *FP48 {
 		if !W.Is_infinity() {return false}
 		return true
 	}
+	return true
+}
 
 /* test group membership - no longer needed*/
 /* Check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
 
 func GTmember(m *FP48) bool {
-	if m.Isunity() {return false}
-	r:=NewFP48copy(m)
+	if m.Isunity() {
+		return false
+	}
+	r := NewFP48copy(m)
 	r.conj()
 	r.Mul(m)
-	if !r.Isunity() {return false}
+	if !r.Isunity() {
+		return false
+	}
 
-	f:=NewFP2bigs(NewBIGints(Fra),NewBIGints(Frb))
+	f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
 
-	r.Copy(m); r.frob(f,8)
-	w:=NewFP48copy(r); w.frob(f,8)
+	r.Copy(m)
+	r.frob(f, 8)
+	w := NewFP48copy(r)
+	w.frob(f, 8)
 	w.Mul(m)
-	if !w.Equals(r) {return false}
+	if !w.Equals(r) {
+		return false
+	}
 
 	q := NewBIGints(CURVE_Order)
 	w.Copy(m)
-	r.Copy(GTpow(w,q))
-	if !r.Isunity() {return false}
+	r.Copy(GTpow(w, q))
+	if !r.Isunity() {
+		return false
+	}
 	return true
 }
-

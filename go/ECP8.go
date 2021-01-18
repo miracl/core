@@ -167,100 +167,100 @@ func (E *ECP8) getz() *FP8 {
 
 /* convert to byte array */
 func (E *ECP8) ToBytes(b []byte, compress bool) {
-	var t [8*int(MODBYTES)]byte
-	MB := 8*int(MODBYTES)
-	alt:=false
+	var t [8 * int(MODBYTES)]byte
+	MB := 8 * int(MODBYTES)
+	alt := false
 	W := NewECP8()
 	W.Copy(E)
 	W.Affine()
 	W.x.ToBytes(t[:])
 
 	if (MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
-		alt=true
+		alt = true
 	}
 
-    if alt {
-		for i:=0;i<MB;i++ {
-			b[i]=t[i]
+	if alt {
+		for i := 0; i < MB; i++ {
+			b[i] = t[i]
 		}
-        if !compress {
-            W.y.ToBytes(t[:]);
-            for i:=0;i<MB;i++ {
-				b[i+MB]=t[i]
+		if !compress {
+			W.y.ToBytes(t[:])
+			for i := 0; i < MB; i++ {
+				b[i+MB] = t[i]
 			}
-        } else {
-            b[0]|=0x80
-            if W.y.islarger()==1 {
-				b[0]|=0x20
+		} else {
+			b[0] |= 0x80
+			if W.y.islarger() == 1 {
+				b[0] |= 0x20
 			}
-        }
-		
+		}
+
 	} else {
-		for i:=0;i<MB;i++ {
-			b[i+1]=t[i]
+		for i := 0; i < MB; i++ {
+			b[i+1] = t[i]
 		}
-        if !compress {
-            b[0]=0x04
-            W.y.ToBytes(t[:])
-	        for i:=0;i<MB;i++ {
-			    b[i+MB+1]=t[i]
+		if !compress {
+			b[0] = 0x04
+			W.y.ToBytes(t[:])
+			for i := 0; i < MB; i++ {
+				b[i+MB+1] = t[i]
 			}
-        } else {
-            b[0]=0x02
-            if W.y.sign() == 1 {
-                b[0]=0x03
+		} else {
+			b[0] = 0x02
+			if W.y.sign() == 1 {
+				b[0] = 0x03
 			}
-        }
+		}
 	}
 }
 
 /* convert from byte array to point */
 func ECP8_fromBytes(b []byte) *ECP8 {
-	var t [8*int(MODBYTES)]byte
-	MB := 8*int(MODBYTES)
+	var t [8 * int(MODBYTES)]byte
+	MB := 8 * int(MODBYTES)
 	typ := int(b[0])
-	alt:=false
+	alt := false
 
 	if (MODBITS-1)%8 <= 4 && ALLOW_ALT_COMPRESS {
-		alt=true
+		alt = true
 	}
 
 	if alt {
-        for i:=0;i<MB;i++  {
-			t[i]=b[i]
+		for i := 0; i < MB; i++ {
+			t[i] = b[i]
 		}
-        t[0]&=0x1f
-        rx:=FP8_fromBytes(t[:]);
-        if (b[0]&0x80)==0 {
-            for i:=0;i<MB;i++ {
-				t[i]=b[i+MB]
+		t[0] &= 0x1f
+		rx := FP8_fromBytes(t[:])
+		if (b[0] & 0x80) == 0 {
+			for i := 0; i < MB; i++ {
+				t[i] = b[i+MB]
 			}
-            ry:=FP8_fromBytes(t[:])
-            return NewECP8fp8s(rx,ry)
-        } else {
-            sgn:=(b[0]&0x20)>>5
-            P:=NewECP8fp8(rx,0)
-            cmp:=P.y.islarger()
-            if (sgn==1 && cmp!=1) || (sgn==0 && cmp==1) {
+			ry := FP8_fromBytes(t[:])
+			return NewECP8fp8s(rx, ry)
+		} else {
+			sgn := (b[0] & 0x20) >> 5
+			P := NewECP8fp8(rx, 0)
+			cmp := P.y.islarger()
+			if (sgn == 1 && cmp != 1) || (sgn == 0 && cmp == 1) {
 				P.neg()
 			}
-            return P;
-        }
-    } else {
-		for i:=0;i<MB;i++ {
-			t[i]=b[i+1]
+			return P
 		}
-        rx:=FP8_fromBytes(t[:])
-        if typ == 0x04 {
-		    for i:=0;i<MB;i++ {
-				t[i]=b[i+MB+1]
+	} else {
+		for i := 0; i < MB; i++ {
+			t[i] = b[i+1]
+		}
+		rx := FP8_fromBytes(t[:])
+		if typ == 0x04 {
+			for i := 0; i < MB; i++ {
+				t[i] = b[i+MB+1]
 			}
-		    ry:=FP8_fromBytes(t[:])
-		    return NewECP8fp8s(rx,ry)
-        } else {
-            return NewECP8fp8(rx,typ&1)
-        }
-    }
+			ry := FP8_fromBytes(t[:])
+			return NewECP8fp8s(rx, ry)
+		} else {
+			return NewECP8fp8(rx, typ&1)
+		}
+	}
 }
 
 /* convert this to hex string */
@@ -314,13 +314,13 @@ func NewECP8fp8s(ix *FP8, iy *FP8) *ECP8 {
 /* construct this from x - but set to O if not on curve */
 func NewECP8fp8(ix *FP8, s int) *ECP8 {
 	E := new(ECP8)
-	h:=NewFP()
+	h := NewFP()
 	E.x = NewFP8copy(ix)
 	E.y = NewFP8int(1)
 	E.z = NewFP8int(1)
 	E.x.norm()
 	rhs := RHS8(E.x)
-	if rhs.qr(h) == 1  {
+	if rhs.qr(h) == 1 {
 		rhs.sqrt(h)
 		if rhs.sign() != s {
 			rhs.neg()
@@ -730,7 +730,7 @@ func ECP8_hap2point(h *BIG) *ECP8 {
 		X2 = NewFP2bigs(one, x)
 		X4 = NewFP4fp2(X2)
 		X8 = NewFP8fp4(X4)
-		Q = NewECP8fp8(X8,0)
+		Q = NewECP8fp8(X8, 0)
 		if !Q.Is_infinity() {
 			break
 		}
@@ -742,70 +742,88 @@ func ECP8_hap2point(h *BIG) *ECP8 {
 
 /* Deterministic mapping of Fp to point on curve */
 func ECP8_map2point(H *FP8) *ECP8 {
-    // Shallue and van de Woestijne
-    NY:=NewFP8int(1)
-    T:=NewFP8copy(H)
-    sgn:=T.sign()
+	// Shallue and van de Woestijne
+	NY := NewFP8int(1)
+	T := NewFP8copy(H)
+	sgn := T.sign()
 
-	Z:=NewFPint(RIADZG2A);
-	X1:=NewFP8fp(Z)
-	X3:=NewFP8copy(X1)
-	A:=RHS8(X1)
-	W:=NewFP8copy(A)
-	W.sqrt(nil);
+	Z := NewFPint(RIADZG2A)
+	X1 := NewFP8fp(Z)
+	X3 := NewFP8copy(X1)
+	A := RHS8(X1)
+	W := NewFP8copy(A)
+	W.sqrt(nil)
 
-	s:=NewFPbig(NewBIGints(SQRTm3))
+	s := NewFPbig(NewBIGints(SQRTm3))
 	Z.mul(s)
 
 	T.sqr()
-	Y:=NewFP8copy(A); Y.mul(T)
-	T.copy(NY); T.add(Y); T.norm()
-	Y.rsub(NY); Y.norm()
-	NY.copy(T); NY.mul(Y)
-	
+	Y := NewFP8copy(A)
+	Y.mul(T)
+	T.copy(NY)
+	T.add(Y)
+	T.norm()
+	Y.rsub(NY)
+	Y.norm()
+	NY.copy(T)
+	NY.mul(Y)
+
 	NY.tmul(Z)
 	NY.inverse(nil)
 
 	W.tmul(Z)
-    if (W.sign()==1) {
-        W.neg()
-        W.norm()
-    }
-    W.tmul(Z)
-	W.mul(H); W.mul(Y); W.mul(NY)
+	if W.sign() == 1 {
+		W.neg()
+		W.norm()
+	}
+	W.tmul(Z)
+	W.mul(H)
+	W.mul(Y)
+	W.mul(NY)
 
-	X1.neg(); X1.norm(); X1.div2()
-	X2:=NewFP8copy(X1)
-	X1.sub(W); X1.norm()
-	X2.add(W); X2.norm()
-	A.add(A); A.add(A); A.norm()
-	T.sqr(); T.mul(NY); T.sqr()
+	X1.neg()
+	X1.norm()
+	X1.div2()
+	X2 := NewFP8copy(X1)
+	X1.sub(W)
+	X1.norm()
+	X2.add(W)
+	X2.norm()
+	A.add(A)
+	A.add(A)
+	A.norm()
+	T.sqr()
+	T.mul(NY)
+	T.sqr()
 	A.mul(T)
-	X3.add(A); X3.norm()
+	X3.add(A)
+	X3.norm()
 
-    Y.copy(RHS8(X2))
-    X3.cmove(X2,Y.qr(nil))
-    Y.copy(RHS8(X1))
-    X3.cmove(X1,Y.qr(nil))
-    Y.copy(RHS8(X3))
-    Y.sqrt(nil)
+	Y.copy(RHS8(X2))
+	X3.cmove(X2, Y.qr(nil))
+	Y.copy(RHS8(X1))
+	X3.cmove(X1, Y.qr(nil))
+	Y.copy(RHS8(X3))
+	Y.sqrt(nil)
 
-    ne:=Y.sign()^sgn
-    W.copy(Y); W.neg(); W.norm()
-    Y.cmove(W,ne)
+	ne := Y.sign() ^ sgn
+	W.copy(Y)
+	W.neg()
+	W.norm()
+	Y.cmove(W, ne)
 
-    return NewECP8fp8s(X3,Y);
+	return NewECP8fp8s(X3, Y)
 }
 
 /* Map octet string to curve point */
 func ECP8_mapit(h []byte) *ECP8 {
 	q := NewBIGints(Modulus)
-	dx:=DBIG_fromBytes(h);
-    x:=dx.Mod(q);
-		
-	Q:=ECP8_hap2point(x)
+	dx := DBIG_fromBytes(h)
+	x := dx.Mod(q)
+
+	Q := ECP8_hap2point(x)
 	Q.Cfp()
-    return Q
+	return Q
 }
 
 /* P=u0.Q0+u1*Q1+u2*Q2+u3*Q3.. */

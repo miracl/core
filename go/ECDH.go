@@ -26,25 +26,26 @@ import "github.com/miracl/core/go/core"
 
 const INVALID_PUBLIC_KEY int = -2
 const ERROR int = -3
+
 //const INVALID int = -4
 const EFS int = int(MODBYTES)
 const EGS int = int(MODBYTES)
 
 // Transform a point multiplier to RFC7748 form
 func RFC7748(r *BIG) {
-    lg:=0
-    t:=NewBIGint(1)
-    c:=CURVE_Cof_I
-    for c!=1 {
-        lg++
-        c/=2
-    }
-    n:=uint(8*EGS-lg+1)
-    r.mod2m(n)
-    t.shl(n)
-    r.add(t)
-    c=r.lastbits(lg)
-    r.dec(c)
+	lg := 0
+	t := NewBIGint(1)
+	c := CURVE_Cof_I
+	for c != 1 {
+		lg++
+		c /= 2
+	}
+	n := uint(8*EGS - lg + 1)
+	r.mod2m(n)
+	t.shl(n)
+	r.add(t)
+	c = r.lastbits(lg)
+	r.dec(c)
 }
 
 /* return true if S is in ranger 0 < S < order , else return false */
@@ -54,7 +55,7 @@ func ECDH_IN_RANGE(S []byte) bool {
 	if s.iszilch() {
 		return false
 	}
-    if Comp(s,r)>=0 {
+	if Comp(s, r) >= 0 {
 		return false
 	}
 	return true
@@ -77,18 +78,18 @@ func ECDH_KEY_PAIR_GENERATE(RNG *core.RAND, S []byte, W []byte) int {
 		s = FromBytes(S)
 	} else {
 		if CURVETYPE != WEIERSTRASS {
-			s = Random(RNG)				// from random bytes
+			s = Random(RNG) // from random bytes
 		} else {
-			s = Randomnum(r, RNG)		// Removes biases
+			s = Randomnum(r, RNG) // Removes biases
 		}
 	}
-	
+
 	if CURVETYPE != WEIERSTRASS {
-		RFC7748(s)						// For Montgomery or Edwards, apply RFC7748 transformation
+		RFC7748(s) // For Montgomery or Edwards, apply RFC7748 transformation
 	}
 
 	s.ToBytes(S)
-	WP := G.clmul(s,r)
+	WP := G.clmul(s, r)
 	WP.ToBytes(W, false) // To use point compression on public keys, change to true
 
 	return res
@@ -133,7 +134,7 @@ func ECDH_PUBLIC_KEY_VALIDATE(W []byte) int {
 // type = 0 is just x coordinate output
 // type = 1 for standard compressed output
 // type = 2 for standard uncompress output 04|x|y
-func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte,typ int) int {
+func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte, typ int) int {
 	res := 0
 
 	s := FromBytes(S)
@@ -145,21 +146,21 @@ func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte,typ int) int {
 
 	if res == 0 {
 		r := NewBIGints(CURVE_Order)
-		W = W.clmul(s,r)
+		W = W.clmul(s, r)
 		if W.Is_infinity() {
 			res = ERROR
 		} else {
 			if CURVETYPE != MONTGOMERY {
-				if typ>0 {
-					if typ==1 {
-						W.ToBytes(Z,true)
+				if typ > 0 {
+					if typ == 1 {
+						W.ToBytes(Z, true)
 					} else {
-						W.ToBytes(Z,false)
+						W.ToBytes(Z, false)
 					}
 				} else {
 					W.GetX().ToBytes(Z)
 				}
-				return res;
+				return res
 			} else {
 				W.GetX().ToBytes(Z)
 			}
@@ -172,7 +173,7 @@ func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte,typ int) int {
 func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []byte) int {
 	var T [EGS]byte
 
-	B := core.GPhashit(core.MC_SHA2, sha, EGS, 0, F, -1, nil )
+	B := core.GPhashit(core.MC_SHA2, sha, EGS, 0, F, -1, nil)
 	G := ECP_generator()
 
 	r := NewBIGints(CURVE_Order)
@@ -188,7 +189,7 @@ func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []b
 		w := Randomnum(r, RNG) /* IMPORTANT - side channel masking to protect invmodp() */
 
 		V.Copy(G)
-		V = V.clmul(u,r)
+		V = V.clmul(u, r)
 		vx := V.GetX()
 		c.copy(vx)
 		c.Mod(r)
@@ -218,7 +219,7 @@ func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []b
 func ECDH_ECPVP_DSA(sha int, W []byte, F []byte, C []byte, D []byte) int {
 	res := 0
 
-	B := core.GPhashit(core.MC_SHA2, sha, EGS, 0, F, -1, nil )
+	B := core.GPhashit(core.MC_SHA2, sha, EGS, 0, F, -1, nil)
 
 	G := ECP_generator()
 	r := NewBIGints(CURVE_Order)
@@ -370,7 +371,7 @@ func ECDH_ECIES_DECRYPT(sha int, P1 []byte, P2 []byte, V []byte, C []byte, T []b
 		AC = append(AC, L2[i])
 	}
 
-	core.HMAC(core.MC_SHA2, sha, TAG, len(TAG), K2[:],AC)
+	core.HMAC(core.MC_SHA2, sha, TAG, len(TAG), K2[:], AC)
 
 	if !ncomp(T, TAG, len(T)) {
 		return nil

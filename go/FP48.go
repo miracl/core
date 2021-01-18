@@ -841,39 +841,39 @@ func (F *FP48) trace() *FP16 {
 
 /* convert from byte array to FP48 */
 func FP48_fromBytes(w []byte) *FP48 {
-	var t [16*int(MODBYTES)]byte
-	MB := 16*int(MODBYTES)
+	var t [16 * int(MODBYTES)]byte
+	MB := 16 * int(MODBYTES)
 
-	for i:=0;i<MB;i++ {
-		t[i]=w[i]
+	for i := 0; i < MB; i++ {
+		t[i] = w[i]
 	}
-    c:=FP16_fromBytes(t[:])
-	for i:=0;i<MB;i++ {
-		t[i]=w[i+MB]
+	c := FP16_fromBytes(t[:])
+	for i := 0; i < MB; i++ {
+		t[i] = w[i+MB]
 	}
-    b:=FP16_fromBytes(t[:])
-	for i:=0;i<MB;i++ {
-		t[i]=w[i+2*MB]
+	b := FP16_fromBytes(t[:])
+	for i := 0; i < MB; i++ {
+		t[i] = w[i+2*MB]
 	}
-    a:=FP16_fromBytes(t[:])
-	return NewFP48fp16s(a,b,c)
+	a := FP16_fromBytes(t[:])
+	return NewFP48fp16s(a, b, c)
 }
 
 /* convert this to byte array */
 func (F *FP48) ToBytes(w []byte) {
-	var t [16*int(MODBYTES)]byte
-	MB := 16*int(MODBYTES)
-    F.c.ToBytes(t[:])
-	for i:=0;i<MB;i++ { 
-		w[i]=t[i]
+	var t [16 * int(MODBYTES)]byte
+	MB := 16 * int(MODBYTES)
+	F.c.ToBytes(t[:])
+	for i := 0; i < MB; i++ {
+		w[i] = t[i]
 	}
-    F.b.ToBytes(t[:])
-	for i:=0;i<MB;i++ {
-		w[i+MB]=t[i]
+	F.b.ToBytes(t[:])
+	for i := 0; i < MB; i++ {
+		w[i+MB] = t[i]
 	}
-    F.a.ToBytes(t[:])
-	for i:=0;i<MB;i++ {
-		w[i+2*MB]=t[i]
+	F.a.ToBytes(t[:])
+	for i := 0; i < MB; i++ {
+		w[i+2*MB] = t[i]
 	}
 }
 
@@ -893,10 +893,10 @@ func (F *FP48) Pow(e *BIG) *FP48 {
 	e3.norm()
 
 	w := NewFP48copy(sf)
-    if e3.iszilch() {
-        w.one()
-        return w
-    }
+	if e3.iszilch() {
+		w.one()
+		return w
+	}
 	nb := e3.nbits()
 	for i := nb - 2; i >= 1; i-- {
 		w.usqr()

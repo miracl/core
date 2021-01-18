@@ -148,14 +148,14 @@ func NewHASH256() *HASH256 {
 
 func NewHASH256copy(HC *HASH256) *HASH256 {
 	H := new(HASH256)
-	for i:=0;i<64;i++ {
-		H.w[i]=HC.w[i]
+	for i := 0; i < 64; i++ {
+		H.w[i] = HC.w[i]
 	}
-	for i:=0;i<8;i++ {
-		H.h[i]=HC.h[i]
+	for i := 0; i < 8; i++ {
+		H.h[i] = HC.h[i]
 	}
-	H.length[0]=HC.length[0]
-	H.length[1]=HC.length[1]
+	H.length[0] = HC.length[0]
+	H.length[1] = HC.length[1]
 	return H
 }
 

@@ -22,7 +22,9 @@
 /* FP4 elements are of the form a+ib, where i is sqrt(-1+sqrt(-1)) */
 
 package XXX
+
 import "github.com/miracl/core/go/core"
+
 //import "fmt"
 
 type FP8 struct {
@@ -46,7 +48,7 @@ func NewFP8int(a int) *FP8 {
 }
 
 /* Constructors */
-func NewFP8ints(a int,b int) *FP8 {
+func NewFP8ints(a int, b int) *FP8 {
 	F := new(FP8)
 	F.a = NewFP4int(a)
 	F.b = NewFP4int(b)
@@ -82,7 +84,7 @@ func NewFP8fp(c *FP) *FP8 {
 }
 
 func NewFP8rand(rng *core.RAND) *FP8 {
-	F := NewFP8fp4s(NewFP4rand(rng),NewFP4rand(rng))
+	F := NewFP8fp4s(NewFP4rand(rng), NewFP4rand(rng))
 	return F
 }
 
@@ -103,45 +105,43 @@ func (F *FP8) iszilch() bool {
 	return F.a.iszilch() && F.b.iszilch()
 }
 
-
 func (F *FP8) islarger() int {
-    if F.iszilch() {
-		return 0;
+	if F.iszilch() {
+		return 0
 	}
-	cmp:=F.b.islarger()
-	if cmp!=0 {
+	cmp := F.b.islarger()
+	if cmp != 0 {
 		return cmp
 	}
 	return F.a.islarger()
 }
 
 func (F *FP8) ToBytes(bf []byte) {
-	var t [4*int(MODBYTES)]byte
-	MB := 4*int(MODBYTES)
-	F.b.ToBytes(t[:]);
-	for i:=0;i<MB;i++ {
-		bf[i]=t[i];
+	var t [4 * int(MODBYTES)]byte
+	MB := 4 * int(MODBYTES)
+	F.b.ToBytes(t[:])
+	for i := 0; i < MB; i++ {
+		bf[i] = t[i]
 	}
-	F.a.ToBytes(t[:]);
-	for i:=0;i<MB;i++ {
-		bf[i+MB]=t[i];
+	F.a.ToBytes(t[:])
+	for i := 0; i < MB; i++ {
+		bf[i+MB] = t[i]
 	}
 }
 
 func FP8_fromBytes(bf []byte) *FP8 {
-	var t [4*int(MODBYTES)]byte
-	MB := 4*int(MODBYTES)
-	for i:=0;i<MB;i++ {
-        t[i]=bf[i];
+	var t [4 * int(MODBYTES)]byte
+	MB := 4 * int(MODBYTES)
+	for i := 0; i < MB; i++ {
+		t[i] = bf[i]
 	}
-    tb:=FP4_fromBytes(t[:])
-	for i:=0;i<MB;i++ {
-        t[i]=bf[i+MB]
+	tb := FP4_fromBytes(t[:])
+	for i := 0; i < MB; i++ {
+		t[i] = bf[i+MB]
 	}
-    ta:=FP4_fromBytes(t[:])
-	return NewFP8fp4s(ta,tb)
+	ta := FP4_fromBytes(t[:])
+	return NewFP8fp4s(ta, tb)
 }
-
 
 /* Conditional move */
 func (F *FP8) cmove(g *FP8, d int) {
@@ -199,25 +199,25 @@ func (F *FP8) one() {
 
 /* Return sign */
 func (F *FP8) sign() int {
-	p1 := F.a.sign();
-	p2 := F.b.sign();
+	p1 := F.a.sign()
+	p2 := F.b.sign()
 	var u int
 	if BIG_ENDIAN_SIGN {
 		if F.b.iszilch() {
-			u=1;
+			u = 1
 		} else {
-			u=0;
+			u = 0
 		}
-		p2^=(p1^p2)&u;
-		return p2;
+		p2 ^= (p1 ^ p2) & u
+		return p2
 	} else {
 		if F.a.iszilch() {
-			u=1;
+			u = 1
 		} else {
-			u=0;
+			u = 0
 		}
-		p1^=(p1^p2)&u;
-		return p1;
+		p1 ^= (p1 ^ p2) & u
+		return p1
 	}
 }
 
@@ -414,7 +414,7 @@ func (F *FP8) frob(f *FP2) {
 	F.b.times_i()
 }
 
-/* this=this^e 
+/* this=this^e
 func (F *FP8) pow(e *BIG) *FP8 {
 	w := NewFP8copy(F)
 	w.norm()
@@ -687,6 +687,7 @@ func (F *FP8) div_i() {
 		F.norm()
 	}
 }
+
 /*
 func (F *FP8) pow(b *BIG) {
 	w := NewFP8copy(F);
@@ -707,7 +708,7 @@ func (F *FP8) pow(b *BIG) {
 */
 
 /* PFGE48S
-// Test for Quadratic Residue 
+// Test for Quadratic Residue
 func (F *FP8) qr(h *FP) int {
 	c := NewFP8copy(F)
 	c.conj()
@@ -716,10 +717,10 @@ func (F *FP8) qr(h *FP) int {
 }
 
 
-// sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2)) 
+// sqrt(a+ib) = sqrt(a+sqrt(a*a-n*b*b)/2)+ib/(2*sqrt(a+sqrt(a*a-n*b*b)/2))
 func (F *FP8) sqrt(h *FP)  {
 	if F.iszilch() {
-		return 
+		return
 	}
 
 	a := NewFP4copy(F.a)
