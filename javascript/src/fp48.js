@@ -825,7 +825,7 @@ var FP48 = function(ctx) {
             this.b.toBytes(t);
 		    for (var i=0;i<4*ctx.BIG.MODBYTES;i++) w[i+16*ctx.BIG.MODBYTES]=t[i];
             this.a.toBytes(t);
-		    for (var i=0;i<4*CONFIG_BIG.MODBYTES;i++) w[i+32*ctx.BIG.MODBYTES]=t[i];
+		    for (var i=0;i<4*ctx.BIG.MODBYTES;i++) w[i+32*ctx.BIG.MODBYTES]=t[i];
         },
 
         /* set this=this^e */
