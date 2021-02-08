@@ -214,9 +214,9 @@ var FP12 = function(ctx) {
 
         /* Granger-Scott Unitary Squaring */
         usqr: function() {
-            var A = new ctx.FP4(this.a), 
-                B = new ctx.FP4(this.c), 
-                C = new ctx.FP4(this.b), 
+            var A = new ctx.FP4(this.a),
+                B = new ctx.FP4(this.c),
+                C = new ctx.FP4(this.b),
                 D = new ctx.FP4(0);
 
             this.a.sqr();
@@ -256,14 +256,14 @@ var FP12 = function(ctx) {
 			if (this.stype==ctx.FP.ONE)
 				return;
 
-            var A = new ctx.FP4(this.a), 
-                B = new ctx.FP4(this.b), 
-                C = new ctx.FP4(this.c), 
-                D = new ctx.FP4(this.a); 
+            var A = new ctx.FP4(this.a),
+                B = new ctx.FP4(this.b),
+                C = new ctx.FP4(this.c),
+                D = new ctx.FP4(this.a);
 
             A.sqr();
             B.mul(this.c);
-            B.add(B); 
+            B.add(B);
             C.sqr();
             D.mul(this.b);
             D.add(D);
@@ -295,12 +295,12 @@ var FP12 = function(ctx) {
 
         /* FP12 full multiplication this=this*y */
         mul: function(y) {
-            var z0 = new ctx.FP4(this.a), 
+            var z0 = new ctx.FP4(this.a),
                 z1 = new ctx.FP4(0),
-                z2 = new ctx.FP4(this.b), 
+                z2 = new ctx.FP4(this.b),
                 z3 = new ctx.FP4(0),
-                t0 = new ctx.FP4(this.a), 
-                t1 = new ctx.FP4(y.a); 
+                t0 = new ctx.FP4(this.a),
+                t1 = new ctx.FP4(y.a);
 
             z0.mul(y.a);
             z2.mul(y.b);
@@ -366,13 +366,13 @@ var FP12 = function(ctx) {
 
 /* FP12 multiplication w=w*y */
 /* catering for special case that arises from special form of ATE pairing line function */
-/* w and y are both sparser line functions - cost = 6m */ 
+/* w and y are both sparser line functions - cost = 6m */
 		smul: function(y) {
 			if (ctx.ECP.SEXTIC_TWIST==ctx.ECP.D_TYPE)
-			{	
+			{
 				var w1=new ctx.FP2(this.a.geta());
 				var w2=new ctx.FP2(this.a.getb());
-				var w3; 
+				var w3;
 
 				w1.mul(y.a.geta());
 				w2.mul(y.a.getb());
@@ -386,7 +386,7 @@ var FP12 = function(ctx) {
 						w3=new ctx.FP2(t);
 					} else {
 						if (y.stype!=ctx.FP.SPARSEST)
-						{	
+						{
 							w3=new ctx.FP2(y.b.geta());
 							w3.pmul(this.b.geta().geta());
 						} else {
@@ -585,7 +585,7 @@ var FP12 = function(ctx) {
 
 				t0.copy(this.a); t0.add(this.c); t0.norm();
 				t1.copy(y.a); t1.add(y.c); t1.norm();
-	
+
 				t0.mul(t1);
 				z2.add(t0);
 
@@ -630,7 +630,7 @@ var FP12 = function(ctx) {
 					return;
 				}
 				if (ctx.ECP.SEXTIC_TWIST==ctx.ECP.D_TYPE)
-				{ // dense by sparser - 13m 
+				{ // dense by sparser - 13m
 					var z0=new ctx.FP4(this.a);
 					var z2=new ctx.FP4(this.b);
 					var z3=new ctx.FP4(this.b);
@@ -681,7 +681,7 @@ var FP12 = function(ctx) {
 					var z3=new ctx.FP4(0);
 					var t0=new ctx.FP4(this.a);
 					var t1=new ctx.FP4(0);
-		
+
 					z0.mul(y.a);
 					t0.add(this.b); t0.norm();
 
@@ -689,7 +689,7 @@ var FP12 = function(ctx) {
 					t0.copy(this.b); t0.add(this.c);
 					t0.norm();
 
-					z3.copy(t0); 
+					z3.copy(t0);
 
 					if (y.stype==ctx.FP.SPARSEST)
 						z3.qmul(y.c.getb().geta());
@@ -699,7 +699,7 @@ var FP12 = function(ctx) {
 
 					t0.copy(z0); t0.neg();
 					z1.add(t0);
-					this.b.copy(z1); 
+					this.b.copy(z1);
 					z2.copy(t0);
 
 					t0.copy(this.a); t0.add(this.c); t0.norm();
@@ -707,8 +707,8 @@ var FP12 = function(ctx) {
 
 					t0.mul(t1);
 					z2.add(t0);
-					t0.copy(this.c); 
-			
+					t0.copy(this.c);
+
 					if (y.stype==ctx.FP.SPARSEST)
 						t0.qmul(y.c.getb().geta());
 					else
@@ -723,7 +723,7 @@ var FP12 = function(ctx) {
 					z3.norm();
 					z3.times_i();
 					this.a.copy(z0); this.a.add(z3);
-				}	
+				}
 			}
 			this.stype=ctx.FP.DENSE;
 			this.norm();
@@ -731,9 +731,9 @@ var FP12 = function(ctx) {
 
         /* this=1/this */
         inverse: function() {
-            var f0 = new ctx.FP4(this.a), 
-                f1 = new ctx.FP4(this.b), 
-                f2 = new ctx.FP4(this.a), 
+            var f0 = new ctx.FP4(this.a),
+                f1 = new ctx.FP4(this.b),
+                f2 = new ctx.FP4(this.a),
                 f3 = new ctx.FP4(0);
 
             f0.sqr();
@@ -817,7 +817,7 @@ var FP12 = function(ctx) {
             this.b.toBytes(t);
 		    for (var i=0;i<4*ctx.BIG.MODBYTES;i++) w[i+4*ctx.BIG.MODBYTES]=t[i];
             this.a.toBytes(t);
-		    for (var i=0;i<4*CONFIG_BIG.MODBYTES;i++) w[i+8*ctx.BIG.MODBYTES]=t[i];
+		    for (var i=0;i<4*ctx.BIG.MODBYTES;i++) w[i+8*ctx.BIG.MODBYTES]=t[i];
         },
 
         /* set this=this^e */
@@ -831,7 +831,7 @@ var FP12 = function(ctx) {
 
 			sf = new FP12(this);
 			sf.norm();
-            w = new FP12(sf); 
+            w = new FP12(sf);
             if (e3.iszilch()) {
                 w.one();
                 return w;
