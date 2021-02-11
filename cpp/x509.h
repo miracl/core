@@ -56,13 +56,13 @@
 
 using namespace core;
 
-extern octet X509_CN;
-extern octet X509_ON;
-extern octet X509_EN;
-extern octet X509_LN;
-extern octet X509_UN;
-extern octet X509_MN;
-extern octet X509_SN;
+extern octet X509_CN;  // Country Name
+extern octet X509_ON;  // organisation Name
+extern octet X509_EN;  // email
+extern octet X509_LN;  // local name
+extern octet X509_UN;  // Unit name (aka Organisation Unit OU)
+extern octet X509_MN;  // My Name (aka Common Name)
+extern octet X509_SN;  // State Name
 
 /**
  * @brief Public key type

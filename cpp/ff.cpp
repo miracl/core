@@ -749,7 +749,7 @@ static void WWW::FF_invmod2m(BIG U[], BIG a[], int n)
 {
     int i;
 #ifndef C99
-    BIG t1[FFLEN_WWW], b[FFLEN_WWW], c[FFLEN_WWW];
+    BIG t1[2*FFLEN_WWW], b[FFLEN_WWW], c[FFLEN_WWW];
 #else
     BIG t1[2 * n], b[n], c[n];
 #endif
