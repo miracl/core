@@ -37,7 +37,7 @@ func reverse(X []byte) {
 
 
 func labeledExtract(SALT []byte,SUITE_ID []byte,label string,IKM []byte) []byte {
-	rfc:="HPKE-07"
+	rfc:="HPKE-v1"
 	RFC:=[]byte(rfc)
 	LABEL:=[]byte(label)
 	var LIKM []byte
@@ -59,7 +59,7 @@ func labeledExtract(SALT []byte,SUITE_ID []byte,label string,IKM []byte) []byte 
 }
 
 func labeledExpand(PRK []byte,SUITE_ID []byte,label string,INFO []byte,L int) []byte {
-	rfc:="HPKE-07"
+	rfc:="HPKE-v1"
 	RFC:=[]byte(rfc)
 	LABEL:=[]byte(label)
 	AR := core.InttoBytes(L,2)

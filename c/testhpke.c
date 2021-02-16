@@ -88,8 +88,8 @@ int hpke_C25519()
 
     mode=0;
     printf("\nMode 0\n");
-    OCT_fromHex(&seedE,(char *)"6305de86b3cec022fae6f2f2d2951f0f90c8662112124fd62f17e0a99bdbd08e");
-    OCT_fromHex(&seedR,(char *)"6d9014e4609687b0a3670a22f2a14eac5ae6ad8c0beb62fb3ecb13dc8ebf5e06");
+    OCT_fromHex(&seedE,(char *)"1dacee520c81ade608f4fa3e5ccae0ecedcc7880e3fc6f3e5afd2e4af8396571");
+    OCT_fromHex(&seedR,(char *)"0a3367dadc97e200074936b5adedcd5680f30672d1ec7158fdfcb795040ec909");
     DeriveKeyPair_C25519(config_id,&skE,&pkE,&seedE);
     DeriveKeyPair_C25519(config_id,&skR,&pkR,&seedR);
 
@@ -116,8 +116,8 @@ int hpke_C25519()
 // Mode 1
     mode=1;
     printf("\nMode 1\n");
-    OCT_fromHex(&seedE,(char *)"abd63dfd2fb9ccf8789cae5a6aff91e07f9f5925c27f005e702bf956b0000a85");
-    OCT_fromHex(&seedR,(char *)"654e8b44e8e29fc75f3beadf7f28dc065e38a53c1a731e15f2d46fd6130574da");
+    OCT_fromHex(&seedE,(char *)"7f5b697a87fb11d733e31265410c80b72525637e1b872f9ede00d507c0c534d7");
+    OCT_fromHex(&seedR,(char *)"89a6ce4b7b8eb12eebff3864615a2539e3e64fa2d4ab525c18c7bc451a2b5e40");
     DeriveKeyPair_C25519(config_id,&skE,&pkE,&seedE);
     DeriveKeyPair_C25519(config_id,&skR,&pkR,&seedR);
     
@@ -143,9 +143,9 @@ int hpke_C25519()
 // Mode 2
     mode=2;
     printf("\nMode 2\n");
-    OCT_fromHex(&seedE,(char *)"42d691088397246b00e9d9ce8f5406a317433558dc28132e02618970005d02fd");
-    OCT_fromHex(&seedR,(char *)"fb953f486ef5f7a1ceddff40bffe02b857c8af9d611966e417a24d6efa7c9d1c");
-    OCT_fromHex(&seedS,(char *)"131aa907c85b05726e7a058b064bf29cb2cb72a2afbffbd8076a884291f3143e");
+    OCT_fromHex(&seedE,(char *)"f7faa81395a22af1071b5273f9f94db0609ab9a7f4eca54834ea408d97294cc2");
+    OCT_fromHex(&seedR,(char *)"a10d107753f85bf7128768693e53129fb44a281ea4849a86231632db48dbb28c");
+    OCT_fromHex(&seedS,(char *)"e1257ce84dd98bca7847d75661b658cd2cc6c4efbf9e989a40f390720b57d409");
     DeriveKeyPair_C25519(config_id,&skE,&pkE,&seedE);
     DeriveKeyPair_C25519(config_id,&skR,&pkR,&seedR);
     DeriveKeyPair_C25519(config_id,&skS,&pkS,&seedS);
@@ -173,9 +173,9 @@ int hpke_C25519()
     mode=3;
     printf("\nMode 3\n");
 
-    OCT_fromHex(&seedE,(char *)"0c3a14fe896a7166f4d5e2a21c903b69f9ca71783290ca10f1b8c5eb258149be");
-    OCT_fromHex(&seedR,(char *)"b759021868fba28c1ddd509eaac450a896ab0f5edffead0a019fecb574950d64");
-    OCT_fromHex(&seedS,(char *)"2e7219703b6659698e4c2d141d13e0092df7039212db9c97e347c7d2c0aee239");
+    OCT_fromHex(&seedE,(char *)"e98713f7e24e7025fb7abddfff317d865ad5f4c3b6be22cda48dbcdde6151a68");
+    OCT_fromHex(&seedR,(char *)"b281654cdb2cd6a9670c3035eaa702736a951585a938381198f7d29085ca7f3a");
+    OCT_fromHex(&seedS,(char *)"ea95c4d3c5e7868af29fc0cb0841485dead8d54b57ee1b8ed31a153295454835");
     DeriveKeyPair_C25519(config_id,&skE,&pkE,&seedE);
     DeriveKeyPair_C25519(config_id,&skR,&pkR,&seedR);
     DeriveKeyPair_C25519(config_id,&skS,&pkS,&seedS);
@@ -262,8 +262,8 @@ int hpke_NIST521()
 
     mode=0;
     printf("\nMode 0\n");
-    OCT_fromHex(&seedE,(char *)"ea39fec1941c5f516e19533f40d415c65fde023c10c559f3845e71ffccea478101573d069cc67874d5b2aba6a22eb51cdd689836b7e9cabbb4469c57947db7316fa7");
-    OCT_fromHex(&seedR,(char *)"8249fd42416aba5b0d51dcd3548d774ae172148cbba1519107c5d84a160225441a9c018fdf3b9ffc2c41c1c62e29208d5165a59e7f14fe93b4f911cbbebda1904391");
+    OCT_fromHex(&seedE,(char *)"bb8f0c6c0d81a0a54d6084e3d7d8001875ce2b4831400075246ddeabc3f62d065d91fa8f2ca0cfee3a94f1fa6f43f53a2e39241ccd5ad9f0d889aba103e78286ca17");
+    OCT_fromHex(&seedR,(char *)"28b1403adcf3d2bba7d7c733df4ef8ab9f4c2cf92c840beb7de3fd139611a95be850589a49825450c033b2e1f6cb66127c83827d5464fca1e427c2bb31bf18e857e2");
 
     DeriveKeyPair_NIST521(config_id,&skE,&pkE,&seedE);
     DeriveKeyPair_NIST521(config_id,&skR,&pkR,&seedR);
@@ -291,8 +291,8 @@ int hpke_NIST521()
     mode=1;
     printf("\nMode 1\n");
 
-    OCT_fromHex(&seedE,(char *)"b563555965facaa37a5e754cf2e50193953e1d527e61637e521df1868354799258f0d15d8807750cea08e9b6a358d2440ab06725861b237fb69973cf41e802434433");
-    OCT_fromHex(&seedR,(char *)"2be954cd856c0c548ec6de490c821be20c4fc9610b5dba1831c698045fa01dbceb49f8324bae26e5d1ee62db3246d65492812e2c539b96bc580d46c247304adfc55e");
+    OCT_fromHex(&seedE,(char *)"bd12d21f5a36063ec0242aa26f22144aa7d24c3cc2e6a1805868250d8e9ce6fb2a04f8852cd6ec3241249fcf262b8f245d179636fcfbf275a75539cfc756a4dd3f53");
+    OCT_fromHex(&seedR,(char *)"e9a016952866c33da399e64ecd629cf32826285698726f2c22debd4799b8fac112ac1a546ce39452406396a389fb10f51036c7022dc1cdde177b54d005731fb79ce4");
     DeriveKeyPair_NIST521(config_id,&skE,&pkE,&seedE);
     DeriveKeyPair_NIST521(config_id,&skR,&pkR,&seedR);
     
@@ -319,9 +319,9 @@ int hpke_NIST521()
     mode=2;
     printf("\nMode 2\n");
 
-    OCT_fromHex(&seedE,(char *)"c9621b9ef899275dc970606a2b0806fe860f62d539f3ee618a9409009b8ae154bc4acf495dd9fa8f850c4dca82b923b42270d7b16ed343c7e86e3036c88d0d7d77ee");
-    OCT_fromHex(&seedR,(char *)"ef805c20cda1fa06e06cfb968ad68c748a3dd94337f7357ca0060a382a84fa5de6df3e3216f886957694547264d5bc63450cfdcc4d2b33fc8ebf8d7c708f8b5e4bb5");
-    OCT_fromHex(&seedS,(char *)"d8779e14425887ebb21b1952b1a0b77842830aef910724b082807dfebc8ec309b4969da762369e77834593970215b85510c9a0347ff14c8583aae7c9c2208275b740");
+    OCT_fromHex(&seedE,(char *)"0e5ec115c172744e793ef333abfd5d9838fd31eef595f0b77a2f5623404aa42f0e77198c2ac78defeae75cc79cf5dc5c7587b6eda733e48f3b17d5e3496482f19cdb");
+    OCT_fromHex(&seedR,(char *)"3f3c12492eee6f1f8029a89002b6539ea9754b48412c14d2fe94368cf1fa473f0171cdb1117aaa447ad6914bfb794ead14a9cd22cd83caa22bd905bd7d614d401ddc");
+    OCT_fromHex(&seedS,(char *)"02d1581b120d0415bda1fb2cbe6a3c81edf28209f0fc1460745ad9018747c31e6d42a36ed1734214312311db80bb3f88c2da6ea7624cf2915d32f2993ebeb92c2934");
     DeriveKeyPair_NIST521(config_id,&skE,&pkE,&seedE);
     DeriveKeyPair_NIST521(config_id,&skR,&pkR,&seedR);
     DeriveKeyPair_NIST521(config_id,&skS,&pkS,&seedS);
@@ -349,9 +349,9 @@ int hpke_NIST521()
     mode=3;
     printf("\nMode 3\n");
 
-    OCT_fromHex(&seedE,(char *)"d7537fd470c0beece615e26dd109922460292e973127cb4e22da16c0756fc336224e07dbecdf36edd144ebcd82aece3db52f814a33a639b5e7c964b27f6e3195cd73");
-    OCT_fromHex(&seedR,(char *)"f0858f5e1865db4fe45dc3274bcd273a29088d80f9203a16ec1210e3d81dd50a99f15c427d547fea55593e2ef834beb5f80c536fdd2881a8943c05488a371a3c988d");
-    OCT_fromHex(&seedS,(char *)"1e8d0026273feb61537181872e03ed2c7756f0ed1c4bb9ecd159614c2afdcaacc5fcf70f6d30d7ea6760c98a1ce1138a82497eb72461ca5da50c8729d431de53857f");
+    OCT_fromHex(&seedE,(char *)"c393a0a0cab3313f0526d72b8bef55b26a156493263fa1a653069ed5f2f3637f371b15704778c89a6e01c3fd958dfee5f85613e2d4b2eb17a152810690d8252df44b");
+    OCT_fromHex(&seedR,(char *)"e7fa07c9938a3d9d883d256abd7fb5777ed7c4195a8d244c0e682fd1a08fdcce58ab1aa7ba31b1fa120f03d9df438509a1e31992506dbc196ac4489079b3b64bea9b");
+    OCT_fromHex(&seedS,(char *)"403e8d5ff0155c71232a887f542df221c385956eaca3acceffdc4681b99c7e9613f90ba03b0c03c0c57a90b2dd31effc6278ab6dc059f3e5389dff6495bda12b4da4");
     DeriveKeyPair_NIST521(config_id,&skE,&pkE,&seedE);
     DeriveKeyPair_NIST521(config_id,&skR,&pkR,&seedR);
     DeriveKeyPair_NIST521(config_id,&skS,&pkS,&seedS);

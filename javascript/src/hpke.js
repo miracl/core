@@ -36,7 +36,7 @@ var HPKE = function(ctx) {
         },
 
         LabeledExtract: function(SALT,SUITE_ID,label,IKM) {
-            var rfc="HPKE-07";
+            var rfc="HPKE-v1";
             var RFC=ctx.ECDH.asciitobytes(rfc);
             var LABEL=ctx.ECDH.asciitobytes(label);
             var LIKM = [];
@@ -56,7 +56,7 @@ var HPKE = function(ctx) {
 
         LabeledExpand: function(PRK,SUITE_ID,label,INFO,L) {
             var AR = ctx.HMAC.inttobytes(L, 2);
-            var rfc="HPKE-07";
+            var rfc="HPKE-v1";
             var RFC=ctx.ECDH.asciitobytes(rfc);
             var LABEL=ctx.ECDH.asciitobytes(label);
             var LINFO = [];

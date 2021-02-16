@@ -23,23 +23,6 @@
 #include "core.h"  // for octet support only
 #include "x509.h"
 
-// ASN.1 tags
-
-#define ANY 0x00
-#define SEQ 0x30
-#define OID 0x06
-#define INT 0x02
-#define NUL 0x05
-#define ZER 0x00
-#define UTF 0x0C
-#define UTC 0x17
-#define LOG 0x01
-#define BIT 0x03
-#define OCT 0x04
-#define STR 0x13
-#define SET 0x31
-#define IA5 0x16
-
 // Define some OIDs
 
 // Elliptic Curve with SHA256
@@ -669,4 +652,113 @@ int X509_find_expiry_date(octet *c, int start)
     return j;
 }
 
+int X509_find_extensions(octet *c)
+{
+    int j, len;
+    j=X509_find_subject(c);
+
+    len = getalen(SEQ, c->val, j);
+    if (len<0) return 0;
+    j += skip(len)+len; // skip subject
+
+    len = getalen(SEQ, c->val, j);
+    if (len<0) return 0;
+    j += skip(len)+len; // skip public key
+
+    if (j>=c->len) return 0;
+    return j;
+}
+
+int X509_find_extension(octet *c, octet *SOID, int start, int *flen)
+{
+    int i, j, k, fin, len, tlen, nj;
+    char foid[50];  /*****/
+    octet FOID = {0, sizeof(foid), foid};
+
+    j = start;
+
+    tlen = getalen(EXT, c->val, j);
+    if (tlen < 0) return 0;
+    j += skip(tlen);
+
+    tlen = getalen(SEQ, c->val, j);
+    if (tlen < 0) return 0;
+    j += skip(tlen);
+
+    for (k = j; j < k + tlen;)
+    {
+        // search for Owner OID
+        len = getalen(SEQ, c->val, j);
+        if (len < 0) return 0;
+        j += skip(len);  nj=j+len;
+        len = getalen(OID, c->val, j);
+        if (len < 0) return 0;
+        j += skip(len);
+        fin = j + len; // extract OID
+        FOID.len = len;
+        for (i = 0; j < fin; j++)
+            FOID.val[i++] = c->val[j];
+        if (OCT_comp(&FOID, SOID))
+        {
+            // if its the right one return
+            *flen = nj-j;
+            return j;
+        }
+        j = nj; // skip over this extension
+    }
+    *flen = 0; /*****/
+    return 0;
+}
+
+// return 1 if name found, else 0, where name is URL
+// input cert, and pointer to SAN extension
+// Takes wild-card into consideration
+int X509_find_alt_name(octet *c,int start,char *name)
+{
+    int i,j,len,k,m,tlen,cmp,tag;
+
+    if (start==0) return 0;
+    j=start;
+    tlen = getalen(OCT, c->val, j);
+    if (tlen < 0) return 0;
+    j += skip(tlen);
+
+    tlen = getalen(SEQ, c->val, j);
+    if (tlen < 0) return 0;
+    j += skip(tlen);  
+    
+    for (k=j;j<k+tlen;)
+    {
+        tag=c->val[j];  tag&=0xff;
+        len = getalen(ANY, c->val, j);
+        if (len < 0) return 0;
+        j += skip(len); 
+        if (tag!=DNS)
+        { // only interested in URLs
+            j+=len;
+            continue;
+        }
+        cmp=1; m=0;
+        if (c->val[j]=='*')
+        { // wildcard
+            j++; len--; // skip over *
+            while (name[m]!='.' && name[m]!=0)
+                m++;
+        }
+        for (i=0;i<len;i++)
+        {
+            if (name[m]==0)
+            {
+                cmp=0;
+                j++;
+                continue;
+            }
+            if (c->val[j++]!=name[m++])
+                cmp=0;
+        }
+        if (name[m]!=0) cmp=0;
+        if (cmp) return 1;
+    }
+    return 0;
+}
 

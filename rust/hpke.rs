@@ -48,7 +48,7 @@ fn printbinary(array: &[u8]) {
 
 #[allow(non_snake_case)]
 fn labeledExtract(prk: &mut [u8],salt: Option<&[u8]>,suite_id: &[u8],label: &str,ikm: Option<&[u8]>) {
-    let rfc="HPKE-07";
+    let rfc="HPKE-v1";
     let prefix1=rfc.as_bytes();
     let prefix2=label.as_bytes();
     let mut likm: [u8; 18+MAX_LABEL+2*POINT] = [0; 18+MAX_LABEL+2*POINT];
@@ -77,7 +77,7 @@ fn labeledExtract(prk: &mut [u8],salt: Option<&[u8]>,suite_id: &[u8],label: &str
 #[allow(non_snake_case)]
 fn labeledExpand(okm: &mut [u8],prk: &[u8],suite_id: &[u8],label: &str,info: Option<&[u8]>,el: usize) {
     let mut ar: [u8; 2] = [0; 2];
-    let rfc="HPKE-07";
+    let rfc="HPKE-v1";
     let prefix1=rfc.as_bytes();
     let prefix2=label.as_bytes();
     hmac::inttobytes(el,&mut ar);

@@ -50,7 +50,7 @@ public final class HPKE {
     }
 
     static byte[] LabeledExtract(byte[] SALT,byte[] SUITE_ID,String label,byte[] IKM) {
-        String rfc="HPKE-07";
+        String rfc="HPKE-v1";
 
         byte[] RFC=rfc.getBytes();
         byte[] LABEL=label.getBytes();
@@ -77,7 +77,7 @@ public final class HPKE {
 
     static byte[] LabeledExpand(byte[] PRK,byte[] SUITE_ID,String label,byte[] INFO,int L) {
         byte[] AR = HMAC.inttoBytes(L, 2);
-        String rfc="HPKE-07";
+        String rfc="HPKE-v1";
         byte[] RFC=rfc.getBytes();
         byte[] LABEL=label.getBytes();
         int INFOlen;

@@ -35,7 +35,7 @@ static void ZZZ::LabeledExtract(octet *PRK,octet *SALT,octet *SUITE_ID,char *lab
 {
     char likm[18+MAX_LABEL+2*POINT];
     octet LIKM={0,sizeof(likm),likm};
-    OCT_jstring(&LIKM,(char *)"HPKE-07");
+    OCT_jstring(&LIKM,(char *)"HPKE-v1");
     OCT_joctet(&LIKM,SUITE_ID);
     OCT_jstring(&LIKM,label);
     if (IKM!=NULL)
@@ -48,7 +48,7 @@ static void ZZZ::LabeledExpand(octet *OKM,octet *PRK,octet *SUITE_ID,char *label
     char linfo[20+MAX_LABEL+3*POINT];
     octet LINFO={0,sizeof(linfo),linfo};
     OCT_jint(&LINFO,L,2);    
-    OCT_jstring(&LINFO,(char *)"HPKE-07");
+    OCT_jstring(&LINFO,(char *)"HPKE-v1");
     OCT_joctet(&LINFO,SUITE_ID);
     OCT_jstring(&LINFO,label);
     if (INFO!=NULL)

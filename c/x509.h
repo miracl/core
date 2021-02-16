@@ -49,6 +49,25 @@
 #define USE_NIST384 10   /**< For the NIST 384-bit standard curve - WEIERSTRASS only */
 #define USE_NIST521 12   /**< For the NIST 521-bit standard curve - WEIERSTRASS only */
 
+// ASN.1 tags
+
+#define ANY 0x00
+#define SEQ 0x30
+#define OID 0x06
+#define INT 0x02
+#define NUL 0x05
+#define ZER 0x00
+#define UTF 0x0C
+#define UTC 0x17
+#define LOG 0x01
+#define BIT 0x03
+#define OCT 0x04
+#define STR 0x13
+#define SET 0x31
+#define IA5 0x16
+#define EXT 0xA3
+#define DNS 0x82
+
 extern octet X509_CN;
 extern octet X509_ON;
 extern octet X509_EN;
@@ -56,6 +75,9 @@ extern octet X509_LN;
 extern octet X509_UN;
 extern octet X509_MN;
 extern octet X509_SN;
+
+extern octet X509_AN;  // Alternate Name
+extern octet X509_KU;  // Key Usage
 
 /**
  * @brief Public key type
@@ -141,5 +163,29 @@ extern int X509_find_start_date(octet *c, int s);
 */
 extern int X509_find_expiry_date(octet *c, int s);
 
+/** @brief
+ *
+	@param c an X.509 certificate
+	@return 0 on failure (or no extensions), or pointer to extensions field in cert
+*/
+extern int X509_find_extensions(octet *c);
+/** @brief
+ *
+	@param c an X.509 certificate
+	@param S is OID of particular extension we are looking for
+	@param s is a pointer to the section of interest in the cert
+	@param f is pointer to the length of the extension
+	@return 0 on failure, or pointer to the extension
+*/
+extern int X509_find_extension(octet *c, octet *S, int s, int *f);
+
+/** @brief
+ *
+	@param c an X.509 certificate
+    @param s is a pointer to certificate extension SubjectAltNames
+    @param name is a URL
+    @return 0 on failure, 1 if URL is in list of alt names
+*/
+extern int X509_find_alt_name(octet *c,int s,char *name);
 
 #endif
