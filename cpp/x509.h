@@ -84,6 +84,7 @@ extern octet X509_SN;  // State Name
 
 extern octet X509_AN;  // Alternate Name
 extern octet X509_KU;  // Key Usage
+extern octet X509_BC;  // Basic Constraints
 
 /**
  * @brief Public key type

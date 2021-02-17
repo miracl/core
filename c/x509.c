@@ -102,6 +102,19 @@ octet X509_MN= {3,sizeof(mn),mn};
 static unsigned char en[9] = {0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x01};
 octet X509_EN = {9, sizeof(en), (char *)en};
 
+// Extensions
+// Alt Name
+static char an[3]={0x55,0x1D,0x11};
+octet X509_AN = {3, sizeof(an),an};
+
+// Key Usage
+static char ku[3]={0x55,0x1d,0x0f};
+octet X509_KU = {3,sizeof(ku),ku};
+
+// Basic Constraints
+static char bc[3]={0x55,0x1d,0x13};
+octet X509_BC = {3,sizeof(bc),bc};
+
 /* Check expected TAG and return ASN.1 field length. If tag=0 skip check. */
 static int getalen(int tag, char *b, int j)
 {

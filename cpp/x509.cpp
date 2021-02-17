@@ -112,6 +112,10 @@ octet X509_AN = {3, sizeof(an),an};
 static char ku[3]={0x55,0x1d,0x0f};
 octet X509_KU = {3,sizeof(ku),ku};
 
+// Basic Constraints
+static char bc[3]={0x55,0x1d,0x13};
+octet X509_BC = {3,sizeof(bc),bc};
+
 /* Check expected TAG and return ASN.1 field length. If tag=0 skip check. */
 static int getalen(int tag, char *b, int j)
 {

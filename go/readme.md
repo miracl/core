@@ -34,6 +34,8 @@ script config32.py or config64.py (depending on whether you want a
 
 --------------------------------------------
 
+(Note from version 1.16 of GO, the environment variable GO111MODE should be set to auto)
+
 To create a 64-bit library
 
     python3 config64.py
