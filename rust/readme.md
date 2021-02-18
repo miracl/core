@@ -5,6 +5,8 @@ NOTE: Updated to Rust 2018
 NOTE: This version of the library requires Version 1.33+ of Rust for 64-bit 
 integer support, and for Rust 2018, and also for const fn support.
 
+NOTE: (18/02/2021) Package "core" changed to "mcore" to avoid clash with Rust
+
 Namespaces are used to separate different curves.
 
 # Installation and Testing
@@ -24,26 +26,26 @@ As a quick example execute from your root directory
 Then select options 1, 3, 7, 28, 30, 36, 37 and 40 (these are fixed for 
 the example program provided). Select 0 to exit.
 
-Then copy the library from core/target/release/libcore.rlib to the
+Then copy the library from mcore/target/release/libmcore.rlib to the
 root directory, and execute
 
-    rustc TestECC.rs --extern core=libcore.rlib
+    rustc TestECC.rs --extern mcore=libmcore.rlib
 
 Run this test program by executing the program TestECC
 
-    rustc TestMPIN.rs --extern core=libcore.rlib
+    rustc TestMPIN.rs --extern mcore=libmcore.rlib
 
 Run this test program by executing the program TestMPIN
 
-    rustc TestBLS.rs --extern core=libcore.rlib
+    rustc TestBLS.rs --extern mcore=libmcore.rlib
 
 Run this test program by executing the program TestBLS
 
-    rustc BenchtestALL.rs --extern core=libcore.rlib
+    rustc BenchtestALL.rs --extern mcore=libmcore.rlib
 
 Run this test program by executing the program BenchtestALL
 
-    rustc TestNHS.rs --extern core=libcore.rlib
+    rustc TestNHS.rs --extern mcore=libmcore.rlib
 
 Run this test program by executing the program TestNHS
 
@@ -59,17 +61,17 @@ where XX can be 32 or 64
 
 ## Using MIRACL core with Cargo
 
-Once you have built the library by running the python script, the contents of the rust folder will have changed, specifically all code files will now be under the folder core. This folder is just a rust library and can be included in any rust project.
+Once you have built the library by running the python script, the contents of the rust folder will have changed, specifically all code files will now be under the folder mcore. This folder is just a rust library and can be included in any rust project.
 
 Create a new rust project
 ```    cargo new mynewmiraclproject```
 
-Copy the core folder into this new projects root directory
+Copy the mcore folder into this new projects root directory
 
-Finally, update the cargo.toml file in your new project to include the core library as a dependency. Here path must equal the path to the core folder, which if copied into the project should be just under the root.
+Finally, update the cargo.toml file in your new project to include the mcore library as a dependency. Here path must equal the path to the mcore folder, which if copied into the project should be just under the root.
 ```
 [dependencies]
-core={path="core", version="0.1.0"}
+mcore={path="mcore", version="0.1.0"}
 ```
 
 -------------------------------------------------
@@ -80,7 +82,7 @@ See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
 
 Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (ed25519, c25519, nist256, goldilocks, secp256k1 and bls12381)
 
-    rustc TestHTP.rs --extern core=libcore.rlib
+    rustc TestHTP.rs --extern mcore=libmcore.rlib
 
 Test program runs through test vectors from the draft standard.
 
@@ -97,6 +99,6 @@ New hpke.rs api file
 
 Create 32 or 64-bit library selecting curves 2 and 10 (c25519 and nist521)
 
-    rustc TestHPKE.rs --extern core=libcore.rlib
+    rustc TestHPKE.rs --extern mcore=libmcore.rlib
 
 Test program runs through test vectors for all modes 0-3.

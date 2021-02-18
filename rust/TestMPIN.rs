@@ -17,12 +17,12 @@
  * limitations under the License.
  */
 
-extern crate core;
+extern crate mcore;
 
 use std::io;
 
-use core::rand::{RAND, RAND_impl};
-use core::share::SHARE;
+use mcore::rand::{RAND, RAND_impl};
+use mcore::share::SHARE;
 
 pub fn printbinary(array: &[u8]) {
     for i in 0..array.len() {
@@ -34,7 +34,7 @@ pub fn printbinary(array: &[u8]) {
 #[allow(unused_variables)]
 fn mpin_bn254(rng: &mut impl RAND) {
 
-    use core::bn254::mpin;
+    use mcore::bn254::mpin;
 
     const EFS: usize = mpin::EFS;
     const EGS: usize = mpin::EGS;
@@ -185,7 +185,7 @@ fn mpin_bn254(rng: &mut impl RAND) {
 }
 
 fn mpin_bls12383(rng: &mut impl RAND) {
-    use core::bls12383::mpin;
+    use mcore::bls12383::mpin;
 
     const EFS: usize = mpin::EFS;
     const EGS: usize = mpin::EGS;
@@ -307,7 +307,7 @@ fn mpin_bls12383(rng: &mut impl RAND) {
 }
 
 fn mpin_bls24479(rng: &mut impl RAND) {
-    use core::bls24479::mpin192;
+    use mcore::bls24479::mpin192;
 
     const EFS: usize = mpin192::EFS;
     const EGS: usize = mpin192::EGS;
@@ -428,7 +428,7 @@ fn mpin_bls24479(rng: &mut impl RAND) {
 }
 
 fn mpin_bls48556(rng: &mut impl RAND) {
-    use core::bls48556::mpin256;
+    use mcore::bls48556::mpin256;
 
     const EFS: usize = mpin256::EFS;
     const EGS: usize = mpin256::EGS;

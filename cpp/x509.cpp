@@ -23,6 +23,25 @@
 #include "core.h"  // for octet support only
 #include "x509.h"
 
+// Some ASN.1 tags
+
+#define ANY 0x00
+#define SEQ 0x30
+#define OID 0x06
+#define INT 0x02
+#define NUL 0x05
+#define ZER 0x00
+#define UTF 0x0C
+#define UTC 0x17
+#define LOG 0x01
+#define BIT 0x03
+#define OCT 0x04
+#define STR 0x13
+#define SET 0x31
+#define IA5 0x16
+#define EXT 0xA3
+#define DNS 0x82
+
 // Define some OIDs
 
 // Elliptic Curve with SHA256

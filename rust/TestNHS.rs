@@ -21,15 +21,15 @@
 
 // See https://eprint.iacr.org/2016/1157 (Alkim, Ducas, Popplemann and Schwabe)
 
-// rustc TestNHS.rs --extern core=libcore.rlib
+// rustc TestNHS.rs --extern mcore=libmcore.rlib
 
-extern crate core;
+extern crate mcore;
 
 //use std::str;
 //use std::io;
 
-use core::rand::{RAND, RAND_impl};
-use core::nhs;
+use mcore::rand::{RAND, RAND_impl};
+use mcore::nhs;
 
 fn main() {
     let mut raw: [u8; 100] = [0; 100];

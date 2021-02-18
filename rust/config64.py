@@ -38,10 +38,10 @@ def rsaset(tb,nb,base,ml) :
     chosen.append(tb)
     cptr=cptr+1
 
-    fpath="core"+slashtext+"src"+slashtext+tb+slashtext
-    os.system("mkdir core"+slashtext+"src"+slashtext+tb)
+    fpath="mcore"+slashtext+"src"+slashtext+tb+slashtext
+    os.system("mkdir mcore"+slashtext+"src"+slashtext+tb)
 
-    with open("core"+slashtext+"src"+slashtext+"lib.rs","a") as libfile:
+    with open("mcore"+slashtext+"src"+slashtext+"lib.rs","a") as libfile:
         libfile.write("pub mod "+tb+";\n")
 
     os.system(copytext+"modrsa.rs "+fpath+"mod.rs")
@@ -60,8 +60,6 @@ def rsaset(tb,nb,base,ml) :
 
     replace(fpath+"ff.rs","@ML@",ml)
 
-    #os.system("go install core"+slashtext+tb)
-
 
 def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     inbt=int(nbt)
@@ -75,10 +73,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     chosen.append(tc)
     cptr=cptr+1
 
-    fpath="core"+slashtext+"src"+slashtext+tc+slashtext
-    os.system("mkdir core"+slashtext+"src"+slashtext+tc)
+    fpath="mcore"+slashtext+"src"+slashtext+tc+slashtext
+    os.system("mkdir mcore"+slashtext+"src"+slashtext+tc)
 
-    with open("core"+slashtext+"src"+slashtext+"lib.rs","a") as libfile:
+    with open("mcore"+slashtext+"src"+slashtext+"lib.rs","a") as libfile:
         libfile.write("pub mod "+tc+";\n")
 
 
@@ -276,18 +274,18 @@ if __name__ == '__main__':
     chosen=[]
     cptr=0
 
-    os.system("cargo new core")
-    #os.system("mkdir core"+slashtext+"src")
-    os.system(copytext+ "hash*.rs core"+slashtext+"src"+slashtext+".")
-    os.system(copytext+ "hmac.rs core"+slashtext+"src"+slashtext+".")
-    os.system(copytext+ "sha3.rs core"+slashtext+"src"+slashtext+".")
-    os.system(copytext+ "rand.rs core"+slashtext+"src"+slashtext+".")
-    os.system(copytext+ "share.rs core"+slashtext+"src"+slashtext+".")
-    os.system(copytext+ "aes.rs core"+slashtext+"src"+slashtext+".")
-    os.system(copytext+ "gcm.rs core"+slashtext+"src"+slashtext+".")
-    os.system(copytext+ "nhs.rs core"+slashtext+"src"+slashtext+".")
-    os.system(copytext+ "arch64.rs core"+slashtext+"src"+slashtext+"arch.rs")
-    os.system(copytext+ "lib.rs core"+slashtext+"src"+slashtext+"lib.rs")
+    os.system("cargo new mcore")
+    #os.system("mkdir mcore"+slashtext+"src")
+    os.system(copytext+ "hash*.rs mcore"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "hmac.rs mcore"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "sha3.rs mcore"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "rand.rs mcore"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "share.rs mcore"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "aes.rs mcore"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "gcm.rs mcore"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "nhs.rs mcore"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "arch64.rs mcore"+slashtext+"src"+slashtext+"arch.rs")
+    os.system(copytext+ "lib.rs mcore"+slashtext+"src"+slashtext+"lib.rs")
 
 
     print("Elliptic Curves")
@@ -540,11 +538,11 @@ if __name__ == '__main__':
             rsaset("rsa4096","64","60","8")
             rsa_selected=True
 
-    os.system("cargo rustc  --manifest-path core"+slashtext+"Cargo.toml --release  --lib")
-    #os.system("cargo rustc  --manifest-path core"+slashtext+"Cargo.toml --release  --lib -- -C opt-level=s")
+    os.system("cargo rustc  --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib")
+    #os.system("cargo rustc  --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib -- -C opt-level=s")
 
     #-- --cfg D64
-    #os.system("cargo rustc --target wasm64-unknown-emscripten --manifest-path core"+slashtext+"Cargo.toml --release --lib")
+    #os.system("cargo rustc --target wasm64-unknown-emscripten --manifest-path mcore"+slashtext+"Cargo.toml --release --lib")
     # maybe wasm64 will exist some day...!
 
     os.system(deltext+" hash*.rs")
@@ -574,12 +572,12 @@ if __name__ == '__main__':
     os.system(deltext+" rom*.rs")
 
     if testing :
-        os.system(copytext+" core"+slashtext+"target"+slashtext+"release"+slashtext+"libcore.rlib .")
-        os.system("rustc TestECC.rs --extern core=libcore.rlib")
-        os.system("rustc TestMPIN.rs --extern core=libcore.rlib")
-        os.system("rustc TestBLS.rs --extern core=libcore.rlib")
-        os.system("rustc BenchtestALL.rs --extern core=libcore.rlib")
-        os.system("rustc TestNHS.rs --extern core=libcore.rlib")
+        os.system(copytext+" mcore"+slashtext+"target"+slashtext+"release"+slashtext+"libmcore.rlib .")
+        os.system("rustc TestECC.rs --extern mcore=libmcore.rlib")
+        os.system("rustc TestMPIN.rs --extern mcore=libmcore.rlib")
+        os.system("rustc TestBLS.rs --extern mcore=libmcore.rlib")
+        os.system("rustc BenchtestALL.rs --extern mcore=libmcore.rlib")
+        os.system("rustc TestNHS.rs --extern mcore=libmcore.rlib")
         if sys.platform.startswith("win") :
             os.system("TestECC")
             os.system("TestMPIN < pins.txt")

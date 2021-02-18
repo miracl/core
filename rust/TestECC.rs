@@ -19,12 +19,12 @@
 
 /* test driver and function exerciser for ECDH/ECIES/ECDSA API Functions */
 
-extern crate core;
+extern crate mcore;
 
 use std::str;
 
-use core::rand::{RAND, RAND_impl};
-use core::hmac;
+use mcore::rand::{RAND, RAND_impl};
+use mcore::hmac;
 
 pub fn printbinary(array: &[u8]) {
     for i in 0..array.len() {
@@ -34,9 +34,9 @@ pub fn printbinary(array: &[u8]) {
 }
 
 fn ecdh_ed25519(rng: &mut impl RAND) {
-    //use core::ed25519;
-    use core::ed25519::ecdh;
-    use core::ed25519::ecp;
+    //use mcore::ed25519;
+    use mcore::ed25519::ecdh;
+    use mcore::ed25519::ecp;
 
     let pw = "M0ng00se";
     let pp: &[u8] = b"M0ng00se";
@@ -186,9 +186,9 @@ fn ecdh_ed25519(rng: &mut impl RAND) {
 }
 
 fn ecdh_nist256(rng: &mut impl RAND) {
-    //use core::nist256;
-    use core::nist256::ecdh;
-    use core::nist256::ecp;
+    //use mcore::nist256;
+    use mcore::nist256::ecdh;
+    use mcore::nist256::ecp;
 
     let pw = "M0ng00se";
     let pp: &[u8] = b"M0ng00se";
@@ -338,9 +338,9 @@ fn ecdh_nist256(rng: &mut impl RAND) {
 }
 
 fn ecdh_goldilocks(rng: &mut impl RAND) {
-    //use core::goldilocks;
-    use core::goldilocks::ecdh;
-    use core::goldilocks::ecp;
+    //use mcore::goldilocks;
+    use mcore::goldilocks::ecdh;
+    use mcore::goldilocks::ecp;
 
 
     let pw = "M0ng00se";
@@ -491,9 +491,9 @@ fn ecdh_goldilocks(rng: &mut impl RAND) {
 }
 
 fn rsa_2048(rng: &mut impl RAND) {
-    //use core::rsa2048;
-    use core::rsa2048::ff;
-    use core::rsa2048::rsa;
+    //use mcore::rsa2048;
+    use mcore::rsa2048::ff;
+    use mcore::rsa2048::rsa;
 
     let sha = rsa::HASH_TYPE;
     let message: &[u8] = b"Hello World\n";

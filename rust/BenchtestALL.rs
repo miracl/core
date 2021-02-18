@@ -17,13 +17,13 @@
  * limitations under the License.
  */
 #![allow(non_snake_case)]
-extern crate core;
+extern crate mcore;
 
 //use std::str;
 //use std::io;
 
-use core::arch;
-use core::rand::{RAND, RAND_impl};
+use mcore::arch;
+use mcore::rand::{RAND, RAND_impl};
 
 use std::time::Instant;
 
@@ -31,11 +31,11 @@ const MIN_ITERS: isize = 10;
 const MIN_TIME: isize = 10;
 
 fn ed25519(rng: &mut impl RAND) {
-    //use core::ed25519;
-    use core::ed25519::big;
-    use core::ed25519::ecp;
-    use core::ed25519::fp;
-    use core::ed25519::rom;
+    //use mcore::ed25519;
+    use mcore::ed25519::big;
+    use mcore::ed25519::ecp;
+    use mcore::ed25519::fp;
+    use mcore::ed25519::rom;
     let mut fail = false;
 
     println!("\nTesting/Timing ed25519 ECC");
@@ -104,11 +104,11 @@ fn ed25519(rng: &mut impl RAND) {
 }
 
 fn nist256(rng: &mut impl RAND) {
-    //use core::nist256;
-    use core::nist256::big;
-    use core::nist256::ecp;
-    use core::nist256::fp;
-    use core::nist256::rom;
+    //use mcore::nist256;
+    use mcore::nist256::big;
+    use mcore::nist256::ecp;
+    use mcore::nist256::fp;
+    use mcore::nist256::rom;
     let mut fail = false;
     println!("\nTesting/Timing nist256 ECC");
 
@@ -176,11 +176,11 @@ fn nist256(rng: &mut impl RAND) {
 }
 
 fn goldilocks(rng: &mut impl RAND) {
-    //use core::goldilocks;
-    use core::goldilocks::big;
-    use core::goldilocks::ecp;
-    use core::goldilocks::fp;
-    use core::goldilocks::rom;
+    //use mcore::goldilocks;
+    use mcore::goldilocks::big;
+    use mcore::goldilocks::ecp;
+    use mcore::goldilocks::fp;
+    use mcore::goldilocks::rom;
     let mut fail = false;
     println!("\nTesting/Timing goldilocks ECC");
 
@@ -248,14 +248,14 @@ fn goldilocks(rng: &mut impl RAND) {
 }
 
 fn bn254(rng: &mut impl RAND) {
-    //use core::bn254;
-    use core::bn254::big;
-    use core::bn254::ecp;
-    use core::bn254::ecp2;
-    use core::bn254::fp;
-    use core::bn254::fp2;
-    use core::bn254::pair;
-    use core::bn254::rom;
+    //use mcore::bn254;
+    use mcore::bn254::big;
+    use mcore::bn254::ecp;
+    use mcore::bn254::ecp2;
+    use mcore::bn254::fp;
+    use mcore::bn254::fp2;
+    use mcore::bn254::pair;
+    use mcore::bn254::rom;
     let mut fail = false;
     println!("\nTesting/Timing bn254 Pairings");
 
@@ -444,14 +444,14 @@ fn bn254(rng: &mut impl RAND) {
 }
 
 fn bls12383(rng: &mut impl RAND) {
-    //use core::bls12383;
-    use core::bls12383::big;
-    use core::bls12383::ecp;
-    use core::bls12383::ecp2;
-    use core::bls12383::fp;
-    use core::bls12383::fp2;
-    use core::bls12383::pair;
-    use core::bls12383::rom;
+    //use mcore::bls12383;
+    use mcore::bls12383::big;
+    use mcore::bls12383::ecp;
+    use mcore::bls12383::ecp2;
+    use mcore::bls12383::fp;
+    use mcore::bls12383::fp2;
+    use mcore::bls12383::pair;
+    use mcore::bls12383::rom;
 
     let mut fail = false;
     println!("\nTesting/Timing bls12383 Pairings");
@@ -659,14 +659,14 @@ fn bls12383(rng: &mut impl RAND) {
 }
 
 fn bls24479(rng: &mut impl RAND) {
-    //use core::bls24479;
-    use core::bls24479::big;
-    use core::bls24479::ecp;
-    use core::bls24479::ecp4;
-    use core::bls24479::fp;
-    use core::bls24479::fp4;
-    use core::bls24479::pair4;
-    use core::bls24479::rom;
+    //use mcore::bls24479;
+    use mcore::bls24479::big;
+    use mcore::bls24479::ecp;
+    use mcore::bls24479::ecp4;
+    use mcore::bls24479::fp;
+    use mcore::bls24479::fp4;
+    use mcore::bls24479::pair4;
+    use mcore::bls24479::rom;
     let mut fail = false;
     println!("\nTesting/Timing bls24479 Pairings");
 
@@ -841,14 +841,14 @@ fn bls24479(rng: &mut impl RAND) {
 }
 
 fn bls48556(rng: &mut impl RAND) {
-    //use core::bls48556;
-    use core::bls48556::big;
-    use core::bls48556::ecp;
-    use core::bls48556::ecp8;
-    use core::bls48556::fp;
-    use core::bls48556::fp8;
-    use core::bls48556::pair8;
-    use core::bls48556::rom;
+    //use mcore::bls48556;
+    use mcore::bls48556::big;
+    use mcore::bls48556::ecp;
+    use mcore::bls48556::ecp8;
+    use mcore::bls48556::fp;
+    use mcore::bls48556::fp8;
+    use mcore::bls48556::pair8;
+    use mcore::bls48556::rom;
     let mut fail = false;
     println!("\nTesting/Timing bls48556 Pairings");
 
@@ -1023,8 +1023,8 @@ fn bls48556(rng: &mut impl RAND) {
 }
 
 fn rsa2048(rng: &mut impl RAND) {
-    use core::rsa2048::ff;
-    use core::rsa2048::rsa;
+    use mcore::rsa2048::ff;
+    use mcore::rsa2048::rsa;
     let mut pbc = rsa::new_public_key(ff::FFLEN);
     let mut prv = rsa::new_private_key(ff::HFLEN);
     let mut c: [u8; rsa::RFS] = [0; rsa::RFS];

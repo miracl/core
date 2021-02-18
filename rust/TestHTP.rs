@@ -20,19 +20,19 @@
 /* Run through some test vectors for hash-to-curve draft standard */
 
 #![allow(non_snake_case)]
-extern crate core;
-use core::hmac;
+extern crate mcore;
+use mcore::hmac;
 
 fn ceil(a: usize,b: usize) -> usize {
     (a-1)/b+1
 }
 
-fn hash_to_field_ed25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::ed25519::fp::FP;2] {
+fn hash_to_field_ed25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [mcore::ed25519::fp::FP;2] {
 
-    use core::ed25519::big::BIG;
-    use core::ed25519::dbig::DBIG;
-    use core::ed25519::fp::FP;
-    use core::ed25519::rom;
+    use mcore::ed25519::big::BIG;
+    use mcore::ed25519::dbig::DBIG;
+    use mcore::ed25519::fp::FP;
+    use mcore::ed25519::rom;
 
     let mut u: [FP; 2] = [FP::new(),FP::new()];
 
@@ -57,8 +57,8 @@ fn hash_to_field_ed25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usiz
 }
 
 fn htp_ed25519(mess: &str) {
-//    use core::ed25519::ecp;
-    use core::ed25519::ecp::ECP;
+//    use mcore::ed25519::ecp;
+    use mcore::ed25519::ecp::ECP;
     println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_".as_bytes();
@@ -85,11 +85,11 @@ fn htp_ed25519(mess: &str) {
     println!("P= {}",P.tostring());
 }
 
-fn hash_to_field_c25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::c25519::fp::FP;2] {
-    use core::c25519::big::BIG;
-    use core::c25519::dbig::DBIG;
-    use core::c25519::fp::FP;
-    use core::c25519::rom;
+fn hash_to_field_c25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [mcore::c25519::fp::FP;2] {
+    use mcore::c25519::big::BIG;
+    use mcore::c25519::dbig::DBIG;
+    use mcore::c25519::fp::FP;
+    use mcore::c25519::rom;
 
     let mut u: [FP; 2] = [FP::new(),FP::new()];
 
@@ -114,8 +114,8 @@ fn hash_to_field_c25519(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize
 }
 
 fn htp_c25519(mess: &str) {
-//    use core::c25519::ecp;
-    use core::c25519::ecp::ECP;
+//    use mcore::c25519::ecp;
+    use mcore::c25519::ecp::ECP;
     let m = mess.as_bytes();
 
     println!("\nNon-Uniform");
@@ -129,12 +129,12 @@ fn htp_c25519(mess: &str) {
     println!("P= {}",P.tostring());
 }
 
-fn hash_to_field_nist256(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::nist256::fp::FP;2] {
+fn hash_to_field_nist256(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [mcore::nist256::fp::FP;2] {
 
-    use core::nist256::big::BIG;
-    use core::nist256::dbig::DBIG;
-    use core::nist256::fp::FP;
-    use core::nist256::rom;
+    use mcore::nist256::big::BIG;
+    use mcore::nist256::dbig::DBIG;
+    use mcore::nist256::fp::FP;
+    use mcore::nist256::rom;
 
     let mut u: [FP; 2] = [FP::new(),FP::new()];
 
@@ -159,8 +159,8 @@ fn hash_to_field_nist256(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usiz
 }
 
 fn htp_nist256(mess: &str) {
-    use core::nist256::ecp;
-    use core::nist256::ecp::ECP;
+    use mcore::nist256::ecp;
+    use mcore::nist256::ecp::ECP;
     println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-P256_XMD:SHA-256_SSWU_RO_".as_bytes();
@@ -187,12 +187,12 @@ fn htp_nist256(mess: &str) {
     println!("P= {}",P.tostring());
 }
 
-fn hash_to_field_goldilocks(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::goldilocks::fp::FP;2] {
+fn hash_to_field_goldilocks(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [mcore::goldilocks::fp::FP;2] {
 
-    use core::goldilocks::big::BIG;
-    use core::goldilocks::dbig::DBIG;
-    use core::goldilocks::fp::FP;
-    use core::goldilocks::rom;
+    use mcore::goldilocks::big::BIG;
+    use mcore::goldilocks::dbig::DBIG;
+    use mcore::goldilocks::fp::FP;
+    use mcore::goldilocks::rom;
 
     let mut u: [FP; 2] = [FP::new(),FP::new()];
 
@@ -217,8 +217,8 @@ fn hash_to_field_goldilocks(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: u
 }
 
 fn htp_goldilocks(mess: &str) {
-    use core::goldilocks::ecp;
-    use core::goldilocks::ecp::ECP;
+    use mcore::goldilocks::ecp;
+    use mcore::goldilocks::ecp::ECP;
     println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_".as_bytes();
@@ -245,12 +245,12 @@ fn htp_goldilocks(mess: &str) {
     println!("P= {}",P.tostring());
 }
 
-fn hash_to_field_secp256k1(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::secp256k1::fp::FP;2] {
+fn hash_to_field_secp256k1(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [mcore::secp256k1::fp::FP;2] {
 
-    use core::secp256k1::big::BIG;
-    use core::secp256k1::dbig::DBIG;
-    use core::secp256k1::fp::FP;
-    use core::secp256k1::rom;
+    use mcore::secp256k1::big::BIG;
+    use mcore::secp256k1::dbig::DBIG;
+    use mcore::secp256k1::fp::FP;
+    use mcore::secp256k1::rom;
 
     let mut u: [FP; 2] = [FP::new(),FP::new()];
 
@@ -275,8 +275,8 @@ fn hash_to_field_secp256k1(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: us
 }
 
 fn htp_secp256k1(mess: &str) {
-    use core::secp256k1::ecp;
-    use core::secp256k1::ecp::ECP;
+    use mcore::secp256k1::ecp;
+    use mcore::secp256k1::ecp::ECP;
     println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-secp256k1_XMD:SHA-256_SSWU_RO_".as_bytes();
@@ -303,12 +303,12 @@ fn htp_secp256k1(mess: &str) {
     println!("P= {}",P.tostring());
 }
 
-fn hash_to_field_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::bls12381::fp::FP;2] {
+fn hash_to_field_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [mcore::bls12381::fp::FP;2] {
 
-    use core::bls12381::big::BIG;
-    use core::bls12381::dbig::DBIG;
-    use core::bls12381::fp::FP;
-    use core::bls12381::rom;
+    use mcore::bls12381::big::BIG;
+    use mcore::bls12381::dbig::DBIG;
+    use mcore::bls12381::fp::FP;
+    use mcore::bls12381::rom;
 
     let mut u: [FP; 2] = [FP::new(),FP::new()];
 
@@ -333,8 +333,8 @@ fn hash_to_field_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usi
 }
 
 fn htp_bls12381(mess: &str) {
-    use core::bls12381::ecp;
-    use core::bls12381::ecp::ECP;
+    use mcore::bls12381::ecp;
+    use mcore::bls12381::ecp::ECP;
     println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-BLS12381G1_XMD:SHA-256_SSWU_RO_".as_bytes();
@@ -361,13 +361,13 @@ fn htp_bls12381(mess: &str) {
     println!("P= {}",P.tostring());
 }
 
-fn hash_to_field2_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [core::bls12381::fp2::FP2;2] {
+fn hash_to_field2_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [mcore::bls12381::fp2::FP2;2] {
 
-    use core::bls12381::big::BIG;
-    use core::bls12381::dbig::DBIG;
-    use core::bls12381::fp::FP;
-    use core::bls12381::fp2::FP2;
-    use core::bls12381::rom;
+    use mcore::bls12381::big::BIG;
+    use mcore::bls12381::dbig::DBIG;
+    use mcore::bls12381::fp::FP;
+    use mcore::bls12381::fp2::FP2;
+    use mcore::bls12381::rom;
 
     let mut u: [FP2; 2] = [FP2::new(),FP2::new()];
 
@@ -398,8 +398,8 @@ fn hash_to_field2_bls12381(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: us
 }
 
 fn htp2_bls12381(mess: &str) {
-    use core::bls12381::ecp;
-    use core::bls12381::ecp2::ECP2;
+    use mcore::bls12381::ecp;
+    use mcore::bls12381::ecp2::ECP2;
     println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-BLS12381G2_XMD:SHA-256_SSWU_RO_".as_bytes();

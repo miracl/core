@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-extern crate core;
-use core::gcm;
+extern crate mcore;
+use mcore::gcm;
 
 fn decode_hex(s: &str) -> Vec<u8> {
     let mut x: Vec<u8> = Vec::new();
@@ -46,10 +46,10 @@ fn printbinary(array: &[u8]) {
 
 #[allow(non_snake_case)]
 fn hpke_c25519() {
-    //use core::ed25519;
-    use core::c25519::hpke;
-    use core::c25519::ecdh;
-    use core::c25519::ecp;
+    //use mcore::ed25519;
+    use mcore::c25519::hpke;
+    use mcore::c25519::ecdh;
+    use mcore::c25519::ecp;
 
     const EGS: usize = ecdh::EGS;
     const EFS: usize = ecdh::EFS;
@@ -183,10 +183,10 @@ fn hpke_c25519() {
 
 #[allow(non_snake_case)]
 fn hpke_nist521() {
-    //use core::ed25519;
-    use core::nist521::hpke;
-    use core::nist521::ecdh;
-    use core::nist521::ecp;
+    //use mcore::ed25519;
+    use mcore::nist521::hpke;
+    use mcore::nist521::ecdh;
+    use mcore::nist521::ecp;
 
     const EGS: usize = ecdh::EGS;
     const EFS: usize = ecdh::EFS;
