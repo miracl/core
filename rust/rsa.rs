@@ -60,6 +60,14 @@ pub fn new_public_key(m: usize) -> RsaPublicKey {
     }
 }
 
+pub fn set_public_key(pk: &mut RsaPublicKey,e: isize, f: &[u8]) {
+    pk.e=e;
+    let m = pk.n.getlen();
+    let mut r = FF::new_int(m);
+    FF::frombytes(&mut r, f);
+    pk.n.copy(&r);
+}
+
 pub fn key_pair(rng: &mut impl RAND, e: isize, prv: &mut RsaPrivateKey, pbc: &mut RsaPublicKey) {
     /* IEEE1363 A16.11/A16.12 more or less */
     let n = pbc.n.getlen() / 2;

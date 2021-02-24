@@ -255,7 +255,7 @@ int main()
         if (st.hash == X509_H256) sha = SHA256;
         if (st.hash == X509_H384) sha = SHA384;
         if (st.hash == X509_H512) sha = SHA512;
-        if (st.hash == 0)
+        if (sha == 0)
         {
             printf("Hash Function not supported\n");
             return 0;
@@ -285,7 +285,7 @@ int main()
         if (st.hash == X509_H256) sha = SHA256;
         if (st.hash == X509_H384) sha = SHA384;
         if (st.hash == X509_H512) sha = SHA512;
-        if (st.hash == 0)
+        if (sha == 0)
         {
             printf("Hash Function not supported\n");
             return 0;
@@ -396,7 +396,7 @@ int main()
         if (st.hash == X509_H256) sha = SHA256;
         if (st.hash == X509_H384) sha = SHA384;
         if (st.hash == X509_H512) sha = SHA512;
-        if (st.hash == 0)
+        if (sha == 0)
         {
             printf("Hash Function not supported\n");
             return 0;
@@ -419,7 +419,7 @@ int main()
         if (st.hash == X509_H256) sha = SHA256;
         if (st.hash == X509_H384) sha = SHA384;
         if (st.hash == X509_H512) sha = SHA512;
-        if (st.hash == 0)
+        if (sha == 0)
         {
             printf("Hash Function not supported\n");
             return 0;

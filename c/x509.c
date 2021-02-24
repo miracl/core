@@ -165,7 +165,7 @@ static int getalen(int tag, char *b, int j)
 static int skip(int len)
 {
     if (len < 128) return 2;
-    if (len >= 128 && len < 256) return 3;
+    if (len < 256) return 3;
     return 4;
 }
 
@@ -397,7 +397,7 @@ pktype X509_extract_public_key(octet *c, octet *key)
 
     if (len + j != c->len) return ret;
 
-    len = getalen(0, c->val, j);
+    len = getalen(ANY, c->val, j);
     if (len < 0) return ret;
     j += skip(len) + len; //jump over version clause
 
@@ -539,7 +539,7 @@ int X509_find_issuer(octet *c)
 
     if (len + j != c->len) return 0;
 
-    len = getalen(0, c->val, j);
+    len = getalen(ANY, c->val, j);
     if (len < 0) return 0;
     j += skip(len) + len; //jump over version clause
 
