@@ -30,6 +30,8 @@
 #include "arch.h"
 #include "core.h"
 
+using namespace core;
+
 /* this is fixed */
 #define NB 4
 

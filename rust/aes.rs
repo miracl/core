@@ -174,7 +174,7 @@ const RTABLE: [u32; 256] = [
 ];
 
 pub struct AES {
-    nk: usize,
+//    nk: usize,
     nr: usize,
     mode: usize,
     fkey: [u32; 60],
@@ -274,7 +274,7 @@ impl AES {
 
     pub fn new() -> AES {
         AES {
-            nk: 0,
+//            nk: 0,
             nr: 0,
             mode: 0,
             fkey: [0; 60],
@@ -308,7 +308,7 @@ impl AES {
             return false;
         }
         let nr = 6 + nk;
-        self.nk = nk;
+        //self.nk = nk;
         self.nr = nr;
         self.reset(m, iv);
         let n = 4 * (nr + 1);
@@ -736,19 +736,19 @@ impl AES {
 }
 
 /* AES encryption/decryption. Encrypt byte array m using key k and returns ciphertext c */
-pub fn cbc_iv0_encrypt(k: &[u8], m: &[u8]) -> Vec<u8> {
+pub fn cbc_iv0_encrypt(k: &[u8], m: &[u8],c: &mut [u8]) -> usize {
     /* AES CBC encryption, with Null IV and key K */
     /* Input is from an octet string m, output is to an octet string c */
     /* Input is padded as necessary to make up a full final block */
     let mut a = AES::new();
     let mut fin = false;
-    let mut c: Vec<u8> = Vec::new();
 
     let mut buff: [u8; 16] = [0; 16];
 
     a.init(CBC, k.len(), k, None);
 
     let mut ipt = 0;
+    let mut opt = 0;
     let mut i;
     loop {
         i = 0;
@@ -767,7 +767,9 @@ pub fn cbc_iv0_encrypt(k: &[u8], m: &[u8]) -> Vec<u8> {
         }
         a.encrypt(&mut buff);
         for j in 0..16 {
-            c.push(buff[j]);
+            if opt < c.len() {
+                c[opt]=buff[j]; opt+=1;
+            }
         }
     }
 
@@ -781,28 +783,30 @@ pub fn cbc_iv0_encrypt(k: &[u8], m: &[u8]) -> Vec<u8> {
     a.encrypt(&mut buff);
 
     for j in 0..16 {
-        c.push(buff[j]);
+        if opt<c.len() {
+            c[opt]=buff[j]; opt+=1;
+        }
     }
     a.end();
-    c
+    opt
 }
 
 /* returns plaintext if all consistent, else returns null string */
-pub fn cbc_iv0_decrypt(k: &[u8], c: &[u8]) -> Option<Vec<u8>> {
+pub fn cbc_iv0_decrypt(k: &[u8], c: &[u8], m: &mut [u8]) -> usize {
     /* padding is removed */
     let mut a = AES::new();
     let mut fin = false;
-    let mut m: Vec<u8> = Vec::new();
 
     let mut buff: [u8; 16] = [0; 16];
 
     a.init(CBC, k.len(), k, None);
 
     let mut ipt = 0;
+    let mut opt = 0;
     let mut i;
 
     if c.is_empty() {
-        return None;
+        return 0;
     }
     let mut ch = c[ipt];
     ipt += 1;
@@ -825,7 +829,9 @@ pub fn cbc_iv0_decrypt(k: &[u8], c: &[u8]) -> Option<Vec<u8>> {
             break;
         }
         for j in 0..16 {
-            m.push(buff[j]);
+            if opt<m.len() {
+                m[opt]=buff[j]; opt+=1;
+            }
         }
     }
 
@@ -845,14 +851,16 @@ pub fn cbc_iv0_decrypt(k: &[u8], c: &[u8]) -> Option<Vec<u8>> {
 
     if !bad {
         for i in 0..16 - padlen {
-            m.push(buff[i]);
+            if opt<m.len() {
+                m[opt]=buff[i]; opt+=1;
+            }
         }
     }
 
     if bad {
-        None
+        0
     } else {
-        Some(m)
+        opt
     }
 }
 

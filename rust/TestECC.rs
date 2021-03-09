@@ -54,7 +54,8 @@ fn ecdh_ed25519(rng: &mut impl RAND) {
     let mut key: [u8; EAS] = [0; EAS];
     let mut cs: [u8; EGS] = [0; EGS];
     let mut ds: [u8; EGS] = [0; EGS];
-    let mut m: Vec<u8> = vec![0; 32]; // array that could be of any length. So use heap.
+    let mut m: [u8; 32] = [0; 32]; 
+    let mut c: [u8; 64] = [0; 64]; 
     let mut p1: [u8; 3] = [0; 3];
     let mut p2: [u8; 4] = [0; 4];
     let mut v: [u8; 2 * EFS + 1] = [0; 2 * EFS + 1];
@@ -139,22 +140,22 @@ fn ecdh_ed25519(rng: &mut impl RAND) {
         p2[2] = 0x2;
         p2[3] = 0x3;
 
-        let cc = ecdh::ecies_encrypt(sha, &p1, &p2, rng, &w1, &m[0..17], &mut v, &mut t);
+        let clen = ecdh::ecies_encrypt(sha, &p1, &p2, rng, &w1, &m[0..17], &mut v, &mut c, &mut t);
 
-        if let Some(mut c) = cc {
+        if clen!=0 {
             println!("Ciphertext= ");
             print!("V= 0x");
             printbinary(&v);
             print!("C= 0x");
-            printbinary(&c);
+            printbinary(&c[0..clen]);
             print!("T= 0x");
             printbinary(&t);
 
-            let mm = ecdh::ecies_decrypt(sha, &p1, &p2, &v, &mut c, &t, &s1);
-            if let Some(rm) = mm {
+            let mlen = ecdh::ecies_decrypt(sha, &p1, &p2, &v, &mut c, clen, &t, &s1, &mut m);
+            if mlen!=0 {
                 println!("Decryption succeeded");
                 print!("Message is 0x");
-                printbinary(&rm);
+                printbinary(&m[0..mlen]);
             } else {
                 println!("*** ECIES Decryption Failed");
                 return;
@@ -206,7 +207,8 @@ fn ecdh_nist256(rng: &mut impl RAND) {
     let mut key: [u8; EAS] = [0; EAS];
     let mut cs: [u8; EGS] = [0; EGS];
     let mut ds: [u8; EGS] = [0; EGS];
-    let mut m: Vec<u8> = vec![0; 32]; // array that could be of any length. So use heap.
+    let mut m: [u8; 32] = [0; 32]; 
+    let mut c: [u8; 64] = [0; 64]; 
     let mut p1: [u8; 3] = [0; 3];
     let mut p2: [u8; 4] = [0; 4];
     let mut v: [u8; 2 * EFS + 1] = [0; 2 * EFS + 1];
@@ -291,22 +293,22 @@ fn ecdh_nist256(rng: &mut impl RAND) {
         p2[2] = 0x2;
         p2[3] = 0x3;
 
-        let cc = ecdh::ecies_encrypt(sha, &p1, &p2, rng, &w1, &m[0..17], &mut v, &mut t);
+        let clen = ecdh::ecies_encrypt(sha, &p1, &p2, rng, &w1, &m[0..17], &mut v, &mut c,&mut t);
 
-        if let Some(mut c) = cc {
+        if clen!=0 {
             println!("Ciphertext= ");
             print!("V= 0x");
             printbinary(&v);
             print!("C= 0x");
-            printbinary(&c);
+            printbinary(&c[0..clen]);
             print!("T= 0x");
             printbinary(&t);
 
-            let mm = ecdh::ecies_decrypt(sha, &p1, &p2, &v, &mut c, &t, &s1);
-            if let Some(rm) = mm {
+            let mlen = ecdh::ecies_decrypt(sha, &p1, &p2, &v, &mut c, clen, &t, &s1, &mut m);
+            if mlen!=0 {
                 println!("Decryption succeeded");
                 print!("Message is 0x");
-                printbinary(&rm);
+                printbinary(&m[0..mlen]);
             } else {
                 println!("*** ECIES Decryption Failed");
                 return;
@@ -359,7 +361,8 @@ fn ecdh_goldilocks(rng: &mut impl RAND) {
     let mut key: [u8; EAS] = [0; EAS];
     let mut cs: [u8; EGS] = [0; EGS];
     let mut ds: [u8; EGS] = [0; EGS];
-    let mut m: Vec<u8> = vec![0; 32]; // array that could be of any length. So use heap.
+    let mut m: [u8; 32] = [0; 32]; 
+    let mut c: [u8; 64] = [0; 64]; 
     let mut p1: [u8; 3] = [0; 3];
     let mut p2: [u8; 4] = [0; 4];
     let mut v: [u8; 2 * EFS + 1] = [0; 2 * EFS + 1];
@@ -444,22 +447,22 @@ fn ecdh_goldilocks(rng: &mut impl RAND) {
         p2[2] = 0x2;
         p2[3] = 0x3;
 
-        let cc = ecdh::ecies_encrypt(sha, &p1, &p2, rng, &w1, &m[0..17], &mut v, &mut t);
+        let clen = ecdh::ecies_encrypt(sha, &p1, &p2, rng, &w1, &m[0..17], &mut v, &mut c,&mut t);
 
-        if let Some(mut c) = cc {
+        if clen!=0 {
             println!("Ciphertext= ");
             print!("V= 0x");
             printbinary(&v);
             print!("C= 0x");
-            printbinary(&c);
+            printbinary(&c[0..clen]);
             print!("T= 0x");
             printbinary(&t);
 
-            let mm = ecdh::ecies_decrypt(sha, &p1, &p2, &v, &mut c, &t, &s1);
-            if let Some(rm) = mm {
+            let mlen = ecdh::ecies_decrypt(sha, &p1, &p2, &v, &mut c, clen, &t, &s1, &mut m);
+            if mlen!=0 {
                 println!("Decryption succeeded");
                 print!("Message is 0x");
-                printbinary(&rm);
+                printbinary(&m[0..mlen]);
             } else {
                 println!("*** ECIES Decryption Failed");
                 return;
@@ -491,16 +494,13 @@ fn ecdh_goldilocks(rng: &mut impl RAND) {
 }
 
 fn rsa_2048(rng: &mut impl RAND) {
-    //use mcore::rsa2048;
-    use mcore::rsa2048::ff;
     use mcore::rsa2048::rsa;
-
     let sha = rsa::HASH_TYPE;
     let message: &[u8] = b"Hello World\n";
     const RFS: usize = rsa::RFS;
 
-    let mut pbc = rsa::new_public_key(ff::FFLEN);
-    let mut prv = rsa::new_private_key(ff::HFLEN);
+    let mut pbc = rsa::new_public_key();
+    let mut prv = rsa::new_private_key();
 
     let mut ml: [u8; RFS] = [0; RFS];
     let mut ms: [u8; RFS] = [0; RFS];
@@ -560,7 +560,6 @@ fn rsa_2048(rng: &mut impl RAND) {
     } else {
         println!("Signature is INVALID");
     }
-
     rsa::private_key_kill(&mut prv);
 }
 

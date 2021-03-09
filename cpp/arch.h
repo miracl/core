@@ -39,28 +39,32 @@ namespace core {
 
 /*** START OF USER CONFIGURABLE SECTION - set architecture ***/
 
-#define CHUNK @WL@      /**< size of chunk in bits = wordlength of computer = 16, 32 or 64. Note not all curve options are supported on 16-bit processors - see rom.c */
+#define CHUNK @WL@      /**< size of chunk in bits = wordlength of computer = 16, 32 or 64. Note not all curve options are supported on 16-bit processors */
 
 /*** END OF USER CONFIGURABLE SECTION ***/
 
 /* Create Integer types */
-/* Support for C99?  Note for GCC need to explicitly include -std=c99 in command line */
 
+//#define byte uint8_t            /**< 8-bit unsigned integer */
+//#define sign8 int8_t            /**< 8-bit signed integer */
+//#define sign16 int16_t          /**< 16-bit signed integer */
+//#define sign32 int32_t          /**< 32-bit signed integer */
+//#define sign64 int64_t          /**< 64-bit signed integer */
+//#define unsign32 uint32_t       /**< 32-bit unsigned integer */
+//#define unsign64 uint64_t       /**< 64-bit unsigned integer */
 
-#define byte uint8_t            /**< 8-bit unsigned integer */
-#define sign8 int8_t            /**< 8-bit signed integer */
-#define sign16 int16_t          /**< 16-bit signed integer */
-#define sign32 int32_t          /**< 32-bit signed integer */
-#define sign64 int64_t          /**< 64-bit signed integer */
-#define unsign32 uint32_t       /**< 32-bit unsigned integer */
-#define unsign64 uint64_t       /**< 64-bit unsigned integer */
+using byte = uint8_t;			/**< 8-bit unsigned integer */
+using sign8 = int8_t;			/**< 8-bit signed integer */
+using sign16 = int16_t;			/**< 16-bit signed integer */
+using sign32 = int32_t;			/**< 32-bit signed integer */
+using sign64 = int64_t;			/**< 64-bit signed integer */
+using unsign32 = uint32_t;		/**< 32-bit unsigned integer */
+using unsign64 = uint64_t;		/**< 64-bit unsigned integer */
 
-#define uchar unsigned char  /**<  Unsigned char */
+//#define uchar unsigned char  /**<  Unsigned char */
+using uchar = unsigned char;
 
 /* Don't mess with anything below this line unless you know what you are doing */
-/* This next is probably OK, but may need changing for non-C99-standard environments */
-
-/* This next is probably OK, but may need changing for non-C99-standard environments */
 
 #if CHUNK==16
 
@@ -79,12 +83,6 @@ namespace core {
 #if CHUNK == 64
 
 #define chunk int64_t       /**< C type corresponding to word length */
-//    #ifdef __GNUC__
-//       #define dchunk __int128        /**< Always define double length chunk type if available - GCC supports 128 bit type  ??? */
-//    #endif
-
-//    #ifdef __clang__
-//       #define dchunk __int128
 #if defined(__SIZEOF_INT128__) && __SIZEOF_INT128__ == 16
 #define dchunk __int128
 #endif

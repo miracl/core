@@ -1023,10 +1023,9 @@ fn bls48556(rng: &mut impl RAND) {
 }
 
 fn rsa2048(rng: &mut impl RAND) {
-    use mcore::rsa2048::ff;
     use mcore::rsa2048::rsa;
-    let mut pbc = rsa::new_public_key(ff::FFLEN);
-    let mut prv = rsa::new_private_key(ff::HFLEN);
+    let mut pbc = rsa::new_public_key();
+    let mut prv = rsa::new_private_key();
     let mut c: [u8; rsa::RFS] = [0; rsa::RFS];
     let mut m: [u8; rsa::RFS] = [0; rsa::RFS];
     let mut p: [u8; rsa::RFS] = [0; rsa::RFS];

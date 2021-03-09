@@ -269,6 +269,7 @@ pub fn ecpvp_dsa(sha: usize, w: &[u8], f: &[u8], c: &[u8], d: &[u8]) -> isize {
 }
 
 /* IEEE1363 ECIES encryption. Encryption of plaintext M uses public key W and produces ciphertext V,C,T */
+// returns length of ciphertext
 #[allow(non_snake_case)]
 pub fn ecies_encrypt(
     sha: usize,
@@ -278,8 +279,9 @@ pub fn ecies_encrypt(
     w: &[u8],
     m: &[u8],
     v: &mut [u8],
+    c: &mut [u8],
     t: &mut [u8],
-) -> Option<Vec<u8>> {
+) -> usize {
     let mut z: [u8; EFS] = [0; EFS];
     let mut k1: [u8; ecp::AESKEY] = [0; ecp::AESKEY];
     let mut k2: [u8; ecp::AESKEY] = [0; ecp::AESKEY];
@@ -288,10 +290,10 @@ pub fn ecies_encrypt(
     let mut k: [u8; 2 * ecp::AESKEY] = [0; 2 * ecp::AESKEY];
 
     if key_pair_generate(Some(rng), &mut u, v) != 0 {
-        return None;
+        return 0;
     }
     if ecpsvdp_dh(&u, &w, &mut z, 0) != 0 {
-        return None;
+        return 0;
     }
 
     for i in 0..2 * EFS + 1 {
@@ -308,27 +310,24 @@ pub fn ecies_encrypt(
         k2[i] = k[ecp::AESKEY + i]
     }
 
-    let mut c = aes::cbc_iv0_encrypt(&k1, m);
+    let clen = aes::cbc_iv0_encrypt(&k1, m, c);
 
     let mut l2: [u8; 8] = [0; 8];
     let p2l = p2.len();
 
     hmac::inttobytes(p2l, &mut l2);
 
+    let mut opt=clen;
     for i in 0..p2l {
-        c.push(p2[i]);
+        c[opt]=p2[i]; opt+=1;
     }
     for i in 0..8 {
-        c.push(l2[i]);
+        c[opt]=l2[i]; opt+=1;
     }
 
-    hmac::hmac1(hmac::MC_SHA2, sha, t, t.len(), &k2, &c);
+    hmac::hmac1(hmac::MC_SHA2, sha, t, t.len(), &k2, &c[0..opt]);
 
-    for _ in 0..p2l + 8 {
-        c.pop();
-    }
-
-    Some(c)
+    clen
 }
 
 /* constant time n-byte compare */
@@ -344,22 +343,24 @@ fn ncomp(t1: &[u8], t2: &[u8], n: usize) -> bool {
 }
 
 /* IEEE1363 ECIES decryption. Decryption of ciphertext V,C,T using private key U outputs plaintext M */
+// returns length of plaintext
 #[allow(non_snake_case)]
 pub fn ecies_decrypt(
     sha: usize,
     p1: &[u8],
     p2: &[u8],
     v: &[u8],
-    c: &mut Vec<u8>,
+    c: &mut [u8],
+    clen: usize,
     t: &[u8],
     u: &[u8],
-) -> Option<Vec<u8>> {
+    m: &mut [u8],
+) -> usize {
     let mut z: [u8; EFS] = [0; EFS];
     let mut k1: [u8; ecp::AESKEY] = [0; ecp::AESKEY];
     let mut k2: [u8; ecp::AESKEY] = [0; ecp::AESKEY];
     let mut vz: [u8; 3 * EFS + 1] = [0; 3 * EFS + 1];
     let mut k: [u8; 2 * ecp::AESKEY] = [0; 2 * ecp::AESKEY];
-
     let mut tag: [u8; 32] = [0; 32]; /* 32 is max length of tag */
 
     for i in 0..t.len() {
@@ -367,7 +368,7 @@ pub fn ecies_decrypt(
     }
 
     if ecpsvdp_dh(&u, &v, &mut z, 0) != 0 {
-        return None;
+        return 0;
     }
 
     for i in 0..2 * EFS + 1 {
@@ -384,34 +385,31 @@ pub fn ecies_decrypt(
         k2[i] = k[ecp::AESKEY + i]
     }
 
-    let m = aes::cbc_iv0_decrypt(&k1, &c);
+    let mlen = aes::cbc_iv0_decrypt(&k1, &c[0..clen], m);
 
-    if m == None {
-        return None;
+    if mlen == 0 {
+        return 0;
     }
 
     let mut l2: [u8; 8] = [0; 8];
     let p2l = p2.len();
 
     hmac::inttobytes(p2l, &mut l2);
+    let mut opt=clen;
 
     for i in 0..p2l {
-        c.push(p2[i]);
+        c[opt]=p2[i]; opt+=1;
     }
     for i in 0..8 {
-        c.push(l2[i]);
+        c[opt]=l2[i]; opt+=1;
     }
 
     let tl=tag.len();
-    hmac::hmac1(hmac::MC_SHA2, sha, &mut tag, tl, &k2, &c);
-
-    for _ in 0..p2l + 8 {
-        c.pop();
-    }
+    hmac::hmac1(hmac::MC_SHA2, sha, &mut tag, tl, &k2, &c[0..opt]);
 
     if !ncomp(&t, &tag, t.len()) {
-        return None;
+        return 0;
     }
 
-    m
+    mlen
 }

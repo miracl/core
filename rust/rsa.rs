@@ -19,7 +19,8 @@
 
 use crate::xxx::big;
 use crate::xxx::ff;
-use crate::xxx::ff::FF;
+use crate::xxx::ff::SF;
+use crate::xxx::ff::DF;
 
 use crate::rand::RAND;
 
@@ -28,59 +29,60 @@ pub const SHA256: usize = 32;
 pub const SHA384: usize = 48;
 pub const SHA512: usize = 64;
 
+pub const SL: usize = ff::SL;
+pub const DL: usize = ff::DL;
+
 pub const HASH_TYPE: usize = SHA256;
 
 pub struct RsaPrivateKey {
-    p: FF,
-    q: FF,
-    dp: FF,
-    dq: FF,
-    c: FF,
+    p: SF,
+    q: SF,
+    dp: SF,
+    dq: SF,
+    c: SF,
 }
 
 pub struct RsaPublicKey {
     e: isize,
-    n: FF,
+    n: DF,
 }
 
-pub fn new_private_key(n: usize) -> RsaPrivateKey {
+pub fn new_private_key() -> RsaPrivateKey {
     RsaPrivateKey {
-        p: FF::new_int(n),
-        q: FF::new_int(n),
-        dp: FF::new_int(n),
-        dq: FF::new_int(n),
-        c: FF::new_int(n),
+        p: SF::new(),
+        q: SF::new(),
+        dp: SF::new(),
+        dq: SF::new(),
+        c: SF::new(),
     }
 }
 
-pub fn new_public_key(m: usize) -> RsaPublicKey {
+pub fn new_public_key() -> RsaPublicKey {
     RsaPublicKey {
         e: 0,
-        n: FF::new_int(m),
+        n: DF::new(),
     }
 }
 
 pub fn set_public_key(pk: &mut RsaPublicKey,e: isize, f: &[u8]) {
     pk.e=e;
-    let m = pk.n.getlen();
-    let mut r = FF::new_int(m);
-    FF::frombytes(&mut r, f);
+    let mut r = DF::new();
+    r.frombytes(f);
     pk.n.copy(&r);
 }
 
 pub fn key_pair(rng: &mut impl RAND, e: isize, prv: &mut RsaPrivateKey, pbc: &mut RsaPublicKey) {
     /* IEEE1363 A16.11/A16.12 more or less */
-    let n = pbc.n.getlen() / 2;
-    let mut t = FF::new_int(n);
-    let mut p1 = FF::new_int(n);
-    let mut q1 = FF::new_int(n);
+    let mut t = SF::new();
+    let mut p1 = SF::new();
+    let mut q1 = SF::new();
 
     loop {
         prv.p.random(rng);
         while prv.p.lastbits(2) != 3 {
             prv.p.inc(1)
         }
-        while !FF::prime(&prv.p, rng) {
+        while !prv.p.isprime(rng) {
             prv.p.inc(4);
         }
 
@@ -98,7 +100,7 @@ pub fn key_pair(rng: &mut impl RAND, e: isize, prv: &mut RsaPrivateKey, pbc: &mu
         while prv.q.lastbits(2) != 3 {
             prv.q.inc(1)
         }
-        while !FF::prime(&prv.q, rng) {
+        while !prv.q.isprime(rng) {
             prv.q.inc(4);
         }
 
@@ -112,7 +114,7 @@ pub fn key_pair(rng: &mut impl RAND, e: isize, prv: &mut RsaPrivateKey, pbc: &mu
         break;
     }
 
-    pbc.n = FF::mul(&prv.p, &prv.q);
+    pbc.n = prv.p.mul(&prv.q);
     pbc.e = e;
 
     t.copy(&p1);
@@ -149,20 +151,17 @@ pub fn private_key_kill(prv: &mut RsaPrivateKey) {
 
 /* RSA encryption with the public key */
 pub fn encrypt(pbc: &RsaPublicKey, f: &[u8], g: &mut [u8]) {
-    let m = pbc.n.getlen();
-    let mut r = FF::new_int(m);
-
-    FF::frombytes(&mut r, f);
+    let mut r = DF::new();
+    r.frombytes(f);
     r.power(pbc.e, &pbc.n);
     r.tobytes(g);
 }
 
 /* RSA decryption with the private key */
 pub fn decrypt(prv: &RsaPrivateKey, g: &[u8], f: &mut [u8]) {
-    let n = prv.p.getlen();
-    let mut r = FF::new_int(2 * n);
+    let mut r = DF::new();
 
-    FF::frombytes(&mut r, g);
+    r.frombytes(g);
     let mut jp = r.dmod(&prv.p);
     let mut jq = r.dmod(&prv.q);
 
@@ -172,16 +171,16 @@ pub fn decrypt(prv: &RsaPrivateKey, g: &[u8], f: &mut [u8]) {
     r.zero();
     r.dscopy(&jp);
     jp.rmod(&prv.q);
-    if FF::comp(&jp, &jq) > 0 {
+    if jp.comp(&jq) > 0 {
         jq.add(&prv.q)
     }
     jq.sub(&jp);
     jq.norm();
 
-    let mut t = FF::mul(&prv.c, &jq);
+    let mut t = prv.c.mul(&jq);
     jq = t.dmod(&prv.q);
 
-    t = FF::mul(&jq, &prv.p);
+    t = jq.mul(&prv.p);
     r.add(&t);
     r.norm();
 
