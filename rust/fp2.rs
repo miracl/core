@@ -32,11 +32,14 @@ pub struct FP2 {
     b: FP,
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Debug for FP2 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
 }
+
+#[cfg(feature = "std")]
 impl std::fmt::Display for FP2 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -446,6 +449,7 @@ impl FP2 {
     }
 
     /* output to hex string */
+#[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         format!("[{},{}]", self.a.tostring(), self.b.tostring())
     }

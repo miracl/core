@@ -26,11 +26,14 @@ pub struct DBIG {
     pub w: [Chunk; big::DNLEN],
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Debug for DBIG {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
 }    
+
+#[cfg(feature = "std")]
 impl std::fmt::Display for DBIG {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -281,6 +284,7 @@ impl DBIG {
     }
 
     /* Convert to Hex String */
+#[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         let mut s = String::new();
         let mut len = self.nbits();

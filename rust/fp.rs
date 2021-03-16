@@ -32,11 +32,14 @@ pub struct FP {
     pub xes: i32,
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Debug for FP {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
 }
+
+#[cfg(feature = "std")]
 impl std::fmt::Display for FP {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -206,6 +209,7 @@ impl FP {
     }
 
     /* convert to string */
+#[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         self.redc().tostring()
     }

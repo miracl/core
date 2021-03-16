@@ -49,11 +49,14 @@ pub struct QF {
     v: [BIG; QL],  
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Debug for SF {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
 }
+
+#[cfg(feature = "std")]
 impl std::fmt::Display for SF {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -162,6 +165,7 @@ impl SF {
     }
 
     /* Convert to Hex String */
+#[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         let mut cs:[BIG;SL]=[BIG::new();SL];
         return generic_tostring(&self.v,&mut cs,SL);
@@ -557,11 +561,14 @@ impl SF {
     }
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Debug for DF {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
 }
+
+#[cfg(feature = "std")]
 impl std::fmt::Display for DF {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -653,6 +660,7 @@ impl DF {
     }
 
     /* Convert to Hex String */
+#[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         let mut cs:[BIG;DL]=[BIG::new();DL];
         return generic_tostring(&self.v,&mut cs,DL);
@@ -928,6 +936,7 @@ impl QF {
     }
 }
 
+#[cfg(feature = "std")]
 fn generic_tostring(v: &[BIG],cs: &mut [BIG],len: usize) -> String {
     generic_copy(cs,v);
     generic_norm(cs);

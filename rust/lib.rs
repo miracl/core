@@ -16,6 +16,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+//#![no_std]
+
 #![allow(clippy::many_single_char_names)]
 #![allow(clippy::needless_range_loop)]
 #![allow(clippy::manual_memcpy)]

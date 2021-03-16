@@ -47,11 +47,14 @@ impl Clone for BIG {
     }
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Debug for BIG {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
 }
+
+#[cfg(feature = "std")]
 impl std::fmt::Display for BIG {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -276,6 +279,7 @@ impl BIG {
     }
 
     /* Convert to Hex String */
+#[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         let mut s = String::new();
         let mut len = self.nbits();
@@ -299,6 +303,7 @@ impl BIG {
         s
     }
 
+#[cfg(feature = "std")]
     pub fn fromstring(val: String) -> BIG {
         let mut res = BIG::new();
         let len = val.len();

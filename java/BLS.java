@@ -59,7 +59,7 @@ public class BLS {
 
     /* hash a message to an ECP point, using SHA2, random oracle method */
     public static ECP bls_hash_to_point(byte[] M) {
-        String dst= new String("BLS_SIG_ZZZG1_XMD:SHA-256_SVDW_RO_NUL_");
+        String dst= new String("BLS_SIG_XXXG1_XMD:SHA-256_SVDW_RO_NUL_");
         FP[] u=hash_to_field(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,dst.getBytes(),M,2);
 
         ECP P=ECP.map2point(u[0]);

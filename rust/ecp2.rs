@@ -33,11 +33,14 @@ pub struct ECP2 {
     z: FP2,
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Debug for ECP2 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
 }    
+
+#[cfg(feature = "std")]
 impl std::fmt::Display for ECP2 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -321,6 +324,7 @@ impl ECP2 {
     }
 
     /* convert this to hex string */
+#[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         let mut W = ECP2::new();
         W.copy(self);

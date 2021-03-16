@@ -157,6 +157,7 @@ pub fn core_verify(sig: &[u8], m: &[u8], w: &[u8]) -> isize {
     let mut v = pair4::miller(&mut r);
 
     //.. or alternatively
+    //    let g = ECP4::generator();
     //    let mut v = pair4::ate2(&g, &d, &pk, &hm);
 
     v = pair4::fexp(&v);

@@ -201,6 +201,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"pair.rs","xxx",tc)
             replace(fpath+"mpin.rs","xxx",tc)
             replace(fpath+"bls.rs","xxx",tc)
+            replace(fpath+"bls.rs","XXX",tc.upper())
 
             if pf == "BN" :
                 replace(fpath+"pair.rs","PFBNS","*/")
@@ -225,6 +226,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"pair4.rs","xxx",tc)
             replace(fpath+"mpin192.rs","xxx",tc)
             replace(fpath+"bls192.rs","xxx",tc)
+            replace(fpath+"bls192.rs","XXX",tc.upper())
 
             os.system(copytext+"modpf192.rs "+fpath+"mod.rs")
 
@@ -248,6 +250,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"pair8.rs","xxx",tc)
             replace(fpath+"mpin256.rs","xxx",tc)
             replace(fpath+"bls256.rs","xxx",tc)
+            replace(fpath+"bls256.rs","XXX",tc.upper())
 
             os.system(copytext+"modpf256.rs "+fpath+"mod.rs")
 
@@ -541,6 +544,7 @@ if __name__ == '__main__':
             rsa_selected=True
 
     os.system("cargo rustc --manifest-path mcore"+slashtext+"Cargo.toml --release --lib")
+    #os.system("cargo rustc --target thumbv6m-none-eabi --manifest-path mcore"+slashtext+"Cargo.toml --release --lib")
     #os.system("cargo rustc  --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib -- -C opt-level=s")
 
     # -- --cfg D32

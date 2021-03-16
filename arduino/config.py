@@ -899,6 +899,7 @@ while ptr<max:
 
     break;
 
+os.system(deltext*" *.rs")
 os.system(deltext+" test.txt")
 os.system(deltext+" test16.txt")
 os.system(deltext+" pins.txt")
@@ -982,7 +983,6 @@ if pfcurve_selected :
     os.system(deltext+ " hpke*.* ")
 os.system(deltext+" testbls.ino")
 os.system(deltext+" timepbc.ino")
-
 
 #print("Your selection was ")
 #for i in range(1,max) :

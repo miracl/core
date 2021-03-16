@@ -31,11 +31,14 @@ pub struct ECP {
     z: FP,
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Debug for ECP {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
 }    
+
+#[cfg(feature = "std")]
 impl std::fmt::Display for ECP {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -502,6 +505,7 @@ impl ECP {
     }
 
     /* convert to hex string */
+#[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         let mut W = ECP::new();
         W.copy(self);

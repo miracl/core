@@ -40,11 +40,14 @@ pub struct FP48 {
     stype: usize,
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Debug for FP48 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
     }
 }    
+
+#[cfg(feature = "std")]
 impl std::fmt::Display for FP48 {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(formatter, "{}", self.tostring())
@@ -918,6 +921,7 @@ impl FP48 {
     }
 
     /* output to hex string */
+#[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         format!(
             "[{},{},{}]",
