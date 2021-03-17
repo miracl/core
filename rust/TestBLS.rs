@@ -61,7 +61,7 @@ fn bls_bn254(rng: &mut impl RAND) {
         ikm[i]=rng.getbyte();
     }
 
-    let m = String::from("This is a test message");
+    let m = "This is a test message";
 
     let mut res = bls::init();
     if res != 0 {
@@ -112,7 +112,7 @@ fn bls_bls12383(rng: &mut impl RAND) {
         ikm[i]=rng.getbyte();
     }
 
-    let m = String::from("This is a test message");
+    let m = "This is a test message";
 
     let mut res = bls::init();
     if res != 0 {
@@ -161,7 +161,7 @@ fn bls_bls24479(rng: &mut impl RAND) {
         ikm[i]=rng.getbyte();
     }
 
-    let m = String::from("This is a test message");
+    let m = "This is a test message";
     let mut res = bls192::init();
     if res != 0 {
         println!("Failed to Initialize");
@@ -209,7 +209,7 @@ fn bls_bls48556(rng: &mut impl RAND) {
         ikm[i]=rng.getbyte();
     }
 
-    let m = String::from("This is a test message");
+    let m = "This is a test message";
     let mut res = bls256::init();
     if res != 0 {
         println!("Failed to Initialize");

@@ -58,4 +58,7 @@ Your working folder should be there, so just click on the subdirectory
 containing the example code. Make sure to activate Tools &rightarrow; Serial Monitor to 
 observe the output.
 
+# Embedded Rust
 
+See very experimental program testbls.rs
+Not for the faint hearted.
