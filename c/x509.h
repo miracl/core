@@ -31,14 +31,14 @@
 
 // Supported Encryption Methods
 
-#define X509_ECC 1
-#define X509_RSA 2
+#define X509_ECC 1      /**< Uses Elliptic Curve Cryptography */
+#define X509_RSA 2      /**< Uses RSA Cryptography */
 
 // Supported Hash functions
 
-#define X509_H256 2
-#define X509_H384 3
-#define X509_H512 4
+#define X509_H256 2     /**< Using SHA256 hashing */
+#define X509_H384 3     /**< Using SHA384 hashing */
+#define X509_H512 4     /**< Using SHA512 hashing */
 
 // Supported Curves
 
@@ -49,17 +49,17 @@
 #define USE_NIST384 10   /**< For the NIST 384-bit standard curve - WEIERSTRASS only */
 #define USE_NIST521 12   /**< For the NIST 521-bit standard curve - WEIERSTRASS only */
 
-extern octet X509_CN;
-extern octet X509_ON;
-extern octet X509_EN;
-extern octet X509_LN;
-extern octet X509_UN;
-extern octet X509_MN;
-extern octet X509_SN;
+extern octet X509_CN;       /**< Country Name */
+extern octet X509_ON;       /**< Organisation Name */
+extern octet X509_EN;       /**< Email */
+extern octet X509_LN;       /**< Local Name */
+extern octet X509_UN;       /**< Unit Name */
+extern octet X509_MN;       /**< My name */
+extern octet X509_SN;       /**< State Name */
 
-extern octet X509_AN;  // Alternate Name
-extern octet X509_KU;  // Key Usage
-extern octet X509_BC;  // Basic Constraints
+extern octet X509_AN;  /**< Alternate Name */
+extern octet X509_KU;  /**< Key Usage */
+extern octet X509_BC;  /**< Basic Constraints */
 
 /**
  * @brief Public key type

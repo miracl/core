@@ -29,8 +29,8 @@
  *
  */
 
-#ifndef MPIN_ZZZ_H
-#define MPIN_ZZZ_H
+#ifndef MPIN256_ZZZ_H
+#define MPIN256_ZZZ_H
 
 #include "pair8_ZZZ.h"
 
@@ -76,7 +76,7 @@ int MPIN_ZZZ_EXTRACT_PIN(octet *HID, int pin, octet *CS);
 	@param x an output internally randomly generated if R!=NULL, otherwise must be provided as an input
 	@param pin is the input PIN number
 	@param T is the input M-Pin token (the client secret with PIN portion removed)
-	@param S is output = CS+TP, where CS=is the reconstructed client secret, and TP is the time permit
+	@param S is the reconstructed client secret
 	@param U is output = x.H(ID)
 	@return 0 or an error code
  */
@@ -96,7 +96,8 @@ int MPIN_ZZZ_RANDOM_GENERATE(csprng *R, octet *S);
 	@return 0 or an error code
  */
 int MPIN_ZZZ_CLIENT_2(octet *x, octet *y, octet *V);
-/**	@brief Perform third pass on the server side of the 3-pass version of the M-Pin protocol
+
+/**	@brief Perform final pass on the server side of the M-Pin protocol
  *
 	@param HID is input H(ID), a hash of the client ID
 	@param y is the input server's randomly generated challenge

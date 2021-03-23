@@ -29,8 +29,8 @@
  *
  */
 
-#ifndef MPIN_ZZZ_H
-#define MPIN_ZZZ_H
+#ifndef MPIN192_ZZZ_H
+#define MPIN192_ZZZ_H
 
 #include "pair4_ZZZ.h"
 
@@ -57,9 +57,9 @@
  *
 	@param DST is the Domain Separation Tag
     @param ID is the input string
-    @param HID is the output point in G1
+    @param HCID is the output point in G1
 */
-void MPIN_ZZZ_ENCODE_TO_CURVE(octet *DST,octet *ID,octet *HID);
+void MPIN_ZZZ_ENCODE_TO_CURVE(octet *DST,octet *ID,octet *HCID);
 
 /**	@brief Extract a PIN number from a client secret
  *
@@ -98,7 +98,7 @@ int MPIN_ZZZ_RANDOM_GENERATE(csprng *R, octet *S);
  */
 int MPIN_ZZZ_CLIENT_2(octet *x, octet *y, octet *V);
 
-/**	@brief Perform third pass on the server side of the 3-pass version of the M-Pin protocol
+/**	@brief Perform final pass on the server side of the M-Pin protocol
  *
 	@param HID is input H(ID), a hash of the client ID
 	@param y is the input server's randomly generated challenge

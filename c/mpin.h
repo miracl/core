@@ -57,9 +57,9 @@
  *
 	@param DST is the Domain Separation Tag
     @param ID is the input string
-    @param HID is the output point in G1
+    @param HCID is the output point in G1
 */
-void MPIN_ZZZ_ENCODE_TO_CURVE(octet *DST,octet *ID,octet *HID);
+void MPIN_ZZZ_ENCODE_TO_CURVE(octet *DST,octet *ID,octet *HCID);
 
 /**	@brief Extract a PIN number from a client secret
  *
@@ -112,7 +112,7 @@ int MPIN_ZZZ_SERVER(octet *HID, octet *y, octet *SS, octet *U, octet *V);
 /**	@brief Create a client secret in G1 from a master secret and the client ID
  *
 	@param S is an input master secret
-	@param HID is the input client identity hashed to curve
+	@param HID is the input client identity hashed to point
 	@param CS is the full client secret = s.H(ID)
 	@return 0 or an error code
  */

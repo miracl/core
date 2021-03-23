@@ -29,8 +29,8 @@
  *
  */
 
-#ifndef BLS_ZZZ_H
-#define BLS_ZZZ_H
+#ifndef BLS256_ZZZ_H
+#define BLS256_ZZZ_H
 
 #include "pair8_ZZZ.h"
 
