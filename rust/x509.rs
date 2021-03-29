@@ -55,7 +55,7 @@ const ANY: u8 = 0x00;
 const SEQ: u8 = 0x30;
 const OID: u8 = 0x006;
 const INT: u8 = 0x02;
-//const NUL: u8 = 0x05;
+const NUL: u8 = 0x05;
 //const ZER: u8 = 0x00;
 //const UTF: u8 = 0x0C;
 const UTC: u8 = 0x17;
@@ -156,6 +156,206 @@ impl FDTYPE {
             length: 0,
         }
     }
+}
+
+// Input private key in PKCS#8 format
+// e.g. openssl req -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+// e.g. openssl req -x509 -nodes -days 3650 -newkey ec:<(openssl ecparam -name prime256v1) -keyout key.pem -out ecdsacert.pem
+// extract private key from uncompressed key.pem into octet
+// For RSA octet = p|q|dp|dq|c where pk->len is multiple of 5
+// For ECC octet = k
+pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
+    let mut soid:[u8;9]=[0;9];
+    let mut ret=PKTYPE::new();
+    let mut j=0 as usize;
+
+    let mut len=getalen(SEQ,c,j);  // Check for expected SEQ clause, and get length
+    if len == 0  {                  // if not a SEQ clause, there is a problem, exit
+        return ret;
+    }
+    j+=skip(len);                   // skip over length to clause contents.
+
+    if len+j != c.len() {
+        return ret;
+    }
+
+    len=getalen(INT,c,j);
+    if len == 0  {                  // if not a SEQ clause, there is a problem, exit
+        return ret;
+    }
+    j+=skip(len)+len;
+
+    len=getalen(SEQ,c,j);
+    if len == 0  {                  // if not a SEQ clause, there is a problem, exit
+        return ret;
+    }
+    j+=skip(len);
+
+// extract OID
+    len=getalen(OID,c,j);
+    if len==0 {
+        return ret;
+    }
+    j+=skip(len);
+
+    let mut fin=j+len;
+    let mut slen=0;
+    while j<fin {
+        soid[slen]=c[j];
+        slen+=1;
+        j+=1;
+    }
+    j=fin;
+    if ECPK == soid[0..slen] {
+        len=getalen(OID,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len);
+        
+        fin=j+len;
+        slen=0;
+        while j<fin {
+            soid[slen]=c[j];
+            slen+=1;
+            j+=1;
+        }
+        j=fin;
+        len=getalen(OCT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len);
+        len=getalen(SEQ,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len);
+        len=getalen(INT,c,j);
+        if len == 0  {     
+            return ret;
+        }
+        j+=skip(len)+len;    // jump over version
+        len=getalen(OCT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len);
+
+        ret.kind=ECC;
+        let mut rlen=0;
+        if PRIME256V1 == soid[0..slen] {
+            ret.curve=USE_NIST256;
+            rlen=32;
+        }
+        if SECP384R1 == soid[0..slen] {
+            ret.curve=USE_NIST384;
+            rlen=48;
+        }
+        if SECP521R1 == soid[0..slen] {
+            ret.curve=USE_NIST521;
+            rlen=66;
+        }
+        ret.len=rlen;
+        for i in 0..rlen-len {
+            pk[i]=0;
+        }
+        for i in rlen-len..rlen {
+            pk[i]=c[j];
+            j+=1;
+        }
+    }
+    if RSAPK == soid[0..slen] {
+        len=getalen(NUL,c,j);
+        if len!=0 {
+            return ret;
+        }
+        j+=skip(len); 
+
+        len=getalen(OCT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len);       
+
+        len=getalen(SEQ,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len);
+
+        len=getalen(INT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len)+len; // jump over version
+
+        len=getalen(INT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len)+len; // jump over n
+
+        len=getalen(INT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len)+len; // jump over e
+
+        len=getalen(INT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len)+len; // jump over d
+
+        len=getalen(INT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len); // get p
+
+        if c[j]==0 {
+            j+=1;
+            len-=1;
+        }
+        let mut rlen=bround(len);
+
+        for i in 0..rlen-len {
+            pk[i]=0;
+        }
+        for i in rlen-len..rlen {
+            pk[i]=c[j];
+            j+=1;
+        }
+
+        let flen=rlen;   // should be same length for all
+        for k in 1..5 {
+            len=getalen(INT,c,j);
+            if len==0 {
+                return ret;
+            }
+            j+=skip(len); // get q,dp,dq,c
+            if c[j]==0 {
+                j+=1;
+                len-=1;
+            }
+            rlen=bround(len);  
+            if rlen!=flen {
+                return ret;
+            }
+            for i in 0..rlen-len {
+                pk[i]=0;
+            }
+            for i in rlen-len..rlen {
+                pk[k*flen+i]=c[j];
+                j+=1;
+            }
+        }
+        ret.len=5*flen;
+        ret.kind=RSA;
+        ret.curve=16*flen;
+    }
+    return ret;
 }
 
 

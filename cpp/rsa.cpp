@@ -82,6 +82,8 @@ void WWW::RSA_KEY_PAIR(csprng *RNG, sign32 e, rsa_private_key *PRIV, rsa_public_
     FF_mul(PUB->n, PRIV->p, PRIV->q, HFLEN_WWW);
     PUB->e = e;
 
+// Only works for 3 mod 4 primes (as always generated above)
+
     FF_copy(t, p1, HFLEN_WWW);
     FF_shr(t, HFLEN_WWW);
     FF_init(PRIV->dp, e, HFLEN_WWW);
@@ -99,6 +101,19 @@ void WWW::RSA_KEY_PAIR(csprng *RNG, sign32 e, rsa_private_key *PRIV, rsa_public_
     FF_invmodp(PRIV->c, PRIV->p, PRIV->q, HFLEN_WWW);
 
     return;
+}
+
+// Input private key from OpenSSL format
+// e.g as in openssl rsa -in privkey.pem -noout -text
+void WWW::RSA_KEY_PAIR_FROM_OPENSSL(sign32 e,octet *P,octet* Q,octet *DP,octet *DQ,octet *C,rsa_private_key *PRIV,rsa_public_key *PUB,octet *P,octet* Q,octet *DP,octet *DQ,octet *C)
+{ // Note order swap - For MIRACL c=1/p mod q, for OpenSSL c=1/q mod p
+    FF_fromOctet(PRIV->p,Q,HFLEN_WWW);
+    FF_fromOctet(PRIV->q,P,HFLEN_WWW);   
+    FF_fromOctet(PRIV->dp,DQ,HFLEN_WWW);
+    FF_fromOctet(PRIV->dq,DP,HFLEN_WWW);
+    FF_fromOctet(PRIV->c,C,HFLEN_WWW);
+    FF_mul(PUB->n, PRIV->p, PRIV->q, HFLEN_WWW);
+    PUB->e = e;
 }
 
 /* destroy the Private Key structure */

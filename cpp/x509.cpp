@@ -56,7 +56,7 @@ static octet ECCSHA384 = {8, sizeof(eccsha384), (char *)eccsha384};
 static unsigned char eccsha512[8] = {0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x04};
 static octet ECCSHA512 = {8, sizeof(eccsha512), (char *)eccsha512};
 
-// EC Public Key
+// EC Public Key - Elliptic curve public key cryptography
 static unsigned char ecpk[7] = {0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01};
 static octet ECPK = {7, sizeof(ecpk), (char *)ecpk};
 
@@ -64,7 +64,7 @@ static octet ECPK = {7, sizeof(ecpk), (char *)ecpk};
 static unsigned char prime25519[9] = {0x2B, 0x06, 0x01, 0x04, 0x01, 0xDA, 0x47, 0x0F, 0x01}; /*****/
 static octet PRIME25519 = {9, sizeof(prime25519), (char *)prime25519};
 
-// NIST256 curve
+// NIST256 curve - (NIST) P-256
 static unsigned char prime256v1[8] = {0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07};
 static octet PRIME256V1 = {8, sizeof(prime256v1), (char *)prime256v1};
 
@@ -76,7 +76,7 @@ static octet SECP384R1 = {5, sizeof(secp384r1), (char *)secp384r1};
 static unsigned char secp521r1[5] = {0x2B, 0x81, 0x04, 0x00, 0x23};
 static octet SECP521R1 = {5, sizeof(secp521r1), (char *)secp521r1};
 
-// RSA Public Key
+// RSA Public Key - RSAES-PKCS1-v1_5
 static unsigned char rsapk[9] = {0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01};
 static octet RSAPK = {9, sizeof(rsapk), (char *)rsapk};
 
@@ -91,6 +91,7 @@ static octet RSASHA384 = {9, sizeof(rsasha384), (char *)rsasha384};
 // RSA with SHA512
 static unsigned char rsasha512[9] = {0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0d};
 static octet RSASHA512 = {9, sizeof(rsasha512), (char *)rsasha512};
+
 
 
 // Cert details
@@ -176,6 +177,169 @@ static int bround(int len)
     if (len % 8 == 0) return len;
     return len + (8 - len % 8);
 
+}
+
+// Input private key in PKCS#8 format
+// e.g. openssl req -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+// e.g. openssl req -x509 -nodes -days 3650 -newkey ec:<(openssl ecparam -name prime256v1) -keyout key.pem -out ecdsacert.pem
+// extract private key from uncompressed key.pem into octet
+// For RSA octet = p|q|dp|dq|c where pk->len is multiple of 5
+// For ECC octet = k
+pktype X509_extract_private_key(octet *c,octet *pk)
+{
+    int i, j, k, fin, len, rlen, flen, sj, ex;
+    char soid[9];
+    octet SOID = {0, sizeof(soid), soid};
+    pktype ret;
+
+    ret.type = 0;
+    ret.hash = 0;
+    j=0;
+
+    len = getalen(SEQ, c->val, j); // Check for expected SEQ clause, and get length
+    if (len < 0) return ret;        // if not a SEQ clause, there is a problem, exit
+    j += skip(len);                 // skip over length to clause contents. Add len to skip clause
+
+    if (len + j != c->len) return ret;
+
+    len = getalen(INT, c->val, j);
+    if (len < 0) return ret;
+    j += skip(len) + len; // jump over serial number clause (if there is one)
+
+    len = getalen(SEQ, c->val, j); 
+    if (len < 0) return ret;        
+    j += skip(len);
+
+// extract OID
+    len = getalen(OID, c->val, j);
+    if (len < 0) return ret;
+    j += skip(len);
+
+    fin = j + len;
+    SOID.len = len;
+    for (i = 0; j < fin; j++)
+        SOID.val[i++] = c->val[j];
+    j=fin;
+
+    if (OCT_comp(&ECPK, &SOID))
+    { // Its an ECC key
+        len = getalen(OID, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+
+        fin = j + len;
+        SOID.len = len;
+        for (i = 0; j < fin; j++)
+            SOID.val[i++] = c->val[j];
+        j=fin;           
+        
+        len = getalen(OCT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+
+        len = getalen(SEQ, c->val, j); 
+        if (len < 0) return ret; 
+        j += skip(len);
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over version
+
+        len = getalen(OCT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+
+        ret.type = X509_ECC;
+        if (OCT_comp(&PRIME256V1, &SOID)) {
+            ret.curve = USE_NIST256;
+            rlen=32;
+        }
+        if (OCT_comp(&SECP384R1, &SOID)) {
+            ret.curve = USE_NIST384;
+            rlen=48;
+        }
+        if (OCT_comp(&SECP521R1, &SOID)) {
+            rlen=66;
+            ret.curve = USE_NIST521;
+        }
+
+        pk->len=rlen;
+        for (i=0;i<rlen-len;i++)
+            pk->val[i]=0;
+        for (i=rlen-len;i<rlen;i++)
+            pk->val[i]=c->val[j++];
+
+    }
+    if (OCT_comp(&RSAPK, &SOID))
+    { // Its an RSA key
+        len = getalen(NUL, c->val, j);
+        if (len<0) return ret;
+        j += skip(len);
+
+        len = getalen(OCT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+
+        len = getalen(SEQ, c->val, j); 
+        if (len < 0) return ret; 
+        j += skip(len);
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over version
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over n
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over e
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over d
+
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len); // get p
+
+        if (c->val[j] == 0)
+        { // skip leading zero
+            j++;
+            len--;
+        }
+        rlen=bround(len);
+        for (i=0;i<rlen-len;i++)
+            pk->val[i]=0;
+
+        for (i=rlen-len;i<rlen;i++)
+            pk->val[i]=c->val[j++];
+
+        flen=rlen;          // should be same length for all
+        for (k=1;k<5;k++)
+        {
+            len = getalen(INT,c->val,j);
+            if (len<0) return ret;
+            j += skip(len);  // get q,dp,dq,c
+            if (c->val[j] == 0)
+            { // skip leading zero
+                j++;
+                len--;
+            }
+            rlen=bround(len);
+            if (rlen!=flen) return ret;
+            for (i=0;i<rlen-len;i++)
+                pk->val[i]=0;
+            for (i=rlen-len;i<rlen;i++)
+                pk->val[k*flen+i]=c->val[j++];
+        }
+        pk->len=5*flen;
+        ret.type = X509_RSA;
+        ret.curve = 16 * flen;
+    }
+    return ret;
 }
 
 //  Input signed cert as octet, and extract signature

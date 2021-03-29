@@ -79,6 +79,15 @@ typedef struct
 
 
 /* X.509 functions */
+
+/** @brief Extract private key
+ *
+	@param c an X.509 private key 
+	@param pk the extracted private key - for RSA octet = p|q|dp|dq|c, for ECC octet = k
+	@return 0 on failure, or indicator of private key type (ECC or RSA)
+*/
+extern pktype X509_extract_private_key(octet *c,octet *pk);
+
 /** @brief Extract certificate signature
  *
 	@param c an X.509 certificate

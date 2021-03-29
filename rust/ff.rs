@@ -199,6 +199,12 @@ impl SF {
         return generic_comp(&self.v,&b.v);
     }
 
+    pub fn frombytes(&mut self, b: &[u8]) {                       // SL and DL only
+        for i in 0..SL {
+            self.v[i] = BIG::frombytearray(b, (SL - i - 1) * (big::MODBYTES as usize))
+        }
+    }
+
     /* in-place swapping using xor - side channel resistant - lengths must be the same */
     pub fn cswap(&mut self, b: &mut SF, d: isize) {              // SL only
         for i in 0..SL {

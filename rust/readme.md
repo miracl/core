@@ -7,6 +7,8 @@ integer support, and for Rust 2018, and also for const fn support.
 
 NOTE: (18/02/2021) Package "core" changed to "mcore" to avoid clash with Rust
 
+NOTE: (29/03/2021) Library now supports #![no_std] flag
+
 Namespaces are used to separate different curves.
 
 # Installation and Testing

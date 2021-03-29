@@ -64,7 +64,18 @@ typedef struct
     BIG_XXX c[FFLEN_WWW / 2]; /**< 1/p mod q */
 } rsa_private_key_WWW;
 
-
+/** @brief RSA Key Pair from OpenSSL 
+ *
+    @param e the encryption exponent
+    @param P Input prime number
+    @param Q Input prime number
+    @param DP Input 1/e mod p-1
+    @param DQ Input 1/e mod q-1
+    @param C Input 1/p mod q
+    @param PRIV the output RSA private key
+    @param PUB the output RSA public key
+ */
+extern void RSA_WWW_KEY_PAIR_FROM_OPENSSL(sign32 e,octet *P,octet* Q,octet *DP,octet *DQ,octet *C,rsa_private_key_WWW *PRIV,rsa_public_key_WWW *PUB);
 
 /** @brief RSA Key Pair Generator
  *
@@ -72,10 +83,10 @@ typedef struct
     @param e the encryption exponent
     @param PRIV the output RSA private key
     @param PUB the output RSA public key
-        @param P Input prime number. Used when R is equal to NULL for testing
-        @param Q Inpuy prime number. Used when R is equal to NULL for testing
+    @param P Input prime number. Used when R is equal to NULL for testing
+    @param Q Inpuy prime number. Used when R is equal to NULL for testing
  */
-extern void RSA_WWW_KEY_PAIR(csprng *R, sign32 e, rsa_private_key_WWW* PRIV, rsa_public_key_WWW* PUB, octet *P, octet* Q);
+extern void RSA_WWW_KEY_PAIR(csprng *R, sign32 e, rsa_private_key_WWW *PRIV, rsa_public_key_WWW *PUB, octet *P, octet* Q);
 
 /** @brief RSA encryption of suitably padded plaintext
  *

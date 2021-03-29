@@ -177,6 +177,169 @@ static int bround(int len)
 
 }
 
+// Input private key in PKCS#8 format
+// e.g. openssl req -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+// e.g. openssl req -x509 -nodes -days 3650 -newkey ec:<(openssl ecparam -name prime256v1) -keyout key.pem -out ecdsacert.pem
+// extract private key from uncompressed key.pem into octet
+// For RSA octet = p|q|dp|dq|c where pk->len is multiple of 5
+// For ECC octet = k
+pktype X509_extract_private_key(octet *c,octet *pk)
+{
+    int i, j, k, fin, len, rlen, flen, sj, ex;
+    char soid[9];
+    octet SOID = {0, sizeof(soid), soid};
+    pktype ret;
+
+    ret.type = 0;
+    ret.hash = 0;
+    j=0;
+
+    len = getalen(SEQ, c->val, j); // Check for expected SEQ clause, and get length
+    if (len < 0) return ret;        // if not a SEQ clause, there is a problem, exit
+    j += skip(len);                 // skip over length to clause contents. Add len to skip clause
+
+    if (len + j != c->len) return ret;
+
+    len = getalen(INT, c->val, j);
+    if (len < 0) return ret;
+    j += skip(len) + len; // jump over serial number clause (if there is one)
+
+    len = getalen(SEQ, c->val, j); 
+    if (len < 0) return ret;        
+    j += skip(len);
+
+// extract OID
+    len = getalen(OID, c->val, j);
+    if (len < 0) return ret;
+    j += skip(len);
+
+    fin = j + len;
+    SOID.len = len;
+    for (i = 0; j < fin; j++)
+        SOID.val[i++] = c->val[j];
+    j=fin;
+
+    if (OCT_comp(&ECPK, &SOID))
+    { // Its an ECC key
+        len = getalen(OID, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+
+        fin = j + len;
+        SOID.len = len;
+        for (i = 0; j < fin; j++)
+            SOID.val[i++] = c->val[j];
+        j=fin;           
+        
+        len = getalen(OCT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+
+        len = getalen(SEQ, c->val, j); 
+        if (len < 0) return ret; 
+        j += skip(len);
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over version
+
+        len = getalen(OCT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+
+        ret.type = X509_ECC;
+        if (OCT_comp(&PRIME256V1, &SOID)) {
+            ret.curve = USE_NIST256;
+            rlen=32;
+        }
+        if (OCT_comp(&SECP384R1, &SOID)) {
+            ret.curve = USE_NIST384;
+            rlen=48;
+        }
+        if (OCT_comp(&SECP521R1, &SOID)) {
+            rlen=66;
+            ret.curve = USE_NIST521;
+        }
+
+        pk->len=rlen;
+        for (i=0;i<rlen-len;i++)
+            pk->val[i]=0;
+        for (i=rlen-len;i<rlen;i++)
+            pk->val[i]=c->val[j++];
+
+    }
+    if (OCT_comp(&RSAPK, &SOID))
+    { // Its an RSA key
+        len = getalen(NUL, c->val, j);
+        if (len<0) return ret;
+        j += skip(len);
+
+        len = getalen(OCT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+
+        len = getalen(SEQ, c->val, j); 
+        if (len < 0) return ret; 
+        j += skip(len);
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over version
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over n
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over e
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len) + len; // jump over d
+
+
+        len = getalen(INT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len); // get p
+
+        if (c->val[j] == 0)
+        { // skip leading zero
+            j++;
+            len--;
+        }
+        rlen=bround(len);
+        for (i=0;i<rlen-len;i++)
+            pk->val[i]=0;
+
+        for (i=rlen-len;i<rlen;i++)
+            pk->val[i]=c->val[j++];
+
+        flen=rlen;          // should be same length for all
+        for (k=1;k<5;k++)
+        {
+            len = getalen(INT,c->val,j);
+            if (len<0) return ret;
+            j += skip(len);  // get q,dp,dq,c
+            if (c->val[j] == 0)
+            { // skip leading zero
+                j++;
+                len--;
+            }
+            rlen=bround(len);
+            if (rlen!=flen) return ret;
+            for (i=0;i<rlen-len;i++)
+                pk->val[i]=0;
+            for (i=rlen-len;i<rlen;i++)
+                pk->val[k*flen+i]=c->val[j++];
+        }
+        pk->len=5*flen;
+        ret.type = X509_RSA;
+        ret.curve = 16 * flen;
+    }
+    return ret;
+}
+
 //  Input signed cert as octet, and extract signature
 //  Return 0 for failure, ECC for Elliptic Curve signature, RSA for RSA signature
 //  Note that signature type is not provided here - its the type of the public key that

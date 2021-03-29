@@ -37,6 +37,20 @@ public final class RSA {
 
 /* generate an RSA key pair */
 
+// Input private key from OpenSSL format
+// e.g as in openssl rsa -in privkey.pem -noout -text
+// Note order swap - For MIRACL c=1/p mod q, for OpenSSL c=1/q mod p
+    public static void KEY_PAIR_FROM_OPENSSL(int e,byte[] P,byte[] Q,byte[] DP,byte[] DQ,byte[] C,private_key PRIV,public_key PUB)
+    {
+        FF.fromBytes(PRIV.p,Q);
+        FF.fromBytes(PRIV.q,P);
+        FF.fromBytes(PRIV.dp,DQ);
+        FF.fromBytes(PRIV.dq,DP);
+        FF.fromBytes(PRIV.c,C);
+		PUB.n=FF.mul(PRIV.p,PRIV.q);
+		PUB.e=e;
+    }
+
 	public static void KEY_PAIR(RAND rng,int e,private_key PRIV,public_key PUB)
 	{ /* IEEE1363 A16.11/A16.12 more or less */
 

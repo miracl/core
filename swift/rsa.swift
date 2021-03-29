@@ -65,6 +65,20 @@ public struct RSA {
 
     /* generate an RSA key pair */
 
+// Input private key from OpenSSL format
+// e.g as in openssl rsa -in privkey.pem -noout -text
+// Note order swap - For MIRACL c=1/p mod q, for OpenSSL c=1/q mod p
+    static public func KEY_PAIR_FROM_OPENSSL(_ e:Int,_ P:[UInt8],_ Q:[UInt8],_ DP:[UInt8],_ DQ:[UInt8],_ C:[UInt8],_ PRIV: inout rsa_private_key,_ PUB: inout rsa_public_key)
+    {
+        FF.fromBytes(PRIV.p,Q)
+        FF.fromBytes(PRIV.q,P)
+        FF.fromBytes(PRIV.dp,DQ)
+        FF.fromBytes(PRIV.dq,DP)
+        FF.fromBytes(PRIV.c,C)
+        PUB.n=FF.mul(PRIV.p,PRIV.q);
+        PUB.e=e;
+    }
+
     static public func KEY_PAIR(_ rng: inout RAND,_ e:Int,_ PRIV: inout rsa_private_key,_ PUB: inout rsa_public_key)
     { /* IEEE1363 A16.11/A16.12 more or less */
 
