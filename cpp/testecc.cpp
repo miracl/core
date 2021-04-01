@@ -511,7 +511,7 @@ int rsa_2048(csprng *RNG)
 {
     using namespace RSA2048;
 
-    int i;
+    int i,valid;
     unsigned long ran;
     char m[RFS_RSA2048], ml[RFS_RSA2048], c[RFS_RSA2048], e[RFS_RSA2048], s[RFS_RSA2048];
     rsa_public_key pub;
@@ -550,6 +550,8 @@ int rsa_2048(csprng *RNG)
     else
         printf("PSS Encoding FAILED\n");
 
+
+// Signature
     printf("Signing message\n");
     PKCS15(HASH_TYPE_RSA_RSA2048, &M, &C);
 
@@ -558,9 +560,20 @@ int rsa_2048(csprng *RNG)
     printf("Signature= ");
     OCT_output(&S);
 
-    RSA_ENCRYPT(&pub, &S, &ML);
 
-    if (OCT_comp(&C, &ML)) printf("Signature is valid\n");
+
+// Verification
+    valid=0;
+    RSA_ENCRYPT(&pub, &S, &ML);
+    PKCS15(HASH_TYPE_RSA_RSA2048, &M, &C);
+
+    if (OCT_comp(&C, &ML)) valid=1;
+    else {
+        PKCS15b(HASH_TYPE_RSA_RSA2048, &M, &C);
+        if (OCT_comp(&C, &ML)) valid=1;
+    }
+
+    if (valid) printf("Signature is valid\n");
     else printf("Signature is INVALID\n");
 
     RSA_PRIVATE_KEY_KILL(&priv);

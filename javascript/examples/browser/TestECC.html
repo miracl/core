@@ -507,6 +507,7 @@ function RSA2048() {
         mywindow.document.write("PSS Encoding FAILED <br>");
 
 
+// Signature
 	mywindow.document.write("Signing message <br>");
 	ctx.HMAC.PKCS15(sha,M,C,ctx.RSA.RFS);
 
@@ -514,16 +515,26 @@ function RSA2048() {
 
 	mywindow.document.write("Signature= 0x" + ctx.RSA.bytestohex(S) + "<br>");  
 
+// Verification
+	var valid=false;
 	ctx.RSA.ENCRYPT(pub,S,ML); 
+	ctx.HMAC.PKCS15(sha,M,C,ctx.RSA.RFS);
 
 	cmp=true;
-	if (C.length!=ML.length) cmp=false;
-	else
-	{
-		for (var j=0;j<C.length;j++)
+	for (var j=0;j<RSA.RFS;j++)
 			if (C[j]!=ML[j]) cmp=false;
+	
+    if (cmp)  {
+        valid=true;
+    } else {
+        ctx.HMAC.PKCS15b(sha,M,C,ctx.RSA.RFS);  
+        cmp=true;
+        for (var j = 0; j < RSA.RFS; j++)
+                if (C[j] != ML[j]) cmp = false;
+        if (cmp) valid=true;
 	}
-	if (cmp) mywindow.document.write("Signature is valid <br>");
+
+	if (valid) mywindow.document.write("Signature is valid <br>");
 	else mywindow.document.write("Signature is INVALID <br>");
 
 	ctx.RSA.PRIVATE_KEY_KILL(priv);

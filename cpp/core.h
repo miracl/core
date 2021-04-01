@@ -610,6 +610,15 @@ extern void XMD_Expand(int hash,int hlen,octet *E,int olen,octet *P,octet *S);
  */
 extern int PKCS15(int h, octet *M, octet *W);
 
+/** @brief Alternative PKCS V1.5 padding of a message prior to RSA signature
+ *
+    @param h is the hash type
+    @param M is the input message
+    @param W is the output encoding, ready for RSA signature
+    @return 1 if OK, else 0
+ */
+extern int PKCS15b(int h, octet *M, octet *W);
+
 /** @brief PSS padding of a message prior to RSA signature
  *
     @param h is the hash type

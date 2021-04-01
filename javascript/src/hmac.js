@@ -379,6 +379,12 @@ var HMAC = function(ctx) {
         SHA384ID: [0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05, 0x00, 0x04, 0x30],
         SHA512ID: [0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05, 0x00, 0x04, 0x40],
 
+        /* SHAXXX identifier strings */
+        SHA256IDb: [0x30, 0x2f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x04, 0x20],
+        SHA384IDb: [0x30, 0x3f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x04, 0x30],
+        SHA512IDb: [0x30, 0x4f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x04, 0x40],
+
+
         /* Mask Generation Function */
         MGF1: function(sha, Z, olen, K) {
             var hlen = sha,
@@ -474,6 +480,52 @@ var HMAC = function(ctx) {
             } else if (hlen == this.SHA512) {
                 for (j = 0; j < idlen; j++) {
                     w[i++] = this.SHA512ID[j];
+                }
+            }
+
+            for (j = 0; j < hlen; j++) {
+                w[i++] = H[j];
+            }
+
+            return true;
+        },
+
+// Alternate PKCS1.5
+        PKCS15b: function(sha, m, w, RFS) {
+            var olen = RFS,
+                hlen = sha,
+                idlen = 17,
+                H, i, j;
+
+            if (olen < idlen + hlen + 10) {
+                return false;
+            }
+            H = this.SPhashit(this.MC_SHA2, sha, m);
+            //H = this.hashit(sha, m, -1);
+
+            for (i = 0; i < w.length; i++) {
+                w[i] = 0;
+            }
+
+            i = 0;
+            w[i++] = 0;
+            w[i++] = 1;
+            for (j = 0; j < olen - idlen - hlen - 3; j++) {
+                w[i++] = 0xFF;
+            }
+            w[i++] = 0;
+
+            if (hlen == this.SHA256) {
+                for (j = 0; j < idlen; j++) {
+                    w[i++] = this.SHA256IDb[j];
+                }
+            } else if (hlen == this.SHA384) {
+                for (j = 0; j < idlen; j++) {
+                    w[i++] = this.SHA384IDb[j];
+                }
+            } else if (hlen == this.SHA512) {
+                for (j = 0; j < idlen; j++) {
+                    w[i++] = this.SHA512IDb[j];
                 }
             }
 

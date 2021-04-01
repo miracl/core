@@ -90,6 +90,8 @@ public class TestRSA extends TestCase {
         else
             fail("PSS Encoding FAILED");
 
+
+// Signature
         System.out.println("Signing message");
         HMAC.PKCS15(sha, M, C, RFS);
 
@@ -97,15 +99,25 @@ public class TestRSA extends TestCase {
 
         System.out.print("Signature= 0x"); printBinary(S);
 
+// Verificaction
+        boolean valid=false;
         RSA.ENCRYPT(pub, S, ML);
-
+        HMAC.PKCS15(sha, M, C, RFS);
+    
         boolean cmp = true;
-        if (C.length != ML.length) cmp = false;
-        else {
-            for (int j = 0; j < C.length; j++)
+        for (int j = 0; j < RFS; j++)
+            if (C[j] != ML[j]) cmp = false;
+        if (cmp)  {
+            valid=true;
+        } else {
+            HMAC.PKCS15b(sha, M, C, RFS);  
+            cmp=true;
+            for (int j = 0; j < RFS; j++)
                 if (C[j] != ML[j]) cmp = false;
+            if (cmp) valid=true;
         }
-        if (cmp) System.out.println("Signature is valid");
+
+        if (valid) System.out.println("Signature is valid");
         else fail("Signature is INVALID");
 
         RSA.PRIVATE_KEY_KILL(priv);

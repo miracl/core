@@ -86,27 +86,39 @@ public func TestRSA_2048(_ rng: inout RAND)
         print("PSS Encoding FAILED\n");
     }
 
+
+// Signature
     print("Signing message")
     HMAC.PKCS15(RSA.HASH_TYPE,M,&C,RFS)
 
     RSA.DECRYPT(priv,C,&S); //  create signature in S
     print("Signature= 0x",terminator: ""); printBinary(S)
 
+// Verification
+    var valid=false;
     RSA.ENCRYPT(pub,S,&ML);
+    HMAC.PKCS15(RSA.HASH_TYPE,M,&C,RFS)
 
     var cmp=true
-    if C.count != ML.count {cmp=false}
-    else
-    {
-        for j in 0 ..< C.count
-        {
+    for j in 0 ..< RFS {
+        if C[j] != ML[j] {cmp=false}
+    }
+    
+    if cmp {
+        valid=true
+    } else {
+        HMAC.PKCS15b(RSA.HASH_TYPE,M,&C,RFS)
+        cmp=true
+        for j in 0 ..< RFS {
             if C[j] != ML[j] {cmp=false}
+        }
+        if cmp {
+            valid=true
         }
     }
 
-    if cmp {print("\nSignature is valid\n")}
+    if valid {print("\nSignature is valid\n")}
     else {print("\nSignature is INVALID\n")}
-
 
     RSA.PRIVATE_KEY_KILL(priv);
 }

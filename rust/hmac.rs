@@ -441,7 +441,7 @@ pub fn mgf1xor(sha: usize, z: &[u8], olen: usize, k: &mut [u8]) {
     }
 }
 
-
+// PKCS 1.5
 /* SHAXXX identifier strings */
 const SHA256ID: [u8; 19] = [
     0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05,
@@ -466,7 +466,6 @@ pub fn pkcs15(sha: usize, m: &[u8], w: &mut [u8],rfs: usize) -> bool {
         return false;
     }
     SPhashit(MC_SHA2,sha,&mut b,Some(m));
-    //hashit(sha, Some(m), -1, &mut b);
 
     for i in 0..w.len() {
         w[i] = 0
@@ -482,7 +481,6 @@ pub fn pkcs15(sha: usize, m: &[u8], w: &mut [u8],rfs: usize) -> bool {
     }
     w[i] = 0;
     i += 1;
-
     if hlen == SHA256 {
         for j in 0..idlen {
             w[i] = SHA256ID[j];
@@ -505,9 +503,67 @@ pub fn pkcs15(sha: usize, m: &[u8], w: &mut [u8],rfs: usize) -> bool {
         w[i] = b[j];
         i += 1
     }
-
     true
 }
+
+// Alternate PKCS 1.5
+/* SHAXXX identifier strings */
+const SHA256IDB: [u8; 17] = [
+    0x30, 0x2f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x04, 0x20];
+const SHA384IDB: [u8; 17] = [
+    0x30, 0x3f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x04, 0x30];
+const SHA512IDB: [u8; 17] = [
+    0x30, 0x4f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x04, 0x40];
+
+pub fn pkcs15b(sha: usize, m: &[u8], w: &mut [u8],rfs: usize) -> bool {
+    let olen = rfs;
+    let hlen = sha;
+    let idlen = 17;
+    let mut b: [u8; 64] = [0; 64]; /* Not good */
+
+    if olen < idlen + hlen + 10 {
+        return false;
+    }
+    SPhashit(MC_SHA2,sha,&mut b,Some(m));
+    for i in 0..w.len() {
+        w[i] = 0
+    }
+    let mut i = 0;
+    w[i] = 0;
+    i += 1;
+    w[i] = 1;
+    i += 1;
+    for _ in 0..olen - idlen - hlen - 3 {
+        w[i] = 0xff;
+        i += 1
+    }
+    w[i] = 0;
+    i += 1;
+    if hlen == SHA256 {
+        for j in 0..idlen {
+            w[i] = SHA256IDB[j];
+            i += 1
+        }
+    }
+    if hlen == SHA384 {
+        for j in 0..idlen {
+            w[i] = SHA384IDB[j];
+            i += 1
+        }
+    }
+    if hlen == SHA512 {
+        for j in 0..idlen {
+            w[i] = SHA512IDB[j];
+            i += 1
+        }
+    }
+    for j in 0..hlen {
+        w[i] = b[j];
+        i += 1
+    }
+    true
+}
+
 /*
 pub fn printbinary(array: &[u8]) {
     for i in 0..array.len() {

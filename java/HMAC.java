@@ -401,6 +401,42 @@ public final class HMAC {
 		return true;
 	}
 
+/* SHAXXX identifier strings */
+	private static final byte[] SHA256IDb={0x30,0x2f,0x30,0x0b,0x06,0x09,0x60,(byte)0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x01,0x04,0x20};
+	private static final byte[] SHA384IDb={0x30,0x3f,0x30,0x0b,0x06,0x09,0x60,(byte)0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x02,0x04,0x30};
+	private static final byte[] SHA512IDb={0x30,0x4f,0x30,0x0b,0x06,0x09,0x60,(byte)0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x03,0x04,0x40};
+
+/* Alternate PKCS 1.5 padding of a message to be signed */
+
+	public static boolean PKCS15b(int sha,byte[] m,byte[] w,int RFS)
+	{
+		int olen=RFS;
+		int i,hlen=sha;
+		int idlen=17; 
+
+		if (olen<idlen+hlen+10) return false;
+		//byte[] H=hashit(sha,m,-1);
+        byte[] H=SPhashit(MC_SHA2,sha,m);
+
+		for (i=0;i<w.length;i++) w[i]=0;
+		i=0;
+		w[i++]=0;
+		w[i++]=1;
+		for (int j=0;j<olen-idlen-hlen-3;j++)
+			w[i++]=(byte)0xff;
+		w[i++]=0;
+
+
+		if (hlen==32) for (int j=0;j<idlen;j++) w[i++]=SHA256IDb[j];
+		if (hlen==48) for (int j=0;j<idlen;j++) w[i++]=SHA384IDb[j];
+		if (hlen==64) for (int j=0;j<idlen;j++) w[i++]=SHA512IDb[j];
+
+		for (int j=0;j<hlen;j++)
+			w[i++]=H[j];
+
+		return true;
+	}
+
     public static byte[] PSS_ENCODE(int sha,byte[] m,RAND rng,int RFS)
     {
         int emlen=RFS;

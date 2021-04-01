@@ -395,7 +395,6 @@ int core::PKCS15(int sha, octet *m, octet *w)
 
     if (olen < idlen + hlen + 10) return 0;
     GPhash(MC_SHA2,sha,&H,0,0,m,-1,NULL);
-    //hashit(sha, m, -1, &H);
 
     OCT_empty(w);
     OCT_jbyte(w, 0x00, 1);
@@ -406,6 +405,41 @@ int core::PKCS15(int sha, octet *m, octet *w)
     if (hlen == 32) OCT_jbytes(w, (char *)SHA256ID, idlen);
     if (hlen == 48) OCT_jbytes(w, (char *)SHA384ID, idlen);
     if (hlen == 64) OCT_jbytes(w, (char *)SHA512ID, idlen);
+
+    OCT_joctet(w, &H);
+
+    return 1;
+}
+
+/* Alternate form, without the NULL 0500
+
+/* SHAXXX identifier strings */
+const unsigned char SHA256IDb[] = {0x30, 0x2f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x04, 0x20};
+const unsigned char SHA384IDb[] = {0x30, 0x3f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x04, 0x30};
+const unsigned char SHA512IDb[] = {0x30, 0x4f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x04, 0x40};
+
+/* PKCS 1.5 padding of a message to be signed */
+
+int core::PKCS15b(int sha, octet *m, octet *w)
+{
+    int olen = w->max;
+    int hlen = sha;
+    int idlen = 17;
+    char h[64];
+    octet H = {0, sizeof(h), h};
+
+    if (olen < idlen + hlen + 10) return 0;
+    GPhash(MC_SHA2,sha,&H,0,0,m,-1,NULL);
+
+    OCT_empty(w);
+    OCT_jbyte(w, 0x00, 1);
+    OCT_jbyte(w, 0x01, 1);
+    OCT_jbyte(w, 0xff, olen - idlen - hlen - 3);
+    OCT_jbyte(w, 0x00, 1);
+
+    if (hlen == 32) OCT_jbytes(w, (char *)SHA256IDb, idlen);
+    if (hlen == 48) OCT_jbytes(w, (char *)SHA384IDb, idlen);
+    if (hlen == 64) OCT_jbytes(w, (char *)SHA512IDb, idlen);
 
     OCT_joctet(w, &H);
 

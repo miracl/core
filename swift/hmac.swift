@@ -423,6 +423,51 @@ public struct HMAC
         return true
     }
 
+    static let SHA256IDb:[UInt8]=[0x30,0x2f,0x30,0x0b,0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x01,0x04,0x20]
+    static let SHA384IDb:[UInt8]=[0x30,0x3f,0x30,0x0b,0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x02,0x04,0x30]
+    static let SHA512IDb:[UInt8]=[0x30,0x4f,0x30,0x0b,0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x03,0x04,0x40]
+
+    /* PKCS 1.5 padding of a message to be signed */
+    @discardableResult static public func PKCS15b(_ sha:Int,_ m:[UInt8],_ w:inout [UInt8],_ RFS:Int)->Bool
+    {
+        let hlen=sha
+        let olen=RFS
+        let idlen=17;
+
+        if olen<idlen+hlen+10 {return false}
+        let H=HMAC.SPhashit(HMAC.MC_SHA2,sha,m)
+
+        for i in 0 ..< w.count {w[i]=0}
+
+        w[0]=0
+        w[1]=1
+        var i=2
+        var j=0
+
+        while j<olen-idlen-hlen-3
+        {
+            w[i]=0xff
+            i+=1; j+=1
+        }
+        w[i]=0; i+=1;
+
+        if hlen==HMAC.SHA256
+        {
+            for j in 0 ..< idlen {w[i]=SHA256IDb[j]; i+=1}
+        }
+        if hlen==HMAC.SHA384
+        {
+            for j in 0 ..< idlen {w[i]=SHA384IDb[j]; i+=1}
+        }
+        if hlen==HMAC.SHA512
+        {
+            for j in 0 ..< idlen {w[i]=SHA512IDb[j]; i+=1}
+        }
+
+        for j in 0 ..< hlen {w[i]=H[j];i+=1}
+
+        return true
+    }
 
     static public func PSS_ENCODE(_ sha:Int,_ m:[UInt8],_ rng: inout RAND,_ RFS:Int) -> [UInt8]
     {

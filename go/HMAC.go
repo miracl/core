@@ -523,6 +523,63 @@ func RSA_PKCS15(sha int, m []byte, w []byte, RFS int) bool {
 	return true
 }
 
+/* SHAXXX identifier strings */
+var SHA256IDb = [...]byte{0x30, 0x2f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x04, 0x20}
+var SHA384IDb = [...]byte{0x30, 0x3f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x04, 0x30}
+var SHA512IDb = [...]byte{0x30, 0x4f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x04, 0x40}
+
+func RSA_PKCS15b(sha int, m []byte, w []byte, RFS int) bool {
+	olen := RFS
+	hlen := sha
+	idlen := 17
+
+	if olen < idlen+hlen+10 {
+		return false
+	}
+	H := SPhashit(MC_SHA2,sha,m)
+	//H := hashit(sha, m, -1)
+
+	for i := 0; i < len(w); i++ {
+		w[i] = 0
+	}
+	i := 0
+	w[i] = 0
+	i++
+	w[i] = 1
+	i++
+	for j := 0; j < olen-idlen-hlen-3; j++ {
+		w[i] = 0xff
+		i++
+	}
+	w[i] = 0
+	i++
+
+	if hlen == SHA256 {
+		for j := 0; j < idlen; j++ {
+			w[i] = SHA256IDb[j]
+			i++
+		}
+	}
+	if hlen == SHA384 {
+		for j := 0; j < idlen; j++ {
+			w[i] = SHA384IDb[j]
+			i++
+		}
+	}
+	if hlen == SHA512 {
+		for j := 0; j < idlen; j++ {
+			w[i] = SHA512IDb[j]
+			i++
+		}
+	}
+	for j := 0; j < hlen; j++ {
+		w[i] = H[j]
+		i++
+	}
+	return true
+}
+
+
 func RSA_PSS_ENCODE(sha int, m []byte, rng *RAND, RFS int) []byte {
 	emlen:=RFS
 	embits:=8*emlen-1

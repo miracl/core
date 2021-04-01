@@ -507,6 +507,8 @@ func rsa_2048(rng *core.RAND) {
         fmt.Printf("PSS Encoding FAILED\n")
 	}
 
+
+// Signature
 	fmt.Printf("Signing message\n")
 	core.RSA_PKCS15(sha, M, C[:],RSA2048.RFS)
 
@@ -515,19 +517,33 @@ func rsa_2048(rng *core.RAND) {
 	fmt.Printf("Signature= 0x")
 	printBinary(S[:])
 
+// Verification
+	valid:=false
 	RSA2048.RSA_ENCRYPT(pub, S[:], ML[:])
+	core.RSA_PKCS15(sha, M, C[:],RSA2048.RFS)
 
 	cmp := true
-	if len(C) != len(ML) {
-		cmp = false
+	for j := 0; j < RSA2048.RFS; j++ {
+		if C[j] != ML[j] {
+			cmp = false
+		}
+	}
+	if cmp {
+		valid=true
 	} else {
-		for j := 0; j < len(C); j++ {
+		core.RSA_PKCS15b(sha, M, C[:],RSA2048.RFS)
+		cmp=true
+		for j := 0; j < RSA2048.RFS; j++ {
 			if C[j] != ML[j] {
 				cmp = false
 			}
 		}
+		if cmp {
+			valid=true
+		}
 	}
-	if cmp {
+
+	if valid {
 		fmt.Printf("Signature is valid\n")
 	} else {
 		fmt.Printf("Signature is INVALID\n")

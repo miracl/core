@@ -535,6 +535,8 @@ fn rsa_2048(rng: &mut impl RAND) {
         println!("PSS Encoding FAILED");
     }
 
+
+// Signature
     println!("Signing message");
     hmac::pkcs15(sha, message, &mut c, RFS);
 
@@ -543,19 +545,33 @@ fn rsa_2048(rng: &mut impl RAND) {
     print!("Signature= 0x");
     printbinary(&s);
 
+// Verification
+    let mut valid=false;
     rsa::encrypt(&pbc, &s, &mut ms);
+    hmac::pkcs15(sha, message, &mut c, RFS);
 
     let mut cmp = true;
-    if c.len() != ms.len() {
-        cmp = false;
-    } else {
-        for j in 0..c.len() {
+    for j in 0..RFS {
+        if c[j] != ms[j] {
+            cmp = false
+        }
+    }
+    if cmp {
+        valid=true;
+    } else { // try alternate PKCS1.5 encoding
+        hmac::pkcs15b(sha, message, &mut c, RFS); 
+        cmp = true;
+        for j in 0..RFS {
             if c[j] != ms[j] {
                 cmp = false
             }
         }
+        if cmp {
+            valid=true;
+        }
     }
-    if cmp {
+
+    if valid {
         println!("Signature is valid");
     } else {
         println!("Signature is INVALID");
