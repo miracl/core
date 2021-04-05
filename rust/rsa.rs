@@ -74,12 +74,16 @@ pub fn set_public_key(pk: &mut RsaPublicKey,e: isize, f: &[u8]) {
 // Input private key from OpenSSL format
 // e.g as in openssl rsa -in privkey.pem -noout -text
 // Note order swap - For MIRACL c=1/p mod q, for OpenSSL c=1/q mod p
-pub fn key_pair_from_openssl(e: isize, p: &[u8],q: &[u8],dp: &[u8],dq: &[u8],c: &[u8], prv: &mut RsaPrivateKey, pbc: &mut RsaPublicKey) {
+pub fn rsa_private_key_from_openssl(p: &[u8],q: &[u8],dp: &[u8],dq: &[u8],c: &[u8], prv: &mut RsaPrivateKey) {
     prv.p.frombytes(q);
     prv.q.frombytes(p);
     prv.dp.frombytes(dq);
     prv.dq.frombytes(dp);
-    prv.c.frombytes(c);
+    prv.c.frombytes(c);    
+}
+
+pub fn key_pair_from_openssl(e: isize, p: &[u8],q: &[u8],dp: &[u8],dq: &[u8],c: &[u8], prv: &mut RsaPrivateKey, pbc: &mut RsaPublicKey) {
+    rsa_private_key_from_openssl(p,q,dp,dq,c,prv);
     pbc.n = prv.p.mul(&prv.q);
     pbc.e = e;
 }

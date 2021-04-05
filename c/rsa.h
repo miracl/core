@@ -64,6 +64,17 @@ typedef struct
     BIG_XXX c[FFLEN_WWW / 2]; /**< 1/p mod q */
 } rsa_private_key_WWW;
 
+/** @brief RSA Private KEy from OpenSSL 
+ *
+    @param P Input prime number
+    @param Q Input prime number
+    @param DP Input 1/e mod p-1
+    @param DQ Input 1/e mod q-1
+    @param C Input 1/p mod q
+    @param PRIV the output RSA private key
+ */
+extern void RSA_WWW_PRIVATE_KEY_FROM_OPENSSL(octet *P,octet* Q,octet *DP,octet *DQ,octet *C,rsa_private_key_WWW *PRIV);
+
 /** @brief RSA Key Pair from OpenSSL 
  *
     @param e the encryption exponent

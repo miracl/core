@@ -57,12 +57,16 @@ func New_public_key(m int) *rsa_public_key {
 // Input private key from OpenSSL format
 // e.g as in openssl rsa -in privkey.pem -noout -text
 // Note order swap - For MIRACL c=1/p mod q, for OpenSSL c=1/q mod p
-func RSA_KEY_PAIR_FROM_OPENSSL(e int,P []byte, Q []byte,DP []byte, DQ []byte, C []byte, PRIV *rsa_private_key, PUB *rsa_public_key) {
+func RSA_PRIVATE_KEY_FROM_OPENSSL(P []byte, Q []byte,DP []byte, DQ []byte, C []byte, PRIV *rsa_private_key) {
     ff_fromBytes(PRIV.p,Q)
     ff_fromBytes(PRIV.q,P)
     ff_fromBytes(PRIV.dp,DQ)
     ff_fromBytes(PRIV.dq,DP)
     ff_fromBytes(PRIV.c,C)
+}
+
+func RSA_KEY_PAIR_FROM_OPENSSL(e int,P []byte, Q []byte,DP []byte, DQ []byte, C []byte, PRIV *rsa_private_key, PUB *rsa_public_key) {
+	RSA_PRIVATE_KEY_FROM_OPENSSL(P,Q,DP,DQ,C,PRIV)
 	PUB.n = ff_mul(PRIV.p, PRIV.q)
 	PUB.e = e
 }

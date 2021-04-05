@@ -102,13 +102,19 @@ void RSA_WWW_KEY_PAIR(csprng *RNG, sign32 e, rsa_private_key_WWW *PRIV, rsa_publ
 
 // Input private key from OpenSSL format
 // e.g as in openssl rsa -in privkey.pem -noout -text
-void RSA_WWW_KEY_PAIR_FROM_OPENSSL(sign32 e,octet *P,octet* Q,octet *DP,octet *DQ,octet *C,rsa_private_key_WWW *PRIV,rsa_public_key_WWW *PUB)
-{ // Note order swap - For MIRACL c=1/p mod q, for OpenSSL c=1/q mod p
+// Note order swap - For MIRACL c=1/p mod q, for OpenSSL c=1/q mod p
+void RSA_WWW_PRIVATE_KEY_FROM_OPENSSL(octet *P,octet* Q,octet *DP,octet *DQ,octet *C,rsa_private_key_WWW *PRIV)
+{
     FF_WWW_fromOctet(PRIV->p,Q,HFLEN_WWW);
     FF_WWW_fromOctet(PRIV->q,P,HFLEN_WWW);   
     FF_WWW_fromOctet(PRIV->dp,DQ,HFLEN_WWW);
     FF_WWW_fromOctet(PRIV->dq,DP,HFLEN_WWW);
     FF_WWW_fromOctet(PRIV->c,C,HFLEN_WWW);
+}
+
+void RSA_WWW_KEY_PAIR_FROM_OPENSSL(sign32 e,octet *P,octet* Q,octet *DP,octet *DQ,octet *C,rsa_private_key_WWW *PRIV,rsa_public_key_WWW *PUB)
+{ 
+    RSA_WWW_PRIVATE_KEY_FROM_OPENSSL(P,Q,DP,DQ,C,PRIV);
     FF_WWW_mul(PUB->n, PRIV->p, PRIV->q, HFLEN_WWW);
     PUB->e = e;
 }

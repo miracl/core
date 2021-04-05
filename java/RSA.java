@@ -40,13 +40,18 @@ public final class RSA {
 // Input private key from OpenSSL format
 // e.g as in openssl rsa -in privkey.pem -noout -text
 // Note order swap - For MIRACL c=1/p mod q, for OpenSSL c=1/q mod p
-    public static void KEY_PAIR_FROM_OPENSSL(int e,byte[] P,byte[] Q,byte[] DP,byte[] DQ,byte[] C,private_key PRIV,public_key PUB)
+    public static void PRIVATE_KEY_FROM_OPENSSL(byte[] P,byte[] Q,byte[] DP,byte[] DQ,byte[] C,private_key PRIV)
     {
         FF.fromBytes(PRIV.p,Q);
         FF.fromBytes(PRIV.q,P);
         FF.fromBytes(PRIV.dp,DQ);
         FF.fromBytes(PRIV.dq,DP);
         FF.fromBytes(PRIV.c,C);
+    }
+
+    public static void KEY_PAIR_FROM_OPENSSL(int e,byte[] P,byte[] Q,byte[] DP,byte[] DQ,byte[] C,private_key PRIV,public_key PUB)
+    {
+        PRIVATE_KEY_FROM_OPENSSL(P,Q,DP,DQ,C,PRIV);
 		PUB.n=FF.mul(PRIV.p,PRIV.q);
 		PUB.e=e;
     }

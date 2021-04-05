@@ -68,6 +68,14 @@ RSA = function(ctx) {
 // Input private key from OpenSSL format
 // e.g as in openssl rsa -in privkey.pem -noout -text
 // Note order swap - For MIRACL c=1/p mod q, for OpenSSL c=1/q mod p
+        PRIVATE_KEY_FROM_OPENSSL: function(P,Q,DP,DQ,C,PRIV) {
+            ctx.FF.fromBytes(PRIV.p,Q);
+            ctx.FF.fromBytes(PRIV.q,P);
+            ctx.FF.fromBytes(PRIV.dp,DQ);
+            ctx.FF.fromBytes(PRIV.dq,DP);
+            ctx.FF.fromBytes(PRIV.c,C);
+        },
+        
         KEY_PAIR_FROM_OPENSSL: function(e,P,Q,DP,DQ,C,PRIV,PUB) {
             ctx.FF.fromBytes(PRIV.p,Q);
             ctx.FF.fromBytes(PRIV.q,P);
