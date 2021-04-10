@@ -59,6 +59,7 @@ const NUL: u8 = 0x05;
 //const ZER: u8 = 0x00;
 //const UTF: u8 = 0x0C;
 const UTC: u8 = 0x17;
+const GTM: u8 = 0x18;
 //const LOG: u8 = 0x01;
 const BIT: u8 = 0x03;
 const OCT: u8 = 0x04;
@@ -870,10 +871,16 @@ pub fn find_start_date(c: &[u8],start: usize) -> usize {
     j+=skip(len);
 
     len=getalen(UTC,c,j);
-    if len==0 {
-        return 0;
+    if len==0 { // could be generalised time
+        len=getalen(GTM,c,j);
+        if len==0 {
+            return 0;
+        }
+        j += skip(len);
+        j +=2; // skip century
+    } else {
+        j+=skip(len);
     }
-    j+=skip(len);
     return j;
 }
 
@@ -887,15 +894,24 @@ pub fn find_expiry_date(c: &[u8],start: usize) -> usize {
 
     len=getalen(UTC,c,j);
     if len==0 {
-        return 0;
+        len=getalen(GTM,c,j);
+        if len==0 {
+            return 0;
+        }
     }
     j+=skip(len)+len;
 
     len=getalen(UTC,c,j);
-    if len==0 {
-        return 0;
+    if len==0 { // could be generalised time
+        len=getalen(GTM,c,j);
+        if len==0 {
+            return 0;
+        }
+        j += skip(len);
+        j +=2;  // skip century
+    } else {
+        j+=skip(len);
     }
-    j+=skip(len);
     return j;
 }
 

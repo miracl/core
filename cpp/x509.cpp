@@ -33,6 +33,7 @@
 #define ZER 0x00
 #define UTF 0x0C
 #define UTC 0x17
+#define GTM 0x18
 #define LOG 0x01
 #define BIT 0x03
 #define OCT 0x04
@@ -823,8 +824,14 @@ int X509_find_start_date(octet *c, int start)
     j += skip(len);
 
     len = getalen(UTC, c->val, j);
-    if (len < 0) return 0;
-    j += skip(len);
+    if (len < 0) 
+    {  // could be generalised time 
+        len = getalen(GTM, c->val, j);
+        if (len<0) return 0;
+        j += skip(len);
+        j += 2; // skip century
+    }
+    else j += skip(len);
     return j;
 }
 
@@ -839,12 +846,22 @@ int X509_find_expiry_date(octet *c, int start)
     j += skip(len);
 
     len = getalen(UTC, c->val, j);
-    if (len < 0) return 0;
+    if (len < 0) 
+    {
+        len = getalen(GTM,c->val,j);
+        if (len<0) return 0;
+    }
     j += skip(len) + len;
 
     len = getalen(UTC, c->val, j);
-    if (len < 0) return 0;
-    j += skip(len);
+    if (len < 0) 
+    {
+        len = getalen(GTM, c->val,j);
+        if (len<0) return 0;
+        j+=skip(len);
+        j+=2; // skip century
+    }
+    else j += skip(len);
 
     return j;
 }
