@@ -177,14 +177,14 @@ var HMAC = function(ctx) {
                     S[Salt.length + j] = N[j];
                 }
 
-                this.HMAC1(hash, sha, F, sha, Pass, S);
+                this.HMAC1(hash, sha, F, sha, S, Pass);
 
                 for (j = 0; j < sha; j++) {
                     U[j] = F[j];
                 }
 
                 for (j = 2; j <= rep; j++) {
-                    this.HMAC1(hash, sha, U, sha, Pass, U);
+                    this.HMAC1(hash, sha, U, sha, U, Pass);
                     for (k = 0; k < sha; k++) {
                         F[k] ^= U[k];
                     }

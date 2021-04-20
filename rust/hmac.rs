@@ -199,16 +199,17 @@ pub fn pbkdf2(hash: usize, sha: usize, pass: &[u8], salt: &[u8], rep: usize, ole
             s[sl + j] = n[j]
         }
 
-        hmac1(hash, sha, &mut f, sha, pass, &s[0..sl + 4]);
+        hmac1(hash, sha, &mut f, sha, &s[0..sl + 4], pass);
 
         for j in 0..sha {
             u[j] = f[j]
         }
+
         for _ in 1..rep {
-            hmac1(hash, sha, &mut ku, sha, pass, &u);
-            for k in 0..sha {
-                u[k] = ku[k];
-                f[k] ^= u[k]
+            hmac1(hash, sha, &mut ku, sha, &u, pass);
+            for m in 0..sha {
+                u[m] = ku[m];
+                f[m] ^= u[m]
             }
         }
         for j in 0..sha {
@@ -266,6 +267,7 @@ pub fn hmac1(hash: usize, sha: usize, tag: &mut [u8], olen: usize, k: &[u8], m: 
     for i in 0..lb {
         k0[i] ^= 0x36
     }
+
     GPhashit(hash, sha, &mut b,0,0,Some(&k0[0..lb]), -1, Some(m));
 
     for i in 0..lb {
@@ -564,14 +566,6 @@ pub fn pkcs15b(sha: usize, m: &[u8], w: &mut [u8],rfs: usize) -> bool {
     true
 }
 
-/*
-pub fn printbinary(array: &[u8]) {
-    for i in 0..array.len() {
-        print!("{:02X}", array[i])
-    }
-    println!("")
-}
-*/
 pub fn pss_encode(sha: usize, m: &[u8], rng: &mut impl RAND, f: &mut [u8], rfs: usize) -> bool {
     let emlen=rfs;
     let embits=8*emlen-1;
@@ -680,6 +674,8 @@ pub fn pss_verify(sha: usize, m: &[u8],f: &[u8]) -> bool {
     }
     true
 }
+
+
 /* OAEP Message Encoding for Encryption */
 pub fn oaep_encode(sha: usize, m: &[u8], rng: &mut impl RAND, p: Option<&[u8]>, f: &mut [u8], rfs: usize) -> bool {
     let olen = rfs - 1;
@@ -712,7 +708,7 @@ pub fn oaep_encode(sha: usize, m: &[u8], rng: &mut impl RAND, p: Option<&[u8]>, 
         seed[i] = rng.getbyte()
     }
 
-    mgf1(sha, &seed, olen - seedlen, &mut dbmask);
+    mgf1(sha, &seed[0..seedlen], olen - seedlen, &mut dbmask);
 
     for i in 0..olen - seedlen {
         dbmask[i] ^= f[i]
@@ -775,7 +771,7 @@ pub fn oaep_decode(sha: usize, p: Option<&[u8]>, f: &mut [u8],rfs :usize) -> usi
     for i in 0..seedlen {
         seed[i] ^= f[i + 1]
     }
-    mgf1(sha, &seed, olen - seedlen, f);
+    mgf1(sha, &seed[0..seedlen], olen - seedlen, f);
     for i in 0..olen - seedlen {
         dbmask[i] ^= f[i]
     }

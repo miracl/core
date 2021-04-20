@@ -149,11 +149,11 @@ public final class HMAC {
             byte[] N = inttoBytes(i, 4);
             for (j = 0; j < 4; j++) S[Salt.length + j] = N[j];
 
-            HMAC1(hash, sha, F, sha, Pass, S);
+            HMAC1(hash, sha, F, sha, S, Pass);
 
             for (j = 0; j < sha; j++) U[j] = F[j];
             for (j = 2; j <= rep; j++) {
-                HMAC1(hash, sha, U, sha, Pass, U);
+                HMAC1(hash, sha, U, sha, U, Pass);
                 for (k = 0; k < sha; k++) F[k] ^= U[k];
             }
             for (j = 0; j < sha; j++) K[opt++] = F[j];

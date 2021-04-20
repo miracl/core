@@ -164,12 +164,12 @@ public struct HMAC
             let N=HMAC.inttoBytes(i,4);
             for j in 0 ..< 4 {S[Salt.count+j]=N[j]}
 
-            HMAC1(hf, sha,&F,sha,Pass,S);
+            HMAC1(hf, sha,&F,sha,S,Pass);
 
             for j in 0 ..< sha {U[j]=F[j]}
             for _ in 2...rep
             {
-                HMAC1(hf, sha,&U,sha,Pass,U);
+                HMAC1(hf, sha,&U,sha,U,Pass);
                 for k in 0 ..< sha {F[k]^=U[k]}
             }
             for j in 0 ..< sha {K[opt]=F[j]; opt+=1}

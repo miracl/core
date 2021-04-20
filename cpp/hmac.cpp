@@ -161,7 +161,9 @@ void core::HMAC(int hash,int hlen,octet *TAG,int olen,octet *K,octet *M)
     else              OCT_copy(&K0,K);
 
     OCT_jbyte(&K0,0,blk-K0.len); 
+
     OCT_xorbyte(&K0,0x36);
+
 
     GPhash(hash,hlen,&H,0,0,&K0,-1,M); 
 

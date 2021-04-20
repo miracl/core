@@ -603,7 +603,7 @@ int main()
     RAW.val[1] = ran >> 8;
     RAW.val[2] = ran >> 16;
     RAW.val[3] = ran >> 24;
-    for (i = 4; i < 100; i++) RAW.val[i] = i;
+    for (i = 0; i < 100; i++) RAW.val[i] = i;
 
     CREATE_CSPRNG(&RNG, &RAW);  // initialise strong RNG
 

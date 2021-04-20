@@ -339,7 +339,7 @@ void ECP_ZZZ_ECIES_ENCRYPT(int hlen, octet *P1, octet *P2, csprng *RNG, octet *W
     len = C->len;
     OCT_joctet(C, P2);
     OCT_joctet(C, &L2);
-    HMAC(MC_SHA2, hlen, T, tlen, C, &K2);
+    HMAC(MC_SHA2, hlen, T, tlen, &K2, C);
     C->len = len;
 }
 
@@ -378,7 +378,7 @@ int ECP_ZZZ_ECIES_DECRYPT(int hlen, octet *P1, octet *P2, octet *V, octet *C, oc
     len = C->len;
     OCT_joctet(C, P2);
     OCT_joctet(C, &L2);
-    HMAC(MC_SHA2, hlen, &TAG, T->len, C, &K2);
+    HMAC(MC_SHA2, hlen, &TAG, T->len, &K2, C);
     C->len = len;
 
     if (!OCT_ncomp(T, &TAG, T->len)) return 0;

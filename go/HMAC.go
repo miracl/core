@@ -212,13 +212,13 @@ func PBKDF2(hash int, sha int, Pass []byte, Salt []byte, rep int, olen int) []by
 			S = append(S, N[j])
 		}
 
-		HMAC(MC_SHA2, sha, F[:], sha, Pass, S)
+		HMAC(MC_SHA2, sha, F[:], sha, S, Pass)
 
 		for j := 0; j < sha; j++ {
 			U[j] = F[j]
 		}
 		for j := 2; j <= rep; j++ {
-			HMAC(MC_SHA2, sha, U[:], sha, Pass, U[:])
+			HMAC(MC_SHA2, sha, U[:], sha, U[:], Pass)
 			for k := 0; k < sha; k++ {
 				F[k] ^= U[k]
 			}

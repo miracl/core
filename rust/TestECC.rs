@@ -69,7 +69,7 @@ fn ecdh_ed25519(rng: &mut impl RAND) {
     println!("Curve ed25519");
     println!("Alice's Passphrase= {}", pw);
 
-    let mut s0: [u8; EFS] = [0; EGS];
+    let mut s0: [u8; EGS] = [0; EGS];
     hmac::pbkdf2(hmac::MC_SHA2, sha, pp, &salt, 1000, EGS, &mut s0);
 
     print!("Alice's private key= 0x");
@@ -222,7 +222,7 @@ fn ecdh_nist256(rng: &mut impl RAND) {
     println!("Curve nist256");
     println!("Alice's Passphrase= {}", pw);
 
-    let mut s0: [u8; EFS] = [0; EGS];
+    let mut s0: [u8; EGS] = [0; EGS];
     hmac::pbkdf2(hmac::MC_SHA2, sha, pp, &salt, 1000, EGS, &mut s0);
 
     print!("Alice's private key= 0x");
@@ -376,7 +376,7 @@ fn ecdh_goldilocks(rng: &mut impl RAND) {
     println!("Curve goldilocks");
     println!("Alice's Passphrase= {}", pw);
 
-    let mut s0: [u8; EFS] = [0; EGS];
+    let mut s0: [u8; EGS] = [0; EGS];
     hmac::pbkdf2(hmac::MC_SHA2, sha, pp, &salt, 1000, EGS, &mut s0);
 
     print!("Alice's private key= 0x");
