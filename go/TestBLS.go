@@ -67,7 +67,7 @@ func bls_BN254(rng *core.RAND) {
         IKM[i]=byte(rng.GetByte())
 	}
 
-	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
+	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature on BN254 curve\n")
 	mess := "This is a test message"
 
 	res := BN254.Init()
@@ -116,7 +116,7 @@ func bls_BLS12383(rng *core.RAND) {
         IKM[i]=byte(rng.GetByte())
 	}
 
-	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
+	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature on BLS12383 curve\n")
 	mess := "This is a test message"
 
 	res := BLS12383.Init()
@@ -165,7 +165,7 @@ func bls_BLS24479(rng *core.RAND) {
         IKM[i]=byte(rng.GetByte())
 	}
 
-	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
+	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature on BLS24479 curve\n")
 	mess := "This is a test message"
 
 	res := BLS24479.Init()
@@ -214,7 +214,7 @@ func bls_BLS48556(rng *core.RAND) {
         IKM[i]=byte(rng.GetByte())
 	}
 
-	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature code\n")
+	fmt.Printf("\nTesting Boneh-Lynn-Shacham BLS signature on BLS48556 curve\n")
 	mess := "This is a test message"
 
 	res := BLS48556.Init()

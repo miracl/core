@@ -80,7 +80,7 @@
 #define BIG_BN_randomnum BIG_256_28_randomnum
 #define BIG_BN_randtrunc BIG_256_28_randtrunc
 
-#define BIG_BLS12 BIG_384_29
+#define BIG_BLS12 BIG_384_29   // 384
 #define BIG_BLS12_rcopy BIG_384_29_rcopy
 #define BIG_BLS12_randomnum BIG_384_29_randomnum
 #define BIG_BLS12_randtrunc BIG_384_29_randtrunc

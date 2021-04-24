@@ -254,10 +254,10 @@ fn main() {
 
     println!("Testing BLS signature for curve bn254");
     bls_bn254(&mut rng);
-    println!("\nTesting BLS signature for curve bls383");
+    println!("\nTesting BLS signature for curve bls12383");
     bls_bls12383(&mut rng);
-    println!("\nTesting BLS signature for curve bls24");
+    println!("\nTesting BLS signature for curve bls24479");
     bls_bls24479(&mut rng);
-    println!("\nTesting BLS signature for curve bls48");
+    println!("\nTesting BLS signature for curve bls48556");
     bls_bls48556(&mut rng);
 }

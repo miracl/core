@@ -328,21 +328,22 @@ if __name__ == '__main__':
     print("31. bls12381")
     print("32. fp256BN")
     print("33. fp512BN")
-    print("34. bls12461")
-    print("35. bn462")
-    print("36. bls24479")
-    print("37. bls48556")
-    print("38. bls48581")
-    print("39. bls48286\n")
+    print("34. bls12443")
+    print("35. bls12461")
+    print("36. bn462")
+    print("37. bls24479")
+    print("38. bls48556")
+    print("39. bls48581")
+    print("40. bls48286\n")
 
     print("RSA")
-    print("40. rsa2048")
-    print("41. rsa3072")
-    print("42. rsa4096")
+    print("41. rsa2048")
+    print("42. rsa3072")
+    print("43. rsa4096")
 
     selection=set()
     ptr=0
-    max=43
+    max=44
 
     curve_selected=False
     pfcurve_selected=False
@@ -496,28 +497,33 @@ if __name__ == '__main__':
         if x==pf+5:
             curveset("fp512bn","60","512","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","POSITIVEX","172","130","128")
             pfcurve_selected=True
-    # https://eprint.iacr.org/2017/334.pdf
+
         if x==pf+6:
+            curveset("bls12443","60","443","1",["-7","1","1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","78","75","128")
+            pfcurve_selected=True    
+    
+    # https://eprint.iacr.org/2017/334.pdf
+        if x==pf+7:
             curveset("bls12461","60","461","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","79","78","128")
             pfcurve_selected=True
 
-        if x==pf+7:
+        if x==pf+8:
             curveset("bn462","60","462","1",["1","1","0"],"NOT_SPECIAL","1","WEIERSTRASS","0","BN","D_TYPE","POSITIVEX","125","118","128")
             pfcurve_selected=True
 
-        if x==pf+8:
+        if x==pf+9:
             curveset("bls24479","56","479","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24","M_TYPE","POSITIVEX","52","49","192")
             pfcurve_selected=True
 
-        if x==pf+9:
+        if x==pf+10:
             curveset("bls48556","58","556","1",["-1","2","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","35","32","256")
             pfcurve_selected=True
 
-        if x==pf+10:
+        if x==pf+11:
             curveset("bls48581","60","581","1",["2","2","0"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48","D_TYPE","NEGATIVEX","36","33","256")
             pfcurve_selected=True
 
-        if x==pf+11:
+        if x==pf+12:
             curveset("bls48286","60","286","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","20","17","128")
             pfcurve_selected=True
 
@@ -527,17 +533,17 @@ if __name__ == '__main__':
     # of the underlying big length
 
     # There are choices here, different ways of getting the same result, but some faster than others
-        if x==pf+12:
+        if x==pf+13:
             #256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
             #512 is faster.. but best is 1024
             rsaset("rsa2048","128","58","2")
             #rsaset("RSA2048","64","60","4")
             #rsaset("RSA2048","32","56","8")
             rsa_selected=True
-        if x==pf+13:
+        if x==pf+14:
             rsaset("rsa3072","48","56","8")
             rsa_selected=True
-        if x==pf+14:
+        if x==pf+15:
             #rsaset("RSA4096","32","56","16")
             rsaset("rsa4096","64","60","8")
             rsa_selected=True
