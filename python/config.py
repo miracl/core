@@ -16,15 +16,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# Thanks to Paulo Barreto for some additions/improvements/fixes for this file
 import os
 import sys
 
 deltext = ""
 slashtext = ""
 copytext = ""
-org1text = "org"
-org2text = "apache"
-org3text = "milagro"
+#org1text = "org"
+#org2text = "apache"
+#org3text = "milagro"
 
 if sys.platform.startswith("linux") or sys.platform.startswith("darwin"):
     copytext = "cp "
@@ -112,13 +114,14 @@ print("7. SEC256K1")
 print("Pairing-Friendly Elliptic Curves")
 print("8. BN254")
 print("9. BN254CX")
-print("10. BLS12383")
-print("11. BLS12381")
-print("12. BN462")
+print("10. BLS12381")
+print("11. BLS12383")
+print("12. BLS12443")
+print("13. BN462")
 
 selection = []
 ptr = 0
-max = 13
+max = 14
 
 curve_selected = False
 pfcurve_selected = False
@@ -161,7 +164,7 @@ while ptr < max:
     if x == 6:
         curveset("nist521", "NOT")
         curve_selected = True
-    if x == 6:
+    if x == 7:
         curveset("sec256k1", "NOT")
         curve_selected = True
 
@@ -172,12 +175,15 @@ while ptr < max:
         curveset("bn254cx", "BN")
         pfcurve_selected = True
     if x == 10:
-        curveset("bls12383", "BLS")
-        pfcurve_selected = True
-    if x == 11:
         curveset("bls12381", "BLS")
         pfcurve_selected = True
+    if x == 11:
+        curveset("bls12383", "BLS")
+        pfcurve_selected = True
     if x == 12:
+        curveset("bls12443", "BLS")
+        pfcurve_selected = True
+    if x == 13:
         curveset("bn462", "BN")
         pfcurve_selected = True
 
@@ -195,15 +201,16 @@ os.system(deltext + " ecp2.py")
 os.system(deltext + " c25519.py")
 os.system(deltext + " ed25519.py")
 os.system(deltext + " nist256.py")
-os.system(deltext + " bn254.py")
-os.system(deltext + " bn254cx.py")
-os.system(deltext + " bls12383.py")
-os.system(deltext + " goldilocks.py")
-os.system(deltext + " bls12381.py")
-os.system(deltext + " bn462.py")
 os.system(deltext + " nist384.py")
 os.system(deltext + " nist521.py")
+os.system(deltext + " goldilocks.py")
 os.system(deltext + " sec256k1.py")
+os.system(deltext + " bn254.py")
+os.system(deltext + " bn254cx.py")
+os.system(deltext + " bn462.py")
+os.system(deltext + " bls12381.py")
+os.system(deltext + " bls12383.py")
+os.system(deltext + " bls12443.py")
 
 if testing:
     os.system("python3 test.py < pins.txt")

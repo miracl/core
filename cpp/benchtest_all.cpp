@@ -611,6 +611,19 @@ int bls383(csprng *RNG)
     BIG_rcopy(r, CURVE_Order);
     FP_rand(&rz,RNG);
 
+/*
+    iterations = 0;
+    start = clock();
+    do {
+        BIG_randomnum(s,r,RNG);
+        iterations++;
+        elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
+    } while (elapsed < MIN_TIME || iterations < MIN_ITERS);
+    elapsed = 1000.0 * elapsed / iterations;
+    printf("BIG_randomnum  - %8d iterations  ", iterations);
+    printf(" %8.2lf ms per iteration\n", elapsed);
+    printf("nbits(r)= %d\n",BIG_nbits(r));
+*/
 //    iterations = 0;
 //    start = clock();
 //    do {

@@ -919,7 +919,7 @@ void XXX::BIG_dshl(DBIG a, int k)
 
 }
 
-/* General shift rightof a by k bits */
+/* General shift right of a by k bits */
 /* a MUST be normalised */
 /* SU= 32 */
 void XXX::BIG_shr(BIG a, int k)
@@ -1336,13 +1336,17 @@ void XXX::BIG_random(BIG m, csprng *rng)
 
 /* get random BIG from rng, modulo q. Done one bit at a time, so its portable */
 
+extern int NFILLPOOL;
+
 void XXX::BIG_randomnum(BIG m, BIG q, csprng *rng)
 {
     int i, b, j = 0, r = 0;
+    int n=2 * BIG_nbits(q);
     DBIG d;
     BIG_dzero(d);
+
     /* generate random DBIG */
-    for (i = 0; i < 2 * BIG_nbits(q); i++)
+    for (i = 0; i < n; i++)
     {
         if (j == 0) r = RAND_byte(rng);
         else r >>= 1;

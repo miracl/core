@@ -1362,10 +1362,11 @@ void BIG_XXX_random(BIG_XXX m, csprng *rng)
 void BIG_XXX_randomnum(BIG_XXX m, BIG_XXX q, csprng *rng)
 {
     int i, b, j = 0, r = 0;
+    int n=2 * BIG_XXX_nbits(q);
     DBIG_XXX d;
     BIG_XXX_dzero(d);
     /* generate random DBIG */
-    for (i = 0; i < 2 * BIG_XXX_nbits(q); i++)
+    for (i = 0; i < n; i++)
     {
         if (j == 0) r = RAND_byte(rng);
         else r >>= 1;
