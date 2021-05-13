@@ -1,5 +1,5 @@
 //
-// Program to generate "best" BN, BLS12, BLS24 and BLS48 curves (with modulus p=3 mod 8)
+// Program to generate "best" BN, BLS12, BLS24 and BLS48 curves (with modulus p=3 mod 4)
 //
 // g++ -O2 bestpair.cpp zzn8.cpp zzn4.cpp zzn2.cpp zzn.cpp ecn8.cpp ecn4.cpp ecn2.cpp ecn.cpp big.cpp miracl.a -o bestpair.exe
 //
@@ -19,7 +19,7 @@
 // b=4, x=0
 // b=5, x=-1
 // b=8, x=-2, 1, 2
-// b=9, x=0, 3, 6, 40
+// b=9, x=-2, 0, 3, 6, 40
 // b=10, x=-1
 // b=12, x=-2, 13
 
@@ -98,6 +98,18 @@ int iterate(int *x, int n)
 
     }
     return gotone;
+}
+
+// is ZZn2(r,1) irreducible (for p=3 mod 4)?
+bool isirp(int r)
+{
+    int n=r*r+1;  // calculate the norm
+    Big p=get_modulus();
+    Big w=pow(n,(p-1)/6,p);
+    Big s=modmult(w,w,p);
+    if (s==1 || modmult(w,s,p)==1)
+        return false;
+    return true;
 }
 
 int main(int argc, char *argv[])
@@ -305,7 +317,7 @@ int main(int argc, char *argv[])
                 xm3 = xm24 % 3;
                 if (xm3 != 1) continue; // quick exit for p%3=0
                 xm8 = xm24 % 8;
-                if (xm8 != 0 && xm8 != 7) continue; // quick exit for p=3 mod 8 condition
+                if (xm8 != 0 && xm8 != 7 && xm8 != 3 && xm8 != 4) continue; // quick exit for p=3 mod 4 condition
 
                 q = pow(x, 4) - x * x + 1;
                 p = q * (((x - 1) * (x - 1)) / 3) + x;
@@ -322,7 +334,7 @@ int main(int argc, char *argv[])
                 xm3 = xm24 % 3;
                 if (xm3 != 1) continue; // quick exit for p%3=0
                 xm8 = xm24 % 8;
-                if (xm8 != 0 && xm8 != 7) continue; // quick exit for p=3 mod 8 condition
+                if (xm8 != 0 && xm8 != 7 && xm8 != 3 && xm8 != 4) continue; // quick exit for p=3 mod 4 condition
 
                 q = pow(x, 8) - pow(x, 4) + 1;
                 p = q * (((x - 1) * (x - 1)) / 3) + x;
@@ -340,7 +352,7 @@ int main(int argc, char *argv[])
                 xm3 = xm24 % 3;
                 if (xm3 != 1) continue; // quick exit for p%3=0
                 xm8 = xm24 % 8;
-                if (xm8 != 0 && xm8 != 7) continue; // quick exit for p=3 mod 8 condition
+                if (xm8 != 0 && xm8 != 7 && xm8 != 3 && xm8 != 4) continue; // quick exit for p=3 mod 4 condition
 
                 q = pow(x, 16) - pow(x, 8) + 1;
                 p = q * (((x - 1) * (x - 1)) / 3) + x;
@@ -355,7 +367,7 @@ int main(int argc, char *argv[])
                 xm8 = x % 8;
                 if (x < 0) xm8 += 8;
                 xm8 %= 8;
-                if (xm8 != 3 && xm8 != 7) continue; // quick exit for p=3 mod 8 condition
+                if (xm8 != 3 && xm8 != 7 && xm8 != 1 && xm8 != 5) continue; // quick exit for p=3 mod 4 condition
 
                 p = 36 * pow(x, 4) + 36 * pow(x, 3) + 24 * x * x + 6 * x + 1;
                 t = 6 * x * x + 1;
@@ -363,7 +375,7 @@ int main(int argc, char *argv[])
                 q = n;
             }
 
-            if (p % 8 != 3) continue;                       // restriction here could be eased
+            if (p % 4 != 3 ) continue;                      
 
             if (small_factors(q)) continue;
             if (small_factors(p)) continue;
@@ -437,14 +449,20 @@ int main(int argc, char *argv[])
 
             ZZn2 xi;
 
-            xi.set(1, 1);               // for p=3 mod 8
-
 // make sure its irreducible
-            if (pow(xi, (p * p - 1) / 2) == 1)
-                continue;
+            if (p%8==3)
+            {
+                xi.set(1, 1);  // for p=3 mod 8
+                if (!isirp(1)) {
+                    mip->pmod8 = 7; // to fool miracl into using 2+sqrt(-1)!
+                    xi.set(2,1);
+                    if (!isirp(2)) continue;
+                }
 
-            if (pow(xi, (p * p - 1) / 3) == 1)
-                continue;  // make sure that x^6-c is irreducible
+            } else {          
+                xi.set(2,1);  // for p=7 mod 8
+                if (!isirp(2)) continue;
+            }
 
             if (G2)
             {
@@ -455,7 +473,6 @@ int main(int argc, char *argv[])
             {
                 if (!prime(coft)) continue;
             }
-
 
 // we have a solution
 // Find curve b parameter - uses first positive one found (but collect some other possibilities)
@@ -502,7 +519,7 @@ int main(int argc, char *argv[])
                 } while (!Q.set(rr));
 
                 Q *= cof2;
-                if (!(n * Q).iszero())
+                if (!(q * Q).iszero())
                 {
                     twist = MR_SEXTIC_M;
                     mip->TWIST = MR_SEXTIC_M;
@@ -512,10 +529,11 @@ int main(int argc, char *argv[])
                     } while (!Q.set(rr));
 
                     Q *= cof2;
-                    if (!(n * Q).iszero())
+                    if (!(q * Q).iszero())
                     {
                         cout << "Never Happens" << endl;
-                        continue;
+                        // continue;
+                        exit(0);
                     }
                 }
             }
@@ -529,7 +547,7 @@ int main(int argc, char *argv[])
                 } while (!Q.set(rr));
 
                 Q *= cof2;
-                if (!(n * Q).iszero())
+                if (!(q * Q).iszero())
                 {
                     twist = MR_SEXTIC_M;
                     mip->TWIST = MR_SEXTIC_M;
@@ -539,7 +557,7 @@ int main(int argc, char *argv[])
                     } while (!Q.set(rr));
 
                     Q *= cof2;
-                    if (!(n * Q).iszero())
+                    if (!(q * Q).iszero())
                     {
                         cout << "Never Happens" << endl;
                         continue;
@@ -556,7 +574,7 @@ int main(int argc, char *argv[])
                 } while (!Q.set(rr));
 
                 Q *= cof2;
-                if (!(n * Q).iszero())
+                if (!(q * Q).iszero())
                 {
                     twist = MR_SEXTIC_M;
                     mip->TWIST = MR_SEXTIC_M;
@@ -566,7 +584,7 @@ int main(int argc, char *argv[])
                     } while (!Q.set(rr));
 
                     Q *= cof2;
-                    if (!(n * Q).iszero())
+                    if (!(q * Q).iszero())
                     {
                         cout << "Never Happens" << endl;
                         continue;
@@ -600,6 +618,10 @@ int main(int argc, char *argv[])
             cout << "\nq= " << q << " (" << bits(q) << " bits)";
             if (twist == MR_SEXTIC_D) cout << " D-Type" << endl;
             if (twist == MR_SEXTIC_M) cout << " M-Type" << endl;
+            cout << "Irreducible Polynomial = " << xi << endl;
+//cout << "cof2= " << cof2 << endl;
+//cout << "cof2= " << m1/q << endl;
+
             if (progress) cout << endl;
             mip->IOBASE = 10;
             //	cout << "twist= " << p+1+t << endl;
