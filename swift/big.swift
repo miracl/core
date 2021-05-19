@@ -271,6 +271,7 @@ public struct BIG{
         {
             s.w[i]=w[i]+x.w[i]
         }
+        s.norm()
         return s
     }
 /* this+=x */

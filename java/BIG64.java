@@ -464,6 +464,7 @@ public class BIG {
         BIG s = new BIG(0);
         for (int i = 0; i < NLEN; i++)
             s.w[i] = w[i] + x.w[i];
+        s.norm();
         return s;
     }
 

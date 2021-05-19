@@ -343,6 +343,7 @@ impl BIG {
         for i in 0..NLEN {
             s.w[i] = self.w[i] + x.w[i];
         }
+        s.norm();
         s
     }
 

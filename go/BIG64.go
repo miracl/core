@@ -380,6 +380,7 @@ func (r *BIG) Plus(x *BIG) *BIG {
 	for i := 0; i < NLEN; i++ {
 		s.w[i] = r.w[i] + x.w[i]
 	}
+	s.norm()
 	return s
 }
 

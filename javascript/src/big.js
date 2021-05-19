@@ -353,6 +353,7 @@ BIG = function(ctx) {
             for (i = 0; i < BIG.NLEN; i++) {
                 s.w[i] = this.w[i] + x.w[i];
             }
+            s.norm();
 
             return s;
         },

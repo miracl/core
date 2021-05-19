@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
                     Q *= cof2;
                     if (!(q * Q).iszero())
                     {
-                        cout << "Never Happens" << endl;
+                        cout << "Never Happens - PANIC" << endl;
                         // continue;
                         exit(0);
                     }
@@ -559,8 +559,9 @@ int main(int argc, char *argv[])
                     Q *= cof2;
                     if (!(q * Q).iszero())
                     {
-                        cout << "Never Happens" << endl;
-                        continue;
+                        cout << "Never Happens - PANIC" << endl;
+                        // continue;
+                        exit(0);
                     }
                 }
             }
@@ -586,8 +587,9 @@ int main(int argc, char *argv[])
                     Q *= cof2;
                     if (!(q * Q).iszero())
                     {
-                        cout << "Never Happens" << endl;
-                        continue;
+                        cout << "Never Happens - PANIC" << endl;
+                        //continue;
+                        exit(0);
                     }
                 }
             }
@@ -619,8 +621,6 @@ int main(int argc, char *argv[])
             if (twist == MR_SEXTIC_D) cout << " D-Type" << endl;
             if (twist == MR_SEXTIC_M) cout << " M-Type" << endl;
             cout << "Irreducible Polynomial = " << xi << endl;
-//cout << "cof2= " << cof2 << endl;
-//cout << "cof2= " << m1/q << endl;
 
             if (progress) cout << endl;
             mip->IOBASE = 10;
