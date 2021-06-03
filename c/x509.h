@@ -33,6 +33,7 @@
 
 #define X509_ECC 1      /**< Uses Elliptic Curve Cryptography */
 #define X509_RSA 2      /**< Uses RSA Cryptography */
+#define X509_ECD 3
 
 // Supported Hash functions
 

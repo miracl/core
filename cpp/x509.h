@@ -37,6 +37,7 @@
 
 #define X509_ECC 1
 #define X509_RSA 2
+#define X509_ECD 3
 
 // Supported Hash functions
 
