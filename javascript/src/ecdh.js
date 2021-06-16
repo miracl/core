@@ -158,9 +158,12 @@ var ECDH = function(ctx) {
             }
 
             if (res === 0) {
-                r = new ctx.BIG(0);
-                r.rcopy(ctx.ROM_CURVE.CURVE_Order);
-                s.mod(r);
+                if (ctx.ECP.CURVETYPE == ctx.ECP.WEIERSTRASS)
+                { // if edwards or montgomery, RFC7748 multiplier should not be disturbed
+                    r = new ctx.BIG(0);
+                    r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+                    s.mod(r);
+                }
                 W = W.mul(s);
 
                 if (W.is_infinity()) {

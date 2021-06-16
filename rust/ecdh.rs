@@ -125,8 +125,11 @@ pub fn ecpsvdp_dh(s: &[u8], wd: &[u8], z: &mut [u8], typ: isize) -> isize {
     }
 
     if res == 0 {
-        let r = BIG::new_ints(&rom::CURVE_ORDER);
-        sc.rmod(&r);
+        if ecp::CURVETYPE == ecp::WEIERSTRASS { 
+        // if edwards or montgomery, RFC7748 multiplier should not be disturbed
+            let r = BIG::new_ints(&rom::CURVE_ORDER);
+            sc.rmod(&r);
+        }
         W = W.mul(&mut sc);
         if W.is_infinity() {
             res = ERROR;

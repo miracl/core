@@ -123,8 +123,11 @@ func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte,typ int) int {
 	}
 
 	if res == 0 {
-		r := NewBIGints(CURVE_Order)
-		s.Mod(r)
+		if CURVETYPE == WEIERSTRASS {
+		// if edwards or montgomery, RFC7748 multiplier should not be disturbed
+			r := NewBIGints(CURVE_Order)
+			s.Mod(r)
+		}
 		W = W.mul(s)
 		if W.Is_infinity() {
 			res = ERROR

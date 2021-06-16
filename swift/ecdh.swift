@@ -129,9 +129,11 @@ public struct ECDH
 
         if (res==0)
         {
-            let r=BIG(ROM.CURVE_Order)
-            s.mod(r)
-
+            if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.WEIERSTRASS {
+// if edwards or montgomery, RFC7748 multiplier should not be disturbed
+                let r=BIG(ROM.CURVE_Order)
+                s.mod(r)
+            }
             W=W.mul(s);
             if W.is_infinity() {res=ECDH.ERROR}
             else

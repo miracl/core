@@ -85,7 +85,7 @@ int DeriveKeyPair_ZZZ(int config_id,octet *SK,octet *PK,octet *SEED)
     OCT_jint(&SUITE_ID,kem,2);
     LabeledExtract(&PRK,NULL,&SUITE_ID,(char *)"dkp_prk",SEED);
     if (kem==32 || kem==33)
-    {
+    { // RFC7748
         LabeledExpand(SK,&PRK,&SUITE_ID,(char *)"sk",NULL,GROUP);
         OCT_reverse(SK);
         if (kem==32)

@@ -134,7 +134,7 @@ public final class HPKE {
         SUITE_ID[k+1]=KEM_ID[1];
         byte[] PRK=LabeledExtract(null,SUITE_ID,"dkp_prk",SEED);
         byte[] S;
-		if (kem==32 || kem==33) {
+		if (kem==32 || kem==33) { // RFC7748
            S=LabeledExpand(PRK,SUITE_ID,"sk",null,GROUP);
            reverse(S);
            if (kem==32)

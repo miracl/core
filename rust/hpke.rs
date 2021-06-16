@@ -147,7 +147,7 @@ pub fn deriveKeyPair(config_id: usize,mut sk: &mut [u8],mut pk: &mut [u8],seed: 
     let mut prk: [u8;ecp::HASH_TYPE]=[0;ecp::HASH_TYPE];
     labeledExtract(&mut prk,None,&suite_id,"dkp_prk",Some(&seed));
 
-	if kem==32 || kem==33 {
+	if kem==32 || kem==33 { // RFC7748
         labeledExpand(&mut sk,&prk,&suite_id,"sk",None,GROUP);
         reverse(&mut sk);
 		if kem==32 {

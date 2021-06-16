@@ -122,7 +122,7 @@ public struct HPKE
 
         let prk=LabeledExtract(nil,suite_ID,"dkp_prk",seed)
         var s=[UInt8]();
-        if kem==32 || kem==33 {
+        if kem==32 || kem==33 { // RFC7748
             s=LabeledExpand(prk,suite_ID,"sk",nil,ECDH.EGS);
             s.reverse();
 		    if kem==32 {

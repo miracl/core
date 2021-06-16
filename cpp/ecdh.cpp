@@ -127,9 +127,11 @@ int ZZZ::ECP_SVDP_DH(octet *S, octet *WD, octet *Z,int type)
     if (!valid) res = ECDH_ERROR;
     if (res == 0)
     {
+#if CURVETYPE_ZZZ==WEIERSTRASS
+// if edwards or montgomery, RFC7748 multiplier should not be disturbed
         BIG_rcopy(r, CURVE_Order);
         BIG_mod(s, r);
-
+#endif
         ECP_mul(&W, s);
         if (ECP_isinf(&W)) res = ECDH_ERROR;
         else

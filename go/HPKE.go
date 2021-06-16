@@ -117,7 +117,7 @@ func DeriveKeyPair(config_id int,SK []byte,PK []byte,SEED []byte) bool {
 
     PRK:=labeledExtract(nil,SUITE_ID,"dkp_prk",SEED)
     var S []byte
-	if kem==32 || kem==33 {
+	if kem==32 || kem==33 {  // RFC7748
 		S=labeledExpand(PRK,SUITE_ID,"sk",nil,EGS)
 		reverse(S)
 		if kem==32 {

@@ -33,7 +33,7 @@
 
 // Permit alternate compression method if 3 spare top bits in field representation
 // Must be set manually
-//#define ALLOW_ALT_COMPRESS_ZZZ
+// #define ALLOW_ALT_COMPRESS_ZZZ
 
 #if PAIRING_FRIENDLY_ZZZ != NOT_PF
 

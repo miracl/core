@@ -107,7 +107,7 @@ var HPKE = function(ctx) {
 
             var PRK=this.LabeledExtract(null,SUITE_ID,"dkp_prk",SEED);
             var S;
-		    if (kem==32 || kem==33) {
+		    if (kem==32 || kem==33) {  // RFC7748
                 S=this.LabeledExpand(PRK,SUITE_ID,"sk",null,ctx.ECDH.EGS);
                 this.reverse(S);
                 if (kem==32)
