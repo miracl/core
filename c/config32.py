@@ -685,7 +685,7 @@ print("21. X448")
 print("22. SECP160R1")
 print("23. C1174")
 print("24. C1665")
-print("25. Million Dollar Curve")
+print("25. MDC201601")
 print("26. TWEEDLEDUM")
 print("27. TWEEDLEDEE\n")
 
@@ -839,7 +839,7 @@ while ptr<max:
         curve_selected=True
 
     if x==25:
-        curveset("256","MDC","MDC","28","1","0","NOT_SPECIAL","0","EDWARDS","1","NOT_PF","","","","","128")
+        curveset("256","MDC201601","MDC201601","28","1","0","NOT_SPECIAL","0","EDWARDS","1","NOT_PF","","","","","128")
         curve_selected=True
 
     if x==26:

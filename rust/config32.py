@@ -318,7 +318,7 @@ if __name__ == '__main__':
     print("22. secp160r1")
     print("23. c1174")
     print("24. c1665")
-    print("25. Million Dollar Curve")
+    print("25. MDC201601")
     print("26. tweedledum")
     print("27. tweedledee\n")
 
