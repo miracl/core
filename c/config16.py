@@ -23,13 +23,21 @@ import os
 import sys
 import fnmatch
 
+testing=False
+rsa_selected=False
+curve_selected=False
+pfcurve_selected=False
+
+ptr=0
+max=7
+selection=[]
+
 deltext="rm"
 copytext="cp"
 if sys.platform.startswith("win") :
     deltext="del"
     copytext=">NUL copy"
 
-testing=False
 if len(sys.argv)==2 :
     if sys.argv[1]=="test":
         testing=True
@@ -554,15 +562,6 @@ print("5. BN254CX")
 
 print("RSA")
 print("6. RSA2048")
-
-
-selection=[]
-ptr=0
-max=7
-
-curve_selected=False
-pfcurve_selected=False
-rsa_selected=False
 
 while ptr<max:
     if testing :
