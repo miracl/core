@@ -561,25 +561,6 @@ while ptr<max:
         rsaset("256","2048","13","8")
         rsa_selected=True
 
-
-os.system(deltext+" big.*")
-os.system(deltext+" fp.*")
-os.system(deltext+" ecp.*")
-os.system(deltext+" ecdh.*")
-os.system(deltext+" ff.*")
-os.system(deltext+" rsa.*")
-os.system(deltext+" config_big.h")
-os.system(deltext+" config_field.h")
-os.system(deltext+" config_curve.h")
-os.system(deltext+" config_ff.h")
-os.system(deltext+" fp2.*")
-os.system(deltext+" fp4.*")
-os.system(deltext+" fp12.*")
-os.system(deltext+" ecp2.*")
-os.system(deltext+" pair.*")
-os.system(deltext+" mpin.*")
-os.system(deltext+" bls.*")
-
 # create library
 os.system("gcc -O3 -std=c99 -c randapi.c")
 
