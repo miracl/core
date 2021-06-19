@@ -18,8 +18,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 import os
 import sys
+import fnmatch
 
 deltext="rm"
 copytext="cp"
@@ -33,6 +35,31 @@ if len(sys.argv)==2 :
         testing=True
 if testing :
     sys.stdin=open("test16.txt","r")
+
+compiler_path = ""
+
+class miracl_compile:
+    def detect_supported_compiler():
+        search_paths = os.environ['PATH'].split(os.pathsep)
+        for path in search_paths:
+            for root, dirs, files in os.walk(path):
+                for name in files:
+                    if fnmatch.fnmatch(name, "*clang*") or fnmatch.fnmatch(name, "*gcc*"):
+                        return os.path.join(root, name)
+        return ""
+
+    def compile_file(optim, file):
+        global compiler_path
+        if optim != 0:
+            flags = " -std=c99 -O%d -c %s" % (optim, file)
+        else:
+            flags = " -std=c99 -c %s" % (file)
+        os.system(compiler_path + flags)
+
+    def compiler_sanity_check():
+        global compiler_path
+        compiler_path = miracl_compile.detect_supported_compiler()
+        return (compiler_path != "")
 
 def inline_mul1(N,base)  :
     str=""
@@ -210,7 +237,7 @@ def rsaset(tb,tff,base,ml) :
     replace(fnamec,"INLINE_REDC1",inline_redc1(nlen,bd))
     replace(fnamec,"INLINE_REDC2",inline_redc2(nlen,bd))
 
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     fnamec="ff_"+tff+".c"
     fnameh="ff_"+tff+".h"
@@ -222,7 +249,7 @@ def rsaset(tb,tff,base,ml) :
     replace(fnamec,"XXX",bd)
     replace(fnameh,"WWW",tff)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     fnamec="rsa_"+tff+".c"
     fnameh="rsa_"+tff+".h"
@@ -234,7 +261,7 @@ def rsaset(tb,tff,base,ml) :
     replace(fnamec,"XXX",bd)
     replace(fnameh,"WWW",tff)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
 def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     inbt=int(nbt)
@@ -314,8 +341,8 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"@AB@",ab)
     replace(fnameh,"@G2@",g2)
 
-    replace(fnameh,"@HC@",hc) 
-    replace(fnameh,"@HC2@",hc2) 
+    replace(fnameh,"@HC@",hc)
+    replace(fnameh,"@HC2@",hc2)
 
     fnamec="big_"+bd+".c"
     fnameh="big_"+bd+".h"
@@ -332,7 +359,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnamec,"INLINE_REDC1",inline_redc1(nlen,bd))
     replace(fnamec,"INLINE_REDC2",inline_redc2(nlen,bd))
 
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     fnamec="fp_"+tf+".c"
     fnameh="fp_"+tf+".h"
@@ -344,7 +371,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnamec,"XXX",bd)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     os.system("gcc -O3 -std=c99 -c rom_field_"+tf+".c");
 
@@ -360,7 +387,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"ZZZ",tc)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     fnamec="ecdh_"+tc+".c"
     fnameh="ecdh_"+tc+".h"
@@ -374,7 +401,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"ZZZ",tc)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     os.system("gcc -O3 -std=c99 -c rom_curve_"+tc+".c");
 
@@ -388,7 +415,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnamec,"XXX",bd)
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
-        os.system("gcc -O3 -std=c99 -c "+fnamec)
+        miracl_compile.compile_file(3, fnamec)
 
         fnamec="fp4_"+tf+".c"
         fnameh="fp4_"+tf+".h"
@@ -401,7 +428,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
         replace(fnameh,"ZZZ",tc)
-        os.system("gcc -O3 -std=c99 -c "+fnamec)
+        miracl_compile.compile_file(3, fnamec)
 
         fnamec="fp12_"+tf+".c"
         fnameh="fp12_"+tf+".h"
@@ -414,7 +441,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
         replace(fnameh,"ZZZ",tc)
-        os.system("gcc -O3 -std=c99 -c "+fnamec)
+        miracl_compile.compile_file(3, fnamec)
 
         fnamec="ecp2_"+tc+".c"
         fnameh="ecp2_"+tc+".h"
@@ -427,7 +454,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnameh,"ZZZ",tc)
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
-        os.system("gcc -O3 -std=c99 -c "+fnamec)
+        miracl_compile.compile_file(3, fnamec)
 
         fnamec="pair_"+tc+".c"
         fnameh="pair_"+tc+".h"
@@ -440,7 +467,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnameh,"ZZZ",tc)
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
-        os.system("gcc -O3 -std=c99 -c "+fnamec)
+        miracl_compile.compile_file(3, fnamec)
 
         fnamec="mpin_"+tc+".c"
         fnameh="mpin_"+tc+".h"
@@ -453,7 +480,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnameh,"ZZZ",tc)
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
-        os.system("gcc -O3 -std=c99 -c "+fnamec)
+        miracl_compile.compile_file(3, fnamec)
 
         fnamec="bls_"+tc+".c"
         fnameh="bls_"+tc+".h"
@@ -466,7 +493,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnameh,"ZZZ",tc)
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
-        os.system("gcc -O3 -std=c99 -c "+fnamec)
+        miracl_compile.compile_file(3, fnamec)
+
+def sanity_checks():
+    if not miracl_compile.compiler_sanity_check():
+        raise Exception("Supported compiler not found in PATH variable, exiting!")
+
+sanity_checks()
 
 replace("arch.h","@WL@","16")
 print("Elliptic Curves")
@@ -562,17 +595,16 @@ while ptr<max:
         rsa_selected=True
 
 # create library
-os.system("gcc -O3 -std=c99 -c randapi.c")
-
-os.system("gcc -O3 -std=c99 -c hash.c")
-os.system("gcc -O3 -std=c99 -c hmac.c")
-os.system("gcc -O3 -std=c99 -c rand.c")
-os.system("gcc -O3 -std=c99 -c oct.c")
-os.system("gcc -O3 -std=c99 -c share.c")
-os.system("gcc -O3 -std=c99 -c aes.c")
-os.system("gcc -O3 -std=c99 -c gcm.c")
-os.system("gcc -O3 -std=c99 -c newhope.c")
-os.system("gcc -O3 -std=c99 -c x509.c")
+miracl_compile.compile_file(3, "randapi.c")
+miracl_compile.compile_file(3, "hash.c")
+miracl_compile.compile_file(3, "hmac.c")
+miracl_compile.compile_file(3, "rand.c")
+miracl_compile.compile_file(3, "oct.c")
+miracl_compile.compile_file(3, "share.c")
+miracl_compile.compile_file(3, "aes.c")
+miracl_compile.compile_file(3, "gcm.c")
+miracl_compile.compile_file(3, "newhope.c")
+miracl_compile.compile_file(3, "x509.c")
 
 if sys.platform.startswith("win") :
     os.system("for %i in (*.o) do @echo %~nxi >> f.list")
