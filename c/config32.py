@@ -871,7 +871,7 @@ def interactive_prompt_input():
             interactive_prompt_input()
 
 interactive_prompt_print()
-while keep_querying:
+while keep_querying and not testing:
     query_val = -1
     while not miracl_crypto.valid_query(query_val):
         query_val = interactive_prompt_input()
@@ -881,6 +881,10 @@ while keep_querying:
             keep_querying = False
         else:
             interactive_prompt_exect(query_val)
+
+if testing:
+    for i in range(0, miracl_crypto.total_entries):
+        interactive_prompt_exect(i)
 
 # create library
 miracl_compile.compile_file(3, "randapi.c")
