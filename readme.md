@@ -44,14 +44,3 @@ Install Python 3 and suitable compilers for each language of interest to you. Py
 
 For a quick start, try out the Python version of the library, and run our sample programs
 
--------------------------------------------
-
-# Contributors
-
-The following people have contributed to the MIRACL Core library
-
-- Mike Scott
-- Kealan McCusker
-- Alessandro Budroni
-- Samuele Andreoli
-
