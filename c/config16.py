@@ -29,10 +29,6 @@ rsa_selected=False
 curve_selected=False
 pfcurve_selected=False
 
-ptr=0
-max=7
-selection=[]
-
 if len(sys.argv)==2 :
     if sys.argv[1]=="test":
         testing=True
@@ -568,7 +564,7 @@ print("5. BN254CX")
 print("RSA")
 print("6. RSA2048")
 
-while ptr<max:
+while True:
     if testing :
         x=int(input())
     else :
@@ -576,17 +572,6 @@ while ptr<max:
     if x == 0:
         break
 #    print("Choice= ",x)
-    already=False
-    for i in range(0,ptr):
-        if x==selection[i]:
-            already=True
-            break
-    if already:
-        continue
-
-    selection.append(x)
-    ptr=ptr+1
-
     if x==1:
         curveset("255","F25519","ED25519","13","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT_PF","","","","","128")
         curve_selected=True
@@ -640,8 +625,3 @@ if testing :
     miracl_compile.compile_binary(2, "testmpin.c", "core.a", "testmpin")
     miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
     miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
-
-#print("Your section was ");
-#for i in range(0,ptr):
-#    print (selection[i])
-
