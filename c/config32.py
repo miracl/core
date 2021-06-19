@@ -49,14 +49,20 @@ class miracl_compile:
         return ""
 
     def compile_file(optim, file):
+        print("Processing " + file + "..", end = "")
         global compiler_path
         if optim != 0:
             flags = " -std=c99 -O%d -c %s" % (optim, file)
         else:
             flags = " -std=c99 -c %s" % (file)
-        os.system(compiler_path + flags)
+        rc = os.WEXITSTATUS(os.system(compiler_path + flags))
+        if rc == 0:
+            print(". [OK]")
+        else:
+            print(". [ERROR]")
 
     def compile_binary(optim, file, lib, bin):
+        print("Processing " + file + "..", end = "")
         global compiler_path
         if sys.platform.startswith("win"):
             bin += ".exe"
@@ -64,7 +70,11 @@ class miracl_compile:
             flags = " -std=c99 -O%d %s %s -o %s" % (optim, file, lib, bin)
         else:
             flags = " -std=c99 %s %s -o %s" % (file, lib, bin)
-        os.system(compiler_path + flags)
+        rc = os.WEXITSTATUS(os.system(compiler_path + flags))
+        if rc == 0:
+            print(". [OK]")
+        else:
+            print(". [ERROR]")
 
     def compiler_sanity_check():
         global compiler_path
