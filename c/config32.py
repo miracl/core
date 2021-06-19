@@ -37,6 +37,7 @@ if testing :
     sys.stdin=open("test.txt","r")
 
 compiler_path = ""
+generated_files = []
 
 class miracl_interaction:
     def delete_file_using_expr(expression):
@@ -47,6 +48,7 @@ class miracl_interaction:
 
     def copy_file_to_working_dir(file, target):
         shutil.copyfile(file, target)
+        generated_files.append(target)
 
 class miracl_compile:
     def detect_supported_compiler():
@@ -879,6 +881,9 @@ while keep_querying:
             keep_querying = False
         else:
             interactive_prompt_exect(query_val)
+
+for file in generated_files:
+    miracl_interaction.delete_file_using_expr(file)
 
 # create library
 miracl_compile.compile_file(3, "randapi.c")
