@@ -884,9 +884,6 @@ while keep_querying:
         else:
             interactive_prompt_exect(query_val)
 
-for file in generated_files:
-    miracl_interaction.delete_file_using_expr(file)
-
 # create library
 miracl_compile.compile_file(3, "randapi.c")
 miracl_compile.compile_file(3, "hash.c")
@@ -903,11 +900,8 @@ if sys.platform.startswith("win") :
     os.system("for %i in (*.o) do @echo %~nxi >> f.list")
     os.system("ar rc core.a @f.list")
     miracl_interaction.delete_file_using_expr("f.list")
-
 else :
     os.system("ar rc core.a *.o")
-
-miracl_interaction.delete_file_using_expr("*.o")
 
 if testing :
     miracl_compile.compile_binary(2, "testecc.c", "core.a", "testecc")
@@ -915,3 +909,8 @@ if testing :
     miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
     miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
     miracl_compile.compile_binary(2, "testnhs.c", "core.a", "testnhs")
+
+for file in generated_files:
+    miracl_interaction.delete_file_using_expr(file)
+
+miracl_interaction.delete_file_using_expr("*.o")
