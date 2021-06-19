@@ -593,9 +593,22 @@ def interactive_prompt_print():
         index += 1
 
     print("\nRSA")
-    for tuple in miracl_crypto.rsa_params:
-        print(str(index) + ".", "RSA" + str(tuple[1]))
-        index += 1
+    # Python interprets the singular RSA entry in a way
+    # that doesn't allow for nested tuples if there aren't
+    # more than one entry, the original code has been commented
+    # out and replaced with a subpar fix
+    #
+    # If you are adding more RSA curves, it will error out
+    # Uncomment the original code if you intend to do so and
+    # comment out the patch
+    #
+    # for tuple in miracl_crypto.rsa_params:
+    #    print(str(index) + ".", "RSA" + str(tuple[1]))
+    #    index += 1
+    # ----BEGIN PATCH-------------
+    print(str(index) + ".", "RSA" + str(miracl_crypto.rsa_params[1]))
+    index += 1
+    # ----END   PATCH--------------
 
 def interactive_prompt_exect(index):
     index -= 1 # Python internally is zero-indexed
@@ -618,10 +631,24 @@ def interactive_prompt_exect(index):
         )
         pfcurve_selected=True
     else:
-        tuple = miracl_crypto.rsa_params[index-(len(miracl_crypto.np_curves)+len(miracl_crypto.pf_curves))]
+        # Python interprets the singular RSA entry in a way
+        # that doesn't allow for nested tuples if there aren't
+        # more than one entry, the original code has been commented
+        # out and replaced with a subpar fix
+        #
+        # If you are adding more RSA curves, it will error out
+        # Uncomment the original code if you intend to do so and
+        # comment out the patch
+        #
+        # tuple = miracl_crypto.rsa_params[index-(len(miracl_crypto.np_curves)+len(miracl_crypto.pf_curves))]
+        # rsaset(
+        #     tuple[0], tuple[1], tuple[2], tuple[3]
+        # )
+        # ----BEGIN PATCH-------------
         rsaset(
-            tuple[0], tuple[1], tuple[2], tuple[3]
+            miracl_crypto.rsa_params[0], miracl_crypto.rsa_params[1], miracl_crypto.rsa_params[2], miracl_crypto.rsa_params[3]
         )
+        # ----END   PATCH--------------
         rsa_selected=True
 
 def interactive_prompt_input():
