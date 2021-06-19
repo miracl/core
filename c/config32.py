@@ -32,10 +32,8 @@ ptr=0
 max=44
 selection=[]
 
-deltext="rm"
 copytext="cp"
 if sys.platform.startswith("win") :
-    deltext="del"
     copytext=">NUL copy"
 
 if len(sys.argv)==2 :
@@ -45,6 +43,13 @@ if testing :
     sys.stdin=open("test.txt","r")
 
 compiler_path = ""
+
+class miracl_interaction:
+    def delete_file_using_expr(expression):
+        for root, dirs, files in os.walk(os.path.abspath(os.path.dirname(__file__))):
+            for name in files:
+                if fnmatch.fnmatch(name, expression):
+                    os.remove(os.path.join(root, name))
 
 class miracl_compile:
     def detect_supported_compiler():
@@ -992,12 +997,12 @@ miracl_compile.compile_file(3, "x509.c")
 if sys.platform.startswith("win") :
     os.system("for %i in (*.o) do @echo %~nxi >> f.list")
     os.system("ar rc core.a @f.list")
-    os.system(deltext+" f.list")
+    miracl_interaction.delete_file_using_expr("f.list")
 
 else :
     os.system("ar rc core.a *.o")
 
-os.system(deltext+" *.o")
+miracl_interaction.delete_file_using_expr("*.o")
 
 if testing :
     miracl_compile.compile_binary(2, "testecc.c", "core.a", "testecc")
