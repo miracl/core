@@ -26,6 +26,7 @@ import fnmatch
 
 testing=False
 rsa_selected=False
+keep_querying=True
 curve_selected=False
 pfcurve_selected=False
 
@@ -744,6 +745,143 @@ def sanity_checks():
 sanity_checks()
 
 replace("arch.h","@WL@","64")
+
+class miracl_crypto:
+    np_curves = (
+        ( "255", "F25519", "ED25519", "56", "2", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "-1", "NOT_PF", "", "", "", "", "128" ),
+        ( "255", "F25519", "C25519", "56", "2", "1", "PSEUDO_MERSENNE", "0", "MONTGOMERY", "486662", "NOT_PF", "", "", "", "", "128" ),
+        ( "256", "NIST256", "NIST256", "56", "1", "-10", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
+        ( "256", "BRAINPOOL", "BRAINPOOL", "56", "1", "-3", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
+        ( "256", "ANSSI", "ANSSI", "56", "1", "-5", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
+        ( "336", "HIFIVE", "HIFIVE", "60", "2", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "192" ),
+        ( "448", "GOLDILOCKS", "GOLDILOCKS", "58", "1", "0", "GENERALISED_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256" ),
+        ( "384", "NIST384", "NIST384", "56", "1", "-12", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "192" ),
+        ( "414", "C41417", "C41417", "60", "1", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256" ),
+        ( "521", "NIST521", "NIST521", "60", "1", "-4", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "256" ),
+        ( "256", "F256PMW", "NUMS256W", "56", "1", "7", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
+        ( "256", "F256PME", "NUMS256E", "56", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
+        ( "384", "F384PM", "NUMS384W", "58", "1", "-4", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "192" ),
+        ( "384", "F384PM", "NUMS384E", "56", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "192" ),
+        ( "512", "F512PM", "NUMS512W", "60", "1", "-4", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "256" ),
+        ( "512", "F512PM", "NUMS512E", "60", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256" ),
+        #                                            ,"1", for SVDW
+        # set for SSWU plus isogenies
+        ( "256", "SECP256K1", "SECP256K1", "56", "1",["-11", "3"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "NOT_PF", "", "", "", "", "128" ),
+        ( "256", "SM2", "SM2", "56", "1", "-9", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
+        ( "255", "F25519", "C13318", "56", "2", "2", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
+        ( "255", "JUBJUB", "JUBJUB", "56", "32", "1", "NOT_SPECIAL", "5", "EDWARDS", "-1", "NOT_PF", "", "", "", "", "128" ),
+        ( "448", "GOLDILOCKS", "X448", "58", "1", "0", "GENERALISED_MERSENNE", "0", "MONTGOMERY", "156326", "NOT_PF", "", "", "", "", "256" ),
+        ( "160", "SECP160R1", "SECP160R1", "56", "1", "3", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
+        ( "251", "C1174", "C1174", "56", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
+        ( "166", "C1665", "C1665", "60", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
+        ( "256", "MDC201601", "MDC201601", "56", "1", "0", "NOT_SPECIAL", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
+        ( "255", "TWEEDLEDUM", "TWEEDLEDUM", "56", "33", "1", "NOT_SPECIAL", "5", "WEIERSTRASS", "0", "NOT_PF", "", "", "", "", "128" ),
+        ( "255", "TWEEDLEDEE", "TWEEDLEDEE", "56", "34", "1", "NOT_SPECIAL", "5", "WEIERSTRASS", "0", "NOT_PF", "", "", "", "", "128" )
+    )
+
+    pf_curves = (
+        ( "254", "BN254", "BN254", "56", "1",["-1", "-1", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "NEGATIVEX", "71", "66", "128" ),
+        ( "254", "BN254CX", "BN254CX", "56", "1",["-1", "-1", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "NEGATIVEX", "76", "66", "128" ),
+        ( "383", "BLS12383", "BLS12383", "58", "1",["1", "1", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS12_CURVE", "M_TYPE", "POSITIVEX", "68", "65", "128" ),
+        #                                           ["-3" ,"-1", "0"]  for SVDW
+        # set for SSWU plus isogenies
+        ( "381", "BLS12381", "BLS12381", "58", "1",["11", "-2", "-1", "11", "3"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS12_CURVE", "M_TYPE", "NEGATIVEX", "69", "65", "128" ),
+        ( "256", "FP256BN", "FP256BN", "56", "1",["1", "1", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "M_TYPE", "NEGATIVEX", "83", "66", "128" ),
+        ( "512", "FP512BN", "FP512BN", "60", "1",["1", "1", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "M_TYPE", "POSITIVEX", "172", "130", "128" ),
+        ( "443", "BLS12443", "BLS12443", "60", "1",["-7", "1", "1", "11", "3"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS12_CURVE", "M_TYPE", "POSITIVEX", "78", "75", "128" ),
+        # https://eprint.iacr.org/2017/334.pdf
+        ( "461", "BLS12461", "BLS12461", "60", "1",["1", "4", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS12_CURVE", "M_TYPE", "NEGATIVEX", "79", "78", "128" ),
+        ( "462", "BN462", "BN462", "60", "1",["1", "1", "0"], "NOT_SPECIAL", "1", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "POSITIVEX", "125", "118", "128" ),
+        ( "479", "BLS24479", "BLS24479", "56", "1",["1", "4", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS24_CURVE", "M_TYPE", "POSITIVEX", "52", "49", "192" ),
+        ( "556", "BLS48556", "BLS48556", "58", "1",["-1", "2", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS48_CURVE", "M_TYPE", "POSITIVEX", "35", "32", "256" ),
+        ( "581", "BLS48581", "BLS48581", "60", "1",["2", "2", "0"], "NOT_SPECIAL", "10", "WEIERSTRASS", "0", "BLS48_CURVE", "D_TYPE", "NEGATIVEX", "36", "33", "256" ),
+        ( "286", "BLS48286", "BLS48286", "60", "1",["1", "1", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS48_CURVE", "M_TYPE", "POSITIVEX", "20", "17", "128" )
+    )
+
+    # There are choices here, different ways of getting the same result, but some faster than others
+    rsa_params = (
+        # 256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
+        # 512 is faster.. but best is 1024
+        ("1024", "2048", "58", "2"),
+        #("512", "2048", "60", "4"),
+        #("256", "2048", "56", "8"),
+        ("384", "3072", "56", "8"),
+        #("256", "4096", "56", "16"),
+        ("512", "4096", "60", "8")
+    )
+
+    total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)
+
+    def valid_query(number):
+        return number >= 0 and number <= miracl_crypto.total_entries
+
+def interactive_prompt_print():
+    index = 1
+    print("Elliptic Curves")
+    for tuple in miracl_crypto.np_curves:
+        print(str(index) + ".", tuple[2])
+        index += 1
+
+    print("\nPairing-Friendly Elliptic Curves")
+    for tuple in miracl_crypto.pf_curves:
+        print(str(index) + ".", tuple[2])
+        index += 1
+
+    print("\nRSA")
+    for tuple in miracl_crypto.rsa_params:
+        print(str(index) + ".", "RSA" + str(tuple[1]))
+        index += 1
+
+def interactive_prompt_exect(index):
+    index -= 1 # Python internally is zero-indexed
+    if index < len(miracl_crypto.np_curves):
+        tuple = miracl_crypto.np_curves[index]
+        curveset(
+            tuple[0], tuple[1], tuple[2], tuple[3], tuple[4],
+            tuple[5], tuple[6], tuple[7], tuple[8], tuple[9],
+            tuple[10], tuple[11], tuple[12],
+            tuple[13], tuple[14], tuple[15]
+        )
+        curve_selected=True
+    elif index < len(miracl_crypto.np_curves) + len(miracl_crypto.pf_curves):
+        tuple = miracl_crypto.pf_curves[index-len(miracl_crypto.np_curves)]
+        curveset(
+            tuple[0], tuple[1], tuple[2], tuple[3], tuple[4],
+            tuple[5], tuple[6], tuple[7], tuple[8], tuple[9],
+            tuple[10], tuple[11], tuple[12],
+            tuple[13], tuple[14], tuple[15]
+        )
+        pfcurve_selected=True
+    else:
+        tuple = miracl_crypto.rsa_params[index-(len(miracl_crypto.np_curves)+len(miracl_crypto.pf_curves))]
+        rsaset(
+            tuple[0], tuple[1], tuple[2], tuple[3]
+        )
+        rsa_selected=True
+
+def interactive_prompt_input():
+    while True:
+        userInput = input("\nChoose schemes to support (select 0 to finish): ")
+        try:
+            return int(userInput)
+        except:
+            if (userInput == ''):
+                return 0
+            print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
+            interactive_prompt_input()
+
+interactive_prompt_print()
+while keep_querying:
+    query_val = -1
+    while not miracl_crypto.valid_query(query_val):
+        query_val = interactive_prompt_input()
+        if not miracl_crypto.valid_query(query_val):
+            print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
+        elif query_val == 0:
+            keep_querying = False
+        else:
+            interactive_prompt_exect(query_val)
+
 # create library
 miracl_compile.compile_file(3, "randapi.c")
 miracl_compile.compile_file(3, "hash.c")

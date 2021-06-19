@@ -26,6 +26,7 @@ import fnmatch
 
 testing=False
 rsa_selected=False
+keep_querying=True
 curve_selected=False
 pfcurve_selected=False
 
@@ -552,6 +553,98 @@ def sanity_checks():
 sanity_checks()
 
 replace("arch.h","@WL@","16")
+
+class miracl_crypto:
+    np_curves = (
+        ( "255", "F25519", "ED25519", "13", "2", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "-1", "NOT_PF", "", "", "", "", "128"),
+        ( "256", "F256PME", "NUMS256E", "13", "1", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128"),
+        ( "160", "SECP160R1", "SECP160R1", "13", "1", "3", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128")
+    )
+
+    pf_curves = (
+        ( "254", "BN254", "BN254", "13", "1",["-1", "-1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "NEGATIVEX", "71", "66", "128"),
+        ( "254", "BN254CX", "BN254CX", "13",["-1", "-1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "NEGATIVEX", "76", "66", "128")
+    )
+
+    # There are choices here, different ways of getting the same result, but some faster than others
+    rsa_params = (
+        # 256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
+        # 512 is faster.. but best is 1024
+        ( "256", "2048", "13", "8")
+    )
+
+    total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)
+
+    def valid_query(number):
+        return number >= 0 and number <= miracl_crypto.total_entries
+
+def interactive_prompt_print():
+    index = 1
+    print("Elliptic Curves")
+    for tuple in miracl_crypto.np_curves:
+        print(str(index) + ".", tuple[2])
+        index += 1
+
+    print("\nPairing-Friendly Elliptic Curves")
+    for tuple in miracl_crypto.pf_curves:
+        print(str(index) + ".", tuple[2])
+        index += 1
+
+    print("\nRSA")
+    for tuple in miracl_crypto.rsa_params:
+        print(str(index) + ".", "RSA" + str(tuple[1]))
+        index += 1
+
+def interactive_prompt_exect(index):
+    index -= 1 # Python internally is zero-indexed
+    if index < len(miracl_crypto.np_curves):
+        tuple = miracl_crypto.np_curves[index]
+        curveset(
+            tuple[0], tuple[1], tuple[2], tuple[3], tuple[4],
+            tuple[5], tuple[6], tuple[7], tuple[8], tuple[9],
+            tuple[10], tuple[11], tuple[12],
+            tuple[13], tuple[14], tuple[15]
+        )
+        curve_selected=True
+    elif index < len(miracl_crypto.np_curves) + len(miracl_crypto.pf_curves):
+        tuple = miracl_crypto.pf_curves[index-len(miracl_crypto.np_curves)]
+        curveset(
+            tuple[0], tuple[1], tuple[2], tuple[3], tuple[4],
+            tuple[5], tuple[6], tuple[7], tuple[8], tuple[9],
+            tuple[10], tuple[11], tuple[12],
+            tuple[13], tuple[14], tuple[15]
+        )
+        pfcurve_selected=True
+    else:
+        tuple = miracl_crypto.rsa_params[index-(len(miracl_crypto.np_curves)+len(miracl_crypto.pf_curves))]
+        rsaset(
+            tuple[0], tuple[1], tuple[2], tuple[3]
+        )
+        rsa_selected=True
+
+def interactive_prompt_input():
+    while True:
+        userInput = input("\nChoose schemes to support (select 0 to finish): ")
+        try:
+            return int(userInput)
+        except:
+            if (userInput == ''):
+                return 0
+            print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
+            interactive_prompt_input()
+
+interactive_prompt_print()
+while keep_querying:
+    query_val = -1
+    while not miracl_crypto.valid_query(query_val):
+        query_val = interactive_prompt_input()
+        if not miracl_crypto.valid_query(query_val):
+            print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
+        elif query_val == 0:
+            keep_querying = False
+        else:
+            interactive_prompt_exect(query_val)
+
 # create library
 miracl_compile.compile_file(3, "randapi.c")
 miracl_compile.compile_file(3, "hash.c")
