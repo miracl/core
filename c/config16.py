@@ -552,52 +552,6 @@ def sanity_checks():
 sanity_checks()
 
 replace("arch.h","@WL@","16")
-print("Elliptic Curves")
-print("1. ED25519")
-print("2. NUMS256E")
-print("3. SECP160R1\n")
-
-print("Pairing-Friendly Elliptic Curves")
-print("4. BN254")
-print("5. BN254CX")
-
-print("RSA")
-print("6. RSA2048")
-
-while True:
-    if testing :
-        x=int(input())
-    else :
-        x=int(input("Choose a Scheme to support - 0 to finish: "))
-    if x == 0:
-        break
-#    print("Choice= ",x)
-    if x==1:
-        curveset("255","F25519","ED25519","13","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT_PF","","","","","128")
-        curve_selected=True
-    if x==2:
-        curveset("256","F256PME","NUMS256E","13","1","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==3:
-        curveset("160","SECP160R1","SECP160R1","13","1","3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT_PF","","","","","128")
-        curve_selected=True
-
-
-    if x==4:
-        curveset("254","BN254","BN254","13","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
-        pfcurve_selected=True
-    if x==5:
-        curveset("254","BN254CX","BN254CX","13",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
-        pfcurve_selected=True
-
-# There are choices here, different ways of getting the same result, but some faster than others
-    if x==6:
-        #256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
-        #512 is faster.. but best is 1024
-        rsaset("256","2048","13","8")
-        rsa_selected=True
-
 # create library
 miracl_compile.compile_file(3, "randapi.c")
 miracl_compile.compile_file(3, "hash.c")
