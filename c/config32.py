@@ -991,22 +991,12 @@ if testing :
         os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls.exe")
         os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all.exe")
         os.system("gcc -O2 -std=c99 testnhs.c core.a -o testnhs.exe")
-        os.system("testecc")
-        os.system("testmpin < pins.txt")
-        os.system("testbls")
-        os.system("benchtest_all")
-        os.system("testnhs")
     else :
         os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc")
         os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin")
         os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls")
         os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all")
         os.system("gcc -O2 -std=c99 testnhs.c core.a -o testnhs")
-        os.system("./testecc")
-        os.system("./testmpin < pins.txt")
-        os.system("./testbls")
-        os.system("./benchtest_all")
-        os.system("./testnhs")
 
 #print("Your section was ");
 #for i in range(0,ptr):
