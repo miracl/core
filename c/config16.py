@@ -56,6 +56,16 @@ class miracl_compile:
             flags = " -std=c99 -c %s" % (file)
         os.system(compiler_path + flags)
 
+    def compile_binary(optim, file, lib, bin):
+        global compiler_path
+        if sys.platform.startswith("win"):
+            bin += ".exe"
+        if optim != 0:
+            flags = " -std=c99 -O%d %s %s -o %s" % (optim, file, lib, bin)
+        else:
+            flags = " -std=c99 %s %s -o %s" % (file, lib, bin)
+        os.system(compiler_path + flags)
+
     def compiler_sanity_check():
         global compiler_path
         compiler_path = miracl_compile.detect_supported_compiler()
@@ -617,16 +627,10 @@ else :
 os.system(deltext+" *.o")
 
 if testing :
-    if sys.platform.startswith("win") :
-        os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc.exe")
-        os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin.exe")
-        os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls.exe")
-        os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all.exe")
-    else :
-        os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc")
-        os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin")
-        os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls")
-        os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all")
+    miracl_compile.compile_binary(2, "testecc.c", "core.a", "testecc")
+    miracl_compile.compile_binary(2, "testmpin.c", "core.a", "testmpin")
+    miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
+    miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
 
 #print("Your section was ");
 #for i in range(0,ptr):
