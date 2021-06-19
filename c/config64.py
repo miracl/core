@@ -218,7 +218,12 @@ def replace(namefile,oldtext,newtext):
     f.write(newdata)
     f.close()
 
-
+# rsaset(big,ring,bit_bits_in_base,multiplier)
+# for each choice give distinct names for "big" and "ring".
+# Typically "big" is the length in bits of the underlying big number type
+# "ring" is the RSA modulus size = "big" times 2^m
+# Next give the number base used for 32 bit architectures, as n where the base is 2^n
+# multiplier is 2^m (see above)
 def rsaset(tb,tff,base,ml) :
 
     itb=int(tb)
@@ -283,6 +288,23 @@ def rsaset(tb,tff,base,ml) :
     replace(fnameh,"WWW",tff)
     replace(fnameh,"XXX",bd)
     miracl_compile.compile_file(3, fnamec)
+
+# curveset(modulus_bits,field,curve,bits_in_base,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
+# for each curve give names for field and curve. In many cases the latter two will be the same.
+# modulus_bits is the bit length of the modulus, typically the same or slightly smaller than "big"
+# Typically "field" describes the modulus, and "curve" is the common name for the elliptic curve
+# Next give the number base used for 32 bit architecture, as n where the base is 2^n (note that these must be fixed for the same "big" name, if is ever re-used for another curve)
+# m8 max m such that 2^m | modulus-1
+# rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
+# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
+# i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
+# curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
+# Curve A parameter
+# pairing_friendly is BN, BLS or NOT (if not pairing friendly)
+# if pairing friendly. M or D type twist, and sign of the family parameter x
+# g2_table size is number of entries in precomputed table
+# ate bits is number of bits in Ate parameter (from romgen program)
+# curve security is AES equiavlent, rounded up.
 
 def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
@@ -790,23 +812,6 @@ while ptr<max:
     selection.append(x)
     ptr=ptr+1
 
-# curveset(modulus_bits,field,curve,bits_in_base,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
-# for each curve give names for field and curve. In many cases the latter two will be the same.
-# modulus_bits is the bit length of the modulus, typically the same or slightly smaller than "big"
-# Typically "field" describes the modulus, and "curve" is the common name for the elliptic curve
-# Next give the number base used for 32 bit architecture, as n where the base is 2^n (note that these must be fixed for the same "big" name, if is ever re-used for another curve)
-# m8 max m such that 2^m | modulus-1
-# rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
-# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
-# i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
-# curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
-# Curve A parameter
-# pairing_friendly is BN, BLS or NOT (if not pairing friendly)
-# if pairing friendly. M or D type twist, and sign of the family parameter x
-# g2_table size is number of entries in precomputed table
-# ate bits is number of bits in Ate parameter (from romgen program)
-# curve security is AES equiavlent, rounded up.
-
     if x==1:
         curveset("255","F25519","ED25519","56","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT_PF","","","","","128")
         curve_selected=True
@@ -956,13 +961,6 @@ while ptr<max:
     if x==pf+12:
         curveset("286","BLS48286","BLS48286","60","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48_CURVE","M_TYPE","POSITIVEX","20","17","128")
         pfcurve_selected=True
-
-# rsaset(big,ring,bit_bits_in_base,multiplier)
-# for each choice give distinct names for "big" and "ring".
-# Typically "big" is the length in bits of the underlying big number type
-# "ring" is the RSA modulus size = "big" times 2^m
-# Next give the number base used for 32 bit architectures, as n where the base is 2^n
-# multiplier is 2^m (see above)
 
 # There are choices here, different ways of getting the same result, but some faster than others
     if x==pf+13:
