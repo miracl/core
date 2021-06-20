@@ -1,0 +1,23 @@
+# Contributions to the Miracl Core project
+
+## Maintainer
+
+* Mike Scott <https://github.com/mcarrickscott>
+
+## Contributors
+
+In alphabetical order:
+
+* Alessandro Budroni <https://github.com/AlessandroBudroni/>
+* Felix Hanley <https://github.com/felix>
+* Jason <https://github.com/ToraNova>
+* Kittywhiskers Van Gogh <https://kittywhiskers.eu>
+* Kealan McCusker <https://github.com/kealan>
+* Lovesh Harchandani <https://github.com/lovesh>
+* Max <https://github.com/bitdivine>
+* Michael Burkhart <https://github.com/burkh4rt>
+* Pascal Schäfer <https://github.com/CryptoMathician>
+* Samuele Andreoli <https://github.com/samuele-andreoli>
+* Vigneswaran R <https://github.com/vigneswaran>
+* Will Abramson  <https://github.com/wip-abramson>
+* [Your name or handle] <[email or website]>
