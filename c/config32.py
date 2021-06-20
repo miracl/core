@@ -18,21 +18,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 import os
 import sys
-
-deltext="rm"
-copytext="cp"
-if sys.platform.startswith("win") :
-    deltext="del"
-    copytext=">NUL copy"
+import shutil
+import fnmatch
 
 testing=False
+rsa_selected=False
+keep_querying=True
+curve_selected=False
+pfcurve_selected=False
+
 if len(sys.argv)==2 :
     if sys.argv[1]=="test":
         testing=True
 if testing :
     sys.stdin=open("test.txt","r")
+
+compiler_path = ""
+generated_files = []
+
+class miracl_interaction:
+    def delete_file_using_expr(expression):
+        for root, dirs, files in os.walk(os.path.abspath(os.path.dirname(__file__))):
+            for name in files:
+                if fnmatch.fnmatch(name, expression):
+                    os.remove(os.path.join(root, name))
+
+    def copy_file_to_working_dir(file, target):
+        shutil.copyfile(file, target)
+        generated_files.append(target)
+
+class miracl_compile:
+    def detect_supported_compiler():
+        search_paths = os.environ['PATH'].split(os.pathsep)
+        for path in search_paths:
+            for root, dirs, files in os.walk(path):
+                for name in files:
+                    if fnmatch.fnmatch(name, "*clang*") or fnmatch.fnmatch(name, "*gcc*"):
+                        return os.path.join(root, name)
+        return ""
+
+    def compile_file(optim, file):
+        print("Processing " + file + "..", end = "")
+        global compiler_path
+        if optim != 0:
+            flags = " -std=c99 -O%d -c %s" % (optim, file)
+        else:
+            flags = " -std=c99 -c %s" % (file)
+        rc = os.WEXITSTATUS(os.system(compiler_path + flags))
+        if rc == 0:
+            print(". [OK]")
+        else:
+            print(". [ERROR]")
+
+    def compile_binary(optim, file, lib, bin):
+        print("Processing " + file + "..", end = "")
+        global compiler_path
+        if sys.platform.startswith("win"):
+            bin += ".exe"
+        if optim != 0:
+            flags = " -std=c99 -O%d %s %s -o %s" % (optim, file, lib, bin)
+        else:
+            flags = " -std=c99 %s %s -o %s" % (file, lib, bin)
+        rc = os.WEXITSTATUS(os.system(compiler_path + flags))
+        if rc == 0:
+            print(". [OK]")
+        else:
+            print(". [ERROR]")
+
+    def compiler_sanity_check():
+        global compiler_path
+        compiler_path = miracl_compile.detect_supported_compiler()
+        return (compiler_path != "")
 
 def inline_mul1(N,base)  :
     str=""
@@ -171,7 +230,12 @@ def replace(namefile,oldtext,newtext):
     f.write(newdata)
     f.close()
 
-
+# rsaset(big,ring,bit_bits_in_base,multiplier)
+# for each choice give distinct names for "big" and "ring".
+# Typically "big" is the length in bits of the underlying big number type
+# "ring" is the RSA modulus size = "big" times 2^m
+# Next give the number base used for 32 bit architectures, as n where the base is 2^n
+# multiplier is 2^m (see above)
 def rsaset(tb,tff,base,ml) :
     itb=int(tb)
     inb=int(itb/8)
@@ -183,13 +247,13 @@ def rsaset(tb,tff,base,ml) :
 
     bd=tb+"_"+base
     fnameh="config_big_"+bd+".h"
-    os.system(copytext+" config_big.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("config_big.h", fnameh)
     replace(fnameh,"XXX",bd)
     replace(fnameh,"@NB@",nb)
     replace(fnameh,"@BASE@",base)
 
     fnameh="config_ff_"+tff+".h"
-    os.system(copytext+" config_ff.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("config_ff.h", fnameh)
     replace(fnameh,"XXX",bd)
     replace(fnameh,"WWW",tff)
     replace(fnameh,"@ML@",ml);
@@ -197,8 +261,8 @@ def rsaset(tb,tff,base,ml) :
     fnamec="big_"+bd+".c"
     fnameh="big_"+bd+".h"
 
-    os.system(copytext+" big.c "+fnamec)
-    os.system(copytext+" big.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("big.c", fnamec)
+    miracl_interaction.copy_file_to_working_dir("big.h", fnameh)
 
     replace(fnamec,"XXX",bd)
     replace(fnameh,"XXX",bd)
@@ -210,32 +274,48 @@ def rsaset(tb,tff,base,ml) :
     replace(fnamec,"INLINE_REDC2",inline_redc2(nlen,bd))
 
 
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     fnamec="ff_"+tff+".c"
     fnameh="ff_"+tff+".h"
 
-    os.system(copytext+" ff.c "+fnamec)
-    os.system(copytext+" ff.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("ff.c", fnamec)
+    miracl_interaction.copy_file_to_working_dir("ff.h", fnameh)
 
     replace(fnamec,"WWW",tff)
     replace(fnamec,"XXX",bd)
     replace(fnameh,"WWW",tff)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     fnamec="rsa_"+tff+".c"
     fnameh="rsa_"+tff+".h"
 
-    os.system(copytext+" rsa.c "+fnamec)
-    os.system(copytext+" rsa.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("rsa.c", fnamec)
+    miracl_interaction.copy_file_to_working_dir("rsa.h", fnameh)
 
     replace(fnamec,"WWW",tff)
     replace(fnamec,"XXX",bd)
     replace(fnameh,"WWW",tff)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
+# curveset(modulus_bits,field,curve,bits_in_base,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
+# for each curve give names for field and curve. In many cases the latter two will be the same.
+# modulus_bits is the bit length of the modulus, typically the same or slightly smaller than "big"
+# Typically "field" describes the modulus, and "curve" is the common name for the elliptic curve
+# Next give the number base used for 32 bit architecture, as n where the base is 2^n (note that these must be fixed for the same "big" name, if is ever re-used for another curve)
+# m8 max m such that 2^m | modulus-1
+# rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
+# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
+# i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
+# curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
+# Curve A parameter
+# pairing_friendly is BN_CURVE, BLS_CURVE or NOT_PF (if not pairing friendly)
+# if pairing friendly. M or D type twist, and sign of the family parameter x
+# g2_table size is number of entries in precomputed table
+# ate bits is number of bits in Ate parameter (from romgen program)
+# curve security is AES equiavlent, rounded up.
 def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     inbt=int(nbt)
     itb=int(inbt+(8-inbt%8)%8)
@@ -246,7 +326,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     bd=tb+"_"+base
 
     fnameh="config_big_"+bd+".h"
-    os.system(copytext+" config_big.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("config_big.h", fnameh)
 
     replace(fnameh,"XXX",bd)
     replace(fnameh,"@NB@",nb)
@@ -254,7 +334,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
 
     fnameh="config_field_"+tf+".h"
-    os.system(copytext+" config_field.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("config_field.h", fnameh)
     replace(fnameh,"XXX",bd)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"@NBT@",nbt)
@@ -302,7 +382,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"@SH@",str(sh))
 
     fnameh="config_curve_"+tc+".h"
-    os.system(copytext+" config_curve.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("config_curve.h", fnameh)
     replace(fnameh,"XXX",bd)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"ZZZ",tc)
@@ -316,14 +396,14 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"@AB@",ab)
     replace(fnameh,"@G2@",g2)
 
-    replace(fnameh,"@HC@",hc) 
-    replace(fnameh,"@HC2@",hc2) 
+    replace(fnameh,"@HC@",hc)
+    replace(fnameh,"@HC2@",hc2)
 
     fnamec="big_"+bd+".c"
     fnameh="big_"+bd+".h"
 
-    os.system(copytext+" big.c "+fnamec)
-    os.system(copytext+" big.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("big.c", fnamec)
+    miracl_interaction.copy_file_to_working_dir("big.h", fnameh)
 
     replace(fnamec,"XXX",bd)
     replace(fnameh,"XXX",bd)
@@ -334,27 +414,27 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnamec,"INLINE_REDC1",inline_redc1(nlen,bd))
     replace(fnamec,"INLINE_REDC2",inline_redc2(nlen,bd))
 
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     fnamec="fp_"+tf+".c"
     fnameh="fp_"+tf+".h"
 
-    os.system(copytext+" fp.c "+fnamec)
-    os.system(copytext+" fp.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("fp.c", fnamec)
+    miracl_interaction.copy_file_to_working_dir("fp.h", fnameh)
 
     replace(fnamec,"YYY",tf)
     replace(fnamec,"XXX",bd)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     os.system("gcc -O3 -std=c99 -c rom_field_"+tf+".c");
 
     fnamec="ecp_"+tc+".c"
     fnameh="ecp_"+tc+".h"
 
-    os.system(copytext+" ecp.c "+fnamec)
-    os.system(copytext+" ecp.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("ecp.c", fnamec)
+    miracl_interaction.copy_file_to_working_dir("ecp.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
     replace(fnamec,"YYY",tf)
@@ -362,13 +442,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"ZZZ",tc)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     fnamec="ecdh_"+tc+".c"
     fnameh="ecdh_"+tc+".h"
 
-    os.system(copytext+" ecdh.c "+fnamec)
-    os.system(copytext+" ecdh.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("ecdh.c", fnamec)
+    miracl_interaction.copy_file_to_working_dir("ecdh.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
     replace(fnamec,"YYY",tf)
@@ -376,17 +456,17 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"ZZZ",tc)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"XXX",bd)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     fnamec="hpke_"+tc+".c"
     fnameh="hpke_"+tc+".h"
 
-    os.system(copytext+" hpke.c "+fnamec)
-    os.system(copytext+" hpke.h "+fnameh)
+    miracl_interaction.copy_file_to_working_dir("hpke.c", fnamec)
+    miracl_interaction.copy_file_to_working_dir("hpke.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
     replace(fnameh,"ZZZ",tc)
-    os.system("gcc -O3 -std=c99 -c "+fnamec)
+    miracl_compile.compile_file(3, fnamec)
 
     os.system("gcc -O3 -std=c99 -c rom_curve_"+tc+".c");
 
@@ -394,627 +474,445 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         fnamec="fp2_"+tf+".c"
         fnameh="fp2_"+tf+".h"
 
-        os.system(copytext+" fp2.c "+fnamec)
-        os.system(copytext+" fp2.h "+fnameh)
+        miracl_interaction.copy_file_to_working_dir("fp2.c", fnamec)
+        miracl_interaction.copy_file_to_working_dir("fp2.h", fnameh)
         replace(fnamec,"YYY",tf)
         replace(fnamec,"XXX",bd)
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
-        os.system("gcc -O3 -std=c99 -c "+fnamec)
+        miracl_compile.compile_file(3, fnamec)
 
         fnamec="fp4_"+tf+".c"
         fnameh="fp4_"+tf+".h"
 
-        os.system(copytext+" fp4.c "+fnamec)
-        os.system(copytext+" fp4.h "+fnameh)
+        miracl_interaction.copy_file_to_working_dir("fp4.c", fnamec)
+        miracl_interaction.copy_file_to_working_dir("fp4.h", fnameh)
         replace(fnamec,"YYY",tf)
         replace(fnamec,"XXX",bd)
         replace(fnamec,"ZZZ",tc)
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
         replace(fnameh,"ZZZ",tc)
-        os.system("gcc -O3 -std=c99 -c "+fnamec)
+        miracl_compile.compile_file(3, fnamec)
 
 
         if pf == "BN_CURVE" or pf == "BLS12_CURVE" :
             fnamec="fp12_"+tf+".c"
             fnameh="fp12_"+tf+".h"
 
-            os.system(copytext+" fp12.c "+fnamec)
-            os.system(copytext+" fp12.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("fp12.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("fp12.h", fnameh)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="ecp2_"+tc+".c"
             fnameh="ecp2_"+tc+".h"
 
-            os.system(copytext+" ecp2.c "+fnamec)
-            os.system(copytext+" ecp2.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("ecp2.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("ecp2.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="pair_"+tc+".c"
             fnameh="pair_"+tc+".h"
 
-            os.system(copytext+" pair.c "+fnamec)
-            os.system(copytext+" pair.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("pair.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("pair.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="mpin_"+tc+".c"
             fnameh="mpin_"+tc+".h"
 
-            os.system(copytext+" mpin.c "+fnamec)
-            os.system(copytext+" mpin.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("mpin.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("mpin.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="bls_"+tc+".c"
             fnameh="bls_"+tc+".h"
 
-            os.system(copytext+" bls.c "+fnamec)
-            os.system(copytext+" bls.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("bls.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("bls.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
         if pf == "BLS24_CURVE" :
             fnamec="fp8_"+tf+".c"
             fnameh="fp8_"+tf+".h"
 
-            os.system(copytext+" fp8.c "+fnamec)
-            os.system(copytext+" fp8.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("fp8.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("fp8.h", fnameh)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
 
             fnamec="fp24_"+tf+".c"
             fnameh="fp24_"+tf+".h"
 
-            os.system(copytext+" fp24.c "+fnamec)
-            os.system(copytext+" fp24.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("fp24.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("fp24.h", fnameh)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="ecp4_"+tc+".c"
             fnameh="ecp4_"+tc+".h"
 
-            os.system(copytext+" ecp4.c "+fnamec)
-            os.system(copytext+" ecp4.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("ecp4.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("ecp4.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="pair4_"+tc+".c"
             fnameh="pair4_"+tc+".h"
 
-            os.system(copytext+" pair4.c "+fnamec)
-            os.system(copytext+" pair4.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("pair4.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("pair4.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="mpin192_"+tc+".c"
             fnameh="mpin192_"+tc+".h"
 
-            os.system(copytext+" mpin192.c "+fnamec)
-            os.system(copytext+" mpin192.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("mpin192.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("mpin192.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="bls192_"+tc+".c"
             fnameh="bls192_"+tc+".h"
 
-            os.system(copytext+" bls192.c "+fnamec)
-            os.system(copytext+" bls192.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("bls192.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("bls192.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
         if pf == "BLS48_CURVE" :
 
             fnamec="fp8_"+tf+".c"
             fnameh="fp8_"+tf+".h"
 
-            os.system(copytext+" fp8.c "+fnamec)
-            os.system(copytext+" fp8.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("fp8.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("fp8.h", fnameh)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
 
             fnamec="ecp8_"+tc+".c"
             fnameh="ecp8_"+tc+".h"
 
-            os.system(copytext+" ecp8.c "+fnamec)
-            os.system(copytext+" ecp8.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("ecp8.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("ecp8.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
 
             fnamec="fp16_"+tf+".c"
             fnameh="fp16_"+tf+".h"
 
-            os.system(copytext+" fp16.c "+fnamec)
-            os.system(copytext+" fp16.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("fp16.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("fp16.h", fnameh)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
 
             fnamec="fp48_"+tf+".c"
             fnameh="fp48_"+tf+".h"
 
-            os.system(copytext+" fp48.c "+fnamec)
-            os.system(copytext+" fp48.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("fp48.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("fp48.h", fnameh)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
 
             fnamec="pair8_"+tc+".c"
             fnameh="pair8_"+tc+".h"
 
-            os.system(copytext+" pair8.c "+fnamec)
-            os.system(copytext+" pair8.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("pair8.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("pair8.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="mpin256_"+tc+".c"
             fnameh="mpin256_"+tc+".h"
 
-            os.system(copytext+" mpin256.c "+fnamec)
-            os.system(copytext+" mpin256.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("mpin256.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("mpin256.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
 
             fnamec="bls256_"+tc+".c"
             fnameh="bls256_"+tc+".h"
 
-            os.system(copytext+" bls256.c "+fnamec)
-            os.system(copytext+" bls256.h "+fnameh)
+            miracl_interaction.copy_file_to_working_dir("bls256.c", fnamec)
+            miracl_interaction.copy_file_to_working_dir("bls256.h", fnameh)
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            os.system("gcc -O3 -std=c99 -c "+fnamec)
+            miracl_compile.compile_file(3, fnamec)
+
+def sanity_checks():
+    if not miracl_compile.compiler_sanity_check():
+        raise Exception("Supported compiler not found in PATH variable, exiting!")
+
+sanity_checks()
 
 replace("arch.h","@WL@","32")
-print("Elliptic Curves")
-print("1. ED25519")
-print("2. C25519")
-print("3. NIST256")
-print("4. BRAINPOOL")
-print("5. ANSSI")
-print("6. HIFIVE")
-print("7. GOLDILOCKS")
-print("8. NIST384")
-print("9. C41417")
-print("10. NIST521")
-print("11. NUMS256W")
-print("12. NUMS256E")
-print("13. NUMS384W")
-print("14. NUMS384E")
-print("15. NUMS512W")
-print("16. NUMS512E")
-print("17. SECP256K1")
-print("18. SM2")
-print("19. C13318")
-print("20. JUBJUB")
-print("21. X448")
-print("22. SECP160R1")
-print("23. C1174")
-print("24. C1665")
-print("25. Million Dollar Curve")
-print("26. TWEEDLEDUM")
-print("27. TWEEDLEDEE\n")
 
-print("Pairing-Friendly Elliptic Curves")
-print("28. BN254")
-print("29. BN254CX")
-print("30. BLS12383")
-print("31. BLS12381")
-print("32. FP256BN")
-print("33. FP512BN")
-print("34. BLS12443")
-print("35. BLS12461")
-print("36. BN462")
-print("37. BLS24479")
-print("38. BLS48556")
-print("39. BLS48581")
-print("40. BLS48286\n")
+class miracl_crypto:
+    np_curves = (
+        ( "255", "F25519", "ED25519", "29", "2", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "-1", "NOT_PF", "", "", "", "", "128"),
+        ( "255", "F25519", "C25519", "29", "2", "1", "PSEUDO_MERSENNE", "0", "MONTGOMERY", "486662", "NOT_PF", "", "", "", "", "128"),
+        ( "256", "NIST256", "NIST256", "28", "1", "-10", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128"),
+        ( "256", "BRAINPOOL", "BRAINPOOL", "28", "1", "-3", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128"),
+        ( "256", "ANSSI", "ANSSI", "28", "1", "-5", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128"),
+        ( "336", "HIFIVE", "HIFIVE", "29", "2", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "192"),
+        ( "448", "GOLDILOCKS", "GOLDILOCKS", "29", "1", "0", "GENERALISED_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256"),
+        ( "384", "NIST384", "NIST384", "29", "1", "-12", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "192"),
+        ( "414", "C41417", "C41417", "29", "1", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256"),
+        ( "521", "NIST521", "NIST521", "28", "1", "-4", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "256"),
+        ( "256", "F256PMW", "NUMS256W", "28", "1", "7", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128"),
+        ( "256", "F256PME", "NUMS256E", "29", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128"),
+        ( "384", "F384PM", "NUMS384W", "29", "1", "-4", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "192"),
+        ( "384", "F384PM", "NUMS384E", "29", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "192"),
+        ( "512", "F512PM", "NUMS512W", "29", "1", "-4", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "256"),
+        ( "512", "F512PM", "NUMS512E", "29", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256"),
+        #                                             ,"1", for SVDW
+        # set for SSWU plus isogenies
+        ( "256", "SECP256K1", "SECP256K1", "28", "1",["-11", "3"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "NOT_PF", "", "", "", "", "128"),
+        ( "256", "SM2", "SM2", "28", "1", "-9", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128"),
+        ( "255", "F25519", "C13318", "29", "2", "2", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128"),
+        ( "255", "JUBJUB", "JUBJUB", "29", "32", "1", "NOT_SPECIAL", "5", "EDWARDS", "-1", "NOT_PF", "", "", "", "", "128"),
+        ( "448", "GOLDILOCKS", "X448", "29", "1", "0", "GENERALISED_MERSENNE", "0", "MONTGOMERY", "156326", "NOT_PF", "", "", "", "", "256"),
+        ( "160", "SECP160R1", "SECP160R1", "29", "1", "3", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128"),
+        ( "251", "C1174", "C1174", "29", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128"),
+        ( "166", "C1665", "C1665", "29", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128"),
+        ( "256", "MDC201601", "MDC201601", "28", "1", "0", "NOT_SPECIAL", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128"),
+        ( "255", "TWEEDLEDUM", "TWEEDLEDUM", "29", "33", "1", "NOT_SPECIAL", "5", "WEIERSTRASS", "0", "NOT_PF", "", "", "", "", "128"),
+        ( "255", "TWEEDLEDEE", "TWEEDLEDEE", "29", "34", "1", "NOT_SPECIAL", "5", "WEIERSTRASS", "0", "NOT_PF", "", "", "", "", "128")
+    )
 
-print("RSA")
-print("41. RSA2048")
-print("42. RSA3072")
-print("43. RSA4096")
+    pf_curves = (
+        ( "254", "BN254", "BN254", "28", "1",["-1", "-1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "NEGATIVEX", "71", "66", "128"),
+        ( "254", "BN254CX", "BN254CX", "28", "1",["-1", "-1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "NEGATIVEX", "76", "66", "128"),
+        ( "383", "BLS12383", "BLS12383", "29", "1",["1", "1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS12_CURVE", "M_TYPE", "POSITIVEX", "68", "65", "128"),
+        #                                        ["-3" ,"-1", "0"]  for SVDW
+        # set for SSWU plus isogenies
+        ( "381", "BLS12381", "BLS12381", "29", "1",["11", "-2", "-1", "11", "3"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS12_CURVE", "M_TYPE", "NEGATIVEX", "69", "65", "128"),
+        ( "256", "FP256BN", "FP256BN", "28", "1",["1", "1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "M_TYPE", "NEGATIVEX", "83", "66", "128"),
+        ( "512", "FP512BN", "FP512BN", "29", "1",["1", "1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "M_TYPE", "POSITIVEX", "172", "130", "128"),
+        ( "443", "BLS12443", "BLS12443", "29", "1",["-7", "1", "1", "11", "3"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS12_CURVE", "M_TYPE", "POSITIVEX", "78", "75", "128"),
+        # https://eprint.iacr.org/2017/334.pdf
+        ( "461", "BLS12461", "BLS12461", "28", "1",["1", "4", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS12_CURVE", "M_TYPE", "NEGATIVEX", "79", "78", "128"),
+        ( "479", "BLS24479", "BLS24479", "29", "1",["1", "4", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS24_CURVE", "M_TYPE", "POSITIVEX", "52", "49", "192"),
+        ( "556", "BLS48556", "BLS48556", "29", "1",["-1", "2", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS48_CURVE", "M_TYPE", "POSITIVEX", "35", "32", "256"),
+        ( "581", "BLS48581", "BLS48581", "29", "1",["2", "2", "0"],"NOT_SPECIAL", "10", "WEIERSTRASS", "0", "BLS48_CURVE", "D_TYPE", "NEGATIVEX", "36", "33", "256"),
+        ( "286", "BLS48286", "BLS48286", "29", "1",["1", "1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS48_CURVE", "M_TYPE", "POSITIVEX", "20", "17", "128")
+    )
 
-selection=[]
-ptr=0
-max=44
+    # There are choices here, different ways of getting the same result, but some faster than others
+    rsa_params = (
+        # 256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
+        # 512 is faster.. but best is 1024
+        ("1024", "2048", "28", "2"),
+        #("512","2048","29","4"),
+        #("256","2048","29","8"),
+        ("384", "3072", "28", "8"),
+        #("256","4096","29","16"),
+        ("512", "4096", "29", "8")
+    )
 
+    total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)
 
-curve_selected=False
-pfcurve_selected=False
-rsa_selected=False
+    def valid_query(number):
+        return number >= 0 and number <= miracl_crypto.total_entries
 
-while ptr<max:
-    if testing :
-        x=int(input())
-    else :
-        x=int(input("Choose a Scheme to support - 0 to finish: "))
-    if x == 0:
-        break
-#    print("Choice= ",x)
-    already=False
-    for i in range(0,ptr):
-        if x==selection[i]:
-            already=True
-            break
-    if already:
-        continue
+def interactive_prompt_print():
+    index = 1
+    print("Elliptic Curves")
+    for tuple in miracl_crypto.np_curves:
+        print(str(index) + ".", tuple[2])
+        index += 1
 
-    selection.append(x)
-    ptr=ptr+1
+    print("\nPairing-Friendly Elliptic Curves")
+    for tuple in miracl_crypto.pf_curves:
+        print(str(index) + ".", tuple[2])
+        index += 1
 
-# curveset(modulus_bits,field,curve,bits_in_base,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
-# for each curve give names for field and curve. In many cases the latter two will be the same.
-# modulus_bits is the bit length of the modulus, typically the same or slightly smaller than "big"
-# Typically "field" describes the modulus, and "curve" is the common name for the elliptic curve
-# Next give the number base used for 32 bit architecture, as n where the base is 2^n (note that these must be fixed for the same "big" name, if is ever re-used for another curve)
-# m8 max m such that 2^m | modulus-1
-# rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
-# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
-# i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
-# curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
-# Curve A parameter
-# pairing_friendly is BN_CURVE, BLS_CURVE or NOT_PF (if not pairing friendly)
-# if pairing friendly. M or D type twist, and sign of the family parameter x
-# g2_table size is number of entries in precomputed table
-# ate bits is number of bits in Ate parameter (from romgen program)
-# curve security is AES equiavlent, rounded up.
+    print("\nRSA")
+    for tuple in miracl_crypto.rsa_params:
+        print(str(index) + ".", "RSA" + str(tuple[1]))
+        index += 1
 
-    if x==1:
-        curveset("255","F25519","ED25519","29","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT_PF","","","","","128")
+def interactive_prompt_exect(index):
+    index -= 1 # Python internally is zero-indexed
+    if index < len(miracl_crypto.np_curves):
+        tuple = miracl_crypto.np_curves[index]
+        curveset(
+            tuple[0], tuple[1], tuple[2], tuple[3], tuple[4],
+            tuple[5], tuple[6], tuple[7], tuple[8], tuple[9],
+            tuple[10], tuple[11], tuple[12],
+            tuple[13], tuple[14], tuple[15]
+        )
         curve_selected=True
-    if x==2:
-        curveset("255","F25519","C25519","29","2","1","PSEUDO_MERSENNE","0","MONTGOMERY","486662","NOT_PF","","","","","128")
-        curve_selected=True
-    if x==3:
-        curveset("256","NIST256","NIST256","28","1","-10","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT_PF","","","","","128")
-        curve_selected=True
-    if x==4:
-        curveset("256","BRAINPOOL","BRAINPOOL","28","1","-3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT_PF","","","","","128")
-        curve_selected=True
-    if x==5:
-        curveset("256","ANSSI","ANSSI","28","1","-5","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==6:
-        curveset("336","HIFIVE","HIFIVE","29","2","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","192")
-        curve_selected=True
-    if x==7:
-        curveset("448","GOLDILOCKS","GOLDILOCKS","29","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","256")
-        curve_selected=True
-    if x==8:
-        curveset("384","NIST384","NIST384","29","1","-12","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT_PF","","","","","192")
-        curve_selected=True
-    if x==9:
-        curveset("414","C41417","C41417","29","1","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","256")
-        curve_selected=True
-    if x==10:
-        curveset("521","NIST521","NIST521","28","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT_PF","","","","","256")
-        curve_selected=True
-
-    if x==11:
-        curveset("256","F256PMW","NUMS256W","28","1","7","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT_PF","","","","","128")
-        curve_selected=True
-    if x==12:
-        curveset("256","F256PME","NUMS256E","29","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","128")
-        curve_selected=True
-    if x==13:
-        curveset("384","F384PM","NUMS384W","29","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT_PF","","","","","192")
-        curve_selected=True
-    if x==14:
-        curveset("384","F384PM","NUMS384E","29","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","192")
-        curve_selected=True
-    if x==15:
-        curveset("512","F512PM","NUMS512W","29","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT_PF","","","","","256")
-        curve_selected=True
-    if x==16:
-        curveset("512","F512PM","NUMS512E","29","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","256")
-        curve_selected=True
-
-    if x==17:
-#                                                       ,"1", for SVDW
-# set for SSWU plus isogenies
-        curveset("256","SECP256K1","SECP256K1","28","1",["-11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","NOT_PF","","","","","128")
-        curve_selected=True
-    if x==18:
-        curveset("256","SM2","SM2","28","1","-9","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==19:
-        curveset("255","F25519","C13318","29","2","2","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==20:
-        curveset("255","JUBJUB","JUBJUB","29","32","1","NOT_SPECIAL","5","EDWARDS","-1","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==21:
-        curveset("448","GOLDILOCKS","X448","29","1","0","GENERALISED_MERSENNE","0","MONTGOMERY","156326","NOT_PF","","","","","256")
-        curve_selected=True
-
-    if x==22:
-        curveset("160","SECP160R1","SECP160R1","29","1","3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==23:
-        curveset("251","C1174","C1174","29","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==24:
-        curveset("166","C1665","C1665","29","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==25:
-        curveset("256","MDC","MDC","28","1","0","NOT_SPECIAL","0","EDWARDS","1","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==26:
-        curveset("255","TWEEDLEDUM","TWEEDLEDUM","29","33","1","NOT_SPECIAL","5","WEIERSTRASS","0","NOT_PF","","","","","128")
-        curve_selected=True
-
-    if x==27:
-        curveset("255","TWEEDLEDEE","TWEEDLEDEE","29","34","1","NOT_SPECIAL","5","WEIERSTRASS","0","NOT_PF","","","","","128")
-        curve_selected=True
-
-    pf=28
-
-    if x==pf+0:
-        curveset("254","BN254","BN254","28","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","71","66","128")
+    elif index < len(miracl_crypto.np_curves) + len(miracl_crypto.pf_curves):
+        tuple = miracl_crypto.pf_curves[index-len(miracl_crypto.np_curves)]
+        curveset(
+            tuple[0], tuple[1], tuple[2], tuple[3], tuple[4],
+            tuple[5], tuple[6], tuple[7], tuple[8], tuple[9],
+            tuple[10], tuple[11], tuple[12],
+            tuple[13], tuple[14], tuple[15]
+        )
         pfcurve_selected=True
-    if x==pf+1:
-        curveset("254","BN254CX","BN254CX","28","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","D_TYPE","NEGATIVEX","76","66","128")
-        pfcurve_selected=True
-    if x==pf+2:
-        curveset("383","BLS12383","BLS12383","29","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12_CURVE","M_TYPE","POSITIVEX","68","65","128")
-        pfcurve_selected=True
-
-    if x==pf+3:
-#                                                      ["-3" ,"-1", "0"]  for SVDW
-# set for SSWU plus isogenies
-        curveset("381","BLS12381","BLS12381","29","1",["11","-2","-1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12_CURVE","M_TYPE","NEGATIVEX","69","65","128")
-        pfcurve_selected=True
-
-    if x==pf+4:
-        curveset("256","FP256BN","FP256BN","28","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","M_TYPE","NEGATIVEX","83","66","128")
-        pfcurve_selected=True
-    if x==pf+5:
-        curveset("512","FP512BN","FP512BN","29","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN_CURVE","M_TYPE","POSITIVEX","172","130","128")
-        pfcurve_selected=True
-
-    if x==pf+6:
-        curveset("443","BLS12443","BLS12443","29","1",["-7","1","1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12_CURVE","M_TYPE","POSITIVEX","78","75","128")
-        pfcurve_selected=True
-
-
-# https://eprint.iacr.org/2017/334.pdf
-    if x==pf+7:
-        curveset("461","BLS12461","BLS12461","28","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12_CURVE","M_TYPE","NEGATIVEX","79","78","128")
-        pfcurve_selected=True
-
-    if x==pf+8:
-        curveset("462","BN462","BN462","28","1",["1","1","0"],"NOT_SPECIAL","1","WEIERSTRASS","0","BN_CURVE","D_TYPE","POSITIVEX","125","118","128") # was 0 M_TYPE
-        pfcurve_selected=True
-
-    if x==pf+9:
-        curveset("479","BLS24479","BLS24479","29","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24_CURVE","M_TYPE","POSITIVEX","52","49","192")
-        pfcurve_selected=True
-
-    if x==pf+10:
-        curveset("556","BLS48556","BLS48556","29","1",["-1","2","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48_CURVE","M_TYPE","POSITIVEX","35","32","256")
-        pfcurve_selected=True
-
-    if x==pf+11:
-        curveset("581","BLS48581","BLS48581","29","1",["2","2","0"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48_CURVE","D_TYPE","NEGATIVEX","36","33","256")
-        pfcurve_selected=True
-
-    if x==pf+12:
-        curveset("286","BLS48286","BLS48286","29","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48_CURVE","M_TYPE","POSITIVEX","20","17","128")
-        pfcurve_selected=True
-
-
-# rsaset(big,ring,bit_bits_in_base,multiplier)
-# for each choice give distinct names for "big" and "ring".
-# Typically "big" is the length in bits of the underlying big number type
-# "ring" is the RSA modulus size = "big" times 2^m
-# Next give the number base used for 32 bit architectures, as n where the base is 2^n
-# multiplier is 2^m (see above)
-
-# There are choices here, different ways of getting the same result, but some faster than others
-    if x==pf+13:
-        #256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
-        #512 is faster.. but best is 1024
-        rsaset("1024","2048","28","2")
-        #rsaset("512","2048","29","4")
-        #rsaset("256","2048","29","8")
-        rsa_selected=True
-    if x==pf+14:
-        rsaset("384","3072","28","8")
-        rsa_selected=True
-    if x==pf+15:
-        #rsaset("256","4096","29","16")
-        rsaset("512","4096","29","8")
+    else:
+        tuple = miracl_crypto.rsa_params[index-(len(miracl_crypto.np_curves)+len(miracl_crypto.pf_curves))]
+        rsaset(
+            tuple[0], tuple[1], tuple[2], tuple[3]
+        )
         rsa_selected=True
 
+def interactive_prompt_input():
+    while True:
+        userInput = input("\nChoose schemes to support (select 0 to finish): ")
+        try:
+            return int(userInput)
+        except:
+            if (userInput == ''):
+                return 0
+            print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
+            interactive_prompt_input()
 
-os.system(deltext+" big.*")
-os.system(deltext+" fp.*")
-os.system(deltext+" ecp.*")
-os.system(deltext+" ecdh.*")
-os.system(deltext+" hpke.*")
-os.system(deltext+" ff.*")
-os.system(deltext+" rsa.*")
-os.system(deltext+" config_big.h")
-os.system(deltext+" config_field.h")
-os.system(deltext+" config_curve.h")
-os.system(deltext+" config_ff.h")
-os.system(deltext+" fp2.*")
-os.system(deltext+" fp4.*")
-os.system(deltext+" fp8.*")
-os.system(deltext+" fp16.*")
+interactive_prompt_print()
+while keep_querying and not testing:
+    query_val = -1
+    while not miracl_crypto.valid_query(query_val):
+        query_val = interactive_prompt_input()
+        if not miracl_crypto.valid_query(query_val):
+            print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
+        elif query_val == 0:
+            keep_querying = False
+        else:
+            interactive_prompt_exect(query_val)
 
-
-os.system(deltext+" fp12.*")
-os.system(deltext+" fp24.*")
-os.system(deltext+" fp48.*")
-
-os.system(deltext+" ecp2.*")
-os.system(deltext+" ecp4.*")
-os.system(deltext+" ecp8.*")
-
-os.system(deltext+" pair.*")
-os.system(deltext+" mpin.*")
-os.system(deltext+" bls.*")
-
-os.system(deltext+" pair4.*")
-os.system(deltext+" mpin192.*")
-os.system(deltext+" bls192.*")
-
-os.system(deltext+" pair8.*")
-os.system(deltext+" mpin256.*")
-os.system(deltext+" bls256.*")
+if testing:
+    for i in range(0, miracl_crypto.total_entries):
+        interactive_prompt_exect(i)
 
 # create library
-os.system("gcc -O3 -std=c99 -c randapi.c")
-
-os.system("gcc -O3 -std=c99 -c hash.c")
-os.system("gcc -O3 -std=c99 -c hmac.c")
-os.system("gcc -O3 -std=c99 -c rand.c")
-os.system("gcc -O3 -std=c99 -c oct.c")
-os.system("gcc -O3 -std=c99 -c share.c")
-os.system("gcc -O3 -std=c99 -c aes.c")
-os.system("gcc -O3 -std=c99 -c gcm.c")
-os.system("gcc -O3 -std=c99 -c newhope.c")
-os.system("gcc -O3 -std=c99 -c x509.c")
+miracl_compile.compile_file(3, "randapi.c")
+miracl_compile.compile_file(3, "hash.c")
+miracl_compile.compile_file(3, "hmac.c")
+miracl_compile.compile_file(3, "rand.c")
+miracl_compile.compile_file(3, "oct.c")
+miracl_compile.compile_file(3, "share.c")
+miracl_compile.compile_file(3, "aes.c")
+miracl_compile.compile_file(3, "gcm.c")
+miracl_compile.compile_file(3, "newhope.c")
+miracl_compile.compile_file(3, "x509.c")
 
 if sys.platform.startswith("win") :
     os.system("for %i in (*.o) do @echo %~nxi >> f.list")
     os.system("ar rc core.a @f.list")
-    os.system(deltext+" f.list")
-
+    miracl_interaction.delete_file_using_expr("f.list")
 else :
     os.system("ar rc core.a *.o")
 
-os.system(deltext+" *.o")
-
 if testing :
-    if sys.platform.startswith("win") :
-        os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc.exe")
-        os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin.exe")
-        os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls.exe")
-        os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all.exe")
-        os.system("gcc -O2 -std=c99 testnhs.c core.a -o testnhs.exe")
-        os.system("testecc")
-        os.system("testmpin < pins.txt")
-        os.system("testbls")
-        os.system("benchtest_all")
-        os.system("testnhs")
-    else :
-        os.system("gcc -O2 -std=c99 testecc.c core.a -o testecc")
-        os.system("gcc -O2 -std=c99 testmpin.c core.a -o testmpin")
-        os.system("gcc -O2 -std=c99 testbls.c core.a -o testbls")
-        os.system("gcc -O2 -std=c99 benchtest_all.c core.a -o benchtest_all")
-        os.system("gcc -O2 -std=c99 testnhs.c core.a -o testnhs")
-        os.system("./testecc")
-        os.system("./testmpin < pins.txt")
-        os.system("./testbls")
-        os.system("./benchtest_all")
-        os.system("./testnhs")
+    miracl_compile.compile_binary(2, "testecc.c", "core.a", "testecc")
+    miracl_compile.compile_binary(2, "testmpin.c", "core.a", "testmpin")
+    miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
+    miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
+    miracl_compile.compile_binary(2, "testnhs.c", "core.a", "testnhs")
 
-#print("Your section was ");
-#for i in range(0,ptr):
-#    print (selection[i])
+for file in generated_files:
+    miracl_interaction.delete_file_using_expr(file)
 
+miracl_interaction.delete_file_using_expr("*.o")
