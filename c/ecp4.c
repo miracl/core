@@ -209,7 +209,7 @@ int ECP4_ZZZ_fromOctet(ECP4_ZZZ *Q, octet *W)
         W->val[0]&=0x1f;
         FP4_YYY_fromBytes(&qx,&(W->val[0]));
         W->val[0]=typ;
-        if (typ&0x80==0)
+        if ((typ&0x80)==0)
         {
             FP4_YYY_fromBytes(&qy,&(W->val[4*MODBYTES_XXX]));
             if (ECP4_ZZZ_set(Q, &qx, &qy)) return 1;

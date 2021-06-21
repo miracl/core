@@ -19,7 +19,7 @@ Here we briefly describe the supported curves
 22. SECP160R1 - A NIST standard 160-bit curve http://www.secg.org/SEC2-Ver-1.0.pdf - for those that like to live dangerously!
 23. C1174 - A 251 bit Edwards curve suggested by Bernstein et al here - https://eprint.iacr.org/2013/325.pdf
 24. C1665 - A fast 166-bit Edwards curve for ~80-bit security
-25. Million Dollar Curve - A super-secure 256 bit Edwards curve, suggested here - https://eprint.iacr.org/2015/1249
+25. MDC - The Million Dollar Curve - a super-secure 256 bit Edwards curve, suggested here - https://eprint.iacr.org/2015/1249
 26. Tweedledum - An amicable pair of elliptic curves - see https://github.com/daira/tweedle
 27. Tweedledee - An amicable pair of elliptic curves - see https://github.com/daira/tweedle
 

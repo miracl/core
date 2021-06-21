@@ -238,7 +238,7 @@ int ZZZ::ECP2_fromOctet(ECP2 *Q, octet *W)
         W->val[0]&=0x1f;
         FP2_fromBytes(&qx,&(W->val[0]));
         W->val[0]=typ;
-        if (typ&0x80==0)
+        if ((typ&0x80)==0)
         {
             FP2_fromBytes(&qy,&(W->val[2*MODBYTES_XXX]));
             if (ECP2_set(Q, &qx, &qy)) return 1;

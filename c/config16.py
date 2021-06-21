@@ -565,7 +565,7 @@ class miracl_crypto:
 
     pf_curves = (
         ( "254", "BN254", "BN254", "13", "1",["-1", "-1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "NEGATIVEX", "71", "66", "128"),
-        ( "254", "BN254CX", "BN254CX", "13",["-1", "-1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "NEGATIVEX", "76", "66", "128")
+        ( "254", "BN254CX", "BN254CX", "13", "1",["-1", "-1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BN_CURVE", "D_TYPE", "NEGATIVEX", "76", "66", "128")
     )
 
     # There are choices here, different ways of getting the same result, but some faster than others
@@ -702,8 +702,12 @@ if testing :
     miracl_compile.compile_binary(2, "testmpin.c", "core.a", "testmpin")
     miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
     miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
+    os.system("./testecc")
+    os.system("./testmpin < pins.txt")
+    os.system("./testbls")
+    os.system("./benchtest_all")
 
-for file in generated_files:
-    miracl_interaction.delete_file_using_expr(file)
+#for file in generated_files:
+#    miracl_interaction.delete_file_using_expr(file)
 
 miracl_interaction.delete_file_using_expr("*.o")

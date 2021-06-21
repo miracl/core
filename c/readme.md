@@ -28,9 +28,8 @@ that you wish to support. Note that support for 16-bit builds is currently
 somewhat limited - see config16.py. A library is built automatically 
 including all of the modules that you will need.
 
-The configuration files assume the gcc compiler. For clang edit the
-config32.py and config64.py files and substitute "clang" for "gcc".
-Note that clang is about 10-15% faster.*
+Here we assume that the gcc compiler is used. If using clang, replace gcc
+with clang below.
 
 Make sure to use a 64-bit compiler on a 64-bit architecture.
 

@@ -763,7 +763,7 @@ class miracl_crypto:
         ( "256", "F256PMW", "NUMS256W", "56", "1", "7", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
         ( "256", "F256PME", "NUMS256E", "56", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
         ( "384", "F384PM", "NUMS384W", "58", "1", "-4", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "192" ),
-        ( "384", "F384PM", "NUMS384E", "56", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "192" ),
+        ( "384", "F384PM", "NUMS384E", "58", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "192" ),
         ( "512", "F512PM", "NUMS512W", "60", "1", "-4", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "256" ),
         ( "512", "F512PM", "NUMS512E", "60", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256" ),
         #                                            ,"1", for SVDW
@@ -776,7 +776,7 @@ class miracl_crypto:
         ( "160", "SECP160R1", "SECP160R1", "56", "1", "3", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
         ( "251", "C1174", "C1174", "56", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
         ( "166", "C1665", "C1665", "60", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
-        ( "256", "MDC201601", "MDC201601", "56", "1", "0", "NOT_SPECIAL", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
+        ( "256", "MDC", "MDC", "56", "1", "0", "NOT_SPECIAL", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
         ( "255", "TWEEDLEDUM", "TWEEDLEDUM", "56", "33", "1", "NOT_SPECIAL", "5", "WEIERSTRASS", "0", "NOT_PF", "", "", "", "", "128" ),
         ( "255", "TWEEDLEDEE", "TWEEDLEDEE", "56", "34", "1", "NOT_SPECIAL", "5", "WEIERSTRASS", "0", "NOT_PF", "", "", "", "", "128" )
     )
@@ -913,8 +913,13 @@ if testing :
     miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
     miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
     miracl_compile.compile_binary(2, "testnhs.c", "core.a", "testnhs")
+    os.system("./testecc")
+    os.system("./testmpin < pins.txt")
+    os.system("./testbls")
+    os.system("./benchtest_all")
+    os.system("./testnhs")
 
-for file in generated_files:
-    miracl_interaction.delete_file_using_expr(file)
+#for file in generated_files:
+#    miracl_interaction.delete_file_using_expr(file)
 
 miracl_interaction.delete_file_using_expr("*.o")

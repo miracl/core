@@ -1027,7 +1027,7 @@ int ECP_ZZZ_fromOctet(ECP_ZZZ *P, octet *W)
         W->val[0]&=0x1f;
         BIG_XXX_fromBytes(x, &(W->val[0]));
         W->val[0]=typ;
-        if (typ&0x80==0)
+        if ((typ&0x80)==0)
         {
             BIG_XXX_fromBytes(y, &(W->val[MODBYTES_XXX]));
             if (ECP_ZZZ_set(P, x, y)) return 1;

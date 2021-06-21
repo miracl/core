@@ -210,7 +210,7 @@ int ECP8_ZZZ_fromOctet(ECP8_ZZZ *Q, octet *W)
         W->val[0]&=0x1f;
         FP8_YYY_fromBytes(&qx,&(W->val[0]));
         W->val[0]=typ;
-        if (typ&0x80==0)
+        if ((typ&0x80)==0)
         {
             FP8_YYY_fromBytes(&qy,&(W->val[8*MODBYTES_XXX]));
             if (ECP8_ZZZ_set(Q, &qx, &qy)) return 1;

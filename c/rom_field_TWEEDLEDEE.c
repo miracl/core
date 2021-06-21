@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 #include "arch.h"
-#include "fp_TWEEDLEDUM.h"
+#include "fp_TWEEDLEDEE.h"
 
 /* TWEEDLEDUM Curve */
 
