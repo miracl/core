@@ -25,73 +25,48 @@ import shutil
 import fnmatch
 
 testing=False
-rsa_selected=False
 keep_querying=True
-curve_selected=False
-pfcurve_selected=False
 
 if len(sys.argv)==2 :
     if sys.argv[1]=="test":
         testing=True
-if testing :
-    sys.stdin=open("test.txt","r")
 
-compiler_path = ""
+my_compiler = "gcc"
 generated_files = []
 
-class miracl_interaction:
-    def delete_file_using_expr(expression):
-        for root, dirs, files in os.walk(os.path.abspath(os.path.dirname(__file__))):
-            for name in files:
-                if fnmatch.fnmatch(name, expression):
-                    os.remove(os.path.join(root, name))
+def copy_keep_file(file, target):
+    shutil.copyfile(file, target)
 
-    def copy_file_to_working_dir(file, target):
-        shutil.copyfile(file, target)
-        generated_files.append(target)
+def copy_temp_file(file, target):
+    shutil.copyfile(file, target)
+    generated_files.append(target)
+
+def delete_file(expression):
+    for root, dirs, files in os.walk(os.path.abspath(os.path.dirname(__file__))):
+        for name in files:
+            if fnmatch.fnmatch(name, expression):
+                os.remove(os.path.join(root, name))
 
 class miracl_compile:
-    def detect_supported_compiler():
-        search_paths = os.environ['PATH'].split(os.pathsep)
-        for path in search_paths:
-            for root, dirs, files in os.walk(path):
-                for name in files:
-                    if fnmatch.fnmatch(name, "*clang*") or fnmatch.fnmatch(name, "*gcc*"):
-                        return os.path.join(root, name)
-        return ""
-
     def compile_file(optim, file):
         print("Processing " + file + "..", end = "")
-        global compiler_path
         if optim != 0:
             flags = " -std=c99 -O%d -c %s" % (optim, file)
         else:
             flags = " -std=c99 -c %s" % (file)
-        rc = os.WEXITSTATUS(os.system(compiler_path + flags))
-        if rc == 0:
-            print(". [OK]")
-        else:
-            print(". [ERROR]")
+        os.system(my_compiler + flags)
+        print(". [DONE]")
 
     def compile_binary(optim, file, lib, bin):
         print("Processing " + file + "..", end = "")
-        global compiler_path
         if sys.platform.startswith("win"):
             bin += ".exe"
         if optim != 0:
             flags = " -std=c99 -O%d %s %s -o %s" % (optim, file, lib, bin)
         else:
             flags = " -std=c99 %s %s -o %s" % (file, lib, bin)
-        rc = os.WEXITSTATUS(os.system(compiler_path + flags))
-        if rc == 0:
-            print(". [OK]")
-        else:
-            print(". [ERROR]")
-
-    def compiler_sanity_check():
-        global compiler_path
-        compiler_path = miracl_compile.detect_supported_compiler()
-        return (compiler_path != "")
+        os.system(my_compiler + flags)
+        print(". [DONE]")
 
 def inline_mul1(N,base)  :
     str=""
@@ -249,13 +224,13 @@ def rsaset(tb,tff,base,ml) :
 
     bd=tb+"_"+base
     fnameh="config_big_"+bd+".h"
-    miracl_interaction.copy_file_to_working_dir("config_big.h", fnameh)
+    copy_keep_file("config_big.h", fnameh)
     replace(fnameh,"XXX",bd)
     replace(fnameh,"@NB@",nb)
     replace(fnameh,"@BASE@",base)
 
     fnameh="config_ff_"+tff+".h"
-    miracl_interaction.copy_file_to_working_dir("config_ff.h", fnameh)
+    copy_keep_file("config_ff.h", fnameh)
     replace(fnameh,"XXX",bd)
     replace(fnameh,"WWW",tff)
     replace(fnameh,"@ML@",ml);
@@ -263,8 +238,8 @@ def rsaset(tb,tff,base,ml) :
     fnamec="big_"+bd+".c"
     fnameh="big_"+bd+".h"
 
-    miracl_interaction.copy_file_to_working_dir("big.c", fnamec)
-    miracl_interaction.copy_file_to_working_dir("big.h", fnameh)
+    copy_temp_file("big.c", fnamec)
+    copy_keep_file("big.h", fnameh)
 
     replace(fnamec,"XXX",bd)
     replace(fnameh,"XXX",bd)
@@ -280,8 +255,8 @@ def rsaset(tb,tff,base,ml) :
     fnamec="ff_"+tff+".c"
     fnameh="ff_"+tff+".h"
 
-    miracl_interaction.copy_file_to_working_dir("ff.c", fnamec)
-    miracl_interaction.copy_file_to_working_dir("ff.h", fnameh)
+    copy_temp_file("ff.c", fnamec)
+    copy_keep_file("ff.h", fnameh)
 
     replace(fnamec,"WWW",tff)
     replace(fnamec,"XXX",bd)
@@ -292,8 +267,8 @@ def rsaset(tb,tff,base,ml) :
     fnamec="rsa_"+tff+".c"
     fnameh="rsa_"+tff+".h"
 
-    miracl_interaction.copy_file_to_working_dir("rsa.c", fnamec)
-    miracl_interaction.copy_file_to_working_dir("rsa.h", fnameh)
+    copy_temp_file("rsa.c", fnamec)
+    copy_keep_file("rsa.h", fnameh)
 
     replace(fnamec,"WWW",tff)
     replace(fnamec,"XXX",bd)
@@ -328,13 +303,15 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
     bd=tb+"_"+base
     fnameh="config_big_"+bd+".h"
-    miracl_interaction.copy_file_to_working_dir("config_big.h", fnameh)
+    copy_keep_file("config_big.h", fnameh)
+
     replace(fnameh,"XXX",bd)
     replace(fnameh,"@NB@",nb)
     replace(fnameh,"@BASE@",base)
 
     fnameh="config_field_"+tf+".h"
-    miracl_interaction.copy_file_to_working_dir("config_field.h", fnameh)
+    copy_keep_file("config_field.h", fnameh)
+
     replace(fnameh,"XXX",bd)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"@NBT@",nbt)
@@ -383,7 +360,8 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"@SH@",str(sh))
 
     fnameh="config_curve_"+tc+".h"
-    miracl_interaction.copy_file_to_working_dir("config_curve.h", fnameh)
+    copy_keep_file("config_curve.h", fnameh)
+
     replace(fnameh,"XXX",bd)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"ZZZ",tc)
@@ -403,8 +381,8 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     fnamec="big_"+bd+".c"
     fnameh="big_"+bd+".h"
 
-    miracl_interaction.copy_file_to_working_dir("big.c", fnamec)
-    miracl_interaction.copy_file_to_working_dir("big.h", fnameh)
+    copy_temp_file("big.c", fnamec)
+    copy_keep_file("big.h", fnameh)
 
     replace(fnamec,"XXX",bd)
     replace(fnameh,"XXX",bd)
@@ -421,8 +399,8 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     fnamec="fp_"+tf+".c"
     fnameh="fp_"+tf+".h"
 
-    miracl_interaction.copy_file_to_working_dir("fp.c", fnamec)
-    miracl_interaction.copy_file_to_working_dir("fp.h", fnameh)
+    copy_temp_file("fp.c", fnamec)
+    copy_keep_file("fp.h", fnameh)
 
     replace(fnamec,"YYY",tf)
     replace(fnamec,"XXX",bd)
@@ -435,8 +413,8 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     fnamec="ecp_"+tc+".c"
     fnameh="ecp_"+tc+".h"
 
-    miracl_interaction.copy_file_to_working_dir("ecp.c", fnamec)
-    miracl_interaction.copy_file_to_working_dir("ecp.h", fnameh)
+    copy_temp_file("ecp.c", fnamec)
+    copy_keep_file("ecp.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
     replace(fnamec,"YYY",tf)
@@ -449,8 +427,8 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     fnamec="ecdh_"+tc+".c"
     fnameh="ecdh_"+tc+".h"
 
-    miracl_interaction.copy_file_to_working_dir("ecdh.c", fnamec)
-    miracl_interaction.copy_file_to_working_dir("ecdh.h", fnameh)
+    copy_temp_file("ecdh.c", fnamec)
+    copy_keep_file("ecdh.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
     replace(fnamec,"YYY",tf)
@@ -463,8 +441,8 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     fnamec="hpke_"+tc+".c"
     fnameh="hpke_"+tc+".h"
 
-    miracl_interaction.copy_file_to_working_dir("hpke.c", fnamec)
-    miracl_interaction.copy_file_to_working_dir("hpke.h", fnameh)
+    copy_temp_file("hpke.c", fnamec)
+    copy_keep_file("hpke.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
     replace(fnameh,"ZZZ",tc)
@@ -476,8 +454,8 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         fnamec="fp2_"+tf+".c"
         fnameh="fp2_"+tf+".h"
 
-        miracl_interaction.copy_file_to_working_dir("fp2.c", fnamec)
-        miracl_interaction.copy_file_to_working_dir("fp2.h", fnameh)
+        copy_temp_file("fp2.c", fnamec)
+        copy_keep_file("fp2.h", fnameh)
         replace(fnamec,"YYY",tf)
         replace(fnamec,"XXX",bd)
         replace(fnameh,"YYY",tf)
@@ -487,8 +465,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         fnamec="fp4_"+tf+".c"
         fnameh="fp4_"+tf+".h"
 
-        miracl_interaction.copy_file_to_working_dir("fp4.c", fnamec)
-        miracl_interaction.copy_file_to_working_dir("fp4.h", fnameh)
+        copy_temp_file("fp4.c", fnamec)
+        copy_keep_file("fp4.h", fnameh)
+
         replace(fnamec,"YYY",tf)
         replace(fnamec,"XXX",bd)
         replace(fnamec,"ZZZ",tc)
@@ -501,8 +480,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="fp12_"+tf+".c"
             fnameh="fp12_"+tf+".h"
 
-            miracl_interaction.copy_file_to_working_dir("fp12.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("fp12.h", fnameh)
+            copy_temp_file("fp12.c", fnamec)
+            copy_keep_file("fp12.h", fnameh)
+ 
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -514,8 +494,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="ecp2_"+tc+".c"
             fnameh="ecp2_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("ecp2.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("ecp2.h", fnameh)
+            copy_temp_file("ecp2.c", fnamec)
+            copy_keep_file("ecp2.h", fnameh)
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -527,8 +508,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="pair_"+tc+".c"
             fnameh="pair_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("pair.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("pair.h", fnameh)
+            copy_temp_file("pair.c", fnamec)
+            copy_keep_file("pair.h", fnameh)
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -540,8 +522,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="mpin_"+tc+".c"
             fnameh="mpin_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("mpin.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("mpin.h", fnameh)
+            copy_temp_file("mpin.c", fnamec)
+            copy_keep_file("mpin.h", fnameh)
+ 
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -553,8 +536,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="bls_"+tc+".c"
             fnameh="bls_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("bls.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("bls.h", fnameh)
+            copy_temp_file("bls.c", fnamec)
+            copy_keep_file("bls.h", fnameh)
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -567,8 +551,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="fp8_"+tf+".c"
             fnameh="fp8_"+tf+".h"
 
-            miracl_interaction.copy_file_to_working_dir("fp8.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("fp8.h", fnameh)
+            copy_temp_file("fp8.c", fnamec)
+            copy_keep_file("fp8.h", fnameh)
+ 
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -581,8 +566,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="fp24_"+tf+".c"
             fnameh="fp24_"+tf+".h"
 
-            miracl_interaction.copy_file_to_working_dir("fp24.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("fp24.h", fnameh)
+            copy_temp_file("fp24.c", fnamec)
+            copy_keep_file("fp24.h", fnameh)
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -594,8 +580,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="ecp4_"+tc+".c"
             fnameh="ecp4_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("ecp4.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("ecp4.h", fnameh)
+            copy_temp_file("ecp4.c", fnamec)
+            copy_keep_file("ecp4.h", fnameh)
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -607,8 +594,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="pair4_"+tc+".c"
             fnameh="pair4_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("pair4.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("pair4.h", fnameh)
+            copy_temp_file("pair4.c", fnamec)
+            copy_keep_file("pair4.h", fnameh)
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -620,8 +608,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="mpin192_"+tc+".c"
             fnameh="mpin192_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("mpin192.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("mpin192.h", fnameh)
+            copy_temp_file("mpin192.c", fnamec)
+            copy_keep_file("mpin192.h", fnameh)
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -633,8 +622,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="bls192_"+tc+".c"
             fnameh="bls192_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("bls192.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("bls192.h", fnameh)
+            copy_temp_file("bls192.c", fnamec)
+            copy_keep_file("bls192.h", fnameh)
+ 
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -648,8 +638,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="fp8_"+tf+".c"
             fnameh="fp8_"+tf+".h"
 
-            miracl_interaction.copy_file_to_working_dir("fp8.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("fp8.h", fnameh)
+            copy_temp_file("fp8.c", fnamec)
+            copy_keep_file("fp8.h", fnameh)
+ 
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -662,8 +653,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="ecp8_"+tc+".c"
             fnameh="ecp8_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("ecp8.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("ecp8.h", fnameh)
+            copy_temp_file("ecp8.c", fnamec)
+            copy_keep_file("ecp8.h", fnameh)
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -676,8 +668,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="fp16_"+tf+".c"
             fnameh="fp16_"+tf+".h"
 
-            miracl_interaction.copy_file_to_working_dir("fp16.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("fp16.h", fnameh)
+            copy_temp_file("fp16.c", fnamec)
+            copy_keep_file("fp16.h", fnameh)
+ 
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -690,8 +683,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="fp48_"+tf+".c"
             fnameh="fp48_"+tf+".h"
 
-            miracl_interaction.copy_file_to_working_dir("fp48.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("fp48.h", fnameh)
+            copy_temp_file("fp48.c", fnamec)
+            copy_keep_file("fp48.h", fnameh)
+ 
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -704,8 +698,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="pair8_"+tc+".c"
             fnameh="pair8_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("pair8.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("pair8.h", fnameh)
+            copy_temp_file("pair8.c", fnamec)
+            copy_keep_file("pair8.h", fnameh)
+  
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -717,8 +712,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="mpin256_"+tc+".c"
             fnameh="mpin256_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("mpin256.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("mpin256.h", fnameh)
+            copy_temp_file("mpin256.c", fnamec)
+            copy_keep_file("mpin256.h", fnameh)
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -730,8 +726,9 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             fnamec="bls256_"+tc+".c"
             fnameh="bls256_"+tc+".h"
 
-            miracl_interaction.copy_file_to_working_dir("bls256.c", fnamec)
-            miracl_interaction.copy_file_to_working_dir("bls256.h", fnameh)
+            copy_temp_file("bls256.c", fnamec)
+            copy_keep_file("bls256.h", fnameh)
+ 
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -739,12 +736,6 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             miracl_compile.compile_file(3, fnamec)
-
-def sanity_checks():
-    if not miracl_compile.compiler_sanity_check():
-        raise Exception("Supported compiler not found in PATH variable, exiting!")
-
-sanity_checks()
 
 replace("arch.h","@WL@","64")
 
@@ -844,7 +835,7 @@ def interactive_prompt_exect(index):
             tuple[10], tuple[11], tuple[12],
             tuple[13], tuple[14], tuple[15]
         )
-        curve_selected=True
+        #curve_selected=True
     elif index < len(miracl_crypto.np_curves) + len(miracl_crypto.pf_curves):
         tuple = miracl_crypto.pf_curves[index-len(miracl_crypto.np_curves)]
         curveset(
@@ -853,13 +844,13 @@ def interactive_prompt_exect(index):
             tuple[10], tuple[11], tuple[12],
             tuple[13], tuple[14], tuple[15]
         )
-        pfcurve_selected=True
+        #pfcurve_selected=True
     else:
         tuple = miracl_crypto.rsa_params[index-(len(miracl_crypto.np_curves)+len(miracl_crypto.pf_curves))]
         rsaset(
             tuple[0], tuple[1], tuple[2], tuple[3]
         )
-        rsa_selected=True
+        #rsa_selected=True
 
 def interactive_prompt_input():
     while True:
@@ -903,7 +894,7 @@ miracl_compile.compile_file(3, "x509.c")
 if sys.platform.startswith("win") :
     os.system("for %i in (*.o) do @echo %~nxi >> f.list")
     os.system("ar rc core.a @f.list")
-    miracl_interaction.delete_file_using_expr("f.list")
+    delete_file("f.list")
 else :
     os.system("ar rc core.a *.o")
 
@@ -913,13 +904,61 @@ if testing :
     miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
     miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
     miracl_compile.compile_binary(2, "testnhs.c", "core.a", "testnhs")
-    os.system("./testecc")
-    os.system("./testmpin < pins.txt")
-    os.system("./testbls")
-    os.system("./benchtest_all")
-    os.system("./testnhs")
 
-#for file in generated_files:
-#    miracl_interaction.delete_file_using_expr(file)
+#clean up
+for file in generated_files:
+    delete_file(file)
 
-miracl_interaction.delete_file_using_expr("*.o")
+delete_file("*.o")
+delete_file("big.*")
+delete_file("fp.*")
+delete_file("ecp.*")
+delete_file("ecdh.*")
+delete_file("hpke.*")
+delete_file("ff.*")
+delete_file("rsa.*")
+delete_file("config_big.h")
+delete_file("config_field.h")
+delete_file("config_curve.h")
+delete_file("config_ff.h")
+delete_file("fp2.*")
+delete_file("fp4.*")
+delete_file("fp8.*")
+delete_file("fp16.*")
+delete_file("share.c")
+delete_file("x509.c")
+delete_file("gcm.c")
+delete_file("hash.c")
+delete_file("hmac.c")
+delete_file("aes.c")
+delete_file("oct.c");
+delete_file("newhope.c")
+delete_file("Doxyfile")
+delete_file("refman.pdf")
+delete_file("readme.md")
+delete_file("rand.c")
+delete_file("randapi.c")
+delete_file("config*.py")
+
+delete_file("fp12.*")
+delete_file("fp24.*")
+delete_file("fp48.*")
+
+delete_file("ecp2.*")
+delete_file("ecp4.*")
+delete_file("ecp8.*")
+
+delete_file("pair.*")
+delete_file("mpin.*")
+delete_file("bls.*")
+
+delete_file("pair4.*")
+delete_file("mpin192.*")
+delete_file("bls192.*")
+
+delete_file("pair8.*")
+delete_file("mpin256.*")
+delete_file("bls256.*")
+
+delete_file("rom_field*.c")
+delete_file("rom_curve*.c")

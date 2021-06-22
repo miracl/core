@@ -28,8 +28,9 @@ that you wish to support. Note that support for 16-bit builds is currently
 somewhat limited - see config16.py. A library is built automatically 
 including all of the modules that you will need.
 
-Here we assume that the gcc compiler is used. If using clang, replace gcc
-with clang below.
+The configuration files assume the gcc compiler. For clang edit the
+config*.py files and substitute "clang" for "gcc".
+Note that clang is about 10-15% faster.*
 
 Make sure to use a 64-bit compiler on a 64-bit architecture.
 
@@ -63,8 +64,6 @@ Next compile
 This test program exercises 4 different pairing friendly curves using 
 the MPIN authentication protocol.
 
-The correct PIN is 1234
-
 
 Next compile
 
@@ -91,6 +90,9 @@ Alternatively building and testing can be combined via
     python3 configXX.py test
 
 where XX can be 16, 32 or 64
+
+Note that this builds the library for ALL of the options. 
+Executables of some test programs are created, and can be run immediately.
 
 -------------------------------------------------
 

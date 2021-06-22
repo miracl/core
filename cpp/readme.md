@@ -17,7 +17,7 @@ somewhat limited - see config16.py. A library is built automatically
 including all of the modules that you will need.
 
 The configuration files assume the g++ compiler. For clang++ edit the
-config32.py and config64.py files and substitute "clang++" for "g++".
+config*.py files and substitute "clang++" for "g++".
 Note that clang++ is about 10-15% faster.*
 
 Make sure to use a 64-bit compiler on a 64-bit architecture.
@@ -76,6 +76,9 @@ Alternatively building and testing can be combined via
     python3 configXX.py test
 
 where XX can be 16, 32 or 64
+
+Note that this builds the library for ALL of the options. 
+Executables of some test programs are created, and can be run immediately.
 
 -------------------------------------------------
 

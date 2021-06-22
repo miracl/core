@@ -24,9 +24,14 @@ import sys
 import shutil
 import fnmatch
 
+testing=False
 keep_querying=True
 
-my_compiler = "emcc"
+if len(sys.argv)==2 :
+    if sys.argv[1]=="test":
+        testing=True
+
+my_compiler = "g++"
 generated_files = []
 
 def copy_keep_file(file, target):
@@ -43,12 +48,23 @@ def delete_file(expression):
                 os.remove(os.path.join(root, name))
 
 class miracl_compile:
-    def compile_file(optim, file, bin):
+    def compile_file(optim, file):
         print("Processing " + file + "..", end = "")
         if optim != 0:
-            flags = " -std=c99 -O%d -c %s -o %s" % (optim, file, bin)
+            flags = " -O%d -c %s" % (optim, file)
         else:
-            flags = " -std=c99 -c %s -o %s" % (file, bin)
+            flags = " -c %s" % (file)
+        os.system(my_compiler + flags)
+        print(". [DONE]")
+
+    def compile_binary(optim, file, lib, bin):
+        print("Processing " + file + "..", end = "")
+        if sys.platform.startswith("win"):
+            bin += ".exe"
+        if optim != 0:
+            flags = " -O%d %s %s -o %s" % (optim, file, lib, bin)
+        else:
+            flags = " %s %s -o %s" % (file, lib, bin)
         os.system(my_compiler + flags)
         print(". [DONE]")
 
@@ -206,7 +222,7 @@ def rsaset(tb,tff,base,ml) :
 
     nlen=(1+((8*inb-1)//ib))
 
-    bd=tb+"_"+base
+    bd="B"+tb+"_"+base
     fnameh="config_big_"+bd+".h"
     copy_keep_file("config_big.h", fnameh)
     replace(fnameh,"XXX",bd)
@@ -219,11 +235,10 @@ def rsaset(tb,tff,base,ml) :
     replace(fnameh,"WWW",tff)
     replace(fnameh,"@ML@",ml);
 
-    fnamec="big_"+bd+".c"
-    fnamebc="big_"+bd+".bc"
+    fnamec="big_"+bd+".cpp"
     fnameh="big_"+bd+".h"
 
-    copy_temp_file("big.c", fnamec)
+    copy_temp_file("big.cpp", fnamec)
     copy_keep_file("big.h", fnameh)
 
     replace(fnamec,"XXX",bd)
@@ -235,33 +250,31 @@ def rsaset(tb,tff,base,ml) :
     replace(fnamec,"INLINE_REDC1",inline_redc1(nlen,bd))
     replace(fnamec,"INLINE_REDC2",inline_redc2(nlen,bd))
 
-    miracl_compile.compile_file(3, fnamec, fnamebc)
+    miracl_compile.compile_file(3, fnamec)
 
-    fnamec="ff_"+tff+".c"
-    fnamebc="ff_"+tff+".bc"
+    fnamec="ff_"+tff+".cpp"
     fnameh="ff_"+tff+".h"
 
-    copy_temp_file("ff.c", fnamec)
+    copy_temp_file("ff.cpp", fnamec)
     copy_keep_file("ff.h", fnameh)
 
     replace(fnamec,"WWW",tff)
     replace(fnamec,"XXX",bd)
     replace(fnameh,"WWW",tff)
     replace(fnameh,"XXX",bd)
-    miracl_compile.compile_file(3, fnamec, fnamebc)
+    miracl_compile.compile_file(3, fnamec)
 
-    fnamec="rsa_"+tff+".c"
-    fnamebc="rsa_"+tff+".bc"
+    fnamec="rsa_"+tff+".cpp"
     fnameh="rsa_"+tff+".h"
 
-    copy_temp_file("rsa.c", fnamec)
+    copy_temp_file("rsa.cpp", fnamec)
     copy_keep_file("rsa.h", fnameh)
 
     replace(fnamec,"WWW",tff)
     replace(fnamec,"XXX",bd)
     replace(fnameh,"WWW",tff)
     replace(fnameh,"XXX",bd)
-    miracl_compile.compile_file(3, fnamec, fnamebc)
+    miracl_compile.compile_file(3, fnamec)
 
 # curveset(modulus_bits,field,curve,bits_in_base,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
 # for each curve give names for field and curve. In many cases the latter two will be the same.
@@ -288,7 +301,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     tb=str(itb)
     nb=str(inb)
 
-    bd=tb+"_"+base
+    bd="B"+tb+"_"+base
     fnameh="config_big_"+bd+".h"
     copy_keep_file("config_big.h", fnameh)
 
@@ -365,11 +378,10 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"@HC@",hc)
     replace(fnameh,"@HC2@",hc2)
 
-    fnamec="big_"+bd+".c"
-    fnamebc="big_"+bd+".bc"
+    fnamec="big_"+bd+".cpp"
     fnameh="big_"+bd+".h"
 
-    copy_temp_file("big.c", fnamec)
+    copy_temp_file("big.cpp", fnamec)
     copy_keep_file("big.h", fnameh)
 
     replace(fnamec,"XXX",bd)
@@ -381,28 +393,27 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnamec,"INLINE_REDC1",inline_redc1(nlen,bd))
     replace(fnamec,"INLINE_REDC2",inline_redc2(nlen,bd))
 
-    miracl_compile.compile_file(3, fnamec, fnamebc)
 
-    fnamec="fp_"+tf+".c"
-    fnamebc="fp_"+tf+".bc"
+    miracl_compile.compile_file(3, fnamec)
+
+    fnamec="fp_"+tf+".cpp"
     fnameh="fp_"+tf+".h"
 
-    copy_temp_file("fp.c", fnamec)
+    copy_temp_file("fp.cpp", fnamec)
     copy_keep_file("fp.h", fnameh)
 
     replace(fnamec,"YYY",tf)
     replace(fnamec,"XXX",bd)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"XXX",bd)
-    miracl_compile.compile_file(3, fnamec, fnamebc)
+    miracl_compile.compile_file(3, fnamec)
 
-    miracl_compile.compile_file(3, "rom_field_"+tf+".c", "rom_field_"+tf+".bc");
+    miracl_compile.compile_file(3, "rom_field_"+tf+".cpp");
 
-    fnamec="ecp_"+tc+".c"
-    fnamebc="ecp_"+tc+".bc"
+    fnamec="ecp_"+tc+".cpp"
     fnameh="ecp_"+tc+".h"
 
-    copy_temp_file("ecp.c", fnamec)
+    copy_temp_file("ecp.cpp", fnamec)
     copy_keep_file("ecp.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
@@ -411,13 +422,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"ZZZ",tc)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"XXX",bd)
-    miracl_compile.compile_file(3, fnamec, fnamebc)
+    miracl_compile.compile_file(3, fnamec)
 
-    fnamec="ecdh_"+tc+".c"
-    fnamebc="ecdh_"+tc+".bc"
+    fnamec="ecdh_"+tc+".cpp"
     fnameh="ecdh_"+tc+".h"
 
-    copy_temp_file("ecdh.c", fnamec)
+    copy_temp_file("ecdh.cpp", fnamec)
     copy_keep_file("ecdh.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
@@ -426,39 +436,36 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"ZZZ",tc)
     replace(fnameh,"YYY",tf)
     replace(fnameh,"XXX",bd)
-    miracl_compile.compile_file(3, fnamec, fnamebc)
+    miracl_compile.compile_file(3, fnamec)
 
-    fnamec="hpke_"+tc+".c"
-    fnamebc="hpke_"+tc+".bc"
+    fnamec="hpke_"+tc+".cpp"
     fnameh="hpke_"+tc+".h"
 
-    copy_temp_file("hpke.c", fnamec)
+    copy_temp_file("hpke.cpp", fnamec)
     copy_keep_file("hpke.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
     replace(fnameh,"ZZZ",tc)
-    miracl_compile.compile_file(3, fnamec, fnamebc)
+    miracl_compile.compile_file(3, fnamec)
 
-    miracl_compile.compile_file(3, "rom_curve_"+tc+".c", "rom_curve_"+tc+".bc");
+    miracl_compile.compile_file(3, "rom_curve_"+tc+".cpp");
 
     if pf != "NOT_PF" :
-        fnamec="fp2_"+tf+".c"
-        fnamebc="fp2_"+tf+".bc"
+        fnamec="fp2_"+tf+".cpp"
         fnameh="fp2_"+tf+".h"
 
-        copy_temp_file("fp2.c", fnamec)
+        copy_temp_file("fp2.cpp", fnamec)
         copy_keep_file("fp2.h", fnameh)
         replace(fnamec,"YYY",tf)
         replace(fnamec,"XXX",bd)
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
-        miracl_compile.compile_file(3, fnamec, fnamebc)
+        miracl_compile.compile_file(3, fnamec)
 
-        fnamec="fp4_"+tf+".c"
-        fnamebc="fp4_"+tf+".bc"
+        fnamec="fp4_"+tf+".cpp"
         fnameh="fp4_"+tf+".h"
 
-        copy_temp_file("fp4.c", fnamec)
+        copy_temp_file("fp4.cpp", fnamec)
         copy_keep_file("fp4.h", fnameh)
 
         replace(fnamec,"YYY",tf)
@@ -467,14 +474,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         replace(fnameh,"YYY",tf)
         replace(fnameh,"XXX",bd)
         replace(fnameh,"ZZZ",tc)
-        miracl_compile.compile_file(3, fnamec, fnamebc)
+        miracl_compile.compile_file(3, fnamec)
 
         if pf == "BN_CURVE" or pf == "BLS12_CURVE" :
-            fnamec="fp12_"+tf+".c"
-            fnamebc="fp12_"+tf+".bc"
+            fnamec="fp12_"+tf+".cpp"
             fnameh="fp12_"+tf+".h"
 
-            copy_temp_file("fp12.c", fnamec)
+            copy_temp_file("fp12.cpp", fnamec)
             copy_keep_file("fp12.h", fnameh)
  
             replace(fnamec,"YYY",tf)
@@ -483,13 +489,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="ecp2_"+tc+".c"
-            fnamebc="ecp2_"+tc+".bc"
+            fnamec="ecp2_"+tc+".cpp"
             fnameh="ecp2_"+tc+".h"
 
-            copy_temp_file("ecp2.c", fnamec)
+            copy_temp_file("ecp2.cpp", fnamec)
             copy_keep_file("ecp2.h", fnameh)
 
             replace(fnamec,"ZZZ",tc)
@@ -498,13 +503,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="pair_"+tc+".c"
-            fnamebc="pair_"+tc+".bc"
+            fnamec="pair_"+tc+".cpp"
             fnameh="pair_"+tc+".h"
 
-            copy_temp_file("pair.c", fnamec)
+            copy_temp_file("pair.cpp", fnamec)
             copy_keep_file("pair.h", fnameh)
 
             replace(fnamec,"ZZZ",tc)
@@ -513,13 +517,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="mpin_"+tc+".c"
-            fnamebc="mpin_"+tc+".bc"
+            fnamec="mpin_"+tc+".cpp"
             fnameh="mpin_"+tc+".h"
 
-            copy_temp_file("mpin.c", fnamec)
+            copy_temp_file("mpin.cpp", fnamec)
             copy_keep_file("mpin.h", fnameh)
  
             replace(fnamec,"ZZZ",tc)
@@ -528,13 +531,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="bls_"+tc+".c"
-            fnamebc="bls_"+tc+".bc"
+            fnamec="bls_"+tc+".cpp"
             fnameh="bls_"+tc+".h"
 
-            copy_temp_file("bls.c", fnamec)
+            copy_temp_file("bls.cpp", fnamec)
             copy_keep_file("bls.h", fnameh)
 
             replace(fnamec,"ZZZ",tc)
@@ -543,14 +545,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
         if pf == "BLS24_CURVE" :
-            fnamec="fp8_"+tf+".c"
-            fnamebc="fp8_"+tf+".bc"
+            fnamec="fp8_"+tf+".cpp"
             fnameh="fp8_"+tf+".h"
 
-            copy_temp_file("fp8.c", fnamec)
+            copy_temp_file("fp8.cpp", fnamec)
             copy_keep_file("fp8.h", fnameh)
  
             replace(fnamec,"YYY",tf)
@@ -559,13 +560,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="fp24_"+tf+".c"
-            fnamebc="fp24_"+tf+".bc"
+
+            fnamec="fp24_"+tf+".cpp"
             fnameh="fp24_"+tf+".h"
 
-            copy_temp_file("fp24.c", fnamec)
+            copy_temp_file("fp24.cpp", fnamec)
             copy_keep_file("fp24.h", fnameh)
 
             replace(fnamec,"YYY",tf)
@@ -574,13 +575,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="ecp4_"+tc+".c"
-            fnamebc="ecp4_"+tc+".bc"
+            fnamec="ecp4_"+tc+".cpp"
             fnameh="ecp4_"+tc+".h"
 
-            copy_temp_file("ecp4.c", fnamec)
+            copy_temp_file("ecp4.cpp", fnamec)
             copy_keep_file("ecp4.h", fnameh)
 
             replace(fnamec,"ZZZ",tc)
@@ -589,13 +589,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="pair4_"+tc+".c"
-            fnamebc="pair4_"+tc+".bc"
+            fnamec="pair4_"+tc+".cpp"
             fnameh="pair4_"+tc+".h"
 
-            copy_temp_file("pair4.c", fnamec)
+            copy_temp_file("pair4.cpp", fnamec)
             copy_keep_file("pair4.h", fnameh)
 
             replace(fnamec,"ZZZ",tc)
@@ -604,13 +603,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="mpin192_"+tc+".c"
-            fnamebc="mpin192_"+tc+".bc"
+            fnamec="mpin192_"+tc+".cpp"
             fnameh="mpin192_"+tc+".h"
 
-            copy_temp_file("mpin192.c", fnamec)
+            copy_temp_file("mpin192.cpp", fnamec)
             copy_keep_file("mpin192.h", fnameh)
 
             replace(fnamec,"ZZZ",tc)
@@ -619,13 +617,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="bls192_"+tc+".c"
-            fnamebc="bls192_"+tc+".bc"
+            fnamec="bls192_"+tc+".cpp"
             fnameh="bls192_"+tc+".h"
 
-            copy_temp_file("bls192.c", fnamec)
+            copy_temp_file("bls192.cpp", fnamec)
             copy_keep_file("bls192.h", fnameh)
  
             replace(fnamec,"ZZZ",tc)
@@ -634,15 +631,14 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
         if pf == "BLS48_CURVE" :
 
-            fnamec="fp8_"+tf+".c"
-            fnamebc="fp8_"+tf+".bc"
+            fnamec="fp8_"+tf+".cpp"
             fnameh="fp8_"+tf+".h"
 
-            copy_temp_file("fp8.c", fnamec)
+            copy_temp_file("fp8.cpp", fnamec)
             copy_keep_file("fp8.h", fnameh)
  
             replace(fnamec,"YYY",tf)
@@ -651,14 +647,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
 
-            fnamec="ecp8_"+tc+".c"
-            fnamebc="ecp8_"+tc+".bc"
+            fnamec="ecp8_"+tc+".cpp"
             fnameh="ecp8_"+tc+".h"
 
-            copy_temp_file("ecp8.c", fnamec)
+            copy_temp_file("ecp8.cpp", fnamec)
             copy_keep_file("ecp8.h", fnameh)
 
             replace(fnamec,"ZZZ",tc)
@@ -667,14 +662,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
 
-            fnamec="fp16_"+tf+".c"
-            fnamebc="fp16_"+tf+".bc"
+            fnamec="fp16_"+tf+".cpp"
             fnameh="fp16_"+tf+".h"
 
-            copy_temp_file("fp16.c", fnamec)
+            copy_temp_file("fp16.cpp", fnamec)
             copy_keep_file("fp16.h", fnameh)
  
             replace(fnamec,"YYY",tf)
@@ -683,13 +677,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="fp48_"+tf+".c"
-            fnamebc="fp48_"+tf+".bc"
+
+            fnamec="fp48_"+tf+".cpp"
             fnameh="fp48_"+tf+".h"
 
-            copy_temp_file("fp48.c", fnamec)
+            copy_temp_file("fp48.cpp", fnamec)
             copy_keep_file("fp48.h", fnameh)
  
             replace(fnamec,"YYY",tf)
@@ -698,13 +692,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             replace(fnameh,"ZZZ",tc)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="pair8_"+tc+".c"
-            fnamebc="pair8_"+tc+".bc"
+
+            fnamec="pair8_"+tc+".cpp"
             fnameh="pair8_"+tc+".h"
 
-            copy_temp_file("pair8.c", fnamec)
+            copy_temp_file("pair8.cpp", fnamec)
             copy_keep_file("pair8.h", fnameh)
   
             replace(fnamec,"ZZZ",tc)
@@ -713,13 +707,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="mpin256_"+tc+".c"
-            fnamebc="mpin256_"+tc+".bc"
+            fnamec="mpin256_"+tc+".cpp"
             fnameh="mpin256_"+tc+".h"
 
-            copy_temp_file("mpin256.c", fnamec)
+            copy_temp_file("mpin256.cpp", fnamec)
             copy_keep_file("mpin256.h", fnameh)
 
             replace(fnamec,"ZZZ",tc)
@@ -728,13 +721,12 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
-            fnamec="bls256_"+tc+".c"
-            fnamebc="bls256_"+tc+".bc"
+            fnamec="bls256_"+tc+".cpp"
             fnameh="bls256_"+tc+".h"
 
-            copy_temp_file("bls256.c", fnamec)
+            copy_temp_file("bls256.cpp", fnamec)
             copy_keep_file("bls256.h", fnameh)
  
             replace(fnamec,"ZZZ",tc)
@@ -743,7 +735,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"ZZZ",tc)
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
-            miracl_compile.compile_file(3, fnamec, fnamebc)
+            miracl_compile.compile_file(3, fnamec)
 
 replace("arch.h","@WL@","64")
 
@@ -803,12 +795,12 @@ class miracl_crypto:
     rsa_params = (
         # 256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
         # 512 is faster.. but best is 1024
-        ("1024", "2048", "58", "2"),
-        #("512", "2048", "60", "4"),
-        #("256", "2048", "56", "8"),
-        ("384", "3072", "56", "8"),
-        #("256", "4096", "56", "16"),
-        ("512", "4096", "60", "8")
+        ("1024", "RSA2048", "58", "2"),
+        #("512", "RSA2048", "60", "4"),
+        #("256", "RSA2048", "56", "8"),
+        ("384", "RSA3072", "56", "8"),
+        #("256", "RSA4096", "56", "16"),
+        ("512", "|RSA4096", "60", "8")
     )
 
     total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)
@@ -872,7 +864,7 @@ def interactive_prompt_input():
             interactive_prompt_input()
 
 interactive_prompt_print()
-while keep_querying :
+while keep_querying and not testing:
     query_val = -1
     while not miracl_crypto.valid_query(query_val):
         query_val = interactive_prompt_input()
@@ -883,30 +875,41 @@ while keep_querying :
         else:
             interactive_prompt_exect(query_val)
 
+if testing:
+    for i in range(0, miracl_crypto.total_entries):
+        interactive_prompt_exect(i)
+
 # create library
-miracl_compile.compile_file(3, "randapi.c", "randapi.bc")
-miracl_compile.compile_file(3, "hash.c", "hash.bc")
-miracl_compile.compile_file(3, "hmac.c", "hmac.bc")
-miracl_compile.compile_file(3, "rand.c", "rand.bc")
-miracl_compile.compile_file(3, "oct.c", "oct.bc")
-miracl_compile.compile_file(3, "share.c", "share.bc")
-miracl_compile.compile_file(3, "aes.c", "aes.bc")
-miracl_compile.compile_file(3, "gcm.c", "gcm.bc")
-miracl_compile.compile_file(3, "newhope.c", "newhope.bc")
-miracl_compile.compile_file(3, "x509.c", "x509.bc")
+miracl_compile.compile_file(3, "randapi.cpp")
+miracl_compile.compile_file(3, "hash.cpp")
+miracl_compile.compile_file(3, "hmac.cpp")
+miracl_compile.compile_file(3, "rand.cpp")
+miracl_compile.compile_file(3, "oct.cpp")
+miracl_compile.compile_file(3, "share.cpp")
+miracl_compile.compile_file(3, "aes.cpp")
+miracl_compile.compile_file(3, "gcm.cpp")
+miracl_compile.compile_file(3, "newhope.cpp")
+miracl_compile.compile_file(3, "x509.cpp")
 
 if sys.platform.startswith("win") :
-    os.system("for %i in (*.bc) do @echo %~nxi >> f.list")
-    os.system("emar rc core.a @f.list")
+    os.system("for %i in (*.o) do @echo %~nxi >> f.list")
+    os.system("ar rc core.a @f.list")
     delete_file("f.list")
 else :
-    os.system("emar rc core.a *.bc")
+    os.system("ar rc core.a *.o")
+
+if testing :
+    miracl_compile.compile_binary(2, "testecc.cpp", "core.a", "testecc")
+    miracl_compile.compile_binary(2, "testmpin.cpp", "core.a", "testmpin")
+    miracl_compile.compile_binary(2, "testbls.cpp", "core.a", "testbls")
+    miracl_compile.compile_binary(2, "benchtest_all.cpp", "core.a", "benchtest_all")
+    miracl_compile.compile_binary(2, "testnhs.cpp", "core.a", "testnhs")
 
 #clean up
 for file in generated_files:
     delete_file(file)
 
-delete_file("*.bc")
+delete_file("*.o")
 delete_file("big.*")
 delete_file("fp.*")
 delete_file("ecp.*")
@@ -922,19 +925,19 @@ delete_file("fp2.*")
 delete_file("fp4.*")
 delete_file("fp8.*")
 delete_file("fp16.*")
-delete_file("share.c")
-delete_file("x509.c")
-delete_file("gcm.c")
-delete_file("hash.c")
-delete_file("hmac.c")
-delete_file("aes.c")
-delete_file("oct.c");
-delete_file("newhope.c")
+delete_file("share.cpp")
+delete_file("x509.cpp")
+delete_file("gcm.cpp")
+delete_file("hash.cpp")
+delete_file("hmac.cpp")
+delete_file("aes.cpp")
+delete_file("oct.cpp");
+delete_file("newhope.cpp")
 delete_file("Doxyfile")
 delete_file("refman.pdf")
 delete_file("readme.md")
-delete_file("rand.c")
-delete_file("randapi.c")
+delete_file("rand.cpp")
+delete_file("randapi.cpp")
 delete_file("config*.py")
 
 delete_file("fp12.*")
@@ -957,5 +960,5 @@ delete_file("pair8.*")
 delete_file("mpin256.*")
 delete_file("bls256.*")
 
-delete_file("rom_field*.c")
-delete_file("rom_curve*.c")
+delete_file("rom_field*.cpp")
+delete_file("rom_curve*.cpp")

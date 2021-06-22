@@ -88,8 +88,12 @@ int mpin_BN254(csprng *RNG)
 // TA sends Server secret to Server
 
 // Client extracts PIN from secret to create Token
-            pin = 1234;
-            printf("Client extracts PIN= %d\n", pin);
+            //pin = 1234;
+            //printf("Client extracts PIN= %d\n", pin);
+            pin=0; printf("Client chooses PIN= ");
+            if (scanf("%d", &pin)) {}; // to avoid silly compile error
+            getchar();
+
             MPIN_BN254_EXTRACT_PIN(&HCID, pin, &TOKEN);
             printf("Client Token= ");
             OCT_output(&TOKEN);
@@ -119,7 +123,7 @@ int mpin_BN254(csprng *RNG)
             OCT_clear(&CLIENT_ID);
             OCT_jstring(&CLIENT_ID, (char *)"testUser@miracl.com");
             MPIN_BN254_ENCODE_TO_CURVE(&DST,&CLIENT_ID,&HCID);
-            pin=0; printf("PIN= ");
+            pin=0; printf("Client enters PIN= ");
             if (scanf("%d", &pin)) {}; // to avoid silly compile error
             getchar();
 
@@ -212,8 +216,11 @@ int mpin_BLS12383(csprng *RNG)
 // TA sends Server secret to Server
 
 // Client extracts PIN from secret to create Token
-            pin = 1234;
-            printf("Client extracts PIN= %d\n", pin);
+            //pin = 1234;
+            //printf("Client extracts PIN= %d\n", pin);
+            pin=0; printf("Client chooses PIN= ");
+            if (scanf("%d", &pin)) {}; // to avoid silly compile error
+            getchar();
             MPIN_BLS12383_EXTRACT_PIN(&HCID, pin, &TOKEN);
             printf("Client Token= ");
             OCT_output(&TOKEN);
@@ -224,7 +231,7 @@ int mpin_BLS12383(csprng *RNG)
             OCT_clear(&CLIENT_ID);
             OCT_jstring(&CLIENT_ID, (char *)"testUser@miracl.com");
             MPIN_BLS12383_ENCODE_TO_CURVE(&DST,&CLIENT_ID,&HCID);
-            pin=0; printf("PIN= ");
+            pin=0; printf("Client enters PIN= ");
             if (scanf("%d", &pin)) {}; // to avoid silly compile error
             getchar();
 
@@ -315,8 +322,11 @@ int mpin192_BLS24479(csprng *RNG)
 // TA sends Server secret to Server
 
 // Client extracts PIN from secret to create Token
-            pin = 1234;
-            printf("Client extracts PIN= %d\n", pin);
+            //pin = 1234;
+            //printf("Client extracts PIN= %d\n", pin);
+            pin=0; printf("Client chooses PIN= ");
+            if (scanf("%d", &pin)) {}; // to avoid silly compile error
+            getchar();
             MPIN_BLS24479_EXTRACT_PIN(&HCID, pin, &TOKEN);
             printf("Client Token= ");
             OCT_output(&TOKEN);
@@ -327,7 +337,7 @@ int mpin192_BLS24479(csprng *RNG)
             OCT_clear(&CLIENT_ID);
             OCT_jstring(&CLIENT_ID, (char *)"testUser@miracl.com");
             MPIN_BLS24479_ENCODE_TO_CURVE(&DST,&CLIENT_ID,&HCID);
-            pin=0; printf("PIN= ");
+            pin=0; printf("Client enters PIN= ");
             if (scanf("%d", &pin)) {}; // to avoid silly compile error
             getchar();
 
@@ -418,8 +428,11 @@ int mpin256_BLS48556(csprng *RNG)
 // TA sends Server secret to Server
 
 // Client extracts PIN from secret to create Token
-            pin = 1234;
-            printf("Client extracts PIN= %d\n", pin);
+            //pin = 1234;
+            //printf("Client extracts PIN= %d\n", pin);
+            pin=0; printf("Client chooses PIN= ");
+            if (scanf("%d", &pin)) {}; // to avoid silly compile error
+            getchar();
             MPIN_BLS48556_EXTRACT_PIN(&HCID, pin, &TOKEN);
             printf("Client Token= ");
             OCT_output(&TOKEN);
@@ -430,7 +443,7 @@ int mpin256_BLS48556(csprng *RNG)
             OCT_clear(&CLIENT_ID);
             OCT_jstring(&CLIENT_ID, (char *)"testUser@miracl.com");
             MPIN_BLS48556_ENCODE_TO_CURVE(&DST,&CLIENT_ID,&HCID);
-            pin=0; printf("PIN= ");
+            pin=0; printf("Client enters PIN= ");
             if (scanf("%d", &pin)) {}; // to avoid silly compile error
             getchar();
 

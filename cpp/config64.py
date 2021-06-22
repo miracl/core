@@ -183,7 +183,6 @@ def rsaset(tb,tff,base,ml) :
 
     nlen=(1+((8*inb-1)//ib))
 
-
     bd="B"+tb+"_"+base
     fnameh="config_big_"+bd+".h"
     os.system(copytext+" config_big.h "+fnameh)
