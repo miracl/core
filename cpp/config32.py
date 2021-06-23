@@ -819,7 +819,7 @@ def interactive_prompt_print():
 
     print("\nRSA")
     for tuple in miracl_crypto.rsa_params:
-        print(str(index) + ".", "RSA" + str(tuple[1]))
+        print(str(index) + ".", str(tuple[1]))
         index += 1
 
 def interactive_prompt_exect(index):

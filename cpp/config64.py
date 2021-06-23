@@ -800,7 +800,7 @@ class miracl_crypto:
         #("256", "RSA2048", "56", "8"),
         ("384", "RSA3072", "56", "8"),
         #("256", "RSA4096", "56", "16"),
-        ("512", "|RSA4096", "60", "8")
+        ("512", "RSA4096", "60", "8")
     )
 
     total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)
@@ -822,7 +822,7 @@ def interactive_prompt_print():
 
     print("\nRSA")
     for tuple in miracl_crypto.rsa_params:
-        print(str(index) + ".", "RSA" + str(tuple[1]))
+        print(str(index) + ".", str(tuple[1]))
         index += 1
 
 def interactive_prompt_exect(index):
