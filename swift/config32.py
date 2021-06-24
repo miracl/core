@@ -71,9 +71,11 @@ def rsaset(tb,nb,base,ml) :
 
     replace(fpath+"config_ff.swift","@ML@",ml);
 
+    print("Processing "+tb+ "..",end = "",flush=True)
     os.system("swiftc -DD32 "+fpath+"*.swift -L. -lcore -I. -O -Ounchecked -whole-module-optimization -emit-library -emit-module -module-name "+tb)
     os.system(deltext+fpath+"*.*")
     os.system("rmdir core"+slashtext+tb)
+    print(". [DONE]")
 
 # curveset(curve,bits_in_base,modulus_bits,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,ate_bits,curve security)
 # where "curve" is the common name for the elliptic curve
@@ -241,12 +243,12 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
         os.system(copytext+"ecdh.swift "+fpath+"ecdh.swift")
         os.system(copytext+"hpke.swift "+fpath+"hpke.swift")
 
-
+    print("Processing "+tc+ "..",end = "",flush=True)
     os.system("swiftc -DD32 "+fpath+"*.swift -L. -lcore -I. -O -Ounchecked -whole-module-optimization -emit-library -emit-module -module-name "+tc)
 #    os.system("swiftc -DD32 "+fpath+"*.swift -L. -lcore -I. -emit-library -emit-module -module-name "+tc)
     os.system(deltext+fpath+"*.*")
     os.system("rmdir core"+slashtext+tc)
-
+    print(". [DONE]")
 
 os.system("mkdir core")
 os.system(copytext+ "hash*.swift core"+slashtext+".")
@@ -306,7 +308,7 @@ class miracl_crypto:
         ("bls24479","29","479","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24","M_TYPE","POSITIVEX","49","192"),
         ("bls48556","29","556","1",["-1","2","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","32","256"),
         ("bls48581","29","581","1",["2","2","0"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48","D_TYPE","NEGATIVEX","33","256"),
-        ("bls48286","29","286","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX""17","128")
+        ("bls48286","29","286","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","17","128")
     )
 
     rsa_params = (

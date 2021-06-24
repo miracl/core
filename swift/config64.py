@@ -72,9 +72,11 @@ def rsaset(tb,nb,base,ml) :
 
     replace(fpath+"config_ff.swift","@ML@",ml);
 
+    print("Processing "+tb+ "..",end = "",flush=True)
     os.system("swiftc -DD64 "+fpath+"*.swift -L. -lcore -I. -O -Ounchecked -whole-module-optimization -emit-library -emit-module -module-name "+tb)
     os.system(deltext+fpath+"*.*")
     os.system("rmdir core"+slashtext+tb)
+    print(". [DONE]")
 
 # curveset(curve,bits_in_base,modulus_bits,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,ate_bits,curve security)
 # where "curve" is the common name for the elliptic curve
@@ -240,11 +242,11 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
         os.system(copytext+"ecdh.swift "+fpath+"ecdh.swift")
         os.system(copytext+"hpke.swift "+fpath+"hpke.swift")
 
-
+    print("Processing "+tc+ "..",end = "",flush=True)
     os.system("swiftc -DD64 "+fpath+"*.swift -L. -lcore -I. -O -Ounchecked -whole-module-optimization -emit-library -emit-module -module-name "+tc)
     os.system(deltext+fpath+"*.*")
     os.system("rmdir core"+slashtext+tc)
-
+    print(". [DONE]")
 
 os.system("mkdir core")
 os.system(copytext+ "hash*.swift core"+slashtext+".")
