@@ -49,7 +49,7 @@ def delete_file(expression):
                 os.remove(os.path.join(root, name))
 
 def request_compile(compiler_path, cflags, optim, file, lib, bin):
-    flags = ""
+    flags = " -std=c++11"
     if optim != 0:
         flags += " -O%d" % optim
     if cflags != None:
