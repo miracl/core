@@ -21,9 +21,12 @@
 
 import os
 import sys
+import getopt
 import shutil
 import fnmatch
 
+intr=False
+arg_options=False
 testing=False
 fast_fail=True
 keep_querying=True
@@ -885,26 +888,93 @@ def interactive_prompt_input():
             print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
             interactive_prompt_input()
 
-def main(argv):
-    global testing, keep_querying, my_compiler, generated_files
+def usage():
+    print("Usage: ./config64.py [OPTIONS] [ARGUMENTS]\n")
+    print("Option              Long Option              Action")
+    print("   -h, -?           --help                   Shows this message\n")
+    print("Script Behaviour:")
+    print("   -d               --disable-fastfail       Disable script termination if build fails (default: false)")
+    print("   -i               --ignore-environment     Do not read environment variables, rely on shell instead (default: false)\n")
+    print("Build Configuration:")
+    print("   -o               --options=1 --options=64 Disable interactive mode and select specific options")
+    print("   -r               --run-tests              Disable interactive mode, select all options, build and run tests")
+    print("                                             (implies --disable-fastfail, --ignore-environment)\n")
 
-    if len(sys.argv)==2 :
-        if sys.argv[1]=="test":
-            testing=True
+def arg_manager(argv, build_options):
+    global testing, arg_options, fast_fail, intr, ignore_variables
+    # Account for legacy behaviour
+    # Should be removed in future releases
+    if len(argv) == 0:
+        intr = True
+        return False
+    if len(argv) == 1:
+        if (argv[0] == "test"):
+            testing = True
+            return False
+    # Now let's try to actually make sense of arguments
+    try:
+        opts, args = getopt.getopt(
+            argv,
+            "hdiro:",
+            ["help", "disable-fastfail", "ignore-environment", "run-tests", "options"]
+        )
+    except getopt.GetoptError as err:
+        print(err)
+        usage()
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt in ['-h', '--help']:
+            usage()
+            sys.exit(0)
+        elif opt in ['-d', '--disable-fastfail']:
+            fast_fail = False
+        elif opt in ['-i', '--ignore-environment']:
+            ignore_variables = True
+        elif opt in ['-r', '--run-tests']:
+            testing = True
+            fast_fail = False
+            ignore_variables = True
+        elif opt in ['-o', '--options']:
+            arg_options = True
+            try:
+                intarg = int(arg)
+                if (intarg <= miracl_crypto.total_entries and intarg > 0):
+                    build_options.append(intarg)
+            except:
+                print("config64.py: Error! You have passed an invalid option, exiting.")
+                print("             If you are trying to select multiple options, please repeat the flag\n")
+                print("             e.g. ")
+                print("                  ./config64.py -o 1 -o 23 -o 25")
+                sys.exit(1)
+    return len(opts) > 0 and not testing and arg_options
+
+def main(argv):
+    global testing, keep_querying, my_compiler, generated_files, arg_options, intr
+    options_list = []
 
     replace("arch.h","@WL@","64")
 
-    interactive_prompt_print()
-    while keep_querying and not testing:
-        query_val = -1
-        while not miracl_crypto.valid_query(query_val):
-            query_val = interactive_prompt_input()
-            if not miracl_crypto.valid_query(query_val):
-                print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
-            elif query_val == 0:
-                keep_querying = False
-            else:
-                interactive_prompt_exect(query_val)
+    if not arg_manager(argv, options_list):
+        if intr:
+            if not testing:
+                interactive_prompt_print()
+            while keep_querying and not testing:
+                query_val = -1
+                while not miracl_crypto.valid_query(query_val):
+                    query_val = interactive_prompt_input()
+                    if not miracl_crypto.valid_query(query_val):
+                        print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
+                    elif query_val == 0:
+                        keep_querying = False
+                    else:
+                        interactive_prompt_exect(query_val)
+        elif not arg_options and not testing:
+            print("config64.py: Invalid input, program terminating")
+            sys.exit(2)
+    else:
+        for i in options_list:
+            interactive_prompt_exect(i)
 
     if testing:
         for i in range(0, miracl_crypto.total_entries):
