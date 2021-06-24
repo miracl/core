@@ -27,10 +27,6 @@ import fnmatch
 testing=False
 keep_querying=True
 
-if len(sys.argv)==2 :
-    if sys.argv[1]=="test":
-        testing=True
-
 my_compiler = "gcc"
 generated_files = []
 
@@ -737,8 +733,6 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"XXX",bd)
             miracl_compile.compile_file(3, fnamec)
 
-replace("arch.h","@WL@","64")
-
 class miracl_crypto:
     np_curves = (
         ( "255", "F25519", "ED25519", "56", "2", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "-1", "NOT_PF", "", "", "", "", "128" ),
@@ -863,48 +857,62 @@ def interactive_prompt_input():
             print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
             interactive_prompt_input()
 
-interactive_prompt_print()
-while keep_querying and not testing:
-    query_val = -1
-    while not miracl_crypto.valid_query(query_val):
-        query_val = interactive_prompt_input()
-        if not miracl_crypto.valid_query(query_val):
-            print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
-        elif query_val == 0:
-            keep_querying = False
-        else:
-            interactive_prompt_exect(query_val)
+def main(argv):
+    global testing, keep_querying, my_compiler, generated_files
 
-if testing:
-    for i in range(0, miracl_crypto.total_entries):
-        interactive_prompt_exect(i+1)
+    if len(sys.argv)==2 :
+        if sys.argv[1]=="test":
+            testing=True
 
-# create library
-miracl_compile.compile_file(3, "randapi.c")
-miracl_compile.compile_file(3, "hash.c")
-miracl_compile.compile_file(3, "hmac.c")
-miracl_compile.compile_file(3, "rand.c")
-miracl_compile.compile_file(3, "oct.c")
-miracl_compile.compile_file(3, "share.c")
-miracl_compile.compile_file(3, "aes.c")
-miracl_compile.compile_file(3, "gcm.c")
-miracl_compile.compile_file(3, "newhope.c")
-miracl_compile.compile_file(3, "x509.c")
+    replace("arch.h","@WL@","64")
 
-if sys.platform.startswith("win") :
-    os.system("for %i in (*.o) do @echo %~nxi >> f.list")
-    os.system("ar rc core.a @f.list")
-    delete_file("f.list")
-else :
-    os.system("ar rc core.a *.o")
+    interactive_prompt_print()
+    while keep_querying and not testing:
+        query_val = -1
+        while not miracl_crypto.valid_query(query_val):
+            query_val = interactive_prompt_input()
+            if not miracl_crypto.valid_query(query_val):
+                print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
+            elif query_val == 0:
+                keep_querying = False
+            else:
+                interactive_prompt_exect(query_val)
 
-if testing :
-    miracl_compile.compile_binary(2, "testecc.c", "core.a", "testecc")
-    miracl_compile.compile_binary(2, "testmpin.c", "core.a", "testmpin")
-    miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
-    miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
-    miracl_compile.compile_binary(2, "testnhs.c", "core.a", "testnhs")
+    if testing:
+        for i in range(0, miracl_crypto.total_entries):
+            interactive_prompt_exect(i+1)
 
-#clean up
-for file in generated_files:
-    delete_file(file)
+    # create library
+    miracl_compile.compile_file(3, "randapi.c")
+    miracl_compile.compile_file(3, "hash.c")
+    miracl_compile.compile_file(3, "hmac.c")
+    miracl_compile.compile_file(3, "rand.c")
+    miracl_compile.compile_file(3, "oct.c")
+    miracl_compile.compile_file(3, "share.c")
+    miracl_compile.compile_file(3, "aes.c")
+    miracl_compile.compile_file(3, "gcm.c")
+    miracl_compile.compile_file(3, "newhope.c")
+    miracl_compile.compile_file(3, "x509.c")
+
+    if sys.platform.startswith("win") :
+        os.system("for %i in (*.o) do @echo %~nxi >> f.list")
+        os.system("ar rc core.a @f.list")
+        delete_file("f.list")
+    else :
+        os.system("ar rc core.a *.o")
+
+    if testing :
+        miracl_compile.compile_binary(2, "testecc.c", "core.a", "testecc")
+        miracl_compile.compile_binary(2, "testmpin.c", "core.a", "testmpin")
+        miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
+        miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
+        miracl_compile.compile_binary(2, "testnhs.c", "core.a", "testnhs")
+
+    #clean up
+    for file in generated_files:
+        delete_file(file)
+
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

@@ -27,10 +27,6 @@ import fnmatch
 testing=False
 keep_querying=True
 
-if len(sys.argv)==2 :
-    if sys.argv[1]=="test":
-        testing=True
-
 my_compiler = "g++"
 generated_files = []
 
@@ -482,7 +478,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp12.cpp", fnamec)
             copy_keep_file("fp12.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -524,7 +520,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("mpin.cpp", fnamec)
             copy_keep_file("mpin.h", fnameh)
- 
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -553,7 +549,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp8.cpp", fnamec)
             copy_keep_file("fp8.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -624,7 +620,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("bls192.cpp", fnamec)
             copy_keep_file("bls192.h", fnameh)
- 
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -640,7 +636,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp8.cpp", fnamec)
             copy_keep_file("fp8.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -670,7 +666,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp16.cpp", fnamec)
             copy_keep_file("fp16.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -685,7 +681,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp48.cpp", fnamec)
             copy_keep_file("fp48.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -700,7 +696,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("pair8.cpp", fnamec)
             copy_keep_file("pair8.h", fnameh)
-  
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -728,7 +724,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("bls256.cpp", fnamec)
             copy_keep_file("bls256.h", fnameh)
- 
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -736,8 +732,6 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fnameh,"YYY",tf)
             replace(fnameh,"XXX",bd)
             miracl_compile.compile_file(3, fnamec)
-
-replace("arch.h","@WL@","64")
 
 class miracl_crypto:
     np_curves = (
@@ -863,48 +857,62 @@ def interactive_prompt_input():
             print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
             interactive_prompt_input()
 
-interactive_prompt_print()
-while keep_querying and not testing:
-    query_val = -1
-    while not miracl_crypto.valid_query(query_val):
-        query_val = interactive_prompt_input()
-        if not miracl_crypto.valid_query(query_val):
-            print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
-        elif query_val == 0:
-            keep_querying = False
-        else:
-            interactive_prompt_exect(query_val)
+def main(argv):
+    global testing, keep_querying, my_compiler, generated_files
 
-if testing:
-    for i in range(0, miracl_crypto.total_entries):
-        interactive_prompt_exect(i+1)
+    if len(sys.argv)==2 :
+        if sys.argv[1]=="test":
+            testing=True
 
-# create library
-miracl_compile.compile_file(3, "randapi.cpp")
-miracl_compile.compile_file(3, "hash.cpp")
-miracl_compile.compile_file(3, "hmac.cpp")
-miracl_compile.compile_file(3, "rand.cpp")
-miracl_compile.compile_file(3, "oct.cpp")
-miracl_compile.compile_file(3, "share.cpp")
-miracl_compile.compile_file(3, "aes.cpp")
-miracl_compile.compile_file(3, "gcm.cpp")
-miracl_compile.compile_file(3, "newhope.cpp")
-miracl_compile.compile_file(3, "x509.cpp")
+    replace("arch.h","@WL@","64")
 
-if sys.platform.startswith("win") :
-    os.system("for %i in (*.o) do @echo %~nxi >> f.list")
-    os.system("ar rc core.a @f.list")
-    delete_file("f.list")
-else :
-    os.system("ar rc core.a *.o")
+    interactive_prompt_print()
+    while keep_querying and not testing:
+        query_val = -1
+        while not miracl_crypto.valid_query(query_val):
+            query_val = interactive_prompt_input()
+            if not miracl_crypto.valid_query(query_val):
+                print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
+            elif query_val == 0:
+                keep_querying = False
+            else:
+                interactive_prompt_exect(query_val)
 
-if testing :
-    miracl_compile.compile_binary(2, "testecc.cpp", "core.a", "testecc")
-    miracl_compile.compile_binary(2, "testmpin.cpp", "core.a", "testmpin")
-    miracl_compile.compile_binary(2, "testbls.cpp", "core.a", "testbls")
-    miracl_compile.compile_binary(2, "benchtest_all.cpp", "core.a", "benchtest_all")
-    miracl_compile.compile_binary(2, "testnhs.cpp", "core.a", "testnhs")
+    if testing:
+        for i in range(0, miracl_crypto.total_entries):
+            interactive_prompt_exect(i+1)
 
-#clean up
-for file in generated_files:
-    delete_file(file)
+    # create library
+    miracl_compile.compile_file(3, "randapi.cpp")
+    miracl_compile.compile_file(3, "hash.cpp")
+    miracl_compile.compile_file(3, "hmac.cpp")
+    miracl_compile.compile_file(3, "rand.cpp")
+    miracl_compile.compile_file(3, "oct.cpp")
+    miracl_compile.compile_file(3, "share.cpp")
+    miracl_compile.compile_file(3, "aes.cpp")
+    miracl_compile.compile_file(3, "gcm.cpp")
+    miracl_compile.compile_file(3, "newhope.cpp")
+    miracl_compile.compile_file(3, "x509.cpp")
+
+    if sys.platform.startswith("win") :
+        os.system("for %i in (*.o) do @echo %~nxi >> f.list")
+        os.system("ar rc core.a @f.list")
+        delete_file("f.list")
+    else :
+        os.system("ar rc core.a *.o")
+
+    if testing :
+        miracl_compile.compile_binary(2, "testecc.cpp", "core.a", "testecc")
+        miracl_compile.compile_binary(2, "testmpin.cpp", "core.a", "testmpin")
+        miracl_compile.compile_binary(2, "testbls.cpp", "core.a", "testbls")
+        miracl_compile.compile_binary(2, "benchtest_all.cpp", "core.a", "benchtest_all")
+        miracl_compile.compile_binary(2, "testnhs.cpp", "core.a", "testnhs")
+
+    #clean up
+    for file in generated_files:
+        delete_file(file)
+
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
