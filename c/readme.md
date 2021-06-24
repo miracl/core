@@ -92,7 +92,7 @@ Alternatively building and testing can be combined via
 where XX can be 16, 32 or 64
 
 Note that this builds the library for ALL of the options. 
-Executables of some test programs are created, and can be run immediately.
+Executables of the above test programs are created, and can be run immediately.
 
 -------------------------------------------------
 

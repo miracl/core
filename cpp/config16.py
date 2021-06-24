@@ -585,7 +585,7 @@ def interactive_prompt_print():
     #    print(str(index) + ".", "RSA" + str(tuple[1]))
     #    index += 1
     # ----BEGIN PATCH-------------
-    print(str(index) + ".", str(miracl_crypto.rsa_params[1]))
+    print(str(index) + ".", miracl_crypto.rsa_params[1])
     index += 1
     # ----END   PATCH--------------
 
@@ -652,7 +652,7 @@ while keep_querying and not testing:
 
 if testing:
     for i in range(0, miracl_crypto.total_entries):
-        interactive_prompt_exect(i)
+        interactive_prompt_exect(i+1)
 
 # create library
 miracl_compile.compile_file(3, "randapi.cpp")

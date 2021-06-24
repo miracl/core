@@ -71,6 +71,9 @@ Alternatively building and testing can be combined via
 
 where XX can be 32 or 64
 
+Note that this builds the library for ALL of the options. 
+Executables of the above test programs are created, and can be run immediately.
+
 -------------------------------------------------
 
 NEW: support for emerging Hash To Curve standard.

@@ -652,7 +652,7 @@ while keep_querying and not testing:
 
 if testing:
     for i in range(0, miracl_crypto.total_entries):
-        interactive_prompt_exect(i)
+        interactive_prompt_exect(i+1)
 
 # create library
 miracl_compile.compile_file(3, "randapi.c")

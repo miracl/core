@@ -32,7 +32,6 @@ if sys.platform.startswith("win") :
     copytext=">NUL copy"
     slashtext="\\"
 
-testing=False
 keep_querying=True
 curve_selected=False
 pfcurve_selected=False
@@ -759,7 +758,7 @@ def interactive_prompt_print():
 
     print("\nRSA")
     for tuple in miracl_crypto.rsa_params:
-        print(str(index) + ".", str(tuple[1]))
+        print(str(index) + ".", tuple[1])
         index += 1
 
     print("\nPost Quantum")

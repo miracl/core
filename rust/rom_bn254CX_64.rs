@@ -18,10 +18,10 @@
  */
 
 use crate::arch::Chunk;
-use crate::bn254CX::big::NLEN;
+use crate::bn254cx::big::NLEN;
 
 // Base Bits= 56
-// bn254CX Modulus
+// bn254cx Modulus
 pub const MODULUS: [Chunk; NLEN] = [
     0x6623EF5C1B55B3,
     0xD6EE18093EE1BE,
@@ -60,7 +60,7 @@ pub const FRB: [Chunk; NLEN] = [
     0x10A6F7D0,
 ];
 
-// bn254CX Curve
+// bn254cx Curve
 pub const CURVE_COF_I: isize = 1;
 pub const CURVE_B_I: isize = 2;
 pub const CURVE_B: [Chunk; NLEN] = [0x2, 0x0, 0x0, 0x0, 0x0];

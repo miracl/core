@@ -21,6 +21,9 @@
 import os
 import sys
 
+testing=False
+keep_querying=True
+
 def replace(namefile,oldtext,newtext):
     f = open(namefile,'r')
     filedata = f.read()
@@ -32,13 +35,14 @@ def replace(namefile,oldtext,newtext):
     f.write(newdata)
     f.close()
 
+# rsaset(rsaname,big_length_bytes,bits_in_base,multiplier)
+# The RSA name reflects the modulus size, which is a 2^m multiplier
+# of the underlying big length
+# There are choices here, different ways of getting the same result, but some faster than others
 
 def rsaset(tb,nb,base,ml) :
     global deltext,slashtext,copytext
-    global cptr,chosen
 
-    chosen.append(tb)
-    cptr=cptr+1
 
     fpath="mcore"+slashtext+"src"+slashtext+tb+slashtext
     os.system("mkdir mcore"+slashtext+"src"+slashtext+tb)
@@ -62,7 +66,20 @@ def rsaset(tb,nb,base,ml) :
 
     replace(fpath+"ff.rs","@ML@",ml)
 
-
+# curveset(curve,bits_in_base,modulus_bits,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
+# where "curve" is the common name for the elliptic curve
+# bits_in_base gives the number base used for 64 bit architectures, as n where the base is 2^n
+# modulus_bits is the actual bit length of the modulus.
+# modulus_mod_8 is the remainder when the modulus is divided by 8
+# rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
+# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
+# i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
+# curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
+# Curve A parameter
+# pairing_friendly is BN, BLS or NOT (if not pairing friendly
+# g2_table size is number of entries in precomputed table
+# ate bits is number of bits in Ate parameter (from romgen program)
+# curve security is AES equivalent, rounded up.
 def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     inbt=int(nbt)
     itb=int(inbt+(8-inbt%8)%8)
@@ -70,10 +87,6 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     nb=str(inb)
 
     global deltext,slashtext,copytext
-    global cptr,chosen
-
-    chosen.append(tc)
-    cptr=cptr+1
 
     fpath="mcore"+slashtext+"src"+slashtext+tc+slashtext
     os.system("mkdir mcore"+slashtext+"src"+slashtext+tc)
@@ -259,6 +272,119 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     else :
         os.system(copytext+"modecc.rs "+fpath+"mod.rs")
 
+
+class miracl_crypto:
+    np_curves = (
+        ("ed25519","56","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128"),
+        ("c25519","56","255","2","1","PSEUDO_MERSENNE","0","MONTGOMERY","486662","NOT","NOT","NOT","NOT","NOT","128"),
+        ("nist256","56","256","1","-10","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
+        ("brainpool","56","256","1","-3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
+        ("anssi","56","256","1","-5","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
+        ("hifive","60","336","2","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","192"),
+        ("goldilocks","58","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
+        ("nist384","56","384","1","-12","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","192"),
+        ("c41417","60","414","1","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
+        ("nist521","60","521","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","256"),
+        ("nums256w","56","256","1","7","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
+        ("nums256e","56","256","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","128"),
+        ("nums384w","58","384","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","192"),
+        ("nums384e","56","384","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","192"),
+        ("nums512w","60","512","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","256"),
+        ("nums512e","60","512","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
+        ("secp256k1","56","256","1",["-11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","NOT","NOT","NOT","NOT","NOT","128"),
+        ("sm2","56","256","1","-9","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
+        ("c13318","56","255","2","2","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
+        ("jubjub","56","255","32","1","NOT_SPECIAL","5","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128"),
+        ("x448","58","448","1","0","GENERALISED_MERSENNE","0","MONTGOMERY","156326","NOT","NOT","NOT","NOT","NOT","256"),
+        ("secp160r1","56","160","1","3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
+        ("c1174","56","251","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","128"),
+        ("c1665","60","166","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","128"),
+        ("mdc","56","256","1","0","NOT_SPECIAL","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","128"),
+        ("tweedledum","56","255","33","1","NOT_SPECIAL","5","WEIERSTRASS","0","NOT","NOT","NOT","NOT","NOT","128"),
+        ("tweedledee","56","255","34","1","NOT_SPECIAL","5","WEIERSTRASS","0","NOT","NOT","NOT","NOT","NOT","128")
+    )
+
+    pf_curves = (
+        ("bn254","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","71","66","128"),
+        ("bn254cx","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","76","66","128") ,
+        ("bls12383","58","383","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","68","65","128"),
+        ("bls12381","58","381","1",["11","-2","-1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","69","65","128"),
+        ("fp256bn","56","256","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","NEGATIVEX","83","66","128"),
+        ("fp512bn","60","512","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","POSITIVEX","172","130","128"),
+        ("bls12443","60","443","1",["-7","1","1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","78","75","128"),
+        ("bls12461","60","461","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","79","78","128"),
+        ("bn462","60","462","1",["1","1","0"],"NOT_SPECIAL","1","WEIERSTRASS","0","BN","D_TYPE","POSITIVEX","125","118","128"),
+        ("bls24479","56","479","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24","M_TYPE","POSITIVEX","52","49","192"),
+        ("bls48556","58","556","1",["-1","2","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","35","32","256"),
+        ("bls48581","60","581","1",["2","2","0"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48","D_TYPE","NEGATIVEX","36","33","256"),
+        ("bls48286","60","286","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","20","17","128")
+            
+    )
+
+    rsa_params = (
+        ("rsa2048","128","58","2"),
+        ("rsa3072","48","56","8"),
+        ("rsa4096","64","60","8")
+    )
+
+    total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)
+
+    def valid_query(number):
+        return number >= 0 and number <= miracl_crypto.total_entries
+
+
+def interactive_prompt_print():
+    index = 1
+    print("Elliptic Curves")
+    for tuple in miracl_crypto.np_curves:
+        print(str(index) + ".", tuple[0])
+        index += 1
+
+    print("\nPairing-Friendly Elliptic Curves")
+    for tuple in miracl_crypto.pf_curves:
+        print(str(index) + ".", tuple[0])
+        index += 1
+
+    print("\nRSA")
+    for tuple in miracl_crypto.rsa_params:
+        print(str(index) + ".", tuple[0])
+        index += 1
+
+def interactive_prompt_exect(index):
+    index -= 1 # Python internally is zero-indexed
+    if index < len(miracl_crypto.np_curves):
+        tuple = miracl_crypto.np_curves[index]
+        curveset(
+            tuple[0], tuple[1], tuple[2], tuple[3], tuple[4],
+            tuple[5], tuple[6], tuple[7], tuple[8], tuple[9],
+            tuple[10], tuple[11], tuple[12],
+            tuple[13], tuple[14]
+        )
+    elif index < len(miracl_crypto.np_curves) + len(miracl_crypto.pf_curves):
+        tuple = miracl_crypto.pf_curves[index-len(miracl_crypto.np_curves)]
+        curveset(
+            tuple[0], tuple[1], tuple[2], tuple[3], tuple[4],
+            tuple[5], tuple[6], tuple[7], tuple[8], tuple[9],
+            tuple[10], tuple[11], tuple[12],
+            tuple[13], tuple[14]
+        )
+    else:
+        tuple = miracl_crypto.rsa_params[index-(len(miracl_crypto.np_curves)+len(miracl_crypto.pf_curves))]
+        rsaset(
+            tuple[0], tuple[1], tuple[2], tuple[3]
+        )
+
+def interactive_prompt_input():
+    while True:
+        userInput = input("\nChoose schemes to support (select 0 to finish): ")
+        try:
+            return int(userInput)
+        except:
+            if (userInput == ''):
+                return 0
+            print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
+            interactive_prompt_input()
+
 if __name__ == '__main__':
     copytext="cp "
     deltext="rm "
@@ -272,12 +398,6 @@ if __name__ == '__main__':
     if len(sys.argv)==2 :
         if sys.argv[1]=="test":
             testing=True
-    if testing :
-        sys.stdin=open("test.txt","r")
-
-
-    chosen=[]
-    cptr=0
 
     os.system("cargo new mcore")
     #os.system("mkdir mcore"+slashtext+"src")
@@ -294,261 +414,21 @@ if __name__ == '__main__':
     os.system(copytext+ "lib.rs mcore"+slashtext+"src"+slashtext+"lib.rs")
 
 
-    print("Elliptic Curves")
-    print("1. ed25519")
-    print("2. c25519")
-    print("3. nist256")
-    print("4. brainpool")
-    print("5. anssi")
-    print("6. hifive")
-    print("7. goldilocks")
-    print("8. nist384")
-    print("9. c41417")
-    print("10. nist521")
-    print("11. nums256w")
-    print("12. nums256e")
-    print("13. nums384w")
-    print("14. nums384e")
-    print("15. nums512w")
-    print("16. nums512e")
-    print("17. secp256k1")
-    print("18. sm2")
-    print("19. c13318")
-    print("20. jubjub")
-    print("21. x448")
-    print("22. secp160r1")
-    print("23. c1174")
-    print("24. c1665")
-    print("25. MDC")
-    print("26. tweedledum")
-    print("27. tweedledee\n")
+    interactive_prompt_print()
+    while keep_querying and not testing:
+        query_val = -1
+        while not miracl_crypto.valid_query(query_val):
+            query_val = interactive_prompt_input()
+            if not miracl_crypto.valid_query(query_val):
+                print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
+            elif query_val == 0:
+                keep_querying = False
+            else:
+                interactive_prompt_exect(query_val)
 
-    print("Pairing-Friendly Elliptic Curves")
-    print("28. bn254")
-    print("29. bn254CX")
-    print("30. bls12383")
-    print("31. bls12381")
-    print("32. fp256BN")
-    print("33. fp512BN")
-    print("34. bls12443")
-    print("35. bls12461")
-    print("36. bn462")
-    print("37. bls24479")
-    print("38. bls48556")
-    print("39. bls48581")
-    print("40. bls48286\n")
-
-    print("RSA")
-    print("41. rsa2048")
-    print("42. rsa3072")
-    print("43. rsa4096")
-
-    selection=set()
-    ptr=0
-    max=44
-
-    curve_selected=False
-    pfcurve_selected=False
-    rsa_selected=False
-
-    while ptr<max:
-        if testing :
-            x=int(input())
-        else :
-            x=int(input("Choose a Scheme to support - 0 to finish: "))
-        if x == 0:
-            break
-        #    print("Choice= ",x)
-        # Prevent repetitions
-        if x in selection:
-            continue
-
-        selection.add(x)
-        ptr=ptr+1
-
-        # curveset(curve,bits_in_base,modulus_bits,modulus_mod_8,Z,modulus_type,curve_type,Curve A,pairing_friendly,sextic twist,sign of x,g2_table size,ate bits,curve security)
-        # where "curve" is the common name for the elliptic curve
-        # bits_in_base gives the number base used for 64 bit architectures, as n where the base is 2^n
-        # modulus_bits is the actual bit length of the modulus.
-        # modulus_mod_8 is the remainder when the modulus is divided by 8
-        # rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
-        # modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
-        # i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
-        # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
-        # Curve A parameter
-        # pairing_friendly is BN, BLS or NOT (if not pairing friendly
-        # g2_table size is number of entries in precomputed table
-        # ate bits is number of bits in Ate parameter (from romgen program)
-        # curve security is AES equivalent, rounded up.
-
-        if x==1:
-            curveset("ed25519","56","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-        if x==2:
-            curveset("c25519","56","255","2","1","PSEUDO_MERSENNE","0","MONTGOMERY","486662","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-        if x==3:
-            curveset("nist256","56","256","1","-10","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-        if x==4:
-            curveset("brainpool","56","256","1","-3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-        if x==5:
-            curveset("anssi","56","256","1","-5","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-
-        if x==6:
-            curveset("hifive","60","336","2","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","192")
-            curve_selected=True
-        if x==7:
-            curveset("goldilocks","58","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256")
-            curve_selected=True
-        if x==8:
-            curveset("nist384","56","384","1","-12","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","192")
-            curve_selected=True
-        if x==9:
-            curveset("c41417","60","414","1","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256")
-            curve_selected=True
-        if x==10:
-            curveset("nist521","60","521","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","256")
-            curve_selected=True
-
-        if x==11:
-            curveset("nums256w","56","256","1","7","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-        if x==12:
-            curveset("nums256e","56","256","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-        if x==13:
-            curveset("nums384w","58","384","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","192")
-            curve_selected=True
-        if x==14:
-            curveset("nums384e","56","384","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","192")
-            curve_selected=True
-        if x==15:
-            curveset("nums512w","60","512","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","256")
-            curve_selected=True
-        if x==16:
-            curveset("nums512e","60","512","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256")
-            curve_selected=True
-
-        if x==17:
-#                                              ,"1", for SVDW
-# set for SSWU plus isogenies
-            curveset("secp256k1","56","256","1",["-11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-        if x==18:
-            curveset("sm2","56","256","1","-9","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-
-        if x==19:
-            curveset("c13318","56","255","2","2","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-
-        if x==20:
-            curveset("jubjub","56","255","32","1","NOT_SPECIAL","5","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-
-        if x==21:
-            curveset("x448","58","448","1","0","GENERALISED_MERSENNE","0","MONTGOMERY","156326","NOT","NOT","NOT","NOT","NOT","256")
-            curve_selected=True
-
-        if x==22:
-            curveset("secp160r1","56","160","1","3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-
-        if x==23:
-            curveset("c1174","56","251","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-        if x==24:
-            curveset("c1665","60","166","1","0","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-
-        if x==25:
-            curveset("mdc","56","256","1","0","NOT_SPECIAL","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-
-        if x==26:
-            curveset("tweedledum","56","255","33","1","NOT_SPECIAL","5","WEIERSTRASS","0","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-
-        if x==27:
-            curveset("tweedledee","56","255","34","1","NOT_SPECIAL","5","WEIERSTRASS","0","NOT","NOT","NOT","NOT","NOT","128")
-            curve_selected=True
-        pf=28
-
-        if x==pf+0:
-            curveset("bn254","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","71","66","128")
-            pfcurve_selected=True
-        if x==pf+1:
-            curveset("bn254CX","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","76","66","128")
-            pfcurve_selected=True
-        if x==pf+2:
-            curveset("bls12383","58","383","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","68","65","128")
-            pfcurve_selected=True
-
-        if x==pf+3:
-#                                              ["-3" ,"-1", "0"]  for SVDW
-# set for SSWU plus isogenies
-            curveset("bls12381","58","381","1",["11","-2","-1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","69","65","128")
-            pfcurve_selected=True
-
-        if x==pf+4:
-            curveset("fp256bn","56","256","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","NEGATIVEX","83","66","128")
-            pfcurve_selected=True
-        if x==pf+5:
-            curveset("fp512bn","60","512","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","POSITIVEX","172","130","128")
-            pfcurve_selected=True
-
-        if x==pf+6:
-            curveset("bls12443","60","443","1",["-7","1","1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","78","75","128")
-            pfcurve_selected=True    
-    
-    # https://eprint.iacr.org/2017/334.pdf
-        if x==pf+7:
-            curveset("bls12461","60","461","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","79","78","128")
-            pfcurve_selected=True
-
-        if x==pf+8:
-            curveset("bn462","60","462","1",["1","1","0"],"NOT_SPECIAL","1","WEIERSTRASS","0","BN","D_TYPE","POSITIVEX","125","118","128")
-            pfcurve_selected=True
-
-        if x==pf+9:
-            curveset("bls24479","56","479","1",["1","4","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS24","M_TYPE","POSITIVEX","52","49","192")
-            pfcurve_selected=True
-
-        if x==pf+10:
-            curveset("bls48556","58","556","1",["-1","2","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","35","32","256")
-            pfcurve_selected=True
-
-        if x==pf+11:
-            curveset("bls48581","60","581","1",["2","2","0"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48","D_TYPE","NEGATIVEX","36","33","256")
-            pfcurve_selected=True
-
-        if x==pf+12:
-            curveset("bls48286","60","286","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","20","17","128")
-            pfcurve_selected=True
-
-
-    # rsaset(rsaname,big_length_bytes,bits_in_base,multiplier)
-    # The RSA name reflects the modulus size, which is a 2^m multiplier
-    # of the underlying big length
-
-    # There are choices here, different ways of getting the same result, but some faster than others
-        if x==pf+13:
-            #256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
-            #512 is faster.. but best is 1024
-            rsaset("rsa2048","128","58","2")
-            #rsaset("RSA2048","64","60","4")
-            #rsaset("RSA2048","32","56","8")
-            rsa_selected=True
-        if x==pf+14:
-            rsaset("rsa3072","48","56","8")
-            rsa_selected=True
-        if x==pf+15:
-            #rsaset("RSA4096","32","56","16")
-            rsaset("rsa4096","64","60","8")
-            rsa_selected=True
+    if testing:
+        for i in range(0, miracl_crypto.total_entries):
+            interactive_prompt_exect(i+1)
 
     os.system("cargo rustc  --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib")
     #os.system("cargo rustc  --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib -- -C opt-level=s")
@@ -591,20 +471,4 @@ if __name__ == '__main__':
         os.system("rustc TestBLS.rs --extern mcore=libmcore.rlib")
         os.system("rustc BenchtestALL.rs --extern mcore=libmcore.rlib")
         os.system("rustc TestNHS.rs --extern mcore=libmcore.rlib")
-        if sys.platform.startswith("win") :
-            os.system("TestECC")
-            os.system("TestMPIN < pins.txt")
-            os.system("TestBLS")
-            os.system("BenchtestALL")
-            os.system("TestNHS")
-        else :
-            os.system("./TestECC")
-            os.system("./TestMPIN < pins.txt")
-            os.system("./TestBLS")
-            os.system("./BenchtestALL")
-            os.system("./TestNHS")
-
-
-# create library
-
 
