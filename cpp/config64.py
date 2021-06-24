@@ -44,36 +44,40 @@ def delete_file(expression):
             if fnmatch.fnmatch(name, expression):
                 os.remove(os.path.join(root, name))
 
-class miracl_compile:
-    def compile_file(optim, file):
-        print("Processing " + file + "..", end = "")
-        if optim != 0:
-            flags = " -O%d -c %s" % (optim, file)
-        else:
-            flags = " -c %s" % (file)
-        if os.WEXITSTATUS(os.system(my_compiler + flags)) == 0:
-            print(". [DONE]")
-        elif fast_fail:
-            print("unable to process. fast-fail enabled, quitting!")
-            sys.exit(1)
-        else:
-            print(". [ERROR]")
-
-    def compile_binary(optim, file, lib, bin):
-        print("Processing " + file + "..", end = "")
+def request_compile(compiler_path, cflags, optim, file, lib, bin):
+    flags = ""
+    if optim != 0:
+        flags += " -O%d" % optim
+    if cflags != None:
+        flags += " %s" % cflags
+    if lib == None and bin == None:
+        flags += " -c %s" % (file)
+    else:
         if sys.platform.startswith("win"):
             bin += ".exe"
-        if optim != 0:
-            flags = " -O%d %s %s -o %s" % (optim, file, lib, bin)
+        flags += " %s %s -o %s" % (file, lib, bin)
+    print("Processing " + file + "..", end = "")
+    if os.WEXITSTATUS(os.system(compiler_path + flags)) == 0:
+        print(". [DONE]")
+    elif fast_fail:
+        print("unable to process. Fast-fail enabled, quitting!")
+        sys.exit(1)
+    else:
+        print(". [ERROR]")
+
+class miracl_compile:
+    def compile_file(optim, file):
+        if (os.environ.get('CXX') != None and not ignore_variables):
+            request_compile(os.environ.get('CXX'), os.environ.get('CXXFLAGS'), optim, file, None, None)
         else:
-            flags = " %s %s -o %s" % (file, lib, bin)
-        if os.WEXITSTATUS(os.system(my_compiler + flags)) == 0:
-            print(". [DONE]")
-        elif fast_fail:
-            print("unable to process. fast-fail enabled, quitting!")
-            sys.exit(1)
+            request_compile(my_compiler, None, optim, file, None, None)
+
+    def compile_binary(optim, file, lib, bin):
+        if (os.environ.get('CXX') != None and not ignore_variables):
+            request_compile(os.environ.get('CXX'), os.environ.get('CXXFLAGS'), optim, file, lib, bin)
         else:
-            print(". [ERROR]")
+            request_compile(my_compiler, None, optim, file, lib, bin)
+
 
 def inline_mul1(N,base)  :
     str=""
