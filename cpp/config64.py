@@ -797,6 +797,19 @@ class miracl_crypto:
         ("512", "RSA4096", "60", "8")
     )
 
+    min_core_library = (
+        "randapi.cpp",
+        "hash.cpp",
+        "hmac.cpp",
+        "rand.cpp",
+        "oct.cpp",
+        "share.cpp",
+        "aes.cpp",
+        "gcm.cpp",
+        "newhope.cpp",
+        "x509.cpp"
+    )
+
     total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)
 
     def valid_query(number):
@@ -883,16 +896,8 @@ def main(argv):
             interactive_prompt_exect(i+1)
 
     # create library
-    miracl_compile.compile_file(3, "randapi.cpp")
-    miracl_compile.compile_file(3, "hash.cpp")
-    miracl_compile.compile_file(3, "hmac.cpp")
-    miracl_compile.compile_file(3, "rand.cpp")
-    miracl_compile.compile_file(3, "oct.cpp")
-    miracl_compile.compile_file(3, "share.cpp")
-    miracl_compile.compile_file(3, "aes.cpp")
-    miracl_compile.compile_file(3, "gcm.cpp")
-    miracl_compile.compile_file(3, "newhope.cpp")
-    miracl_compile.compile_file(3, "x509.cpp")
+    for f in miracl_crypto.min_core_library:
+        miracl_compile.compile_file(3, f)
 
     if sys.platform.startswith("win") :
         os.system("for %i in (*.o) do @echo %~nxi >> f.list")
