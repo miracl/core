@@ -25,6 +25,7 @@ import shutil
 import fnmatch
 
 testing=False
+fast_fail=True
 keep_querying=True
 
 my_compiler = "gcc"
@@ -50,8 +51,13 @@ class miracl_compile:
             flags = " -std=c99 -O%d -c %s" % (optim, file)
         else:
             flags = " -std=c99 -c %s" % (file)
-        os.system(my_compiler + flags)
-        print(". [DONE]")
+        if os.WEXITSTATUS(os.system(my_compiler + flags)) == 0:
+            print(". [DONE]")
+        elif fast_fail:
+            print("unable to process. fast-fail enabled, quitting!")
+            sys.exit(1)
+        else:
+            print(". [ERROR]")
 
     def compile_binary(optim, file, lib, bin):
         print("Processing " + file + "..", end = "")
@@ -61,8 +67,13 @@ class miracl_compile:
             flags = " -std=c99 -O%d %s %s -o %s" % (optim, file, lib, bin)
         else:
             flags = " -std=c99 %s %s -o %s" % (file, lib, bin)
-        os.system(my_compiler + flags)
-        print(". [DONE]")
+        if os.WEXITSTATUS(os.system(my_compiler + flags)) == 0:
+            print(". [DONE]")
+        elif fast_fail:
+            print("unable to process. fast-fail enabled, quitting!")
+            sys.exit(1)
+        else:
+            print(". [ERROR]")
 
 def inline_mul1(N,base)  :
     str=""
