@@ -104,11 +104,11 @@ public struct GCM {
         for i in 0 ..< 128
         {
             j-=1
-            var c=UInt32((stateX[m]>>UInt8(j))&1); c = ( ~c ) + 1
+            var c=UInt32((stateX[m]>>UInt8(j))&1); c = ( ~c ) &+ 1
             for k in 0 ..< GCM.NB {P[k]^=(table[i][k] & c)}
             if (j==0)
             {
-		j=8; m += 1;
+		        j=8; m += 1;
                 if (m==16) {break}
             }
         }

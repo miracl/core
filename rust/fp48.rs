@@ -137,7 +137,7 @@ impl FP48 {
         self.b.cmove(&g.b, d);
         self.c.cmove(&g.c, d);
         let mut u = d as usize;
-        u = !(u - 1);
+        u = !(u.wrapping_sub(1));
         self.stype ^= (self.stype ^ g.stype) & u;
     }
 

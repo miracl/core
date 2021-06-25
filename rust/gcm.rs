@@ -93,7 +93,7 @@ impl GCM {
         for i in 0..128 {
             j -= 1;
             let mut c = ((self.statex[m] >> j) & 1) as u32;
-            c = (!c) + 1;
+            c = (!c).wrapping_add(1); // + 1;
             for k in 0..GCM_NB {
                 p[k] ^= self.table[i][k] & c
             }

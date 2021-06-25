@@ -118,7 +118,7 @@ public struct FP12
         a.cmove(g.a,d)
         b.cmove(g.b,d)
         c.cmove(g.c,d)
-        let u = ~(d-1)
+        let u = ~(d - 1)
         stype^=(stype^g.stype)&u   
     }
 
