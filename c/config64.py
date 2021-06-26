@@ -60,14 +60,18 @@ def request_compile(compiler_path, cflags, optim, file, lib, bin):
         if sys.platform.startswith("win"):
             bin += ".exe"
         flags += " %s %s -o %s" % (file, lib, bin)
-    print("Processing " + file + "..", end = "")
-    if os.WEXITSTATUS(os.system(compiler_path + flags)) == 0:
+    print("Processing " + file + "..", end = "", flush=True)
+    if sys.platform.startswith("win") :
+        os.system(compiler_path + flags)
         print(". [DONE]")
-    elif fast_fail:
-        print("unable to process. Fast-fail enabled, quitting!")
-        sys.exit(1)
-    else:
-        print(". [ERROR]")
+    else :
+        if os.WEXITSTATUS(os.system(compiler_path + flags)) == 0:
+            print(". [DONE]")
+        elif fast_fail:
+            print("unable to process. Fast-fail enabled, quitting!")
+            sys.exit(1)
+        else:
+            print(". [ERROR]")
 
 class miracl_compile:
     def compile_file(optim, file):
@@ -1001,6 +1005,7 @@ def main(argv):
     #clean up
     for file in generated_files:
         delete_file(file)
+    delete_file("*.o")
 
     sys.exit(0)
 

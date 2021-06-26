@@ -49,7 +49,7 @@ def delete_file(expression):
 
 class miracl_compile:
     def compile_file(optim, file):
-        print("Processing " + file + "..", end = "")
+        print("Processing " + file + "..", end = "", flush=True)
         if optim != 0:
             flags = " -std=c99 -O%d -c %s" % (optim, file)
         else:
@@ -58,7 +58,7 @@ class miracl_compile:
         print(". [DONE]")
 
     def compile_binary(optim, file, lib, bin):
-        print("Processing " + file + "..", end = "")
+        print("Processing " + file + "..", end = "", flush=True)
         if sys.platform.startswith("win"):
             bin += ".exe"
         if optim != 0:
