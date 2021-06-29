@@ -946,6 +946,8 @@ def arg_manager(argv, build_options):
                 intarg = int(arg)
                 if (intarg <= miracl_crypto.total_entries and intarg > 0):
                     build_options.append(intarg)
+                else:
+                    raise ValueError("Value too low or too high!")
             except:
                 print("config64.py: Error! You have passed an invalid option, exiting.")
                 print("             If you are trying to select multiple options, please repeat the flag\n")
