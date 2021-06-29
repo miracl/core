@@ -920,7 +920,7 @@ def arg_manager(argv, build_options):
         opts, args = getopt.getopt(
             argv,
             "hdiro:",
-            ["help", "disable-fastfail", "ignore-environment", "run-tests", "options"]
+            ["help", "disable-fastfail", "ignore-environment", "run-tests", "options="]
         )
     except getopt.GetoptError as err:
         print(err)
