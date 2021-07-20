@@ -616,11 +616,15 @@ fn glv(e: &BIG) -> [BIG; 2] {
     let q = BIG::new_ints(&rom::CURVE_ORDER);
     let mut x = BIG::new_ints(&rom::CURVE_BNX);
     let x2 = BIG::smul(&x, &x);
+    let mut ee= BIG::new_copy(e);
+    ee.rmod(&q);
     x.copy(&BIG::smul(&x2, &x2));
-    u[0].copy(&e);
-    u[0].rmod(&x);
-    u[1].copy(&e);
-    u[1].div(&x);
+    let bd=q.nbits()-x.nbits();
+
+    u[0].copy(&ee);
+    u[0].ctmod(&x,bd);
+    u[1].copy(&ee);
+    u[1].ctdiv(&x,bd);
     u[1].rsub(&q);
 
     u
@@ -641,11 +645,15 @@ pub fn gs(e: &BIG) -> [BIG; 8] {
     ];
     let q = BIG::new_ints(&rom::CURVE_ORDER);
     let x = BIG::new_ints(&rom::CURVE_BNX);
-    let mut w = BIG::new_copy(&e);
+    let mut ee= BIG::new_copy(e);
+    ee.rmod(&q);
+    let bd=q.nbits()-x.nbits();  // fixed
+
+    let mut w = BIG::new_copy(&ee);
     for i in 0..7 {
         u[i].copy(&w);
-        u[i].rmod(&x);
-        w.div(&x);
+        u[i].ctmod(&x,bd);
+        w.ctdiv(&x,bd);
     }
     u[7].copy(&w);
     if ecp::SIGN_OF_X == ecp::NEGATIVEX {

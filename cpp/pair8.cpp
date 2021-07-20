@@ -731,23 +731,28 @@ void ZZZ::PAIR_fexp(FP48 *r)
 static void ZZZ::glv(BIG u[2], BIG e)
 {
 
+    int bd;
+    BIG ee,q,x,x2;
+    BIG_copy(ee,e);
+    BIG_rcopy(q, CURVE_Order);
+    BIG_mod(ee,q);
 // -(x^8).P = (Beta.x,y)
 
-    BIG x, x2, q;
     BIG_rcopy(x, CURVE_Bnx);
 
     BIG_smul(x2, x, x);
     BIG_smul(x, x2, x2);
     BIG_smul(x2, x, x);
+    bd=BIG_nbits(q)-BIG_nbits(x2); // fixed x^8
 
-    BIG_copy(u[0], e);
-    BIG_mod(u[0], x2);
-    BIG_copy(u[1], e);
-    BIG_sdiv(u[1], x2);
+    BIG_copy(u[0], ee);
+    //BIG_mod(u[0], x2);
+    BIG_ctmod(u[0], x2, bd);
+    BIG_copy(u[1], ee);
+    //BIG_sdiv(u[1], x2);
+    BIG_ctsdiv(u[1], x2, bd);
 
-    BIG_rcopy(q, CURVE_Order);
     BIG_sub(u[1], q, u[1]);
-
 
     return;
 }
@@ -756,44 +761,23 @@ static void ZZZ::glv(BIG u[2], BIG e)
 /* Galbraith & Scott Method */
 static void ZZZ::gs(BIG u[16], BIG e)
 {
-    int i;
-
-    BIG x, w, q, t, c;
+    int i,bd;
+    BIG ee,q,x,w;
+    BIG_copy(ee,e);
     BIG_rcopy(q, CURVE_Order);
+    BIG_mod(ee,q);
+
     BIG_rcopy(x, CURVE_Bnx);
-    BIG_copy(w, e);
+    BIG_copy(w, ee);
+    bd=BIG_nbits(q)-BIG_nbits(x); // fixed
 
     for (i = 0; i < 15; i++)
     {
         BIG_copy(u[i], w);
-        BIG_mod(u[i], x);
-        BIG_sdiv(w, x);
+        BIG_ctmod(u[i], x, bd);
+        BIG_ctsdiv(w, x, bd);
     }
     BIG_copy(u[15], w);
-
-    BIG_zero(t);
-    for (i = 15; i >= 1; i--)
-    {
-        BIG_add(t, t, u[i]) ;
-        BIG_norm(t);
-        BIG_smul(c, t, x);
-        BIG_copy(t, c);
-        BIG_norm(t);
-    }
-    BIG_add(t, t, u[0]);
-    BIG_norm(t);
-    /*
-        for (i=0;i<16;i++ )
-        {
-            printf("u[%d]= ",i);BIG_output(u[i]); printf("\n");
-        }
-
-        printf("x= ");BIG_output(x); printf("\n");
-        printf("q= ");BIG_output(q); printf("\n");
-        printf("e= ");BIG_output(e); printf("\n");
-        printf("t= ");BIG_output(t); printf("\n");
-    */
-
 
     /*  */
 #if SIGN_OF_X_ZZZ==NEGATIVEX

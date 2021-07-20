@@ -1164,101 +1164,83 @@ int BIG_XXX_dnbits(DBIG_XXX a)
     return bts;
 }
 
-
-/* Set b=b mod c */
-/* SU= 16 */
-void BIG_XXX_mod(BIG_XXX b, BIG_XXX c1)
+void BIG_XXX_ctmod(BIG_XXX b,BIG_XXX m,int bd)
 {
-    int k = 0;
-    BIG_XXX r; /**/
-    BIG_XXX c;
-    BIG_XXX_copy(c, c1);
-
+    int k=bd;
+    BIG_XXX r,c;
+    BIG_XXX_copy(c,m);
     BIG_XXX_norm(b);
-    if (BIG_XXX_comp(b, c) < 0)
-        return;
-    do
-    {
-        BIG_XXX_fshl(c, 1);
-        k++;
-    }
-    while (BIG_XXX_comp(b, c) >= 0);
 
-    while (k > 0)
+    BIG_XXX_shl(c,k);
+    while (k>=0)
     {
-        BIG_XXX_fshr(c, 1);
-
-// constant time...
         BIG_XXX_sub(r, b, c);
         BIG_XXX_norm(r);
         BIG_XXX_cmove(b, r, 1 - ((r[NLEN_XXX - 1] >> (CHUNK - 1)) & 1));
+        BIG_XXX_fshr(c, 1);
         k--;
     }
 }
 
-/* Set a=b mod c, b is destroyed. Slow but rarely used. */
-/* SU= 96 */
-void BIG_XXX_dmod(BIG_XXX a, DBIG_XXX b, BIG_XXX c)
+/* Set b=b mod c */
+/* SU= 16 */
+void BIG_XXX_mod(BIG_XXX b, BIG_XXX m)
 {
-    int k = 0;
-    DBIG_XXX m, r;
+    int k=BIG_XXX_nbits(b)-BIG_XXX_nbits(m);
+    if (k<0) k=0;
+    BIG_XXX_ctmod(b,m,k);
+}
+
+// Set a=b mod m in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+void BIG_XXX_ctdmod(BIG_XXX a, DBIG_XXX b, BIG_XXX m, int bd)
+{
+    int k=bd;
+    DBIG_XXX c,r;
+    BIG_XXX_dscopy(c,m);
     BIG_XXX_dnorm(b);
-    BIG_XXX_dscopy(m, c);
 
-    if (BIG_XXX_dcomp(b, m) < 0)
+    BIG_XXX_dshl(c,k);
+    while (k>=0)
     {
-        BIG_XXX_sdcopy(a, b);
-        return;
-    }
-
-    do
-    {
-        BIG_XXX_dshl(m, 1);
-        k++;
-    }
-    while (BIG_XXX_dcomp(b, m) >= 0);
-
-    while (k > 0)
-    {
-        BIG_XXX_dshr(m, 1);
-// constant time...
-        BIG_XXX_dsub(r, b, m);
+        BIG_XXX_dsub(r, b, c);
         BIG_XXX_dnorm(r);
         BIG_XXX_dcmove(b, r, 1 - ((r[DNLEN_XXX - 1] >> (CHUNK - 1)) & 1));
-
+        BIG_XXX_dshr(c, 1);
         k--;
     }
-    BIG_XXX_sdcopy(a, b);
+    BIG_XXX_sdcopy(a,b);
 }
 
-/* Set a=b/c,  b is destroyed. Slow but rarely used. */
-/* SU= 136 */
 
-void BIG_XXX_ddiv(BIG_XXX a, DBIG_XXX b, BIG_XXX c)
+/* Set a=b mod m, b is destroyed. Slow but rarely used. */
+void BIG_XXX_dmod(BIG_XXX a, DBIG_XXX b, BIG_XXX m)
 {
-    int d, k = 0;
-    DBIG_XXX m, dr;
-    BIG_XXX e, r;
+    int k=BIG_XXX_dnbits(b)-BIG_XXX_nbits(m);
+    if (k<0) k=0;
+    BIG_XXX_ctdmod(a,b,m,k);
+}
+
+// a=b/m  in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+void BIG_XXX_ctddiv(BIG_XXX a,DBIG_XXX b,BIG_XXX m,int bd)
+{
+    int d,k=bd;
+    DBIG_XXX c,dr;
+    BIG_XXX e,r;
+    BIG_XXX_dscopy(c,m);
     BIG_XXX_dnorm(b);
-    BIG_XXX_dscopy(m, c);
 
     BIG_XXX_zero(a);
     BIG_XXX_zero(e);
     BIG_XXX_inc(e, 1);
 
-    while (BIG_XXX_dcomp(b, m) >= 0)
-    {
-        BIG_XXX_fshl(e, 1);
-        BIG_XXX_dshl(m, 1);
-        k++;
-    }
+    BIG_XXX_shl(e,k);
+    BIG_XXX_dshl(c,k);
 
-    while (k > 0)
+    while (k >= 0)
     {
-        BIG_XXX_dshr(m, 1);
-        BIG_XXX_fshr(e, 1);
-
-        BIG_XXX_dsub(dr, b, m);
+        BIG_XXX_dsub(dr, b, c);
         BIG_XXX_dnorm(dr);
         d = 1 - ((dr[DNLEN_XXX - 1] >> (CHUNK - 1)) & 1);
         BIG_XXX_dcmove(b, dr, d);
@@ -1267,46 +1249,59 @@ void BIG_XXX_ddiv(BIG_XXX a, DBIG_XXX b, BIG_XXX c)
         BIG_XXX_norm(r);
         BIG_XXX_cmove(a, r, d);
 
+        BIG_XXX_dshr(c, 1);
+        BIG_XXX_fshr(e, 1);
         k--;
     }
 }
 
-/* SU= 136 */
-
-void BIG_XXX_sdiv(BIG_XXX a, BIG_XXX c)
+/* Set a=b/m,  b is destroyed. Slow but rarely used. */
+void BIG_XXX_ddiv(BIG_XXX a, DBIG_XXX b, BIG_XXX m)
 {
-    int d, k = 0;
-    BIG_XXX m, e, b, r;
-    BIG_XXX_norm(a);
-    BIG_XXX_copy(b, a);
-    BIG_XXX_copy(m, c);
+    int k=BIG_XXX_dnbits(b)-BIG_XXX_nbits(m);
+    if (k<0) k=0;
+    BIG_XXX_ctddiv(a,b,m,k);
+}
 
-    BIG_XXX_zero(a);
+// a=a/m  in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+void BIG_XXX_ctsdiv(BIG_XXX b,BIG_XXX m,int bd)
+{
+    int d, k=bd;
+    BIG_XXX e,a,r,c;
+    BIG_XXX_norm(b);
+    BIG_XXX_copy(a,b);
+    BIG_XXX_copy(c,m);
+    BIG_XXX_zero(b);
     BIG_XXX_zero(e);
     BIG_XXX_inc(e, 1);
 
-    while (BIG_XXX_comp(b, m) >= 0)
-    {
-        BIG_XXX_fshl(e, 1);
-        BIG_XXX_fshl(m, 1);
-        k++;
-    }
+    BIG_XXX_shl(c,k);
+    BIG_XXX_shl(e,k);
 
-    while (k > 0)
+    while (k >= 0)
     {
-        BIG_XXX_fshr(m, 1);
-        BIG_XXX_fshr(e, 1);
-
-        BIG_XXX_sub(r, b, m);
+        BIG_XXX_sub(r, a, c);
         BIG_XXX_norm(r);
         d = 1 - ((r[NLEN_XXX - 1] >> (CHUNK - 1)) & 1);
+        BIG_XXX_cmove(a, r, d);
+
+        BIG_XXX_add(r, b, e);
+        BIG_XXX_norm(r);
         BIG_XXX_cmove(b, r, d);
 
-        BIG_XXX_add(r, a, e);
-        BIG_XXX_norm(r);
-        BIG_XXX_cmove(a, r, d);
+        BIG_XXX_fshr(c, 1);
+        BIG_XXX_fshr(e, 1);
+
         k--;
     }
+}
+
+void BIG_XXX_sdiv(BIG_XXX b, BIG_XXX m)
+{
+    int k=BIG_XXX_nbits(b)-BIG_XXX_nbits(m);
+    if (k<0) k=0;
+    BIG_XXX_ctsdiv(b,m,k);
 }
 
 /* return LSB of a */
@@ -1319,8 +1314,9 @@ int BIG_XXX_parity(BIG_XXX a)
 /* SU= 16 */
 int BIG_XXX_bit(BIG_XXX a, int n)
 {
-    if (a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) return 1;
-    else return 0;
+    return (int)((a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) >> (n%BASEBITS_XXX));
+//    if (a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) return 1;
+//    else return 0;
 }
 
 /* return last n bits of a, where n is small < BASEBITS */

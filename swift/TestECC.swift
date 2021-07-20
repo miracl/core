@@ -24,7 +24,7 @@
 //  Copyright (c) 2015 Michael Scott. All rights reserved.
 //
 
-/* test driver and function exerciser for ECDH/ECIES/ECDSA API Functions */
+// test driver and function exerciser for ECDH/ECIES/ECDSA API Functions 
 
 import Foundation
 import core // comment out for Xcode
@@ -62,14 +62,14 @@ public func TestRSA_2048(_ rng: inout RAND)
 
     let M=[UInt8](message.utf8)
     print("Encrypting test string\n");
-    let E=HMAC.OAEP_ENCODE(RSA.HASH_TYPE,M,&rng,nil,RFS); /* OAEP encode message m to e  */
+    let E=HMAC.OAEP_ENCODE(RSA.HASH_TYPE,M,&rng,nil,RFS); // OAEP encode message m to e  
 
-    RSA.ENCRYPT(pub,E,&C);     /* encrypt encoded message */
+    RSA.ENCRYPT(pub,E,&C);     // encrypt encoded message 
     print("Ciphertext= 0x", terminator: ""); printBinary(C)
 
     print("Decrypting test string\n");
     RSA.DECRYPT(priv,C,&ML)
-    let MS=HMAC.OAEP_DECODE(RSA.HASH_TYPE,nil,&ML,RFS) /* OAEP encode message m to e  */
+    let MS=HMAC.OAEP_DECODE(RSA.HASH_TYPE,nil,&ML,RFS) // OAEP encode message m to e  
 
     message=""
     for i in 0 ..< MS.count
@@ -157,17 +157,17 @@ public func TestECDH_ed25519(_ rng: inout RAND)
     print("Alice's Passphrase= " + pp)
     let PW=[UInt8]( (pp).utf8 )
 
-    /* private key S0 of size EGS bytes derived from Password and Salt */
+    // private key S0 of size EGS bytes derived from Password and Salt 
 
-/* Note use of curve name here to disambiguate between supported curves!! */
-/* Not needed if only one curve supported */
+// Note use of curve name here to disambiguate between supported curves!! 
+// Not needed if only one curve supported 
 
     var S0=HMAC.PBKDF2(HMAC.MC_SHA2,sha,PW,SALT,1000,EGS)
     print("Alice's private key= 0x",terminator: ""); printBinary(S0)
 
 
 
-    /* Generate Key pair S/W */
+    // Generate Key pair S/W 
     ed25519.ECDH.KEY_PAIR_GENERATE(&NULLRNG,&S0,&W0);
 
     print("Alice's public key= 0x",terminator: ""); printBinary(W0)
@@ -180,7 +180,7 @@ public func TestECDH_ed25519(_ rng: inout RAND)
         return;
     }
 
-    /* Random private key for other party */
+    // Random private key for other party 
     ed25519.ECDH.KEY_PAIR_GENERATE(&REALRNG,&S1,&W1)
 
     print("Servers private key= 0x",terminator: ""); printBinary(S1)
@@ -194,7 +194,7 @@ public func TestECDH_ed25519(_ rng: inout RAND)
         return
     }
 
-    /* Calculate common key using DH - IEEE 1363 method */
+    // Calculate common key using DH - IEEE 1363 method 
 
     ed25519.ECDH.ECPSVDP_DH(S0,W1,&Z0,0)
     ed25519.ECDH.ECPSVDP_DH(S1,W0,&Z1,0)
@@ -297,15 +297,15 @@ public func TestECDH_nist256(_ rng: inout RAND)
     print("Alice's Passphrase= " + pp)
     let PW=[UInt8]( (pp).utf8 )
 
-    /* private key S0 of size EGS bytes derived from Password and Salt */
+    // private key S0 of size EGS bytes derived from Password and Salt 
 
-/* Note use of curve name here to disambiguate between supported curves!! */
-/* Not needed if only one curve supported */
+// Note use of curve name here to disambiguate between supported curves!! 
+// Not needed if only one curve supported 
 
     var S0=HMAC.PBKDF2(HMAC.MC_SHA2,sha,PW,SALT,1000,EGS)
     print("Alice's private key= 0x",terminator: ""); printBinary(S0)
 
-    /* Generate Key pair S/W */
+    // Generate Key pair S/W 
     nist256.ECDH.KEY_PAIR_GENERATE(&NULLRNG,&S0,&W0)
 
     print("Alice's public key= 0x",terminator: ""); printBinary(W0)
@@ -318,7 +318,7 @@ public func TestECDH_nist256(_ rng: inout RAND)
         return;
     }
 
-    /* Random private key for other party */
+    // Random private key for other party 
     nist256.ECDH.KEY_PAIR_GENERATE(&REALRNG,&S1,&W1)
 
     print("Servers private key= 0x",terminator: ""); printBinary(S1)
@@ -332,7 +332,7 @@ public func TestECDH_nist256(_ rng: inout RAND)
         return
     }
 
-    /* Calculate common key using DH - IEEE 1363 method */
+    // Calculate common key using DH - IEEE 1363 method 
 
     nist256.ECDH.ECPSVDP_DH(S0,W1,&Z0,0)
     nist256.ECDH.ECPSVDP_DH(S1,W0,&Z1,0)
@@ -434,15 +434,15 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
     print("Alice's Passphrase= " + pp)
     let PW=[UInt8]( (pp).utf8 )
 
-    /* private key S0 of size EGS bytes derived from Password and Salt */
+    // private key S0 of size EGS bytes derived from Password and Salt 
 
-/* Note use of curve name here to disambiguate between supported curves!! */
-/* Not needed if only one curve supported */
+// Note use of curve name here to disambiguate between supported curves!! 
+// Not needed if only one curve supported 
 
     var S0=HMAC.PBKDF2(HMAC.MC_SHA2,sha,PW,SALT,1000,EGS)
     print("Alice's private key= 0x",terminator: ""); printBinary(S0)
 
-    /* Generate Key pair S/W */
+    // Generate Key pair S/W 
     goldilocks.ECDH.KEY_PAIR_GENERATE(&NULLRNG,&S0,&W0);
 
     print("Alice's public key= 0x",terminator: ""); printBinary(W0)
@@ -455,7 +455,7 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
         return;
     }
 
-    /* Random private key for other party */
+    // Random private key for other party 
     goldilocks.ECDH.KEY_PAIR_GENERATE(&REALRNG,&S1,&W1)
 
     print("Servers private key= 0x",terminator: ""); printBinary(S1)
@@ -469,7 +469,7 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
         return
     }
 
-    /* Calculate common key using DH - IEEE 1363 method */
+    // Calculate common key using DH - IEEE 1363 method 
 
     goldilocks.ECDH.ECPSVDP_DH(S0,W1,&Z0,0)
     goldilocks.ECDH.ECPSVDP_DH(S1,W0,&Z1,0)
@@ -544,7 +544,6 @@ var rng=RAND()
 rng.clean();
 for i in 0 ..< 100 {RAW[i]=UInt8(i&0xff)}
 rng.seed(100,RAW)
-
 
 TestECDH_ed25519(&rng)
 TestECDH_nist256(&rng)

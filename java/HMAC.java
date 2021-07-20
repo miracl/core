@@ -577,7 +577,7 @@ public final class HMAC {
 	public static byte[] OAEP_DECODE(int sha,byte[] p,byte[] f,int RFS)
 	{
 		int x,t;
-		boolean comp;
+		int comp;
 		int i,k,olen=RFS-1;
 		int hlen,seedlen;
 
@@ -614,34 +614,46 @@ public final class HMAC {
 		MGF1(sha,SEED,olen-seedlen,f);
 		for (i=0;i<olen-seedlen;i++) DBMASK[i]^=f[i];
 
-		comp=true;
+		comp=0;
 		for (i=0;i<hlen;i++)
 		{
-			if (CHASH[i]!=DBMASK[i]) comp=false;
+            comp|=(int)(CHASH[i]^DBMASK[i]);
+			//if (CHASH[i]!=DBMASK[i]) comp=false;
 		}
-
-		for (i=0;i<olen-seedlen-hlen;i++)
+        int m=olen-seedlen-hlen;
+		for (i=0;i<m;i++)
 			DBMASK[i]=DBMASK[i+hlen];
 
 		for (i=0;i<hlen;i++)
 			SEED[i]=CHASH[i]=0;
 		
+
+        t=0;
+        k=0;
+        for (i=0;i<m;i++) {
+            if (t==0 && DBMASK[i]!=0)
+            {
+                k=i;
+                t=DBMASK[i];
+            }
+        }
+/*
 		for (k=0;;k++)
 		{
-			if (k>=olen-seedlen-hlen) return new byte[0];
+			if (k>=m) return new byte[0];
 			if (DBMASK[k]!=0) break;
 		}
+		t=DBMASK[k]; */
 
-		t=DBMASK[k];
-		if (!comp || x!=0 || t!=0x01) 
+		if (comp!=0 || x!=0 || t!=0x01) 
 		{
 			for (i=0;i<olen-seedlen;i++) DBMASK[i]=0;
 			return new byte[0];
 		}
 
-		byte[] r=new byte[olen-seedlen-hlen-k-1];
+		byte[] r=new byte[m-k-1];
 
-		for (i=0;i<olen-seedlen-hlen-k-1;i++)
+		for (i=0;i<m-k-1;i++)
 			r[i]=DBMASK[i+k+1];
 	
 		for (i=0;i<olen-seedlen;i++) DBMASK[i]=0;

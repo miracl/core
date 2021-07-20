@@ -488,8 +488,9 @@ public struct BIG{
 /* return n-th bit */
     func bit(_ n: UInt) -> Int
     {
-        if ((w[Int(n/CONFIG_BIG.BASEBITS)]&(1<<Chunk(n%CONFIG_BIG.BASEBITS)))>0) {return 1;}
-        else {return 0;}
+        return Int( (w[Int(n/CONFIG_BIG.BASEBITS)]&(1<<Chunk(n%CONFIG_BIG.BASEBITS))) >>  Chunk(n%CONFIG_BIG.BASEBITS)            );
+        //if ((w[Int(n/CONFIG_BIG.BASEBITS)]&(1<<Chunk(n%CONFIG_BIG.BASEBITS)))>0) {return 1;}
+        //else {return 0;}
     }
 
     /* return n last bits */
@@ -536,9 +537,36 @@ public struct BIG{
         self.copy(U)
         self.norm()
     }
-    /* reduce this mod m */
-    mutating func mod(_ m1: BIG)
+
+// Set self=self mod m in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+
+    mutating func ctmod(_ m: BIG,_ bd: UInt)
     {
+        var k=bd;
+        var r=BIG()
+        var c=BIG(m)
+        norm()
+
+        c.shl(k);
+        while true {
+            r.copy(self)
+            r.sub(c)
+            r.norm()
+            cmove(r,Int(1-((r.w[CONFIG_BIG.NLEN-1]>>Chunk(CONFIG_BIG.CHUNK-1))&1)))
+            if k==0 {break}
+            c.fshr(1)
+            k -= 1
+        }
+    }
+
+    /* reduce this mod m */
+    mutating func mod(_ m: BIG)
+    {
+        var k=nbits()-m.nbits()
+        if k<0 {k=0}
+        ctmod(m,UInt(k))
+/*
         var k=0
         var m=BIG(m1)
         var r=BIG(0)
@@ -560,11 +588,47 @@ public struct BIG{
             cmove(r,Int(1-((r.w[CONFIG_BIG.NLEN-1]>>Chunk(CONFIG_BIG.CHUNK-1))&1)))
 
             k -= 1
+        }  */
+    }
+
+    mutating func ctdiv(_ m: BIG,_ bd:UInt)
+    {
+        var k=bd;
+        norm()
+        var e=BIG(1)
+        var a=BIG(self)
+        var r=BIG()
+        var c=BIG(m)
+        zero()
+
+        c.shl(k)
+        e.shl(k)
+
+        while true {
+            r.copy(a)
+            r.sub(c)
+            r.norm()
+            let d=Int(1-((r.w[CONFIG_BIG.NLEN-1]>>Chunk(CONFIG_BIG.CHUNK-1))&1))
+            a.cmove(r,d)
+            r.copy(self)
+            r.add(e)
+            r.norm()
+            cmove(r,d)
+
+            if k==0 {break}
+            c.fshr(1)
+            e.fshr(1)
+            k -= 1;
         }
     }
+
     /* divide this by m */
-    mutating func div(_ m1: BIG)
+    mutating func div(_ m: BIG)
     {
+        var k=nbits()-m.nbits()
+        if k<0 {k=0}
+        ctdiv(m,UInt(k))
+/*
         var k=0
         norm()
         var e=BIG(1)
@@ -596,7 +660,7 @@ public struct BIG{
             cmove(r,d)
 
             k -= 1
-        }
+        } */
     }
     /* get 8*CONFIG_BIG.MODBYTES size random number */
     static func random(_ rng: inout RAND) -> BIG
@@ -633,6 +697,7 @@ public struct BIG{
             d.shl(1); d.w[0]+=b
             j += 1; j&=7
         }
+ 
         let m=d.mod(q)
         return m
     }

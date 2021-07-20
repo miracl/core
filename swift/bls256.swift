@@ -49,7 +49,8 @@ public struct BLS256
 /* output u \in F_p */
     static func hash_to_field(_ hf: Int,_ hlen: Int,_ DST: [UInt8],_ M: [UInt8],_ ctr:Int) -> [FP] {
         let q=BIG(ROM.Modulus)
-        let L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8)
+        let nbq=q.nbits()
+        let L = ceil(nbq+CONFIG_CURVE.AESKEY*8,8)
         var u=[FP]()
         var fd=[UInt8](repeating: 0,count: L)
         var dx:DBIG
@@ -60,7 +61,7 @@ public struct BLS256
                 fd[j]=OKM[i*L+j]
             }
             dx=DBIG.fromBytes(fd)
-            u.append(FP(dx.mod(q)))
+            u.append(FP(dx.ctmod(q,UInt(8*L-nbq))))
         }
 
         return u
@@ -93,7 +94,8 @@ public struct BLS256
     @discardableResult static public func KeyPairGenerate(_ IKM: [UInt8],_ S:inout [UInt8],_ W:inout [UInt8]) -> Int
     {
         let r = BIG(ROM.CURVE_Order)
-        let L = ceil(3*ceil(r.nbits(),8),2)
+        let nbr=r.nbits()
+        let L = ceil(3*ceil(nbr,8),2)
         let LEN=HMAC.inttoBytes(L, 2)
         var AIKM=[UInt8]()
         AIKM.append(contentsOf: IKM)
@@ -107,7 +109,7 @@ public struct BLS256
         let OKM=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,PRK,LEN)
 
         var dx = DBIG.fromBytes(OKM)
-        let s = dx.mod(r)
+        let s = dx.ctmod(r,UInt(8*L-nbr))
         s.toBytes(&S)
 // SkToPk
         G=PAIR8.G2mul(G,s)

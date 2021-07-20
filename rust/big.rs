@@ -540,11 +540,14 @@ impl BIG {
 
     /* return n-th bit */
     pub fn bit(&self, n: usize) -> isize {
-        if (self.w[n / (BASEBITS as usize)] & (1 << (n % BASEBITS))) > 0 {
-            1
-        } else {
-            0
-        }
+        return ((self.w[n / (BASEBITS as usize)] & (1 << (n % BASEBITS))) >> (n%BASEBITS)) as isize;
+
+
+ //       if (self.w[n / (BASEBITS as usize)] & (1 << (n % BASEBITS))) > 0 {
+//            1
+//        } else {
+//            0
+//        }
     }
 
     /* return n last bits */
@@ -594,68 +597,71 @@ impl BIG {
         self.norm();
     }
 
-    /* reduce self mod m */
-    pub fn rmod(&mut self, n: &BIG) {
-        let mut k = 0;
-        let mut m = BIG::new_copy(n);
-        let mut r = BIG::new();
+// Set self=self mod m in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+    pub fn ctmod(&mut self,m:&BIG,bd:usize) {
+        let mut k=bd;
+        let mut r=BIG::new();
+        let mut c=BIG::new_copy(m);
         self.norm();
-        if BIG::comp(self, &m) < 0 {
-            return;
-        }
+
+        c.shl(k);
         loop {
-            m.fshl(1);
-            k += 1;
-            if BIG::comp(self, &m) < 0 {
-                break;
-            }
-        }
-
-        while k > 0 {
-            m.fshr(1);
-
             r.copy(self);
-            r.sub(&m);
+            r.sub(&c);
             r.norm();
-            self.cmove(
-                &r,
-                (1 - ((r.w[NLEN - 1] >> (arch::CHUNK - 1)) & 1)) as isize,
-            );
-            k -= 1;
+            self.cmove(&r,(1 - ((r.w[NLEN - 1] >> (arch::CHUNK - 1)) & 1)) as isize);
+            if k==0 {break;}
+            c.fshr(1);
+            k -= 1;  
         }
     }
 
-    /* divide self by m */
-    pub fn div(&mut self, n: &BIG) {
-        let mut k = 0;
+    /* reduce self mod m */
+    pub fn rmod(&mut self, m: &BIG) {
+        let ss=self.nbits() as isize;
+        let ms=m.nbits() as isize;
+        let mut k=(ss-ms) as usize;
+        if ss<ms {k=0;}
+        self.ctmod(m,k);
+    }
+
+    pub fn ctdiv(&mut self, m:&BIG, bd:usize) {
+        let mut k=bd; 
         self.norm();
         let mut e = BIG::new_int(1);
-        let mut b = BIG::new_copy(self);
-        let mut m = BIG::new_copy(n);
+        let mut a = BIG::new_copy(self);
+        let mut c = BIG::new_copy(m);
         let mut r = BIG::new();
-        self.zero();
+        self.zero(); 
+        
+        c.shl(k);
+        e.shl(k);
 
-        while BIG::comp(&b, &m) >= 0 {
-            e.fshl(1);
-            m.fshl(1);
-            k += 1;
-        }
-
-        while k > 0 {
-            m.fshr(1);
-            e.fshr(1);
-
-            r.copy(&b);
-            r.sub(&m);
+        loop {
+            r.copy(&a);
+            r.sub(&c);
             r.norm();
             let d = (1 - ((r.w[NLEN - 1] >> (arch::CHUNK - 1)) & 1)) as isize;
-            b.cmove(&r, d);
+            a.cmove(&r, d);
             r.copy(self);
             r.add(&e);
             r.norm();
             self.cmove(&r, d);
+            if k==0 {break;}
             k -= 1;
-        }
+            c.fshr(1);
+            e.fshr(1);
+        }    
+    }
+
+    /* divide self by m */
+    pub fn div(&mut self, m: &BIG) {
+        let ss=self.nbits() as isize;
+        let ms=m.nbits() as isize;
+        let mut k=(ss-ms) as usize;
+        if ss<ms {k=0;}
+        self.ctdiv(m,k);
     }
 
     /* get 8*MODBYTES size random number */
@@ -756,7 +762,10 @@ impl BIG {
         }
     }
 
-    /* self=1/self mod p. Binary method */
+// Set self=1/self mod p. Binary method 
+// NOTE: This function is NOT side-channel safe
+// If a is a secret then ALWAYS calculate 1/a = m*(1/am) mod p 
+// where m is a random masking value
     pub fn invmodp(&mut self, p: &BIG) {
         self.rmod(p);
 	    if self.iszilch() {return;}

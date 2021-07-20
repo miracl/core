@@ -82,7 +82,7 @@ typedef struct
 {
     unsign32 length[2]; /**< 64-bit input length */
     unsign32 h[8];      /**< Internal state */
-    unsign32 w[80];	/**< Internal state */
+    unsign32 w[64];	/**< Internal state */
     int hlen;		/**< Hash length in bytes */
 } hash256;
 

@@ -192,64 +192,54 @@ impl DBIG {
         self.w[big::DNLEN - 1] += carry
     }
 
-    /* reduces self DBIG mod a BIG, and returns the BIG */
-    pub fn dmod(&mut self, c: &BIG) -> BIG {
-        let mut k = 0;
+// Set self=self mod m in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+    pub fn ctdmod(&mut self, m: &BIG, bd: usize) -> BIG {
+        let mut k=bd;
         self.norm();
-        let mut m = DBIG::new_scopy(c);
+        let mut c = DBIG::new_scopy(m);
         let mut dr = DBIG::new();
 
-        if DBIG::comp(self, &m) < 0 {
-            let r = BIG::new_dcopy(self);
-            return r;
-        }
+        c.shl(k);
 
         loop {
-            m.shl(1);
-            k += 1;
-            if DBIG::comp(self, &m) < 0 {
-                break;
-            }
-        }
-
-        while k > 0 {
-            m.shr(1);
-
             dr.copy(self);
-            dr.sub(&m);
+            dr.sub(&c);
             dr.norm();
-            self.cmove(
-                &dr,
-                (1 - ((dr.w[big::DNLEN - 1] >> (arch::CHUNK - 1)) & 1)) as isize,
-            );
-
-            k -= 1;
+            self.cmove(&dr,(1 - ((dr.w[big::DNLEN - 1] >> (arch::CHUNK - 1)) & 1)) as isize);
+            if k==0 {break;}
+            c.shr(1);
+            k -= 1; 
         }
         BIG::new_dcopy(self)
     }
 
-    /* return this/c */
-    pub fn div(&mut self, c: &BIG) -> BIG {
-        let mut k = 0;
-        let mut m = DBIG::new_scopy(c);
+    /* reduces self DBIG mod a BIG, and returns the BIG */
+    pub fn dmod(&mut self, m: &BIG) -> BIG {
+        let ss=self.nbits() as isize;
+        let ms=m.nbits() as isize;
+        let mut k=(ss-ms) as usize;
+        if ss<ms {k=0;}
+        self.ctdmod(m,k)
+    }
+
+// self=self/m  in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+    pub fn ctdiv(&mut self, m: &BIG, bd:usize) -> BIG {
+        let mut k=bd;
+        let mut c = DBIG::new_scopy(m);
         let mut a = BIG::new();
         let mut e = BIG::new_int(1);
         let mut dr = DBIG::new();
         let mut r = BIG::new();
         self.norm();
 
-        while DBIG::comp(self, &m) >= 0 {
-            e.fshl(1);
-            m.shl(1);
-            k += 1;
-        }
+        c.shl(k);
+        e.shl(k);
 
-        while k > 0 {
-            m.shr(1);
-            e.shr(1);
-
+        loop {
             dr.copy(self);
-            dr.sub(&m);
+            dr.sub(&c);
             dr.norm();
             let d = (1 - ((dr.w[big::DNLEN - 1] >> (arch::CHUNK - 1)) & 1)) as isize;
             self.cmove(&dr, d);
@@ -257,10 +247,21 @@ impl DBIG {
             r.add(&e);
             r.norm();
             a.cmove(&r, d);
-
+            if k==0 {break;}
             k -= 1;
+            c.shr(1);
+            e.shr(1);
         }
         a
+    }
+
+    /* return this/c */
+    pub fn div(&mut self, m: &BIG) -> BIG {
+        let ss=self.nbits() as isize;
+        let ms=m.nbits() as isize;
+        let mut k=(ss-ms) as usize;
+        if ss<ms {k=0;}
+        self.ctdiv(m,k)
     }
 
     /* return number of bits */

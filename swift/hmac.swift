@@ -657,36 +657,46 @@ public struct HMAC
         HMAC.MGF1(sha,SEED,olen-seedlen,&f);
         for i in 0 ..< olen-seedlen {DBMASK[i]^=f[i]}
 
-        var comp=true;
+        var comp:UInt = 0;
         for i in 0 ..< hlen
         {
-            if (CHASH[i] != DBMASK[i]) {comp=false}
+            comp |= UInt(CHASH[i] ^ DBMASK[i]);
         }
-
-        for i in 0 ..< olen-seedlen-hlen
+        let m=olen-seedlen-hlen
+        for i in 0 ..< m
         {DBMASK[i]=DBMASK[i+hlen]}
 
         for i in 0 ..< hlen
             {SEED[i]=0;CHASH[i]=0;}
 
+        var t:UInt=0
+        k=0
+        for i in 0 ..< m {
+            if (t == 0 && DBMASK[i] != 0) {
+                k=i;
+                t=UInt(DBMASK[i]);
+            }
+        }
+
+/*
         k=0
         while (true)
         {
-            if (k>=olen-seedlen-hlen) {return [UInt8]()}
+            if (k>=m) {return [UInt8]()}
             if (DBMASK[k] != 0) {break}
             k+=1
         }
+        let t=DBMASK[k]; */
 
-        let t=DBMASK[k];
-        if (!comp || x != 0 || t != 0x01)
+        if (comp != 0 || x != 0 || t != 0x01)
         {
             for i in 0 ..< olen-seedlen {DBMASK[i]=0}
             return [UInt8]()
         }
 
-        var r=[UInt8](repeating: 0,count: olen-seedlen-hlen-k-1)
+        var r=[UInt8](repeating: 0,count: m-k-1)
 
-        for i in 0 ..< olen-seedlen-hlen-k-1
+        for i in 0 ..< m-k-1
             {r[i]=DBMASK[i+k+1]}
 
         for i in 0 ..< olen-seedlen {DBMASK[i]=0}

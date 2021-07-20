@@ -36,13 +36,14 @@ static FP16_YYY G2_TAB[G2_TABLE_ZZZ];  // space for precomputation on fixed G2 p
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
 static void hash_to_field(int hash,int hlen,FP_YYY *u,octet *DST,octet *M, int ctr)
 {
-    int i,j,L;
+    int i,j,L,nbq;
     BIG_XXX q,w;
     DBIG_XXX dx;
     char okm[256],fd[128];
     octet OKM = {0,sizeof(okm),okm};
 
     BIG_XXX_rcopy(q, Modulus_YYY);
+    nbq=BIG_XXX_nbits(q);
     L=CEIL(BIG_XXX_nbits(q)+CURVE_SECURITY_ZZZ,8);
 
     XMD_Expand(hash,hlen,&OKM,L*ctr,DST,M);
@@ -52,7 +53,7 @@ static void hash_to_field(int hash,int hlen,FP_YYY *u,octet *DST,octet *M, int c
             fd[j]=OKM.val[i*L+j];
         
         BIG_XXX_dfromBytesLen(dx,fd,L);
-        BIG_XXX_dmod(w,dx,q);
+        BIG_XXX_ctdmod(w,dx,q,8*L-nbq);
         FP_YYY_nres(&u[i],w);
     }
 }
@@ -86,7 +87,7 @@ int BLS_ZZZ_INIT()
 /* generate key pair, private key S, public key W */
 int BLS_ZZZ_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W)
 {
-    int L;
+    int nbr,L;
     BIG_XXX r,s;
     DBIG_XXX dx;
     ECP8_ZZZ G;
@@ -101,7 +102,8 @@ int BLS_ZZZ_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W)
     OCT_jbyte(&AIKM,0,1);
 
     BIG_XXX_rcopy(r, CURVE_Order_ZZZ);
-    L=CEIL(3*CEIL(BIG_XXX_nbits(r),8),2);
+    nbr=BIG_XXX_nbits(r);
+    L=CEIL(3*CEIL(nbr,8),2);
     OCT_jint(&LEN,L,2);
 
     if (!ECP8_ZZZ_generator(&G)) return BLS_FAIL;
@@ -111,7 +113,7 @@ int BLS_ZZZ_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W)
     HKDF_Expand(MC_SHA2,HASH_TYPE_ZZZ,&OKM,L,&PRK,&LEN);
 
     BIG_XXX_dfromBytesLen(dx,OKM.val,L);
-    BIG_XXX_dmod(s,dx,r);
+    BIG_XXX_ctdmod(s,dx,r,8*L-nbr);
     BIG_XXX_toBytes(S->val, s);
     S->len = MODBYTES_XXX;
 

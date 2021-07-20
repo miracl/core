@@ -184,7 +184,7 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
         do
         {
             BIG_randomnum(u, r, RNG);
-            BIG_randomnum(w, r, RNG); /* side channel masking */
+            BIG_randomnum(w, r, RNG); /* IMPORTANT - side channel masking to protect invmodp() */
 
 #ifdef AES_S
             BIG_mod2m(u, 2 * AES_S);

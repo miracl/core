@@ -618,17 +618,16 @@ int core::OAEP_DECODE(int sha, octet *p, octet *f)
     OCT_clear(&SEED);
     OCT_clear(&CHASH);
 
-    for (k = 0;; k++)
+// find first non-zero t in array
+    t=k=0;
+    for (i=0;i<DBMASK.len;i++)
     {
-        if (k >= DBMASK.len)
-        {
-            OCT_clear(&DBMASK);
-            return 0;
+        if (t==0 && DBMASK.val[i]!=0) {
+            k=i;
+            t=DBMASK.val[i];
         }
-        if (DBMASK.val[k] != 0) break;
     }
 
-    t = DBMASK.val[k];
     if (!comp || x != 0 || t != 0x01)
     {
         OCT_clear(&DBMASK);

@@ -165,9 +165,35 @@ public struct DBIG{
         }
         w[CONFIG_BIG.DNLEN-1]+=carry
     }
-    /* reduces this DBIG mod a BIG, and returns the BIG */
-    mutating public func mod(_ c: BIG) -> BIG
+
+    mutating public func ctmod(_ m: BIG,_ bd: UInt) -> BIG
     {
+        var k=bd
+        norm()
+        var c=DBIG(m)
+        var r=DBIG()
+
+        c.shl(k)
+
+        while true {
+		    r.copy(self)
+		    r.sub(c)
+		    r.norm()
+		    cmove(r,Int(1-((r.w[CONFIG_BIG.DNLEN-1]>>Chunk(CONFIG_BIG.CHUNK-1))&1)))
+            if k==0 {break}
+            k -= 1
+            c.shr(1)
+        }
+        return BIG(self)
+    }
+
+    /* reduces this DBIG mod a BIG, and returns the BIG */
+    mutating public func mod(_ m: BIG) -> BIG
+    {
+        var k=nbits()-m.nbits()
+        if k<0 {k=0}
+        return ctmod(m,UInt(k))
+/*
         var k:Int=0
         norm()
         var m=DBIG(c)
@@ -193,11 +219,47 @@ public struct DBIG{
 
             k -= 1
         }
-        return BIG(self)
+        return BIG(self) */
+    }
+
+    mutating func ctdiv(_ m: BIG,_ bd: UInt) -> BIG
+    {
+        var k=bd
+        var c=DBIG(m)
+        var a=BIG(0)
+        var e=BIG(1)
+        var r=BIG()
+        var dr=DBIG(0)
+        norm()
+
+        c.shl(1)
+        e.shl(1)
+
+        while true {
+		    dr.copy(self)
+		    dr.sub(c)
+		    dr.norm()
+		    let d=Int(1-((dr.w[CONFIG_BIG.DNLEN-1]>>Chunk(CONFIG_BIG.CHUNK-1))&1))
+		    cmove(dr,d)
+		    r.copy(a)
+		    r.add(e)
+		    r.norm()
+		    a.cmove(r,d)
+            if k==0 {break}
+            k -= 1
+            c.shr(1)
+            e.shr(1)
+        }
+        return a
     }
     /* return this/c */
-    mutating func div(_ c:BIG) -> BIG
+    mutating func div(_ m:BIG) -> BIG
     {
+        var k=nbits()-m.nbits()
+        if k<0 {k=0}
+        return ctdiv(m,UInt(k))
+
+/*
         var k:Int=0
         var m=DBIG(c)
         var a=BIG(0)
@@ -231,7 +293,7 @@ public struct DBIG{
 
             k -= 1
         }
-        return a
+        return a */
     }
 
     /* split DBIG at position n, return higher half, keep lower half */
@@ -254,7 +316,7 @@ public struct DBIG{
     func nbits() -> Int
     {
         var k=(CONFIG_BIG.DNLEN-1)
-        var t=BIG(self)
+        var t=DBIG(self)
         t.norm()
         while k>=0 && t.w[k]==0 {k -= 1}
         if k<0 {return 0}

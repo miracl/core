@@ -721,23 +721,26 @@ void PAIR_ZZZ_fexp(FP48_YYY *r)
 static void glv(BIG_XXX u[2], BIG_XXX e)
 {
 
+    int bd;
+    BIG_XXX ee,q,x,x2;
+    BIG_XXX_copy(ee,e);
+    BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
+    BIG_XXX_mod(ee,q);
 // -(x^8).P = (Beta.x,y)
 
-    BIG_XXX x, x2, q;
     BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
 
     BIG_XXX_smul(x2, x, x);
     BIG_XXX_smul(x, x2, x2);
     BIG_XXX_smul(x2, x, x);
+    bd=BIG_XXX_nbits(q)-BIG_XXX_nbits(x2); // fixed x^8
 
-    BIG_XXX_copy(u[0], e);
-    BIG_XXX_mod(u[0], x2);
-    BIG_XXX_copy(u[1], e);
-    BIG_XXX_sdiv(u[1], x2);
+    BIG_XXX_copy(u[0], ee);
+    BIG_XXX_ctmod(u[0], x2, bd);
+    BIG_XXX_copy(u[1], ee);
+    BIG_XXX_ctsdiv(u[1], x2, bd);
 
-    BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
     BIG_XXX_sub(u[1], q, u[1]);
-
 
     return;
 }
@@ -746,18 +749,21 @@ static void glv(BIG_XXX u[2], BIG_XXX e)
 /* Galbraith & Scott Method */
 static void gs(BIG_XXX u[16], BIG_XXX e)
 {
-    int i;
-
-    BIG_XXX x, w, q;
+    int i,bd;
+    BIG_XXX ee,q,x,w;
+    BIG_XXX_copy(ee,e);
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
+    BIG_XXX_mod(ee,q);
+
     BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
-    BIG_XXX_copy(w, e);
+    BIG_XXX_copy(w, ee);
+    bd=BIG_XXX_nbits(q)-BIG_XXX_nbits(x); // fixed
 
     for (i = 0; i < 15; i++)
     {
         BIG_XXX_copy(u[i], w);
-        BIG_XXX_mod(u[i], x);
-        BIG_XXX_sdiv(w, x);
+        BIG_XXX_ctmod(u[i], x, bd);
+        BIG_XXX_ctsdiv(w, x, bd);
     }
     BIG_XXX_copy(u[15], w);
 
@@ -772,7 +778,6 @@ static void gs(BIG_XXX u[16], BIG_XXX e)
     BIG_XXX_modneg(u[13], u[13], q);
     BIG_XXX_modneg(u[15], u[15], q);
 #endif
-
 
     return;
 }

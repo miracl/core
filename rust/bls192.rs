@@ -47,7 +47,8 @@ fn ceil(a: usize,b: usize) -> usize {
 /* output u \in F_p */
 fn hash_to_field(hash: usize,hlen: usize ,u: &mut [FP], dst: &[u8],m: &[u8],ctr: usize) {
     let q = BIG::new_ints(&rom::MODULUS);
-    let el = ceil(q.nbits()+ecp::AESKEY*8,8);
+    let nbq=q.nbits();
+    let el = ceil(nbq+ecp::AESKEY*8,8);
 
     let mut okm: [u8;256]=[0;256];
     let mut fd: [u8;128]=[0;128];
@@ -57,7 +58,7 @@ fn hash_to_field(hash: usize,hlen: usize ,u: &mut [FP], dst: &[u8],m: &[u8],ctr:
         for j in 0..el {
             fd[j]=okm[el*i+j];
         }
-        u[i]=FP::new_big(&DBIG::frombytes(&fd[0 .. el]).dmod(&q));
+        u[i]=FP::new_big(&DBIG::frombytes(&fd[0 .. el]).ctdmod(&q,8*el-nbq));
     }
 }
 
@@ -93,7 +94,8 @@ pub fn init() -> isize {
 /* generate key pair, private key s, public key w */
 pub fn key_pair_generate(ikm: &[u8], s: &mut [u8], w: &mut [u8]) -> isize {
     let r = BIG::new_ints(&rom::CURVE_ORDER);   
-    let el = ceil(3*ceil(r.nbits(),8),2);
+    let nbr=r.nbits();
+    let el = ceil(3*ceil(nbr,8),2);
     let g = ECP4::generator();
     let mut len: [u8; 2] = [0; 2];
     hmac::inttobytes(el,&mut len);
@@ -115,7 +117,7 @@ pub fn key_pair_generate(ikm: &[u8], s: &mut [u8], w: &mut [u8]) -> isize {
     hmac::hkdf_expand(hmac::MC_SHA2,hlen,&mut okm,el,&prk[0 .. hlen],&len);
 
     let mut dx = DBIG::frombytes(&okm[0 .. el]);
-    let sc = dx.dmod(&r);
+    let sc = dx.ctdmod(&r,8*el-nbr);
     sc.tobytes(s);
 // SkToPk
     pair4::g2mul(&g, &sc).tobytes(w,true);  // true for public key compression

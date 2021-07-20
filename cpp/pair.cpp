@@ -812,19 +812,24 @@ void ZZZ::PAIR_fexp(FP12 *r)
 /* GLV method */
 static void ZZZ::glv(BIG u[2], BIG e)
 {
+    BIG ee,q;
 #if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     int i, j;
-    BIG v[2], t, q;
+    BIG v[2], t;
     DBIG d;
+
+    BIG_copy(ee,e);
     BIG_rcopy(q, CURVE_Order);
+    BIG_mod(ee,q);
     for (i = 0; i < 2; i++)
     {
         BIG_rcopy(t, CURVE_W[i]);
-        BIG_mul(d, t, e);
-        BIG_ddiv(v[i], d, q);
+        BIG_mul(d, t, ee);
+        //BIG_ddiv(v[i], d, q);
+        BIG_ctddiv(v[i],d,q,BIG_nbits(t));
         BIG_zero(u[i]);
     }
-    BIG_copy(u[0], e);
+    BIG_copy(u[0], ee);
     for (i = 0; i < 2; i++)
         for (j = 0; j < 2; j++)
         {
@@ -832,21 +837,28 @@ static void ZZZ::glv(BIG u[2], BIG e)
             BIG_modmul(t, v[j], t, q);
             BIG_add(u[i], u[i], q);
             BIG_sub(u[i], u[i], t);
-            BIG_mod(u[i], q);
+            //BIG_mod(u[i], q);
+            BIG_ctmod(u[i],q,1);
         }
 
 #else
 // -(x^2).P = (Beta.x,y)
+    int bd;
+    BIG x, x2;
 
-    BIG x, x2, q;
-    BIG_rcopy(x, CURVE_Bnx);
-    BIG_smul(x2, x, x);
-    BIG_copy(u[0], e);
-    BIG_mod(u[0], x2);
-    BIG_copy(u[1], e);
-    BIG_sdiv(u[1], x2);
-
+    BIG_copy(ee,e);
     BIG_rcopy(q, CURVE_Order);
+    BIG_mod(ee,q);
+
+    BIG_rcopy(x, CURVE_Bnx);
+
+    BIG_smul(x2, x, x);
+    bd=BIG_nbits(q)-BIG_nbits(x2); // fixed
+    BIG_copy(u[0], ee);
+    BIG_ctmod(u[0], x2, bd);
+    BIG_copy(u[1], ee);
+    BIG_ctsdiv(u[1], x2, bd);
+
     BIG_sub(u[1], q, u[1]);
 
 #endif
@@ -859,20 +871,26 @@ static void ZZZ::glv(BIG u[2], BIG e)
 static void ZZZ::gs(BIG u[4], BIG e)
 {
     int i;
+    BIG ee,q;
+
 #if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     int j;
-    BIG v[4], t, q;
+    BIG v[4], t;
     DBIG d;
+    BIG_copy(ee,e);
     BIG_rcopy(q, CURVE_Order);
+    BIG_mod(ee,q);
+
     for (i = 0; i < 4; i++)
     {
         BIG_rcopy(t, CURVE_WB[i]);
-        BIG_mul(d, t, e);
-        BIG_ddiv(v[i], d, q);
+        BIG_mul(d, t, ee);
+        //BIG_ddiv(v[i], d, q);
+        BIG_ctddiv(v[i],d,q,BIG_nbits(t));
         BIG_zero(u[i]);
     }
 
-    BIG_copy(u[0], e);
+    BIG_copy(u[0], ee);
     for (i = 0; i < 4; i++)
         for (j = 0; j < 4; j++)
         {
@@ -880,21 +898,28 @@ static void ZZZ::gs(BIG u[4], BIG e)
             BIG_modmul(t, v[j], t, q);
             BIG_add(u[i], u[i], q);
             BIG_sub(u[i], u[i], t);
-            BIG_mod(u[i], q);
+            //BIG_mod(u[i], q);
+            BIG_ctmod(u[i],q,1);
         }
 
 #else
-
-    BIG x, w, q;
+    int bd;
+    BIG x, w;
+    BIG_copy(ee,e);
     BIG_rcopy(q, CURVE_Order);
+    BIG_mod(ee,q);
+
     BIG_rcopy(x, CURVE_Bnx);
-    BIG_copy(w, e);
+    BIG_copy(w, ee);
+    bd=BIG_nbits(q)-BIG_nbits(x); // fixed
 
     for (i = 0; i < 3; i++)
     {
         BIG_copy(u[i], w);
-        BIG_mod(u[i], x);
-        BIG_sdiv(w, x);
+        //BIG_mod(u[i], x);
+        BIG_ctmod(u[i],x,bd);
+        //BIG_sdiv(w, x);
+        BIG_ctsdiv(w,x,bd);
     }
     BIG_copy(u[3], w);
 

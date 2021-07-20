@@ -685,12 +685,14 @@ public struct PAIR8 {
         let q=BIG(ROM.CURVE_Order)
         var x=BIG(ROM.CURVE_Bnx)
         var x2=BIG.smul(x,x)
+        var ee=BIG(e); ee.mod(q)
         x.copy(BIG.smul(x2,x2))
         x2.copy(BIG.smul(x,x))
-        u.append(BIG(e))
-        u[0].mod(x2)
-        u.append(BIG(e))
-        u[1].div(x2)
+        let bd=UInt(q.nbits()-x2.nbits())
+        u.append(BIG(ee))
+        u[0].ctmod(x2,bd)
+        u.append(BIG(ee))
+        u[1].ctdiv(x2,bd)
         u[1].rsub(q)
 
         return u
@@ -702,12 +704,14 @@ public struct PAIR8 {
         var u=[BIG]();
         let q=BIG(ROM.CURVE_Order)        
         let x=BIG(ROM.CURVE_Bnx)
-        var w=BIG(e)
+        var ee=BIG(e); ee.mod(q)
+        let bd=UInt(q.nbits()-x.nbits())
+        var w=BIG(ee)
         for i in 0 ..< 15
         {
             u.append(BIG(w))
-            u[i].mod(x)
-            w.div(x)
+            u[i].ctmod(x,bd)
+            w.ctdiv(x,bd)
         }
         u.append(BIG(w))
         if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {

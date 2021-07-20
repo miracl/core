@@ -615,11 +615,12 @@ BIG = function(ctx) {
 
         /* return n-th bit of this */
         bit: function(n) {
-            if ((this.w[Math.floor(n / BIG.BASEBITS)] & (1 << (n % BIG.BASEBITS))) > 0) {
-                return 1;
-            } else {
-                return 0;
-            }
+            return (this.w[Math.floor(n / BIG.BASEBITS)] & (1 << (n % BIG.BASEBITS))) >> (n % BIG.BASEBITS) ;
+            //if ((this.w[Math.floor(n / BIG.BASEBITS)] & (1 << (n % BIG.BASEBITS))) > 0) {
+            //    return 1;
+            //} else {
+            //    return 0;
+            //}
         },
 
         /* return last n bits of this */

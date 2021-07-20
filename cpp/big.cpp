@@ -1142,15 +1142,38 @@ int XXX::BIG_dnbits(DBIG a)
     return bts;
 }
 
-
-/* Set b=b mod c */
-/* SU= 16 */
-void XXX::BIG_mod(BIG b, BIG c1)
+// Set b=b mod m in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+void XXX::BIG_ctmod(BIG b, BIG m, int bd)
 {
+    int k=bd;
+    BIG r,c;
+    BIG_copy(c,m);
+    BIG_norm(b);
+
+    BIG_shl(c,k);
+    while (k>=0)
+    {
+        BIG_sub(r, b, c);
+        BIG_norm(r);
+        BIG_cmove(b, r, 1 - ((r[NLEN_XXX - 1] >> (CHUNK - 1)) & 1));
+        BIG_fshr(c, 1);
+        k--;
+    }
+}
+
+/* Set b=b mod m */
+/* SU= 16 */
+void XXX::BIG_mod(BIG b, BIG m)
+{
+    int k=BIG_nbits(b)-BIG_nbits(m);
+    if (k<0) k=0;
+    BIG_ctmod(b,m,k);
+/*
     int k = 0;
-    BIG r; /**/
+    BIG r; 
     BIG c;
-    BIG_copy(c, c1);
+    BIG_copy(c, m);
 
     BIG_norm(b);
     if (BIG_comp(b, c) < 0)
@@ -1171,19 +1194,46 @@ void XXX::BIG_mod(BIG b, BIG c1)
         BIG_norm(r);
         BIG_cmove(b, r, 1 - ((r[NLEN_XXX - 1] >> (CHUNK - 1)) & 1));
         k--;
+    } */
+}
+
+
+// Set a=b mod m in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+void XXX::BIG_ctdmod(BIG a, DBIG b, BIG m, int bd)
+{
+    int k=bd;
+    DBIG c,r;
+    BIG_dscopy(c,m);
+    BIG_dnorm(b);
+
+    BIG_dshl(c,k);
+    while (k>=0)
+    {
+        BIG_dsub(r, b, c);
+        BIG_dnorm(r);
+        BIG_dcmove(b, r, 1 - ((r[DNLEN_XXX - 1] >> (CHUNK - 1)) & 1));
+        BIG_dshr(c, 1);
+        k--;
     }
+    BIG_sdcopy(a,b);
 }
 
 /* Set a=b mod c, b is destroyed. Slow but rarely used. */
 /* SU= 96 */
-void XXX::BIG_dmod(BIG a, DBIG b, BIG c)
+void XXX::BIG_dmod(BIG a, DBIG b, BIG m)
 {
-    int k = 0;
-    DBIG m, r;
-    BIG_dnorm(b);
-    BIG_dscopy(m, c);
+    int k=BIG_dnbits(b)-BIG_nbits(m);
+    if (k<0) k=0;
+    BIG_ctdmod(a,b,m,k);
 
-    if (BIG_dcomp(b, m) < 0)
+/*
+    int k = 0;
+    DBIG c, r;
+    BIG_dnorm(b);
+    BIG_dscopy(c,m);
+
+    if (BIG_dcomp(b, c) < 0)
     {
         BIG_sdcopy(a, b);
         return;
@@ -1191,52 +1241,89 @@ void XXX::BIG_dmod(BIG a, DBIG b, BIG c)
 
     do
     {
-        BIG_dshl(m, 1);
+        BIG_dshl(c, 1);
         k++;
     }
-    while (BIG_dcomp(b, m) >= 0);
+    while (BIG_dcomp(b, c) >= 0);
 
     while (k > 0)
     {
-        BIG_dshr(m, 1);
+        BIG_dshr(c, 1);
 // constant time...
-        BIG_dsub(r, b, m);
+        BIG_dsub(r, b, c);
         BIG_dnorm(r);
         BIG_dcmove(b, r, 1 - ((r[DNLEN_XXX - 1] >> (CHUNK - 1)) & 1));
 
         k--;
     }
-    BIG_sdcopy(a, b);
+    BIG_sdcopy(a, b); */
 }
 
-/* Set a=b/c,  b is destroyed. Slow but rarely used. */
-/* SU= 136 */
-
-void XXX::BIG_ddiv(BIG a, DBIG b, BIG c)
+// a=b/m  in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+void XXX::BIG_ctddiv(BIG a,DBIG b,BIG m,int bd)
 {
-    int d, k = 0;
-    DBIG m, dr;
-    BIG e, r;
+    int d,k=bd;
+    DBIG c,dr;
+    BIG e,r;
+    BIG_dscopy(c,m);
     BIG_dnorm(b);
-    BIG_dscopy(m, c);
 
     BIG_zero(a);
     BIG_zero(e);
     BIG_inc(e, 1);
 
-    while (BIG_dcomp(b, m) >= 0)
+    BIG_shl(e,k);
+    BIG_dshl(c,k);
+
+    while (k >= 0)
+    {
+        BIG_dsub(dr, b, c);
+        BIG_dnorm(dr);
+        d = 1 - ((dr[DNLEN_XXX - 1] >> (CHUNK - 1)) & 1);
+        BIG_dcmove(b, dr, d);
+
+        BIG_add(r, a, e);
+        BIG_norm(r);
+        BIG_cmove(a, r, d);
+
+        BIG_dshr(c, 1);
+        BIG_fshr(e, 1);
+        k--;
+    }
+}
+
+/* Set a=b/c,  b is destroyed. Slow but rarely used. */
+/* SU= 136 */
+void XXX::BIG_ddiv(BIG a, DBIG b, BIG m)
+{
+    int k=BIG_dnbits(b)-BIG_nbits(m);
+    if (k<0) k=0;
+    BIG_ctddiv(a,b,m,k);
+/*
+    int d, k = 0;
+    DBIG c, dr;
+    BIG e, r;
+    BIG_dnorm(b);
+    BIG_dscopy(c,m);
+
+    BIG_zero(a);
+    BIG_zero(e);
+    BIG_inc(e, 1);
+
+    while (BIG_dcomp(b, c) >= 0)
     {
         BIG_fshl(e, 1);
-        BIG_dshl(m, 1);
+        BIG_dshl(c, 1);
         k++;
     }
 
     while (k > 0)
     {
-        BIG_dshr(m, 1);
+        BIG_dshr(c, 1);
         BIG_fshr(e, 1);
 
-        BIG_dsub(dr, b, m);
+        BIG_dsub(dr, b, c);
         BIG_dnorm(dr);
         d = 1 - ((dr[DNLEN_XXX - 1] >> (CHUNK - 1)) & 1);
         BIG_dcmove(b, dr, d);
@@ -1246,45 +1333,81 @@ void XXX::BIG_ddiv(BIG a, DBIG b, BIG c)
         BIG_cmove(a, r, d);
 
         k--;
-    }
+    } */
 }
 
-/* SU= 136 */
-
-void XXX::BIG_sdiv(BIG a, BIG c)
+// a=a/m  in constant time (if bd is known at compile time)
+// bd is Max number of bits in b - Actual number of bits in m
+void XXX::BIG_ctsdiv(BIG b,BIG m,int bd)
 {
-    int d, k = 0;
-    BIG m, e, b, r;
-    BIG_norm(a);
-    BIG_copy(b, a);
-    BIG_copy(m, c);
-
-    BIG_zero(a);
+    int d, k=bd;
+    BIG e,a,r,c;
+    BIG_norm(b);
+    BIG_copy(a,b);
+    BIG_copy(c,m);
+    BIG_zero(b);
     BIG_zero(e);
     BIG_inc(e, 1);
 
-    while (BIG_comp(b, m) >= 0)
+    BIG_shl(c,k);
+    BIG_shl(e,k);
+
+    while (k >= 0)
+    {
+        BIG_sub(r, a, c);
+        BIG_norm(r);
+        d = 1 - ((r[NLEN_XXX - 1] >> (CHUNK - 1)) & 1);
+        BIG_cmove(a, r, d);
+
+        BIG_add(r, b, e);
+        BIG_norm(r);
+        BIG_cmove(b, r, d);
+
+        BIG_fshr(c, 1);
+        BIG_fshr(e, 1);
+
+        k--;
+    }
+}
+
+void XXX::BIG_sdiv(BIG b, BIG m)
+{
+    int k=BIG_nbits(b)-BIG_nbits(m);
+    if (k<0) k=0;
+    BIG_ctsdiv(b,m,k);
+/*
+    int d, k = 0;
+    BIG c, e, a, r;
+    BIG_norm(b);
+    BIG_copy(a,b);
+    BIG_copy(c, m);
+
+    BIG_zero(b);
+    BIG_zero(e);
+    BIG_inc(e, 1);
+
+    while (BIG_comp(a, c) >= 0)
     {
         BIG_fshl(e, 1);
-        BIG_fshl(m, 1);
+        BIG_fshl(c, 1);
         k++;
     }
 
     while (k > 0)
     {
-        BIG_fshr(m, 1);
+        BIG_fshr(c, 1);
         BIG_fshr(e, 1);
 
-        BIG_sub(r, b, m);
+        BIG_sub(r, a, c);
         BIG_norm(r);
         d = 1 - ((r[NLEN_XXX - 1] >> (CHUNK - 1)) & 1);
-        BIG_cmove(b, r, d);
-
-        BIG_add(r, a, e);
-        BIG_norm(r);
         BIG_cmove(a, r, d);
+
+        BIG_add(r, b, e);
+        BIG_norm(r);
+        BIG_cmove(b, r, d);
         k--;
-    }
+    } */
 }
 
 /* return LSB of a */
@@ -1297,8 +1420,11 @@ int XXX::BIG_parity(BIG a)
 /* SU= 16 */
 int XXX::BIG_bit(BIG a, int n)
 {
-    if (a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) return 1;
-    else return 0;
+
+    return (int)((a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) >> (n%BASEBITS_XXX));
+
+//    if (a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) return 1;
+//    else return 0;
 }
 
 /* return last n bits of a, where n is small < BASEBITS_XXX */
@@ -1503,7 +1629,10 @@ void XXX::step2(BIG xf,BIG xs,BIG p)
 
 */
 
-/* Set r=1/a mod p. Binary method */
+// Set r=1/a mod p. Binary method 
+// NOTE: This function is NOT side-channel safe
+// If a is a secret then ALWAYS calculate 1/a = m*(1/am) mod p 
+// where m is a random masking value
 void XXX::BIG_invmodp(BIG r, BIG a, BIG p)
 {
     BIG u, v, x1, x2, t, one;

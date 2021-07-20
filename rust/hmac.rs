@@ -776,11 +776,9 @@ pub fn oaep_decode(sha: usize, p: Option<&[u8]>, f: &mut [u8],rfs :usize) -> usi
         dbmask[i] ^= f[i]
     }
 
-    let mut comp = true;
+    let mut comp=0;
     for i in 0..hlen {
-        if chash[i] != dbmask[i] {
-            comp = false
-        }
+        comp |= (chash[i]^dbmask[i]) as usize;
     }
 
     for i in 0..olen - seedlen - hlen {
@@ -792,26 +790,25 @@ pub fn oaep_decode(sha: usize, p: Option<&[u8]>, f: &mut [u8],rfs :usize) -> usi
         chash[i] = 0
     }
 
-    let mut k = 0;
-    loop {
-        if k >= olen - seedlen - hlen {
-            return 0;
+// find first non-zero t in array
+    let mut k=0;
+    let mut t=0;
+    let m=olen-seedlen-hlen;
+    for i in 0..m {
+        if t==0 && dbmask[i]!=0 {
+            k=i;
+            t=dbmask[i];
         }
-        if dbmask[k] != 0 {
-            break;
-        }
-        k += 1;
     }
 
-    let t = dbmask[k];
-    if !comp || x != 0 || t != 0x01 {
+    if comp!=0 || x != 0 || t != 0x01 {
         for i in 0..olen - seedlen {
             dbmask[i] = 0
         }
         return 0;
     }
 
-    for i in 0..olen - seedlen - hlen - k - 1 {
+    for i in 0..m - k - 1 {
         f[i] = dbmask[i + k + 1];
     }
 
@@ -819,7 +816,7 @@ pub fn oaep_decode(sha: usize, p: Option<&[u8]>, f: &mut [u8],rfs :usize) -> usi
         dbmask[i] = 0
     }
 
-    olen - seedlen - hlen - k - 1
+    m - k - 1
 }
 
 /*

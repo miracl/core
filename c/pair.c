@@ -808,19 +808,23 @@ void PAIR_ZZZ_fexp(FP12_YYY *r)
 /* GLV method */
 static void glv(BIG_XXX u[2], BIG_XXX e)
 {
+    BIG_XXX ee,q;
 #if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     int i, j;
-    BIG_XXX v[2], t, q;
+    BIG_XXX v[2], t;
     DBIG_XXX d;
+
+    BIG_XXX_copy(ee,e);
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
+    BIG_XXX_mod(ee,q);
     for (i = 0; i < 2; i++)
     {
         BIG_XXX_rcopy(t, CURVE_W_ZZZ[i]);
-        BIG_XXX_mul(d, t, e);
-        BIG_XXX_ddiv(v[i], d, q);
+        BIG_XXX_mul(d, t, ee);
+        BIG_XXX_ctddiv(v[i],d,q,BIG_XXX_nbits(t));
         BIG_XXX_zero(u[i]);
     }
-    BIG_XXX_copy(u[0], e);
+    BIG_XXX_copy(u[0], ee);
     for (i = 0; i < 2; i++)
         for (j = 0; j < 2; j++)
         {
@@ -828,21 +832,27 @@ static void glv(BIG_XXX u[2], BIG_XXX e)
             BIG_XXX_modmul(t, v[j], t, q);
             BIG_XXX_add(u[i], u[i], q);
             BIG_XXX_sub(u[i], u[i], t);
-            BIG_XXX_mod(u[i], q);
+            BIG_XXX_ctmod(u[i],q,1);
         }
 
 #else
 // -(x^2).P = (Beta.x,y)
+    int bd;
+    BIG_XXX x, x2;
 
-    BIG_XXX x, x2, q;
-    BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
-    BIG_XXX_smul(x2, x, x);
-    BIG_XXX_copy(u[0], e);
-    BIG_XXX_mod(u[0], x2);
-    BIG_XXX_copy(u[1], e);
-    BIG_XXX_sdiv(u[1], x2);
-
+    BIG_XXX_copy(ee,e);
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
+    BIG_XXX_mod(ee,q);
+
+    BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
+
+    BIG_XXX_smul(x2, x, x);
+    bd=BIG_XXX_nbits(q)-BIG_XXX_nbits(x2); // fixed
+    BIG_XXX_copy(u[0], ee);
+    BIG_XXX_ctmod(u[0], x2, bd);
+    BIG_XXX_copy(u[1], ee);
+    BIG_XXX_ctsdiv(u[1], x2, bd);
+
     BIG_XXX_sub(u[1], q, u[1]);
 
 #endif
@@ -855,20 +865,24 @@ static void glv(BIG_XXX u[2], BIG_XXX e)
 static void gs(BIG_XXX u[4], BIG_XXX e)
 {
     int i;
+    BIG_XXX ee,q;
 #if PAIRING_FRIENDLY_ZZZ==BN_CURVE
     int j;
-    BIG_XXX v[4], t, q;
+    BIG_XXX v[4], t;
     DBIG_XXX d;
+    BIG_XXX_copy(ee,e);
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
+    BIG_XXX_mod(ee,q);
+
     for (i = 0; i < 4; i++)
     {
         BIG_XXX_rcopy(t, CURVE_WB_ZZZ[i]);
-        BIG_XXX_mul(d, t, e);
-        BIG_XXX_ddiv(v[i], d, q);
+        BIG_XXX_mul(d, t, ee);
+        BIG_XXX_ctddiv(v[i],d,q,BIG_XXX_nbits(t));
         BIG_XXX_zero(u[i]);
     }
 
-    BIG_XXX_copy(u[0], e);
+    BIG_XXX_copy(u[0], ee);
     for (i = 0; i < 4; i++)
         for (j = 0; j < 4; j++)
         {
@@ -876,21 +890,24 @@ static void gs(BIG_XXX u[4], BIG_XXX e)
             BIG_XXX_modmul(t, v[j], t, q);
             BIG_XXX_add(u[i], u[i], q);
             BIG_XXX_sub(u[i], u[i], t);
-            BIG_XXX_mod(u[i], q);
+            BIG_XXX_ctmod(u[i],q,1);
         }
-
 #else
-
-    BIG_XXX x, w, q;
+    int bd;
+    BIG_XXX x, w;
+    BIG_XXX_copy(ee,e);
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
+    BIG_XXX_mod(ee,q);
+
     BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
-    BIG_XXX_copy(w, e);
+    BIG_XXX_copy(w, ee);
+    bd=BIG_XXX_nbits(q)-BIG_XXX_nbits(x); // fixed
 
     for (i = 0; i < 3; i++)
     {
         BIG_XXX_copy(u[i], w);
-        BIG_XXX_mod(u[i], x);
-        BIG_XXX_sdiv(w, x);
+        BIG_XXX_ctmod(u[i],x,bd);
+        BIG_XXX_ctsdiv(w,x,bd);
     }
     BIG_XXX_copy(u[3], w);
 
@@ -901,9 +918,6 @@ static void gs(BIG_XXX u[4], BIG_XXX e)
 #endif
 
 #endif
-
-
-
     return;
 }
 

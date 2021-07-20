@@ -694,7 +694,7 @@ var HMAC = function(ctx) {
                 comp,
                 hlen,
                 seedlen,
-                x, t, d, i, k, h, r;
+                x, t, d, i, k, h, r, m;
 
             seedlen = hlen = sha;
             if (olen < seedlen + hlen + 1) {
@@ -735,14 +735,13 @@ var HMAC = function(ctx) {
                 DBMASK[i] ^= f[i];
             }
 
-            comp = true;
+            comp = 0;
             for (i = 0; i < hlen; i++) {
-                if (CHASH[i] != DBMASK[i]) {
-                    comp = false;
-                }
+                comp |= (CHASH[i] ^ DBMASK[i]);
             }
 
-            for (i = 0; i < olen - seedlen - hlen; i++) {
+            m=olen - seedlen - hlen;
+            for (i = 0; i < m; i++) {
                 DBMASK[i] = DBMASK[i + hlen];
             }
 
@@ -750,8 +749,17 @@ var HMAC = function(ctx) {
                 SEED[i] = CHASH[i] = 0;
             }
 
+            t=k=0;
+            for (i=0;i<m;i++) {
+                if (t==0 && DBMASK[i]!=0)
+                {
+                    k=i;
+                    t=DBMASK[i];
+                }
+            }
+
             for (k = 0;; k++) {
-                if (k >= olen - seedlen - hlen) {
+                if (k >= m) {
                     return null;
                 }
 
@@ -759,9 +767,9 @@ var HMAC = function(ctx) {
                     break;
                 }
             }
-
             t = DBMASK[k];
-            if (!comp || x !== 0 || t != 0x01) {
+
+            if (comp != 0 || x !== 0 || t != 0x01) {
                 for (i = 0; i < olen - seedlen; i++) {
                     DBMASK[i] = 0;
                 }
@@ -769,7 +777,7 @@ var HMAC = function(ctx) {
             }
             r = [];
 
-            for (i = 0; i < olen - seedlen - hlen - k - 1; i++) {
+            for (i = 0; i < m - k - 1; i++) {
                 r[i] = DBMASK[i + k + 1];
             }
 

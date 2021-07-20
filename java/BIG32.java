@@ -407,8 +407,9 @@ public class BIG {
 
     /* return n-th bit */
     public int bit(int n) {
-        if ((w[n / CONFIG_BIG.BASEBITS] & (cast_to_chunk(1) << (n % CONFIG_BIG.BASEBITS))) > 0) return 1;
-        else return 0;
+        return (int)((w[n / CONFIG_BIG.BASEBITS] & (cast_to_chunk(1) << (n % CONFIG_BIG.BASEBITS))) >> (n % CONFIG_BIG.BASEBITS));
+//        if ((w[n / CONFIG_BIG.BASEBITS] & (cast_to_chunk(1) << (n % CONFIG_BIG.BASEBITS))) > 0) return 1;
+//        else return 0;
     }
 
     /* Shift right by less than a word */

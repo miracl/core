@@ -592,10 +592,11 @@ func (r *BIG) parity() int {
 
 /* return n-th bit */
 func (r *BIG) bit(n int) int {
-	if (r.w[n/int(BASEBITS)] & (Chunk(1) << (uint(n) % BASEBITS))) > 0 {
-		return 1
-	}
-	return 0
+	return int((r.w[n/int(BASEBITS)] & (Chunk(1) << (uint(n) % BASEBITS))) >> (uint(n) % BASEBITS))
+//	if (r.w[n/int(BASEBITS)] & (Chunk(1) << (uint(n) % BASEBITS))) > 0 {
+//		return 1
+//	}
+//	return 0
 }
 
 /* return n last bits */

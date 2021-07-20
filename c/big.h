@@ -423,6 +423,47 @@ extern int BIG_XXX_nbits(BIG_XXX x);
 	@return Number of bits in x
  */
 extern int BIG_XXX_dnbits(DBIG_XXX x);
+
+
+/**	@brief Reduce x mod n - constant time for fixed bd
+ *
+	Slow but rarely used
+	@param x BIG number to be reduced mod n
+	@param n The modulus
+    @param bd non-negative bit difference between maximum x and n
+ */
+extern void BIG_XXX_ctmod(BIG_XXX x, BIG_XXX n, int bd);
+
+/**	@brief  x=y mod n - constant time for fixed bd
+ *
+	Slow but rarely used. y is destroyed.
+	@param x BIG number, on exit = y mod n
+	@param y DBIG number
+	@param n Modulus
+    @param bd non-negative bit difference between maximum y and n
+ */
+extern void BIG_XXX_ctdmod(BIG_XXX x, DBIG_XXX y, BIG_XXX n, int bd);
+
+/**	@brief Divide x by n - constant time for fixed bd
+ *
+	Slow but rarely used
+	@param x BIG number to be divided by n
+	@param n The Divisor
+    @param bd non-negative bit difference between maximum x and n
+ */
+extern void BIG_XXX_ctsdiv(BIG_XXX x,BIG_XXX n,int bd);
+
+/**	@brief  x=y/n - constant time for fixed bd
+ *
+	Slow but rarely used. y is destroyed.
+	@param x BIG number, on exit = y/n
+	@param y DBIG number
+	@param n Modulus
+    @param bd non-negative bit difference between maximum y and n
+ */
+extern void BIG_XXX_ctddiv(BIG_XXX x, DBIG_XXX y, BIG_XXX n,int bd);
+
+
 /**	@brief Reduce x mod n - input and output normalised (Variable Time)
  *
 	Slow but rarely used

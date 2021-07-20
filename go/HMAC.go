@@ -800,14 +800,15 @@ func RSA_OAEP_DECODE(sha int, p []byte, f []byte, RFS int) []byte {
 		DBMASK[i] ^= f[i]
 	}
 
-	comp := true
+	comp := 0
 	for i := 0; i < hlen; i++ {
-		if CHASH[i] != DBMASK[i] {
-			comp = false
-		}
+		comp |= int(CHASH[i] ^ DBMASK[i])
+		//if CHASH[i] != DBMASK[i] {
+		//	comp = false
+		//}
 	}
-
-	for i := 0; i < olen-seedlen-hlen; i++ {
+	m:=olen-seedlen-hlen
+	for i := 0; i < m; i++ {
 		DBMASK[i] = DBMASK[i+hlen]
 	}
 
@@ -816,27 +817,36 @@ func RSA_OAEP_DECODE(sha int, p []byte, f []byte, RFS int) []byte {
 		CHASH[i] = 0
 	}
 
+	k:=0
+	t:=0
+	for i:=0;i<m; i++ {
+		if t==0 && DBMASK[i]!=0 {
+			k=i
+			t=int(DBMASK[i])
+		}
+	}
+/*
 	var k int
 	for k = 0; ; k++ {
-		if k >= olen-seedlen-hlen {
+		if k >= m {
 			return nil
 		}
 		if DBMASK[k] != 0 {
 			break
 		}
 	}
+	t := DBMASK[k] */
 
-	t := DBMASK[k]
-	if !comp || x != 0 || t != 0x01 {
+	if comp!=0 || x != 0 || t != 0x01 {
 		for i := 0; i < olen-seedlen; i++ {
 			DBMASK[i] = 0
 		}
 		return nil
 	}
 
-	var r = make([]byte, olen-seedlen-hlen-k-1)
+	var r = make([]byte, m-k-1)
 
-	for i := 0; i < olen-seedlen-hlen-k-1; i++ {
+	for i := 0; i < m-k-1; i++ {
 		r[i] = DBMASK[i+k+1]
 	}
 

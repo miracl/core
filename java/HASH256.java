@@ -31,7 +31,7 @@ package org.miracl.core;
 public class HASH256 {
     private int[] length = new int[2];
     private int[] h = new int[8];
-    private int[] w = new int[80];
+    private int[] w = new int[64];
 
     public static final int H0 = 0x6A09E667;
     public static final int H1 = 0xBB67AE85;

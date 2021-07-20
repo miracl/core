@@ -126,7 +126,6 @@ public struct ECDH
 
         var W=ECP.fromBytes(WD)
         if W.is_infinity() {res=ECDH.ERROR}
-
         if (res==0)
         {
             if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.WEIERSTRASS {

@@ -694,62 +694,6 @@ pub fn fexp(m: &FP12) -> FP12 {
 
         r.mul(&y1);
         r.reduce();
-
-
-/*
-        // Ghamman & Fouotsa Method
-
-        let mut y0 = FP12::new_copy(&r);
-        y0.usqr();
-        let mut y1 = y0.pow(&mut x);
-        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-            y1.conj();
-        }
-        x.fshr(1);
-        let mut y2 = y1.pow(&mut x);
-        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-            y2.conj();
-        }
-        x.fshl(1);
-        let mut y3 = FP12::new_copy(&r);
-        y3.conj();
-        y1.mul(&y3);
-
-        y1.conj();
-        y1.mul(&y2);
-
-        y2 = y1.pow(&mut x);
-        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-            y2.conj();
-        }
-        y3 = y2.pow(&mut x);
-        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-            y3.conj();
-        }
-        y1.conj();
-        y3.mul(&y1);
-
-        y1.conj();
-        y1.frob(&f);
-        y1.frob(&f);
-        y1.frob(&f);
-        y2.frob(&f);
-        y2.frob(&f);
-        y1.mul(&y2);
-
-        y2 = y3.pow(&mut x);
-        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-            y2.conj();
-        }
-        y2.mul(&y0);
-        y2.mul(&r);
-
-        y1.mul(&y2);
-        y2.copy(&y3);
-        y2.frob(&f);
-        y1.mul(&y2);
-        r.copy(&y1);
-        r.reduce(); */
     }
     r
 }
@@ -760,23 +704,24 @@ fn glv(e: &BIG) -> [BIG; 2] {
     let mut u: [BIG; 2] = [BIG::new(), BIG::new()];
     if ecp::CURVE_PAIRING_TYPE == ecp::BN {
 /* PFBNS
+        let mut ee= BIG::new_copy(e);
         let mut t = BIG::new();
         let q = BIG::new_ints(&rom::CURVE_ORDER);
         let mut v: [BIG; 2] = [BIG::new(), BIG::new()];
-
+        ee.rmod(&q);
         for i in 0..2 {
             t.copy(&BIG::new_ints(&rom::CURVE_W[i])); // why not just t=new BIG(ROM.CURVE_W[i]);
-            let mut d: DBIG = BIG::mul(&t, e);
-            v[i].copy(&d.div(&q));
+            let mut d: DBIG = BIG::mul(&t, &ee);
+            v[i].copy(&d.ctdiv(&q,t.nbits()));
         }
-        u[0].copy(&e);
+        u[0].copy(&ee);
         for i in 0..2 {
             for j in 0..2 {
                 t = BIG::new_ints(&rom::CURVE_SB[j][i]);
                 t = BIG::modmul(&mut v[j], &mut t, &q);
                 u[i].add(&q);
                 u[i].sub(&t);
-                u[i].rmod(&q);
+                u[i].ctmod(&q,1);
             }
         }
 PFBNF */
@@ -784,10 +729,13 @@ PFBNF */
         let q = BIG::new_ints(&rom::CURVE_ORDER);
         let x = BIG::new_ints(&rom::CURVE_BNX);
         let x2 = BIG::smul(&x, &x);
-        u[0].copy(&e);
-        u[0].rmod(&x2);
-        u[1].copy(&e);
-        u[1].div(&x2);
+        let mut ee= BIG::new_copy(e);
+        let bd=q.nbits()-x2.nbits();
+        ee.rmod(&q);
+        u[0].copy(&ee);
+        u[0].ctmod(&x2,bd);
+        u[1].copy(&ee);
+        u[1].ctdiv(&x2,bd);
         u[1].rsub(&q);
     }
     u
@@ -801,32 +749,38 @@ pub fn gs(e: &BIG) -> [BIG; 4] {
 /* PFBNS
         let mut t = BIG::new();
         let q = BIG::new_ints(&rom::CURVE_ORDER);
+        let mut ee= BIG::new_copy(e);
+        ee.rmod(&q);
 
         let mut v: [BIG; 4] = [BIG::new(), BIG::new(), BIG::new(), BIG::new()];
         for i in 0..4 {
             t.copy(&BIG::new_ints(&rom::CURVE_WB[i]));
-            let mut d: DBIG = BIG::mul(&t, e);
-            v[i].copy(&d.div(&q));
+            let mut d: DBIG = BIG::mul(&t, &ee);
+            v[i].copy(&d.ctdiv(&q,t.nbits()));
         }
-        u[0].copy(&e);
+        u[0].copy(&ee);
         for i in 0..4 {
             for j in 0..4 {
                 t = BIG::new_ints(&rom::CURVE_BB[j][i]);
                 t = BIG::modmul(&mut v[j], &mut t, &q);
                 u[i].add(&q);
                 u[i].sub(&t);
-                u[i].rmod(&q);
+                u[i].ctmod(&q,1);
             }
         }
 PFBNF */
     } else {
         let q = BIG::new_ints(&rom::CURVE_ORDER);
         let x = BIG::new_ints(&rom::CURVE_BNX);
-        let mut w = BIG::new_copy(&e);
+        let mut ee= BIG::new_copy(e);
+        ee.rmod(&q);
+        let bd=q.nbits()-x.nbits();  // fixed
+
+        let mut w = BIG::new_copy(&ee);
         for i in 0..3 {
             u[i].copy(&w);
-            u[i].rmod(&x);
-            w.div(&x);
+            u[i].ctmod(&x,bd);
+            w.ctdiv(&x,bd);
         }
         u[3].copy(&w);
         if ecp::SIGN_OF_X == ecp::NEGATIVEX {

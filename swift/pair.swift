@@ -757,6 +757,7 @@ public struct PAIR {
 /* PFBNS
 		var t=BIG(0)
 		let q=BIG(ROM.CURVE_Order)
+        var ee=BIG(e); ee.mod(q)
 		var v=[BIG]();
 		for _ in 0 ..< 2
 		{
@@ -767,10 +768,10 @@ public struct PAIR {
 		for i in 0 ..< 2
 		{
 			t.copy(BIG(ROM.CURVE_W[i]))
-			var d=BIG.mul(t,e)
-			v[i].copy(d.div(q))
+			var d=BIG.mul(t,ee)
+			v[i].copy(d.ctdiv(q,UInt(t.nbits())))
 		}
-		u[0].copy(e);
+		u[0].copy(ee);
 		for i in 0 ..< 2
 		{
 			for j in 0 ..< 2
@@ -779,7 +780,7 @@ public struct PAIR {
 				t.copy(BIG.modmul(v[j],t,q))
 				u[i].add(q)
 				u[i].sub(t)
-				u[i].mod(q)
+				u[i].ctmod(q,1)
 			}
 		}
 PFBNF */
@@ -787,10 +788,12 @@ PFBNF */
 		let q=BIG(ROM.CURVE_Order)
 		let x=BIG(ROM.CURVE_Bnx)
 		let x2=BIG.smul(x,x)
-		u.append(BIG(e))
-		u[0].mod(x2)
-		u.append(BIG(e))
-		u[1].div(x2)
+        var ee=BIG(e); ee.mod(q)
+        let bd=UInt(q.nbits()-x2.nbits())
+		u.append(BIG(ee))
+		u[0].ctmod(x2,bd)
+		u.append(BIG(ee))
+		u[1].ctdiv(x2,bd)
 		u[1].rsub(q)
 
 	}
@@ -804,6 +807,7 @@ PFBNF */
 /* PFBNS
 		  var t=BIG(0)
 		  let q=BIG(ROM.CURVE_Order)
+          var ee=BIG(e); ee.mod(q)
 		  var v=[BIG]();
 		  for _ in 0 ..< 4
 		  {
@@ -814,10 +818,10 @@ PFBNF */
 		  for i in 0 ..< 4
 		  {
 			 t.copy(BIG(ROM.CURVE_WB[i]))
-			 var d=BIG.mul(t,e)
-			 v[i].copy(d.div(q))
+			 var d=BIG.mul(t,ee)
+			 v[i].copy(d.ctdiv(q,UInt(t.nbits())))
 		  }
-		  u[0].copy(e);
+		  u[0].copy(ee);
 		  for i in 0 ..< 4
 		  {
 			for j in 0 ..< 4
@@ -826,7 +830,7 @@ PFBNF */
 				t.copy(BIG.modmul(v[j],t,q))
 				u[i].add(q)
 				u[i].sub(t)
-				u[i].mod(q)
+				u[i].ctmod(q,1)
 			}
 
 		  }
@@ -834,12 +838,15 @@ PFBNF */
 	} else {
             let q=BIG(ROM.CURVE_Order)        
             let x=BIG(ROM.CURVE_Bnx)
-            var w=BIG(e)
+            var ee=BIG(e); ee.mod(q)
+            let bd=UInt(q.nbits()-x.nbits())
+
+            var w=BIG(ee)
             for i in 0 ..< 3
             {
 			     u.append(BIG(w))
-			     u[i].mod(x)
-			     w.div(x)
+			     u[i].ctmod(x,bd)
+			     w.ctdiv(x,bd)
             }
             u.append(BIG(w))
             if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
