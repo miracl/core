@@ -688,12 +688,14 @@ func glv(e *BIG) []*BIG {
 	q := NewBIGints(CURVE_Order)
 	x := NewBIGints(CURVE_Bnx)
 	x2 := smul(x, x)
+	ee := NewBIGcopy(e); ee.Mod(q)
 	x = smul(x2, x2)
 	x2 = smul(x, x)
-	u = append(u, NewBIGcopy(e))
-	u[0].Mod(x2)
-	u = append(u, NewBIGcopy(e))
-	u[1].div(x2)
+	bd := uint(q.nbits()-x2.nbits())
+	u = append(u, NewBIGcopy(ee))
+	u[0].ctmod(x2,bd)
+	u = append(u, NewBIGcopy(ee))
+	u[1].ctdiv(x2,bd)
 	u[1].rsub(q)
 	return u
 }
@@ -704,11 +706,13 @@ func gs(e *BIG) []*BIG {
 
 	q := NewBIGints(CURVE_Order)
 	x := NewBIGints(CURVE_Bnx)
-	w := NewBIGcopy(e)
+	ee := NewBIGcopy(e); ee.Mod(q)
+	bd := uint(q.nbits()-x.nbits())
+	w := NewBIGcopy(ee)
 	for i := 0; i < 15; i++ {
 		u = append(u, NewBIGcopy(w))
-		u[i].Mod(x)
-		w.div(x)
+		u[i].ctmod(x,bd)
+		w.ctdiv(x,bd)
 	}
 	u = append(u, NewBIGcopy(w))
 	if SIGN_OF_X == NEGATIVEX {

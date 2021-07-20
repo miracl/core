@@ -784,22 +784,23 @@ func glv(e *BIG) []*BIG {
 /* PFBNS
 		t := NewBIGint(0)
 		q := NewBIGints(CURVE_Order)
+		ee := NewBIGcopy(e); ee.Mod(q)
 		var v []*BIG
 
 		for i := 0; i < 2; i++ {
 			t.copy(NewBIGints(CURVE_W[i])) // why not just t=new BIG(ROM.CURVE_W[i]);
-			d := mul(t, e)
-			v = append(v, NewBIGcopy(d.div(q)))
+			d := mul(t, ee)
+			v = append(v, NewBIGcopy(d.ctdiv(q,uint(t.nbits()))))
 			u = append(u, NewBIGint(0))
 		}
-		u[0].copy(e)
+		u[0].copy(ee)
 		for i := 0; i < 2; i++ {
 			for j := 0; j < 2; j++ {
 				t.copy(NewBIGints(CURVE_SB[j][i]))
 				t.copy(Modmul(v[j], t, q))
 				u[i].add(q)
 				u[i].sub(t)
-				u[i].Mod(q)
+				u[i].ctmod(q,1)
 			}
 		}
 PFBNF */
@@ -807,10 +808,12 @@ PFBNF */
 		q := NewBIGints(CURVE_Order)
 		x := NewBIGints(CURVE_Bnx)
 		x2 := smul(x, x)
-		u = append(u, NewBIGcopy(e))
-		u[0].Mod(x2)
-		u = append(u, NewBIGcopy(e))
-		u[1].div(x2)
+		ee := NewBIGcopy(e); ee.Mod(q)
+		bd := uint(q.nbits()-x2.nbits())
+		u = append(u, NewBIGcopy(ee))
+		u[0].ctmod(x2,bd)
+		u = append(u, NewBIGcopy(ee))
+		u[1].ctdiv(x2,bd)
 		u[1].rsub(q)
 	}
 	return u
@@ -823,33 +826,37 @@ func gs(e *BIG) []*BIG {
 /* PFBNS
 		t := NewBIGint(0)
 		q := NewBIGints(CURVE_Order)
+		ee := NewBIGcopy(e); ee.Mod(q)
 
 		var v []*BIG
 		for i := 0; i < 4; i++ {
 			t.copy(NewBIGints(CURVE_WB[i]))
-			d := mul(t, e)
-			v = append(v, NewBIGcopy(d.div(q)))
+			d := mul(t, ee)
+			v = append(v, NewBIGcopy(d.ctdiv(q,uint(t.nbits()))))
 			u = append(u, NewBIGint(0))
 		}
-		u[0].copy(e)
+		u[0].copy(ee)
 		for i := 0; i < 4; i++ {
 			for j := 0; j < 4; j++ {
 				t.copy(NewBIGints(CURVE_BB[j][i]))
 				t.copy(Modmul(v[j], t, q))
 				u[i].add(q)
 				u[i].sub(t)
-				u[i].Mod(q)
+				u[i].ctmod(q,1)
 			}
 		}
 PFBNF */
 	} else {
 		q := NewBIGints(CURVE_Order)
 		x := NewBIGints(CURVE_Bnx)
-		w := NewBIGcopy(e)
+		ee := NewBIGcopy(e); ee.Mod(q)
+		bd := uint(q.nbits()-x.nbits())
+
+		w := NewBIGcopy(ee)
 		for i := 0; i < 3; i++ {
 			u = append(u, NewBIGcopy(w))
-			u[i].Mod(x)
-			w.div(x)
+			u[i].ctmod(x,bd)
+			w.ctdiv(x,bd)
 		}
 		u = append(u, NewBIGcopy(w))
 		if SIGN_OF_X == NEGATIVEX {

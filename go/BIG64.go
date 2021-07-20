@@ -598,8 +598,31 @@ func (r *BIG) invmod2m() {
 	r.norm()
 }
 
+func (r *BIG) ctmod(m *BIG,bd uint) {
+	k:=bd
+	sr:=NewBIG()
+	c:=NewBIGcopy(m)
+	r.norm()
+
+	c.shl(k)
+
+	for {
+		sr.copy(r)
+		sr.sub(c)
+		sr.norm()	
+		r.cmove(sr, int(1-((sr.w[NLEN-1]>>uint(CHUNK-1))&1)))
+		if k==0 {break}
+		c.fshr(1)
+		k -= 1
+	}
+}
+
 /* reduce this mod m */
-func (r *BIG) Mod(m1 *BIG) {
+func (r *BIG) Mod(m *BIG) {
+	k:=r.nbits()-m.nbits()
+	if k<0 {k=0}
+	r.ctmod(m,uint(k))
+/*
 	m := NewBIGcopy(m1)
 	sr := NewBIG()
 	r.norm()
@@ -623,11 +646,44 @@ func (r *BIG) Mod(m1 *BIG) {
 		r.cmove(sr, int(1-((sr.w[NLEN-1]>>uint(CHUNK-1))&1)))
 
 		k--
+	} */
+}
+
+func (r *BIG) ctdiv(m *BIG,bd uint) {
+	k:=bd
+	e:=NewBIGint(1);
+	sr:=NewBIG()
+	a:=NewBIGcopy(r)
+	c:=NewBIGcopy(m)
+	r.norm()
+	r.zero()
+
+	c.shl(k)
+	e.shl(k)
+
+	for {
+		sr.copy(a)
+		sr.sub(c)
+		sr.norm()
+		d := int(1 - ((sr.w[NLEN-1] >> uint(CHUNK-1)) & 1))
+		a.cmove(sr, d)
+		sr.copy(r)
+		sr.add(e)
+		sr.norm()
+		r.cmove(sr, d)
+		if k==0 {break}
+		c.fshr(1)
+		e.fshr(1)
+		k -= 1
 	}
 }
 
 /* divide this by m */
-func (r *BIG) div(m1 *BIG) {
+func (r *BIG) div(m *BIG) {
+	k:=r.nbits()-m.nbits()
+	if k<0 {k=0}
+	r.ctdiv(m,uint(k))	
+/*
 	m := NewBIGcopy(m1)
 	var d int
 	k := 0
@@ -658,7 +714,7 @@ func (r *BIG) div(m1 *BIG) {
 		r.cmove(sr, d)
 
 		k--
-	}
+	} */
 }
 
 /* get 8*MODBYTES size random number */

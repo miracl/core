@@ -193,33 +193,6 @@ public struct DBIG{
         var k=nbits()-m.nbits()
         if k<0 {k=0}
         return ctmod(m,UInt(k))
-/*
-        var k:Int=0
-        norm()
-        var m=DBIG(c)
-        var r=DBIG(0)
-
-        if DBIG.comp(self,m)<0 {return BIG(self)}
-
-        repeat
-        {
-            m.shl(1)
-            k += 1
-        }
-        while (DBIG.comp(self,m)>=0);
-
-        while (k>0)
-        {
-            m.shr(1)
-
-		r.copy(self)
-		r.sub(m)
-		r.norm()
-		cmove(r,Int(1-((r.w[CONFIG_BIG.DNLEN-1]>>Chunk(CONFIG_BIG.CHUNK-1))&1)))
-
-            k -= 1
-        }
-        return BIG(self) */
     }
 
     mutating func ctdiv(_ m: BIG,_ bd: UInt) -> BIG
@@ -232,8 +205,8 @@ public struct DBIG{
         var dr=DBIG(0)
         norm()
 
-        c.shl(1)
-        e.shl(1)
+        c.shl(k)
+        e.shl(k)
 
         while true {
 		    dr.copy(self)
@@ -258,42 +231,6 @@ public struct DBIG{
         var k=nbits()-m.nbits()
         if k<0 {k=0}
         return ctdiv(m,UInt(k))
-
-/*
-        var k:Int=0
-        var m=DBIG(c)
-        var a=BIG(0)
-        var e=BIG(1)
-        var r=BIG(0)
-        var dr=DBIG(0)
-
-        norm()
-
-        while (DBIG.comp(self,m)>=0)
-        {
-            e.fshl(1)
-            m.shl(1)
-            k += 1
-        }
-
-        while (k>0)
-        {
-            m.shr(1)
-            e.shr(1)
-
-		dr.copy(self)
-		dr.sub(m)
-		dr.norm()
-		let d=Int(1-((dr.w[CONFIG_BIG.DNLEN-1]>>Chunk(CONFIG_BIG.CHUNK-1))&1))
-		cmove(dr,d)
-		r.copy(a)
-		r.add(e)
-		r.norm()
-		a.cmove(r,d)
-
-            k -= 1
-        }
-        return a */
     }
 
     /* split DBIG at position n, return higher half, keep lower half */
