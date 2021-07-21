@@ -487,6 +487,8 @@ impl FP {
     }
 
     /* return self^e mod Modulus */
+    // Could leak size of e
+    // but not used here with secret exponent e
     pub fn pow(&self, e: &BIG) -> FP {
         let mut tb: [FP; 16] = [
             FP::new(),

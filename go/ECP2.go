@@ -570,7 +570,8 @@ func (E *ECP2) mul(e *BIG) *ECP2 {
 	}
 	w[nb] = int8(t.lastbits(5))
 
-	P.Copy(W[(w[nb]-1)/2])
+	//P.Copy(W[(w[nb]-1)/2])
+	P.selector(W, int32(w[nb]))
 	for i := nb - 1; i >= 0; i-- {
 		Q.selector(W, int32(w[i]))
 		P.dbl()

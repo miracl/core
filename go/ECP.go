@@ -1078,7 +1078,8 @@ func (E *ECP) mul(e *BIG) *ECP {
 		}
 		w[nb] = int8(t.lastbits(5))
 
-		P.Copy(W[(int(w[nb])-1)/2])
+		//P.Copy(W[(int(w[nb])-1)/2])
+		P.selector(W, int32(w[nb]))
 		for i := nb - 1; i >= 0; i-- {
 			Q.selector(W, int32(w[i]))
 			P.dbl()
@@ -1219,8 +1220,8 @@ func (E *ECP) Mul2(e *BIG, Q *ECP, f *BIG) *ECP {
 		w[i] = int8(4*a + b)
 	}
 	w[nb] = int8(4*te.lastbits(3) + tf.lastbits(3))
-	S.Copy(W[(w[nb]-1)/2])
-
+	//S.Copy(W[(w[nb]-1)/2])
+	S.selector(W, int32(w[nb]))
 	for i := nb - 1; i >= 0; i-- {
 		T.selector(W, int32(w[i]))
 		S.dbl()

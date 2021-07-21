@@ -552,7 +552,8 @@ void ECP2_ZZZ_mul(ECP2_ZZZ *P, BIG_XXX e)
     }
     w[nb] = BIG_XXX_lastbits(t, 5);
 
-    ECP2_ZZZ_copy(P, &W[(w[nb] - 1) / 2]);
+    //ECP2_ZZZ_copy(P, &W[(w[nb] - 1) / 2]);
+    ECP2_ZZZ_select(P, W, w[i]);
     for (i = nb - 1; i >= 0; i--)
     {
         ECP2_ZZZ_select(&Q, W, w[i]);

@@ -491,7 +491,8 @@ var ECP4 = function(ctx) {
             }
             w[nb] = t.lastbits(5);
 
-            P.copy(W[Math.floor((w[nb] - 1) / 2)]);
+            //P.copy(W[Math.floor((w[nb] - 1) / 2)]);
+            P.select(W, w[nb]);
             for (i = nb - 1; i >= 0; i--) {
                 Q.select(W, w[i]);
                 P.dbl();

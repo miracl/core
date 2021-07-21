@@ -1127,7 +1127,9 @@ impl ECP {
             }
             w[nb] = t.lastbits(5) as i8;
 
-            P.copy(&W[((w[nb] as usize) - 1) / 2]);
+            //P.copy(&W[((w[nb] as usize) - 1) / 2]);
+
+            P.selector(&W, w[nb] as i32);
             for i in (0..nb).rev() {
                 Q.selector(&W, w[i] as i32);
                 P.dbl();
@@ -1295,7 +1297,8 @@ impl ECP {
             w[i] = (4 * a + b) as i8;
         }
         w[nb] = (4 * te.lastbits(3) + tf.lastbits(3)) as i8;
-        S.copy(&W[((w[nb] as usize) - 1) / 2]);
+        //S.copy(&W[((w[nb] as usize) - 1) / 2]);
+        S.selector(&W, w[nb] as i32);
 
         for i in (0..nb).rev() {
             T.selector(&W, w[i] as i32);

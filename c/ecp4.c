@@ -535,7 +535,8 @@ void ECP4_ZZZ_mul(ECP4_ZZZ *P, BIG_XXX e)
     }
     w[nb] = BIG_XXX_lastbits(t, 5);
 
-    ECP4_ZZZ_copy(P, &W[(w[nb] - 1) / 2]);
+    //ECP4_ZZZ_copy(P, &W[(w[nb] - 1) / 2]);
+    ECP4_ZZZ_select(P, W, w[i]);
     for (i = nb - 1; i >= 0; i--)
     {
         ECP4_ZZZ_select(&Q, W, w[i]);

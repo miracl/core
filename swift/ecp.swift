@@ -922,7 +922,8 @@ public struct ECP {
             }
             w[nb]=Int8(t.lastbits(5))
 
-            P.copy(W[Int((w[nb])-1)/2]);
+            //P.copy(W[Int((w[nb])-1)/2]);
+            P.select(W,Int32(w[nb]));
             for i in (0...nb-1).reversed()
             {
 				Q.select(W,Int32(w[i]));
@@ -1038,7 +1039,8 @@ public struct ECP {
             w[i]=Int8(4*a+b);
         }
         w[nb]=Int8(4*te.lastbits(3)+tf.lastbits(3));
-        S.copy(W[Int(w[nb]-1)/2]);
+        //S.copy(W[Int(w[nb]-1)/2]);
+        S.select(W,Int32(w[nb]));
         for i in (0...nb-1).reversed()
         {
             T.select(W,Int32(w[i]));

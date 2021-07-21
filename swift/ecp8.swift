@@ -559,7 +559,8 @@ public struct ECP8 {
         }
         w[nb]=Int8(t.lastbits(5))
 
-        P.copy(W[Int(w[nb]-1)/2])
+        //P.copy(W[Int(w[nb]-1)/2])
+        P.select(W,Int32(w[nb]));
         for i in (0...nb-1).reversed()
         {
             Q.select(W,Int32(w[i]))

@@ -1068,7 +1068,8 @@ var ECP = function(ctx) {
                 }
                 w[nb] = t.lastbits(5);
 
-                P.copy(W[Math.floor((w[nb] - 1) / 2)]);
+                //P.copy(W[Math.floor((w[nb] - 1) / 2)]);
+                P.select(W, w[nb]);
                 for (i = nb - 1; i >= 0; i--) {
                     Q.select(W, w[i]);
                     P.dbl();
@@ -1172,8 +1173,8 @@ var ECP = function(ctx) {
                 w[i] = (4 * a + b);
             }
             w[nb] = (4 * te.lastbits(3) + tf.lastbits(3));
-            S.copy(W[Math.floor((w[nb] - 1) / 2)]);
-
+            //S.copy(W[Math.floor((w[nb] - 1) / 2)]);
+            S.select(W, w[nb]);
             for (i = nb - 1; i >= 0; i--) {
                 T.select(W, w[i]);
                 S.dbl();

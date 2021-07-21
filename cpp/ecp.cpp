@@ -1076,7 +1076,8 @@ void ZZZ::ECP_mul(ECP *P, BIG e)
     }
     w[nb] = BIG_lastbits(t, 5);
 
-    ECP_copy(P, &W[(w[nb] - 1) / 2]);
+    //ECP_copy(P, &W[(w[nb] - 1) / 2]);
+    ECP_select(P, W, w[nb]);
     for (i = nb - 1; i >= 0; i--)
     {
         ECP_select(&Q, W, w[i]);
@@ -1211,7 +1212,8 @@ void ZZZ::ECP_mul2(ECP *P, ECP *Q, BIG e, BIG f)
     }
     w[nb] = (4 * BIG_lastbits(te, 3) + BIG_lastbits(tf, 3));
 
-    ECP_copy(P, &W[(w[nb] - 1) / 2]);
+    //ECP_copy(P, &W[(w[nb] - 1) / 2]);
+    ECP_select(P, W, w[nb]);
     for (i = nb - 1; i >= 0; i--)
     {
         ECP_select(&T, W, w[i]);

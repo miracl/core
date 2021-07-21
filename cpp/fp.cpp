@@ -622,6 +622,8 @@ void YYY::FP_div2(FP *r, FP *a)
     BIG_cmove(r->g,w,pr);
 }
 
+// Could leak size of b
+// but not used here with secret exponent b
 void YYY::FP_pow(FP *r, FP *a, BIG b)
 {
     sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 3) / 4];

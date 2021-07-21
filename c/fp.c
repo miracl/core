@@ -584,7 +584,8 @@ void FP_YYY_div2(FP_YYY *r, FP_YYY *a)
 
 }
 
-
+// Could leak size of b
+// but not used here with secret exponent b
 void FP_YYY_pow(FP_YYY *r, FP_YYY *a, BIG_XXX b)
 {
     sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 3) / 4];

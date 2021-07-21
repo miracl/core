@@ -898,7 +898,8 @@ public final class ECP {
 			}
 			w[nb]=(byte)t.lastbits(5);
 
-			P.copy(W[(w[nb]-1)/2]);
+			//P.copy(W[(w[nb]-1)/2]);
+            P.select(W,w[nb]);
 			for (i=nb-1;i>=0;i--)
 			{
 				Q.select(W,w[i]);
@@ -1019,8 +1020,8 @@ public final class ECP {
 			w[i]=(byte)(4*a+b);
 		}
 		w[nb]=(byte)(4*te.lastbits(3)+tf.lastbits(3));
-		S.copy(W[(w[nb]-1)/2]);
-
+		//S.copy(W[(w[nb]-1)/2]);
+        S.select(W,w[nb]);
 		for (i=nb-1;i>=0;i--)
 		{
 			T.select(W,w[i]);

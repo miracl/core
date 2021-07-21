@@ -542,7 +542,8 @@ void ZZZ::ECP8_mul(ECP8 *P, BIG e)
     }
     w[nb] = BIG_lastbits(t, 5);
 
-    ECP8_copy(P, &W[(w[nb] - 1) / 2]);
+    //ECP8_copy(P, &W[(w[nb] - 1) / 2]);
+    ECP8_select(P, W, w[nb]);
     for (i = nb - 1; i >= 0; i--)
     {
         ECP8_select(&Q, W, w[i]);
