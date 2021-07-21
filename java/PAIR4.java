@@ -582,10 +582,12 @@ public final class PAIR4 {
         BIG x = new BIG(ROM.CURVE_Bnx);
         BIG x2 = BIG.smul(x, x);
         x = BIG.smul(x2, x2);
-        u[0] = new BIG(e);
-        u[0].mod(x);
-        u[1] = new BIG(e);
-        u[1].div(x);
+        BIG ee = new BIG(e); ee.mod(q);
+        int bd = q.nbits()-x.nbits();
+        u[0] = new BIG(ee);
+        u[0].ctmod(x,bd);
+        u[1] = new BIG(ee);
+        u[1].ctdiv(x,bd);
         u[1].rsub(q);
 
         return u;
@@ -597,11 +599,13 @@ public final class PAIR4 {
 
         BIG q = new BIG(ROM.CURVE_Order);
         BIG x = new BIG(ROM.CURVE_Bnx);
-        BIG w = new BIG(e);
+        BIG ee = new BIG(e); ee.mod(q);
+        int bd = q.nbits()-x.nbits();
+        BIG w = new BIG(ee);
         for (int i = 0; i < 7; i++) {
             u[i] = new BIG(w);
-            u[i].mod(x);
-            w.div(x);
+            u[i].ctmod(x,bd);
+            w.ctdiv(x,bd);
         }
         u[7] = new BIG(w);
         if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {

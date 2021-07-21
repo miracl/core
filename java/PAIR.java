@@ -733,22 +733,23 @@ public final class PAIR {
             int i, j;
             BIG t = new BIG(0);
             BIG q = new BIG(ROM.CURVE_Order);
-
+            BIG ee = new BIG(e); ee.mod(q);
             BIG[] v = new BIG[2];
+
             for (i = 0; i < 2; i++) {
                 t.copy(new BIG(ROM.CURVE_W[i]));  // why not just t=new BIG(ROM.CURVE_W[i]);
-                DBIG d = BIG.mul(t, e);
-                v[i] = new BIG(d.div(q));
+                DBIG d = BIG.mul(t, ee);
+                v[i] = new BIG(d.ctdiv(q,t.nbits()));
                 u[i] = new BIG(0);
             }
-            u[0].copy(e);
+            u[0].copy(ee);
             for (i = 0; i < 2; i++)
                 for (j = 0; j < 2; j++) {
                     t.copy(new BIG(ROM.CURVE_SB[j][i]));
                     t.copy(BIG.modmul(v[j], t, q));
                     u[i].add(q);
                     u[i].sub(t);
-                    u[i].mod(q);
+                    u[i].ctmod(q,1);
                 }
 PFBNF */
         } else {
@@ -756,10 +757,12 @@ PFBNF */
             BIG q = new BIG(ROM.CURVE_Order);
             BIG x = new BIG(ROM.CURVE_Bnx);
             BIG x2 = BIG.smul(x, x);
-            u[0] = new BIG(e);
-            u[0].mod(x2);
-            u[1] = new BIG(e);
-            u[1].div(x2);
+            BIG ee = new BIG(e); ee.mod(q);
+            int bd=q.nbits()-x2.nbits();
+            u[0] = new BIG(ee);
+            u[0].ctmod(x2,bd);
+            u[1] = new BIG(ee);
+            u[1].ctdiv(x2,bd);
             u[1].rsub(q);
         }
         return u;
@@ -773,32 +776,36 @@ PFBNF */
             int i, j;
             BIG t = new BIG(0);
             BIG q = new BIG(ROM.CURVE_Order);
+            BIG ee = new BIG(e); ee.mod(q);
 
             BIG[] v = new BIG[4];
             for (i = 0; i < 4; i++) {
                 t.copy(new BIG(ROM.CURVE_WB[i]));
-                DBIG d = BIG.mul(t, e);
-                v[i] = new BIG(d.div(q));  // v=e.WB[i] / q
+                DBIG d = BIG.mul(t, ee);
+                v[i] = new BIG(d.ctdiv(q,t.nbits()));  // v=e.WB[i] / q
                 u[i] = new BIG(0);
             }
-            u[0].copy(e);
+            u[0].copy(ee);
             for (i = 0; i < 4; i++)
                 for (j = 0; j < 4; j++) {
                     t.copy(new BIG(ROM.CURVE_BB[j][i]));
                     t.copy(BIG.modmul(v[j], t, q));
                     u[i].add(q);
                     u[i].sub(t);
-                    u[i].mod(q);
+                    u[i].ctmod(q,1);
                 }
 PFBNF */
         } else {
             BIG q = new BIG(ROM.CURVE_Order);
             BIG x = new BIG(ROM.CURVE_Bnx);
-            BIG w = new BIG(e);
+            BIG ee = new BIG(e); ee.mod(q);
+            int bd=q.nbits()-x.nbits();
+
+            BIG w = new BIG(ee);
             for (int i = 0; i < 3; i++) {
                 u[i] = new BIG(w);
-                u[i].mod(x);
-                w.div(x);
+                u[i].ctmod(x,bd);
+                w.ctdiv(x,bd);
             }
             u[3] = new BIG(w);
             if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {

@@ -776,23 +776,24 @@ var PAIR = function(ctx) {
     /* GLV method */
     PAIR.glv = function(e) {
         var u = [],
-            t, q, v, d, x, x2, i, j;
+            t, q, v, d, x, x2, i, j, ee, bd;
 
         if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BN) {
             t = new ctx.BIG(0);
             q = new ctx.BIG(0);
+            ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
             v = [];
 
             q.rcopy(ctx.ROM_CURVE.CURVE_Order);
 
             for (i = 0; i < 2; i++) {
                 t.rcopy(ctx.ROM_CURVE.CURVE_W[i]);
-                d = ctx.BIG.mul(t, e);
-                v[i] = new ctx.BIG(d.div(q));
+                d = ctx.BIG.mul(t, ee);
+                v[i] = new ctx.BIG(d.ctdiv(q,t.nbits()));
                 u[i] = new ctx.BIG(0);
             }
 
-            u[0].copy(e);
+            u[0].copy(ee);
 
             for (i = 0; i < 2; i++) {
                 for (j = 0; j < 2; j++) {
@@ -800,7 +801,7 @@ var PAIR = function(ctx) {
                     t.copy(ctx.BIG.modmul(v[j], t, q));
                     u[i].add(q);
                     u[i].sub(t);
-                    u[i].mod(q);
+                    u[i].ctmod(q,1);
                 }
             }
         } else { // -(x^2).P = (Beta.x,y)
@@ -809,10 +810,12 @@ var PAIR = function(ctx) {
             x = new ctx.BIG(0);
             x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
             x2 = ctx.BIG.smul(x, x);
-            u[0] = new ctx.BIG(e);
-            u[0].mod(x2);
-            u[1] = new ctx.BIG(e);
-            u[1].div(x2);
+            ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
+            bd = q.nbits()-x2.nbits();
+            u[0] = new ctx.BIG(ee);
+            u[0].ctmod(x2,bd);
+            u[1] = new ctx.BIG(ee);
+            u[1].ctdiv(x2,bd);
             u[1].rsub(q);
         }
 
@@ -822,23 +825,24 @@ var PAIR = function(ctx) {
     /* Galbraith & Scott Method */
     PAIR.gs = function(e) {
         var u = [],
-            i, j, t, q, v, d, x, w;
+            i, j, t, q, v, d, x, w, ee, bd;
 
         if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BN) {
             t = new ctx.BIG(0);
             q = new ctx.BIG(0);
             q.rcopy(ctx.ROM_CURVE.CURVE_Order);
+            ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
 
             v = [];
 
             for (i = 0; i < 4; i++) {
                 t.rcopy(ctx.ROM_CURVE.CURVE_WB[i]);
-                d = ctx.BIG.mul(t, e);
-                v[i] = new ctx.BIG(d.div(q));
+                d = ctx.BIG.mul(t, ee);
+                v[i] = new ctx.BIG(d.ctdiv(q,t.nbits()));
                 u[i] = new ctx.BIG(0);
             }
 
-            u[0].copy(e);
+            u[0].copy(ee);
 
             for (i = 0; i < 4; i++) {
                 for (j = 0; j < 4; j++) {
@@ -846,7 +850,7 @@ var PAIR = function(ctx) {
                     t.copy(ctx.BIG.modmul(v[j], t, q));
                     u[i].add(q);
                     u[i].sub(t);
-                    u[i].mod(q);
+                    u[i].ctmod(q,1);
                 }
             }
         } else {
@@ -854,12 +858,14 @@ var PAIR = function(ctx) {
             x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
             q = new ctx.BIG(0);
             q.rcopy(ctx.ROM_CURVE.CURVE_Order);
-            w = new ctx.BIG(e);
+            ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
+            bd = q.nbits()-x.nbits();
+            w = new ctx.BIG(ee);
 
             for (i = 0; i < 3; i++) {
                 u[i] = new ctx.BIG(w);
-                u[i].mod(x);
-                w.div(x);
+                u[i].ctmod(x,bd);
+                w.ctdiv(x,bd);
             }
 
             u[3] = new ctx.BIG(w);

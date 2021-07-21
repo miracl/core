@@ -42,7 +42,8 @@ public class BLS192 {
 
     static FP[] hash_to_field(int hash,int hlen,byte[] DST,byte[] M,int ctr) {
         BIG q = new BIG(ROM.Modulus);
-        int L = ceil(q.nbits()+CONFIG_CURVE.AESKEY*8,8);
+        int nbq = q.nbits();
+        int L = ceil(nbq+CONFIG_CURVE.AESKEY*8,8);
         FP [] u = new FP[ctr];
         byte[] fd=new byte[L];
 
@@ -51,7 +52,7 @@ public class BLS192 {
         {
             for (int j=0;j<L;j++)
                 fd[j]=OKM[i*L+j];
-            u[i]=new FP(DBIG.fromBytes(fd).mod(q));
+            u[i]=new FP(DBIG.fromBytes(fd).ctmod(q,8*L-nbq));
         }
     
         return u;
@@ -79,8 +80,9 @@ public class BLS192 {
 
     /* generate key pair, private key S, public key W */
     public static int KeyPairGenerate(byte[] IKM, byte[] S, byte[] W) {
-        BIG r = new BIG(ROM.CURVE_Order);     
-        int L = ceil(3*ceil(r.nbits(),8),2);
+        BIG r = new BIG(ROM.CURVE_Order);  
+        int nbr = r.nbits();        
+        int L = ceil(3*ceil(nbr,8),2);
         ECP4 G = ECP4.generator();
         byte[] LEN = HMAC.inttoBytes(L, 2);
         byte[] AIKM = new byte[IKM.length+1];
@@ -93,7 +95,7 @@ public class BLS192 {
         byte[] OKM=HMAC.HKDF_Expand(HMAC.MC_SHA2,CONFIG_CURVE.HASH_TYPE,L,PRK,LEN);
 
         DBIG dx=DBIG.fromBytes(OKM);
-        BIG s=dx.mod(r);
+        BIG s=dx.ctmod(r,8*L-nbr);
         s.toBytes(S);
 // SkToPk
         G = PAIR4.G2mul(G, s);

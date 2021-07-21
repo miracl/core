@@ -622,31 +622,6 @@ func (r *BIG) Mod(m *BIG) {
 	k:=r.nbits()-m.nbits()
 	if k<0 {k=0}
 	r.ctmod(m,uint(k))
-/*
-	m := NewBIGcopy(m1)
-	sr := NewBIG()
-	r.norm()
-	if Comp(r, m) < 0 {
-		return
-	}
-
-	m.fshl(1)
-	k := 1
-
-	for Comp(r, m) >= 0 {
-		m.fshl(1)
-		k++
-	}
-
-	for k > 0 {
-		m.fshr(1)
-		sr.copy(r)
-		sr.sub(m)
-		sr.norm()
-		r.cmove(sr, int(1-((sr.w[NLEN-1]>>uint(CHUNK-1))&1)))
-
-		k--
-	} */
 }
 
 func (r *BIG) ctdiv(m *BIG,bd uint) {
@@ -683,38 +658,6 @@ func (r *BIG) div(m *BIG) {
 	k:=r.nbits()-m.nbits()
 	if k<0 {k=0}
 	r.ctdiv(m,uint(k))	
-/*
-	m := NewBIGcopy(m1)
-	var d int
-	k := 0
-	r.norm()
-	sr := NewBIG()
-	e := NewBIGint(1)
-	b := NewBIGcopy(r)
-	r.zero()
-
-	for Comp(b, m) >= 0 {
-		e.fshl(1)
-		m.fshl(1)
-		k++
-	}
-
-	for k > 0 {
-		m.fshr(1)
-		e.fshr(1)
-
-		sr.copy(b)
-		sr.sub(m)
-		sr.norm()
-		d = int(1 - ((sr.w[NLEN-1] >> uint(CHUNK-1)) & 1))
-		b.cmove(sr, d)
-		sr.copy(r)
-		sr.add(e)
-		sr.norm()
-		r.cmove(sr, d)
-
-		k--
-	} */
 }
 
 /* get 8*MODBYTES size random number */

@@ -580,7 +580,7 @@ var PAIR4 = function(ctx) {
     /* GLV method */
     PAIR4.glv = function(e) {
         var u = [],
-            q, x, x2;
+            q, x, x2, ee, bd;
 
         // -(x^2).P = (Beta.x,y)
         q = new ctx.BIG(0);
@@ -589,10 +589,12 @@ var PAIR4 = function(ctx) {
         x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
         x2 = ctx.BIG.smul(x, x);
         x = ctx.BIG.smul(x2,x2);
-        u[0] = new ctx.BIG(e);
-        u[0].mod(x);
-        u[1] = new ctx.BIG(e);
-        u[1].div(x);
+        ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
+        bd = q.nbits()-x.nbits();
+        u[0] = new ctx.BIG(ee);
+        u[0].ctmod(x,bd);
+        u[1] = new ctx.BIG(ee);
+        u[1].ctdiv(x,bd);
         u[1].rsub(q);
 
         return u;
@@ -601,18 +603,20 @@ var PAIR4 = function(ctx) {
     /* Galbraith & Scott Method */
     PAIR4.gs = function(e) {
         var u = [],
-            i, q, x, w;
+            i, q, x, w, ee, bd;
 
         x = new ctx.BIG(0);
         x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
         q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
-        w = new ctx.BIG(e);
+        ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
+        bd = q.nbits()-x.nbits();
+        w = new ctx.BIG(ee);
 
         for (i = 0; i < 7; i++) {
             u[i] = new ctx.BIG(w);
-            u[i].mod(x);
-            w.div(x);
+            u[i].ctmod(x,bd);
+            w.ctdiv(x,bd);
         }
 
         u[7] = new ctx.BIG(w);

@@ -544,8 +544,32 @@ BIG = function(ctx) {
             this.norm();
         },
 
+        ctmod: function(m,bd) {
+            var k=bd;
+            var r = new BIG(0);
+            var c = new BIG(0); c.copy(m);
+            this.norm();
+
+            c.shl(k);
+
+            while (true)
+            {
+                r.copy(this);
+                r.sub(c);
+                r.norm();
+                this.cmove(r, (1 - ((r.w[BIG.NLEN - 1] >> (BIG.CHUNK - 1)) & 1)));
+                if (k==0) break;
+                c.fshr(1);
+                k--;
+            }
+        },
+
         /* reduce this mod m */
-        mod: function(m1) {
+        mod: function(m) {
+            var k=this.nbits()-m.nbits();
+            if (k<0) k=0;
+            this.ctmod(m,k);
+/*
             var k = 0,
                 r = new BIG(0);
 			var m=new BIG(0); m.copy(m1);
@@ -570,10 +594,45 @@ BIG = function(ctx) {
                 this.cmove(r, (1 - ((r.w[BIG.NLEN - 1] >> (BIG.CHUNK - 1)) & 1)));
 
                 k--;
+            } */
+        },
+
+        ctdiv: function(m,bd) {
+            var k=bd;
+            var d=0;
+            var e = new BIG(1);
+            var a = new BIG(0); a.copy(this);
+            var r = new BIG(0);
+            var c = new BIG(0); c.copy(m);
+            this.norm();
+            this.zero();
+
+            c.shl(k);
+            e.shl(k);
+
+            while (true)
+            {
+                r.copy(a);
+                r.sub(c);
+                r.norm();
+                d = (1 - ((r.w[BIG.NLEN - 1] >> (BIG.CHUNK - 1)) & 1));
+                a.cmove(r, d);
+                r.copy(this);
+                r.add(e);
+                r.norm();
+                this.cmove(r, d);
+                if (k==0) break;
+                c.fshr(1);
+                e.fshr(1);
+                k--;
             }
         },
         /* this/=m */
-        div: function(m1) {
+        div: function(m) {
+            var k=this.nbits()-m.nbits();
+            if (k<0) k=0;
+            this.ctdiv(m,k);
+/*
             var k = 0,
                 d = 0,
                 e = new BIG(1),
@@ -606,7 +665,7 @@ BIG = function(ctx) {
                 this.cmove(r, d);
 
                 k--;
-            }
+            } */
         },
         /* return parity of this */
         parity: function() {
@@ -1336,8 +1395,35 @@ DBIG = function(ctx) {
             return s;
         },
 
+        ctmod: function(m,bd) {
+            var k=bd;
+            var c = new DBIG(0); c.hcopy(m);
+            var dr = new DBIG(0);
+            var r = new ctx.BIG(0);
+            this.norm();
+
+            c.shl(k);
+
+            while (true)
+            {
+                dr.copy(this);
+                dr.sub(c);
+                dr.norm();
+                this.cmove(dr, (1 - ((dr.w[ctx.BIG.DNLEN - 1] >> (ctx.BIG.CHUNK - 1)) & 1)));
+                if (k==0) break;
+                c.shr(1);
+                k--;
+            }
+            r.hcopy(this);
+            return r;
+        },
+
         /* reduces this DBIG mod a ctx.BIG, and returns the ctx.BIG */
-        mod: function(c) {
+        mod: function(m) {
+            var k=this.nbits()-m.nbits();
+            if (k<0) k=0;
+            return this.ctmod(m,k);
+/*
             var k = 0,
                 m = new DBIG(0),
                 dr = new DBIG(0),
@@ -1368,11 +1454,46 @@ DBIG = function(ctx) {
 
             r.hcopy(this);
 
-            return r;
+            return r; */
+        },
+
+        ctdiv: function(m,bd) {
+            var d,k=bd;
+            var c = new DBIG(0); c.hcopy(m);
+            var dr = new DBIG(0);
+            var r = new ctx.BIG(0);
+            var a = new ctx.BIG(0);
+            var e = new ctx.BIG(1);
+            this.norm();
+
+            c.shl(k);
+            e.shl(k);
+
+            while (true)
+            {
+                dr.copy(this);
+                dr.sub(c);
+                dr.norm();
+                d = (1 - ((dr.w[ctx.BIG.DNLEN - 1] >> (ctx.BIG.CHUNK - 1)) & 1));
+                this.cmove(dr, d);
+                r.copy(a);
+                r.add(e);
+                r.norm();
+                a.cmove(r, d);
+                if (k==0) break;
+                c.shr(1);
+                e.shr(1);
+                k--;
+            }
+            return a;
         },
 
         /* this/=c */
-        div: function(c) {
+        div: function(m) {
+            var k=this.nbits()-m.nbits();
+            if (k<0) k=0;
+            return this.ctdiv(m,k);
+/*
             var d = 0,
                 k = 0,
                 m = new DBIG(0),
@@ -1406,7 +1527,7 @@ DBIG = function(ctx) {
 
                 k--;
             }
-            return a;
+            return a; */
         },
 
         /* split this DBIG at position n, return higher half, keep lower half */

@@ -624,8 +624,33 @@ public class BIG {
         norm();
     }
 
+    public void ctmod(BIG m,int bd) {
+        int k=bd;
+        BIG r=new BIG(0);
+        BIG c=new BIG(m);
+        norm();
+
+        c.shl(k);
+
+        while (true)
+        {
+            r.copy(this);
+            r.sub(c);
+            r.norm();
+            cmove(r, (int)(1 - ((r.w[NLEN - 1] >> (CHUNK - 1)) & 1)));
+            if (k==0) break;
+            c.fshr(1);
+            k--;
+        }
+    }
+
     /* reduce this mod m */
-    public void mod(BIG m1) {
+    public void mod(BIG m) {
+        int k=nbits()-m.nbits();
+        if (k<0) k=0;
+        ctmod(m,k);
+        
+/*
         int k = 0;
         BIG r = new BIG(0);
         BIG m = new BIG(m1);
@@ -645,11 +670,45 @@ public class BIG {
             r.norm();
             cmove(r, (int)(1 - ((r.w[NLEN - 1] >> (CHUNK - 1)) & 1)));
             k--;
-        }
+        } */
     }
 
+    public void ctdiv(BIG m,int bd) {
+        int k=bd;
+        BIG e = new BIG(1);
+        BIG r = new BIG(0);
+        BIG a = new BIG(this);
+        BIG c = new BIG(m);
+        norm();
+        zero();
+
+        c.shl(k);
+        e.shl(k);
+
+        while (true)
+        {
+            r.copy(a);
+            r.sub(c);
+            r.norm();
+            int d = (int)(1 - ((r.w[NLEN - 1] >> (CHUNK - 1)) & 1));
+            a.cmove(r, d);
+            r.copy(this);
+            r.add(e);
+            r.norm();
+            cmove(r, d);
+            if (k==0) break;
+            c.fshr(1);
+            e.fshr(1);
+            k--;
+        }
+    }
     /* divide this by m */
-    public void div(BIG m1) {
+    public void div(BIG m) {
+        int k=nbits()-m.nbits();
+        if (k<0) k=0;
+        ctdiv(m,k);
+
+/*
         int d, k = 0;
         norm();
         BIG e = new BIG(1);
@@ -678,7 +737,7 @@ public class BIG {
             r.norm();
             cmove(r, d);
             k--;
-        }
+        } */
     }
 
     /* return parity */

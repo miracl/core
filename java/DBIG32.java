@@ -83,7 +83,7 @@ public class DBIG {
 		DBIG t=new DBIG(this);
 		long c;
 		t.norm();
-		while (t.w[k]==0 && k>=0) k--;
+		while (k>=0 && t.w[k]==0) k--;
 		if (k<0) return 0;
 		bts=CONFIG_BIG.BASEBITS*k;
 		c=t.w[k];
@@ -201,8 +201,35 @@ public class DBIG {
 	}
 
 /* reduces this DBIG mod a BIG, and returns the BIG */
-	public BIG mod(BIG c)
+    public BIG ctmod(BIG m,int bd)
+    {
+        int k=bd;
+        norm();
+        DBIG c=new DBIG(m);
+        DBIG r=new DBIG(0);
+
+        c.shl(k);
+
+        while (true)
+        {
+			r.copy(this);
+			r.sub(c);
+			r.norm();
+			cmove(r,(int)(1-((r.w[BIG.DNLEN-1]>>(BIG.CHUNK-1))&1)));
+            if (k==0) break;
+            c.shr(1);
+            k--;
+        }
+        return new BIG(this);
+    }
+
+/* reduces this DBIG mod a BIG, and returns the BIG */
+	public BIG mod(BIG m)
 	{
+        int k=nbits()-m.nbits();
+        if (k<0) k=0;
+        return ctmod(m,k);
+/*
 		int k=0;  
 		norm();
 		DBIG m=new DBIG(c);
@@ -225,14 +252,51 @@ public class DBIG {
 			r.sub(m);
 			r.norm();
 			cmove(r,(int)(1-((r.w[BIG.DNLEN-1]>>(BIG.CHUNK-1))&1)));
+
 			k--;
 		}
-		return new BIG(this);
+		return new BIG(this); */
 	}
 
+    public BIG ctdiv(BIG m,int bd)
+    {
+        int k=bd;
+		DBIG c=new DBIG(m);
+		DBIG dr=new DBIG(0);
+		BIG r=new BIG(0);
+		BIG a=new BIG(0);
+		BIG e=new BIG(1);
+		norm();
+
+        c.shl(k);
+        e.shl(k);
+
+        while (true)
+        {
+			dr.copy(this);
+			dr.sub(c);
+			dr.norm();
+			int d=(int)(1-((dr.w[BIG.DNLEN-1]>>(BIG.CHUNK-1))&1));
+			cmove(dr,d);
+			r.copy(a);
+			r.add(e);
+			r.norm();
+			a.cmove(r,d);
+            if (k==0) break;
+            c.shr(1);
+            e.shr(1);
+            k--;
+        }
+        return a;
+    }
+
 /* return this/c */
-	public BIG div(BIG c)
+	public BIG div(BIG m)
 	{
+        int k=nbits()-m.nbits();
+        if (k<0) k=0;
+        return ctdiv(m,k);
+/*
 		int d,k=0;
 		DBIG m=new DBIG(c);
 		DBIG dr=new DBIG(0);
@@ -264,7 +328,7 @@ public class DBIG {
 			a.cmove(r,d);
 			k--;
 		}
-		return a;
+		return a; */
 	}
 
     /* convert from byte array to DBIG */

@@ -81,7 +81,8 @@ var BLS = function(ctx) {
         hash_to_field: function(hash,hlen,DST,M,ctr) {
             var q = new ctx.BIG(0);
             q.rcopy(ctx.ROM_FIELD.Modulus);
-            var L = this.ceil(q.nbits()+ctx.ECP.AESKEY*8,8);
+            var nbq=q.nbits();
+            var L = this.ceil(nbq+ctx.ECP.AESKEY*8,8);
             var u=[];
             var fd=[];
             var OKM=ctx.HMAC.XMD_Expand(hash,hlen,L*ctr,DST,M);
@@ -90,7 +91,7 @@ var BLS = function(ctx) {
             {
                 for (var j=0;j<L;j++)
                     fd[j]=OKM[i*L+j];
-                u[i]=new ctx.FP(ctx.DBIG.fromBytes(fd).mod(q));
+                u[i]=new ctx.FP(ctx.DBIG.fromBytes(fd).ctmod(q,8*L-nbq));
             }
             return u;
         }, 
@@ -112,7 +113,8 @@ var BLS = function(ctx) {
         KeyPairGenerate: function(IKM, S, W) {
             var r = new ctx.BIG(0);
             r.rcopy(ctx.ROM_CURVE.CURVE_Order); 
-            var L = this.ceil(3*this.ceil(r.nbits(),8),2);
+            var nbr = r.nbits();
+            var L = this.ceil(3*this.ceil(nbr,8),2);
             var G = ctx.ECP2.generator();
 	        var LEN=ctx.HMAC.inttobytes(L, 2);
             var AIKM = [];
@@ -125,7 +127,7 @@ var BLS = function(ctx) {
             var OKM=ctx.HMAC.HKDF_Expand(ctx.HMAC.MC_SHA2,ctx.ECP.HASH_TYPE,L,PRK,LEN);
 
             var dx=ctx.DBIG.fromBytes(OKM);
-            var s=dx.mod(r);
+            var s=dx.ctmod(r,8*L-nbr);
             s.toBytes(S);
 // SkToPk
             G = ctx.PAIR.G2mul(G, s);
