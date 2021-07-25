@@ -1034,7 +1034,7 @@ public struct BIG{
         a.mod(m)
         b.mod(m)
         var d=mul(a,b)
-        return d.mod(m)
+        return d.ctmod(m,UInt(m.nbits()))
     }
 
     /* return a^2 mod m */
@@ -1043,7 +1043,7 @@ public struct BIG{
         var a=BIG(a1)
         a.mod(m)
         var d=sqr(a)
-        return d.mod(m)
+        return d.ctmod(m,UInt(m.nbits()))
     }
 
     /* return -a mod m */
@@ -1052,7 +1052,7 @@ public struct BIG{
         var a=BIG(a1)
         a.mod(m)
 	    a.rsub(m)
-	    a.mod(m)
+	    a.norm()
         return a
     }
 
@@ -1063,7 +1063,7 @@ public struct BIG{
         a.mod(m)
         b.mod(m)
         a.add(b); a.norm()
-        a.mod(m)
+        a.ctmod(m,1)
         return a
     }
 

@@ -719,7 +719,7 @@ func Modmul(a1, b1, m *BIG) *BIG {
 	a.Mod(m)
 	b.Mod(m)
 	d := mul(a, b)
-	return d.Mod(m)
+	return d.ctmod(m,uint(m.nbits()))
 }
 
 /* return a^2 mod m */
@@ -727,7 +727,7 @@ func Modsqr(a1, m *BIG) *BIG {
 	a := NewBIGcopy(a1)
 	a.Mod(m)
 	d := sqr(a)
-	return d.Mod(m)
+	return d.ctmod(m,uint(m.nbits()))
 }
 
 /* return -a mod m */
@@ -735,7 +735,7 @@ func Modneg(a1, m *BIG) *BIG {
 	a := NewBIGcopy(a1)
 	a.Mod(m)
 	a.rsub(m)
-	a.Mod(m)
+	a.norm()
 	return a
 }
 
@@ -746,7 +746,7 @@ func Modadd(a1, b1, m *BIG) *BIG {
 	a.Mod(m)
 	b.Mod(m)
 	a.add(b); a.norm()
-	a.Mod(m)
+	a.ctmod(m,1)
 	return a
 }
 

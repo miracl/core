@@ -575,14 +575,13 @@ public final class PAIR4 {
     }
 
     /* GLV method */
-    public static BIG[] glv(BIG e) {
+    public static BIG[] glv(BIG ee) {
         BIG[] u = new BIG[2];
 // -(x^4).P = (Beta.x,y)
         BIG q = new BIG(ROM.CURVE_Order);
         BIG x = new BIG(ROM.CURVE_Bnx);
         BIG x2 = BIG.smul(x, x);
         x = BIG.smul(x2, x2);
-        BIG ee = new BIG(e); ee.mod(q);
         int bd = q.nbits()-x.nbits();
         u[0] = new BIG(ee);
         u[0].ctmod(x,bd);
@@ -594,12 +593,10 @@ public final class PAIR4 {
     }
 
     /* Galbraith & Scott Method */
-    public static BIG[] gs(BIG e) {
+    public static BIG[] gs(BIG ee) {
         BIG[] u = new BIG[8];
-
         BIG q = new BIG(ROM.CURVE_Order);
         BIG x = new BIG(ROM.CURVE_Bnx);
-        BIG ee = new BIG(e); ee.mod(q);
         int bd = q.nbits()-x.nbits();
         BIG w = new BIG(ee);
         for (int i = 0; i < 7; i++) {
@@ -621,16 +618,18 @@ public final class PAIR4 {
     /* Multiply P by e in group G1 */
     public static ECP G1mul(ECP P, BIG e) {
         ECP R;
+        BIG q = new BIG(ROM.CURVE_Order);
+        BIG ee = new BIG(e); ee.mod(q);
         if (CONFIG_CURVE.USE_GLV) {
             R = new ECP();
             R.copy(P);
             int i, np, nn;
             ECP Q = new ECP();
             Q.copy(P); Q.affine();
-            BIG q = new BIG(ROM.CURVE_Order);
+ 
             FP cru = new FP(new BIG(ROM.CRu));
             BIG t = new BIG(0);
-            BIG[] u = glv(e);
+            BIG[] u = glv(ee);
             Q.getx().mul(cru);
 
             np = u[0].nbits();
@@ -653,7 +652,7 @@ public final class PAIR4 {
             R = R.mul2(u[0], Q, u[1]);
 
         } else {
-            R = P.mul(e);
+            R = P.clmul(ee,q);
         }
         return R;
     }
@@ -661,12 +660,13 @@ public final class PAIR4 {
     /* Multiply P by e in group G2 */
     public static ECP4 G2mul(ECP4 P, BIG e) {
         ECP4 R;
+        BIG q = new BIG(ROM.CURVE_Order);
+        BIG ee = new BIG(e); ee.mod(q);
         if (CONFIG_CURVE.USE_GS_G2) {
             ECP4[] Q = new ECP4[8];
             FP2[] F = ECP4.frob_constants();
 
-            BIG q = new BIG(ROM.CURVE_Order);
-            BIG[] u = gs(e);
+            BIG[] u = gs(ee);
 
             BIG t = new BIG(0);
             int i, np, nn;
@@ -698,13 +698,15 @@ public final class PAIR4 {
     /* Note that this method requires a lot of RAM! Better to use compressed XTR method, see FP8.java */
     public static FP24 GTpow(FP24 d, BIG e) {
         FP24 r;
+        BIG q = new BIG(ROM.CURVE_Order);
+        BIG ee = new BIG(e); ee.mod(q);
         if (CONFIG_CURVE.USE_GS_GT) {
             FP24[] g = new FP24[8];
             FP2 f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
-            BIG q = new BIG(ROM.CURVE_Order);
+ 
             BIG t = new BIG(0);
             int i, np, nn;
-            BIG[] u = gs(e);
+            BIG[] u = gs(ee);
 
             g[0] = new FP24(d);
             for (i = 1; i < 8; i++) {
@@ -723,7 +725,7 @@ public final class PAIR4 {
             }
             r = FP24.pow8(g, u);
         } else {
-            r = d.pow(e);
+            r = d.pow(ee);
         }
         return r;
     }
@@ -733,7 +735,7 @@ public final class PAIR4 {
     {
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
-        ECP W=G1mul(P,q);
+        ECP W=P.mul(q);
         if (!W.is_infinity()) return false;
         return true;
     }
@@ -743,7 +745,7 @@ public final class PAIR4 {
     {
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
-        ECP4 W=G2mul(P,q);
+        ECP4 W=P.mul(q);
         if (!W.is_infinity()) return false;
         return true;
     }

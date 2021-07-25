@@ -1005,13 +1005,19 @@ func (E *ECP) pinmul(e int32, bts int32) *ECP {
 	}
 }
 
-/* return e.this */
-
 func (E *ECP) mul(e *BIG) *ECP {
+	return E.clmul(e,e)
+}
+
+/* return e.this */
+func (E *ECP) clmul(e *BIG,maxe *BIG) *ECP {
 	if e.iszilch() || E.Is_infinity() {
 		return NewECP()
 	}
 	P := NewECP()
+	cm:= NewBIGcopy(e); cm.or(maxe)
+	max:=cm.nbits()
+
 	if CURVETYPE == MONTGOMERY {
 		/* use Ladder */
 		D := NewECP()
@@ -1021,7 +1027,7 @@ func (E *ECP) mul(e *BIG) *ECP {
 		R1.Copy(E)
 		R1.dbl()
 		D.Copy(E); D.Affine()
-		nb := e.nbits()
+		nb := max
 		for i := nb - 2; i >= 0; i-- {
 			b := int(e.bit(i))
 			P.Copy(R1)
@@ -1067,7 +1073,7 @@ func (E *ECP) mul(e *BIG) *ECP {
 		Q.cmove(E, ns)
 		C.Copy(Q)
 
-		nb := 1 + (t.nbits()+3)/4
+		nb := 1 + (max+3)/4
 
 		// convert exponent to signed 4-bit window
 		for i := 0; i < nb; i++ {

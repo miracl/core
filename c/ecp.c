@@ -1505,14 +1505,25 @@ void ECP_ZZZ_pinmul(ECP_ZZZ *P, int e, int bts)
 }
 #endif
 
+
+void ECP_ZZZ_mul(ECP_ZZZ *P,BIG_XXX e)
+{
+    ECP_ZZZ_clmul(P,e,e);
+}
+
 /* Set P=r*P */
 /* SU=424 */
-void ECP_ZZZ_mul(ECP_ZZZ *P, BIG_XXX e)
+void ECP_ZZZ_clmul(ECP_ZZZ *P, BIG_XXX e, BIG_XXX maxe)
 {
+    int max;
+    BIG_XXX cm;
 #if CURVETYPE_ZZZ==MONTGOMERY
     /* Montgomery ladder */
     int nb, i, b;
     ECP_ZZZ R0, R1, D;
+    BIG_XXX_or(cm,e,maxe);
+    max=BIG_XXX_nbits(cm);
+
     if (ECP_ZZZ_isinf(P)) return;
     if (BIG_XXX_iszilch(e))
     {
@@ -1527,7 +1538,7 @@ void ECP_ZZZ_mul(ECP_ZZZ *P, BIG_XXX e)
     ECP_ZZZ_copy(&D, P);
     ECP_ZZZ_affine(&D);
 
-    nb = BIG_XXX_nbits(e);
+    nb = max;
     for (i = nb - 2; i >= 0; i--)
     {
         b = BIG_XXX_bit(e, i);
@@ -1548,6 +1559,8 @@ void ECP_ZZZ_mul(ECP_ZZZ *P, BIG_XXX e)
     BIG_XXX mt, t;
     ECP_ZZZ Q, W[8], C;
     sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 3) / 4];
+    BIG_XXX_or(cm,e,maxe);
+    max=BIG_XXX_nbits(cm);
 
     if (ECP_ZZZ_isinf(P)) return;
     if (BIG_XXX_iszilch(e))
@@ -1584,7 +1597,7 @@ void ECP_ZZZ_mul(ECP_ZZZ *P, BIG_XXX e)
     ECP_ZZZ_cmove(&Q, P, ns);
     ECP_ZZZ_copy(&C, &Q);
 
-    nb = 1 + (BIG_XXX_nbits(t) + 3) / 4;
+    nb = 1 + (max + 3) / 4;
 
     /* convert exponent to signed 4-bit window */
     for (i = 0; i < nb; i++)

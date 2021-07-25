@@ -649,28 +649,6 @@ public class BIG {
         int k=nbits()-m.nbits();
         if (k<0) k=0;
         ctmod(m,k);
-        
-/*
-        int k = 0;
-        BIG r = new BIG(0);
-        BIG m = new BIG(m1);
-
-        norm();
-        if (comp(this, m) < 0) return;
-        do {
-            m.fshl(1);
-            k++;
-        } while (comp(this, m) >= 0);
-
-        while (k > 0) {
-            m.fshr(1);
-
-            r.copy(this);
-            r.sub(m);
-            r.norm();
-            cmove(r, (int)(1 - ((r.w[NLEN - 1] >> (CHUNK - 1)) & 1)));
-            k--;
-        } */
     }
 
     public void ctdiv(BIG m,int bd) {
@@ -707,37 +685,6 @@ public class BIG {
         int k=nbits()-m.nbits();
         if (k<0) k=0;
         ctdiv(m,k);
-
-/*
-        int d, k = 0;
-        norm();
-        BIG e = new BIG(1);
-        BIG m = new BIG(m1);
-        BIG b = new BIG(this);
-        BIG r = new BIG(0);
-        zero();
-
-        while (comp(b, m) >= 0) {
-            e.fshl(1);
-            m.fshl(1);
-            k++;
-        }
-
-        while (k > 0) {
-            m.fshr(1);
-            e.fshr(1);
-
-            r.copy(b);
-            r.sub(m);
-            r.norm();
-            d = (int)(1 - ((r.w[NLEN - 1] >> (CHUNK - 1)) & 1));
-            b.cmove(r, d);
-            r.copy(this);
-            r.add(e);
-            r.norm();
-            cmove(r, d);
-            k--;
-        } */
     }
 
     /* return parity */
@@ -800,7 +747,7 @@ public class BIG {
         a.mod(m);
         b.mod(m);
         DBIG d = mul(a, b);
-        return d.mod(m);
+        return d.ctmod(m,m.nbits());
     }
 
     /* return a^2 mod m */
@@ -808,7 +755,7 @@ public class BIG {
         BIG a = new BIG(a1);
         a.mod(m);
         DBIG d = sqr(a);
-        return d.mod(m);
+        return d.ctmod(m,m.nbits());
     }
 
     /* return -a mod m */
@@ -816,7 +763,7 @@ public class BIG {
         BIG a = new BIG(a1);
         a.mod(m);
         a.rsub(m);
-        a.mod(m);
+        a.norm();
         return a;
     }
 
@@ -827,7 +774,7 @@ public class BIG {
         a.mod(m);
         b.mod(m);
         a.add(b); a.norm();
-        a.mod(m);
+        a.ctmod(m,1);
         return a;
     }
 

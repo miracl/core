@@ -717,13 +717,12 @@ pub fn fexp(m: &FP48) -> FP48 {
 
 #[allow(non_snake_case)]
 /* GLV method */
-fn glv(e: &BIG) -> [BIG; 2] {
+fn glv(ee: &BIG) -> [BIG; 2] {
     let mut u: [BIG; 2] = [BIG::new(), BIG::new()];
     let q = BIG::new_ints(&rom::CURVE_ORDER);
     let mut x = BIG::new_ints(&rom::CURVE_BNX);
     let mut x2 = BIG::smul(&x, &x);
-    let mut ee= BIG::new_copy(e);
-    ee.rmod(&q);
+
     x.copy(&BIG::smul(&x2, &x2));
     x2.copy(&BIG::smul(&x, &x));  // x^8
     let bd=q.nbits()-x2.nbits();  // fixed
@@ -739,7 +738,7 @@ fn glv(e: &BIG) -> [BIG; 2] {
 
 #[allow(non_snake_case)]
 /* Galbraith & Scott Method */
-pub fn gs(e: &BIG) -> [BIG; 16] {
+pub fn gs(ee: &BIG) -> [BIG; 16] {
     let mut u: [BIG; 16] = [
         BIG::new(),
         BIG::new(),
@@ -760,8 +759,7 @@ pub fn gs(e: &BIG) -> [BIG; 16] {
     ];
     let q = BIG::new_ints(&rom::CURVE_ORDER);
     let x = BIG::new_ints(&rom::CURVE_BNX);
-    let mut ee= BIG::new_copy(e);
-    ee.rmod(&q);
+
     let bd=q.nbits()-x.nbits();  // fixed
 
     let mut w = BIG::new_copy(&ee);
@@ -797,14 +795,17 @@ pub fn gs(e: &BIG) -> [BIG; 16] {
 /* Multiply P by e in group G1 */
 pub fn g1mul(P: &ECP, e: &BIG) -> ECP {
     let mut R = ECP::new();
+    let q = BIG::new_ints(&rom::CURVE_ORDER);
+    let mut ee= BIG::new_copy(e);
+    ee.rmod(&q);
     if rom::USE_GLV {
         R.copy(P);
         let mut Q = ECP::new();
         Q.copy(P);
         Q.affine();
-        let q = BIG::new_ints(&rom::CURVE_ORDER);
+
         let mut cru = FP::new_big(&BIG::new_ints(&rom::CRU));
-        let mut u = glv(e);
+        let mut u = glv(&ee);
         Q.mulx(&mut cru);
 
         let mut np = u[0].nbits();
@@ -826,7 +827,7 @@ pub fn g1mul(P: &ECP, e: &BIG) -> ECP {
         u[1].norm();
         R = R.mul2(&u[0], &mut Q, &u[1]);
     } else {
-        R = P.mul(e);
+        R = P.clmul(&ee,&q);
     }
     R
 }
@@ -835,6 +836,9 @@ pub fn g1mul(P: &ECP, e: &BIG) -> ECP {
 /* Multiply P by e in group G2 */
 pub fn g2mul(P: &ECP8, e: &BIG) -> ECP8 {
     let mut R = ECP8::new();
+    let q = BIG::new_ints(&rom::CURVE_ORDER);
+    let mut ee= BIG::new_copy(e);
+    ee.rmod(&q);
     if rom::USE_GS_G2 {
         let mut Q: [ECP8; 16] = [
             ECP8::new(),
@@ -854,8 +858,8 @@ pub fn g2mul(P: &ECP8, e: &BIG) -> ECP8 {
             ECP8::new(),
             ECP8::new(),
         ];
-        let q = BIG::new_ints(&rom::CURVE_ORDER);
-        let mut u = gs(e);
+
+        let mut u = gs(&ee);
         let mut T = ECP8::new();
 
         let f = ECP8::frob_constants();
@@ -883,7 +887,7 @@ pub fn g2mul(P: &ECP8, e: &BIG) -> ECP8 {
 
         R.copy(&ECP8::mul16(&mut Q, &u));
     } else {
-        R.copy(&P.mul(e));
+        R.copy(&P.mul(&ee));
     }
     R
 }
@@ -892,6 +896,9 @@ pub fn g2mul(P: &ECP8, e: &BIG) -> ECP8 {
 /* Note that this method requires a lot of RAM! Better to use compressed XTR method, see FP4.java */
 pub fn gtpow(d: &FP48, e: &BIG) -> FP48 {
     let mut r = FP48::new();
+    let q = BIG::new_ints(&rom::CURVE_ORDER);
+    let mut ee= BIG::new_copy(e);
+    ee.rmod(&q);
     if rom::USE_GS_GT {
         let mut g: [FP48; 16] = [
             FP48::new(),
@@ -912,9 +919,9 @@ pub fn gtpow(d: &FP48, e: &BIG) -> FP48 {
             FP48::new(),
         ];
         let f = FP2::new_bigs(&BIG::new_ints(&rom::FRA), &BIG::new_ints(&rom::FRB));
-        let q = BIG::new_ints(&rom::CURVE_ORDER);
+
         let mut t = BIG::new();
-        let mut u = gs(e);
+        let mut u = gs(&ee);
         let mut w = FP48::new();
 
         g[0].copy(&d);
@@ -935,7 +942,7 @@ pub fn gtpow(d: &FP48, e: &BIG) -> FP48 {
         }
         r.copy(&FP48::pow16(&mut g, &u));
     } else {
-        r.copy(&d.pow(e));
+        r.copy(&d.pow(&ee));
     }
     r
 }
@@ -947,7 +954,7 @@ pub fn g1member(P: &ECP) -> bool {
     if P.is_infinity() {
         return false;
     }
-    let W=g1mul(&P,&q);
+    let W=P.mul(&q); 
     if !W.is_infinity() {
         return false;
     }
@@ -961,7 +968,7 @@ pub fn g2member(P: &ECP8) -> bool {
     if P.is_infinity() {
         return false;
     }
-    let W=g2mul(&P,&q);
+    let W=P.mul(&q); 
     if !W.is_infinity() {
         return false;
     }

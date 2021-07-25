@@ -823,11 +823,18 @@ public final class ECP {
 		}
 	}
 
-/* return e.this */
+    public ECP mul(BIG e)
+    {
+        return clmul(e,e);
+    }
 
-	public ECP mul(BIG e) {
+/* return e.this */
+	public ECP clmul(BIG e,BIG maxe) {
 		if (e.iszilch() || is_infinity()) return new ECP();
 		ECP P=new ECP();
+        BIG cm=new BIG(e); cm.or(maxe);
+        int max=cm.nbits();
+
 		if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.MONTGOMERY)
 		{
 /* use Ladder */
@@ -838,7 +845,7 @@ public final class ECP {
 			R1.dbl();
 
 			D.copy(this); D.affine();
-			nb=e.nbits();
+			nb=max;
 			for (i=nb-2;i>=0;i--)
 			{
 				b=e.bit(i);
@@ -887,7 +894,7 @@ public final class ECP {
 			Q.cmove(this,ns);
 			C.copy(Q);
 
-			nb=1+(t.nbits()+3)/4;
+			nb=1+(max+3)/4;
 
 // convert exponent to signed 4-bit window
 			for (i=0;i<nb;i++)

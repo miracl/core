@@ -496,7 +496,7 @@ public class BIG {
     }
 
     /* this|=x */
-    public void or (BIG x) {
+    public void or(BIG x) {
         for (int i = 0; i < NLEN; i++)
             w[i] |= x.w[i];
     }
@@ -820,7 +820,7 @@ public class BIG {
         a.mod(m);
         b.mod(m);
         DBIG d = mul(a, b);
-        return d.mod(m);
+        return d.ctmod(m,m.nbits());
     }
 
     /* return a^2 mod m */
@@ -828,7 +828,7 @@ public class BIG {
         BIG a = new BIG(a1);
         a.mod(m);
         DBIG d = sqr(a);
-        return d.mod(m);
+        return d.ctmod(m,m.nbits());
     }
 
     /* return -a mod m */
@@ -836,7 +836,7 @@ public class BIG {
         BIG a = new BIG(a1);
         a.mod(m);
         a.rsub(m);
-        a.mod(m);
+        a.norm();
         return a;
     }
 
@@ -847,7 +847,7 @@ public class BIG {
         a.mod(m);
         b.mod(m);
         a.add(b); a.norm();
-        a.mod(m);
+        a.ctmod(m,1);
         return a;
     }
 

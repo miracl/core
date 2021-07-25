@@ -73,16 +73,14 @@ public struct ECDH
         if (RNG==nil)
         {
             s=BIG.fromBytes(S)
-            s.mod(r)
         }
         else
         {
-            s=BIG.randtrunc(r,16*CONFIG_CURVE.AESKEY,&RNG!)
+            s=BIG.randomnum(r,&RNG!)
+            s.toBytes(&S)
         }
 
-        s.toBytes(&S)
-
-        let WP=G.mul(s)
+        let WP=G.clmul(s,r)
         WP.toBytes(&W,false)  // To use point compression on public keys, change to true
 
         return res;
@@ -122,18 +120,15 @@ public struct ECDH
     @discardableResult static public func ECPSVDP_DH(_ S:[UInt8],_ WD:[UInt8],_ Z:inout [UInt8],_ type:Int) -> Int
     {
         var res=0
-        var s=BIG.fromBytes(S)
+        let s=BIG.fromBytes(S)
 
         var W=ECP.fromBytes(WD)
         if W.is_infinity() {res=ECDH.ERROR}
         if (res==0)
         {
-            if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.WEIERSTRASS {
-// if edwards or montgomery, RFC7748 multiplier should not be disturbed
-                let r=BIG(ROM.CURVE_Order)
-                s.mod(r)
-            }
-            W=W.mul(s);
+            let r=BIG(ROM.CURVE_Order)
+
+            W=W.clmul(s,r);
             if W.is_infinity() {res=ECDH.ERROR}
             else
             {
@@ -173,10 +168,10 @@ public struct ECDH
 
         repeat {
             var u=BIG.randomnum(r,&RNG);
-            let w=BIG.randomnum(r,&RNG);  /* side channel masking */
+            let w=BIG.randomnum(r,&RNG);  /* IMPORTANT - side channel masking to protect invmodp() */
 
             V.copy(G)
-            V=V.mul(u)
+            V=V.clmul(u,r)
             let vx=V.getX()
             c.copy(vx)
             c.mod(r)
@@ -184,7 +179,7 @@ public struct ECDH
             u.copy(BIG.modmul(u,w,r))
             u.invmodp(r)
             d.copy(BIG.modmul(s,c,r))
-            d.add(f)
+            d.copy(BIG.modadd(d,f,r))
             d.copy(BIG.modmul(d,w,r))
             d.copy(BIG.modmul(u,d,r))
         } while d.iszilch()

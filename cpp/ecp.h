@@ -284,7 +284,18 @@ extern void ECP_dbl(ECP *P);
 	@param b maximum number of bits in multiplier
  */
 extern void ECP_pinmul(ECP *P, int i, int b);
+
 /**	@brief Multiplies an ECP instance P by a BIG, side-channel resistant
+ *
+	Uses Montgomery ladder for Montgomery curves, otherwise fixed sized windows.
+	@param P ECP instance, on exit =b*P
+	@param e BIG number multiplier
+    @param maxe maximum e
+
+ */
+extern void ECP_clmul(ECP *P, XXX::BIG e, XXX::BIG maxe);
+
+/**	@brief Multiplies an ECP instance P by a BIG
  *
 	Uses Montgomery ladder for Montgomery curves, otherwise fixed sized windows.
 	@param P ECP instance, on exit =b*P
@@ -292,7 +303,7 @@ extern void ECP_pinmul(ECP *P, int i, int b);
 
  */
 extern void ECP_mul(ECP *P, XXX::BIG b);
-/**	@brief Calculates double multiplication P=e*P+f*Q, side-channel resistant
+/**	@brief Calculates double multiplication P=e*P+f*Q
  *
 	@param P ECP instance, on exit =e*P+f*Q
 	@param Q ECP instance
@@ -300,6 +311,17 @@ extern void ECP_mul(ECP *P, XXX::BIG b);
 	@param f BIG number multiplier
  */
 extern void ECP_mul2(ECP *P, ECP *Q, XXX::BIG e, XXX::BIG f);
+
+/**	@brief Calculates double multiplication P=e*P+f*Q, side-channel resistant
+ *
+	@param P ECP instance, on exit =e*P+f*Q
+	@param Q ECP instance
+	@param e BIG number multiplier
+	@param f BIG number multiplier
+    @param maxe maximum multiplier
+ */
+extern void ECP_clmul2(ECP *P, ECP *Q, XXX::BIG e, XXX::BIG f, XXX::BIG maxe);
+
 
 /**	@brief Calculates multi-multiplication P=Sigma e_i*X_i, side-channel resistant
  *

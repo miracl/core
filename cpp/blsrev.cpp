@@ -37,14 +37,15 @@ using namespace YYY;
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
 static void hash_to_field(int hash,int hlen,FP2 *u,octet *DST,octet *M, int ctr)
 {
-    int i,j,k,L;
+    int i,j,k,L,nbq;
     BIG q,a[2];
     DBIG dx;
     char okm[512],fd[128];
     octet OKM = {0,sizeof(okm),okm};
 
     BIG_rcopy(q, Modulus);
-    L=CEIL(BIG_nbits(q)+CURVE_SECURITY_ZZZ,8);
+    nbq=BIG_nbits(q);
+    L=CEIL(nbq+CURVE_SECURITY_ZZZ,8);
 
     XMD_Expand(hash,hlen,&OKM,L*ctr*2,DST,M);
     for (i=0;i<ctr;i++)
@@ -55,7 +56,7 @@ static void hash_to_field(int hash,int hlen,FP2 *u,octet *DST,octet *M, int ctr)
                 fd[j]=OKM.val[(2*i+k)*L+j];
         
             BIG_dfromBytesLen(dx,fd,L);
-            BIG_dmod(a[k],dx,q);
+            BIG_ctdmod(a[k],dx,q,8*L-nbq);
         }
         FP2_from_BIGs(&u[i],a[0],a[1]);
     }
@@ -88,7 +89,7 @@ int ZZZ::BLS_INIT()
 /* generate key pair, private key S, public key W */
 int ZZZ::BLS_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W)
 {
-    int L;
+    int nbr,L;
     BIG r,s;
     DBIG dx;
     ECP G;
@@ -103,7 +104,8 @@ int ZZZ::BLS_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W)
     OCT_jbyte(&AIKM,0,1);
 
     BIG_rcopy(r, CURVE_Order);
-    L=CEIL(3*CEIL(BIG_nbits(r),8),2);
+    nbr=BIG_nbits(r);
+    L=CEIL(3*CEIL(nbr,8),2);
     OCT_jint(&LEN,L,2);
 
     if (!ECP_generator(&G)) return BLS_FAIL;
@@ -113,7 +115,7 @@ int ZZZ::BLS_KEY_PAIR_GENERATE(octet *IKM, octet* S, octet *W)
     HKDF_Expand(MC_SHA2,HASH_TYPE_ZZZ,&OKM,L,&PRK,&LEN);
 
     BIG_dfromBytesLen(dx,OKM.val,L);
-    BIG_dmod(s,dx,r);
+    BIG_ctdmod(s,dx,r,8*L-nbr);
     BIG_toBytes(S->val, s);
     S->len = MODBYTES_XXX;
 

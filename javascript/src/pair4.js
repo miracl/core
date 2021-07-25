@@ -578,7 +578,7 @@ var PAIR4 = function(ctx) {
 	};
 
     /* GLV method */
-    PAIR4.glv = function(e) {
+    PAIR4.glv = function(ee) {
         var u = [],
             q, x, x2, ee, bd;
 
@@ -589,7 +589,6 @@ var PAIR4 = function(ctx) {
         x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
         x2 = ctx.BIG.smul(x, x);
         x = ctx.BIG.smul(x2,x2);
-        ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
         bd = q.nbits()-x.nbits();
         u[0] = new ctx.BIG(ee);
         u[0].ctmod(x,bd);
@@ -601,7 +600,7 @@ var PAIR4 = function(ctx) {
     };
 
     /* Galbraith & Scott Method */
-    PAIR4.gs = function(e) {
+    PAIR4.gs = function(ee) {
         var u = [],
             i, q, x, w, ee, bd;
 
@@ -609,7 +608,6 @@ var PAIR4 = function(ctx) {
         x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
         q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
-        ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
         bd = q.nbits()-x.nbits();
         w = new ctx.BIG(ee);
 
@@ -632,20 +630,21 @@ var PAIR4 = function(ctx) {
 
     /* Multiply P by e in group G1 */
     PAIR4.G1mul = function(P, e) {
-        var R, Q, q, bcru, cru, t, u, np, nn;
-
+        var R, Q, q, bcru, cru, t, u, np, nn, ee;
+        q = new ctx.BIG(0);
+        q.rcopy(ctx.ROM_CURVE.CURVE_Order);
+        ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
         if (ctx.ROM_CURVE.USE_GLV) {
             R = new ctx.ECP();
             R.copy(P);
             Q = new ctx.ECP();
             Q.copy(P); Q.affine();
-            q = new ctx.BIG(0);
-            q.rcopy(ctx.ROM_CURVE.CURVE_Order);
+
             bcru = new ctx.BIG(0);
             bcru.rcopy(ctx.ROM_FIELD.CRu);
             cru = new ctx.FP(bcru);
             t = new ctx.BIG(0);
-            u = PAIR4.glv(e);
+            u = PAIR4.glv(ee);
 
             Q.getx().mul(cru);
 
@@ -668,7 +667,7 @@ var PAIR4 = function(ctx) {
             u[1].norm();
             R = R.mul2(u[0], Q, u[1]);
         } else {
-            R = P.mul(e);
+            R = P.clmul(ee,q);
         }
 
         return R;
@@ -676,16 +675,15 @@ var PAIR4 = function(ctx) {
 
     /* Multiply P by e in group G2 */
     PAIR4.G2mul = function(P, e) {
-        var R, Q, F, q, u, t, i, np, nn;
-
+        var R, Q, F, q, u, t, i, np, nn, ee;
+        q = new ctx.BIG(0);
+        q.rcopy(ctx.ROM_CURVE.CURVE_Order);
+        ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
         if (ctx.ROM_CURVE.USE_GS_G2) {
             Q = [];
             F = ctx.ECP4.frob_constants();
 
-            q = new ctx.BIG(0);
-            q.rcopy(ctx.ROM_CURVE.CURVE_Order);
-
-            u = PAIR4.gs(e);
+            u = PAIR4.gs(ee);
             t = new ctx.BIG(0);
           
             Q[0] = new ctx.ECP4();
@@ -711,15 +709,17 @@ var PAIR4 = function(ctx) {
 
             R = ctx.ECP4.mul8(Q, u);
         } else {
-            R = P.mul(e);
+            R = P.mul(ee);
         }
         return R;
     };
 
     /* Note that this method requires a lot of RAM */
     PAIR4.GTpow = function(d, e) {
-        var r, g, fa, fb, f, q, t, u, i, np, nn;
-
+        var r, g, fa, fb, f, q, t, u, i, np, nn, ee;
+        q = new ctx.BIG(0);
+        q.rcopy(ctx.ROM_CURVE.CURVE_Order);
+        ee = new ctx.BIG(0); ee.copy(e); ee.mod(q);
         if (ctx.ROM_CURVE.USE_GS_GT) {
             g = [];
             fa = new ctx.BIG(0);
@@ -727,10 +727,8 @@ var PAIR4 = function(ctx) {
             fb = new ctx.BIG(0);
             fb.rcopy(ctx.ROM_FIELD.Frb);
             f = new ctx.FP2(fa, fb);
-            q = new ctx.BIG(0);
-            q.rcopy(ctx.ROM_CURVE.CURVE_Order);
             t = new ctx.BIG(0);
-            u = PAIR4.gs(e);
+            u = PAIR4.gs(ee);
 
             g[0] = new ctx.FP24(d);
 
@@ -754,7 +752,7 @@ var PAIR4 = function(ctx) {
 
             r = ctx.FP24.pow8(g, u);
         } else {
-            r = d.pow(e);
+            r = d.pow(ee);
         }
 
         return r;
@@ -766,7 +764,7 @@ var PAIR4 = function(ctx) {
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         if (P.is_infinity()) return false;
-        var W=PAIR4.G1mul(P,q);
+        var W=P.mul(q);
         if (!W.is_infinity()) return false;
         return true;
     }
@@ -776,7 +774,7 @@ var PAIR4 = function(ctx) {
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         if (P.is_infinity()) return false;
-        var W=PAIR4.G2mul(P,q);
+        var W=P.mul(q);
         if (!W.is_infinity()) return false;
         return true;
     }

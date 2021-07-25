@@ -847,13 +847,20 @@ public struct ECP {
         }
     }
 
-    /* return e.self */
-
     public func mul(_ e:BIG) -> ECP
+    {
+        return clmul(e,e)
+    }
+
+    /* return e*self */
+    public func clmul(_ e:BIG,_ maxe: BIG) -> ECP
     {
         if (e.iszilch() || is_infinity()) {return ECP()}
 
         var P=ECP()
+        var cm=BIG(e); cm.or(maxe);
+        let max=cm.nbits()
+       
         if CONFIG_CURVE.CURVETYPE == CONFIG_CURVE.MONTGOMERY
         {
             /* use Ladder */
@@ -862,7 +869,7 @@ public struct ECP {
             var R1=ECP(); R1.copy(self)
             R1.dbl()
             D.copy(self); D.affine()
-            let nb=e.nbits()
+            let nb=max
 
             for i in (0...nb-2).reversed()
             {
@@ -910,7 +917,7 @@ public struct ECP {
             Q.cmove(self,ns);
             C.copy(Q);
 
-            let nb=1+(t.nbits()+3)/4;
+            let nb=1+(max+3)/4;
 
     // convert exponent to signed 4-bit window
             for i in 0 ..< nb

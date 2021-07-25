@@ -616,14 +616,13 @@ func Fexp(m *FP24) *FP24 {
 }
 
 /* GLV method */
-func glv(e *BIG) []*BIG {
+func glv(ee *BIG) []*BIG {
 	var u []*BIG
 
 	q := NewBIGints(CURVE_Order)
 	x := NewBIGints(CURVE_Bnx)
 	x2 := smul(x, x)
 	x = smul(x2, x2)
-	ee := NewBIGcopy(e); ee.Mod(q)
 	bd := uint(q.nbits()-x.nbits())
 	u = append(u, NewBIGcopy(ee))
 	u[0].ctmod(x,bd)
@@ -634,12 +633,11 @@ func glv(e *BIG) []*BIG {
 }
 
 /* Galbraith & Scott Method */
-func gs(e *BIG) []*BIG {
+func gs(ee *BIG) []*BIG {
 	var u []*BIG
 
 	q := NewBIGints(CURVE_Order)
 	x := NewBIGints(CURVE_Bnx)
-	ee := NewBIGcopy(e); ee.Mod(q)
 	bd := uint(q.nbits()-x.nbits())
 	w := NewBIGcopy(ee)
 	for i := 0; i < 7; i++ {
@@ -662,16 +660,18 @@ func gs(e *BIG) []*BIG {
 /* Multiply P by e in group G1 */
 func G1mul(P *ECP, e *BIG) *ECP {
 	var R *ECP
+	q := NewBIGints(CURVE_Order)
+	ee:= NewBIGcopy(e); ee.Mod(q)
 	if USE_GLV {
 		R = NewECP()
 		R.Copy(P)
 		Q := NewECP()
 		Q.Copy(P)
 		Q.Affine()
-		q := NewBIGints(CURVE_Order)
+
 		cru := NewFPbig(NewBIGints(CRu))
 		t := NewBIGint(0)
-		u := glv(e)
+		u := glv(ee)
 		Q.getx().mul(cru)
 
 		np := u[0].nbits()
@@ -694,7 +694,7 @@ func G1mul(P *ECP, e *BIG) *ECP {
 		R = R.Mul2(u[0], Q, u[1])
 
 	} else {
-		R = P.mul(e)
+		R = P.clmul(ee,q)
 	}
 	return R
 }
@@ -702,13 +702,13 @@ func G1mul(P *ECP, e *BIG) *ECP {
 /* Multiply P by e in group G2 */
 func G2mul(P *ECP4, e *BIG) *ECP4 {
 	var R *ECP4
+	q := NewBIGints(CURVE_Order)
+	ee:= NewBIGcopy(e); ee.Mod(q)
 	if USE_GS_G2 {
 		var Q []*ECP4
 
 		F := ECP4_frob_constants()
-
-		q := NewBIGints(CURVE_Order)
-		u := gs(e)
+		u := gs(ee)
 
 		t := NewBIGint(0)
 
@@ -733,7 +733,7 @@ func G2mul(P *ECP4, e *BIG) *ECP4 {
 		R = mul8(Q, u)
 
 	} else {
-		R = P.mul(e)
+		R = P.mul(ee)
 	}
 	return R
 }
@@ -742,13 +742,14 @@ func G2mul(P *ECP4, e *BIG) *ECP4 {
 /* Note that this method requires a lot of RAM!  */
 func GTpow(d *FP24, e *BIG) *FP24 {
 	var r *FP24
+	q := NewBIGints(CURVE_Order)
+	ee:= NewBIGcopy(e); ee.Mod(q)
 	if USE_GS_GT {
 		var g []*FP24
 		f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
-		q := NewBIGints(CURVE_Order)
 		t := NewBIGint(0)
 
-		u := gs(e)
+		u := gs(ee)
 
 		g = append(g, NewFP24copy(d))
 		for i := 1; i < 8; i++ {
@@ -768,7 +769,7 @@ func GTpow(d *FP24, e *BIG) *FP24 {
 		}
 		r = pow8(g, u)
 	} else {
-		r = d.Pow(e)
+		r = d.Pow(ee)
 	}
 	return r
 }
@@ -777,7 +778,7 @@ func GTpow(d *FP24, e *BIG) *FP24 {
 	func G1member(P *ECP) bool {
 		q := NewBIGints(CURVE_Order)
 		if P.Is_infinity() {return false}
-		W:=G1mul(P,q)
+		W:=P.mul(q)
 		if !W.Is_infinity() {return false}
 		return true
 	}
@@ -786,7 +787,7 @@ func GTpow(d *FP24, e *BIG) *FP24 {
 	func G2member(P *ECP4) bool {
 		q := NewBIGints(CURVE_Order)
 		if P.Is_infinity() {return false}
-		W:=G2mul(P,q)
+		W:=P.mul(q)
 		if !W.Is_infinity() {return false}
 		return true
 	}

@@ -726,14 +726,13 @@ public final class PAIR {
     }
 
     /* GLV method */
-    public static BIG[] glv(BIG e) {
+    public static BIG[] glv(BIG ee) {
         BIG[] u = new BIG[2];
+        BIG q = new BIG(ROM.CURVE_Order);
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
 /* PFBNS
             int i, j;
             BIG t = new BIG(0);
-            BIG q = new BIG(ROM.CURVE_Order);
-            BIG ee = new BIG(e); ee.mod(q);
             BIG[] v = new BIG[2];
 
             for (i = 0; i < 2; i++) {
@@ -754,10 +753,8 @@ public final class PAIR {
 PFBNF */
         } else {
             // -(x^2).P = (Beta.x,y)
-            BIG q = new BIG(ROM.CURVE_Order);
             BIG x = new BIG(ROM.CURVE_Bnx);
             BIG x2 = BIG.smul(x, x);
-            BIG ee = new BIG(e); ee.mod(q);
             int bd=q.nbits()-x2.nbits();
             u[0] = new BIG(ee);
             u[0].ctmod(x2,bd);
@@ -769,14 +766,13 @@ PFBNF */
     }
 
     /* Galbraith & Scott Method */
-    public static BIG[] gs(BIG e) {
+    public static BIG[] gs(BIG ee) {
         BIG[] u = new BIG[4];
+        BIG q = new BIG(ROM.CURVE_Order);
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
 /* PFBNS
             int i, j;
             BIG t = new BIG(0);
-            BIG q = new BIG(ROM.CURVE_Order);
-            BIG ee = new BIG(e); ee.mod(q);
 
             BIG[] v = new BIG[4];
             for (i = 0; i < 4; i++) {
@@ -796,11 +792,8 @@ PFBNF */
                 }
 PFBNF */
         } else {
-            BIG q = new BIG(ROM.CURVE_Order);
             BIG x = new BIG(ROM.CURVE_Bnx);
-            BIG ee = new BIG(e); ee.mod(q);
             int bd=q.nbits()-x.nbits();
-
             BIG w = new BIG(ee);
             for (int i = 0; i < 3; i++) {
                 u[i] = new BIG(w);
@@ -819,6 +812,8 @@ PFBNF */
     /* Multiply P by e in group G1 */
     public static ECP G1mul(ECP P, BIG e) {
         ECP R;
+        BIG q = new BIG(ROM.CURVE_Order);
+        BIG ee = new BIG(e); ee.mod(q);
         if (CONFIG_CURVE.USE_GLV) {
             //P.affine();
             R = new ECP();
@@ -826,10 +821,10 @@ PFBNF */
             int i, np, nn;
             ECP Q = new ECP();
             Q.copy(P); Q.affine();
-            BIG q = new BIG(ROM.CURVE_Order);
+
             FP cru = new FP(new BIG(ROM.CRu));
             BIG t = new BIG(0);
-            BIG[] u = glv(e);
+            BIG[] u = glv(ee);
             Q.getx().mul(cru);
 
             np = u[0].nbits();
@@ -852,7 +847,7 @@ PFBNF */
             R = R.mul2(u[0], Q, u[1]);
  //           R.affine();
         } else {
-            R = P.mul(e);
+            R = P.clmul(ee,q);
         }
 
         return R;
@@ -861,6 +856,8 @@ PFBNF */
     /* Multiply P by e in group G2 */
     public static ECP2 G2mul(ECP2 P, BIG e) {
         ECP2 R;
+        BIG q = new BIG(ROM.CURVE_Order);
+        BIG ee = new BIG(e); ee.mod(q);
         if (CONFIG_CURVE.USE_GS_G2) {
             ECP2[] Q = new ECP2[4];
             FP2 f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
@@ -870,8 +867,7 @@ PFBNF */
                 f.norm();
             }
 
-            BIG q = new BIG(ROM.CURVE_Order);
-            BIG[] u = gs(e);
+            BIG[] u = gs(ee);
 
             BIG t = new BIG(0);
             int i, np, nn;
@@ -894,7 +890,7 @@ PFBNF */
 
             R = ECP2.mul4(Q, u);
         } else {
-            R = P.mul(e);
+            R = P.mul(ee);
         }
         return R;
     }
@@ -903,13 +899,14 @@ PFBNF */
     /* Note that this method requires a lot of RAM! Better to use compressed XTR method, see FP4.java */
     public static FP12 GTpow(FP12 d, BIG e) {
         FP12 r;
+        BIG q = new BIG(ROM.CURVE_Order);
+        BIG ee = new BIG(e); ee.mod(q);
         if (CONFIG_CURVE.USE_GS_GT) {
             FP12[] g = new FP12[4];
             FP2 f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
-            BIG q = new BIG(ROM.CURVE_Order);
             BIG t = new BIG(0);
             int i, np, nn;
-            BIG[] u = gs(e);
+            BIG[] u = gs(ee);
 
             g[0] = new FP12(d);
             for (i = 1; i < 4; i++) {
@@ -928,7 +925,7 @@ PFBNF */
             }
             r = FP12.pow4(g, u);
         } else {
-            r = d.pow(e);
+            r = d.pow(ee);
         }
         return r;
     }
@@ -938,7 +935,7 @@ PFBNF */
     {
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
-        ECP W=G1mul(P,q);
+        ECP W=P.mul(q);
 //        W.affine();
         if (!W.is_infinity()) return false;
         return true;
@@ -949,7 +946,7 @@ PFBNF */
     {
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
-        ECP2 W=G2mul(P,q);
+        ECP2 W=P.mul(q);
         if (!W.is_infinity()) return false;
         return true;
     }

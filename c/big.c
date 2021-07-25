@@ -1401,7 +1401,7 @@ void BIG_XXX_modmul(BIG_XXX r, BIG_XXX a1, BIG_XXX b1, BIG_XXX m)
     BIG_XXX_mod(b, m);
 
     BIG_XXX_mul(d, a, b);
-    BIG_XXX_dmod(r, d, m);
+    BIG_XXX_ctdmod(r, d, m, BIG_XXX_nbits(m));
 }
 
 /* Set a=a*a mod m */
@@ -1413,7 +1413,7 @@ void BIG_XXX_modsqr(BIG_XXX r, BIG_XXX a1, BIG_XXX m)
     BIG_XXX_copy(a, a1);
     BIG_XXX_mod(a, m);
     BIG_XXX_sqr(d, a);
-    BIG_XXX_dmod(r, d, m);
+    BIG_XXX_ctdmod(r, d, m, BIG_XXX_nbits(m));
 }
 
 /* Set r=-a mod m */
@@ -1423,8 +1423,7 @@ void BIG_XXX_modneg(BIG_XXX r, BIG_XXX a1, BIG_XXX m)
     BIG_XXX a;
     BIG_XXX_copy(a, a1);
     BIG_XXX_mod(a, m);
-    BIG_XXX_sub(r, m, a);
-    BIG_XXX_mod(r, m);
+    BIG_XXX_sub(r, m, a); BIG_XXX_norm(r);
 }
 
 /* Set r=a+b mod m */
@@ -1436,7 +1435,7 @@ void BIG_XXX_modadd(BIG_XXX r, BIG_XXX a1, BIG_XXX b1, BIG_XXX m)
     BIG_XXX_mod(a, m);
     BIG_XXX_mod(b, m);
     BIG_XXX_add(r,a,b); BIG_XXX_norm(r);
-    BIG_XXX_mod(r,m);
+    BIG_XXX_ctmod(r,m,1);
 }
 
 /* Set a=a/b mod m */
@@ -1453,7 +1452,7 @@ void BIG_XXX_moddiv(BIG_XXX r, BIG_XXX a1, BIG_XXX b1, BIG_XXX m)
     BIG_XXX_invmodp(z, b, m);
 
     BIG_XXX_mul(d, a, z);
-    BIG_XXX_dmod(r, d, m);
+    BIG_XXX_ctdmod(r, d, m, BIG_XXX_nbits(m));
 }
 
 /* Get jacobi Symbol (a/p). Returns 0, 1 or -1 */

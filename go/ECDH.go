@@ -54,20 +54,16 @@ func ECDH_KEY_PAIR_GENERATE(RNG *core.RAND, S []byte, W []byte) int {
 	var G *ECP
 
 	G = ECP_generator()
-
 	r := NewBIGints(CURVE_Order)
 
 	if RNG == nil {
 		s = FromBytes(S)
-		s.Mod(r)
 	} else {
-		s = Randtrunc(r, 16*AESKEY, RNG)
+		s = Randomnum(r, RNG)
+		s.ToBytes(S)
 	}
 
-	s.ToBytes(S)
-
-	WP := G.mul(s)
-
+	WP := G.clmul(s,r)
 	WP.ToBytes(W, false) // To use point compression on public keys, change to true
 
 	return res
@@ -123,12 +119,8 @@ func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte,typ int) int {
 	}
 
 	if res == 0 {
-		if CURVETYPE == WEIERSTRASS {
-		// if edwards or montgomery, RFC7748 multiplier should not be disturbed
-			r := NewBIGints(CURVE_Order)
-			s.Mod(r)
-		}
-		W = W.mul(s)
+		r := NewBIGints(CURVE_Order)
+		W = W.clmul(s,r)
 		if W.Is_infinity() {
 			res = ERROR
 		} else {
@@ -159,7 +151,6 @@ func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []b
 	G := ECP_generator()
 
 	r := NewBIGints(CURVE_Order)
-
 	s := FromBytes(S)
 	f := FromBytes(B[:])
 
@@ -169,9 +160,10 @@ func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []b
 
 	for d.iszilch() {
 		u := Randomnum(r, RNG)
-		w := Randomnum(r, RNG) /* side channel masking */
+		w := Randomnum(r, RNG) /* IMPORTANT - side channel masking to protect invmodp() */
+
 		V.Copy(G)
-		V = V.mul(u)
+		V = V.clmul(u,r)
 		vx := V.GetX()
 		c.copy(vx)
 		c.Mod(r)
@@ -181,7 +173,7 @@ func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []b
 		u.copy(Modmul(u, w, r))
 		u.Invmodp(r)
 		d.copy(Modmul(s, c, r))
-		d.add(f)
+		d.copy(Modadd(d, f, r))
 		d.copy(Modmul(d, w, r))
 		d.copy(Modmul(u, d, r))
 	}

@@ -585,13 +585,13 @@ public struct PAIR4 {
     }
 
     // GLV method
-    static func glv(_ e:BIG) -> [BIG]
+    static func glv(_ ee:BIG) -> [BIG]
     {
         var u=[BIG]();
         let q=BIG(ROM.CURVE_Order)
         var x=BIG(ROM.CURVE_Bnx)
         let x2=BIG.smul(x,x)
-        var ee=BIG(e); ee.mod(q)
+
         x.copy(BIG.smul(x2,x2))
         let bd=UInt(q.nbits()-x.nbits())
         u.append(BIG(ee))
@@ -604,12 +604,12 @@ public struct PAIR4 {
     }
 
     // Galbraith & Scott Method
-    static func gs(_ e:BIG) -> [BIG]
+    static func gs(_ ee:BIG) -> [BIG]
     {
         var u=[BIG]();
         let q=BIG(ROM.CURVE_Order)        
         let x=BIG(ROM.CURVE_Bnx)
-        var ee=BIG(e); ee.mod(q)
+ 
         let bd=UInt(q.nbits()-x.nbits())
         var w=BIG(ee)
         for i in 0 ..< 7
@@ -634,16 +634,18 @@ public struct PAIR4 {
     static public func G1mul(_ P:ECP,_ e:BIG) -> ECP
     {
         var R:ECP
+        let q=BIG(ROM.CURVE_Order)
+        var ee=BIG(e); ee.mod(q)
         if (CONFIG_CURVE.USE_GLV)
         {
             R=ECP()
             R.copy(P)
             var Q=ECP()
             Q.copy(P); Q.affine()
-            let q=BIG(ROM.CURVE_Order)
+
             let cru=FP(BIG(ROM.CRu))
             var t=BIG(0)
-            var u=PAIR4.glv(e)
+            var u=PAIR4.glv(ee)
             Q.mulx(cru);            
     
             var np=u[0].nbits()
@@ -669,7 +671,7 @@ public struct PAIR4 {
         }
         else
         {
-            R=P.mul(e)
+            R=P.clmul(ee,q)
         }
         return R
     }
@@ -678,12 +680,14 @@ public struct PAIR4 {
     static public func G2mul(_ P:ECP4,_ e:BIG) -> ECP4
     {
         var R:ECP4
+        let q=BIG(ROM.CURVE_Order)
+        var ee=BIG(e); ee.mod(q)
         if (CONFIG_CURVE.USE_GS_G2)
         {
             var Q=[ECP4]()
             let F=ECP4.frob_constants()
-            let q=BIG(ROM.CURVE_Order);
-            var u=PAIR4.gs(e);
+
+            var u=PAIR4.gs(ee);
     
             var t=BIG(0)
             Q.append(ECP4())
@@ -710,7 +714,7 @@ public struct PAIR4 {
         }
         else
         {
-            R=P.mul(e)
+            R=P.mul(ee)
         }
         return R;
     }
@@ -720,14 +724,15 @@ public struct PAIR4 {
     static public func GTpow(_ d:FP24,_ e:BIG) -> FP24
     {
         var r:FP24
+        let q=BIG(ROM.CURVE_Order)
+        var ee=BIG(e); ee.mod(q)
         if (CONFIG_CURVE.USE_GS_GT)
         {
             var g=[FP24]()
             let f=FP2(BIG(ROM.Fra),BIG(ROM.Frb))
-            let q=BIG(ROM.CURVE_Order)
             var t=BIG(0)
         
-            var u=gs(e)
+            var u=gs(ee)
             g.append(FP24())
             g[0].copy(d);
             for i in 1 ..< 8
@@ -751,7 +756,7 @@ public struct PAIR4 {
         }
         else
         {
-            r=d.pow(e)
+            r=d.pow(ee)
         }
         return r
     }
@@ -761,7 +766,7 @@ public struct PAIR4 {
     {
         let q=BIG(ROM.CURVE_Order)
         if P.is_infinity() {return false}
-        let W=G1mul(P,q)
+        let W=P.mul(q)
         if !W.is_infinity() {return false}
         return true
     }
@@ -770,7 +775,7 @@ public struct PAIR4 {
     {
         let q=BIG(ROM.CURVE_Order)
         if P.is_infinity() {return false}
-        let W=G2mul(P,q)
+        let W=P.mul(q)
         if !W.is_infinity() {return false}
         return true
     }

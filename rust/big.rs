@@ -994,7 +994,7 @@ impl BIG {
         a.rmod(m);
         b.rmod(m);
         let mut d = BIG::mul(&a, &b);
-        d.dmod(m)
+        d.ctdmod(m,m.nbits())
     }
 
     /* return a^2 mod m */
@@ -1002,7 +1002,7 @@ impl BIG {
         let mut a = BIG::new_copy(a1);
         a.rmod(m);
         let mut d = BIG::sqr(&a);
-        d.dmod(m)
+        d.ctdmod(m,m.nbits())
     }
 
     /* return -a mod m */
@@ -1010,7 +1010,7 @@ impl BIG {
         let mut a = BIG::new_copy(a1);
         a.rmod(m);
 	    a.rsub(m);
-	    a.rmod(m);
+	    a.norm();
         a
     }
 
@@ -1021,7 +1021,7 @@ impl BIG {
         a.rmod(m);
         b.rmod(m);
         a.add(&b); a.norm();
-        a.rmod(m);
+        a.ctmod(m,1);
         a
     }
 

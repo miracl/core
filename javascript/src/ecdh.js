@@ -93,15 +93,12 @@ var ECDH = function(ctx) {
 
             if (RNG === null) {
                 s = ctx.BIG.fromBytes(S);
-                s.mod(r);
             } else {
-                s = ctx.BIG.randtrunc(r, 16 * ctx.ECP.AESKEY, RNG);
-
+                s = ctx.BIG.randomnum(r, RNG);
+                s.toBytes(S);
             }
 
-            s.toBytes(S);
-
-            WP = G.mul(s);
+            WP = G.clmul(s,r);
             WP.toBytes(W, false); // To use point compression on public keys, change to true 
 
             return res;
@@ -144,7 +141,10 @@ var ECDH = function(ctx) {
 
             return res;
         },
-
+    /* IEEE-1363 Diffie-Hellman online calculation Z=S.WD */
+    // type = 0 is just x coordinate output
+    // type = 1 for standard compressed output
+    // type = 2 for standard uncompress output 04|x|y
         ECPSVDP_DH: function(S, WD, Z, type) {
             var res = 0,
                 r, s, i,
@@ -158,13 +158,9 @@ var ECDH = function(ctx) {
             }
 
             if (res === 0) {
-                if (ctx.ECP.CURVETYPE == ctx.ECP.WEIERSTRASS)
-                { // if edwards or montgomery, RFC7748 multiplier should not be disturbed
-                    r = new ctx.BIG(0);
-                    r.rcopy(ctx.ROM_CURVE.CURVE_Order);
-                    s.mod(r);
-                }
-                W = W.mul(s);
+                r = new ctx.BIG(0);
+                r.rcopy(ctx.ROM_CURVE.CURVE_Order);
+                W = W.clmul(s,r);
 
                 if (W.is_infinity()) {
                     res = this.ERROR;
@@ -188,7 +184,7 @@ var ECDH = function(ctx) {
             }
             return res;
         },
-
+    /* IEEE ECDSA Signature, C and D are signature on F using private key S */
         ECPSP_DSA: function(sha, RNG, S, F, C, D) {
             var T = [],
                 i, r, s, f, c, d, u, vx, w,
@@ -210,9 +206,10 @@ var ECDH = function(ctx) {
 
             do {
                 u = ctx.BIG.randomnum(r, RNG);
-                w = ctx.BIG.randomnum(r, RNG); /* side channel masking */
+                w = ctx.BIG.randomnum(r, RNG); /* IMPORTANT - side channel masking to protect invmodp() */
+ 
                 V.copy(G);
-                V = V.mul(u);
+                V = V.clmul(u,r);
                 vx = V.getX();
                 c.copy(vx);
                 c.mod(r);
@@ -222,7 +219,7 @@ var ECDH = function(ctx) {
                 u = ctx.BIG.modmul(u, w, r);
                 u.invmodp(r);
                 d = ctx.BIG.modmul(s, c, r);
-                d.add(f);
+                d = ctx.BIG.modadd(d, f, r);
                 d = ctx.BIG.modmul(d, w, r);
                 d = ctx.BIG.modmul(u, d, r);
             } while (d.iszilch());
@@ -239,6 +236,7 @@ var ECDH = function(ctx) {
             return 0;
         },
 
+    /* IEEE1363 ECDSA Signature Verification. Signature C and D on F is verified using public key W */
         ECPVP_DSA: function(sha, W, F, C, D) {
             var B = [],
                 res = 0,

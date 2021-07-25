@@ -61,14 +61,12 @@ public final class ECDH {
 
         if (RNG == null) {
             s = BIG.fromBytes(S);
-            s.mod(r);
         } else {
-            s = BIG.randtrunc(r, 16 * CONFIG_CURVE.AESKEY, RNG);
+            s = BIG.randomnum(r, RNG);
+            s.toBytes(S);
         }
 
-        s.toBytes(S);
-
-        WP = G.mul(s);
+        WP = G.clmul(s,r);
         WP.toBytes(W, false); // To use point compression on public keys, change to true
 
         return res;
@@ -116,12 +114,8 @@ public final class ECDH {
         if (W.is_infinity()) res = ERROR;
 
         if (res == 0) {
-            if (CONFIG_CURVE.CURVETYPE==CONFIG_CURVE.WEIERSTRASS)
-            { // if edwards or montgomery, RFC7748 multiplier should not be disturbed
-                r = new BIG(ROM.CURVE_Order);
-                s.mod(r);
-            }
-            W = W.mul(s);
+            r = new BIG(ROM.CURVE_Order);
+            W = W.clmul(s,r);
             if (W.is_infinity()) res = ERROR;
             else {
 		        if (CONFIG_CURVE.CURVETYPE!=CONFIG_CURVE.MONTGOMERY)
@@ -148,6 +142,7 @@ public final class ECDH {
         byte[] T = new byte[EFS];
         BIG r, s, f, c, d, u, vx, w;
         ECP G, V;
+
         byte[] B = HMAC.GPhashit(HMAC.MC_SHA2, sha, CONFIG_BIG.MODBYTES, 0,F, -1, null );
 
         G = ECP.generator();
@@ -162,10 +157,10 @@ public final class ECDH {
 
         do {
             u = BIG.randomnum(r, RNG);
-            w = BIG.randomnum(r, RNG); /* side channel masking */
+            w = BIG.randomnum(r, RNG); /* IMPORTANT - side channel masking to protect invmodp() */
 
             V.copy(G);
-            V = V.mul(u);
+            V = V.clmul(u,r);
             vx = V.getX();
             c.copy(vx);
             c.mod(r);
@@ -175,10 +170,9 @@ public final class ECDH {
 
             u.invmodp(r);
             d.copy(BIG.modmul(s, c, r));
-            d.add(f);
+            d.copy(BIG.modadd(d, f, r));
 
             d.copy(BIG.modmul(d, w, r));
-
             d.copy(BIG.modmul(u, d, r));
         } while (d.iszilch());
 

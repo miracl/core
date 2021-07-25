@@ -991,17 +991,21 @@ var ECP = function(ctx) {
             this.copy(this.mul(c));
         },
 
+        mul: function(e) {
+            return this.clmul(e,e);
+        },
 
         /* return e.this - SPA immune, using Ladder */
-        mul: function(e) {
+        clmul: function(e,maxe) {
             var P, D, R0, R1, mt, t, Q, C, W, w,
-                i, b, nb, s, ns;
+                i, b, nb, s, ns, max, cm;
 
             if (e.iszilch() || this.is_infinity()) {
                 return new ECP();
             }
-
             P = new ECP();
+            cm =new ctx.BIG(); cm.copy(e); cm.or(maxe);
+            max=cm.nbits();
 
             if (ECP.CURVETYPE == ECP.MONTGOMERY) { /* use ladder */
                 D = new ECP();
@@ -1011,7 +1015,7 @@ var ECP = function(ctx) {
                 R1.copy(this);
                 R1.dbl();
                 D.copy(this); D.affine();
-                nb = e.nbits();
+                nb = max;
                 for (i = nb - 2; i >= 0; i--) {
                     b = e.bit(i);
                     P.copy(R1);
@@ -1057,7 +1061,7 @@ var ECP = function(ctx) {
                 Q.cmove(this, ns);
                 C.copy(Q);
 
-                nb = 1 + Math.floor((t.nbits() + 3) / 4);
+                nb = 1 + Math.floor((max + 3) / 4);
 
                 // convert exponent to signed 4-bit window
                 for (i = 0; i < nb; i++) {

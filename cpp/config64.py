@@ -310,7 +310,7 @@ def rsaset(tb,tff,base,ml) :
 # if pairing friendly. M or D type twist, and sign of the family parameter x
 # g2_table size is number of entries in precomputed table
 # ate bits is number of bits in Ate parameter (from romgen program)
-# curve security is AES equiavlent, rounded up.
+# curve security is AES equivalent, rounded up.
 
 def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 

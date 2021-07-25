@@ -29,7 +29,6 @@
 using namespace XXX;
 using namespace YYY;
 
-
 /* return 1 if S is in ranger 0 < S < order , else return 0 */
 int ZZZ::ECP_IN_RANGE(octet* S)
 {
@@ -57,18 +56,16 @@ int ZZZ::ECP_KEY_PAIR_GENERATE(csprng *RNG, octet* S, octet *W)
 
     if (RNG != NULL)
     {
-        BIG_randtrunc(s, r, 2 * CURVE_SECURITY_ZZZ, RNG);
+        BIG_randomnum(s, r, RNG);
+        S->len = EGS_ZZZ;
+        BIG_toBytes(S->val, s);
     }
     else
     {
         BIG_fromBytes(s, S->val);
-        BIG_mod(s, r);
     }
 
-    S->len = EGS_ZZZ;
-    BIG_toBytes(S->val, s);
-
-    ECP_mul(&G, s);
+    ECP_clmul(&G, s, r);
     ECP_toOctet(W, &G, false);  // To use point compression on public keys, change to true
 
     return res;
@@ -121,18 +118,13 @@ int ZZZ::ECP_SVDP_DH(octet *S, octet *WD, octet *Z,int type)
     int res = 0;
 
     BIG_fromBytes(s, S->val);
-
     valid = ECP_fromOctet(&W, WD);
 
     if (!valid) res = ECDH_ERROR;
     if (res == 0)
     {
-#if CURVETYPE_ZZZ==WEIERSTRASS
-// if edwards or montgomery, RFC7748 multiplier should not be disturbed
         BIG_rcopy(r, CURVE_Order);
-        BIG_mod(s, r);
-#endif
-        ECP_mul(&W, s);
+        ECP_clmul(&W, s, r);
         if (ECP_isinf(&W)) res = ECDH_ERROR;
         else
         {
@@ -169,7 +161,6 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
     SPhash(MC_SHA2, hlen, &H, F);
 
     ECP_generator(&G);
-
     BIG_rcopy(r, CURVE_Order);
 
     BIG_fromBytes(s, S->val);
@@ -178,7 +169,6 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
     if (H.len > MODBYTES_XXX) blen = MODBYTES_XXX;
     BIG_fromBytesLen(f, H.val, blen);
 
-
     if (RNG != NULL)
     {
         do
@@ -186,11 +176,10 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
             BIG_randomnum(u, r, RNG);
             BIG_randomnum(w, r, RNG); /* IMPORTANT - side channel masking to protect invmodp() */
 
-#ifdef AES_S
-            BIG_mod2m(u, 2 * AES_S);
-#endif
+            // possible optimization for some curves
+
             ECP_copy(&V, &G);
-            ECP_mul(&V, u);
+            ECP_clmul(&V, u, r);
 
             ECP_get(vx, vx, &V);
 
@@ -203,10 +192,8 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
             BIG_invmodp(u, u, r);
             BIG_modmul(d, s, c, r);
 
-            BIG_add(d, f, d);
-
+            BIG_modadd(d, f, d, r);
             BIG_modmul(d, d, w, r);
-
             BIG_modmul(d, u, d, r);
 
         }
@@ -215,13 +202,9 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
     else
     {
         BIG_fromBytes(u, K->val);
-        BIG_mod(u, r);
 
-#ifdef AES_S
-        BIG_mod2m(u, 2 * AES_S);
-#endif
         ECP_copy(&V, &G);
-        ECP_mul(&V, u);
+        ECP_clmul(&V, u, r);
 
         ECP_get(vx, vx, &V);
 
@@ -232,8 +215,7 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
         BIG_invmodp(u, u, r);
         BIG_modmul(d, s, c, r);
 
-        BIG_add(d, f, d);
-
+        BIG_modadd(d, f, d, r);
         BIG_modmul(d, u, d, r);
         if (BIG_iszilch(d)) return ECDH_ERROR;
 

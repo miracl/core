@@ -728,14 +728,13 @@ void ZZZ::PAIR_fexp(FP48 *r)
 
 #ifdef USE_GLV_ZZZ
 /* GLV method */
-static void ZZZ::glv(BIG u[2], BIG e)
+static void ZZZ::glv(BIG u[2], BIG ee)
 {
 
     int bd;
-    BIG ee,q,x,x2;
-    BIG_copy(ee,e);
+    BIG q,x,x2;
     BIG_rcopy(q, CURVE_Order);
-    BIG_mod(ee,q);
+
 // -(x^8).P = (Beta.x,y)
 
     BIG_rcopy(x, CURVE_Bnx);
@@ -746,10 +745,8 @@ static void ZZZ::glv(BIG u[2], BIG e)
     bd=BIG_nbits(q)-BIG_nbits(x2); // fixed x^8
 
     BIG_copy(u[0], ee);
-    //BIG_mod(u[0], x2);
     BIG_ctmod(u[0], x2, bd);
     BIG_copy(u[1], ee);
-    //BIG_sdiv(u[1], x2);
     BIG_ctsdiv(u[1], x2, bd);
 
     BIG_sub(u[1], q, u[1]);
@@ -759,13 +756,11 @@ static void ZZZ::glv(BIG u[2], BIG e)
 #endif // USE_GLV
 
 /* Galbraith & Scott Method */
-static void ZZZ::gs(BIG u[16], BIG e)
+static void ZZZ::gs(BIG u[16], BIG ee)
 {
     int i,bd;
-    BIG ee,q,x,w;
-    BIG_copy(ee,e);
+    BIG q,x,w;
     BIG_rcopy(q, CURVE_Order);
-    BIG_mod(ee,q);
 
     BIG_rcopy(x, CURVE_Bnx);
     BIG_copy(w, ee);
@@ -798,15 +793,18 @@ static void ZZZ::gs(BIG u[16], BIG e)
 /* Multiply P by e in group G1 */
 void ZZZ::PAIR_G1mul(ECP *P, BIG e)
 {
+    BIG ee,q;
+    BIG_copy(ee,e);
+    BIG_rcopy(q, CURVE_Order);
+    BIG_mod(ee,q);
 #ifdef USE_GLV_ZZZ   /* Note this method is patented */
     int np, nn;
     ECP Q;
     FP cru;
-    BIG t, q;
+    BIG t;
     BIG u[2];
 
-    BIG_rcopy(q, CURVE_Order);
-    glv(u, e);
+    glv(u, ee);
 
     ECP_copy(&Q, P); ECP_affine(&Q);
     FP_rcopy(&cru, CRu);
@@ -836,39 +834,39 @@ void ZZZ::PAIR_G1mul(ECP *P, BIG e)
     ECP_mul2(P, &Q, u[0], u[1]);
 
 #else
-    ECP_mul(P, e);
+    ECP_clmul(P, ee, q);
 #endif
 }
 
 /* Multiply P by e in group G2 */
 void ZZZ::PAIR_G2mul(ECP8 *P, BIG e)
 {
+    BIG ee,q;
+    BIG_copy(ee,e);
+    BIG_rcopy(q, CURVE_Order);
+    BIG_mod(ee,q);
 #ifdef USE_GS_G2_ZZZ   /* Well we didn't patent it :) */
     int i, np, nn;
     ECP8 Q[16], T;
     FP2 X[3];
-    BIG x, y, u[16], p;
+    BIG x, u[16];
 
     ECP8_frob_constants(X);
 
-    BIG_rcopy(y, CURVE_Order);
-    BIG_rcopy(p, Modulus);
-
-    gs(u, e);
+    gs(u, ee);
 
     ECP8_copy(&Q[0], P);
 
     for (i = 1; i < 16; i++)
     {
         ECP8_copy(&Q[i], &Q[i - 1]);
-        //ECP8_mul(&Q[i],p);
         ECP8_frob(&Q[i], X, 1);
     }
 
     for (i = 0; i < 16; i++)
     {
         np = BIG_nbits(u[i]);
-        BIG_modneg(x, u[i], y);
+        BIG_modneg(x, u[i], q);
         BIG_norm(x);
         nn = BIG_nbits(x);
         if (nn < np)
@@ -882,18 +880,22 @@ void ZZZ::PAIR_G2mul(ECP8 *P, BIG e)
     ECP8_mul16(P, Q, u);
 
 #else
-    ECP8_mul(P, e);
+    ECP8_mul(P, ee);
 #endif
 }
 
 /* f=f^e */
 void ZZZ::PAIR_GTpow(FP48 *f, BIG e)
 {
+    BIG ee,q;
+    BIG_copy(ee,e);
+    BIG_rcopy(q, CURVE_Order);
+    BIG_mod(ee,q);
 #ifdef USE_GS_GT_ZZZ   /* Note that this option requires a lot of RAM! Maybe better to use compressed XTR method, see FP16.cpp */
     int i, np, nn;
     FP48 g[16];
     FP2 X;
-    BIG t, q;
+    BIG t;
     FP fx, fy;
     BIG u[16];
 
@@ -901,8 +903,7 @@ void ZZZ::PAIR_GTpow(FP48 *f, BIG e)
     FP_rcopy(&fy, Frb);
     FP2_from_FPs(&X, &fx, &fy);
 
-    BIG_rcopy(q, CURVE_Order);
-    gs(u, e);
+    gs(u, ee);
 
     FP48_copy(&g[0], f);
     for (i = 1; i < 16; i++)
@@ -926,7 +927,7 @@ void ZZZ::PAIR_GTpow(FP48 *f, BIG e)
     FP48_pow16(f, g, u);
 
 #else
-    FP48_pow(f, f, e);
+    FP48_pow(f, f, ee);
 #endif
 }
 
@@ -939,7 +940,7 @@ int ZZZ::PAIR_G1member(ECP *P)
     if (ECP_isinf(P)) return 0;
     BIG_rcopy(q, CURVE_Order);
 	ECP_copy(&W,P);
-	PAIR_G1mul(&W,q);
+	ECP_mul(&W,q);
 	if (!ECP_isinf(&W)) return 0;
 	return 1;
 }
@@ -953,7 +954,7 @@ int ZZZ::PAIR_G2member(ECP8 *P)
     if (ECP8_isinf(P)) return 0;
     BIG_rcopy(q, CURVE_Order);
 	ECP8_copy(&W,P);
-	PAIR_G2mul(&W,q);
+	ECP8_mul(&W,q);
 	if (!ECP8_isinf(&W)) return 0;
 	return 1;
 }

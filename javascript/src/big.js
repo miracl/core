@@ -1116,7 +1116,7 @@ BIG = function(ctx) {
         b.mod(m);
         d = BIG.mul(a, b);
 
-        return d.mod(m);
+        return d.ctmod(m,m.nbits());
     };
 
     /* return a^2 mod m */
@@ -1126,7 +1126,7 @@ BIG = function(ctx) {
         a.mod(m);
         d = BIG.sqr(a);
 
-        return d.mod(m);
+        return d.ctmod(m,m.nbits());
     };
 
     /* return -a mod m */
@@ -1134,7 +1134,7 @@ BIG = function(ctx) {
 		var a=new BIG(0); a.copy(a1);
         a.mod(m);
 		a.rsub(m);
-		a.mod(m);
+		a.norm();
 		return a;
     };
 
@@ -1145,7 +1145,7 @@ BIG = function(ctx) {
         a.mod(m);
         b.mod(m);
         a.add(b); a.norm();
-        a.mod(m);
+        a.ctmod(m,1);
         return a;
     };
 

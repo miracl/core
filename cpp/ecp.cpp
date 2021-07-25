@@ -987,10 +987,18 @@ void ZZZ::ECP_pinmul(ECP *P, int e, int bts)
 }
 #endif
 
+void ZZZ::ECP_mul(ECP *P,BIG e)
+{
+    ECP_clmul(P,e,e);
+}
+
 /* Set P=r*P */
 /* SU=424 */
-void ZZZ::ECP_mul(ECP *P, BIG e)
+void ZZZ::ECP_clmul(ECP *P, BIG e, BIG maxe)
 {
+    BIG cm;
+    BIG_or(cm,e,maxe);
+    int max=BIG_nbits(cm);
 #if CURVETYPE_ZZZ==MONTGOMERY
     /* Montgomery ladder */
     int nb, i, b;
@@ -1009,7 +1017,7 @@ void ZZZ::ECP_mul(ECP *P, BIG e)
     ECP_copy(&D, P);
     ECP_affine(&D);
 
-    nb = BIG_nbits(e);
+    nb = max;
     for (i = nb - 2; i >= 0; i--)
     {
         b = BIG_bit(e, i);
@@ -1064,8 +1072,7 @@ void ZZZ::ECP_mul(ECP *P, BIG e)
     ECP_cmove(&Q, P, ns);
     ECP_copy(&C, &Q);
 
-    nb = 1 + (BIG_nbits(t) + 3) / 4;
-
+    nb = 1 + (max + 3) / 4;
     /* convert exponent to signed 4-bit window */
     for (i = 0; i < nb; i++)
     {
@@ -1133,16 +1140,25 @@ void ZZZ::ECP_muln(ECP *P,int n,ECP X[],BIG e[])
     }
 }
 
+void ZZZ::ECP_mul2(ECP *P, ECP *Q, BIG e, BIG f)
+{
+    ECP_clmul2(P,Q,e,f,e);
+}
+
 /* Set P=eP+fQ double multiplication */
 /* constant time - as useful for GLV method in pairings */
 /* SU=456 */
 
-void ZZZ::ECP_mul2(ECP *P, ECP *Q, BIG e, BIG f)
+void ZZZ::ECP_clmul2(ECP *P, ECP *Q, BIG e, BIG f, BIG maxe)
 {
+    BIG cm;
     BIG te, tf, mt;
     ECP S, T, W[8], C;
     sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 1) / 2];
     int i, a, b, s, ns, nb;
+
+    BIG_copy(cm,maxe); BIG_or(cm,cm,e); BIG_or(cm,cm,f);
+    int max=BIG_nbits(cm);
 
     BIG_copy(te, e);
     BIG_copy(tf, f);
@@ -1193,9 +1209,9 @@ void ZZZ::ECP_mul2(ECP *P, ECP *Q, BIG e, BIG f)
     ECP_cmove(&S, Q, ns);
     ECP_add(&C, &S);
 
-    BIG_add(mt, te, tf);
-    BIG_norm(mt);
-    nb = 1 + (BIG_nbits(mt) + 1) / 2;
+    //BIG_add(mt, te, tf);
+    //BIG_norm(mt);
+    nb = 1 + (max + 1) / 2;
 
     /* convert exponent to signed 2-bit window */
     for (i = 0; i < nb; i++)

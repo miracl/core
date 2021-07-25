@@ -750,14 +750,14 @@ public struct PAIR {
     }
     
     // GLV method
-    static func glv(_ e:BIG) -> [BIG]
+    static func glv(_ ee:BIG) -> [BIG]
     {
 	var u=[BIG]();
+    let q=BIG(ROM.CURVE_Order)
 	if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
 /* PFBNS
 		var t=BIG(0)
-		let q=BIG(ROM.CURVE_Order)
-        var ee=BIG(e); ee.mod(q)
+
 		var v=[BIG]();
 		for _ in 0 ..< 2
 		{
@@ -785,10 +785,9 @@ public struct PAIR {
 		}
 PFBNF */
 	} else { // -(x^2).P = (Beta.x,y)
-		let q=BIG(ROM.CURVE_Order)
 		let x=BIG(ROM.CURVE_Bnx)
 		let x2=BIG.smul(x,x)
-        var ee=BIG(e); ee.mod(q)
+
         let bd=UInt(q.nbits()-x2.nbits())
 		u.append(BIG(ee))
 		u[0].ctmod(x2,bd)
@@ -800,14 +799,14 @@ PFBNF */
         return u
     }
     // Galbraith & Scott Method
-    static func gs(_ e:BIG) -> [BIG]
+    static func gs(_ ee:BIG) -> [BIG]
     {
         var u=[BIG]();
+		let q=BIG(ROM.CURVE_Order)
         if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
 /* PFBNS
 		  var t=BIG(0)
-		  let q=BIG(ROM.CURVE_Order)
-          var ee=BIG(e); ee.mod(q)
+
 		  var v=[BIG]();
 		  for _ in 0 ..< 4
 		  {
@@ -835,10 +834,8 @@ PFBNF */
 
 		  }
 PFBNF */
-	} else {
-            let q=BIG(ROM.CURVE_Order)        
+	} else {     
             let x=BIG(ROM.CURVE_Bnx)
-            var ee=BIG(e); ee.mod(q)
             let bd=UInt(q.nbits()-x.nbits())
 
             var w=BIG(ee)
@@ -861,16 +858,18 @@ PFBNF */
     static public func G1mul(_ P:ECP,_ e:BIG) -> ECP
     {
         var R:ECP
+        let q=BIG(ROM.CURVE_Order)
+        var ee=BIG(e); ee.mod(q)
         if (CONFIG_CURVE.USE_GLV)
         {
             R=ECP()
             R.copy(P)
             var Q=ECP()
             Q.copy(P); Q.affine()
-            let q=BIG(ROM.CURVE_Order)
+
             let cru=FP(BIG(ROM.CRu))
             var t=BIG(0)
-            var u=PAIR.glv(e)
+            var u=PAIR.glv(ee)
             Q.mulx(cru);
     
             var np=u[0].nbits()
@@ -896,7 +895,7 @@ PFBNF */
         }
         else
         {
-            R=P.mul(e)
+            R=P.clmul(ee,q)
         }
         return R
     }
@@ -905,12 +904,14 @@ PFBNF */
     static public func G2mul(_ P:ECP2,_ e:BIG) -> ECP2
     {
         var R:ECP2
+        let q=BIG(ROM.CURVE_Order)
+        var ee=BIG(e); ee.mod(q)
         if (CONFIG_CURVE.USE_GS_G2)
         {
             var Q=[ECP2]()
             var f=FP2(BIG(ROM.Fra),BIG(ROM.Frb));
-            let q=BIG(ROM.CURVE_Order);
-            var u=PAIR.gs(e);
+ 
+            var u=PAIR.gs(ee);
     
             if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {  
                 let pNIL:FP?=nil   
@@ -943,7 +944,7 @@ PFBNF */
         }
         else
         {
-            R=P.mul(e)
+            R=P.mul(ee)
         }
         return R;
     }
@@ -952,14 +953,15 @@ PFBNF */
     static public func GTpow(_ d:FP12,_ e:BIG) -> FP12
     {
         var r:FP12
+        let q=BIG(ROM.CURVE_Order)
+        var ee=BIG(e); ee.mod(q)
         if (CONFIG_CURVE.USE_GS_GT)
         {
             var g=[FP12]()
             let f=FP2(BIG(ROM.Fra),BIG(ROM.Frb))
-            let q=BIG(ROM.CURVE_Order)
             var t=BIG(0)
         
-            var u=gs(e)
+            var u=gs(ee)
             g.append(FP12())
             g[0].copy(d);
             for i in 1 ..< 4
@@ -983,7 +985,7 @@ PFBNF */
         }
         else
         {
-            r=d.pow(e)
+            r=d.pow(ee)
         }
         return r
     }
@@ -993,7 +995,7 @@ PFBNF */
     {
         let q=BIG(ROM.CURVE_Order)
         if P.is_infinity() {return false}
-        let W=G1mul(P,q)
+        let W=P.mul(q)
         if !W.is_infinity() {return false}
         return true
     }
@@ -1002,7 +1004,7 @@ PFBNF */
     {
         let q=BIG(ROM.CURVE_Order)
         if P.is_infinity() {return false}
-        let W=G2mul(P,q)
+        let W=P.mul(q)
         if !W.is_infinity() {return false}
         return true
     }

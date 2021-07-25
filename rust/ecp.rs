@@ -1043,13 +1043,19 @@ impl ECP {
         }
     }
 
-    /* return e.self */
-
     pub fn mul(&self, e: &BIG) -> ECP {
+        return self.clmul(e,e);
+    }
+
+    /* return e*self */
+    pub fn clmul(&self, e: &BIG, maxe: &BIG) -> ECP {
         if e.iszilch() || self.is_infinity() {
             return ECP::new();
         }
         let mut P = ECP::new();
+        let mut cm = BIG::new_copy(e); cm.or(maxe);
+        let max=cm.nbits();
+        
         if CURVETYPE == MONTGOMERY {
             /* use Ladder */
             let mut D = ECP::new();
@@ -1059,7 +1065,7 @@ impl ECP {
             R1.copy(&self);
             R1.dbl();
             D.copy(&self); D.affine();
-            let nb = e.nbits();
+            let nb = max;
 
             for i in (0..nb - 1).rev() {
                 let b = e.bit(i);
@@ -1116,7 +1122,7 @@ impl ECP {
             Q.cmove(&self, ns);
             C.copy(&Q);
 
-            let nb = 1 + (t.nbits() + 3) / 4;
+            let nb = 1 + (max + 3) / 4;
 
             // convert exponent to signed 4-bit window
             for i in 0..nb {

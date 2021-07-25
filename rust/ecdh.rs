@@ -56,21 +56,19 @@ pub fn in_range(s: &[u8]) -> bool {
 #[allow(non_snake_case)]
 pub fn key_pair_generate(rng: Option<&mut impl RAND>, s: &mut [u8], w: &mut [u8]) -> isize {
     let res = 0;
-    let mut sc: BIG;
+    let sc: BIG;
     let G = ECP::generator();
 
     let r = BIG::new_ints(&rom::CURVE_ORDER);
 
     if let Some(x) = rng {
-        sc = BIG::randtrunc(&r, 16 * ecp::AESKEY, x);
+        sc = BIG::randomnum(&r, x);
+        sc.tobytes(s);
     } else {
         sc = BIG::frombytes(&s);
-        sc.rmod(&r);
     }
 
-    sc.tobytes(s);
-
-    let WP = G.mul(&mut sc);
+    let WP = G.clmul(&sc,&r);
 
     WP.tobytes(w, false); // To use point compression on public keys, change to true
 
@@ -117,7 +115,7 @@ pub fn public_key_validate(w: &[u8]) -> isize {
 pub fn ecpsvdp_dh(s: &[u8], wd: &[u8], z: &mut [u8], typ: isize) -> isize {
     let mut res = 0;
 
-    let mut sc = BIG::frombytes(&s);
+    let sc = BIG::frombytes(&s);
 
     let mut W = ECP::frombytes(&wd);
     if W.is_infinity() {
@@ -125,12 +123,8 @@ pub fn ecpsvdp_dh(s: &[u8], wd: &[u8], z: &mut [u8], typ: isize) -> isize {
     }
 
     if res == 0 {
-        if ecp::CURVETYPE == ecp::WEIERSTRASS { 
-        // if edwards or montgomery, RFC7748 multiplier should not be disturbed
-            let r = BIG::new_ints(&rom::CURVE_ORDER);
-            sc.rmod(&r);
-        }
-        W = W.mul(&mut sc);
+        let r = BIG::new_ints(&rom::CURVE_ORDER);
+        W = W.clmul(&sc,&r);
         if W.is_infinity() {
             res = ERROR;
         } else {
@@ -172,7 +166,7 @@ pub fn ecpsp_dsa(
 
     let r = BIG::new_ints(&rom::CURVE_ORDER);
 
-    let mut sc = BIG::frombytes(s); /* s or &s? */
+    let sc = BIG::frombytes(s); /* s or &s? */
     let fb = BIG::frombytes(&b);
 
     let mut cb = BIG::new();
@@ -182,10 +176,10 @@ pub fn ecpsp_dsa(
 
     while db.iszilch() {
         let mut u = BIG::randomnum(&r, rng);
-        let mut w = BIG::randomnum(&r, rng); /* side channel masking */
+        let w = BIG::randomnum(&r, rng); /* IMPORTANT - side channel masking to protect invmodp() */
 
         V.copy(&G);
-        V = V.mul(&mut u);
+        V = V.clmul(&u,&r);
         let vx = V.getx();
         cb.copy(&vx);
         cb.rmod(&r);
@@ -193,17 +187,16 @@ pub fn ecpsp_dsa(
             continue;
         }
 
-        tb.copy(&BIG::modmul(&mut u, &mut w, &r));
+        tb.copy(&BIG::modmul(&u, &w, &r));
         u.copy(&tb);
 
         u.invmodp(&r);
-        db.copy(&BIG::modmul(&mut sc, &mut cb, &r));
-        db.add(&fb);
-
-        tb.copy(&BIG::modmul(&mut db, &mut w, &r));
+        db.copy(&BIG::modmul(&sc, &cb, &r));
+        db.copy(&BIG::modadd(&db, &fb, &r));
+        tb.copy(&BIG::modmul(&db, &w, &r));
         db.copy(&tb);
 
-        tb.copy(&BIG::modmul(&mut u, &mut db, &r));
+        tb.copy(&BIG::modmul(&u, &db, &r));
         db.copy(&tb);
     }
 

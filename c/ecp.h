@@ -316,7 +316,18 @@ extern void ECP_ZZZ_dbl(ECP_ZZZ *P);
 	@param b maximum number of bits in multiplier
  */
 extern void ECP_ZZZ_pinmul(ECP_ZZZ *P, int i, int b);
+
 /**	@brief Multiplies an ECP instance P by a BIG, side-channel resistant
+ *
+	Uses Montgomery ladder for Montgomery curves, otherwise fixed sized windows.
+	@param P ECP instance, on exit =b*P
+	@param e BIG number multiplier
+    @param maxe maximum e
+
+ */
+extern void ECP_ZZZ_clmul(ECP_ZZZ *P, BIG_XXX e, BIG_XXX maxe);
+
+/**	@brief Multiplies an ECP instance P by a BIG
  *
 	Uses Montgomery ladder for Montgomery curves, otherwise fixed sized windows.
 	@param P ECP instance, on exit =b*P
