@@ -1420,11 +1420,7 @@ int XXX::BIG_parity(BIG a)
 /* SU= 16 */
 int XXX::BIG_bit(BIG a, int n)
 {
-
     return (int)((a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) >> (n%BASEBITS_XXX));
-
-//    if (a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) return 1;
-//    else return 0;
 }
 
 /* return last n bits of a, where n is small < BASEBITS_XXX */

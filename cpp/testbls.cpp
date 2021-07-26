@@ -303,7 +303,6 @@ int main()
     printf("%d bit build\n", CHUNK);
 
     printf("\nTesting BLS signature for curve BN254\n");
-
     bls_BN254(&RNG);
 
 #if CHUNK!=16

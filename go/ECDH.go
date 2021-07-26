@@ -30,6 +30,23 @@ const ERROR int = -3
 const EFS int = int(MODBYTES)
 const EGS int = int(MODBYTES)
 
+// Transform a point multiplier to RFC7748 form
+func RFC7748(r *BIG) {
+    lg:=0
+    t:=NewBIGint(1)
+    c:=CURVE_Cof_I
+    for c!=1 {
+        lg++
+        c/=2
+    }
+    n:=uint(8*EGS-lg+1)
+    r.mod2m(n)
+    t.shl(n)
+    r.add(t)
+    c=r.lastbits(lg)
+    r.dec(c)
+}
+
 /* return true if S is in ranger 0 < S < order , else return false */
 func ECDH_IN_RANGE(S []byte) bool {
 	r := NewBIGints(CURVE_Order)
@@ -59,10 +76,18 @@ func ECDH_KEY_PAIR_GENERATE(RNG *core.RAND, S []byte, W []byte) int {
 	if RNG == nil {
 		s = FromBytes(S)
 	} else {
-		s = Randomnum(r, RNG)
-		s.ToBytes(S)
+		if CURVETYPE != WEIERSTRASS {
+			s = Random(RNG)				// from random bytes
+		} else {
+			s = Randomnum(r, RNG)		// Removes biases
+		}
+	}
+	
+	if CURVETYPE != WEIERSTRASS {
+		RFC7748(s)						// For Montgomery or Edwards, apply RFC7748 transformation
 	}
 
+	s.ToBytes(S)
 	WP := G.clmul(s,r)
 	WP.ToBytes(W, false) // To use point compression on public keys, change to true
 
@@ -145,9 +170,9 @@ func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte,typ int) int {
 
 /* IEEE ECDSA Signature, C and D are signature on F using private key S */
 func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []byte) int {
-	var T [EFS]byte
+	var T [EGS]byte
 
-	B := core.GPhashit(core.MC_SHA2, sha, int(MODBYTES), 0, F, -1, nil )
+	B := core.GPhashit(core.MC_SHA2, sha, EGS, 0, F, -1, nil )
 	G := ECP_generator()
 
 	r := NewBIGints(CURVE_Order)
@@ -179,11 +204,11 @@ func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []b
 	}
 
 	c.ToBytes(T[:])
-	for i := 0; i < EFS; i++ {
+	for i := 0; i < EGS; i++ {
 		C[i] = T[i]
 	}
 	d.ToBytes(T[:])
-	for i := 0; i < EFS; i++ {
+	for i := 0; i < EGS; i++ {
 		D[i] = T[i]
 	}
 	return 0
@@ -193,7 +218,7 @@ func ECDH_ECPSP_DSA(sha int, RNG *core.RAND, S []byte, F []byte, C []byte, D []b
 func ECDH_ECPVP_DSA(sha int, W []byte, F []byte, C []byte, D []byte) int {
 	res := 0
 
-	B := core.GPhashit(core.MC_SHA2, sha, int(MODBYTES), 0, F, -1, nil )
+	B := core.GPhashit(core.MC_SHA2, sha, EGS, 0, F, -1, nil )
 
 	G := ECP_generator()
 	r := NewBIGints(CURVE_Order)

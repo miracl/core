@@ -29,6 +29,28 @@
 using namespace XXX;
 using namespace YYY;
 
+#if CURVETYPE_ZZZ!=WEIERSTRASS
+// Process a random BIG r by RFC7748 (for Montgomery & Edwards curves only)
+void ZZZ::RFC7748(BIG r)
+{
+    int c,lg=0;
+    BIG t;
+    c=CURVE_Cof_I;
+    while (c!=1)
+    {
+        lg++;
+        c/=2;
+    }
+    int n=8*EGS_ZZZ-lg+1;
+    BIG_mod2m(r,n);
+    BIG_zero(t); BIG_inc(t,1); BIG_shl(t,n);
+    BIG_add(r,r,t);
+    c=BIG_lastbits(r,lg);
+    BIG_dec(r,c);
+//    printf("lg= %d n=%d\n",lg,n);
+}
+#endif
+
 /* return 1 if S is in ranger 0 < S < order , else return 0 */
 int ZZZ::ECP_IN_RANGE(octet* S)
 {
@@ -56,17 +78,25 @@ int ZZZ::ECP_KEY_PAIR_GENERATE(csprng *RNG, octet* S, octet *W)
 
     if (RNG != NULL)
     {
-        BIG_randomnum(s, r, RNG);
-        S->len = EGS_ZZZ;
-        BIG_toBytes(S->val, s);
+#if CURVETYPE_ZZZ!=WEIERSTRASS
+        BIG_random(s,RNG);          // from random bytes
+#else
+        BIG_randomnum(s, r, RNG);   // Removes biases
+#endif
     }
     else
     {
         BIG_fromBytes(s, S->val);
     }
 
+#if CURVETYPE_ZZZ!=WEIERSTRASS
+    RFC7748(s);                     // For Montgomery or Edwards, apply RFC7748 transformation
+#endif
+    S->len = EGS_ZZZ;
+    BIG_toBytes(S->val, s);
+
     ECP_clmul(&G, s, r);
-    ECP_toOctet(W, &G, false);  // To use point compression on public keys, change to true
+    ECP_toOctet(W, &G, false);      // To use point compression on public keys, change to true
 
     return res;
 }
@@ -141,7 +171,7 @@ int ZZZ::ECP_SVDP_DH(octet *S, octet *WD, octet *Z,int type)
             ECP_get(wx, &W);
 #endif
         }
-        Z->len = MODBYTES_XXX;
+        Z->len = EFS_ZZZ;
         BIG_toBytes(Z->val, wx);
     }
     return res;
@@ -166,7 +196,7 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
     BIG_fromBytes(s, S->val);
 
     int blen = H.len;
-    if (H.len > MODBYTES_XXX) blen = MODBYTES_XXX;
+    if (H.len > EGS_ZZZ) blen = EGS_ZZZ;
     BIG_fromBytesLen(f, H.val, blen);
 
     if (RNG != NULL)
@@ -175,8 +205,6 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
         {
             BIG_randomnum(u, r, RNG);
             BIG_randomnum(w, r, RNG); /* IMPORTANT - side channel masking to protect invmodp() */
-
-            // possible optimization for some curves
 
             ECP_copy(&V, &G);
             ECP_clmul(&V, u, r);
@@ -218,7 +246,6 @@ int ZZZ::ECP_SP_DSA(int hlen, csprng *RNG, octet *K, octet *S, octet *F, octet *
         BIG_modadd(d, f, d, r);
         BIG_modmul(d, u, d, r);
         if (BIG_iszilch(d)) return ECDH_ERROR;
-
     }
 
     C->len = D->len = EGS_ZZZ;
@@ -245,14 +272,11 @@ int ZZZ::ECP_VP_DSA(int hlen, octet *W, octet *F, octet *C, octet *D)
     ECP_generator(&G);
     BIG_rcopy(r, CURVE_Order);
 
-    OCT_shl(C, C->len - MODBYTES_XXX);
-    OCT_shl(D, D->len - MODBYTES_XXX);
-
     BIG_fromBytes(c, C->val);
     BIG_fromBytes(d, D->val);
 
     int blen = H.len;
-    if (blen > MODBYTES_XXX) blen = MODBYTES_XXX;
+    if (blen > EGS_ZZZ) blen = EGS_ZZZ;
 
     BIG_fromBytesLen(f, H.val, blen);
 
@@ -262,7 +286,6 @@ int ZZZ::ECP_VP_DSA(int hlen, octet *W, octet *F, octet *C, octet *D)
     if (res == 0)
     {
         BIG_invmodp(d, d, r);
-
         BIG_modmul(f, f, d, r);
         BIG_modmul(h2, c, d, r);
 
@@ -270,17 +293,6 @@ int ZZZ::ECP_VP_DSA(int hlen, octet *W, octet *F, octet *C, octet *D)
         if (!valid) res = ECDH_ERROR;
         else
         {
-/*
-            ECP VT[2];
-            BIG e[2];
-            ECP_copy(&VT[0],&WP);
-            ECP_copy(&VT[1],&G);
-            BIG_copy(e[0],h2);
-            BIG_copy(e[1],f);
-
-            ECP_muln(&WP,2,VT,e);
-*/
-
             ECP_mul2(&WP, &G, h2, f);
             if (ECP_isinf(&WP)) res = ECDH_ERROR;
             else

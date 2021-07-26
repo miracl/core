@@ -68,9 +68,6 @@ int ecdh_ED25519(csprng *RNG)
 
     PBKDF2(MC_SHA2,HASH_TYPE_ED25519, &S0, EGS_ED25519, &PW, &SALT, 1000);
 
-
-//OCT_fromHex(&S0,(char *)"07cbb59289312a5cc5803e474d6ecb21308b0a0124d6aceb780d5502f68caa4f");
-
     printf("Alices private key= 0x");
     OCT_output(&S0);
 

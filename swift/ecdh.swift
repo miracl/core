@@ -41,6 +41,24 @@ public struct ECDH
     static public let SHA384=48
     static public let SHA512=64
 
+// Transform a point multiplier to RFC7748 form
+    static public func RFC7748(_ r: inout BIG)
+    {
+        var lg=0
+        var t=BIG(1)
+        var c=ROM.CURVE_Cof_I
+        while c != 1 {
+            lg+=1
+            c/=2
+        }
+        let n=UInt(8*EGS-lg+1)
+        r.mod2m(n)
+        t.shl(n)
+        r.add(t)
+        c=r.lastbits(UInt(lg))
+        r.dec(c)
+    }
+
     /* return true if S is in ranger 0 < S < order , else return false */
     static public func IN_RANGE(_ S: [UInt8]) -> Bool
     {
@@ -70,16 +88,21 @@ public struct ECDH
 
         let r=BIG(ROM.CURVE_Order)
 
-        if (RNG==nil)
-        {
+        if (RNG==nil) {
             s=BIG.fromBytes(S)
-        }
-        else
-        {
-            s=BIG.randomnum(r,&RNG!)
-            s.toBytes(&S)
+        } else {
+            if CONFIG_CURVE.CURVETYPE != CONFIG_CURVE.WEIERSTRASS {
+                s=BIG.random(&RNG!)
+            } else {
+                s=BIG.randomnum(r,&RNG!)
+            }
         }
 
+        if CONFIG_CURVE.CURVETYPE != CONFIG_CURVE.WEIERSTRASS {
+            RFC7748(&s)
+        }
+
+        s.toBytes(&S)
         let WP=G.clmul(s,r)
         WP.toBytes(&W,false)  // To use point compression on public keys, change to true
 
@@ -153,8 +176,8 @@ public struct ECDH
     /* IEEE ECDSA Signature, C and D are signature on F using private key S */
     static public func ECPSP_DSA(_ sha:Int,_ RNG: inout RAND,_ S:[UInt8],_ F:[UInt8],_ C:inout [UInt8],_ D:inout [UInt8]) -> Int
     {
-        var T=[UInt8](repeating: 0,count: ECDH.EFS)
-        let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,Int(CONFIG_BIG.MODBYTES), 0,F,-1,nil)
+        var T=[UInt8](repeating: 0,count: ECDH.EGS)
+        let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,ECDH.EGS, 0,F,-1,nil)
 
         let G=ECP.generator();
         let r=BIG(ROM.CURVE_Order)
@@ -185,9 +208,9 @@ public struct ECDH
         } while d.iszilch()
 
         c.toBytes(&T)
-        for i in 0 ..< ECDH.EFS {C[i]=T[i]}
+        for i in 0 ..< ECDH.EGS {C[i]=T[i]}
         d.toBytes(&T)
-        for i in 0 ..< ECDH.EFS {D[i]=T[i]}
+        for i in 0 ..< ECDH.EGS {D[i]=T[i]}
         return 0;
     }
 
@@ -195,7 +218,7 @@ public struct ECDH
     static public func ECPVP_DSA(_ sha:Int,_ W:[UInt8],_ F:[UInt8],_ C:[UInt8],_ D:[UInt8]) -> Int
     {
         var res=0
-        let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,Int(CONFIG_BIG.MODBYTES),0,F,-1,nil)
+        let B=HMAC.GPhashit(HMAC.MC_SHA2,sha,ECDH.EGS,0,F,-1,nil)
 
         let G=ECP.generator();
         let r=BIG(ROM.CURVE_Order)

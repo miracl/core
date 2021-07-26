@@ -663,7 +663,7 @@ public struct BIG{
         } */
     }
     /* get 8*CONFIG_BIG.MODBYTES size random number */
-    static func random(_ rng: inout RAND) -> BIG
+    static public func random(_ rng: inout RAND) -> BIG
     {
         var m=BIG();
         var j:Int=0

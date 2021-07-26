@@ -35,6 +35,25 @@ public final class ECDH {
     public static final int EFS = CONFIG_BIG.MODBYTES;
     public static final int EGS = CONFIG_BIG.MODBYTES;
 
+// Transform a point multiplier to RFC7748 form
+    public static void RFC7748(BIG r)
+    {
+        int c,lg=0;
+        BIG t=new BIG(1);
+        c=ROM.CURVE_Cof_I;
+        while (c!=1)
+        {
+            lg++;
+            c/=2;
+        }
+        int n=8*EGS-lg+1;
+        r.mod2m(n);
+        t.shl(n);
+        r.add(t);
+        c=r.lastbits(lg);
+        r.dec(c);
+    }
+
     /* return true if S is in ranger 0 < S < order , else return false */
     public static boolean IN_RANGE(byte[] S) {
         BIG r, s;
@@ -56,18 +75,23 @@ public final class ECDH {
         int res = 0;
 
         G = ECP.generator();
-
         r = new BIG(ROM.CURVE_Order);
 
         if (RNG == null) {
             s = BIG.fromBytes(S);
         } else {
-            s = BIG.randomnum(r, RNG);
-            s.toBytes(S);
+            if (CONFIG_CURVE.CURVETYPE!=CONFIG_CURVE.WEIERSTRASS)
+                s = BIG.random(RNG);            // from random bytes
+            else
+                s = BIG.randomnum(r, RNG);      // Removes biases
         }
 
+        if (CONFIG_CURVE.CURVETYPE!=CONFIG_CURVE.WEIERSTRASS)
+            RFC7748(s);             // For Montgomery or Edwards, apply RFC7748 transformation
+
+        s.toBytes(S);
         WP = G.clmul(s,r);
-        WP.toBytes(W, false); // To use point compression on public keys, change to true
+        WP.toBytes(W, false);       // To use point compression on public keys, change to true
 
         return res;
     }
@@ -139,11 +163,11 @@ public final class ECDH {
 
     /* IEEE ECDSA Signature, C and D are signature on F using private key S */
     public static int SP_DSA(int sha, RAND RNG, byte[] S, byte[] F, byte[] C, byte[] D) {
-        byte[] T = new byte[EFS];
+        byte[] T = new byte[EGS];
         BIG r, s, f, c, d, u, vx, w;
         ECP G, V;
 
-        byte[] B = HMAC.GPhashit(HMAC.MC_SHA2, sha, CONFIG_BIG.MODBYTES, 0,F, -1, null );
+        byte[] B = HMAC.GPhashit(HMAC.MC_SHA2, sha, EGS, 0,F, -1, null );
 
         G = ECP.generator();
         r = new BIG(ROM.CURVE_Order);
@@ -177,9 +201,9 @@ public final class ECDH {
         } while (d.iszilch());
 
         c.toBytes(T);
-        for (int i = 0; i < EFS; i++) C[i] = T[i];
+        for (int i = 0; i < EGS; i++) C[i] = T[i];
         d.toBytes(T);
-        for (int i = 0; i < EFS; i++) D[i] = T[i];
+        for (int i = 0; i < EGS; i++) D[i] = T[i];
         return 0;
     }
 
@@ -190,7 +214,7 @@ public final class ECDH {
         ECP G, WP, P;
         int valid;
 
-        byte[] B = HMAC.GPhashit(HMAC.MC_SHA2, sha, CONFIG_BIG.MODBYTES, 0, F, -1, null);
+        byte[] B = HMAC.GPhashit(HMAC.MC_SHA2, sha, EGS, 0, F, -1, null);
 
         G = ECP.generator();
         r = new BIG(ROM.CURVE_Order);
@@ -221,7 +245,6 @@ public final class ECDH {
                 }
             }
         }
-
         return res;
     }
 
@@ -247,7 +270,6 @@ public final class ECDH {
         for (i = 0; i < CONFIG_CURVE.AESKEY; i++) {K1[i] = K[i]; K2[i] = K[CONFIG_CURVE.AESKEY + i];}
 
         byte[] C = AES.CBC_IV0_ENCRYPT(K1, M);
-
         byte[] L2 = HMAC.inttoBytes(P2.length, 8);
 
         byte[] AC = new byte[C.length + P2.length + 8];
@@ -303,10 +325,7 @@ public final class ECDH {
         for (i = 0; i < 8; i++) AC[C.length + P2.length + i] = L2[i];
 
         HMAC.HMAC1(HMAC.MC_SHA2, sha, TAG, TAG.length, K2, AC);
-
         if (!ncomp(T, TAG, T.length)) return new byte[0];
-
         return M;
-
     }
 }

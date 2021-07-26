@@ -69,7 +69,22 @@ var ECDH = function(ctx) {
             return b;
         },
 
-        /* ctx.AES encryption/decryption */
+        RFC7748: function(r) {
+            var c,lg=0;
+            var t = new ctx.BIG(1);
+            c=ctx.ROM_CURVE.CURVE_Cof_I;
+            while (c!=1)
+            {
+                lg++;
+                c/=2;
+            }
+            var n=8*this.EGS-lg+1;
+            r.mod2m(n);
+            t.shl(n);
+            r.add(t);
+            c=r.lastbits(lg);
+            r.dec(c);
+        },
 
         IN_RANGE: function(S) {
             var r,s;
@@ -87,19 +102,25 @@ var ECDH = function(ctx) {
             // var T=[];
 
             G = ctx.ECP.generator();
-
             r = new ctx.BIG(0);
             r.rcopy(ctx.ROM_CURVE.CURVE_Order);
 
             if (RNG === null) {
                 s = ctx.BIG.fromBytes(S);
             } else {
-                s = ctx.BIG.randomnum(r, RNG);
-                s.toBytes(S);
+                if (ctx.ECP.CURVETYPE != ctx.ECP.WEIERSTRASS)
+                    s = ctx.BIG.random(RNG);            // from random bytes
+                else
+                    s = ctx.BIG.randomnum(r, RNG);      // Removes biases
+
             }
 
+            if (ctx.ECP.CURVETYPE != ctx.ECP.WEIERSTRASS)
+                this.RFC7748(s);            // For Montgomery or Edwards, apply RFC7748 transformation
+
+            s.toBytes(S);
             WP = G.clmul(s,r);
-            WP.toBytes(W, false); // To use point compression on public keys, change to true 
+            WP.toBytes(W, false);           // To use point compression on public keys, change to true 
 
             return res;
         },
@@ -190,7 +211,7 @@ var ECDH = function(ctx) {
                 i, r, s, f, c, d, u, vx, w,
                 G, V, B;
 
-            B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha, ctx.BIG.MODBYTES, 0, F, -1, null);
+            B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha, this.EGS, 0, F, -1, null);
 
             G = ctx.ECP.generator();
 
@@ -225,11 +246,11 @@ var ECDH = function(ctx) {
             } while (d.iszilch());
 
             c.toBytes(T);
-            for (i = 0; i < this.EFS; i++) {
+            for (i = 0; i < this.EGS; i++) {
                 C[i] = T[i];
             }
             d.toBytes(T);
-            for (i = 0; i < this.EFS; i++) {
+            for (i = 0; i < this.EGS; i++) {
                 D[i] = T[i];
             }
 
@@ -243,7 +264,7 @@ var ECDH = function(ctx) {
                 r, f, c, d, h2,
                 G, WP, P;
 
-            B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha, ctx.BIG.MODBYTES, 0, F, -1, null);
+            B = ctx.HMAC.GPhashit(ctx.HMAC.MC_SHA2, sha, this.EGS, 0, F, -1, null);
 
             G = ctx.ECP.generator();
 

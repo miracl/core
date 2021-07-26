@@ -719,7 +719,7 @@ func (r *BIG) div(m *BIG) {
 }
 
 /* get 8*MODBYTES size random number */
-func random(rng *core.RAND) *BIG {
+func Random(rng *core.RAND) *BIG {
 	m := NewBIG()
 	var j int = 0
 	var r byte = 0

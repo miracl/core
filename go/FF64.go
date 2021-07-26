@@ -645,11 +645,11 @@ func (F *FF) invmod2m() *FF {
 func (F *FF) random(rng *core.RAND) {
 	n := F.length
 	for i := 0; i < n; i++ {
-		F.v[i].copy(random(rng))
+		F.v[i].copy(Random(rng))
 	}
 	/* make sure top bit is 1 */
 	for F.v[n-1].nbits() < int(MODBYTES*8) {
-		F.v[n-1].copy(random(rng))
+		F.v[n-1].copy(Random(rng))
 	}
 }
 
@@ -659,7 +659,7 @@ func (F *FF) randomnum(p *FF, rng *core.RAND) {
 	d := NewFFint(2 * n)
 
 	for i := 0; i < 2*n; i++ {
-		d.v[i].copy(random(rng))
+		d.v[i].copy(Random(rng))
 	}
 	F.copy(d.dmod(p))
 }
