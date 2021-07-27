@@ -987,13 +987,23 @@ void ZZZ::ECP_pinmul(ECP *P, int e, int bts)
 }
 #endif
 
+// Point multiplication, multiplies a point P by a scalar e
+// This code has no inherent awareness of the order of the curve, or the order of the point.
+// The order of the curve will be h.r, where h is a cofactor, and r is a large prime
+// Typically P will be of order r (but not always), and typically e will be less than r (but not always)
+// A problem can arise if a secret e is a few bits less than r, as the leading zeros in e will leak via a timing attack
+// The secret e may however be greater than r (see RFC7748 which combines elimination of a small cofactor h with the point multiplication, using an e>r)
+// Our solution is to use as a multiplier an e, whose length in bits is that of the logical OR of e and r, hence allowing e>r while forcing inclusion of leading zeros if e<r. 
+// The point multiplication methods used will process leading zeros correctly.
+
+// So this function leaks information about the length of e...
 void ZZZ::ECP_mul(ECP *P,BIG e)
 {
     ECP_clmul(P,e,e);
 }
 
-/* Set P=r*P */
-/* SU=424 */
+// .. but this one does not (typically set maxe=r)
+// Set P=e*P 
 void ZZZ::ECP_clmul(ECP *P, BIG e, BIG maxe)
 {
     BIG cm;
@@ -1083,7 +1093,6 @@ void ZZZ::ECP_clmul(ECP *P, BIG e, BIG maxe)
     }
     w[nb] = BIG_lastbits(t, 5);
 
-    //ECP_copy(P, &W[(w[nb] - 1) / 2]);
     ECP_select(P, W, w[nb]);
     for (i = nb - 1; i >= 0; i--)
     {
@@ -1420,22 +1429,6 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_sqrt(&Y,&B,&hint);   // sqrt(num*den)
     FP_mul(&Y,&Y,&D);       // sqrt(num/den^3)
 
-/*
-
-    FP_sqrt(&Y,&B,&hint);   // sqrt(num*den)
-    FP_mul(&Y,&Y,&D);       // sqrt(num/den^3)
-
-    FP_imul(&B,&B,qnr);     // now for gx2 = Z.u^2.gx1
-    FP_rcopy(&w,CURVE_HTPC);   // qnr^C3  
-    FP_mul(&hint,&hint,&w);    // modify hint for gx2
-
-    FP_sqrt(&Y3,&B,&hint);  // second candidate
-    FP_mul(&D,&D,h);
-    FP_mul(&Y3,&Y3,&D);
-
-    FP_cmove(&X1,&X2,1-qres);  // pick correct one
-    FP_cmove(&Y,&Y3,1-qres);
-*/
 // correct sign of Y
     FP_neg(&w,&Y); FP_norm(&w);
     FP_cmove(&Y,&w,qres^FP_sign(&Y));
@@ -1567,19 +1560,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
         FP_sqrt(&Y,&w,&hint);  // first candidate if X2 is correct
         FP_mul(&Y,&Y,&D2);
-/*
-        FP_mul(&D2,&D2,&t);     // second candidate if X3 is correct
-        FP_imul(&w,&w,RIADZ_YYY); 
 
-        FP_rcopy(&X1,CURVE_HTPC);     
-        FP_mul(&hint,&hint,&X1); // modify hint
-
-        FP_sqrt(&Y3,&w,&hint);
-        FP_mul(&Y3,&Y3,&D2);
-
-        FP_cmove(&X2,&X3,1-qr); 
-        FP_cmove(&Y,&Y3,1-qr); 
-*/
         ne=FP_sign(&Y)^sgn;
         FP_neg(&w,&Y); FP_norm(&w);
         FP_cmove(&Y,&w,ne);

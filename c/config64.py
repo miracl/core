@@ -811,8 +811,8 @@ class miracl_crypto:
     rsa_params = (
         # 256 is slower but may allow reuse of 256-bit BIGs used for elliptic curve
         # 512 is faster.. but best is 1024
-        ("1024", "2048", "58", "2"),
-        #("512", "2048", "60", "4"),
+        #("1024", "2048", "58", "2"),
+        ("512", "2048", "60", "4"),
         #("256", "2048", "56", "8"),
         ("384", "3072", "56", "8"),
         #("256", "4096", "56", "16"),

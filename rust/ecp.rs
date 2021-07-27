@@ -1043,11 +1043,22 @@ impl ECP {
         }
     }
 
+// Point multiplication, multiplies a point P by a scalar e
+// This code has no inherent awareness of the order of the curve, or the order of the point.
+// The order of the curve will be h.r, where h is a cofactor, and r is a large prime
+// Typically P will be of order r (but not always), and typically e will be less than r (but not always)
+// A problem can arise if a secret e is a few bits less than r, as the leading zeros in e will leak via a timing attack
+// The secret e may however be greater than r (see RFC7748 which combines elimination of a small cofactor h with the point multiplication, using an e>r)
+// Our solution is to use as a multiplier an e, whose length in bits is that of the logical OR of e and r, hence allowing e>r while forcing inclusion of leading zeros if e<r. 
+// The point multiplication methods used will process leading zeros correctly.
+
+// So this function leaks information about the length of e...
     pub fn mul(&self, e: &BIG) -> ECP {
         return self.clmul(e,e);
     }
 
-    /* return e*self */
+// .. but this one does not (typically set maxe=r)
+// Set P=e*P 
     pub fn clmul(&self, e: &BIG, maxe: &BIG) -> ECP {
         if e.iszilch() || self.is_infinity() {
             return ECP::new();
