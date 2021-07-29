@@ -1624,6 +1624,90 @@ void XXX::step2(BIG xf,BIG xs,BIG p)
 
 */
 
+/* Arazi and Qi inversion mod 256 */
+static int invmod256(int a)
+{
+    int U, t1, t2, b, c;
+    t1 = 0;
+    c = (a >> 1) & 1;
+    t1 += c;
+    t1 &= 1;
+    t1 = 2 - t1;
+    t1 <<= 1;
+    U = t1 + 1;
+
+// i=2
+    b = a & 3;
+    t1 = U * b;
+    t1 >>= 2;
+    c = (a >> 2) & 3;
+    t2 = (U * c) & 3;
+    t1 += t2;
+    t1 *= U;
+    t1 &= 3;
+    t1 = 4 - t1;
+    t1 <<= 2;
+    U += t1;
+
+// i=4
+    b = a & 15;
+    t1 = U * b;
+    t1 >>= 4;
+    c = (a >> 4) & 15;
+    t2 = (U * c) & 15;
+    t1 += t2;
+    t1 *= U;
+    t1 &= 15;
+    t1 = 16 - t1;
+    t1 <<= 4;
+    U += t1;
+
+    return U;
+}
+
+/* a=1/a mod 2^BIGBITS_XXX. This is very fast! */
+void XXX::BIG_invmod2m(BIG a)
+{
+    int i;
+    BIG U, t1, b, c;
+    BIG_zero(U);
+    BIG_inc(U, invmod256(BIG_lastbits(a, 8)));
+    for (i = 8; i < BIGBITS_XXX; i <<= 1)
+    {
+        BIG_norm(U);
+        BIG_copy(b, a);
+        BIG_mod2m(b, i);  // bottom i bits of a
+
+        BIG_smul(t1, U, b);
+        BIG_shr(t1, i); // top i bits of U*b
+
+        BIG_copy(c, a);
+        BIG_shr(c, i);
+        BIG_mod2m(c, i); // top i bits of a
+
+        BIG_smul(b, U, c);
+        BIG_mod2m(b, i); // bottom i bits of U*c
+
+        BIG_add(t1, t1, b);
+        BIG_norm(t1);
+        BIG_smul(b, t1, U);
+        BIG_copy(t1, b); // (t1+b)*U
+        BIG_mod2m(t1, i);               // bottom i bits of (t1+b)*U
+
+        BIG_one(b);
+        BIG_shl(b, i);
+        BIG_sub(t1, b, t1);
+        BIG_norm(t1);
+
+        BIG_shl(t1, i);
+
+        BIG_add(U, U, t1);
+    }
+    BIG_copy(a, U);
+    BIG_norm(a);
+    BIG_mod2m(a, BIGBITS_XXX);
+}
+
 // Set r=1/a mod p. Binary method 
 // NOTE: This function is NOT side-channel safe
 // If a is a secret then ALWAYS calculate 1/a = m*(1/am) mod p 
