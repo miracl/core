@@ -847,24 +847,20 @@ func GTpow(d *FP48, e *BIG) *FP48 {
 }
 
 /* test G1 group membership */
-	func G1member(P *ECP) bool {
-		q := NewBIGints(CURVE_Order)
-		if P.Is_infinity() {return false}
-		W:=P.mul(q)
-		if !W.Is_infinity() {return false}
-		return true
-	}
+func G1member(P *ECP) bool {
+	q := NewBIGints(CURVE_Order)
+	if P.Is_infinity() {return false}
+	W:=P.mul(q)
+	if !W.Is_infinity() {return false}
 	return true
 }
 
 /* test G2 group membership */
-	func G2member(P *ECP8) bool {
-		q := NewBIGints(CURVE_Order)
-		if P.Is_infinity() {return false}
-		W:=P.mul(q)
-		if !W.Is_infinity() {return false}
-		return true
-	}
+func G2member(P *ECP8) bool {
+	q := NewBIGints(CURVE_Order)
+	if P.Is_infinity() {return false}
+	W:=P.mul(q)
+	if !W.Is_infinity() {return false}
 	return true
 }
 
