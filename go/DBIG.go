@@ -91,13 +91,13 @@ func (r *DBIG) cmove(g *DBIG, d int) {
 
 /* Compare a and b, return 0 if a==b, -1 if a<b, +1 if a>b. Inputs must be normalised */
 func dcomp(a *DBIG, b *DBIG) int {
-	gt:=Chunk(0)
-	eq:=Chunk(1)
+	gt := Chunk(0)
+	eq := Chunk(1)
 	for i := DNLEN - 1; i >= 0; i-- {
-		gt |= ((b.w[i]-a.w[i]) >> BASEBITS) & eq
-		eq &= ((b.w[i]^a.w[i])-1) >> BASEBITS
+		gt |= ((b.w[i] - a.w[i]) >> BASEBITS) & eq
+		eq &= ((b.w[i] ^ a.w[i]) - 1) >> BASEBITS
 	}
-	return int(gt+gt+eq-1)
+	return int(gt + gt + eq - 1)
 }
 
 /* Copy from another DBIG */

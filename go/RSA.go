@@ -140,7 +140,6 @@ func RSA_KEY_PAIR(rng *core.RAND, e int, PRIV *rsa_private_key, PUB *rsa_public_
 
 }
 
-
 /* RSA encryption with the public key */
 func RSA_ENCRYPT(PUB *rsa_public_key, F []byte, G []byte) {
 	n := PUB.n.getlen()
