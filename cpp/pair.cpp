@@ -1057,12 +1057,10 @@ int ZZZ::PAIR_G2member(ECP2 *P)
 	return 1;
 }
 
-/* test GT group membership */
-/* First check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} */
-
-int ZZZ::PAIR_GTmember(FP12 *m)
+/* Check that m is in cyclotomic sub-group */
+/* Check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} */
+int ZZZ::PAIR_GTcyclotomic(FP12 *m)
 {
-	BIG q;
 	FP fx,fy;
 	FP2 X;
 	FP12 r,w;
@@ -1080,15 +1078,21 @@ int ZZZ::PAIR_GTmember(FP12 *m)
 	FP12_mul(&w,m);
 
 	if (!FP12_equals(&w,&r)) return 0;
-
-    BIG_rcopy(q, CURVE_Order);
-	FP12_copy(&r,m);
-	PAIR_GTpow(&r,q);
-	if (!FP12_isunity(&r)) return 0;
-	return 1;
-
+    return 1;
 }
 
+/* test for full GT group membership */
+int ZZZ::PAIR_GTmember(FP12 *m)
+{
+	BIG q;
+    FP12 r;
+    if (!PAIR_GTcyclotomic(m)) return 0;
+
+    BIG_rcopy(q, CURVE_Order);
+    FP12_pow(&r, m, q);
+	if (!FP12_isunity(&r)) return 0;
+	return 1;
+}
 
 #ifdef HAS_MAIN
 

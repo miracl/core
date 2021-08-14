@@ -975,9 +975,9 @@ pub fn g2member(P: &ECP8) -> bool {
     true
 }
 
-/* test GT group membership */
-/* First check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
-pub fn gtmember(m: &FP48) -> bool {
+/* Check that m is in cyclotomic sub-group */
+/* Check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
+pub fn gtcyclotomic(m: &FP48) -> bool {
     if m.isunity() {
         return false;
     }
@@ -994,9 +994,16 @@ pub fn gtmember(m: &FP48) -> bool {
     if !w.equals(&r) {
         return false;
     }
+    return true;
+}
+
+/* test for full GT group membership */
+pub fn gtmember(m: &FP48) -> bool {
+    if !gtcyclotomic(m) {
+        return false;
+    }
     let q = BIG::new_ints(&rom::CURVE_ORDER);
-    w.copy(&m);
-    r.copy(&gtpow(&w,&q));
+    let r = m.pow(&q);
     if !r.isunity() {
         return false;
     }

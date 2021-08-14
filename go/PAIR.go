@@ -1003,10 +1003,9 @@ func G2member(P *ECP2) bool {
 	return true
 }
 
-/* test group membership - no longer needed*/
+/* Check that m is in cyclotomic sub-group */
 /* Check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} */
-
-func GTmember(m *FP12) bool {
+func GTcyclotomic(m *FP12) bool {
 	if m.Isunity() {
 		return false
 	}
@@ -1029,10 +1028,17 @@ func GTmember(m *FP12) bool {
 	if !w.Equals(r) {
 		return false
 	}
+	return true
+}
 
+/* test for full GT membership */
+func GTmember(m *FP12) bool {
+
+	if !GTcyclotomic(m) {
+		return false
+	}
 	q := NewBIGints(CURVE_Order)
-	w.Copy(m)
-	r.Copy(GTpow(w, q))
+	r := m.Pow(q)
 	if !r.Isunity() {
 		return false
 	}

@@ -108,6 +108,9 @@ extern void PAIR_G1mul(ECP *Q, XXX::BIG b);
 
  */
 extern void PAIR_G2mul(ECP2 *P, XXX::BIG b);
+
+
+
 /**	@brief Fast raising of a member of GT to a BIG power
  *
 	May exploit endomorphism for speed.
@@ -134,6 +137,13 @@ extern int PAIR_G1member(ZZZ::ECP *P);
  */
 extern int PAIR_G2member(ZZZ::ECP2 *P);
 
+/**	@brief Tests FP12 for membership of cyclotomic sub-group
+ *
+	@param x FP12 instance
+	@return true or false
+
+ */
+extern int PAIR_GTcyclotomic(YYY::FP12 *x);
 
 /**	@brief Tests FP12 for membership of GT
  *

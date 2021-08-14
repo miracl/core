@@ -1013,7 +1013,7 @@ var PAIR = function(ctx) {
         var W=P.mul(q);
         if (!W.is_infinity()) return false;
         return true;
-    }
+    };
 /* test G2 group membership */
     PAIR.G2member=function(P)
     {
@@ -1023,11 +1023,11 @@ var PAIR = function(ctx) {
         var W=P.mul(q);
         if (!W.is_infinity()) return false;
         return true;
-    }
-/* test group membership - no longer needed */
-/* Check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} */
+    };
 
-    PAIR.GTmember= function(m)
+/* Check that m is in cyclotomic sub-group */
+/* Check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} */
+    PAIR.GTcyclotomic= function(m)
     {
         if (m.isunity()) return false;
         var r=new ctx.FP12(m);
@@ -1043,12 +1043,16 @@ var PAIR = function(ctx) {
         var w=new ctx.FP12(r); w.frob(f); w.frob(f);
         w.mul(m);
         if (!w.equals(r)) return false;
+        return true;
+    };
 
+/* test for full GT group membership */
+    PAIR.GTmember= function(m)
+    {
+        if (!PAIR.GTcyclotomic(m)) return false;
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
-
-        w.copy(m); 
-        r.copy(PAIR.GTpow(w,q));
+        var r=m.pow(q);
         if (!r.isunity()) return false;
         return true;
     };

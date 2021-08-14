@@ -135,7 +135,16 @@ extern int PAIR_ZZZ_G1member(ECP_ZZZ *P);
 
  */
 extern int PAIR_ZZZ_G2member(ECP8_ZZZ *P);
-/**	@brief Tests FP48 for membership of GT
+
+/**	@brief Tests FP48 for membership of cyclotomic sub-group
+ *
+	@param x FP48 instance
+	@return 1 if x is cyclotomic, else return 0
+
+ */
+extern int PAIR_ZZZ_GTcyclotomic(FP48_YYY *x);
+
+/**	@brief Tests FP48 for full membership of GT
  *
 	@param x FP48 instance
 	@return 1 if x is in GT, else return 0

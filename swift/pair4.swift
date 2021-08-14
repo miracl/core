@@ -780,10 +780,9 @@ public struct PAIR4 {
         return true
     }
 
-    // test GT group membership
-    // Check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2}
-
-    static public func GTmember(_ m:FP24) -> Bool
+// Check that m is in cyclotomic sub-group 
+// Check that m!=1, conj(m)*m==1, and m.m^{p^8}=m^{p^4} 
+    static public func GTcyclotomic(_ m:FP24) -> Bool
     {
         if m.isunity() {return false}
         var r=FP24(m)
@@ -798,10 +797,15 @@ public struct PAIR4 {
         var w=FP24(r); w.frob(f,4)
         w.mul(m)
         if !w.equals(r) {return false}
+        return true
+    }
 
+// test for full GT group membership
+    static public func GTmember(_ m:FP24) -> Bool
+    {
+        if !GTcyclotomic(m) {return false}
         let q=BIG(ROM.CURVE_Order)
-        w.copy(m)
-        r.copy(GTpow(w,q))
+        let r=m.pow(q)
         if !r.isunity() {return false}
         return true
     }

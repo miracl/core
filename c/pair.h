@@ -136,7 +136,16 @@ extern int PAIR_ZZZ_G1member(ECP_ZZZ *P);
 
  */
 extern int PAIR_ZZZ_G2member(ECP2_ZZZ *P);
-/**	@brief Tests FP12 for membership of GT
+
+/**	@brief Tests FP12 for membership of cyclotomic sub-group
+ *
+	@param x FP12 instance
+	@return 1 if x is cyclotomic, else return 0
+
+ */
+extern int PAIR_ZZZ_GTcyclotomic(FP12_YYY *x);
+
+/**	@brief Tests FP12 for full membership of GT
  *
 	@param x FP12 instance
 	@return 1 if x is in GT, else return 0

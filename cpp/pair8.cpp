@@ -959,12 +959,11 @@ int ZZZ::PAIR_G2member(ECP8 *P)
 	return 1;
 }
 
-/* test GT group membership */
-/* First check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
 
-int ZZZ::PAIR_GTmember(FP48 *m)
+/* Check that m is in cyclotomic sub-group */
+/* Check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
+int ZZZ::PAIR_GTcyclotomic(FP48 *m)
 {
-	BIG q;
 	FP fx,fy;
 	FP2 X;
 	FP48 r,w;
@@ -982,15 +981,21 @@ int ZZZ::PAIR_GTmember(FP48 *m)
 	FP48_mul(&w,m);
 
 	if (!FP48_equals(&w,&r)) return 0;
-
-    BIG_rcopy(q, CURVE_Order);
-	FP48_copy(&r,m);
-	PAIR_GTpow(&r,q);
-	if (!FP48_isunity(&r)) return 0;
-	return 1;
-
+    return 1;
 }
 
+/* test for full GT group membership */
+int ZZZ::PAIR_GTmember(FP48 *m)
+{
+	BIG q;
+    FP48 r;
+    if (!PAIR_GTcyclotomic(m)) return 0;
+
+    BIG_rcopy(q, CURVE_Order);
+    FP48_pow(&r, m, q);
+	if (!FP48_isunity(&r)) return 0;
+	return 1;
+}
 
 #ifdef HAS_MAIN
 

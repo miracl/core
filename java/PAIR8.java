@@ -846,10 +846,9 @@ public final class PAIR8 {
         return true;
     }
 
-/* test GT group membership */
-/* First check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
-
-    public static boolean GTmember(FP48 m)
+/* Check that m is in cyclotomic sub-group */
+/* Check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
+    public static boolean GTcyclotomic(FP48 m)
     {
         if (m.isunity()) return false;
         FP48 r=new FP48(m);
@@ -864,13 +863,17 @@ public final class PAIR8 {
         w.mul(m);
 
         if (!w.equals(r)) return false;
-
-        BIG q=new BIG(ROM.CURVE_Order);
-        w.copy(m); 
-        r.copy(GTpow(w,q));
-        if (!r.isunity()) return false;
         return true;
     }
 
+/* test for full GT group membership */
+    public static boolean GTmember(FP48 m)
+    {
+        if (!GTcyclotomic(m)) return false;
+        BIG q=new BIG(ROM.CURVE_Order);
+        FP48 r=m.pow(q);
+        if (!r.isunity()) return false;
+        return true;
+    }
 }
 

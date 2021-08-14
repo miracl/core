@@ -111,7 +111,18 @@ extern int PAIR_G1member(ZZZ::ECP *P);
 
  */
 extern int PAIR_G2member(ZZZ::ECP4 *P);
-/**	@brief Tests FP24 for membership of GT
+
+
+/**	@brief Tests FP24 for membership of cyclotomic subgroup
+ *
+	@param x FP24 instance
+	@return 1 if x is cyclotomic, else return 0
+
+ */
+extern int PAIR_GTcyclotomic(YYY::FP24 *x);
+
+
+/**	@brief Tests FP24 for full membership of GT
  *
 	@param x FP24 instance
 	@return 1 if x is in GT, else return 0

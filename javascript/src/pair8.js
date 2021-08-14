@@ -869,7 +869,7 @@ var PAIR8 = function(ctx) {
         var W=P.mul(q);
         if (!W.is_infinity()) return false;
         return true;
-    }
+    };
 /* test G2 group membership */
     PAIR8.G2member=function(P)
     {
@@ -879,11 +879,11 @@ var PAIR8 = function(ctx) {
         var W=P.mul(q);
         if (!W.is_infinity()) return false;
         return true;
-    }
-/* test group membership - no longer needed */
-/* Check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
+    };
 
-    PAIR8.GTmember= function(m)
+/* Check that m is in cyclotomic sub-group */
+/* Check that m!=1, conj(m)*m==1, and m.m^{p^16}=m^{p^8} */
+    PAIR8.GTcyclotomic= function(m)
     {
         if (m.isunity()) return false;
         var r=new ctx.FP48(m);
@@ -899,12 +899,16 @@ var PAIR8 = function(ctx) {
         var w=new ctx.FP48(r); w.frob(f,8); 
         w.mul(m);
         if (!w.equals(r)) return false;
+        return true;
+    };
+/* test for full GT group membership */
+    PAIR8.GTmember= function(m)
+    {
+        if (!PAIR8.GTcyclotomic(m)) return false;
 
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
-
-        w.copy(m); 
-        r.copy(PAIR8.GTpow(w,q));
+        var r=m.pow(q);
         if (!r.isunity()) return false;
         return true;
     };

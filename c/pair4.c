@@ -858,12 +858,10 @@ int PAIR_ZZZ_G2member(ECP4_ZZZ *P)
 	return 1;
 }
 
-/* test GT group membership */
-/* First check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} */
-
-int PAIR_ZZZ_GTmember(FP24_YYY *m)
+/* Check that m is in cyclotomic sub-group */
+/* Check that m!=1, conj(m)*m==1, and m.m^{p^8}=m^{p^4} */
+int PAIR_ZZZ_GTcyclotomic(FP24_YYY *m)
 {
-	BIG_XXX q;
 	FP_YYY fx,fy;
 	FP2_YYY X;
 	FP24_YYY r,w;
@@ -881,10 +879,19 @@ int PAIR_ZZZ_GTmember(FP24_YYY *m)
 	FP24_YYY_mul(&w,m);
 
 	if (!FP24_YYY_equals(&w,&r)) return 0;
+    return 1;
+}
+
+
+/* test for full GT group membership */
+int PAIR_ZZZ_GTmember(FP24_YYY *m)
+{
+	BIG_XXX q;
+    FP24_YYY r;
+    if (!PAIR_ZZZ_GTcyclotomic(m)) return 0;
 
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
-	FP24_YYY_copy(&r,m);
-	PAIR_ZZZ_GTpow(&r,q);
+	FP24_YYY_pow(&r,m,q);
 	if (!FP24_YYY_isunity(&r)) return 0;
 	return 1;
 

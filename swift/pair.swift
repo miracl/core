@@ -1009,10 +1009,9 @@ PFBNF */
         return true
     }
 
-    // test GT group membership
-    // Check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2}
-
-    static public func GTmember(_ m:FP12) -> Bool
+// Check that m is in cyclotomic sub-group 
+// Check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} 
+    static public func GTcyclotomic(_ m:FP12) -> Bool
     {
         if m.isunity() {return false}
         var r=FP12(m)
@@ -1027,10 +1026,15 @@ PFBNF */
         var w=FP12(r); w.frob(f); w.frob(f)
         w.mul(m)
         if !w.equals(r) {return false}
+        return true
+    }
 
+// test for full  GT group membership
+    static public func GTmember(_ m:FP12) -> Bool
+    {
+        if !GTcyclotomic(m) {return false}
         let q=BIG(ROM.CURVE_Order)
-        w.copy(m)
-        r.copy(GTpow(w,q))
+        let r=m.pow(q)
         if !r.isunity() {return false}
         return true
     }

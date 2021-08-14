@@ -951,10 +951,9 @@ PFBNF */
         return true;
     }
 
-/* test GT group membership */
-/* First check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} */
-
-    public static boolean GTmember(FP12 m)
+/* Check that m is in cyclotomic sub-group */
+/* Check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} */
+    public static boolean GTcyclotomic(FP12 m)
     {
         if (m.isunity()) return false;
         FP12 r=new FP12(m);
@@ -969,10 +968,15 @@ PFBNF */
         w.mul(m);
 
         if (!w.equals(r)) return false;
+        return true;
+    }
 
+/* test for full GT group membership */
+    public static boolean GTmember(FP12 m)
+    {
+        if (!GTcyclotomic(m)) return false;
         BIG q=new BIG(ROM.CURVE_Order);
-        w.copy(m); 
-        r.copy(GTpow(w,q));
+        FP12 r=m.pow(q); 
         if (!r.isunity()) return false;
         return true;
     }
