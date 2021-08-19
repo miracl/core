@@ -935,28 +935,71 @@ void ZZZ::PAIR_GTpow(FP48 *f, BIG e)
 
 int ZZZ::PAIR_G1member(ECP *P)
 {
+    ECP W,T;
+    BIG x;
+    FP cru;
+    if (ECP_isinf(P)) return 0;
+
+    BIG_rcopy(x, CURVE_Bnx);
+    ECP_copy(&W,P);
+    ECP_copy(&T,P);
+    ECP_mul(&T,x); ECP_mul(&T,x);
+    ECP_mul(&T,x); ECP_mul(&T,x);
+    ECP_mul(&T,x); ECP_mul(&T,x);
+    ECP_mul(&T,x); ECP_mul(&T,x);
+    ECP_neg(&T);
+
+    FP_rcopy(&cru, CRu);
+    FP_mul(&(W.x), &(W.x), &cru);
+    if (!ECP_equals(&W,&T)) return 0;  // check that Endomorphism works
+
+    ECP_add(&W,P);
+    FP_mul(&(T.x), &(T.x), &cru);
+    ECP_add(&W,&T);
+    if (!ECP_isinf(&W)) return 0;      // use it to check order
+/*
 	BIG q;
 	ECP W;
     if (ECP_isinf(P)) return 0;
     BIG_rcopy(q, CURVE_Order);
 	ECP_copy(&W,P);
 	ECP_mul(&W,q);
-	if (!ECP_isinf(&W)) return 0;
-	return 1;
+	if (!ECP_isinf(&W)) return 0; */
+	return 1; 
 }
 
 /* test G2 group membership */
 
 int ZZZ::PAIR_G2member(ECP8 *P)
 {
-	BIG q;
+    ECP8 W,T;
+    BIG x;
+    FP2 X[3];
+    ECP8_frob_constants(X);
+    BIG_rcopy(x, CURVE_Bnx);
+
+    ECP8_copy(&W,P);
+    ECP8_frob(&W, X, 1);
+
+    ECP8_copy(&T,P);
+    ECP8_mul(&T,x);
+
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    ECP8_neg(&T);
+#endif
+
+    if (ECP8_equals(&W,&T)) return 1;
+    return 0;
+
+
+/*	BIG q;
 	ECP8 W;
     if (ECP8_isinf(P)) return 0;
     BIG_rcopy(q, CURVE_Order);
 	ECP8_copy(&W,P);
 	ECP8_mul(&W,q);
 	if (!ECP8_isinf(&W)) return 0;
-	return 1;
+	return 1; */
 }
 
 
@@ -987,14 +1030,33 @@ int ZZZ::PAIR_GTcyclotomic(FP48 *m)
 /* test for full GT group membership */
 int ZZZ::PAIR_GTmember(FP48 *m)
 {
-	BIG q;
-    FP48 r;
+    BIG x;
+    FP2 X;
+    FP fx, fy;
+    FP48 r,t;
     if (!PAIR_GTcyclotomic(m)) return 0;
 
+    FP_rcopy(&fx, Fra);
+    FP_rcopy(&fy, Frb);
+    FP2_from_FPs(&X, &fx, &fy);
+    BIG_rcopy(x, CURVE_Bnx);
+
+    FP48_copy(&r,m);
+    FP48_frob(&r, &X, 1);
+
+    FP48_pow(&t,m,x);
+
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP48_conj(&t,&t);
+#endif
+
+    if (FP48_equals(&r,&t)) return 1;
+    return 0;
+/*
     BIG_rcopy(q, CURVE_Order);
     FP48_pow(&r, m, q);
 	if (!FP48_isunity(&r)) return 0;
-	return 1;
+	return 1; */
 }
 
 #ifdef HAS_MAIN

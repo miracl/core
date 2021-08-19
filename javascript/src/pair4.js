@@ -761,22 +761,48 @@ var PAIR4 = function(ctx) {
 /* test G1 group membership */
     PAIR4.G1member=function(P)
     {
+        var x = new ctx.BIG(0);
+        x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
+        var bcru = new ctx.BIG(0);
+        bcru.rcopy(ctx.ROM_FIELD.CRu);
+        var cru = new ctx.FP(bcru);
+        var W=new ctx.ECP(); W.copy(P);
+        var T=P.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T.neg();
+        W.getx().mul(cru);
+        if (!W.equals(T)) return false;
+        W.add(P);
+        T.getx().mul(cru);
+        W.add(T);
+        if (!W.is_infinity()) return false;
+/*
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         if (P.is_infinity()) return false;
         var W=P.mul(q);
-        if (!W.is_infinity()) return false;
+        if (!W.is_infinity()) return false; */
         return true;
     };
 /* test G2 group membership */
     PAIR4.G2member=function(P)
     {
+        var F = ctx.ECP4.frob_constants();
+        var x = new ctx.BIG(0);
+        x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
+        var W=new ctx.ECP4(); W.copy(P); W.frob(F,1);
+        var T=P.mul(x);
+        if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+            T.neg();
+        }
+        if (W.equals(T))
+            return true;
+        return false;
+/*
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         if (P.is_infinity()) return false;
         var W=P.mul(q);
         if (!W.is_infinity()) return false;
-        return true;
+        return true; */
     };
 
 /* Check that m is in cyclotomic sub-group */
@@ -804,11 +830,25 @@ var PAIR4 = function(ctx) {
     PAIR4.GTmember= function(m)
     {
         if (!PAIR4.GTcyclotomic(m)) return false;
+        var fa=new ctx.BIG(0); fa.rcopy(ctx.ROM_FIELD.Fra);
+        var fb=new ctx.BIG(0); fb.rcopy(ctx.ROM_FIELD.Frb);
+        var f=new ctx.FP2(fa,fb); 
+        var x = new ctx.BIG(0);
+        x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
+        var r=new ctx.FP24(m); r.frob(f,1);
+        var t=m.pow(x);
+        if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+            t.conj();
+        }
+        if (r.equals(t))
+            return true;
+        return false;
+/*
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         var r=m.pow(q);
         if (!r.isunity()) return false;
-        return true;
+        return true; */
     };
 
 

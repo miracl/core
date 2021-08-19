@@ -1075,13 +1075,36 @@ void PAIR_ZZZ_GTpow(FP12_YYY *f, BIG_XXX e)
 
 int PAIR_ZZZ_G1member(ECP_ZZZ *P)
 {
-	BIG_XXX q;
+    ECP_ZZZ W,T;
+    BIG_XXX x;
+    FP_YYY cru;
+    if (ECP_ZZZ_isinf(P)) return 0;
+#if PAIRING_FRIENDLY_ZZZ!=BN_CURVE
+    BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
+    ECP_ZZZ_copy(&W,P);
+    ECP_ZZZ_copy(&T,P);
+    ECP_ZZZ_mul(&T,x);
+    ECP_ZZZ_mul(&T,x);
+    ECP_ZZZ_neg(&T);
+
+    FP_YYY_rcopy(&cru, CRu_YYY);
+    FP_YYY_mul(&(W.x), &(W.x), &cru);
+    if (!ECP_ZZZ_equals(&W,&T)) return 0;  // check that Endomorphism works
+
+    ECP_ZZZ_add(&W,P);
+    FP_YYY_mul(&(T.x), &(T.x), &cru);
+    ECP_ZZZ_add(&W,&T);
+    if (!ECP_ZZZ_isinf(&W)) return 0;      // use it to check order
+
+/*	BIG_XXX q;
 	ECP_ZZZ W;
     if (ECP_ZZZ_isinf(P)) return 0;
+#if PAIRING_FRIENDLY_ZZZ!=BN_CURVE
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
 	ECP_ZZZ_copy(&W,P);
 	ECP_ZZZ_mul(&W,q);
-	if (!ECP_ZZZ_isinf(&W)) return 0;
+	if (!ECP_ZZZ_isinf(&W)) return 0; */
+#endif 
 	return 1;
 }
 
@@ -1089,14 +1112,47 @@ int PAIR_ZZZ_G1member(ECP_ZZZ *P)
 
 int PAIR_ZZZ_G2member(ECP2_ZZZ *P)
 {
+    ECP2_ZZZ W,T;
+    BIG_XXX x;
+    FP2_YYY X;
+    FP_YYY fx, fy;
+
+    FP_YYY_rcopy(&fx, Fra_YYY);
+    FP_YYY_rcopy(&fy, Frb_YYY);
+    FP2_YYY_from_FPs(&X, &fx, &fy);
+#if SEXTIC_TWIST_ZZZ==M_TYPE
+    FP2_YYY_inv(&X, &X, NULL);
+    FP2_YYY_norm(&X);
+#endif
+    BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
+
+    ECP2_ZZZ_copy(&W,P);
+    ECP2_ZZZ_frob(&W, &X);
+
+    ECP2_ZZZ_copy(&T,P);
+    ECP2_ZZZ_mul(&T,x);
+
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
+    ECP2_ZZZ_mul(&T,x);
+    BIG_XXX_zero(x); BIG_XXX_inc(x,6);
+    ECP2_ZZZ_mul(&T,x);
+#else
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    ECP2_ZZZ_neg(&T);
+#endif
+#endif
+
+    if (ECP2_ZZZ_equals(&W,&T)) return 1;
+    return 0;
+/*
 	BIG_XXX q;
 	ECP2_ZZZ W;
-   if (ECP2_ZZZ_isinf(P)) return 0;
+    if (ECP2_ZZZ_isinf(P)) return 0;
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
 	ECP2_ZZZ_copy(&W,P);
 	ECP2_ZZZ_mul(&W,q);
 	if (!ECP2_ZZZ_isinf(&W)) return 0;
-	return 1;
+	return 1; */
 }
 
 
@@ -1127,7 +1183,36 @@ int PAIR_ZZZ_GTcyclotomic(FP12_YYY *m)
 /* test for full GT group membership */
 int PAIR_ZZZ_GTmember(FP12_YYY *m)
 {
-	BIG_XXX q;
+    BIG_XXX x;
+    FP2_YYY X;
+    FP_YYY fx, fy;
+    FP12_YYY r,t;
+    if (!PAIR_ZZZ_GTcyclotomic(m)) return 0;
+
+    FP_YYY_rcopy(&fx, Fra_YYY);
+    FP_YYY_rcopy(&fy, Frb_YYY);
+    FP2_YYY_from_FPs(&X, &fx, &fy);
+    BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
+
+    FP12_YYY_copy(&r,m);
+    FP12_YYY_frob(&r, &X);
+
+    FP12_YYY_pow(&t,m,x);
+
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
+    FP12_YYY_pow(&t,&t,x);
+    BIG_XXX_zero(x); BIG_XXX_inc(x,6);
+    FP12_YYY_pow(&t,&t,x);
+#else
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP12_YYY_conj(&t,&t);
+#endif
+#endif
+
+    if (FP12_YYY_equals(&r,&t)) return 1;
+    return 0;
+
+/*	BIG_XXX q;
 	FP12_YYY r;
     if (!PAIR_ZZZ_GTcyclotomic(m)) return 0;
 
@@ -1135,7 +1220,7 @@ int PAIR_ZZZ_GTmember(FP12_YYY *m)
     FP12_YYY_pow(&r,m,q);
 	if (!FP12_YYY_isunity(&r)) return 0;
 	return 1;
-
+*/
 }
 
 #ifdef HAS_MAIN

@@ -1033,20 +1033,72 @@ void ZZZ::PAIR_GTpow(FP12 *f, BIG e)
 
 int ZZZ::PAIR_G1member(ECP *P)
 {
-	BIG q;
-	ECP W;
+    ECP W,T;
+    BIG x;
+    FP cru;
     if (ECP_isinf(P)) return 0;
+#if PAIRING_FRIENDLY_ZZZ!=BN_CURVE
+    BIG_rcopy(x, CURVE_Bnx);
+    ECP_copy(&W,P);
+    ECP_copy(&T,P);
+    ECP_mul(&T,x);
+    ECP_mul(&T,x);
+    ECP_neg(&T);
+
+    FP_rcopy(&cru, CRu);
+    FP_mul(&(W.x), &(W.x), &cru);
+    if (!ECP_equals(&W,&T)) return 0;  // check that Endomorphism works
+
+    ECP_add(&W,P);
+    FP_mul(&(T.x), &(T.x), &cru);
+    ECP_add(&W,&T);
+    if (!ECP_isinf(&W)) return 0;      // use it to check order
+/*
     BIG_rcopy(q, CURVE_Order);
 	ECP_copy(&W,P);
 	ECP_mul(&W,q);
-	if (!ECP_isinf(&W)) return 0;
-	return 1;
+	if (!ECP_isinf(&W)) return 0; */
+#endif
+	return 1; 
 }
 
 /* test G2 group membership */
-
 int ZZZ::PAIR_G2member(ECP2 *P)
 {
+    ECP2 W,T;
+    BIG x;
+    FP2 X;
+    FP fx, fy;
+
+    FP_rcopy(&fx, Fra);
+    FP_rcopy(&fy, Frb);
+    FP2_from_FPs(&X, &fx, &fy);
+#if SEXTIC_TWIST_ZZZ==M_TYPE
+    FP2_inv(&X, &X, NULL);
+    FP2_norm(&X);
+#endif
+    BIG_rcopy(x, CURVE_Bnx);
+
+    ECP2_copy(&W,P);
+    ECP2_frob(&W, &X);
+
+    ECP2_copy(&T,P);
+    ECP2_mul(&T,x);
+
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
+    ECP2_mul(&T,x);
+    BIG_zero(x); BIG_inc(x,6);
+    ECP2_mul(&T,x);
+#else
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    ECP2_neg(&T);
+#endif
+#endif
+
+    if (ECP2_equals(&W,&T)) return 1;
+    return 0;
+
+/*
 	BIG q;
 	ECP2 W;
     if (ECP2_isinf(P)) return 0;
@@ -1054,7 +1106,7 @@ int ZZZ::PAIR_G2member(ECP2 *P)
 	ECP2_copy(&W,P);
 	ECP2_mul(&W,q);
 	if (!ECP2_isinf(&W)) return 0;
-	return 1;
+	return 1; */
 }
 
 /* Check that m is in cyclotomic sub-group */
@@ -1084,14 +1136,41 @@ int ZZZ::PAIR_GTcyclotomic(FP12 *m)
 /* test for full GT group membership */
 int ZZZ::PAIR_GTmember(FP12 *m)
 {
-	BIG q;
-    FP12 r;
+    BIG x;
+    FP2 X;
+    FP fx, fy;
+    FP12 r,t;
     if (!PAIR_GTcyclotomic(m)) return 0;
+
+    FP_rcopy(&fx, Fra);
+    FP_rcopy(&fy, Frb);
+    FP2_from_FPs(&X, &fx, &fy);
+    BIG_rcopy(x, CURVE_Bnx);
+
+    FP12_copy(&r,m);
+    FP12_frob(&r, &X);
+
+    FP12_pow(&t,m,x);
+
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
+    FP12_pow(&t,&t,x);
+    BIG_zero(x); BIG_inc(x,6);
+    FP12_pow(&t,&t,x);
+#else
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP12_conj(&t,&t);
+#endif
+#endif
+
+    if (FP12_equals(&r,&t)) return 1;
+    return 0;
+
+/*
 
     BIG_rcopy(q, CURVE_Order);
     FP12_pow(&r, m, q);
 	if (!FP12_isunity(&r)) return 0;
-	return 1;
+	return 1; */
 }
 
 #ifdef HAS_MAIN

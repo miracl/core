@@ -845,13 +845,35 @@ void ZZZ::PAIR_GTpow(FP24 *f, BIG e)
 
 int ZZZ::PAIR_G1member(ECP *P)
 {
+    ECP W,T;
+    BIG x;
+    FP cru;
+    if (ECP_isinf(P)) return 0;
+
+    BIG_rcopy(x, CURVE_Bnx);
+    ECP_copy(&W,P);
+    ECP_copy(&T,P);
+    ECP_mul(&T,x); ECP_mul(&T,x);
+    ECP_mul(&T,x); ECP_mul(&T,x);
+    ECP_neg(&T);
+
+    FP_rcopy(&cru, CRu);
+    FP_mul(&(W.x), &(W.x), &cru);
+    if (!ECP_equals(&W,&T)) return 0;  // check that Endomorphism works
+
+    ECP_add(&W,P);
+    FP_mul(&(T.x), &(T.x), &cru);
+    ECP_add(&W,&T);
+    if (!ECP_isinf(&W)) return 0;      // use it to check order
+
+/*
 	BIG q;
 	ECP W;
     if (ECP_isinf(P)) return 0;
     BIG_rcopy(q, CURVE_Order);
 	ECP_copy(&W,P);
 	ECP_mul(&W,q);
-	if (!ECP_isinf(&W)) return 0;
+	if (!ECP_isinf(&W)) return 0; */
 	return 1;
 }
 
@@ -859,6 +881,26 @@ int ZZZ::PAIR_G1member(ECP *P)
 
 int ZZZ::PAIR_G2member(ECP4 *P)
 {
+    ECP4 W,T;
+    BIG x;
+    FP2 X[3];
+    ECP4_frob_constants(X);
+    BIG_rcopy(x, CURVE_Bnx);
+
+    ECP4_copy(&W,P);
+    ECP4_frob(&W, X, 1);
+
+    ECP4_copy(&T,P);
+    ECP4_mul(&T,x);
+
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    ECP4_neg(&T);
+#endif
+
+    if (ECP4_equals(&W,&T)) return 1;
+    return 0;
+
+/*
 	BIG q;
 	ECP4 W;
     if (ECP4_isinf(P)) return 0;
@@ -866,7 +908,7 @@ int ZZZ::PAIR_G2member(ECP4 *P)
 	ECP4_copy(&W,P);
 	ECP4_mul(&W,q);
 	if (!ECP4_isinf(&W)) return 0;
-	return 1;
+	return 1; */
 }
 
 /* Check that m is in cyclotomic sub-group */
@@ -896,14 +938,33 @@ int ZZZ::PAIR_GTcyclotomic(FP24 *m)
 
 int ZZZ::PAIR_GTmember(FP24 *m)
 {
-	BIG q;
-    FP24 r;
+    BIG x;
+    FP2 X;
+    FP fx, fy;
+    FP24 r,t;
     if (!PAIR_GTcyclotomic(m)) return 0;
 
+    FP_rcopy(&fx, Fra);
+    FP_rcopy(&fy, Frb);
+    FP2_from_FPs(&X, &fx, &fy);
+    BIG_rcopy(x, CURVE_Bnx);
+
+    FP24_copy(&r,m);
+    FP24_frob(&r, &X, 1);
+
+    FP24_pow(&t,m,x);
+
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP24_conj(&t,&t);
+#endif
+
+    if (FP24_equals(&r,&t)) return 1;
+    return 0;
+/*
     BIG_rcopy(q, CURVE_Order);
     FP24_pow(&r, m, q);
 	if (!FP24_isunity(&r)) return 0;
-	return 1;
+	return 1; */
 }
 
 #ifdef HAS_MAIN

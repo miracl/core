@@ -829,21 +829,46 @@ public final class PAIR8 {
 /* test G1 group membership */
     public static boolean G1member(ECP P)
     {
+        if (P.is_infinity()) return false;
+        BIG x = new BIG(ROM.CURVE_Bnx);
+        FP cru = new FP(new BIG(ROM.CRu));
+        ECP W=new ECP(P);
+        ECP T=P.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T.neg();
+        W.getx().mul(cru);
+        if (!W.equals(T)) return false;
+        W.add(P);
+        T.getx().mul(cru);
+        W.add(T);
+        if (!W.is_infinity()) return false;
+/*
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
         ECP W=P.mul(q);
-        if (!W.is_infinity()) return false;
+        if (!W.is_infinity()) return false; */
         return true;
     }
 
 /* test G2 group membership */
     public static boolean G2member(ECP8 P)
     {
+        FP2[] F = ECP8.frob_constants();
+        BIG x = new BIG(ROM.CURVE_Bnx);
+
+        ECP8 W=new ECP8(P); W.frob(F,1);
+        ECP8 T=P.mul(x);
+
+        if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+            T.neg();
+        }
+        if (W.equals(T))
+            return true;
+        return false;
+/*
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
         ECP8 W=P.mul(q);
         if (!W.is_infinity()) return false;
-        return true;
+        return true; */
     }
 
 /* Check that m is in cyclotomic sub-group */
@@ -870,10 +895,25 @@ public final class PAIR8 {
     public static boolean GTmember(FP48 m)
     {
         if (!GTcyclotomic(m)) return false;
+
+        FP2 f=new FP2(new BIG(ROM.Fra),new BIG(ROM.Frb));
+        BIG x = new BIG(ROM.CURVE_Bnx);
+
+        FP48 r=new FP48(m); r.frob(f,1);
+        FP48 t=m.pow(x);
+
+        if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+            t.conj();
+        }    
+        if (r.equals(t))
+            return true;
+        return false;
+
+/*
         BIG q=new BIG(ROM.CURVE_Order);
         FP48 r=m.pow(q);
         if (!r.isunity()) return false;
-        return true;
+        return true; */
     }
 }
 

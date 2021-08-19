@@ -933,22 +933,57 @@ PFBNF */
 /* test G1 group membership */
     public static boolean G1member(ECP P)
     {
-		BIG q=new BIG(ROM.CURVE_Order);  
+		//BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
-        ECP W=P.mul(q);
-//        W.affine();
-        if (!W.is_infinity()) return false;
+        if (CONFIG_CURVE.CURVE_PAIRING_TYPE != CONFIG_CURVE.BN)
+        {
+            BIG x = new BIG(ROM.CURVE_Bnx);
+            FP cru = new FP(new BIG(ROM.CRu));
+            ECP W=new ECP(P);
+            ECP T=P.mul(x); T=T.mul(x); T.neg();
+            W.getx().mul(cru);
+            if (!W.equals(T)) return false;
+            W.add(P);
+            T.getx().mul(cru);
+            W.add(T);
+            if (!W.is_infinity()) return false;
+/*
+            ECP W=P.mul(q);
+            if (!W.is_infinity()) return false; */
+        }
         return true;
     }
 
 /* test G2 group membership */
     public static boolean G2member(ECP2 P)
     {
+        FP2 f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
+        if (CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE) {
+            f.inverse(null);
+            f.norm();
+        }
+        BIG x = new BIG(ROM.CURVE_Bnx);
+        ECP2 W=new ECP2(P); W.frob(f);
+        ECP2 T=P.mul(x);
+
+        if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
+            T=T.mul(x);
+            BIG six=new BIG(6);
+            T=T.mul(six);
+        } else {
+            if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+                T.neg();
+            }
+        }
+        if (W.equals(T))
+            return true;
+        return false;
+/*
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
         ECP2 W=P.mul(q);
         if (!W.is_infinity()) return false;
-        return true;
+        return true;  */
     }
 
 /* Check that m is in cyclotomic sub-group */
@@ -975,10 +1010,30 @@ PFBNF */
     public static boolean GTmember(FP12 m)
     {
         if (!GTcyclotomic(m)) return false;
+
+        FP2 f=new FP2(new BIG(ROM.Fra),new BIG(ROM.Frb));
+        BIG x = new BIG(ROM.CURVE_Bnx);
+
+        FP12 r=new FP12(m); r.frob(f);
+        FP12 t=m.pow(x);
+        if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
+            t=t.pow(x);
+            BIG six=new BIG(6);
+            t=t.pow(six);
+        } else {
+            if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+                t.conj();
+            }
+        }      
+        if (r.equals(t))
+            return true;
+        return false;
+
+/*
         BIG q=new BIG(ROM.CURVE_Order);
         FP12 r=m.pow(q); 
         if (!r.isunity()) return false;
-        return true;
+        return true; */
     }
 
 }

@@ -834,13 +834,34 @@ void PAIR_ZZZ_GTpow(FP24_YYY *f, BIG_XXX e)
 
 int PAIR_ZZZ_G1member(ECP_ZZZ *P)
 {
-	BIG_XXX q;
+    ECP_ZZZ W,T;
+    BIG_XXX x;
+    FP_YYY cru;
+    if (ECP_ZZZ_isinf(P)) return 0;
+
+    BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
+    ECP_ZZZ_copy(&W,P);
+    ECP_ZZZ_copy(&T,P);
+    ECP_ZZZ_mul(&T,x); ECP_ZZZ_mul(&T,x);
+    ECP_ZZZ_mul(&T,x); ECP_ZZZ_mul(&T,x);
+    ECP_ZZZ_neg(&T);
+
+    FP_YYY_rcopy(&cru, CRu_YYY);
+    FP_YYY_mul(&(W.x), &(W.x), &cru);
+    if (!ECP_ZZZ_equals(&W,&T)) return 0;  // check that Endomorphism works
+
+    ECP_ZZZ_add(&W,P);
+    FP_YYY_mul(&(T.x), &(T.x), &cru);
+    ECP_ZZZ_add(&W,&T);
+    if (!ECP_ZZZ_isinf(&W)) return 0;      // use it to check order
+
+/*	BIG_XXX q;
 	ECP_ZZZ W;
-   if (ECP_ZZZ_isinf(P)) return 0;
+    if (ECP_ZZZ_isinf(P)) return 0;
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
 	ECP_ZZZ_copy(&W,P);
 	ECP_ZZZ_mul(&W,q);
-	if (!ECP_ZZZ_isinf(&W)) return 0;
+	if (!ECP_ZZZ_isinf(&W)) return 0; */
 	return 1;
 }
 
@@ -848,14 +869,33 @@ int PAIR_ZZZ_G1member(ECP_ZZZ *P)
 
 int PAIR_ZZZ_G2member(ECP4_ZZZ *P)
 {
+    ECP4_ZZZ W,T;
+    BIG_XXX x;
+    FP2_YYY X[3];
+    ECP4_ZZZ_frob_constants(X);
+    BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
+
+    ECP4_ZZZ_copy(&W,P);
+    ECP4_ZZZ_frob(&W, X, 1);
+
+    ECP4_ZZZ_copy(&T,P);
+    ECP4_ZZZ_mul(&T,x);
+
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    ECP4_ZZZ_neg(&T);
+#endif
+
+    if (ECP4_ZZZ_equals(&W,&T)) return 1;
+    return 0;
+/*
 	BIG_XXX q;
 	ECP4_ZZZ W;
-   if (ECP4_ZZZ_isinf(P)) return 0;
+    if (ECP4_ZZZ_isinf(P)) return 0;
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
 	ECP4_ZZZ_copy(&W,P);
 	ECP4_ZZZ_mul(&W,q);
 	if (!ECP4_ZZZ_isinf(&W)) return 0;
-	return 1;
+	return 1; */
 }
 
 /* Check that m is in cyclotomic sub-group */
@@ -886,6 +926,30 @@ int PAIR_ZZZ_GTcyclotomic(FP24_YYY *m)
 /* test for full GT group membership */
 int PAIR_ZZZ_GTmember(FP24_YYY *m)
 {
+    BIG_XXX x;
+    FP2_YYY X;
+    FP_YYY fx, fy;
+    FP24_YYY r,t;
+    if (!PAIR_ZZZ_GTcyclotomic(m)) return 0;
+
+    FP_YYY_rcopy(&fx, Fra_YYY);
+    FP_YYY_rcopy(&fy, Frb_YYY);
+    FP2_YYY_from_FPs(&X, &fx, &fy);
+    BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
+
+    FP24_YYY_copy(&r,m);
+    FP24_YYY_frob(&r, &X, 1);
+
+    FP24_YYY_pow(&t,m,x);
+
+#if SIGN_OF_X_ZZZ==NEGATIVEX
+    FP24_YYY_conj(&t,&t);
+#endif
+
+    if (FP24_YYY_equals(&r,&t)) return 1;
+    return 0;
+
+/*
 	BIG_XXX q;
     FP24_YYY r;
     if (!PAIR_ZZZ_GTcyclotomic(m)) return 0;
@@ -894,7 +958,7 @@ int PAIR_ZZZ_GTmember(FP24_YYY *m)
 	FP24_YYY_pow(&r,m,q);
 	if (!FP24_YYY_isunity(&r)) return 0;
 	return 1;
-
+*/
 }
 
 

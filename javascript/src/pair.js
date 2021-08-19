@@ -1007,22 +1007,66 @@ var PAIR = function(ctx) {
 /* test G1 group membership */
     PAIR.G1member=function(P)
     {
-        var q = new ctx.BIG(0);
-        q.rcopy(ctx.ROM_CURVE.CURVE_Order);
+
+ //       var q = new ctx.BIG(0);
+ //       q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         if (P.is_infinity()) return false;
-        var W=P.mul(q);
-        if (!W.is_infinity()) return false;
+        if (ctx.ECP.CURVE_PAIRING_TYPE != ctx.ECP.BN) {
+            var x = new ctx.BIG(0);
+            x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
+            var bcru = new ctx.BIG(0);
+            bcru.rcopy(ctx.ROM_FIELD.CRu);
+            var cru = new ctx.FP(bcru);
+            var W=new ctx.ECP(); W.copy(P);
+            var T=P.mul(x); T=T.mul(x); T.neg();
+            W.getx().mul(cru);
+            if (!W.equals(T)) return false;
+            W.add(P);
+            T.getx().mul(cru);
+            W.add(T);
+            if (!W.is_infinity()) return false;
+/*
+            var W=P.mul(q);
+            if (!W.is_infinity()) return false; */
+        } 
         return true;
     };
 /* test G2 group membership */
     PAIR.G2member=function(P)
     {
+
+        var fa=new ctx.BIG(0); fa.rcopy(ctx.ROM_FIELD.Fra);
+        var fb=new ctx.BIG(0); fb.rcopy(ctx.ROM_FIELD.Frb);
+        var f=new ctx.FP2(fa,fb); 
+        var x = new ctx.BIG(0);
+        x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
+        if (ctx.ECP.SEXTIC_TWIST==ctx.ECP.M_TYPE)
+		{
+		    f.inverse(null);
+		    f.norm();
+		}
+        var W=new ctx.ECP2(); W.copy(P); W.frob(f);
+        var T=P.mul(x);
+        if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BN) {
+            T=T.mul(x);
+            var six=new ctx.BIG(6);
+            T=T.mul(six);
+        } else {
+            if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+                T.neg();
+            }
+        }
+        if (W.equals(T))
+            return true;
+        return false;
+
+/*
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         if (P.is_infinity()) return false;
         var W=P.mul(q);
         if (!W.is_infinity()) return false;
-        return true;
+        return true; */
     };
 
 /* Check that m is in cyclotomic sub-group */
@@ -1050,11 +1094,33 @@ var PAIR = function(ctx) {
     PAIR.GTmember= function(m)
     {
         if (!PAIR.GTcyclotomic(m)) return false;
+
+        var fa=new ctx.BIG(0); fa.rcopy(ctx.ROM_FIELD.Fra);
+        var fb=new ctx.BIG(0); fb.rcopy(ctx.ROM_FIELD.Frb);
+        var f=new ctx.FP2(fa,fb); 
+        var x = new ctx.BIG(0);
+        x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
+        var r=new ctx.FP12(m); r.frob(f);
+        var t=m.pow(x);
+
+        if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BN) {
+            t=t.pow(x);
+            var six=new ctx.BIG(6);
+            t=t.pow(six);
+        } else {
+            if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+                t.conj();
+            }
+        }
+        if (r.equals(t))
+            return true;
+        return false;
+/*
         var q = new ctx.BIG(0);
         q.rcopy(ctx.ROM_CURVE.CURVE_Order);
         var r=m.pow(q);
         if (!r.isunity()) return false;
-        return true;
+        return true; */
     };
 
 

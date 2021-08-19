@@ -950,28 +950,51 @@ pub fn gtpow(d: &FP48, e: &BIG) -> FP48 {
 /* test G1 group membership */
 #[allow(non_snake_case)]
 pub fn g1member(P: &ECP) -> bool {
-    let q = BIG::new_ints(&rom::CURVE_ORDER);
+    //let q = BIG::new_ints(&rom::CURVE_ORDER);
     if P.is_infinity() {
         return false;
     }
+    let x = BIG::new_ints(&rom::CURVE_BNX);
+    let mut cru = FP::new_big(&BIG::new_ints(&rom::CRU));
+    let mut W=ECP::new(); W.copy(P); W.mulx(&mut cru);
+    let mut T=P.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T.neg();
+    if !W.equals(&T) {
+        return false;
+    }
+    W.add(P); T.mulx(&mut cru); W.add(&T);
+    if !W.is_infinity() {
+        return false;
+    }   
+/*
     let W=P.mul(&q); 
     if !W.is_infinity() {
         return false;
-    }
+    } */
     true
 }
 
 /* test G2 group membership */
 #[allow(non_snake_case)]
 pub fn g2member(P: &ECP8) -> bool {
-    let q = BIG::new_ints(&rom::CURVE_ORDER);
+    //let q = BIG::new_ints(&rom::CURVE_ORDER);
     if P.is_infinity() {
         return false;
     }
+    let f = ECP8::frob_constants();
+    let x = BIG::new_ints(&rom::CURVE_BNX);
+    let mut W=ECP8::new(); W.copy(P); W.frob(&f,1);
+    let mut T=P.mul(&x);
+    if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+        T.neg();
+    }
+    if !W.equals(&T) {
+        return false;
+    }
+/*
     let W=P.mul(&q); 
     if !W.is_infinity() {
         return false;
-    }
+    } */
     true
 }
 
@@ -1002,11 +1025,24 @@ pub fn gtmember(m: &FP48) -> bool {
     if !gtcyclotomic(m) {
         return false;
     }
+    let f = FP2::new_bigs(&BIG::new_ints(&rom::FRA), &BIG::new_ints(&rom::FRB));    
+    let x = BIG::new_ints(&rom::CURVE_BNX);
+    let mut r=FP48::new_copy(m); r.frob(&f,1);
+    let mut t=m.pow(&x);
+
+    if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+        t.conj();
+    }
+    
+    if !r.equals(&t) {
+        return false;
+    }
+/*
     let q = BIG::new_ints(&rom::CURVE_ORDER);
     let r = m.pow(&q);
     if !r.isunity() {
         return false;
-    }
+    } */
     true
 }
 

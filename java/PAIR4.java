@@ -733,21 +733,46 @@ public final class PAIR4 {
 /* test G1 group membership */
     public static boolean G1member(ECP P)
     {
-		BIG q=new BIG(ROM.CURVE_Order);  
+        if (P.is_infinity()) return false;
+        BIG x = new BIG(ROM.CURVE_Bnx);
+        FP cru = new FP(new BIG(ROM.CRu));
+        ECP W=new ECP(P);
+        ECP T=P.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T.neg();
+        W.getx().mul(cru);
+        if (!W.equals(T)) return false;
+        W.add(P);
+        T.getx().mul(cru);
+        W.add(T);
+        if (!W.is_infinity()) return false;
+
+/*		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
         ECP W=P.mul(q);
-        if (!W.is_infinity()) return false;
+        if (!W.is_infinity()) return false; */
         return true;
     }
 
 /* test G2 group membership */
     public static boolean G2member(ECP4 P)
     {
+        FP2[] F = ECP4.frob_constants();
+        BIG x = new BIG(ROM.CURVE_Bnx);
+
+        ECP4 W=new ECP4(P); W.frob(F,1);
+        ECP4 T=P.mul(x);
+
+        if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+            T.neg();
+        }
+        if (W.equals(T))
+            return true;
+        return false;
+/*
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;
         ECP4 W=P.mul(q);
         if (!W.is_infinity()) return false;
-        return true;
+        return true; */
     }
 
 /* Check that m is in cyclotomic sub-group */
@@ -774,10 +799,23 @@ public final class PAIR4 {
     public static boolean GTmember(FP24 m)
     {
         if (!GTcyclotomic(m)) return false;
-        BIG q=new BIG(ROM.CURVE_Order);
+        FP2 f=new FP2(new BIG(ROM.Fra),new BIG(ROM.Frb));
+        BIG x = new BIG(ROM.CURVE_Bnx);
+
+        FP24 r=new FP24(m); r.frob(f,1);
+        FP24 t=m.pow(x);
+
+        if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+            t.conj();
+        }    
+        if (r.equals(t))
+            return true;
+        return false;
+
+/*        BIG q=new BIG(ROM.CURVE_Order);
         FP24 r=m.pow(q);
         if (!r.isunity()) return false;
-        return true;
+        return true; */
     }
 }
 

@@ -413,6 +413,7 @@ int bn254(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
     //printf("Q= "); ECP2_output(&Q); printf("\n");
     ECP2_mul(&Q,r);
     if (!ECP2_isinf(&Q))
@@ -685,6 +686,7 @@ int bls383(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
     ECP2_mul(&Q,r);
     if (!ECP2_isinf(&Q))
     {
@@ -719,6 +721,7 @@ int bls383(csprng *RNG)
     PAIR_fexp(&w);
 
     FP12_copy(&g, &w);
+
     PAIR_GTpow(&g, r);
 
     if (!FP12_isunity(&g))
@@ -926,6 +929,7 @@ int bls24(csprng *RNG)
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }
+
     ECP4_mul(&Q,r);
     if (!ECP4_isinf(&Q))
     {

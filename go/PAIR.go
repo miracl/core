@@ -987,20 +987,53 @@ func GTpow(d *FP12, e *BIG) *FP12 {
 
 /* test G1 group membership */
 func G1member(P *ECP) bool {
-	q := NewBIGints(CURVE_Order)
+	//q := NewBIGints(CURVE_Order)
 	if P.Is_infinity() {return false}
-	W:=P.mul(q)
-	if !W.Is_infinity() {return false}
+	if CURVE_PAIRING_TYPE != BN {
+		x := NewBIGints(CURVE_Bnx)
+		cru := NewFPbig(NewBIGints(CRu))
+		W := NewECP(); W.Copy(P)
+		W.getx().mul(cru)
+		T := P.mul(x); T=T.mul(x); T.Neg()
+		if !W.Equals(T) {return false}
+		W.Add(P);
+		T.getx().mul(cru)
+		W.Add(T)
+		if !W.Is_infinity() {return false}
+/*
+		W:=P.mul(q)
+		if !W.Is_infinity() {return false} */
+	}
 	return true
 }
 
 /* test G2 group membership */
 func G2member(P *ECP2) bool {
+	f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
+	if SEXTIC_TWIST == M_TYPE {
+		f.inverse(nil)
+		f.norm()
+	}
+	x := NewBIGints(CURVE_Bnx)
+	W := NewECP2(); W.Copy(P); W.frob(f)
+	T := P.mul(x)
+	if CURVE_PAIRING_TYPE == BN {
+		T=T.mul(x)
+		six:=NewBIGint(6)
+		T=T.mul(six)
+	} else {
+		if SIGN_OF_X == NEGATIVEX {
+			T.neg()
+		}
+	}
+	if !W.Equals(T) {return false}
+	return true
+/*
 	q := NewBIGints(CURVE_Order)
 	if P.Is_infinity() {return false}
 	W:=P.mul(q)
 	if !W.Is_infinity() {return false}
-	return true
+	return true */
 }
 
 /* Check that m is in cyclotomic sub-group */
@@ -1037,10 +1070,28 @@ func GTmember(m *FP12) bool {
 	if !GTcyclotomic(m) {
 		return false
 	}
+	f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
+	x := NewBIGints(CURVE_Bnx)
+
+	r := NewFP12copy(m); r.frob(f)
+	t := m.Pow(x)
+
+	if CURVE_PAIRING_TYPE == BN {
+		t=t.Pow(x)
+		six:=NewBIGint(6)
+		t=t.Pow(six)
+	} else {
+		if SIGN_OF_X == NEGATIVEX {
+			t.conj()
+		}
+	}
+	if !r.Equals(t) {return false}
+	return true
+/*
 	q := NewBIGints(CURVE_Order)
 	r := m.Pow(q)
 	if !r.Isunity() {
 		return false
-	}
-	return true
+	} 
+	return true */
 }
