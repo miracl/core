@@ -1001,8 +1001,8 @@ PFBNF */
             var W=ECP(); W.copy(P); W.mulx(cru)
             var T=P.mul(x); T=T.mul(x); T.neg()
             if !W.equals(T) {return false}
-            W.add(P); T.mulx(cru); W.add(T)
-            if !W.is_infinity() {return false}
+//            W.add(P); T.mulx(cru); W.add(T)
+//            if !W.is_infinity() {return false}
 
 /*
             let W=P.mul(q)

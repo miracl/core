@@ -1049,10 +1049,11 @@ int ZZZ::PAIR_G1member(ECP *P)
     FP_mul(&(W.x), &(W.x), &cru);
     if (!ECP_equals(&W,&T)) return 0;  // check that Endomorphism works
 
-    ECP_add(&W,P);
-    FP_mul(&(T.x), &(T.x), &cru);
-    ECP_add(&W,&T);
-    if (!ECP_isinf(&W)) return 0;      // use it to check order
+// Not needed
+//    ECP_add(&W,P);
+//    FP_mul(&(T.x), &(T.x), &cru);
+//    ECP_add(&W,&T);
+//    if (!ECP_isinf(&W)) return 0;      // use it to check order
 /*
     BIG_rcopy(q, CURVE_Order);
 	ECP_copy(&W,P);

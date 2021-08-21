@@ -836,10 +836,12 @@ public final class PAIR8 {
         ECP T=P.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T.neg();
         W.getx().mul(cru);
         if (!W.equals(T)) return false;
-        W.add(P);
-        T.getx().mul(cru);
-        W.add(T);
-        if (!W.is_infinity()) return false;
+
+// Not needed
+//        W.add(P);
+//        T.getx().mul(cru);
+//        W.add(T);
+//        if (!W.is_infinity()) return false;
 /*
 		BIG q=new BIG(ROM.CURVE_Order);  
         if (P.is_infinity()) return false;

@@ -961,10 +961,12 @@ pub fn g1member(P: &ECP) -> bool {
     if !W.equals(&T) {
         return false;
     }
-    W.add(P); T.mulx(&mut cru); W.add(&T);
-    if !W.is_infinity() {
-        return false;
-    }   
+
+// Not needed
+//    W.add(P); T.mulx(&mut cru); W.add(&T);
+//    if !W.is_infinity() {
+//        return false;
+//    }   
 /*
     let W=P.mul(&q); 
     if !W.is_infinity() {

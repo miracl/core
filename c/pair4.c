@@ -850,10 +850,11 @@ int PAIR_ZZZ_G1member(ECP_ZZZ *P)
     FP_YYY_mul(&(W.x), &(W.x), &cru);
     if (!ECP_ZZZ_equals(&W,&T)) return 0;  // check that Endomorphism works
 
-    ECP_ZZZ_add(&W,P);
-    FP_YYY_mul(&(T.x), &(T.x), &cru);
-    ECP_ZZZ_add(&W,&T);
-    if (!ECP_ZZZ_isinf(&W)) return 0;      // use it to check order
+// Not needed
+//    ECP_ZZZ_add(&W,P);
+//    FP_YYY_mul(&(T.x), &(T.x), &cru);
+//    ECP_ZZZ_add(&W,&T);
+//    if (!ECP_ZZZ_isinf(&W)) return 0;      // use it to check order
 
 /*	BIG_XXX q;
 	ECP_ZZZ W;

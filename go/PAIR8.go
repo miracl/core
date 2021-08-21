@@ -855,10 +855,12 @@ func G1member(P *ECP) bool {
 	W.getx().mul(cru)
 	T := P.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T.Neg()
 	if !W.Equals(T) {return false}
-	W.Add(P);
-	T.getx().mul(cru)
-	W.Add(T)
-	if !W.Is_infinity() {return false}
+
+// Not needed
+//	W.Add(P);
+//	T.getx().mul(cru)
+//	W.Add(T)
+//	if !W.Is_infinity() {return false}
 /*
 	q := NewBIGints(CURVE_Order)
 	if P.Is_infinity() {return false}
