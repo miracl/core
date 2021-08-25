@@ -994,7 +994,9 @@ func G1member(P *ECP) bool {
 		cru := NewFPbig(NewBIGints(CRu))
 		W := NewECP(); W.Copy(P)
 		W.getx().mul(cru)
-		T := P.mul(x); T=T.mul(x); T.Neg()
+		T := P.mul(x)
+		if P.Equals(T) {return false}    // P is of low order     		
+		T=T.mul(x); T.Neg()
 		if !W.Equals(T) {return false}
 
 // Not needed

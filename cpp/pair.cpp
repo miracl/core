@@ -1042,6 +1042,7 @@ int ZZZ::PAIR_G1member(ECP *P)
     ECP_copy(&W,P);
     ECP_copy(&T,P);
     ECP_mul(&T,x);
+    if (ECP_equals(P,&T)) return 0;    // P is of low order
     ECP_mul(&T,x);
     ECP_neg(&T);
 

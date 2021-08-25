@@ -769,7 +769,9 @@ public struct PAIR4 {
         let x=BIG(ROM.CURVE_Bnx)
         let cru=FP(BIG(ROM.CRu))
         var W=ECP(); W.copy(P); W.mulx(cru)
-        var T=P.mul(x); T=T.mul(x); T=T.mul(x); T=T.mul(x); T.neg()
+        var T=P.mul(x); 
+        if P.equals(T) {return false}      // P is of low order         
+        T=T.mul(x); T=T.mul(x); T=T.mul(x); T.neg()
         if !W.equals(T) {return false}
 //        W.add(P); T.mulx(cru); W.add(T)
 //        if !W.is_infinity() {return false}

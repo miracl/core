@@ -940,7 +940,9 @@ PFBNF */
             BIG x = new BIG(ROM.CURVE_Bnx);
             FP cru = new FP(new BIG(ROM.CRu));
             ECP W=new ECP(P);
-            ECP T=P.mul(x); T=T.mul(x); T.neg();
+            ECP T=P.mul(x); 
+            if (P.equals(T)) return false;    // P is of low order            
+            T=T.mul(x); T.neg();
             W.getx().mul(cru);
             if (!W.equals(T)) return false;
 // Not needed

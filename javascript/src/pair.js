@@ -1018,7 +1018,9 @@ var PAIR = function(ctx) {
             bcru.rcopy(ctx.ROM_FIELD.CRu);
             var cru = new ctx.FP(bcru);
             var W=new ctx.ECP(); W.copy(P);
-            var T=P.mul(x); T=T.mul(x); T.neg();
+            var T=P.mul(x); 
+            if (P.equals(T)) return false;    // P is of low order
+            T=T.mul(x); T.neg();
             W.getx().mul(cru);
             if (!W.equals(T)) return false;
 // Not needed

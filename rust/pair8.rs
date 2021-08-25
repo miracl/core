@@ -957,7 +957,9 @@ pub fn g1member(P: &ECP) -> bool {
     let x = BIG::new_ints(&rom::CURVE_BNX);
     let mut cru = FP::new_big(&BIG::new_ints(&rom::CRU));
     let mut W=ECP::new(); W.copy(P); W.mulx(&mut cru);
-    let mut T=P.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T.neg();
+    let mut T=P.mul(&x); 
+    if P.equals(&T) {return false;}    // P is of low order         
+    T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T=T.mul(&x); T.neg();
     if !W.equals(&T) {
         return false;
     }

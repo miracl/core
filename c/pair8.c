@@ -940,7 +940,9 @@ int PAIR_ZZZ_G1member(ECP_ZZZ *P)
     BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
     ECP_ZZZ_copy(&W,P);
     ECP_ZZZ_copy(&T,P);
-    ECP_ZZZ_mul(&T,x); ECP_ZZZ_mul(&T,x);
+    ECP_ZZZ_mul(&T,x); 
+    if (ECP_ZZZ_equals(P,&T)) return 0;    // P is of low order        
+    ECP_ZZZ_mul(&T,x);
     ECP_ZZZ_mul(&T,x); ECP_ZZZ_mul(&T,x);
     ECP_ZZZ_mul(&T,x); ECP_ZZZ_mul(&T,x);
     ECP_ZZZ_mul(&T,x); ECP_ZZZ_mul(&T,x);
