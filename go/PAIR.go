@@ -1030,6 +1030,14 @@ func G2member(P *ECP2) bool {
 			T.neg()
 		}
 	}
+
+	R:=NewECP2(); R.Copy(W)
+    R.frob(f)
+    W.Sub(R)
+    R.Copy(T)
+    R.frob(f)
+    W.Add(R)
+
 	if !W.Equals(T) {return false}
 	return true
 /*

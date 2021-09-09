@@ -1033,6 +1033,14 @@ PFBNF */
                 T.neg()
             }
         }
+
+        var R=ECP2(); R.copy(W)
+        R.frob(f)
+        W.sub(R)
+        R.copy(T)
+        R.frob(f)
+        W.add(R)
+
         if !W.equals(T) {return false}
 /*
         let q=BIG(ROM.CURVE_Order)

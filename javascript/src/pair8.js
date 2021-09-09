@@ -899,6 +899,14 @@ var PAIR8 = function(ctx) {
         if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
             T.neg();
         }
+
+        var R=new ctx.ECP8(); R.copy(W);
+        R.frob(F,1);
+        W.sub(R);
+        R.copy(T);
+        R.frob(F,1);
+        W.add(R);
+
         if (W.equals(T))
             return true;
         return false;

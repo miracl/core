@@ -884,7 +884,7 @@ int ZZZ::PAIR_G1member(ECP *P)
 
 int ZZZ::PAIR_G2member(ECP4 *P)
 {
-    ECP4 W,T;
+    ECP4 W,T,R;
     BIG x;
     FP2 X[3];
     ECP4_frob_constants(X);
@@ -899,6 +899,13 @@ int ZZZ::PAIR_G2member(ECP4 *P)
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     ECP4_neg(&T);
 #endif
+
+    ECP4_copy(&R,&W);
+    ECP4_frob(&R,X,1);    // R=\psi^2(P)
+    ECP4_sub(&W,&R);
+    ECP4_copy(&R,&T);    // R=xP
+    ECP4_frob(&R,X,1);
+    ECP4_add(&W,&R);     // W=\psi(P)-\psi^2(P)+\psi(xP)
 
     if (ECP4_equals(&W,&T)) return 1;
     return 0;

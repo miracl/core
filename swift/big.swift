@@ -28,6 +28,9 @@ import core
 
 public struct BIG{
     var w=[Chunk](repeating: 0,count: CONFIG_BIG.NLEN)
+    //var w: ContiguousArray<Chunk> = ContiguousArray(repeating: 0,count: CONFIG_BIG.NLEN)
+    //var w: Array<Chunk> = Array(repeating: 0,count: CONFIG_BIG.NLEN)
+
 /* Constructors */
     init() {
         for i in 0 ..< CONFIG_BIG.NLEN {w[i]=0}
