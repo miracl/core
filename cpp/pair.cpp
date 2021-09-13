@@ -1067,7 +1067,7 @@ int ZZZ::PAIR_G1member(ECP *P)
 /* test G2 group membership */
 int ZZZ::PAIR_G2member(ECP2 *P)
 {
-    ECP2 W,T,R;
+    ECP2 W,T;
     BIG x;
     FP2 X;
     FP fx, fy;
@@ -1098,14 +1098,14 @@ int ZZZ::PAIR_G2member(ECP2 *P)
 #endif
 
 // T=xP
-
+/* Not needed
     ECP2_copy(&R,&W);
     ECP2_frob(&R,&X);    // R=\psi^2(P)
     ECP2_sub(&W,&R);
     ECP2_copy(&R,&T);    // R=xP
     ECP2_frob(&R,&X);
     ECP2_add(&W,&R);     // W=\psi(P)-\psi^2(P)+\psi(xP)
-
+*/
     if (ECP2_equals(&W,&T)) return 1;
     return 0;
 

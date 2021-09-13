@@ -971,7 +971,7 @@ int PAIR_ZZZ_G1member(ECP_ZZZ *P)
 
 int PAIR_ZZZ_G2member(ECP8_ZZZ *P)
 {
-    ECP8_ZZZ W,T,R;
+    ECP8_ZZZ W,T;
     BIG_XXX x;
     FP2_YYY X[3];
     ECP8_ZZZ_frob_constants(X);
@@ -986,14 +986,14 @@ int PAIR_ZZZ_G2member(ECP8_ZZZ *P)
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     ECP8_ZZZ_neg(&T);
 #endif
-
+/*
     ECP8_ZZZ_copy(&R,&W);
     ECP8_ZZZ_frob(&R,X,1);    // R=\psi^2(P)
     ECP8_ZZZ_sub(&W,&R);
     ECP8_ZZZ_copy(&R,&T);    // R=xP
     ECP8_ZZZ_frob(&R,X,1);
     ECP8_ZZZ_add(&W,&R);     // W=\psi(P)-\psi^2(P)+\psi(xP)
-
+*/
     if (ECP8_ZZZ_equals(&W,&T)) return 1;
     return 0;
 /*

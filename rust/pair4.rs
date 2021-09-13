@@ -850,14 +850,14 @@ pub fn g2member(P: &ECP4) -> bool {
     if ecp::SIGN_OF_X == ecp::NEGATIVEX {
         T.neg();
     }
-
+/*
     let mut R=ECP4::new(); R.copy(&W);
     R.frob(&f,1);
     W.sub(&R);
     R.copy(&T);
     R.frob(&f,1);
     W.add(&R);
-
+*/
     if !W.equals(&T) {
         return false;
     }

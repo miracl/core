@@ -1059,14 +1059,14 @@ var PAIR = function(ctx) {
                 T.neg();
             }
         }
-
+/*
         var R=new ctx.ECP2(); R.copy(W);
         R.frob(f);
         W.sub(R);
         R.copy(T);
         R.frob(f);
         W.add(R);
-
+*/
         if (W.equals(T))
             return true;
         return false;

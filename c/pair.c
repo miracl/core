@@ -1114,7 +1114,7 @@ int PAIR_ZZZ_G1member(ECP_ZZZ *P)
 
 int PAIR_ZZZ_G2member(ECP2_ZZZ *P)
 {
-    ECP2_ZZZ W,T,R;
+    ECP2_ZZZ W,T;
     BIG_XXX x;
     FP2_YYY X;
     FP_YYY fx, fy;
@@ -1143,14 +1143,14 @@ int PAIR_ZZZ_G2member(ECP2_ZZZ *P)
     ECP2_ZZZ_neg(&T);
 #endif
 #endif
-
+/* Not needed
     ECP2_ZZZ_copy(&R,&W);
     ECP2_ZZZ_frob(&R,&X);    // R=\psi^2(P)
     ECP2_ZZZ_sub(&W,&R);
     ECP2_ZZZ_copy(&R,&T);    // R=xP
     ECP2_ZZZ_frob(&R,&X);
     ECP2_ZZZ_add(&W,&R);     // W=\psi(P)-\psi^2(P)+\psi(xP)
-
+*/
     if (ECP2_ZZZ_equals(&W,&T)) return 1;
     return 0;
 /*

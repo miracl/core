@@ -961,14 +961,14 @@ pub fn g2member(P: &ECP2) -> bool {
             T.neg();
         }
     }
-
+/*
     let mut R=ECP2::new(); R.copy(&W);
     R.frob(&f);
     W.sub(&R);
     R.copy(&T);
     R.frob(&f);
     W.add(&R);
-
+*/
     if !W.equals(&T) {
         return false;
     }

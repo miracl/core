@@ -768,14 +768,14 @@ public final class PAIR4 {
         if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
             T.neg();
         }
-
+/*
         ECP4 R=new ECP4(W);
         R.frob(F,1);
         W.sub(R);
         R.copy(T);
         R.frob(F,1);
         W.add(R);
-
+*/
         if (W.equals(T))
             return true;
         return false;

@@ -880,14 +880,14 @@ func G2member(P *ECP8) bool {
 	if SIGN_OF_X == NEGATIVEX {
 		T.neg()
 	}
-
+/*
 	R:=NewECP8(); R.Copy(W)
     R.frob(F,1)
     W.Sub(R)
     R.Copy(T)
     R.frob(F,1)
     W.Add(R)
-
+*/
 	if !W.Equals(T) {return false}
 	return true
 /*
