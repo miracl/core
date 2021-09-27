@@ -73,25 +73,36 @@ public class BIG {
 
 
     /* Conditional swap of two bigs depending on d using XOR - no branches */
-    public void cswap(BIG b, int d) {
+    public long cswap(BIG b, int d) {
         int i;
-        long t, c = (long)d;
-        c = ~(c - 1);
-
+        long e,r,s,t, c = (long)-d;
+        s=0; 
+        r=w[0]+b.w[1]; 
         for (i = 0; i < NLEN; i++) {
             t = c & (w[i] ^ b.w[i]);
-            w[i] ^= t;
-            b.w[i] ^= t;
+            t^=r; 
+            e=w[i]^t; s+=e;  // to force calculation of e
+            w[i] = e^r;
+            e=b.w[i]^t; s+=e;
+            b.w[i] = e^r;
+            r+=s;  // sure why not?
         }
+        return s;
     }
 
-    public void cmove(BIG g, int d) {
+    public long cmove(BIG g, int d) {
         int i;
-        long t, b = -d;
-
+        long e,r,s,t, b = (long)-d;
+        s=0; 
+        r=w[0]+g.w[1];
         for (i = 0; i < NLEN; i++) {
-            w[i] ^= (w[i] ^ g.w[i]) & b;
+            t=(w[i] ^ g.w[i])&b;
+            t^=r;
+            e=w[i]^t; s+=e;
+            w[i] = e^r;
+            r+=s;
         }
+        return s;
     }
 
     public static long cast_to_chunk(int x) {

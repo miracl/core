@@ -188,21 +188,37 @@ impl BIG {
     }
 
     /* Conditional swap of two bigs depending on d using XOR - no branches */
-    pub fn cswap(&mut self, b: &mut BIG, d: isize) {
-        let mut c = d as Chunk;
-        c = !(c - 1);
+    pub fn cswap(&mut self, b: &mut BIG, d: isize) -> Chunk {
+        let c = -d as Chunk;
+        let mut w=0 as Chunk;
+        let mut r=self.w[0].wrapping_add(b.w[1]);
         for i in 0..NLEN {
-            let t = c & (self.w[i] ^ b.w[i]);
-            self.w[i] ^= t;
-            b.w[i] ^= t;
+            let mut t = c & (self.w[i] ^ b.w[i]);
+            t^=r;
+            let mut e=self.w[i]^t; w=w.wrapping_add(e);
+            self.w[i]=e^r; 
+            e=b.w[i]^t;  w=w.wrapping_add(e);
+            b.w[i]=e^r;
+            r=r.wrapping_add(w);
+            //self.w[i] ^= t;
+            //b.w[i] ^= t;
         }
+        return w;
     }
 
-    pub fn cmove(&mut self, g: &BIG, d: isize) {
+    pub fn cmove(&mut self, g: &BIG, d: isize)  -> Chunk {
         let b = -d as Chunk;
+        let mut w=0 as Chunk;
+        let mut r=self.w[0].wrapping_add(g.w[1]);
         for i in 0..NLEN {
-            self.w[i] ^= (self.w[i] ^ g.w[i]) & b;
+            let mut t = b & (self.w[i] ^ g.w[i]);
+            t^=r;
+            let e=self.w[i]^t; w=w.wrapping_add(e);
+            self.w[i]=e^r; 
+            r=r.wrapping_add(w);
+            //self.w[i] ^= (self.w[i] ^ g.w[i]) & b;
         }
+        return w;
     }
 
     /* Shift right by less than a word */

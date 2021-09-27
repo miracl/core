@@ -131,11 +131,19 @@ impl DBIG {
         }
     }
 
-    pub fn cmove(&mut self, g: &DBIG, d: isize) {
+    pub fn cmove(&mut self, g: &DBIG, d: isize) -> Chunk {
         let b = -d as Chunk;
+        let mut w=0 as Chunk;
+        let mut r=self.w[0].wrapping_add(g.w[1]);
         for i in 0..big::DNLEN {
-            self.w[i] ^= (self.w[i] ^ g.w[i]) & b;
+            //self.w[i] ^= (self.w[i] ^ g.w[i]) & b;
+            let mut t = b & (self.w[i] ^ g.w[i]);
+            t^=r;
+            let e=self.w[i]^t; w=w.wrapping_add(e);
+            self.w[i]=e^r; 
+            r=r.wrapping_add(w);
         }
+        return w;
     }
 
     /* self+=x */

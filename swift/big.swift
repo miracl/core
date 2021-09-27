@@ -134,24 +134,38 @@ public struct BIG{
         for i in 0 ..< CONFIG_BIG.NLEN {w[i] = x.w[i]}
     }
 /* Conditional swap of two bigs depending on d using XOR - no branches */
-    mutating func cswap(_ b: inout BIG,_ d: Int)
+    @discardableResult mutating func cswap(_ b: inout BIG,_ d: Int) -> Chunk
     {
-        var c = Chunk(d)
-        c = ~(c-1)
+        let c = Chunk(-d)
+        var s=Chunk(0)
+        var r=w[0] &+ b.w[1]
         for i in 0 ..< CONFIG_BIG.NLEN
         {
-            let t=c&(w[i]^b.w[i])
-            w[i]^=t
-            b.w[i]^=t
+            var t=c&(w[i]^b.w[i])
+            t^=r
+            var e=w[i]^t; s &+= e
+            w[i]=e^r
+            e=b.w[i]^t; s &+= e
+            b.w[i]=e^r
+            r &+= s
         }
+        return s
     }
-    mutating func cmove(_ g: BIG,_ d: Int)
+    @discardableResult mutating func cmove(_ g: BIG,_ d: Int) -> Chunk
     {
         let b=Chunk(-d)
+        var s=Chunk(0)
+        var r=w[0] &+ g.w[1]
         for i in 0 ..< CONFIG_BIG.NLEN
         {
-            w[i]^=(w[i]^g.w[i])&b;
+            //w[i]^=(w[i]^g.w[i])&b;
+            var t=(w[i]^g.w[i])&b
+            t^=r
+            let e=w[i]^t; s &+= e
+            w[i]=e^r
+            r &+= s
         }
+        return s
     }
 /* normalise BIG - force all digits < 2^CONFIG_BIG.BASEBITS */
     @discardableResult mutating func norm() -> Chunk

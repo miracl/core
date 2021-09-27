@@ -108,13 +108,21 @@ public class DBIG {
 		return s;
 	}
 
-	public void cmove(DBIG g,int d)
+	public int cmove(DBIG g,int d)
 	{
-		int i;
+		int e,r,s,t,i;
+        s=0;
+        r=w[0]+g.w[1];
 		for (i=0;i<BIG.DNLEN;i++)
 		{
-			w[i]^=(w[i]^g.w[i])&BIG.cast_to_chunk(-d);
+			//w[i]^=(w[i]^g.w[i])&BIG.cast_to_chunk(-d);
+            t=(w[i] ^ g.w[i])&BIG.cast_to_chunk(-d);
+            t^=r;
+            e=w[i]^t; s+=e;
+            w[i] = e^r;
+            r+=s;
 		}
+        return s;
 	}
 
 /* Constructors */

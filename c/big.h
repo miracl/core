@@ -98,24 +98,27 @@ extern void BIG_XXX_rawoutput(BIG_XXX x);
 	@param x a BIG number
 	@param y another BIG number
 	@param s swap takes place if not equal to 0
+    @return ignore
  */
-extern void BIG_XXX_cswap(BIG_XXX x, BIG_XXX y, int s);
+extern chunk BIG_XXX_cswap(BIG_XXX x, BIG_XXX y, int s);
 /**	@brief Conditional copy of BIG number
  *
 	Conditionally copies second parameter to the first (Constant Time without branching)
 	@param x a BIG number
 	@param y another BIG number
 	@param s copy takes place if not equal to 0
+    @return ignore
  */
-extern void BIG_XXX_cmove(BIG_XXX x, BIG_XXX y, int s);
+extern chunk BIG_XXX_cmove(BIG_XXX x, BIG_XXX y, int s);
 /**	@brief Conditional copy of DBIG number
  *
 	Conditionally copies second parameter to the first (Constant Time without branching)
 	@param x a DBIG number
 	@param y another DBIG number
 	@param s copy takes place if not equal to 0
+    @return ignore
  */
-extern void BIG_XXX_dcmove(BIG_XXX x, BIG_XXX y, int s);
+extern chunk BIG_XXX_dcmove(BIG_XXX x, BIG_XXX y, int s);
 /**	@brief Convert from BIG number to byte array (Constant Time)
  *
 	@param a byte array

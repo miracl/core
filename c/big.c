@@ -91,11 +91,14 @@ void BIG_XXX_rawoutput(BIG_XXX a)
 }
 
 /* Swap a and b if d=1 */
-void BIG_XXX_cswap(BIG_XXX a, BIG_XXX b, int d)
+chunk BIG_XXX_cswap(BIG_XXX a, BIG_XXX b, int d)
 {
     int i;
-    chunk t, c = d;
-    c = ~(c - 1);
+    chunk e,r,w,t, c = (chunk) - d;
+    //c = ~(c - 1);
+    w=0; 
+    r=a[0]+b[1]; 
+
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
@@ -103,39 +106,62 @@ void BIG_XXX_cswap(BIG_XXX a, BIG_XXX b, int d)
 #endif
     {
         t = c & (a[i] ^ b[i]);
-        a[i] ^= t;
-        b[i] ^= t;
+        t^=r; 
+        e=a[i]^t; w+=e;  // to force calculation of e
+        a[i] = e^r;
+        e=b[i]^t; w+=e;
+        b[i] = e^r;
+        r+=w;
+//        a[i] ^= t;
+//        b[i] ^= t;
     }
+    return w;
 }
 
 /* Move b to a if d=1 */
-void BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
+chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
 {
     int i;
-    chunk b = (chunk) - d;
+    chunk e,w,r,t,b = (chunk) - d;
+    w=0;
+    r=f[0]+g[1];
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        f[i] ^= (f[i] ^ g[i])&b;
+//        f[i] ^= (f[i] ^ g[i])&b;
+        t=(f[i] ^ g[i])&b;
+        t^=r;
+        e=f[i]^t; w+=e;
+        f[i] = e^r;
+        r+=w;
     }
+    return w;
 }
 
 /* Move g to f if d=1 */
-void BIG_XXX_dcmove(DBIG_XXX f, DBIG_XXX g, int d)
+chunk BIG_XXX_dcmove(DBIG_XXX f, DBIG_XXX g, int d)
 {
     int i;
-    chunk b = (chunk) - d;
+    chunk e,w,r,t,b = (chunk) - d;
+    w=0;
+    r=f[0]+g[1];
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
     for (i = 0; i < DNLEN_XXX; i++)
 #endif
     {
-        f[i] ^= (f[i] ^ g[i])&b;
+//        f[i] ^= (f[i] ^ g[i])&b;
+        t=(f[i] ^ g[i])&b;
+        t^=r;
+        e=f[i]^t; w+=e;
+        f[i] = e^r;
+        r+=w;
     }
+    return w;
 }
 
 /* convert BIG to/from bytes */

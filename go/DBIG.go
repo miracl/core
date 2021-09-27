@@ -81,12 +81,18 @@ func (r *DBIG) split(n uint) *BIG {
 	return t
 }
 
-func (r *DBIG) cmove(g *DBIG, d int) {
+func (r *DBIG) cmove(g *DBIG, d int) Chunk {
 	var b = Chunk(-d)
-
+	s := Chunk(0)
+	v := r.w[0]+g.w[1]
 	for i := 0; i < DNLEN; i++ {
-		r.w[i] ^= (r.w[i] ^ g.w[i]) & b
+		t :=(r.w[i] ^ g.w[i])&b
+		t^=v
+		e := r.w[i]^t; s+=e
+		r.w[i] = e^v
+		v+=s
 	}
+	return s
 }
 
 /* Compare a and b, return 0 if a==b, -1 if a<b, +1 if a>b. Inputs must be normalised */

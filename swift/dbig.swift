@@ -52,14 +52,21 @@ public struct DBIG{
         for i in 0 ..< CONFIG_BIG.DNLEN {w[i]=x[i]}
     }
 
-    mutating func cmove(_ g: DBIG,_ d: Int)
+    @discardableResult mutating func cmove(_ g: DBIG,_ d: Int)  -> Chunk
     {
         let b = Chunk(-d)
-
+        var s=Chunk(0)
+        var r=w[0] &+ g.w[1]
         for i in 0 ..< CONFIG_BIG.DNLEN
         {
-            w[i]^=(w[i]^g.w[i])&b;
+            //w[i]^=(w[i]^g.w[i])&b;
+            var t=(w[i]^g.w[i])&b
+            t^=r
+            let e=w[i]^t; s &+= e
+            w[i]=e^r
+            r &+= s
         }
+        return s
     }
 
 /* Copy from another DBIG */

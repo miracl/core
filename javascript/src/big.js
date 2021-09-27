@@ -112,28 +112,40 @@ BIG = function(ctx) {
 
         /* Conditional swap of two BIGs depending on d using XOR - no branches */
         cswap: function(b, d) {
-            var c = d,
+            var e,r,s,c = d,
                 t, i;
 
             c = ~(c - 1);
-
+            s=0; 
+            r=this.w[0]+b.w[1];
             for (i = 0; i < BIG.NLEN; i++) {
                 t = c & (this.w[i] ^ b.w[i]);
-                this.w[i] ^= t;
-                b.w[i] ^= t;
+                t^=r; 
+                e=this.w[i]^t; s+=e;  // to force calculation of e
+                this.w[i] = e^r;
+                e=b.w[i]^t; s+=e;
+                b.w[i] = e^r;
+                r+=s;
             }
+            return s;
         },
 
         /* Conditional move of BIG depending on d using XOR - no branches */
         cmove: function(b, d) {
-            var c = d,
+            var e,r,s,t,c = d,
                 i;
 
             c = ~(c - 1);
-
+            s=0; 
+            r=this.w[0]+b.w[1];
             for (i = 0; i < BIG.NLEN; i++) {
-                this.w[i] ^= (this.w[i] ^ b.w[i]) & c;
+                t=(this.w[i] ^ b.w[i])&c;
+                t^=r;
+                e=this.w[i]^t; s+=e;
+                this.w[i] = e^r;
+                r+=s;
             }
+            return s;
         },
 
         /* copy from another BIG */
@@ -1315,14 +1327,20 @@ DBIG = function(ctx) {
 
         /* Conditional move of ctx.BIG depending on d using XOR - no branches */
         cmove: function(b, d) {
-            var c = d,
+            var e,r,s,t,c = d,
                 i;
 
             c = ~(c - 1);
-
+            s=0; 
+            r=this.w[0]+b.w[1];
             for (i = 0; i < ctx.BIG.DNLEN; i++) {
-                this.w[i] ^= (this.w[i] ^ b.w[i]) & c;
+                t=(this.w[i] ^ b.w[i])&c;
+                t^=r;
+                e=this.w[i]^t; s+=e;
+                this.w[i] = e^r;
+                r+=s;
             }
+            return s;
         },
 
         /* this+=x */

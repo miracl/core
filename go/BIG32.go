@@ -327,23 +327,34 @@ func (r *BIG) dcopy(x *DBIG) {
 }
 
 /* Conditional swap of two bigs depending on d using XOR - no branches */
-func (r *BIG) cswap(b *BIG, d int) {
-	c := Chunk(d)
-	c = ^(c - 1)
-
+func (r *BIG) cswap(b *BIG, d int) Chunk {
+	c := Chunk(-d)
+	s := Chunk(0)
+	v := r.w[0]+b.w[1]
 	for i := 0; i < NLEN; i++ {
 		t := c & (r.w[i] ^ b.w[i])
-		r.w[i] ^= t
-		b.w[i] ^= t
+		t^=v 
+		e := r.w[i]^t; s+=e  // to force calculation of e
+		r.w[i] = e^v
+		e = b.w[i]^t; s+=e
+		b.w[i] = e^v
+		v+=s
 	}
+	return s
 }
 
-func (r *BIG) cmove(g *BIG, d int) {
+func (r *BIG) cmove(g *BIG, d int) Chunk {
 	b := Chunk(-d)
-
+	s := Chunk(0)
+	v := r.w[0]+g.w[1]
 	for i := 0; i < NLEN; i++ {
-		r.w[i] ^= (r.w[i] ^ g.w[i]) & b
+		t:=(r.w[i] ^ g.w[i])&b
+		t^=v
+		e := r.w[i]^t; s+=e
+		r.w[i] = e^v
+		v+=s
 	}
+	return s
 }
 
 /* general shift right */
