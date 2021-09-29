@@ -112,38 +112,38 @@ BIG = function(ctx) {
 
         /* Conditional swap of two BIGs depending on d using XOR - no branches */
         cswap: function(b, d) {
-            var e,r,s,c = d,
+            var e,r,ra,s,c = d,
                 t, i;
 
             c = ~(c - 1);
             s=0; 
-            r=this.w[0]+b.w[1];
+            r=this.w[0]^b.w[1];
+            ra=r+r; ra>>=1;
             for (i = 0; i < BIG.NLEN; i++) {
                 t = c & (this.w[i] ^ b.w[i]);
                 t^=r; 
-                e=this.w[i]^t; s+=e;  // to force calculation of e
-                this.w[i] = e^r;
-                e=b.w[i]^t; s+=e;
-                b.w[i] = e^r;
-                r+=s;
+                e=this.w[i]^t; s^=e;  // to force calculation of e
+                this.w[i] = e^ra;
+                e=b.w[i]^t; s^=e;
+                b.w[i] = e^ra;
             }
             return s;
         },
 
         /* Conditional move of BIG depending on d using XOR - no branches */
         cmove: function(b, d) {
-            var e,r,s,t,c = d,
+            var e,r,ra,s,t,c = d,
                 i;
 
             c = ~(c - 1);
             s=0; 
-            r=this.w[0]+b.w[1];
+            r=this.w[0]^b.w[1];
+            ra=r+r; ra>>=1;
             for (i = 0; i < BIG.NLEN; i++) {
                 t=(this.w[i] ^ b.w[i])&c;
                 t^=r;
-                e=this.w[i]^t; s+=e;
-                this.w[i] = e^r;
-                r+=s;
+                e=this.w[i]^t; s^=e;
+                this.w[i] = e^ra;
             }
             return s;
         },
@@ -1327,18 +1327,18 @@ DBIG = function(ctx) {
 
         /* Conditional move of ctx.BIG depending on d using XOR - no branches */
         cmove: function(b, d) {
-            var e,r,s,t,c = d,
+            var e,r,ra,s,t,c = d,
                 i;
 
             c = ~(c - 1);
             s=0; 
-            r=this.w[0]+b.w[1];
+            r=this.w[0]^b.w[1];
+            ra=r+r; ra>>=1;
             for (i = 0; i < ctx.BIG.DNLEN; i++) {
                 t=(this.w[i] ^ b.w[i])&c;
                 t^=r;
-                e=this.w[i]^t; s+=e;
-                this.w[i] = e^r;
-                r+=s;
+                e=this.w[i]^t; s^=e;
+                this.w[i] = e^ra;
             }
             return s;
         },

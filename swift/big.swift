@@ -138,16 +138,16 @@ public struct BIG{
     {
         let c = Chunk(-d)
         var s=Chunk(0)
-        var r=w[0] &+ b.w[1]
+        let r=w[0] ^ b.w[1]
+        var ra=r &+ r; ra >>= 1
         for i in 0 ..< CONFIG_BIG.NLEN
         {
             var t=c&(w[i]^b.w[i])
             t^=r
-            var e=w[i]^t; s &+= e
-            w[i]=e^r
-            e=b.w[i]^t; s &+= e
-            b.w[i]=e^r
-            r &+= s
+            var e=w[i]^t; s ^= e
+            w[i]=e^ra
+            e=b.w[i]^t; s ^= e
+            b.w[i]=e^ra
         }
         return s
     }
@@ -155,15 +155,14 @@ public struct BIG{
     {
         let b=Chunk(-d)
         var s=Chunk(0)
-        var r=w[0] &+ g.w[1]
+        let r=w[0] ^ g.w[1]
+        var ra=r &+ r; ra >>= 1
         for i in 0 ..< CONFIG_BIG.NLEN
         {
-            //w[i]^=(w[i]^g.w[i])&b;
             var t=(w[i]^g.w[i])&b
             t^=r
-            let e=w[i]^t; s &+= e
-            w[i]=e^r
-            r &+= s
+            let e=w[i]^t; s ^= e
+            w[i]=e^ra
         }
         return s
     }

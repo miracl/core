@@ -56,15 +56,14 @@ public struct DBIG{
     {
         let b = Chunk(-d)
         var s=Chunk(0)
-        var r=w[0] &+ g.w[1]
+        let r=w[0] ^ g.w[1]
+        var ra=r &+ r; ra >>= 1
         for i in 0 ..< CONFIG_BIG.DNLEN
         {
-            //w[i]^=(w[i]^g.w[i])&b;
             var t=(w[i]^g.w[i])&b
             t^=r
-            let e=w[i]^t; s &+= e
-            w[i]=e^r
-            r &+= s
+            let e=w[i]^t; s ^= e
+            w[i]=e^ra
         }
         return s
     }

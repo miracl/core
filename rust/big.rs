@@ -191,17 +191,15 @@ impl BIG {
     pub fn cswap(&mut self, b: &mut BIG, d: isize) -> Chunk {
         let c = -d as Chunk;
         let mut w=0 as Chunk;
-        let mut r=self.w[0].wrapping_add(b.w[1]);
+        let r=self.w[0]^b.w[1];
+        let mut ra=r.wrapping_add(r); ra >>= 1;
         for i in 0..NLEN {
             let mut t = c & (self.w[i] ^ b.w[i]);
             t^=r;
-            let mut e=self.w[i]^t; w=w.wrapping_add(e);
-            self.w[i]=e^r; 
-            e=b.w[i]^t;  w=w.wrapping_add(e);
-            b.w[i]=e^r;
-            r=r.wrapping_add(w);
-            //self.w[i] ^= t;
-            //b.w[i] ^= t;
+            let mut e=self.w[i]^t; w^=e;
+            self.w[i]=e^ra; 
+            e=b.w[i]^t;  w^=e;
+            b.w[i]=e^ra;
         }
         return w;
     }
@@ -209,14 +207,13 @@ impl BIG {
     pub fn cmove(&mut self, g: &BIG, d: isize)  -> Chunk {
         let b = -d as Chunk;
         let mut w=0 as Chunk;
-        let mut r=self.w[0].wrapping_add(g.w[1]);
+        let r=self.w[0]^g.w[1];
+        let mut ra=r.wrapping_add(r); ra >>= 1;
         for i in 0..NLEN {
             let mut t = b & (self.w[i] ^ g.w[i]);
             t^=r;
-            let e=self.w[i]^t; w=w.wrapping_add(e);
-            self.w[i]=e^r; 
-            r=r.wrapping_add(w);
-            //self.w[i] ^= (self.w[i] ^ g.w[i]) & b;
+            let e=self.w[i]^t; w^=e;
+            self.w[i]=e^ra; 
         }
         return w;
     }

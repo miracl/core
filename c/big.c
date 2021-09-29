@@ -94,11 +94,10 @@ void BIG_XXX_rawoutput(BIG_XXX a)
 chunk BIG_XXX_cswap(BIG_XXX a, BIG_XXX b, int d)
 {
     int i;
-    chunk e,r,w,t, c = (chunk) - d;
-    //c = ~(c - 1);
+    chunk e,r,ra,w,t, c = (chunk) - d;
     w=0; 
-    r=a[0]+b[1]; 
-
+    r=a[0]^b[1]; 
+    ra=r+r; ra>>=1; // I know this doesn't change r, but the compiler doesn't!
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
@@ -107,13 +106,10 @@ chunk BIG_XXX_cswap(BIG_XXX a, BIG_XXX b, int d)
     {
         t = c & (a[i] ^ b[i]);
         t^=r; 
-        e=a[i]^t; w+=e;  // to force calculation of e
-        a[i] = e^r;
-        e=b[i]^t; w+=e;
-        b[i] = e^r;
-        r+=w;
-//        a[i] ^= t;
-//        b[i] ^= t;
+        e=a[i]^t; w^=e;  // to force calculation of e
+        a[i] = e^ra;
+        e=b[i]^t; w^=e;
+        b[i] = e^ra;
     }
     return w;
 }
@@ -122,21 +118,20 @@ chunk BIG_XXX_cswap(BIG_XXX a, BIG_XXX b, int d)
 chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
 {
     int i;
-    chunk e,w,r,t,b = (chunk) - d;
+    chunk e,w,r,ra,t,b = (chunk) - d;
     w=0;
-    r=f[0]+g[1];
+    r=f[0]^g[1];
+    ra=r+r; ra>>=1; // I know this doesn't change r, but the compiler doesn't!
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-//        f[i] ^= (f[i] ^ g[i])&b;
         t=(f[i] ^ g[i])&b;
         t^=r;
-        e=f[i]^t; w+=e;
-        f[i] = e^r;
-        r+=w;
+        e=f[i]^t; w^=e;
+        f[i] = e^ra;
     }
     return w;
 }
@@ -145,21 +140,20 @@ chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
 chunk BIG_XXX_dcmove(DBIG_XXX f, DBIG_XXX g, int d)
 {
     int i;
-    chunk e,w,r,t,b = (chunk) - d;
+    chunk e,w,r,ra,t,b = (chunk) - d;
     w=0;
     r=f[0]+g[1];
+    ra=r+r; ra>>=1; // I know this doesn't change r, but the compiler doesn't!
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
     for (i = 0; i < DNLEN_XXX; i++)
 #endif
     {
-//        f[i] ^= (f[i] ^ g[i])&b;
         t=(f[i] ^ g[i])&b;
         t^=r;
-        e=f[i]^t; w+=e;
-        f[i] = e^r;
-        r+=w;
+        e=f[i]^t; w^=e;
+        f[i] = e^ra;
     }
     return w;
 }

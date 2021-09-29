@@ -75,32 +75,32 @@ public class BIG {
     /* Conditional swap of two bigs depending on d using XOR - no branches */
     public long cswap(BIG b, int d) {
         int i;
-        long e,r,s,t, c = (long)-d;
+        long e,r,ra,s,t, c = (long)-d;
         s=0; 
-        r=w[0]+b.w[1]; 
+        r=w[0]^b.w[1]; 
+        ra=r+r; ra>>=1;
         for (i = 0; i < NLEN; i++) {
             t = c & (w[i] ^ b.w[i]);
             t^=r; 
-            e=w[i]^t; s+=e;  // to force calculation of e
-            w[i] = e^r;
-            e=b.w[i]^t; s+=e;
-            b.w[i] = e^r;
-            r+=s;  // sure why not?
+            e=w[i]^t; s^=e;  // to force calculation of e
+            w[i] = e^ra;
+            e=b.w[i]^t; s^=e;
+            b.w[i] = e^ra;
         }
         return s;
     }
 
     public long cmove(BIG g, int d) {
         int i;
-        long e,r,s,t, b = (long)-d;
+        long e,r,ra,s,t, b = (long)-d;
         s=0; 
-        r=w[0]+g.w[1];
+        r=w[0]^g.w[1];
+        ra=r+r; ra>>=1;
         for (i = 0; i < NLEN; i++) {
             t=(w[i] ^ g.w[i])&b;
             t^=r;
-            e=w[i]^t; s+=e;
-            w[i] = e^r;
-            r+=s;
+            e=w[i]^t; s^=e;
+            w[i] = e^ra;
         }
         return s;
     }

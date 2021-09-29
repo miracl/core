@@ -84,13 +84,13 @@ func (r *DBIG) split(n uint) *BIG {
 func (r *DBIG) cmove(g *DBIG, d int) Chunk {
 	var b = Chunk(-d)
 	s := Chunk(0)
-	v := r.w[0]+g.w[1]
+	v := r.w[0]^g.w[1]
+	va := v+v; va >>= 1;
 	for i := 0; i < DNLEN; i++ {
 		t :=(r.w[i] ^ g.w[i])&b
 		t^=v
-		e := r.w[i]^t; s+=e
-		r.w[i] = e^v
-		v+=s
+		e := r.w[i]^t; s^=e
+		r.w[i] = e^va
 	}
 	return s
 }
