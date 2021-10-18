@@ -830,6 +830,7 @@ class miracl_crypto:
         "aes.cpp",
         "gcm.cpp",
         "newhope.cpp",
+        "dilithium.cpp",
         "x509.cpp"
     )
 
@@ -1004,6 +1005,7 @@ def main(argv):
         miracl_compile.compile_binary(2, "testbls.cpp", "core.a", "testbls")
         miracl_compile.compile_binary(2, "benchtest_all.cpp", "core.a", "benchtest_all")
         miracl_compile.compile_binary(2, "testnhs.cpp", "core.a", "testnhs")
+        miracl_compile.compile_binary(2, "testdlthm.cpp", "core.a", "testdlthm")
 
     #clean up
     for file in generated_files:

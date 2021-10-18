@@ -24,6 +24,16 @@
 
 #include "core.h"
 
+/* NewHope parameters */
+
+//q= 12289
+
+#define RLWE_PRIME 0x3001	// q in Hex
+#define RLWE_LGN 10			// Degree n=2^LGN
+#define RLWE_ND 0xF7002FFF	// 1/(R-q) mod R
+#define RLWE_ONE 0x2AC8		// R mod q
+#define RLWE_R2MODP 0x1620	// R^2 mod q
+
 namespace core {
 /** @brief NHS server first pass
  *

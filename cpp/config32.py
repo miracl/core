@@ -883,6 +883,7 @@ miracl_compile.compile_file(3, "share.cpp")
 miracl_compile.compile_file(3, "aes.cpp")
 miracl_compile.compile_file(3, "gcm.cpp")
 miracl_compile.compile_file(3, "newhope.cpp")
+miracl_compile.compile_file(3, "dilithium.cpp")
 miracl_compile.compile_file(3, "x509.cpp")
 
 if sys.platform.startswith("win") :
@@ -898,6 +899,7 @@ if testing :
     miracl_compile.compile_binary(2, "testbls.cpp", "core.a", "testbls")
     miracl_compile.compile_binary(2, "benchtest_all.cpp", "core.a", "benchtest_all")
     miracl_compile.compile_binary(2, "testnhs.cpp", "core.a", "testnhs")
+    miracl_compile.compile_binary(2, "testdlthm.cpp", "core.a", "testdlthm")
 
 #clean up
 for file in generated_files:
@@ -927,6 +929,7 @@ delete_file("hmac.cpp")
 delete_file("aes.cpp")
 delete_file("oct.cpp");
 delete_file("newhope.cpp")
+delete_file("dilithium.cpp")
 delete_file("Doxyfile")
 delete_file("refman.pdf")
 delete_file("readme.md")

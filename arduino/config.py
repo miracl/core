@@ -37,6 +37,7 @@ curve_selected=False
 pfcurve_selected=False
 rsa_selected=False
 nhs_selected=False
+dlthm_selected=False
 
 def copy_file(file, target):
     shutil.copyfile(file, target)
@@ -739,7 +740,7 @@ class miracl_crypto:
         ("512", "RSA4096", "29", "8")
     )
 
-    total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)+1
+    total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)+2
 
     def valid_query(number):
         return number >= 0 and number <= miracl_crypto.total_entries
@@ -764,12 +765,15 @@ def interactive_prompt_print():
     print("\nPost Quantum")
     print(str(index)+". NewHope")
     index += 1
+    print(str(index)+". Dilithium")
+    index += 1
 
 def interactive_prompt_exect(index):
     global curve_selected
     global pfcurve_selected
     global rsa_selected
     global nhs_selected
+    global dlthm_selected
     index -= 1 # Python internally is zero-indexed
     if index < len(miracl_crypto.np_curves):
         tuple = miracl_crypto.np_curves[index]
@@ -795,8 +799,10 @@ def interactive_prompt_exect(index):
             tuple[0], tuple[1], tuple[2], tuple[3]
         )
         rsa_selected=True
-    else :
+    elif index < len(miracl_crypto.np_curves) + len(miracl_crypto.pf_curves) + len(miracl_crypto.rsa_params)+1 :
         nhs_selected=True
+    else :
+        dlthm_selected=True
 
 def interactive_prompt_input():
     while True:
@@ -869,6 +875,17 @@ else :
     os.system("mkdir examples"+slashtext+"testnhs")
     os.system(copytext+" testnhs.ino "+"examples"+slashtext+"testnhs"+slashtext+"testnhs.ino")
 os.system(deltext+" testnhs.ino")
+
+if not dlthm_selected :
+    os.system(deltext+" dilithium.cpp")
+    os.system(deltext+" dilithium.h")
+else :
+    os.system("mkdir examples")
+    os.system("mkdir examples"+slashtext+"testdlthm")
+    os.system(copytext+" testdlthm.ino "+"examples"+slashtext+"testdlthm"+slashtext+"testdlthm.ino")
+os.system(deltext+" testdlthm.ino")
+
+
 
 os.system(deltext+" share.cpp")
 os.system(deltext+" *.rs")
@@ -1046,6 +1063,7 @@ os.system(deltext+" testmpin.cpp")
 os.system(deltext+" testhpke.cpp")
 os.system(deltext+" testhtp.cpp")
 os.system(deltext+" testnhs.cpp")
+os.system(deltext+" testdlthm.cpp")
 os.system(deltext+" testx509.cpp")
 os.system(deltext+" *.md")
 

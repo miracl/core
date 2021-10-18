@@ -94,6 +94,9 @@ void XXX::BIG_rawoutput(BIG a)
 }
 
 // modified to prevent Nonce@Once side channel attack
+// Two tricks to thwart compiler optimization
+// 1. Prevent mask removal by performing transformation that might change the mask, but in fact does not
+// 2. Force the code to calculate an intermediate value, by making it part of (an unused) return value
 // problem is XORing with all zeros or XORing with "random" shows up in side-channel, and reveals d
 
 /* Swap a and b if d=1 */
