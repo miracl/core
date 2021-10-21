@@ -409,6 +409,7 @@ if __name__ == '__main__':
     os.system(copytext+ "aes.rs mcore"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "gcm.rs mcore"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "nhs.rs mcore"+slashtext+"src"+slashtext+".")
+    os.system(copytext+ "dilithium.rs mcore"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "x509.rs mcore"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "arch64.rs mcore"+slashtext+"src"+slashtext+"arch.rs")
     os.system(copytext+ "lib.rs mcore"+slashtext+"src"+slashtext+"lib.rs")
@@ -445,6 +446,7 @@ if __name__ == '__main__':
     os.system(deltext+" share.rs")
     os.system(deltext+" gcm.rs")
     os.system(deltext+" nhs.rs")
+    os.system(deltext+" dilithium.rs")
     os.system(deltext+" x509.rs");
 
     os.system(deltext+" arch*.rs")
@@ -471,4 +473,5 @@ if __name__ == '__main__':
         os.system("rustc TestBLS.rs --extern mcore=libmcore.rlib")
         os.system("rustc BenchtestALL.rs --extern mcore=libmcore.rlib")
         os.system("rustc TestNHS.rs --extern mcore=libmcore.rlib")
+        os.system("rustc TestDLTHM.rs --extern mcore=libmcore.rlib")
 

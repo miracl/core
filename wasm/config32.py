@@ -887,6 +887,7 @@ miracl_compile.compile_file(3, "share.c", "share.bc")
 miracl_compile.compile_file(3, "aes.c", "aes.bc")
 miracl_compile.compile_file(3, "gcm.c", "gcm.bc")
 miracl_compile.compile_file(3, "newhope.c", "newhope.bc")
+miracl_compile.compile_file(3, "dilithium.c", "dilithium.bc")
 miracl_compile.compile_file(3, "x509.c", "x509.bc")
 
 if sys.platform.startswith("win") :
@@ -924,6 +925,7 @@ delete_file("hmac.c")
 delete_file("aes.c")
 delete_file("oct.c");
 delete_file("newhope.c")
+delete_file("dilithium.c")
 delete_file("Doxyfile")
 delete_file("refman.pdf")
 delete_file("readme.md")

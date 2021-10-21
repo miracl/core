@@ -21,7 +21,7 @@
 
 // See https://eprint.iacr.org/2017/633 (Ducas, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehle)
 
-/* gcc -O2 testdlthm.c core.a -o testdlthm.exe */
+/* gcc -O2 testdlthm.c core.a -o testdlthm */
 
 #include <stdio.h>
 #include <time.h>
@@ -152,7 +152,7 @@ void loop() {
 #endif
     int attempts;
     bool result;
-    char sk[32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8], pk[(K*DEGREE*TD)/8+32], sig[(DEGREE*L*(LG+1))/8+OMEGA+K+32],m[128];
+    char sk[32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8], pk[(K*DEGREE*TD)/8+32], sig[(DEGREE*L*(LG+1))/8+OMEGA+K+32], m[128];
     octet SK = {0, sizeof(sk), sk};
     octet PK = {0, sizeof(pk), pk};
     octet SIG = {0, sizeof(sig), sig};

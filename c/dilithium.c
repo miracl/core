@@ -24,8 +24,6 @@
 
 #include "dilithium.h"
 
-using namespace core;
-
 #define round(a,b) (((a)+((b)/2))/(b))
 
 const sign32 roots[] = {0x3ffe00,0x64f7,0x581103,0x77f504,0x39e44,0x740119,0x728129,0x71e24,0x1bde2b,0x23e92b,0x7a64ae,0x5ff480,0x2f9a75,0x53db0a,0x2f7a49,0x28e527,0x299658,0xfa070,0x6f65a5,0x36b788,0x777d91,0x6ecaa1,0x27f968,0x5fb37c,0x5f8dd7,0x44fae8,0x6a84f8,0x4ddc99,0x1ad035,0x7f9423,0x3d3201,0x445c5,0x294a67,0x17620,0x2ef4cd,0x35dec5,0x668504,0x49102d,0x5927d5,0x3bbeaf,0x44f586,0x516e7d,0x368a96,0x541e42,0x360400,0x7b4a4e,0x23d69c,0x77a55e,0x65f23e,0x66cad7,0x357e1e,0x458f5a,0x35843f,0x5f3618,0x67745d,0x38738c,0xc63a8,0x81b9a,0xe8f76,0x3b3853,0x3b8534,0x58dc31,0x1f9d54,0x552f2e,0x43e6e6,0x688c82,0x47c1d0,0x51781a,0x69b65e,0x3509ee,0x2135c7,0x67afbc,0x6caf76,0x1d9772,0x419073,0x709cf7,0x4f3281,0x4fb2af,0x4870e1,0x1efca,0x3410f2,0x70de86,0x20c638,0x296e9f,0x5297a4,0x47844c,0x799a6e,0x5a140a,0x75a283,0x6d2114,0x7f863c,0x6be9f8,0x7a0bde,0x1495d4,0x1c4563,0x6a0c63,0x4cdbea,0x40af0,0x7c417,0x2f4588,0xad00,0x6f16bf,0xdcd44,0x3c675a,0x470bcb,0x7fbe7f,0x193948,0x4e49c1,0x24756c,0x7ca7e0,0xb98a1,0x6bc809,0x2e46c,0x49a809,0x3036c2,0x639ff7,0x5b1c94,0x7d2ae1,0x141305,0x147792,0x139e25,0x67b0e1,0x737945,0x69e803,0x51cea3,0x44a79d,0x488058,0x3a97d9,0x1fea93,0x33ff5a,0x2358d4,0x3a41f8,0x4cdf73,0x223dfb,0x5a8ba0,0x498423,0x412f5,0x252587,0x6d04f1,0x359b5d,0x4a28a1,0x4682fd,0x6d9b57,0x4f25df,0xdbe5e,0x1c5e1a,0xde0e6,0xc7f5a,0x78f83,0x67428b,0x7f3705,0x77e6fd,0x75e022,0x503af7,0x1f0084,0x30ef86,0x49997e,0x77dcd7,0x742593,0x4901c3,0x53919,0x4610c,0x5aad42,0x3eb01b,0x3472e7,0x4ce03c,0x1a7cc7,0x31924,0x2b5ee5,0x291199,0x585a3b,0x134d71,0x3de11c,0x130984,0x25f051,0x185a46,0x466519,0x1314be,0x283891,0x49bb91,0x52308a,0x1c853f,0x1d0b4b,0x6fd6a7,0x6b88bf,0x12e11b,0x4d3e3f,0x6a0d30,0x78fde5,0x1406c7,0x327283,0x61ed6f,0x6c5954,0x1d4099,0x590579,0x6ae5ae,0x16e405,0xbdbe7,0x221de8,0x33f8cf,0x779935,0x54aa0d,0x665ff9,0x63b158,0x58711c,0x470c13,0x910d8,0x463e20,0x612659,0x251d8b,0x2573b7,0x7d5c90,0x1ddd98,0x336898,0x2d4bb,0x6d73a8,0x4f4cbf,0x27c1c,0x18aa08,0x2dfd71,0xc5ca5,0x19379a,0x478168,0x646c3e,0x51813d,0x35c539,0x3b0115,0x41dc0,0x21c4f7,0x70fbf5,0x1a35e7,0x7340e,0x795d46,0x1a4cd0,0x645caf,0x1d2668,0x666e99,0x6f0634,0x7be5db,0x455fdc,0x530765,0x5dc1b0,0x7973de,0x5cfd0a,0x2cc93,0x70f806,0x189c2a,0x49c5aa,0x776a51,0x3bcf2c,0x7f234f,0x6b16e0,0x3c15ca,0x155e68,0x72f6b7,0x1e29ce};
@@ -78,7 +76,6 @@ static sign32 modmul(unsign32 a, unsign32 b)
 
 // Here intt(z) <- intt(z);nres(z); 
 // Combining is more efficient
-// note that ntt() and intt() are not mutually inverse
 
 /* NTT code */
 /* Cooley-Tukey NTT */
@@ -271,30 +268,30 @@ static void ExpandAij(byte rho[32],sign32 Aij[],int i,int j)
 // array t has ab active bits per word
 // extract bytes from array of words
 // if max!=0 then -max<=t[i]<=+max
-static byte nextbyte32(int ab,int max,sign32 t[],int &ptr, int &bts)
+static byte nextbyte32(int ab,int max,sign32 t[],int *ptr, int *bts)
 {
     sign32 r,w;
-    int left=ab-bts; // number of bits left in this word
+    int left=ab-(*bts); // number of bits left in this word
     int i=0;
-    w=t[ptr];
+    w=t[*ptr];
     if (max!=0)
         w=max-w;
-    r=w>>bts;
+    r=w>>(*bts);
     while (left<8)
     {
         i++;
-        w=t[ptr+i];
+        w=t[(*ptr)+i];
         if (max!=0)
             w=max-w;
         r|=w<<left;
         left+=ab;
     }
 
-    bts+=8;
-    while (bts>=ab)
+    *bts+=8;
+    while ((*bts)>=ab)
     {
-        bts-=ab;
-        ptr++;
+        *bts-=ab;
+        (*ptr)++;
     }
     return (byte)r&0xff;        
 }
@@ -302,30 +299,30 @@ static byte nextbyte32(int ab,int max,sign32 t[],int &ptr, int &bts)
 // array t has ab active bits per word
 // extract dense bytes from array of words
 // if max!=0 then -max<=t[i]<=+max
-static byte nextbyte16(int ab,int max,sign16 t[],int &ptr, int &bts)
+static byte nextbyte16(int ab,int max,sign16 t[],int *ptr, int *bts)
 {
     sign32 r,w;
-    int left=ab-bts; // number of bits left in this word
+    int left=ab-(*bts); // number of bits left in this word
     int i=0;
-    w=t[ptr];
+    w=t[*ptr];
     if (max!=0)
         w=max-w;
-    r=w>>bts;
+    r=w>>(*bts);
     while (left<8)
     {
         i++;
-        w=t[ptr+i];
+        w=t[(*ptr)+i];
         if (max!=0)
             w=max-w;
         r|=w<<left;
         left+=ab;
     }
 
-    bts+=8;
-    while (bts>=ab)
+    *bts+=8;
+    while ((*bts)>=ab)
     {
-        bts-=ab;
-        ptr++;
+        *bts-=ab;
+        (*ptr)++;
     }
     return (byte)r&0xff;        
 }
@@ -333,58 +330,58 @@ static byte nextbyte16(int ab,int max,sign16 t[],int &ptr, int &bts)
 // array t has ab active bits per word
 // extract dense bytes from array of words
 // if max!=0 then -max<=t[i]<=+max
-static byte nextbyte8(int ab,int max,sign8 t[],int &ptr, int &bts)
+static byte nextbyte8(int ab,int max,sign8 t[],int *ptr, int *bts)
 {
     sign32 r,w;
-    int left=ab-bts; // number of bits left in this word
+    int left=ab-(*bts); // number of bits left in this word
     int i=0;
-    w=t[ptr];
+    w=t[*ptr];
     if (max!=0)
         w=max-w;
-    r=w>>bts;
+    r=w>>(*bts);
     while (left<8)
     {
         i++;
-        w=t[ptr+i];
+        w=t[(*ptr)+i];
         if (max!=0)
             w=max-w;
         r|=w<<left;
         left+=ab;
     }
 
-    bts+=8;
-    while (bts>=ab)
+    *bts+=8;
+    while ((*bts)>=ab)
     {
-        bts-=ab;
-        ptr++;
+        *bts-=ab;
+        (*ptr)++;
     }
     return (byte)r&0xff;        
 }
 
 // extract ab bits into word from dense byte stream
-static sign32 nextword(int ab,int max,byte t[],int &ptr, int &bts)
+static sign32 nextword(int ab,int max,byte t[],int *ptr, int *bts)
 {
-    sign32 r=t[ptr]>>bts;
+    sign32 r=t[*ptr]>>(*bts);
     sign32 mask=(1<<ab)-1;
     sign32 w;
     int i=0;
-    int gotbits=8-bts; // bits left in current byte
+    int gotbits=8-(*bts); // bits left in current byte
     while (gotbits<ab)
     {
         i++;
-        w=(sign32)t[ptr+i];
+        w=(sign32)t[(*ptr)+i];
         r|=w<<gotbits;
         gotbits+=8;
     }
-    bts+=ab;
-    while (bts>=8)
+    *bts+=ab;
+    while ((*bts)>=8)
     {
-        bts-=8;
-        ptr++;
+        *bts-=8;
+        (*ptr)++;
     }
     w=r&mask;
     if (max!=0)
-        w=max-w;
+     w=max-w;
     return w;  
 }
 
@@ -396,7 +393,7 @@ static void pack_pk(byte pk[],byte rho[32],sign16 t1[])
         pk[i]=rho[i];
     n=32; ptr=bts=0;
     for (i=0;i<(K*DEGREE*TD)/8;i++ )
-        pk[n++]=nextbyte16(TD,0,t1,ptr,bts);
+        pk[n++]=nextbyte16(TD,0,t1,&ptr,&bts);
 }
 
 // unpack public key
@@ -407,7 +404,7 @@ static void unpack_pk(byte rho[32],sign16 t1[],byte pk[])
         rho[i]=pk[i];
     ptr=bts=0;
     for (i=0;i<K*DEGREE;i++ )
-        t1[i]=(sign16)nextword(TD,0,&pk[32],ptr,bts);
+        t1[i]=(sign16)nextword(TD,0,&pk[32],&ptr,&bts);
 }
 
 // secret key of size 32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8
@@ -422,13 +419,13 @@ static void pack_sk(byte sk[],byte rho[32],byte bK[32],byte tr[32],sign8 s1[],si
         sk[n++]=tr[i];
     ptr=bts=0;
     for (i=0;i<(L*DEGREE*LG2ETA1)/8;i++)
-        sk[n++]=nextbyte8(LG2ETA1,ETA,s1,ptr,bts);
+        sk[n++]=nextbyte8(LG2ETA1,ETA,s1,&ptr,&bts);
     ptr=bts=0;
     for (i=0;i<(K*DEGREE*LG2ETA1)/8;i++)
-        sk[n++]=nextbyte8(LG2ETA1,ETA,s2,ptr,bts);
+        sk[n++]=nextbyte8(LG2ETA1,ETA,s2,&ptr,&bts);
     ptr=bts=0;
     for (i=0;i<(K*DEGREE*D)/8;i++)
-        sk[n++]=nextbyte16(D,(1<<(D-1)),t0,ptr,bts);
+        sk[n++]=nextbyte16(D,(1<<(D-1)),t0,&ptr,&bts);
 }
 
 static void unpack_sk(byte rho[32],byte bK[32],byte tr[32],sign8 s1[],sign8 s2[],sign16 t0[],byte sk[])
@@ -442,15 +439,15 @@ static void unpack_sk(byte rho[32],byte bK[32],byte tr[32],sign8 s1[],sign8 s2[]
         tr[i]=sk[n++];
     ptr=bts=0; 
     for (i=0;i<L*DEGREE;i++ )
-        s1[i]=(sign8)nextword(LG2ETA1,ETA,&sk[n],ptr,bts);
+        s1[i]=(sign8)nextword(LG2ETA1,ETA,&sk[n],&ptr,&bts);
     n+=ptr;
     ptr=bts=0; 
     for (i=0;i<K*DEGREE;i++ )
-        s2[i]=(sign8)nextword(LG2ETA1,ETA,&sk[n],ptr,bts);
+        s2[i]=(sign8)nextword(LG2ETA1,ETA,&sk[n],&ptr,&bts);
     n+=ptr;
     ptr=bts=0;
     for (i=0;i<K*DEGREE;i++ )
-        t0[i]=(sign16)nextword(D,(1<<(D-1)),&sk[n],ptr,bts);
+        t0[i]=(sign16)nextword(D,(1<<(D-1)),&sk[n],&ptr,&bts);
 }
 
 // pack signature - changes z 
@@ -471,12 +468,13 @@ static void pack_sig(byte sig[],sign32 z[],byte ct[],byte h[])
         {
             t=z[row+m];
             if (t>PRIME/2) t-=PRIME;
+            //t+=GAMMA1-1;
             t=GAMMA1-t;
             z[row+m]=t;
         }
     }
     for (i=0;i<k;i++) {
-        sig[n++]=nextbyte32(LG+1,0,z,ptr,bts);
+        sig[n++]=nextbyte32(LG+1,0,z,&ptr,&bts);
     }
     for (i=0;i<OMEGA+K;i++)
         sig[n++]=h[i];
@@ -492,7 +490,7 @@ static void unpack_sig(sign32 z[],byte ct[],byte h[],byte sig[])
 
     ptr=bts=0;
     for (i=0;i<n;i++) {
-        t=nextword(LG+1,0,&sig[32],ptr,bts);
+        t=nextword(LG+1,0,&sig[32],&ptr,&bts);
         t=GAMMA1-t;
         if (t<0) t+=PRIME;
         z[i]=t;
@@ -519,7 +517,7 @@ static void sample_Sn(byte rhod[64],sign8 s[],int n)
     {
         do
         {
-            s[m]=nextword(LG2ETA1,0,buff,ptr,bts);
+            s[m]=nextword(LG2ETA1,0,buff,&ptr,&bts);
         }
         while (s[m]>2*ETA);
         s[m]=ETA-s[m];
@@ -548,7 +546,7 @@ static void sample_Y(int k,byte rhod[64],sign32 y[])
         ptr=bts=0;
         for (m=0;m<DEGREE;m++)
         {  // take in LG+1 bits at a time
-            w=nextword(LG+1,0,buff,ptr,bts);  // 20 bits
+            w=nextword(LG+1,0,buff,&ptr,&bts);  // 20 bits
             w=GAMMA1-w;
             t=w>>31;
             r[m]=w+(PRIME&t);
@@ -568,7 +566,7 @@ static void CRH1(byte H[32],byte rho[32],sign16 t1[])
         SHA3_process(&sh,rho[i]);
     ptr=bts=0;
     for (i=0;i<(K*DEGREE*TD)/8;i++)
-            SHA3_process(&sh,nextbyte16(TD,0,t1,ptr,bts));
+            SHA3_process(&sh,nextbyte16(TD,0,t1,&ptr,&bts));
     SHA3_shake(&sh,(char *)H,32);
 }
 
@@ -609,7 +607,7 @@ static void H4(byte CT[32],byte mu[64],sign8 w1[])
         SHA3_process(&sh,mu[i]);
     ptr=bts=0;
     for (i=0;i<(K*DEGREE*W1B)/8;i++)
-        SHA3_process(&sh,nextbyte8(W1B,0,w1,ptr,bts));
+        SHA3_process(&sh,nextbyte8(W1B,0,w1,&ptr,&bts));
     SHA3_shake(&sh,(char *)CT,32);
 }
 
@@ -763,7 +761,7 @@ sign32 infinity_norm(sign32 w[])
 
 // Dilithium API
 
-void core::DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
+void DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
 {
     int i,row,j,m;
     sha3 sh;
@@ -780,6 +778,7 @@ void core::DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
     sign16 t1[K*DEGREE];    // 3072 bytes
     sign32 w[DEGREE]; // work space  1024 bytes
     sign32 r[DEGREE]; // work space  1024 bytes total = 12352
+
     SHA3_init(&sh, SHAKE256);
     for (i=0;i<32;i++)
         tau[i]=RAND_byte(RNG);
@@ -797,9 +796,11 @@ void core::DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
 
     for (i=0;i<L;i++)
     {
+
         row=DEGREE*i;
         sample_Sn(rhod,&s1[row],i);
     }
+
     for (i=0;i<K;i++)
     {
         row=DEGREE*i;
@@ -831,7 +832,7 @@ void core::DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
     pack_sk((byte *)sk->val,rho,bK,tr,s1,s2,t0);
 }
 
-int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
+int DLTHM_signature(octet *sk,octet *M,octet *sig)
 {
     int i,k,nh,fk,row,j,m;
     bool badone;
@@ -895,10 +896,10 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
 // Calculate w1
             hibits(&w1[row],&Ay[row]);
         }
+
 // Calculate c
         H4(ct,mu,w1);
         SampleInBall(ct,c);
-
         badone=false;
 // Calculate z=y+c.s1
         ntt(c);
@@ -908,6 +909,7 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
             poly_scopy(w,&s1[row]);
             ntt(w);
             poly_mul(w,w,c);
+
             intt(w);
             poly_add(&y[row],&y[row],w);   // Use y for z 
             poly_soft_reduce(&y[row]);
@@ -970,7 +972,7 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
     return k+1;      
 }
 
-bool core::DLTHM_verify(octet *pk,octet *M,octet *sig)
+bool DLTHM_verify(octet *pk,octet *M,octet *sig)
 {
     int i,row,j,m,hints;
     byte rho[32];

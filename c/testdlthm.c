@@ -27,10 +27,9 @@
 #include <time.h>
 #include "dilithium.h"
 
-using namespace core;
-
 int main() {
     int i,attempts;
+//int tats=0;
     unsigned long ran;
     bool result;
     char raw[100];
@@ -53,7 +52,6 @@ int main() {
 
     printf("Testing Dilithium signature\n");
 
-//int tats=0;
 //for (i=0;i<1000;i++ ) {
     OCT_clear(&M);
     OCT_jstring(&M,(char *)"Hello World");
@@ -71,7 +69,7 @@ int main() {
         printf("Signature is verified\n");
     } else {
         printf("Signature is NOT verified\n"); 
- //break;
+//break;
     }
 //}
 //printf("Average= %d\n",tats/1000);

@@ -51,8 +51,6 @@
 #define ND 0xFC7FDFFF   // 1/(R-Q) mod R
 
 
-namespace core {
-
 /** @brief Dilithium signature key pair generation
  *
     @param RNG Random Number Generator handle
@@ -81,6 +79,5 @@ extern int DLTHM_signature(octet *SK,octet *M, octet *SIG);
 
  */
 extern bool DLTHM_verify(octet *PK,octet *M,octet *SIG);
-}
 
 #endif
