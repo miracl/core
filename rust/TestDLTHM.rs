@@ -31,6 +31,8 @@ extern crate mcore;
 use mcore::rand::{RAND, RAND_impl};
 use mcore::dilithium;
 
+const LOOPS: usize = 100;
+
 fn main() {
     let mut raw: [u8; 100] = [0; 100];
 
@@ -43,31 +45,33 @@ fn main() {
     }
     rng.seed(100, &raw);
 
-//let mut tats=0;
-//for _ in 0..1000 {
-    let mut sk: [u8; dilithium::SK_SIZE] = [0; dilithium::SK_SIZE];
-    let mut pk: [u8; dilithium::PK_SIZE] = [0; dilithium::PK_SIZE];
-    let mut sig: [u8; dilithium::SIG_SIZE] = [0; dilithium::SIG_SIZE];
+    let mut tats=0;
+    for _ in 0..LOOPS {
+        let mut sk: [u8; dilithium::SK_SIZE] = [0; dilithium::SK_SIZE];
+        let mut pk: [u8; dilithium::PK_SIZE] = [0; dilithium::PK_SIZE];
+        let mut sig: [u8; dilithium::SIG_SIZE] = [0; dilithium::SIG_SIZE];
 
-    let message = "Hello World";
-    let m = message.as_bytes();
+        let message = "Hello World";
+        let m = message.as_bytes();
 
-    dilithium::keypair(&mut rng, &mut sk, &mut pk);
+        dilithium::keypair(&mut rng, &mut sk, &mut pk);
 
-    println!("private key {} bits",8*dilithium::SK_SIZE);
-    println!("public key {} bits",8*dilithium::PK_SIZE);
+        println!("private key {} bits",8*dilithium::SK_SIZE);
+        println!("public key {} bits",8*dilithium::PK_SIZE);
 
-    let attempts=dilithium::signature(&sk,&m,&mut sig);
-//tats+=attempts;
-    println!("signature {} bits created on attempt {}",8*dilithium::SIG_SIZE,attempts);
+        let attempts=dilithium::signature(&sk,&m,&mut sig);
+        tats+=attempts;
+        println!("signature {} bits created on attempt {}",8*dilithium::SIG_SIZE,attempts);
 
-    let result=dilithium::verify(&pk,&m,&sig);
-    if result {
-        println!("Signature is verified");
-    } else {
-        println!("Signature is NOT verified");
-//break;
+        let result=dilithium::verify(&pk,&m,&sig);
+        if result {
+            println!("Signature is verified");
+        } else {
+            println!("Signature is NOT verified");
+            break;
+        }
     }
-//}
-//println!("Average= {}",tats/1000);
+    if LOOPS>1 {
+        println!("Average= {}",tats/LOOPS);
+    }
 }

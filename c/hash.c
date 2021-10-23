@@ -393,62 +393,86 @@ static const unsign64 RC[24] =
 
 static void SHA3_transform(sha3 *sh)
 {
-    int i, j, k;
-    unsign64 C[5], D[5], B[5][5];
+    int k;
+    unsign64 B00,B01,B02,B03,B04,B10,B11,B12,B13,B14,B20,B21,B22,B23,B24,B30,B31,B32,B33,B34,B40,B41,B42,B43,B44;
+    unsign64 C0,C1,C2,C3,C4,D0,D1,D2,D3,D4;
 
     for (k = 0; k < SHA3_ROUNDS; k++)
     {
-        C[0] = sh->S[0][0] ^ sh->S[0][1] ^ sh->S[0][2] ^ sh->S[0][3] ^ sh->S[0][4];
-        C[1] = sh->S[1][0] ^ sh->S[1][1] ^ sh->S[1][2] ^ sh->S[1][3] ^ sh->S[1][4];
-        C[2] = sh->S[2][0] ^ sh->S[2][1] ^ sh->S[2][2] ^ sh->S[2][3] ^ sh->S[2][4];
-        C[3] = sh->S[3][0] ^ sh->S[3][1] ^ sh->S[3][2] ^ sh->S[3][3] ^ sh->S[3][4];
-        C[4] = sh->S[4][0] ^ sh->S[4][1] ^ sh->S[4][2] ^ sh->S[4][3] ^ sh->S[4][4];
 
-        D[0] = C[4] ^ rotl(C[1], 1);
-        D[1] = C[0] ^ rotl(C[2], 1);
-        D[2] = C[1] ^ rotl(C[3], 1);
-        D[3] = C[2] ^ rotl(C[4], 1);
-        D[4] = C[3] ^ rotl(C[0], 1);
+        C0=sh->S[0] ^ sh->S[5] ^ sh->S[10] ^ sh->S[15] ^ sh->S[20];
+        C1=sh->S[1] ^ sh->S[6] ^ sh->S[11] ^ sh->S[16] ^ sh->S[21];
+        C2=sh->S[2] ^ sh->S[7] ^ sh->S[12] ^ sh->S[17] ^ sh->S[22];
+        C3=sh->S[3] ^ sh->S[8] ^ sh->S[13] ^ sh->S[18] ^ sh->S[23];
+        C4=sh->S[4] ^ sh->S[9] ^ sh->S[14] ^ sh->S[19] ^ sh->S[24];
 
-        for (i = 0; i < 5; i++)
-            for (j = 0; j < 5; j++)
-                sh->S[i][j] ^= D[i]; /* let the compiler unroll it! */
+        D0 = C4 ^ rotl(C1, 1);
+        D1 = C0 ^ rotl(C2, 1);
+        D2 = C1 ^ rotl(C3, 1);
+        D3 = C2 ^ rotl(C4, 1);
+        D4 = C3 ^ rotl(C0, 1);
 
-        B[0][0] = sh->S[0][0];
-        B[1][3] = rotl(sh->S[0][1], 36);
-        B[2][1] = rotl(sh->S[0][2], 3);
-        B[3][4] = rotl(sh->S[0][3], 41);
-        B[4][2] = rotl(sh->S[0][4], 18);
+        B00 =      sh->S[0]^D0;
+        B02 = rotl(sh->S[1]^D1, 1);
+        B04 = rotl(sh->S[2]^D2, 62);
+        B01 = rotl(sh->S[3]^D3, 28);
+        B03 = rotl(sh->S[4]^D4, 27);
 
-        B[0][2] = rotl(sh->S[1][0], 1);
-        B[1][0] = rotl(sh->S[1][1], 44);
-        B[2][3] = rotl(sh->S[1][2], 10);
-        B[3][1] = rotl(sh->S[1][3], 45);
-        B[4][4] = rotl(sh->S[1][4], 2);
+        B13 = rotl(sh->S[5]^D0, 36);
+        B10 = rotl(sh->S[6]^D1, 44);
+        B12 = rotl(sh->S[7]^D2, 6);
+        B14 = rotl(sh->S[8]^D3, 55);
+        B11 = rotl(sh->S[9]^D4, 20);
 
-        B[0][4] = rotl(sh->S[2][0], 62);
-        B[1][2] = rotl(sh->S[2][1], 6);
-        B[2][0] = rotl(sh->S[2][2], 43);
-        B[3][3] = rotl(sh->S[2][3], 15);
-        B[4][1] = rotl(sh->S[2][4], 61);
+        B21 = rotl(sh->S[10]^D0, 3);
+        B23 = rotl(sh->S[11]^D1, 10);
+        B20 = rotl(sh->S[12]^D2, 43);
+        B22 = rotl(sh->S[13]^D3, 25);
+        B24 = rotl(sh->S[14]^D4, 39);
 
-        B[0][1] = rotl(sh->S[3][0], 28);
-        B[1][4] = rotl(sh->S[3][1], 55);
-        B[2][2] = rotl(sh->S[3][2], 25);
-        B[3][0] = rotl(sh->S[3][3], 21);
-        B[4][3] = rotl(sh->S[3][4], 56);
+        B34 = rotl(sh->S[15]^D0, 41);
+        B31 = rotl(sh->S[16]^D1, 45);
+        B33 = rotl(sh->S[17]^D2, 15);
+        B30 = rotl(sh->S[18]^D3, 21);
+        B32 = rotl(sh->S[19]^D4, 8);
 
-        B[0][3] = rotl(sh->S[4][0], 27);
-        B[1][1] = rotl(sh->S[4][1], 20);
-        B[2][4] = rotl(sh->S[4][2], 39);
-        B[3][2] = rotl(sh->S[4][3], 8);
-        B[4][0] = rotl(sh->S[4][4], 14);
+        B42 = rotl(sh->S[20]^D0, 18);
+        B44 = rotl(sh->S[21]^D1, 2);
+        B41 = rotl(sh->S[22]^D2, 61);
+        B43 = rotl(sh->S[23]^D3, 56);
+        B40 = rotl(sh->S[24]^D4, 14);    
 
-        for (i = 0; i < 5; i++)
-            for (j = 0; j < 5; j++)
-                sh->S[i][j] = B[i][j] ^ (~B[(i + 1) % 5][j] & B[(i + 2) % 5][j]);
+        sh->S[0]=B00^(~B10&B20);
+        sh->S[1]=B10^(~B20&B30);
+        sh->S[2]=B20^(~B30&B40);
+        sh->S[3]=B30^(~B40&B00);
+        sh->S[4]=B40^(~B00&B10);
 
-        sh->S[0][0] ^= RC[k];
+        sh->S[5]=B01^(~B11&B21);
+        sh->S[6]=B11^(~B21&B31);
+        sh->S[7]=B21^(~B31&B41);
+        sh->S[8]=B31^(~B41&B01);
+        sh->S[9]=B41^(~B01&B11);
+
+        sh->S[10]=B02^(~B12&B22);
+        sh->S[11]=B12^(~B22&B32);
+        sh->S[12]=B22^(~B32&B42);
+        sh->S[13]=B32^(~B42&B02);
+        sh->S[14]=B42^(~B02&B12);
+
+        sh->S[15]=B03^(~B13&B23);
+        sh->S[16]=B13^(~B23&B33);
+        sh->S[17]=B23^(~B33&B43);
+        sh->S[18]=B33^(~B43&B03);
+        sh->S[19]=B43^(~B03&B13);
+
+        sh->S[20]=B04^(~B14&B24);
+        sh->S[21]=B14^(~B24&B34);
+        sh->S[22]=B24^(~B34&B44);
+        sh->S[23]=B34^(~B44&B04);
+        sh->S[24]=B44^(~B04&B14);
+
+        sh->S[0] ^= RC[k];
     }
 }
 
@@ -457,10 +481,9 @@ static void SHA3_transform(sha3 *sh)
 
 void SHA3_init(sha3 *sh, int olen)
 {
-    int i, j;
-    for (i = 0; i < 5; i++)
-        for (j = 0; j < 5; j++)
-            sh->S[i][j] = 0;  /* 5x5x8 bytes = 200 bytes of state */
+    int i;
+    for (i = 0; i < 25; i++)
+        sh->S[i] = 0;  /* 5x5x8 bytes = 200 bytes of state */
     sh->length = 0;
     sh->len = olen;
     sh->rate = 200 - 2 * olen; /* number of bytes consumed in one gulp. Note that some bytes in the
@@ -474,9 +497,9 @@ void SHA3_process(sha3 *sh, int byt)
     int cnt = (int)(sh->length % sh->rate);
     int i, j, b = cnt % 8;
     cnt /= 8;
-    i = cnt % 5;
-    j = cnt / 5; /* process by columns! */
-    sh->S[i][j] ^= ((unsign64)byt << (8 * b));
+    j = cnt % 5;
+    i = cnt / 5; /* process by columns! */
+    sh->S[5*i+j] ^= ((unsign64)byt << (8 * b));
     sh->length++;
     if (sh->length % sh->rate == 0) SHA3_transform(sh);
 }
@@ -484,28 +507,24 @@ void SHA3_process(sha3 *sh, int byt)
 /* squeeze the sponge */
 void SHA3_squeeze(sha3 *sh, char *buff, int len)
 {
-    int done, i, j, k, m = 0;
+    int done, i, k, m = 0;
     unsign64 el;
     /* extract by columns */
     done = 0;
     for (;;)
     {
-        for (j = 0; j < 5; j++)
+        for (i = 0; i < 25; i++)
         {
-            for (i = 0; i < 5; i++)
+            el = sh->S[i];
+            for (k = 0; k < 8; k++)
             {
-                el = sh->S[i][j];
-                for (k = 0; k < 8; k++)
+                buff[m++] = (el & 0xff);
+                if (m >= len || m % sh->rate == 0)
                 {
-                    buff[m++] = (el & 0xff);
-                    if (m >= len || m % sh->rate == 0)
-                    {
-                        done = 1;
-                        break;
-                    }
-                    el >>= 8;
+                    done = 1;
+                    break;
                 }
-                if (done) break;
+                el >>= 8;
             }
             if (done) break;
         }

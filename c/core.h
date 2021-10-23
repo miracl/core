@@ -105,7 +105,7 @@ typedef hash512 hash384;
 typedef struct
 {
     unsign64 length;   /**< 64-bit input length */
-    unsign64 S[5][5];  /**< Internal state */
+    unsign64 S[25];  /**< Internal state */
     int rate;          /**< TODO */
     int len;           /**< Hash length in bytes */
 } sha3;

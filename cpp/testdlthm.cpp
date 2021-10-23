@@ -29,6 +29,8 @@
 
 using namespace core;
 
+#define LOOPS 100
+
 int main() {
     int i,attempts;
     unsigned long ran;
@@ -52,29 +54,32 @@ int main() {
     RAND_seed(&RNG, 100, raw);
 
     printf("Testing Dilithium signature\n");
+    int tats=0;
+    for (i=0;i<LOOPS;i++) {
 
-//int tats=0;
-//for (i=0;i<1000;i++ ) {
-    OCT_clear(&M);
-    OCT_jstring(&M,(char *)"Hello World");
-    DLTHM_keypair(&RNG,&SK,&PK);
+        OCT_clear(&M);
+        OCT_jstring(&M,(char *)"Hello World");
+        DLTHM_keypair(&RNG,&SK,&PK);
 
-    printf("private key %d bits\n",8*SK.len);
-    printf("public key %d bits\n",8*PK.len);
+        printf("private key %d bits\n",8*SK.len);
+        printf("public key %d bits\n",8*PK.len);
 
-    attempts=DLTHM_signature(&SK,&M,&SIG);
-//tats+=attempts;
-    printf("Signature %d bits created on attempt %d\n",8*SIG.len,attempts);
+        attempts=DLTHM_signature(&SK,&M,&SIG);
 
-    result=DLTHM_verify(&PK,&M,&SIG);
-    if (result) {
-        printf("Signature is verified\n");
-    } else {
-        printf("Signature is NOT verified\n"); 
- //break;
+        tats+=attempts;
+
+        printf("Signature %d bits created on attempt %d\n",8*SIG.len,attempts);
+
+        result=DLTHM_verify(&PK,&M,&SIG);
+        if (result) {
+            printf("Signature is verified\n");
+        } else {
+            printf("Signature is NOT verified\n"); 
+            break;
+        }
     }
-//}
-//printf("Average= %d\n",tats/1000);
+    if (LOOPS>1)
+        printf("Average= %d\n",tats/LOOPS);
     return 0;
 } 
 

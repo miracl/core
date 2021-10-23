@@ -17,7 +17,19 @@
  * limitations under the License.
  */
 
-/* Dilithium API high-level functions  */
+/* Dilithium API high-level functions.  Constant time where it matters. Slow (spends nearly all of its time running SHA3) but small.
+
+Note that the Matrix A is calculated on-the-fly to keep memory requirement minimal
+But this makes all stages much slower
+Note that 
+1. Matrix A can just be generated randomly for Key generation (without using SHA3 which is very slow)
+2. A precalculated A can be included in the public key, for use by signature and verification (which blows up public key size)
+3. Precalculating A for signature calculation means that the A does not have to re-calculated for each attempt to find a good signature
+
+Might be simpler to wait for hardware support for SHA3!
+
+   M.Scott 30/09/2021
+*/
 
 use crate::rand::RAND;
 use crate::sha3;

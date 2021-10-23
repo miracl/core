@@ -17,7 +17,16 @@
  * limitations under the License.
  */
 
-/* Dilithium API implementation. Constant time where it matters
+/* Dilithium API implementation. Constant time where it matters. Slow (spends nearly all of its time running SHA3) but small.
+
+Note that the Matrix A is calculated on-the-fly to keep memory requirement minimal
+But this makes all stages much slower
+Note that 
+1. Matrix A can just be generated randomly for Key generation (without using SHA3 which is very slow)
+2. A precalculated A can be included in the public key, for use by signature and verification (which blows up public key size)
+3. Precalculating A for signature calculation means that the A does not have to re-calculated for each attempt to find a good signature
+
+Might be simpler to wait for hardware support for SHA3!
 
    M.Scott 30/09/2021
 */
@@ -37,10 +46,10 @@ static sign32 redc(unsign64 T)
     return ((unsign64)m * PRIME + T) >> 32;
 }
 
-static sign32 nres(unsign32 x)
-{
-    return redc((unsign64)x * R2MODP);
-}
+//static sign32 nres(unsign32 x)
+//{
+//    return redc((unsign64)x * R2MODP);
+//}
 
 static sign32 modmul(unsign32 a, unsign32 b)
 {
@@ -84,7 +93,7 @@ static sign32 modmul(unsign32 a, unsign32 b)
 static void ntt(sign32 *x)
 {
     int m, i, j, start, len = DEGREE / 2;
-    sign32 S, U, V, W, q = PRIME;
+    sign32 S, V, q = PRIME;
 
     /* Make positive */
     for (j = 0; j < DEGREE; j++)
@@ -558,7 +567,7 @@ static void sample_Y(int k,byte rhod[64],sign32 y[])
 // CRH(rho,t1)
 static void CRH1(byte H[32],byte rho[32],sign16 t1[])
 {
-    int i,m,row;
+    int i;
     int ptr,bts;
     sha3 sh;
     SHA3_init(&sh, SHAKE256);
@@ -573,7 +582,7 @@ static void CRH1(byte H[32],byte rho[32],sign16 t1[])
 // CRH(tr,M)
 static void CRH2(byte H[64],byte tr[32],byte mess[],int mlen)
 {
-    int i,m,row;
+    int i;
     sha3 sh;
     SHA3_init(&sh, SHAKE256);
     for (i=0;i<32;i++)
@@ -586,7 +595,7 @@ static void CRH2(byte H[64],byte tr[32],byte mess[],int mlen)
 // CRH(K,mu)
 static void CRH3(byte H[64],byte bK[32],byte mu[64])
 {
-    int i,m,row;
+    int i;
     sha3 sh;
     SHA3_init(&sh, SHAKE256);
     for (i=0;i<32;i++)
@@ -599,7 +608,7 @@ static void CRH3(byte H[64],byte bK[32],byte mu[64])
 // H(mu,w1)
 static void H4(byte CT[32],byte mu[64],sign8 w1[])
 {
-    int i,m,row;
+    int i;
     int ptr,bts;
     sha3 sh;
     SHA3_init(&sh, SHAKE256);
@@ -763,7 +772,7 @@ sign32 infinity_norm(sign32 w[])
 
 void DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
 {
-    int i,row,j,m;
+    int i,row,j;
     sha3 sh;
     byte tau[32];
     byte buff[128];
@@ -834,7 +843,7 @@ void DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
 
 int DLTHM_signature(octet *sk,octet *M,octet *sig)
 {
-    int i,k,nh,fk,row,j,m;
+    int i,k,nh,fk,row,j;
     bool badone;
     byte rho[32];
     byte bK[32];
