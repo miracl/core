@@ -237,6 +237,12 @@ fn intt(x: &mut [i32]) {
     }
 }
 
+fn redc_it(p: &mut [i32]) {
+    for i in 0..DEGREE {
+        p[i] = redc(p[i] as u64);
+    }
+}
+
 fn poly_copy(p1: &mut [i32], p3: &[i32]) {
     for i in 0..DEGREE {
         p1[i] = p3[i];
@@ -594,7 +600,6 @@ fn sample_sn(rhod: &[u8],s: &mut [i8],n: usize) {
 }
 
 fn sample_y(k: usize,rhod: &[u8],y: &mut [i32]) {
-    let mut r: [i32; DEGREE] = [0; DEGREE];
     let mut buff: [u8; YBYTES] = [0; YBYTES];
     for i in 0..L {
         let row=DEGREE*i;
@@ -614,9 +619,8 @@ fn sample_y(k: usize,rhod: &[u8],y: &mut [i32]) {
             let mut w=nextword(LG+1,0,&buff,&mut ptr,&mut bts);
             w=GAMMA1-w;
             let t=w>>31;
-            r[m]=w+(PRIME&t);
+            y[row+m]=w+(PRIME&t);
         }
-        poly_copy(&mut y[row..],&r);
     }
 }
 
@@ -881,7 +885,6 @@ pub fn signature(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
     let mut t0: [i16; K*DEGREE] = [0; K*DEGREE];
     
     let mut y: [i32; L*DEGREE] = [0; L*DEGREE];
-    let mut z: [i32; L*DEGREE] = [0; L*DEGREE];
     let mut ay: [i32; K*DEGREE] = [0; K*DEGREE];
 
     let mut w1: [i8; K*DEGREE] = [0; K*DEGREE];
@@ -899,18 +902,17 @@ pub fn signature(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
     loop {
         let fk=k*L; k+=1;
         sample_y(fk,&rhod,&mut y);
-// create copy, and NTT it
+// NTT y
         for i in 0..L {
             let row=DEGREE*i;
-            poly_copy(&mut z[row..],&y[row..]);
-            ntt(&mut z[row..]);
+            ntt(&mut y[row..]);
         }
 // Calculate ay 
         for i in 0..K {
             let row=DEGREE*i;
             poly_zero(&mut r);
             for j in 0..L {
-                poly_copy(&mut w,&z[j*DEGREE..]);
+                poly_copy(&mut w,&y[j*DEGREE..]);
                 expandaij(&rho,&mut c,i,j);
                 poly_mul(&mut w,&c);
                 poly_add(&mut r,&w);
@@ -933,6 +935,10 @@ pub fn signature(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
             ntt(&mut w);
             poly_mul(&mut w,&c);
             intt(&mut w);
+// unNTT y
+            redc_it(&mut y[row..]);
+            intt(&mut y[row..]);
+
             poly_add(&mut y[row..],&w);
             poly_soft_reduce(&mut y[row..]);
             if infinity_norm(&y[row..])>=GAMMA1-BETA {

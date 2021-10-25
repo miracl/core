@@ -169,6 +169,13 @@ static void intt(sign32 *x)
     } 
 }
 
+static void redc_it(sign32 *p)
+{
+    int i;
+    for (i = 0; i < DEGREE; i++)
+        p[i] = redc(p[i]);
+}
+
 // copy polynomial
 static void poly_copy(sign32 *p1, sign32 *p2)
 {
@@ -540,7 +547,7 @@ static void sample_Y(int k,byte rhod[64],sign32 y[])
 {
     int i,j,m,ki,row,ptr,bts;   // 2^n-1
     sha3 sh;
-    sign32 w,t,r[DEGREE];
+    sign32 w,t;
     byte buff[YBYTES];
 
     for (i=0;i<L;i++)
@@ -560,9 +567,8 @@ static void sample_Y(int k,byte rhod[64],sign32 y[])
             w=nextword(LG+1,0,buff,ptr,bts);  // 20 bits
             w=GAMMA1-w;
             t=w>>31;
-            r[m]=w+(PRIME&t);
+            y[row+m]=w+(PRIME&t);
         }
-        poly_copy(&y[row],r);
     }
 }
 
@@ -858,13 +864,12 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
     sign16 t0[K*DEGREE]; // 3072 bytes
 
     sign32 y[L*DEGREE];  // 5120 bytes
-    sign32 z[L*DEGREE];  // 5120 bytes
     sign32 Ay[K*DEGREE]; // 6144 bytes
 
     sign8 w1[K*DEGREE]; // 1280 bytes
     sign32 c[DEGREE];  // 1024 bytes
     sign32 w[DEGREE];  // work space 1024 bytes
-    sign32 r[DEGREE];  // work space 1024 bytes total= 26793
+    sign32 r[DEGREE];  // work space 1024 bytes total= 21673 bytes
 
     unpack_sk(rho,bK,tr,s1,s2,t0,(byte *)sk->val);
 
@@ -877,12 +882,11 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
         fk=k*L;
         sample_Y(fk,rhod,y);
 
-// create copy of y, and NTT it
+// NTT y
         for (i=0;i<L;i++)
         {
             row=DEGREE*i;
-            poly_copy(&z[row],&y[row]);
-            ntt(&z[row]);
+            ntt(&y[row]);
         }
 
 // Calculate Ay 
@@ -892,7 +896,7 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
             poly_zero(r);
             for (j=0;j<L;j++)
             { // Note: no NTTs in here
-                poly_copy(w,&z[j*DEGREE]);
+                poly_copy(w,&y[j*DEGREE]);
                 ExpandAij(rho,c,i,j);  // This is bottleneck // re-use c for Aij 
                 poly_mul(w,w,c);
                 poly_add(r,r,w);
@@ -918,7 +922,11 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
             ntt(w);
             poly_mul(w,w,c);
             intt(w);
-            poly_add(&y[row],&y[row],w);   // Use y for z 
+// unNTT y
+            redc_it(&y[row]);
+            intt(&y[row]);
+
+            poly_add(&y[row],&y[row],w);   // re-use y for z 
             poly_soft_reduce(&y[row]);
             if (infinity_norm(&y[row])>=GAMMA1-BETA)
             {
