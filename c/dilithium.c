@@ -46,10 +46,10 @@ static sign32 redc(unsign64 T)
     return ((unsign64)m * PRIME + T) >> 32;
 }
 
-//static sign32 nres(unsign32 x)
-//{
-//    return redc((unsign64)x * R2MODP);
-//}
+static sign32 nres(unsign32 x)
+{
+    return redc((unsign64)x * R2MODP);
+}
 
 static sign32 modmul(unsign32 a, unsign32 b)
 {
@@ -164,6 +164,13 @@ static void intt(sign32 *x)
         x[j] -= q;
         x[j] += (x[j] >> 31)&q;
     } 
+}
+
+static void nres_it(sign32 *p)
+{
+    int i;
+    for (i = 0; i < DEGREE; i++)
+        p[i] = nres(p[i]);
 }
 
 static void redc_it(sign32 *p)
@@ -922,12 +929,12 @@ int DLTHM_signature(octet *sk,octet *M,octet *sig)
             poly_scopy(w,&s1[row]);
             ntt(w);
             poly_mul(w,w,c);
-            intt(w);
-// unNTT y
-            redc_it(&y[row]);
+
+            nres_it(w);
+            poly_add(&y[row],&y[row],w);  // re-use y for z 
+            redc_it(&y[row]);  // unNTT y
             intt(&y[row]);
 
-            poly_add(&y[row],&y[row],w);   // re-use y for z
             poly_soft_reduce(&y[row]);
             if (infinity_norm(&y[row])>=GAMMA1-BETA)
             {

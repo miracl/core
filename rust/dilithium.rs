@@ -59,6 +59,7 @@ const W1B: usize = 4;
 const ONE: i32 = 0x3FFE00;    // R mod Q
 const COMBO: i32 = 0xA3FA;    // ONE*inv mod Q
 const ND: u32 = 0xFC7FDFFF; // 1/(R-Q) mod R
+const R2MODP: u64 = 0x2419FF; // R^2 mod Q
 
 pub const SK_SIZE: usize=32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8;
 pub const PK_SIZE: usize=(K*DEGREE*TD)/8+32;
@@ -125,9 +126,9 @@ fn redc(t: u64) -> i32 {
     (((m as u64) * (PRIME as u64) + t) >> 32) as i32
 }
 
-//fn nres(x: i32) -> i32 {
-//    redc((x as u64) * R2MODP)
-//}
+fn nres(x: i32) -> i32 {
+    redc((x as u64) * R2MODP)
+}
 
 fn modmul(a: i32, b: i32) -> i32 {
     redc((a as u64) * (b as u64))
@@ -234,6 +235,12 @@ fn intt(x: &mut [i32]) {
         x[j] = modmul(x[j],COMBO);
         x[j] -= q;
         x[j] += (x[j] >> 31) & q;
+    }
+}
+
+fn nres_it(p: &mut [i32]) {
+    for i in 0..DEGREE {
+        p[i] = nres(p[i]);
     }
 }
 
@@ -934,12 +941,12 @@ pub fn signature(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
             poly_scopy(&mut w,&s1[row..]);
             ntt(&mut w);
             poly_mul(&mut w,&c);
-            intt(&mut w);
-// unNTT y
-            redc_it(&mut y[row..]);
+
+            nres_it(&mut w);
+            poly_add(&mut y[row..],&w);  // re-use y for z 
+            redc_it(&mut y[row..]);  // unNTT y
             intt(&mut y[row..]);
 
-            poly_add(&mut y[row..],&w);
             poly_soft_reduce(&mut y[row..]);
             if infinity_norm(&y[row..])>=GAMMA1-BETA {
                 badone=true;
