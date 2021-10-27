@@ -413,34 +413,34 @@ static void SHA3_transform(sha3 *sh)
         D4 = C3 ^ rotl(C0, 1);
 
         B00 =      sh->S[0]^D0;
-        B02 = rotl(sh->S[1]^D1, 1);
-        B04 = rotl(sh->S[2]^D2, 62);
-        B01 = rotl(sh->S[3]^D3, 28);
-        B03 = rotl(sh->S[4]^D4, 27);
-
-        B13 = rotl(sh->S[5]^D0, 36);
         B10 = rotl(sh->S[6]^D1, 44);
-        B12 = rotl(sh->S[7]^D2, 6);
-        B14 = rotl(sh->S[8]^D3, 55);
-        B11 = rotl(sh->S[9]^D4, 20);
-
-        B21 = rotl(sh->S[10]^D0, 3);
-        B23 = rotl(sh->S[11]^D1, 10);
         B20 = rotl(sh->S[12]^D2, 43);
-        B22 = rotl(sh->S[13]^D3, 25);
-        B24 = rotl(sh->S[14]^D4, 39);
-
-        B34 = rotl(sh->S[15]^D0, 41);
-        B31 = rotl(sh->S[16]^D1, 45);
-        B33 = rotl(sh->S[17]^D2, 15);
         B30 = rotl(sh->S[18]^D3, 21);
-        B32 = rotl(sh->S[19]^D4, 8);
-
-        B42 = rotl(sh->S[20]^D0, 18);
-        B44 = rotl(sh->S[21]^D1, 2);
-        B41 = rotl(sh->S[22]^D2, 61);
-        B43 = rotl(sh->S[23]^D3, 56);
         B40 = rotl(sh->S[24]^D4, 14);    
+
+        B01 = rotl(sh->S[3]^D3, 28);
+        B11 = rotl(sh->S[9]^D4, 20);
+        B21 = rotl(sh->S[10]^D0, 3);
+        B31 = rotl(sh->S[16]^D1, 45);
+        B41 = rotl(sh->S[22]^D2, 61);
+
+        B02 = rotl(sh->S[1]^D1, 1);
+        B12 = rotl(sh->S[7]^D2, 6);
+        B22 = rotl(sh->S[13]^D3, 25);
+        B32 = rotl(sh->S[19]^D4, 8);
+        B42 = rotl(sh->S[20]^D0, 18);
+
+        B03 = rotl(sh->S[4]^D4, 27);
+        B13 = rotl(sh->S[5]^D0, 36);
+        B23 = rotl(sh->S[11]^D1, 10);
+        B33 = rotl(sh->S[17]^D2, 15);
+        B43 = rotl(sh->S[23]^D3, 56);
+
+        B04 = rotl(sh->S[2]^D2, 62);
+        B14 = rotl(sh->S[8]^D3, 55);
+        B24 = rotl(sh->S[14]^D4, 39);
+        B34 = rotl(sh->S[15]^D0, 41);
+        B44 = rotl(sh->S[21]^D1, 2);
 
         sh->S[0]=B00^(~B10&B20);
         sh->S[1]=B10^(~B20&B30);
@@ -494,55 +494,60 @@ void SHA3_init(sha3 *sh, int olen)
 /* process a single byte */
 void SHA3_process(sha3 *sh, int byt)
 {
-    int cnt = (int)(sh->length % sh->rate);
-    int i, j, b = cnt % 8;
+    int cnt = (int)(sh->length);
+    int b = cnt % 8;
     cnt /= 8;
-    j = cnt % 5;
-    i = cnt / 5; /* process by columns! */
-    sh->S[5*i+j] ^= ((unsign64)byt << (8 * b));
+    sh->S[cnt] ^= ((unsign64)byt << (8 * b));
     sh->length++;
-    if (sh->length % sh->rate == 0) SHA3_transform(sh);
+    if (sh->length == sh->rate) {
+        sh->length=0;
+        SHA3_transform(sh);
+    }
 }
 
 /* squeeze the sponge */
 void SHA3_squeeze(sha3 *sh, char *buff, int len)
 {
-    int done, i, k, m = 0;
+    int i, j, k, m = 0;
     unsign64 el;
-    /* extract by columns */
-    done = 0;
-    for (;;)
+    int nb=len/sh->rate;
+
+    for (j=0;j<nb;j++ )
     {
-        for (i = 0; i < 25; i++)
+        for (i=0;i<sh->rate/8;i++)
         {
-            el = sh->S[i];
-            for (k = 0; k < 8; k++)
+            el=sh->S[i];
+            for (k=0;k<8;k++)
             {
-                buff[m++] = (el & 0xff);
-                if (m >= len || m % sh->rate == 0)
-                {
-                    done = 1;
-                    break;
-                }
-                el >>= 8;
+               buff[m++] = (el & 0xff);
+               el >>= 8;
             }
-            if (done) break;
         }
-        if (m >= len) break;
-        done = 0;
-        SHA3_transform(sh);
+        SHA3_transform(sh);    
     }
+   
+    i=0;
+    while (m<len)
+    {
+        el = sh->S[i++];
+        for (k = 0; k < 8; k++)
+        {
+            buff[m++] = (el & 0xff);
+            if (m >= len) break;
+            el >>= 8;
+        }    
+    } 
 }
 
 void SHA3_hash(sha3 *sh, char *hash)
 {
     /* generate a SHA3 hash of appropriate size */
-    int q = sh->rate - (sh->length % sh->rate);
+    int q = sh->rate - sh->length;
     if (q == 1) SHA3_process(sh, 0x86);
     else
     {
         SHA3_process(sh, 0x06);  /* 0x06 for SHA-3 */
-        while ((int)sh->length % sh->rate != sh->rate - 1) SHA3_process(sh, 0x00);
+        while ((int)sh->length != sh->rate - 1) SHA3_process(sh, 0x00);
         SHA3_process(sh, 0x80); /* this will force a final transform */
     }
     SHA3_squeeze(sh, hash, sh->len);
@@ -558,12 +563,12 @@ void SHA3_continuing_hash(sha3 *sh,char *digest)
 void SHA3_shake(sha3 *sh, char *buff, int len)
 {
     /* SHAKE out a buffer of variable length len */
-    int q = sh->rate - (sh->length % sh->rate);
+    int q = sh->rate - sh->length;
     if (q == 1) SHA3_process(sh, 0x9f);
     else
     {
         SHA3_process(sh, 0x1f);  // 0x06 for SHA-3 !!!!
-        while ((int) sh->length % sh->rate != sh->rate - 1) SHA3_process(sh, 0x00);
+        while ((int) sh->length != sh->rate - 1) SHA3_process(sh, 0x00);
         SHA3_process(sh, 0x80); /* this will force a final transform */
     }
     SHA3_squeeze(sh, buff, len);

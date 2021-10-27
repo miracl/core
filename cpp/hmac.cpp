@@ -413,7 +413,7 @@ int core::PKCS15(int sha, octet *m, octet *w)
     return 1;
 }
 
-/* Alternate form, without the NULL 0500
+/* Alternate form, without the NULL 0500 */
 
 /* SHAXXX identifier strings */
 const unsigned char SHA256IDb[] = {0x30, 0x2f, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x04, 0x20};
@@ -452,7 +452,6 @@ int core::PKCS15b(int sha, octet *m, octet *w)
 
 int core::PSS_ENCODE(int sha, octet *m, csprng *RNG, octet *w)
 { 
-    int i,k;
     unsigned char mask;
     char h[64];
     octet H = {0, sizeof(h), h};
@@ -464,10 +463,7 @@ int core::PSS_ENCODE(int sha, octet *m, csprng *RNG, octet *w)
     int emlen=w->max;
     int embits=8*emlen-1;
 
-    OCT_rand(&SALT, RNG, hlen);
- //   for (i=0;i<hlen;i++)
- //       SALT.val[i]=i+1;
-    
+    OCT_rand(&SALT, RNG, hlen);  
 
     mask=(0xff)>>(8*emlen-embits);
 

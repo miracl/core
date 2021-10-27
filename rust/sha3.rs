@@ -54,7 +54,7 @@ const RC: [u64; 24] = [
 ];
 
 pub struct SHA3 {
-    length: u64,
+    length: usize,
     rate: usize,
     len: usize,
     //s: [[u64; 5]; 5],
@@ -185,14 +185,13 @@ impl SHA3 {
     /* process a single byte */
     pub fn process(&mut self, byt: u8) {
         /* process the next message byte */
-        let cnt = (self.length % (self.rate as u64)) as usize;
+        let cnt = self.length as usize;
         let b = cnt % 8;
         let ind = cnt / 8;
-        let j = ind % 5;
-        let i = ind / 5;
-        self.s[5*i+j] ^= (byt as u64) << (8 * b);
+        self.s[ind] ^= (byt as u64) << (8 * b);
         self.length += 1;
-        if cnt + 1 == self.rate {
+        if self.length == self.rate {
+            self.length=0;
             self.transform();
         }
     }
@@ -214,9 +213,35 @@ impl SHA3 {
     }
 
     pub fn squeeze(&mut self, buff: &mut [u8], olen: usize) {
-        //let olen=buff.len();
-        let mut done = false;
         let mut m = 0;
+        let nb=olen/self.rate;
+
+        for _ in 0..nb {
+            for i in 0..self.rate/8 {
+                let mut el=self.s[i];
+                for _ in 0..8 {
+                    buff[m]=(el & 0xff) as u8;
+                    m += 1;
+                    el >>= 8;
+                }
+            }
+            self.transform();
+        }
+
+        let mut i=0;
+        while m<olen {
+            let mut el=self.s[i]; i += 1;
+            for _ in 0..8 {
+                buff[m]=(el & 0xff) as u8;
+                m += 1;
+                if m >= olen {
+                    break;
+                }
+                el >>= 8;
+            }
+        }
+
+/*
         loop {
             for i in 0..25 {
                 let mut el = self.s[i];
@@ -238,18 +263,18 @@ impl SHA3 {
             }
             done = false;
             self.transform();
-        }
+        } */
     }
 
     /* Generate 32-byte Hash */
     pub fn hash(&mut self, digest: &mut [u8]) {
         /* pad message and finish - supply digest */
-        let q = self.rate - (self.length % (self.rate as u64)) as usize;
+        let q = self.rate - self.length;
         if q == 1 {
             self.process(0x86);
         } else {
             self.process(0x06);
-            while (self.length % (self.rate as u64)) as usize != self.rate - 1 {
+            while self.length != self.rate - 1 {
                 self.process(0x00)
             }
             self.process(0x80);
@@ -264,12 +289,12 @@ impl SHA3 {
     }
 
     pub fn shake(&mut self, digest: &mut [u8], olen: usize) {
-        let q = self.rate - (self.length % (self.rate as u64)) as usize;
+        let q = self.rate - self.length;
         if q == 1 {
             self.process(0x9f);
         } else {
             self.process(0x1f);
-            while (self.length % (self.rate as u64)) as usize != self.rate - 1 {
+            while self.length != self.rate - 1 {
                 self.process(0x00)
             }
             self.process(0x80);

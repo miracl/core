@@ -91,7 +91,8 @@ fn frombase64(w: &mut [u8],b: &str) -> usize
     let mut ptr: [u8; 3]= [0; 3];
     while j < len && k < w.len() {
         let mut pads = 0;
-        for i in 0..4 { 
+        let mut i=0;
+        while i<4 { 
             let mut c:u8 = 80 + b.as_bytes()[j]; j+=1;
             if c <= 112 {
                 continue; /* ignore white space */
@@ -113,9 +114,11 @@ fn frombase64(w: &mut [u8],b: &str) -> usize
             }
             if c == 141 {
                 pads+=1;    /* ignore pads '=' */
+                i += 1;
                 continue;
             }
             ch[i] = c;
+            i+=1;
         }
         ptr[0] = (ch[0] << 2) | (ch[1] >> 4);
         ptr[1] = (ch[1] << 4) | (ch[2] >> 2);

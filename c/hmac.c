@@ -448,7 +448,6 @@ int PKCS15b(int sha, octet *m, octet *w)
 
 int PSS_ENCODE(int sha, octet *m, csprng *RNG, octet *w)
 { 
-    int i,k;
     unsigned char mask;
     char h[64];
     octet H = {0, sizeof(h), h};
@@ -461,9 +460,7 @@ int PSS_ENCODE(int sha, octet *m, csprng *RNG, octet *w)
     int embits=8*emlen-1;
 
     OCT_rand(&SALT, RNG, hlen);
-//    for (i=0;i<hlen;i++)
-//        SALT.val[i]=i+1;
- 
+
 
     mask=(0xff)>>(8*emlen-embits);
 

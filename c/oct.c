@@ -282,8 +282,8 @@ void OCT_frombase64(octet *w, char *b)
     j = k = 0;
     while (j < len && k < w->max)
     {
-        pads = 0;
-        for (i = 0; i < 4; i++)
+        pads = 0; i=0;
+        while (i < 4)
         {
             c = 80 + b[j++];
             if (c <= 112) continue; /* ignore white space */
@@ -295,9 +295,10 @@ void OCT_frombase64(octet *w, char *b)
             if (c == 141)
             {
                 pads++;    /* ignore pads '=' */
+                i++;
                 continue;
             }
-            ch[i] = c;
+            ch[i++] = c;
         }
         ptr[0] = (ch[0] << 2) | (ch[1] >> 4);
         ptr[1] = (ch[1] << 4) | (ch[2] >> 2);
