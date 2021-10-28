@@ -134,6 +134,11 @@ fn modmul(a: i32, b: i32) -> i32 {
     redc((a as u64) * (b as u64))
 }
 
+fn poly_pos(p: &mut [i32]) {
+    for j in 0..DEGREE {
+        p[j] += (p[j]>>31)&PRIME;
+    }
+}
 // NTT code
 
 // Important!
@@ -172,9 +177,8 @@ fn ntt(x: &mut [i32]) {
     let q = PRIME;
 
     /* Make positive */
-    for j in 0..DEGREE {
-        x[j] += (x[j]>>31)&PRIME;
-    }
+    poly_pos(x);
+
     let mut m = 1;
     while m < DEGREE {
         let mut k = 0;
@@ -719,7 +723,7 @@ fn sampleinball(ct: &[u8],c: &mut [i32]) {
 fn p2r(r0: &mut i32) -> i16 {
     let d=(1<<D) as i32;
     let r1=(*r0+d/2-1)>>D;
-    *r0-=r1*d;
+    *r0-=r1 << D;
     return r1 as i16;
 }
 
@@ -868,6 +872,7 @@ pub fn keypair(rng: &mut impl RAND,sk: &mut [u8],pk: &mut [u8]) {
         poly_hard_reduce(&mut r);
         intt(&mut r);
         poly_scopy(&mut w,&s2[row..]);
+        poly_pos(&mut w);
         poly_add(&mut r,&w);
         poly_soft_reduce(&mut r);
         power2round(&r,&mut t0[row..],&mut t1[row..]);

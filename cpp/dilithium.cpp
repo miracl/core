@@ -58,6 +58,14 @@ static sign32 modmul(unsign32 a, unsign32 b)
     return redc((unsign64)a * b);
 }
 
+// make all elements +ve
+static void poly_pos(sign32 *p)
+{
+    int i;
+    for (i=0;i<DEGREE;i++)
+        p[i]+=(p[i]>>31)&PRIME; 
+}
+
 // NTT code
 
 // Important!
@@ -99,8 +107,7 @@ static void ntt(sign32 *x)
     sign32 S, V, q = PRIME;
 
     /* Make positive */
-    for (j = 0; j < DEGREE; j++)
-        x[j]+=(x[j]>>31)&PRIME;  // change -x to PRIME-x
+    poly_pos(x);
     m = 1;
     while (m < DEGREE)
     {
@@ -669,8 +676,8 @@ static sign16 p2r(sign32 *r0)
 {
     sign32 d=(1<<D);
     sign32 r1;
-    r1=(*r0+d/2-1)>>D;
-    *r0-=r1*d;
+    r1=(*r0+d/2-1)>>D;  
+    *r0-=(r1 << D);
     return (sign16)r1;
 }
 
@@ -822,11 +829,11 @@ void core::DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
         row=DEGREE*i;
         sample_Sn(rhod,&s1[row],i);
     }
+
     for (i=0;i<K;i++)
     {
         row=DEGREE*i;
         sample_Sn(rhod,&s2[row],L+i);
-
         poly_zero(r);
         for (j=0;j<L;j++)
         {
@@ -840,6 +847,7 @@ void core::DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
         poly_hard_reduce(r);  
         intt(r);
         poly_scopy(w,&s2[row]);
+        poly_pos(w);
         poly_add(r,r,w);
         poly_soft_reduce(r);
         Power2Round(r,&t0[row],&t1[row]);
@@ -915,6 +923,7 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
 // Calculate w1
             hibits(&w1[row],&Ay[row]);
         }
+
 // Calculate c
         H4(ct,mu,w1);
         SampleInBall(ct,c);
@@ -933,7 +942,6 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
             poly_add(&y[row],&y[row],w);  // re-use y for z 
             redc_it(&y[row]);  // unNTT y
             intt(&y[row]);
-
             poly_soft_reduce(&y[row]);
             if (infinity_norm(&y[row])>=GAMMA1-BETA)
             {
