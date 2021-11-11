@@ -59,6 +59,8 @@ fn main() {
     let mut keya: [u8; 32] = [0; 32];
     let mut keyb: [u8; 32] = [0; 32];
 
+// See https://eprint.iacr.org/2016/1157.pdf Protocol 1
+
     nhs::server_1(&mut srng, &mut sb, &mut ss);
 
     nhs::client(&mut crng, &sb, &mut uc, &mut keyb);

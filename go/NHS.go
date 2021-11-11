@@ -342,8 +342,8 @@ func poly_hard_reduce(poly []int32) {
 	}
 }
 
-/* API files */
-
+/* API functions. See https://eprint.iacr.org/2016/1157.pdf Protocol 1 */
+// S is secret key key, SB is seed|public key to be sent to client
 func NHS_SERVER_1(rng *RAND, SB []byte, S []byte) {
 	var seed [32]byte
 	var array [1792]byte
@@ -386,6 +386,9 @@ func NHS_SERVER_1(rng *RAND, SB []byte, S []byte) {
 
 }
 
+// optimized to reduce memory
+// UC is U|cbar to be returned to server
+// KEY is shared key
 func NHS_CLIENT(rng *RAND, SB []byte, UC []byte, KEY []byte) {
 	sh := NewSHA3(SHA3_HASH256)
 	var seed [32]byte
@@ -463,6 +466,7 @@ func NHS_CLIENT(rng *RAND, SB []byte, UC []byte, KEY []byte) {
 	}
 }
 
+// calculate shared key from UC and secret key S
 func NHS_SERVER_2(S []byte, UC []byte, KEY []byte) {
 	sh := NewSHA3(SHA3_HASH256)
 

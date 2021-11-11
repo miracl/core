@@ -372,8 +372,9 @@ var NHS = function(ctx) {
 
             return s;
         },
-        /* API files */
 
+/* API functions. See https://eprint.iacr.org/2016/1157.pdf Protocol 1 */
+// S is secret key key, SB is seed|public key to be sent to client
         SERVER_1: function(RNG, SB, S) {
             var seed = new Uint8Array(32),
                 array = new Uint8Array(1792),
@@ -417,6 +418,9 @@ var NHS = function(ctx) {
             }
         },
 
+// optimized to reduce memory
+// UC is U|cbar to be returned to server
+// KEY is shared key
         CLIENT: function(RNG, SB, UC, KEY) {
             var sh = new ctx.SHA3(ctx.SHA3.HASH256),
                 seed = new Uint8Array(32),
@@ -495,6 +499,7 @@ var NHS = function(ctx) {
             }
         },
 
+// calculate shared key from UC and secret key S
         SERVER_2: function(S, UC, KEY) {
             var sh = new ctx.SHA3(ctx.SHA3.HASH256),
                 c = new Int32Array(NHS.DEGREE),

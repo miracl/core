@@ -331,8 +331,8 @@ public final class NHS {
         }
     }
 
-    /* API files */
-
+/* API functions. See https://eprint.iacr.org/2016/1157.pdf Protocol 1 */
+// S is secret key key, SB is seed|public key to be sent to client
     public static void SERVER_1(RAND RNG, byte[] SB, byte[] S) {
         int i;
         byte[] seed = new byte[32];
@@ -373,6 +373,9 @@ public final class NHS {
 
     }
 
+// optimized to reduce memory
+// UC is U|cbar to be returned to server
+// KEY is shared key
     public static void CLIENT(RAND RNG, byte[] SB, byte[] UC, byte[] KEY) {
         int i;
         SHA3 sh = new SHA3(SHA3.HASH256);
@@ -444,6 +447,7 @@ public final class NHS {
 
     }
 
+// calculate shared key from UC and secret key S
     public static void SERVER_2(byte[] S, byte[] UC, byte[] KEY) {
         int i;
         SHA3 sh = new SHA3(SHA3.HASH256);

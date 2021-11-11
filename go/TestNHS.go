@@ -48,6 +48,7 @@ func main() {
 
 	var S [1792]byte
 
+// NewHope Simple key exchange -  - see https://eprint.iacr.org/2016/1157.pdf Protocol 1
 	var SB [1824]byte
 	core.NHS_SERVER_1(srng, SB[:], S[:])
 	var UC [2176]byte

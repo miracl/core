@@ -515,8 +515,8 @@ fn poly_hard_reduce(poly: &mut [i32]) {
     }
 }
 
-/* API files */
-
+/* API functions. See https://eprint.iacr.org/2016/1157.pdf Protocol 1 */
+// ss is secret key key, sb is seed|public key to be sent to client
 pub fn server_1(rng: &mut impl RAND, sb: &mut [u8], ss: &mut [u8]) {
     let mut seed: [u8; 32] = [0; 32];
     let mut array: [u8; 1792] = [0; 1792];
@@ -558,6 +558,9 @@ pub fn server_1(rng: &mut impl RAND, sb: &mut [u8], ss: &mut [u8]) {
     }
 }
 
+// optimized to reduce memory
+// uc is U|cbar to be returned to server
+// okey is shared key
 pub fn client(rng: &mut impl RAND, sb: &[u8], uc: &mut [u8], okey: &mut [u8]) {
     let mut sh = SHA3::new(sha3::HASH256);
 
@@ -636,6 +639,7 @@ pub fn client(rng: &mut impl RAND, sb: &[u8], uc: &mut [u8], okey: &mut [u8]) {
     }
 }
 
+// calculate shared okey from uc and secret key ss
 pub fn server_2(ss: &[u8], uc: &[u8], okey: &mut [u8]) {
     let mut sh = SHA3::new(sha3::HASH256);
 

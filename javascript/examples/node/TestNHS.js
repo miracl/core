@@ -15,7 +15,7 @@ var SB=[];
 var UC=[];
 var KEYA=[];
 var KEYB=[];
-
+// NewHope Simple key exchange - see https://eprint.iacr.org/2016/1157.pdf Protocol 1
 ctx.NHS.SERVER_1(srng,SB,S);
 
 ctx.NHS.CLIENT(crng,SB,UC,KEYB);

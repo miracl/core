@@ -337,7 +337,9 @@ public struct NHS
 			poly[i]=e+((e>>(WL-1))&PRIME)
 		}
 	}
-/* API files */
+
+/* API functions. See https://eprint.iacr.org/2016/1157.pdf Protocol 1 */
+// S is secret key key, SB is seed|public key to be sent to client
 
 	public static func SERVER_1(_ rng: inout RAND,_ SB:inout [UInt8],_ S:inout [UInt8]) {
 		var seed=[UInt8](repeating:0,count:32)
@@ -380,6 +382,9 @@ public struct NHS
 		}
 	}
 
+// optimized to reduce memory
+// UC is U|cbar to be returned to server
+// KEY is shared key
 	public static func CLIENT(_ rng: inout RAND,_ SB: [UInt8],_ UC:inout [UInt8],_ KEY:inout [UInt8]) {
 		var sh=SHA3(SHA3.HASH256)
 		var seed=[UInt8](repeating:0,count:32)
@@ -459,6 +464,7 @@ public struct NHS
 		}
 	}
 
+// calculate shared key from UC and secret key S
 	public static func SERVER_2(_ S: [UInt8],_ UC: [UInt8],_ KEY:inout [UInt8]) {
 		var sh=SHA3(SHA3.HASH256)
 

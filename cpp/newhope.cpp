@@ -373,8 +373,8 @@ static void poly_hard_reduce(sign32 *poly)
     }
 }
 
-/* API files */
-
+/* API functions. See https://eprint.iacr.org/2016/1157.pdf Protocol 1 */
+// S is secret key key, SB is seed|public key to be sent to client
 void core::NHS_SERVER_1(csprng *RNG, octet *SB, octet *S)
 {
     int i;
@@ -411,6 +411,8 @@ void core::NHS_SERVER_1(csprng *RNG, octet *SB, octet *S)
 }
 
 // optimized to reduce memory
+// UC is U|cbar to be returned to server
+// KEY is shared key
 void core::NHS_CLIENT(csprng *RNG, octet *SB, octet *UC, octet *KEY)
 {
     int i;
@@ -472,6 +474,7 @@ void core::NHS_CLIENT(csprng *RNG, octet *SB, octet *UC, octet *KEY)
     OCT_jbytes(UC, (char *)cc, 384);
 }
 
+// calculate shared key from UC and secret key S
 void core::NHS_SERVER_2(octet *S, octet *UC, octet *KEY)
 {
     int i;

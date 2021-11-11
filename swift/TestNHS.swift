@@ -48,6 +48,7 @@ public func TestNHS()
 				for i in 0..<100 {RAW[i]=UInt8((i+2)&0xff)}
 				crng.seed(100,RAW)
 
+// NewHope Simple key exchange -  - see https://eprint.iacr.org/2016/1157.pdf Protocol 1
 
 	NHS.SERVER_1(&srng,&SB,&S)
 				NHS.CLIENT(&crng,SB,&UC,&KEYB)

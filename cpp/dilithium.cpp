@@ -17,16 +17,14 @@
  * limitations under the License.
  */
 
-/* Dilithium API implementation. Constant time where it matters. Slow (spends nearly all of its time running SHA3) but small.
+/* Dilithium API implementation. Constant time where it matters. Spends nearly all of its time running SHA3. Small.
 
-Note that the Matrix A is calculated on-the-fly to keep memory requirement minimal
-But this makes all stages much slower
+The Matrix A is calculated on-the-fly to keep memory requirement minimal
 Note that 
-1. Matrix A can just be generated randomly for Key generation (without using SHA3 which is very slow)
-2. A precalculated A can be included in the public key, for use by signature and verification (which blows up public key size)
-3. Precalculating A for signature calculation means that the A does not have to re-calculated for each attempt to find a good signature
+1. A precalculated A can be included in the public key, for use by signature and verification (which blows up public key size)
+2. Precalculating A for signature calculation means that the A does not have to re-calculated for each attempt to find a good signature
 
-Might be simpler to wait for hardware support for SHA3!
+Might be simpler to wait for hardware support for SHA3 before attempting further optimization!
 
    M.Scott 30/09/2021
 */
@@ -131,7 +129,7 @@ static void ntt(sign32 *x)
 /* Gentleman-Sande INTT */
 /* Excess of 2 allowed on input - coefficients must be < 2*PRIME */
 /* Output fully reduced */
-#define NTTL 2 // maybe could be 1?
+#define NTTL 1 // maybe should be 2?
 
 static void intt(sign32 *x)
 {
@@ -150,6 +148,7 @@ static void intt(sign32 *x)
             S = iroots[m + i];
             for (j = k; j < k + t; j++)
             {
+#if NTTL>1
 				if (m<NTTL && j<k+lim)   // This should be unwound for timings
 				{ // need to knock back excesses. Never used if NTTL=1.
 					U=modmul(x[j],ONE);  
@@ -158,6 +157,10 @@ static void intt(sign32 *x)
                     U = x[j];
                     V = x[j + t];
                 }
+#else
+                U = x[j];
+                V = x[j + t];                
+#endif
                 x[j] = U + V;
                 W = U + (DEGREE/NTTL) * q - V; 
                 x[j + t] = modmul(W, S); 
@@ -937,7 +940,6 @@ int core::DLTHM_signature(octet *sk,octet *M,octet *sig)
             poly_scopy(w,&s1[row]);
             ntt(w);
             poly_mul(w,w,c);
-
             nres_it(w);
             poly_add(&y[row],&y[row],w);  // re-use y for z 
             redc_it(&y[row]);  // unNTT y
@@ -1073,3 +1075,4 @@ bool core::DLTHM_verify(octet *pk,octet *M,octet *sig)
             return false;
     return true;
 }
+

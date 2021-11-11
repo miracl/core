@@ -50,7 +50,7 @@ public class TestNHS extends TestCase {
         for (i = 0; i < 100; i++) RAW[i] = (byte)(i + 2);
         CRNG.seed(100, RAW);
 
-// NewHope Simple key exchange
+// NewHope Simple key exchange -  - see https://eprint.iacr.org/2016/1157.pdf Protocol 1
 
         NHS.SERVER_1(SRNG, SB, S);
         NHS.CLIENT(CRNG, SB, UC, KEYB);

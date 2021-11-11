@@ -58,7 +58,8 @@ int main()
     RAND_seed(&SRNG, 100, raw);
     for (i = 4; i < 100; i++) raw[i] = i + 2;
     RAND_seed(&CRNG, 100, raw);
-// NewHope Simple key exchange
+
+// NewHope Simple key exchange - see https://eprint.iacr.org/2016/1157.pdf Protocol 1
 
     NHS_SERVER_1(&SRNG, &SB, &S);
     NHS_CLIENT(&CRNG, &SB, &UC, &KEYB);
