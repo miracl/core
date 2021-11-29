@@ -84,6 +84,9 @@ int ZZZ::DeriveKeyPair(int config_id,octet *SK,octet *PK,octet *SEED)
     OCT_jstring(&SUITE_ID,(char *)"KEM");
     OCT_jint(&SUITE_ID,kem,2);
     LabeledExtract(&PRK,NULL,&SUITE_ID,(char *)"dkp_prk",SEED);
+
+//printf("PRK= ");OCT_output(&PRK); printf("\n");
+
     if (kem==32 || kem==33)
     { // RFC7748
         LabeledExpand(SK,&PRK,&SUITE_ID,(char *)"sk",NULL,GROUP);
@@ -111,7 +114,9 @@ int ZZZ::DeriveKeyPair(int config_id,octet *SK,octet *PK,octet *SEED)
             counter++;
         }
     }
-
+//printf("SK= ");OCT_output(SK); printf("\n");
+//printf("kem= %d\n",kem);
+//printf("counter= %d\n",counter);
     ECP_KEY_PAIR_GENERATE(NULL, SK, PK);
     if (kem==32 || kem==33)
         OCT_reverse(PK);

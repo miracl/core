@@ -23,13 +23,13 @@ package main
 
 import "fmt"
 
-import "github.com/miracl/core/go/core"
-import "github.com/miracl/core/go/core/ED25519"
-import "github.com/miracl/core/go/core/C25519"
-import "github.com/miracl/core/go/core/NIST256"
-import "github.com/miracl/core/go/core/GOLDILOCKS"
-import "github.com/miracl/core/go/core/SECP256K1"
-import "github.com/miracl/core/go/core/BLS12381"
+import "miracl/core"
+import "miracl/core/ED25519"
+import "miracl/core/C25519"
+import "miracl/core/NIST256"
+import "miracl/core/GOLDILOCKS"
+import "miracl/core/SECP256K1"
+import "miracl/core/BLS12381"
 
 func ceil(a int, b int) int {
 	return (((a)-1)/(b) + 1)

@@ -21,7 +21,7 @@
 
 // See https://eprint.iacr.org/2017/633 (Ducas, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehle)
 
-/* gcc -O2 testdlthm.c core.a -o testdlthm */
+/* g++ -O2 testdlthm.cpp core.a -o testdlthm */
 
 #include <stdio.h>
 #include <time.h>

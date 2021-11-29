@@ -3,7 +3,7 @@
 Namespaces are used to separate different curves.
 
 So for example to support both ED25519 and the NIST P256 curves, one
-could import into a particular module both "core/ED25519" and "core/NIST256"
+could import into a particular module both "miracl/core/ED25519" and "miracl/core/NIST256"
 
 Separate ROM files provide the constants required for each curve. Some
 files (BIG.go, FP.go, ECP.go) also specify certain constants 
@@ -11,30 +11,24 @@ that must be set for the particular curve.
 
 # Installation and Testing
 
-Make sure that the GOPATH environmental variable is set to point
-at the working directory
+Assumes version 1.16+ of Go
 
-Then clone the MIRACL Core repository by executing
+Set the $GOPATH environmental variable to $HOME/go. Set the environment variable GO111MODE to auto
 
-    go get github.com/miracl/core
+	export GOPATH=$HOME/go
+	export GO111MODULE="auto"
 
-Ignore the warning message about "no Go files"
+Create a directory
 
-This assumes that Git is installed on your machine - see 
-https://git-scm.com/download/
+	$GOPATH/src/miracl
 
-Next navigate to $GOPATH/src/github.com/miracl/core/go
-
-NOTE: If the repository address changes, then change the above, and also
-change import statements at the start of some files.
+Navigate to this directory and copy in all files from the go/ directory of the MIRACL core repository.
 
 To build the library and see it in action, execute the python3 
 script config32.py or config64.py (depending on whether you want a 
 32 or 64-bit build), and select the curves that you wish to support. 
 
 --------------------------------------------
-
-(Note from version 1.16 of GO, the environment variable GO111MODE should be set to auto)
 
 To create a 64-bit library
 

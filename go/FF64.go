@@ -21,7 +21,7 @@ package XXX
 
 //import "fmt"
 //import "os"
-import "github.com/miracl/core/go/core"
+import "miracl/core"
 
 //const FFLEN int = @ML@
 

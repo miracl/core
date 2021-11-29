@@ -25,9 +25,9 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/miracl/core/go/core"
-	"github.com/miracl/core/go/core/C25519"
-	"github.com/miracl/core/go/core/NIST521"
+	"miracl/core"
+	"miracl/core/C25519"
+	"miracl/core/NIST521"
 )
 
 func printBinary(array []byte) {

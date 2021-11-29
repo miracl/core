@@ -389,8 +389,9 @@ void core::NHS_SERVER_1(csprng *RNG, octet *SB, octet *S)
     NHSError(RNG, e);
     NHSError(RNG, s);
 
-    ntt(s);
-    ntt(e);
+	ntt(s);
+	ntt(e);
+
     poly_mul(b, b, s);
     poly_add(b, b, e);
     poly_hard_reduce(b);

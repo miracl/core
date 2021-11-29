@@ -399,15 +399,15 @@ fn hpke_nist256() {
         decode_hex(&mut seedE,"4270e54ffd08d79d5928020af4686d8f6b7d35dbe470265f1f5aa22816ce860e");
         decode_hex(&mut seedR,"668b37171f1072f3cf12ea8a236a45df23fc13b82af3609ad1e354f6ef817550");
         
-	//print!("seedE= "); printbinary(&seedE);
+	print!("seedE= "); printbinary(&seedE);
 
 	hpke::deriveKeyPair(config_id,&mut skE,&mut pkE,&seedE);
-	//print!("1. pkE= "); printbinary(&pkE);
+	print!("1. pkE= "); printbinary(&pkE);
 
         hpke::deriveKeyPair(config_id,&mut skR,&mut pkR,&seedR);   
 
 	hpke::encap(config_id,&skE,&mut z,&pkE,&pkR);
-	print!("pkE= "); printbinary(&pkE);
+	print!("2. pkE= "); printbinary(&pkE);
 
 	print!("Encapsulated z= "); printbinary(&z);
 

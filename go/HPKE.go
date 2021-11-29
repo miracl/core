@@ -24,7 +24,7 @@
 package XXX
 
 //import "fmt"
-import "github.com/miracl/core/go/core"
+import "miracl/core"
 
 func reverse(X []byte) {
 	lx := len(X)

@@ -25,7 +25,7 @@
 
 package XXX
 
-import "github.com/miracl/core/go/core"
+import "miracl/core"
 
 //import "fmt"
 

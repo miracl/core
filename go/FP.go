@@ -22,7 +22,7 @@
 
 package XXX
 
-import "github.com/miracl/core/go/core"
+import "miracl/core"
 
 type FP struct {
 	x   *BIG

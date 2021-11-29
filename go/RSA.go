@@ -22,7 +22,7 @@
 package XXX
 
 //import "fmt"
-import "github.com/miracl/core/go/core"
+import "miracl/core"
 
 const RFS int = int(MODBYTES) * FFLEN
 

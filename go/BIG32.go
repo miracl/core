@@ -24,7 +24,7 @@ package XXX
 import (
 	"strconv"
 
-	"github.com/miracl/core/go/core"
+	"miracl/core"
 )
 
 //import "fmt"

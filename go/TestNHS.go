@@ -24,7 +24,7 @@ package main
 
 import "fmt"
 
-import "github.com/miracl/core/go/core"
+import "miracl/core"
 
 //import "core"
 

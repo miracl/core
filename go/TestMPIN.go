@@ -22,11 +22,11 @@
 package main
 
 import "fmt"
-import "github.com/miracl/core/go/core"
-import "github.com/miracl/core/go/core/BN254"
-import "github.com/miracl/core/go/core/BLS12383"
-import "github.com/miracl/core/go/core/BLS24479"
-import "github.com/miracl/core/go/core/BLS48556"
+import "miracl/core"
+import "miracl/core/BN254"
+import "miracl/core/BLS12383"
+import "miracl/core/BLS24479"
+import "miracl/core/BLS48556"
 
 func printBinary(array []byte) {
 	for i := 0; i < len(array); i++ {

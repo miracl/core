@@ -25,6 +25,7 @@
 #include <time.h>
 #include "hpke_C25519.h"
 #include "hpke_NIST521.h"
+#include "hpke_NIST256.h"
 
 using namespace core;
 
@@ -385,6 +386,191 @@ int hpke_NIST521()
     return res;
 }
 
+int hpke_NIST256()
+{
+    using namespace NIST256;
+
+    int res=0;
+    int config_id=0x510; // 10|11|00010010 = 2, 3, 18  // 01|01|00010000  = 1, 1, 16
+    int i,mode;
+    char info[64];
+
+    char seede[EGS_NIST256];
+    char seedr[EGS_NIST256];
+    char seeds[EGS_NIST256];
+    octet seedE = {0, sizeof(seede), seede};
+    octet seedR = {0, sizeof(seedr), seedr};
+    octet seedS = {0, sizeof(seeds), seeds};
+
+    char skr[EGS_NIST256];
+    char sks[EGS_NIST256];
+    char ske[EGS_NIST256];
+    char psks[64];
+    char pskid[64];
+    char pkr[2*EFS_NIST256+1];
+    char pks[2*EFS_NIST256+1];
+    char pke[2*EFS_NIST256+1];
+    char z[256];
+    char plain[80];
+    char cipher[80];
+    char aad[32];
+    char tag[32];
+    char exporter_secret[128];
+    
+    octet INFO = {0, sizeof(info), info};
+    octet skR = {0, sizeof(skr), skr};
+    octet skS = {0, sizeof(sks), sks};
+    octet skE = {0, sizeof(ske), ske};
+    octet psk = {0, sizeof(psks), psks};
+    octet pskID = {0,sizeof(pskid), pskid};
+    octet pkR = {0, sizeof(pkr), pkr};
+    octet pkS = {0, sizeof(pks), pks};
+    octet pkE = {0, sizeof(pke), pke};
+    octet Z = {0, sizeof(z), z};
+    octet PLAIN = {0,sizeof(plain),plain};
+    octet CIPHER = {0,sizeof(cipher),cipher};
+    octet AAD = {0,sizeof(aad),aad};
+    octet TAG = {0,sizeof(tag),tag};
+    octet EXPORTER_SECRET = {0,sizeof(exporter_secret),exporter_secret};      
+
+    OCT_fromHex(&INFO,(char *)"4f6465206f6e2061204772656369616e2055726e");
+    OCT_fromHex(&psk,(char *)"0247fd33b913760fa1fa51e1892d9f307fbe65eb171e8132c2af18555a738b82");
+    OCT_fromHex(&pskID,(char *)"456e6e796e20447572696e206172616e204d6f726961");
+    OCT_fromHex(&PLAIN,(char *)"4265617574792069732074727574682c20747275746820626561757479");
+    OCT_fromHex(&AAD,(char *)"436f756e742d30");
+
+    char key[64];
+    char nonce[24];
+    octet KEY = {0, sizeof(key), key};
+    octet NONCE = {0, sizeof(nonce), nonce};
+
+// Mode 0
+
+    mode=0;
+    printf("\nMode 0\n");
+
+    OCT_fromHex(&seedE,(char *)"4270e54ffd08d79d5928020af4686d8f6b7d35dbe470265f1f5aa22816ce860e");
+    OCT_fromHex(&seedR,(char *)"668b37171f1072f3cf12ea8a236a45df23fc13b82af3609ad1e354f6ef817550");
+
+	//printf("seedE= "); OCT_output(&seedE);
+   
+    DeriveKeyPair(config_id,&skE,&pkE,&seedE);
+
+    //printf("1. pkE= "); OCT_output(&pkE); 
+
+    DeriveKeyPair(config_id,&skR,&pkR,&seedR);
+
+    HPKE_Encap(config_id,&skE,&Z,&pkE,&pkR);
+    printf("pkE= "); OCT_output(&pkE); 
+
+
+    printf("Encapsulated Z= "); OCT_output(&Z);
+
+    HPKE_Decap(config_id,&skR,&Z,&pkE,&pkR);
+    printf("Decapsulated Z= "); OCT_output(&Z);
+
+    HPKE_KeySchedule(config_id,&KEY,&NONCE,&EXPORTER_SECRET,mode,&Z,&INFO,NULL,NULL);
+
+    printf("Key=   "); OCT_output(&KEY);
+    printf("Nonce= "); OCT_output(&NONCE);
+    printf("Exporter Secret= "); OCT_output(&EXPORTER_SECRET); 
+    
+    AES_GCM_ENCRYPT(&KEY,&NONCE,&AAD,&PLAIN,&CIPHER,&TAG);
+
+    printf("Cipher= "); OCT_output(&CIPHER);
+    printf("Tag= "); OCT_output(&TAG);
+
+// Mode 1
+    mode=1;
+    printf("\nMode 1\n");
+
+    OCT_fromHex(&seedE,(char *)"2afa611d8b1a7b321c761b483b6a053579afa4f767450d3ad0f84a39fda587a6");
+    OCT_fromHex(&seedR,(char *)"d42ef874c1913d9568c9405407c805baddaffd0898a00f1e84e154fa787b2429");
+    DeriveKeyPair(config_id,&skE,&pkE,&seedE);
+    DeriveKeyPair(config_id,&skR,&pkR,&seedR);
+    
+    HPKE_Encap(config_id,&skE,&Z,&pkE,&pkR);
+    
+    printf("pkE= "); OCT_output(&pkE); 
+    printf("Encapsulated Z= "); OCT_output(&Z);
+
+    HPKE_Decap(config_id,&skR,&Z,&pkE,&pkR);
+    printf("Decapsulated Z= "); OCT_output(&Z);
+
+    HPKE_KeySchedule(config_id,&KEY,&NONCE,&EXPORTER_SECRET,mode,&Z,&INFO,&psk,&pskID);
+
+    printf("Key=   "); OCT_output(&KEY);
+    printf("Nonce= "); OCT_output(&NONCE);
+    printf("Exporter Secret= "); OCT_output(&EXPORTER_SECRET); 
+    
+    AES_GCM_ENCRYPT(&KEY,&NONCE,&AAD,&PLAIN,&CIPHER,&TAG);
+
+    printf("Cipher= "); OCT_output(&CIPHER);
+    printf("Tag= "); OCT_output(&TAG);
+
+// Mode 2
+    mode=2;
+    printf("\nMode 2\n");
+
+    OCT_fromHex(&seedE,(char *)"798d82a8d9ea19dbc7f2c6dfa54e8a6706f7cdc119db0813dacf8440ab37c857");
+    OCT_fromHex(&seedR,(char *)"7bc93bde8890d1fb55220e7f3b0c107ae7e6eda35ca4040bb6651284bf0747ee");
+    OCT_fromHex(&seedS,(char *)"874baa0dcf93595a24a45a7f042e0d22d368747daaa7e19f80a802af19204ba8");
+    DeriveKeyPair(config_id,&skE,&pkE,&seedE);
+    DeriveKeyPair(config_id,&skR,&pkR,&seedR);
+    DeriveKeyPair(config_id,&skS,&pkS,&seedS);
+ 
+    HPKE_AuthEncap(config_id,&skE,&skS,&Z,&pkE,&pkR,&pkS);
+
+    printf("pkE= "); OCT_output(&pkE); 
+    printf("Encapsulated Z= "); OCT_output(&Z);
+
+    HPKE_AuthDecap(config_id,&skR,&Z,&pkE,&pkR,&pkS);
+    printf("Decapsulated Z= "); OCT_output(&Z);
+
+    HPKE_KeySchedule(config_id,&KEY,&NONCE,&EXPORTER_SECRET,mode,&Z,&INFO,NULL,NULL);
+
+    printf("Key=   "); OCT_output(&KEY);
+    printf("Nonce= "); OCT_output(&NONCE);
+    printf("Exporter Secret= "); OCT_output(&EXPORTER_SECRET); 
+    
+    AES_GCM_ENCRYPT(&KEY,&NONCE,&AAD,&PLAIN,&CIPHER,&TAG);
+
+    printf("Cipher= "); OCT_output(&CIPHER);
+    printf("Tag= "); OCT_output(&TAG);
+
+// Mode 3
+    mode=3;
+    printf("\nMode 3\n");
+
+    OCT_fromHex(&seedE,(char *)"3c1fceb477ec954c8d58ef3249e4bb4c38241b5925b95f7486e4d9f1d0d35fbb");
+    OCT_fromHex(&seedR,(char *)"abcc2da5b3fa81d8aabd91f7f800a8ccf60ec37b1b585a5d1d1ac77f258b6cca");
+    OCT_fromHex(&seedS,(char *)"6262031f040a9db853edd6f91d2272596eabbc78a2ed2bd643f770ecd0f19b82");
+    DeriveKeyPair(config_id,&skE,&pkE,&seedE);
+    DeriveKeyPair(config_id,&skR,&pkR,&seedR);
+    DeriveKeyPair(config_id,&skS,&pkS,&seedS);
+
+    HPKE_AuthEncap(config_id,&skE,&skS,&Z,&pkE,&pkR,&pkS);
+
+    printf("pkE= "); OCT_output(&pkE); 
+    printf("Encapsulated Z= "); OCT_output(&Z);
+
+    HPKE_AuthDecap(config_id,&skR,&Z,&pkE,&pkR,&pkS);
+    printf("Decapsulated Z= "); OCT_output(&Z);
+
+    HPKE_KeySchedule(config_id,&KEY,&NONCE,&EXPORTER_SECRET,mode,&Z,&INFO,&psk,&pskID);
+
+    printf("Key=   "); OCT_output(&KEY);
+    printf("Nonce= "); OCT_output(&NONCE);
+    printf("Exporter Secret= "); OCT_output(&EXPORTER_SECRET); 
+    
+    AES_GCM_ENCRYPT(&KEY,&NONCE,&AAD,&PLAIN,&CIPHER,&TAG);
+
+    printf("Cipher= "); OCT_output(&CIPHER);
+    printf("Tag= "); OCT_output(&TAG);
+
+    return res;
+}
+
 int main()
 {
     printf("\n%d bit build", CHUNK);
@@ -394,6 +580,11 @@ int main()
 
     printf("\nTesting HPKE for curve NIST521\n");
     hpke_NIST521();
+
+    printf("\nTesting HPKE for curve NIST256\n");
+    hpke_NIST256();
 }
+
+
 
 

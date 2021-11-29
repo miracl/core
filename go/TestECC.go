@@ -23,11 +23,11 @@ package main
 
 import "fmt"
 
-import "github.com/miracl/core/go/core"
-import "github.com/miracl/core/go/core/ED25519"
-import "github.com/miracl/core/go/core/NIST256"
-import "github.com/miracl/core/go/core/GOLDILOCKS"
-import "github.com/miracl/core/go/core/RSA2048"
+import "miracl/core"
+import "miracl/core/ED25519"
+import "miracl/core/NIST256"
+import "miracl/core/GOLDILOCKS"
+import "miracl/core/RSA2048"
 
 func printBinary(array []byte) {
 	for i := 0; i < len(array); i++ {

@@ -22,7 +22,7 @@
 package XXX
 
 //import "fmt"
-import "github.com/miracl/core/go/core"
+import "miracl/core"
 
 const INVALID_PUBLIC_KEY int = -2
 const ERROR int = -3
