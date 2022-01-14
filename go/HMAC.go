@@ -368,7 +368,7 @@ func XOF_Expand(hlen int, olen int, DST []byte, MSG []byte) []byte {
 	return OKM
 }
 
-func XMD_Expand(hash int, hlen int, olen int, DST []byte, MSG []byte) []byte {
+func xmd_Expand_Short_DST(hash int, hlen int, olen int, DST []byte, MSG []byte) []byte {
 	var OKM = make([]byte, olen)
 	var TMP = make([]byte, len(DST)+4)
 
@@ -406,6 +406,18 @@ func XMD_Expand(hash int, hlen int, olen int, DST []byte, MSG []byte) []byte {
 		}
 	}
 	return OKM
+}
+
+func XMD_Expand(hash int, hlen int, olen int, DST []byte, MSG []byte) []byte {
+	var R []byte
+	OS := []byte("H2C-OVERSIZE-DST-")
+	if len(DST)>=256 {
+		W := GPhashit(hash, hlen, 0, 0, OS, -1, DST)
+		R=xmd_Expand_Short_DST(hash,hlen,olen,W,MSG)
+	} else {
+		R=xmd_Expand_Short_DST(hash,hlen,olen,DST,MSG)
+	}
+	return R;
 }
 
 /* Mask Generation Function */

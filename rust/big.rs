@@ -292,7 +292,8 @@ impl BIG {
     }
 
     /* Convert to Hex String */
-#[cfg(feature = "std")]
+//#[cfg(feature = "std")]
+#[cfg(not(feature = "no_std"))]
     pub fn tostring(&self) -> String {
         let mut s = String::new();
         let mut len = self.nbits();

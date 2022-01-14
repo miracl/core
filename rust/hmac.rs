@@ -341,6 +341,18 @@ pub fn xof_expand(hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],msg: &[u8]) 
 }
 
 pub fn xmd_expand(hash: usize,hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],msg: &[u8]) {
+    let mut w:[u8; 64]=[0;64];
+    if dst.len() >= 256 {
+        GPhashit(hash, hlen, &mut w, 0, 0, Some(b"H2C-OVERSIZE-DST-"), -1, Some(&dst));
+        xmd_expand_short_dst(hash, hlen, okm, olen, &w[0..hlen], msg);
+    } else {
+        xmd_expand_short_dst(hash, hlen, okm, olen, dst, msg);
+    }
+}
+
+// Assumes dst.len() < 256.
+fn xmd_expand_short_dst(hash: usize,hlen: usize,okm: &mut [u8],olen: usize,dst: &[u8],msg: &[u8]) {
+
     let mut tmp: [u8; 260] = [0; 260];
     let mut h0: [u8; 64]=[0;64];
     let mut h1: [u8; 64]=[0;64];

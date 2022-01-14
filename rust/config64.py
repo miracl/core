@@ -431,7 +431,7 @@ if __name__ == '__main__':
         for i in range(0, miracl_crypto.total_entries):
             interactive_prompt_exect(i+1)
 
-    os.system("cargo rustc  --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib")
+    os.system("cargo rustc --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib")
     #os.system("cargo rustc  --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib -- -C opt-level=s")
 
     #-- --cfg D64

@@ -89,10 +89,8 @@ var RAND = function(ctx) {
                 if (pdiff > t) {
                     this.borrow = 1;
                 }
-
                 this.ira[i] = (pdiff | 0);
             }
-
             return this.ira[0];
         },
 

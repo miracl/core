@@ -209,7 +209,7 @@ impl FP {
     }
 
     /* convert to string */
-#[cfg(feature = "std")]
+#[cfg(not(feature = "no_std"))]
     pub fn tostring(&self) -> String {
         self.redc().tostring()
     }

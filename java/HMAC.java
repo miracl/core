@@ -276,7 +276,7 @@ public final class HMAC {
         return OKM;
     }
 
-    public static byte[] XMD_Expand(int hash,int hlen,int olen,byte[] DST,byte[] MSG) {
+    static byte[] XMD_Expand_Short_DST(int hash,int hlen,int olen,byte[] DST,byte[] MSG) {
         byte[] OKM = new byte[olen];
         byte[] H1 = new byte[hlen];
         byte[] TMP = new byte[DST.length+4];
@@ -312,6 +312,20 @@ public final class HMAC {
         
         return OKM;
     }
+
+    public static byte[] XMD_Expand(int hash,int hlen,int olen,byte[] DST,byte[] MSG) {
+        String OS="H2C-OVERSIZE-DST-";
+        byte[] R;
+        if (DST.length>=256)
+        {
+            byte[] W=GPhashit(hash,hlen,0,0,OS.getBytes(),-1,DST);
+            R=XMD_Expand_Short_DST(hash,hlen,olen,W,MSG);
+        } else {
+            R=XMD_Expand_Short_DST(hash,hlen,olen,DST,MSG);
+        }
+        return R;
+    }
+
 
 /* Mask Generation Function */
 

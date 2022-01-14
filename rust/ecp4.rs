@@ -325,7 +325,7 @@ impl ECP4 {
     }
 
     /* convert this to hex string */
-#[cfg(feature = "std")]
+#[cfg(not(feature = "no_std"))]
     pub fn tostring(&self) -> String {
         let mut W = ECP4::new();
         W.copy(self);

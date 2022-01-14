@@ -232,7 +232,7 @@ void XOF_Expand(int hlen,octet *OKM,int olen,octet *DST,octet *M)
     OKM->len=olen;
 }
 
-void XMD_Expand(int hash, int hlen,octet *OKM,int olen,octet *DST,octet *M)
+static void XMD_Expand_Short_DST(int hash, int hlen,octet *OKM,int olen,octet *DST,octet *M)
 {
     int i,blk;
     int ell=CEIL(olen,hlen);
@@ -271,6 +271,21 @@ void XMD_Expand(int hash, int hlen,octet *OKM,int olen,octet *DST,octet *M)
     OKM->len=olen; 
 }
 
+void XMD_Expand(int hash, int hlen,octet *OKM,int olen,octet *DST,octet *M)
+{
+    char w[64];
+    octet W = {0, sizeof(w), w};
+    char os[20];
+    octet OS={0,sizeof(os),os};
+    OCT_jstring(&OS,(char *)"H2C-OVERSIZE-DST-");
+    if (DST->len>=256)
+    {
+        GPhash(hash,hlen,&W,0,0,&OS,-1,DST);
+        XMD_Expand_Short_DST(hash,hlen,OKM,olen,&W,M);
+    } else {
+        XMD_Expand_Short_DST(hash,hlen,OKM,olen,DST,M);
+    }
+}
 /* Key Derivation Function */
 
 void KDF2(int hash, int hlen, octet *key, int olen, octet *z, octet *p)

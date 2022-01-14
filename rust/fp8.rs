@@ -388,7 +388,7 @@ impl FP8 {
     }
 
     /* output to hex string */
-#[cfg(feature = "std")]
+#[cfg(not(feature = "no_std"))]
     pub fn tostring(&self) -> String {
         format!("[{},{}]", self.a.tostring(), self.b.tostring())
     }

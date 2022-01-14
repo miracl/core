@@ -333,7 +333,7 @@ var HMAC = function(ctx) {
             return OKM;
         },
 
-        XMD_Expand(hash,hlen,olen,DST,MSG) {
+        XMD_Expand_Short_DST(hash,hlen,olen,DST,MSG) {
             var OKM = [];
             var H1 = [];
             var TMP = [];
@@ -368,6 +368,27 @@ var HMAC = function(ctx) {
             }
         
             return OKM;
+        },
+
+        asciitobytes(s) {
+            var b = [],i;
+            for (i = 0; i < s.length; i++) {
+                b.push(s.charCodeAt(i));
+            }
+            return b;
+        },
+
+        XMD_Expand(hash,hlen,olen,DST,MSG) {
+            var R;
+            var OS=this.asciitobytes("H2C-OVERSIZE-DST-");
+            if (DST.length>=256)
+            {
+                var W=this.GPhashit(hash,hlen,0,0,OS,-1,DST);
+                R=this.XMD_Expand_Short_DST(hash,hlen,olen,W,MSG);
+            } else {
+                R=this.XMD_Expand_Short_DST(hash,hlen,olen,DST,MSG);
+            }
+            return R;
         },
 
         SHA256: 32,

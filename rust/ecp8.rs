@@ -326,7 +326,7 @@ impl ECP8 {
     }
 
     /* convert this to hex string */
-#[cfg(feature = "std")]
+#[cfg(not(feature = "no_std"))]
     pub fn tostring(&self) -> String {
         let mut W = ECP8::new();
         W.copy(self);

@@ -299,7 +299,7 @@ public struct HMAC
         return OKM
     }
 
-    static public func XMD_Expand(_ hf: Int,_ hlen:Int, _ olen:Int, _ DST: [UInt8], _ MSG:[UInt8]) -> [UInt8]
+    static func XMD_Expand_Short_DST(_ hf: Int,_ hlen:Int, _ olen:Int, _ DST: [UInt8], _ MSG:[UInt8]) -> [UInt8]
     {
         var OKM=[UInt8](repeating: 0,count: olen)
         var TMP=[UInt8](repeating: 0,count: DST.count+4)
@@ -340,6 +340,19 @@ public struct HMAC
             }
         }     
         return OKM
+    }
+
+    static public func XMD_Expand(_ hf: Int,_ hlen:Int, _ olen:Int, _ DST: [UInt8], _ MSG:[UInt8]) -> [UInt8]
+    {
+        var R:[UInt8]
+        let OS = [UInt8]("H2C-OVERSIZE-DST-".utf8)
+        if DST.count >= 256 {
+            let W=HMAC.GPhashit(hf, hlen, 0, 0, OS, -1, DST)
+            R=XMD_Expand_Short_DST(hf,hlen,olen,W,MSG)
+        } else {
+            R=XMD_Expand_Short_DST(hf,hlen,olen,DST,MSG)
+        }
+        return R;
     }
 
     /* Mask Generation Function */
