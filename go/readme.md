@@ -11,18 +11,19 @@ that must be set for the particular curve.
 
 # Installation and Testing
 
+Note: The MIRACL library for Go must be downloaded from the github repository and configured locally before use.
+Therefore it cannot simply be specified as a requirement and fetched directly from its github repository into
+a project.
+
 Assumes version 1.16+ of Go
 
-Set the $GOPATH environmental variable to $HOME/go. Set the environment variable GO111MODE to auto
+Create a directory in any suitable location
 
-	export GOPATH=$HOME/go
-	export GO111MODULE="auto"
+	mkdir miracl
+	cd miracl
+	go mod init miracl
 
-Create a directory
-
-	$GOPATH/src/miracl
-
-Navigate to this directory and copy in all files from the go/ directory of the MIRACL core repository.
+Copy in all files from the go/ directory of the MIRACL core repository.
 
 To build the library and see it in action, execute the python3 
 script config32.py or config64.py (depending on whether you want a 

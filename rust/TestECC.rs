@@ -186,10 +186,10 @@ fn ecdh_ed25519(rng: &mut impl RAND) {
     }
 }
 
-fn ecdh_nist256(rng: &mut impl RAND) {
-    //use mcore::nist256;
-    use mcore::nist256::ecdh;
-    use mcore::nist256::ecp;
+fn ecdh_nist384(rng: &mut impl RAND) {
+    //use mcore::nist384;
+    use mcore::nist384::ecdh;
+    use mcore::nist384::ecp;
 
     let pw = "M0ng00se";
     let pp: &[u8] = b"M0ng00se";
@@ -219,7 +219,7 @@ fn ecdh_nist256(rng: &mut impl RAND) {
     } // set Salt
 
     println!("\nTesting ECDH/ECDSA/ECIES");
-    println!("Curve nist256");
+    println!("Curve nist384");
     println!("Alice's Passphrase= {}", pw);
 
     let mut s0: [u8; EGS] = [0; EGS];
@@ -591,7 +591,7 @@ fn main() {
     rng.seed(100, &raw);
 
     ecdh_ed25519(&mut rng);
-    ecdh_nist256(&mut rng);
+    ecdh_nist384(&mut rng);
     ecdh_goldilocks(&mut rng);
     rsa_2048(&mut rng);
 }
