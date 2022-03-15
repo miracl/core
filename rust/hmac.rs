@@ -578,7 +578,7 @@ pub fn pkcs15b(sha: usize, m: &[u8], w: &mut [u8],rfs: usize) -> bool {
     true
 }
 
-pub fn pss_encode(sha: usize, m: &[u8], rng: &mut impl RAND, f: &mut [u8], rfs: usize) -> bool {
+pub fn pss_encode(sha: usize, m: &[u8], rng: &mut RAND, f: &mut [u8], rfs: usize) -> bool {
     let emlen=rfs;
     let embits=8*emlen-1;
     let hlen=sha;
@@ -689,7 +689,7 @@ pub fn pss_verify(sha: usize, m: &[u8],f: &[u8]) -> bool {
 
 
 /* OAEP Message Encoding for Encryption */
-pub fn oaep_encode(sha: usize, m: &[u8], rng: &mut impl RAND, p: Option<&[u8]>, f: &mut [u8], rfs: usize) -> bool {
+pub fn oaep_encode(sha: usize, m: &[u8], rng: &mut RAND, p: Option<&[u8]>, f: &mut [u8], rfs: usize) -> bool {
     let olen = rfs - 1;
     let mlen = m.len();
 

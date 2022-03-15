@@ -454,7 +454,7 @@ fn decompress(array: &[u8], poly: &mut [i32]) {
 
 /* generate centered binomial distribution */
 
-fn error(rng: &mut impl RAND, poly: &mut [i32]) {
+fn error(rng: &mut RAND, poly: &mut [i32]) {
     for i in 0..DEGREE {
         let mut n1 = ((rng.getbyte() as i32) & 0xff) + (((rng.getbyte() as i32) & 0xff) << 8);
         let mut n2 = ((rng.getbyte() as i32) & 0xff) + (((rng.getbyte() as i32) & 0xff) << 8);
@@ -517,7 +517,7 @@ fn poly_hard_reduce(poly: &mut [i32]) {
 
 /* API functions. See https://eprint.iacr.org/2016/1157.pdf Protocol 1 */
 // ss is secret key key, sb is seed|public key to be sent to client
-pub fn server_1(rng: &mut impl RAND, sb: &mut [u8], ss: &mut [u8]) {
+pub fn server_1(rng: &mut RAND, sb: &mut [u8], ss: &mut [u8]) {
     let mut seed: [u8; 32] = [0; 32];
     let mut array: [u8; 1792] = [0; 1792];
     let mut s: [i32; DEGREE] = [0; DEGREE];
@@ -561,7 +561,7 @@ pub fn server_1(rng: &mut impl RAND, sb: &mut [u8], ss: &mut [u8]) {
 // optimized to reduce memory
 // uc is U|cbar to be returned to server
 // okey is shared key
-pub fn client(rng: &mut impl RAND, sb: &[u8], uc: &mut [u8], okey: &mut [u8]) {
+pub fn client(rng: &mut RAND, sb: &[u8], uc: &mut [u8], okey: &mut [u8]) {
     let mut sh = SHA3::new(sha3::HASH256);
 
     let mut seed: [u8; 32] = [0; 32];

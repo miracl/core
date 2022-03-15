@@ -111,7 +111,7 @@ impl<'a> SHARE<'a> {
 /* input Random number generator rng to be used */
 /* return share structure */
 // must bind lifetime of the byte array stored by structure, to lifetime of s
-    pub fn new(ident: usize,numshare: usize,s: &'a mut [u8],m: &[u8], rng: &mut impl RAND) -> SHARE<'a> {
+    pub fn new(ident: usize,numshare: usize,s: &'a mut [u8],m: &[u8], rng: &mut RAND) -> SHARE<'a> {
         if ident<1 || ident>=256 || numshare<2 || numshare>=256 {
             return SHARE{id:0,nsr:0,b:s};
         }

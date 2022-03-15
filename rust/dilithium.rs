@@ -822,7 +822,7 @@ fn infinity_norm(w: &[i32]) -> i32 {
     return n;
 }
 
-pub fn keypair(rng: &mut impl RAND,sk: &mut [u8],pk: &mut [u8]) {
+pub fn keypair(rng: &mut RAND,sk: &mut [u8],pk: &mut [u8]) {
     let mut sh = SHA3::new(sha3::SHAKE256);
     let mut tau: [u8; 32] = [0; 32]; 
     let mut buff: [u8; 128] = [0; 128]; 

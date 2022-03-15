@@ -106,7 +106,7 @@ impl FP {
         f
     }
 
-    pub fn new_rand(rng: &mut impl RAND) -> FP {
+    pub fn new_rand(rng: &mut RAND) -> FP {
         let m = BIG::new_ints(&rom::MODULUS);
         let w = BIG::randomnum(&m,rng);
         FP::new_big(&w)

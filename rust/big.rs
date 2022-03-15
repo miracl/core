@@ -679,7 +679,7 @@ impl BIG {
     }
 
     /* get 8*MODBYTES size random number */
-    pub fn random(rng: &mut impl RAND) -> BIG {
+    pub fn random(rng: &mut RAND) -> BIG {
         let mut m = BIG::new();
         let mut j = 0;
         let mut r: u8 = 0;
@@ -702,7 +702,7 @@ impl BIG {
     }
 
     /* Create random BIG in portable way, one bit at a time */
-    pub fn randomnum(q: &BIG, rng: &mut impl RAND) -> BIG {
+    pub fn randomnum(q: &BIG, rng: &mut RAND) -> BIG {
         let mut d = DBIG::new();
         let mut j = 0;
         let mut r: u8 = 0;
@@ -724,7 +724,7 @@ impl BIG {
     }
 
 /* create randum BIG less than r and less than trunc bits */
-    pub fn randtrunc(q: &BIG, trunc: usize, rng: &mut impl RAND) -> BIG {
+    pub fn randtrunc(q: &BIG, trunc: usize, rng: &mut RAND) -> BIG {
         let mut m=BIG::randomnum(q,rng);
 	    if q.nbits() > trunc {
 	        m.mod2m(trunc);

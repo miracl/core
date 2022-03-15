@@ -76,7 +76,7 @@ pub fn encode_to_curve(dst: &[u8],id: &[u8],hcid: &mut [u8]) {
 }
 
 /* create random secret S */
-pub fn random_generate(rng: &mut impl RAND, s: &mut [u8]) -> isize {
+pub fn random_generate(rng: &mut RAND, s: &mut [u8]) -> isize {
     let r = BIG::new_ints(&rom::CURVE_ORDER);
     let sc = BIG::randtrunc(&r, 16 * ecp::AESKEY, rng);
     sc.tobytes(s);
@@ -137,7 +137,7 @@ pub fn get_client_secret(s: &mut [u8], idhtc: &[u8], cst: &mut [u8]) -> isize {
 #[allow(non_snake_case)]
 pub fn client_1(
     cid: &[u8],
-    rng: Option<&mut impl RAND>,
+    rng: Option<&mut RAND>,
     x: &mut [u8],
     pin: usize,
     token: &[u8],

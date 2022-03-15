@@ -88,7 +88,7 @@ pub fn key_pair_from_openssl(e: isize, p: &[u8],q: &[u8],dp: &[u8],dq: &[u8],c: 
     pbc.e = e;
 }
 
-pub fn key_pair(rng: &mut impl RAND, e: isize, prv: &mut RsaPrivateKey, pbc: &mut RsaPublicKey) {
+pub fn key_pair(rng: &mut RAND, e: isize, prv: &mut RsaPrivateKey, pbc: &mut RsaPublicKey) {
     /* IEEE1363 A16.11/A16.12 more or less */
     let mut t = SF::new();
     let mut p1 = SF::new();

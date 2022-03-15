@@ -21,7 +21,7 @@
 
 use crate::hash256::HASH256;
 
-pub const RAND_NK: usize = 21;
+const RAND_NK: usize = 21;
 const RAND_NJ: usize = 6;
 const RAND_NV: usize = 8;
 
@@ -29,11 +29,11 @@ const RAND_NV: usize = 8;
 // Analysis: https://ieeexplore.ieee.org/document/669305
 #[allow(non_camel_case_types)]
 pub struct RAND {
-    pub ira: [u32; RAND_NK], /* random number...   */
-    pub rndptr: usize,
-    pub borrow: u32,
-    pub pool_ptr: usize,
-    pub pool: [u8; 32],
+    ira: [u32; RAND_NK], /* random number...   */
+    rndptr: usize,
+    borrow: u32,
+    pool_ptr: usize,
+    pool: [u8; 32],
 }
 
 impl RAND {

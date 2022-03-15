@@ -23,7 +23,7 @@ extern crate mcore;
 
 use std::str;
 
-use mcore::rand::{RAND, RAND_impl};
+use mcore::rand::RAND;
 use mcore::hmac;
 
 pub fn printbinary(array: &[u8]) {
@@ -33,7 +33,7 @@ pub fn printbinary(array: &[u8]) {
     println!("")
 }
 
-fn ecdh_ed25519(rng: &mut impl RAND) {
+fn ecdh_ed25519(rng: &mut RAND) {
     //use mcore::ed25519;
     use mcore::ed25519::ecdh;
     use mcore::ed25519::ecp;
@@ -76,7 +76,7 @@ fn ecdh_ed25519(rng: &mut impl RAND) {
     printbinary(&s0);
 
     /* Generate Key pair S/W */
-    ecdh::key_pair_generate(None::<&mut RAND_impl>, &mut s0, &mut w0);
+    ecdh::key_pair_generate(None::<&mut RAND>, &mut s0, &mut w0);
 
     print!("Alice's public key= 0x");
     printbinary(&w0);
@@ -186,7 +186,7 @@ fn ecdh_ed25519(rng: &mut impl RAND) {
     }
 }
 
-fn ecdh_nist256(rng: &mut impl RAND) {
+fn ecdh_nist256(rng: &mut RAND) {
     //use mcore::nist256;
     use mcore::nist256::ecdh;
     use mcore::nist256::ecp;
@@ -229,7 +229,7 @@ fn ecdh_nist256(rng: &mut impl RAND) {
     printbinary(&s0);
 
     /* Generate Key pair S/W */
-    ecdh::key_pair_generate(None::<&mut RAND_impl>, &mut s0, &mut w0);
+    ecdh::key_pair_generate(None::<&mut RAND>, &mut s0, &mut w0);
 
     print!("Alice's public key= 0x");
     printbinary(&w0);
@@ -339,7 +339,7 @@ fn ecdh_nist256(rng: &mut impl RAND) {
     }
 }
 
-fn ecdh_goldilocks(rng: &mut impl RAND) {
+fn ecdh_goldilocks(rng: &mut RAND) {
     //use mcore::goldilocks;
     use mcore::goldilocks::ecdh;
     use mcore::goldilocks::ecp;
@@ -383,7 +383,7 @@ fn ecdh_goldilocks(rng: &mut impl RAND) {
     printbinary(&s0);
 
     /* Generate Key pair S/W */
-    ecdh::key_pair_generate(None::<&mut RAND_impl>, &mut s0, &mut w0);
+    ecdh::key_pair_generate(None::<&mut RAND>, &mut s0, &mut w0);
 
     print!("Alice's public key= 0x");
     printbinary(&w0);
@@ -493,7 +493,7 @@ fn ecdh_goldilocks(rng: &mut impl RAND) {
     }
 }
 
-fn rsa_2048(rng: &mut impl RAND) {
+fn rsa_2048(rng: &mut RAND) {
     use mcore::rsa2048::rsa;
     let sha = rsa::HASH_TYPE;
     let message: &[u8] = b"Hello World\n";
@@ -582,7 +582,7 @@ fn rsa_2048(rng: &mut impl RAND) {
 fn main() {
     let mut raw: [u8; 100] = [0; 100];
 
-    let mut rng = RAND_impl::new();
+    let mut rng = RAND::new();
     rng.clean();
     for i in 0..100 {
         raw[i] = i as u8

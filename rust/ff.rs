@@ -184,7 +184,7 @@ impl SF {
         }
     }
 
-    pub fn random(&mut self, rng: &mut impl RAND) {              // SL only
+    pub fn random(&mut self, rng: &mut RAND) {              // SL only
         for i in 0..SL {
             self.v[i].copy(&BIG::random(rng))
         }
@@ -372,7 +372,7 @@ impl SF {
     }
 
     /* generate random x less than p */
-    pub fn randomnum(&mut self, p: &SF, rng: &mut impl RAND) {    // SL only
+    pub fn randomnum(&mut self, p: &SF, rng: &mut RAND) {    // SL only
         let mut d = DF::new();
         for i in 0..DL {
             d.v[i].copy(&BIG::random(rng));
@@ -496,7 +496,7 @@ impl SF {
 
 
     /* Miller-Rabin test for primality. Slow. */
-    pub fn isprime(&self, rng: &mut impl RAND) -> bool {            // SL only
+    pub fn isprime(&self, rng: &mut RAND) -> bool {            // SL only
         let mut s = 0;
         let mut d = SF::new();
         let mut x = SF::new();

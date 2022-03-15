@@ -21,7 +21,7 @@ use crate::xxx::ecp;
 use crate::xxx::ecdh;
 
 use crate::hmac;
-use crate::rand::RAND_impl;
+use crate::rand::RAND;
 
 const GROUP: usize = ecdh::EGS;
 const POINT: usize = 2*ecdh::EFS+1;
@@ -181,7 +181,7 @@ pub fn deriveKeyPair(config_id: usize,mut sk: &mut [u8],mut pk: &mut [u8],seed: 
 //    println!("SK= {:02X?}",sk);
   //  println!("kem= {}",kem);
     //println!("counter= {}",counter);
-    ecdh::key_pair_generate(None::<&mut RAND_impl>, &mut sk, &mut pk);
+    ecdh::key_pair_generate(None::<&mut RAND>, &mut sk, &mut pk);
     if kem==32 || kem==33 {
         reverse(&mut pk);
     }

@@ -74,6 +74,56 @@ impl HASH256 {
         HASH256::s(17, x) ^ HASH256::s(19, x) ^ HASH256::r(10, x)
     }
 
+    pub fn as_bytes(&self,array: &mut [u8]) {
+        let mut ptr=0;
+        for i in 0..2 {
+            let mut t=self.length[i];
+            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
+            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
+            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
+            array[ptr]=t as u8; ptr+=1;
+        }
+        for i in 0..8 {
+            let mut t=self.h[i];
+            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
+            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
+            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
+            array[ptr]=t as u8; ptr+=1;
+        }
+        for i in 0..64 {
+            let mut t=self.w[i];
+            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
+            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
+            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
+            array[ptr]=t as u8; ptr+=1;
+        }
+    }
+
+    pub fn from_bytes(&mut self,array: &[u8]) {
+        let mut ptr=0;
+        for i in 0..2 {
+            let mut t=array[ptr+3] as u32; 
+            t=256*t+(array[ptr+2] as u32); 
+            t=256*t+(array[ptr+1] as u32); 
+            t=256*t+(array[ptr] as u32);
+            self.length[i]=t; ptr+=4;
+        }
+        for i in 0..8 {
+            let mut t=array[ptr+3] as u32;
+            t=256*t+(array[ptr+2] as u32); 
+            t=256*t+(array[ptr+1] as u32);
+            t=256*t+(array[ptr] as u32);
+            self.h[i]=t; ptr+=4;
+        }
+        for i in 0..64 {
+            let mut t=array[ptr+3] as u32; 
+            t=256*t+(array[ptr+2] as u32);
+            t=256*t+(array[ptr+1] as u32);
+            t=256*t+(array[ptr] as u32);
+            self.w[i]=t; ptr+=4;
+        }
+    }
+
     fn transform(&mut self) {
         /* basic transformation step */
         for j in 16..64 {

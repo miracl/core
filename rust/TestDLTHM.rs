@@ -28,7 +28,7 @@ extern crate mcore;
 //use std::str;
 //use std::io;
 
-use mcore::rand::{RAND, RAND_impl};
+use mcore::rand::RAND;
 use mcore::dilithium;
 
 const LOOPS: usize = 100;
@@ -38,7 +38,7 @@ fn main() {
 
     println!("Testing Dilithium signature");
 
-    let mut rng = RAND_impl::new();
+    let mut rng = RAND::new();
     rng.clean();
     for i in 0..100 {
         raw[i] = (i + 1) as u8

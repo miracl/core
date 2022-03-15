@@ -103,7 +103,7 @@ impl FP2 {
         f
     }
 
-    pub fn new_rand(rng: &mut impl RAND) -> FP2 {
+    pub fn new_rand(rng: &mut RAND) -> FP2 {
         FP2::new_fps(&FP::new_rand(rng),&FP::new_rand(rng))
     }
 

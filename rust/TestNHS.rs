@@ -28,7 +28,7 @@ extern crate mcore;
 //use std::str;
 //use std::io;
 
-use mcore::rand::{RAND, RAND_impl};
+use mcore::rand::RAND;
 use mcore::nhs;
 
 fn main() {
@@ -36,7 +36,7 @@ fn main() {
 
     println!("\nTesting New Hope Key Exchange");
 
-    let mut srng = RAND_impl::new();
+    let mut srng = RAND::new();
     srng.clean();
     for i in 0..100 {
         raw[i] = (i + 1) as u8
@@ -44,7 +44,7 @@ fn main() {
 
     srng.seed(100, &raw);
 
-    let mut crng = RAND_impl::new();
+    let mut crng = RAND::new();
     crng.clean();
     for i in 0..100 {
         raw[i] = (i + 2) as u8

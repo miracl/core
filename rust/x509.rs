@@ -585,6 +585,28 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
     return ret;
 }
 
+// Extract pointer to cert inside signed cert, and return its length;
+// let c=&sc[ptr..ptr+len]
+pub fn extract_cert_ptr(sc: &[u8],ptr: &mut usize) -> usize {
+    let mut j:usize=0;
+
+    let mut len=getalen(SEQ,sc,j);
+    if len==0 {
+        return 0;
+    }
+    j+=skip(len);
+
+    let k=j;
+    len=getalen(SEQ,sc,j);
+    if len==0 {
+        return 0;
+    }
+    j+=skip(len);
+    let fin=j+len;
+    *ptr=k;
+    return fin-k;
+}
+
 // Extract certificate from signed cert
 pub fn extract_cert(sc: &[u8],cert: &mut [u8]) -> usize {
     let mut j:usize=0;

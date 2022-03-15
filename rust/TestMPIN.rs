@@ -21,7 +21,7 @@ extern crate mcore;
 
 use std::io;
 
-use mcore::rand::{RAND, RAND_impl};
+use mcore::rand::RAND;
 use mcore::share::SHARE;
 
 pub fn printbinary(array: &[u8]) {
@@ -32,7 +32,7 @@ pub fn printbinary(array: &[u8]) {
 }
 
 #[allow(unused_variables)]
-fn mpin_bn254(rng: &mut impl RAND) {
+fn mpin_bn254(rng: &mut RAND) {
 
     use mcore::bn254::mpin;
 
@@ -103,7 +103,7 @@ fn mpin_bn254(rng: &mut impl RAND) {
         for i in 0..128 {
             r[i]=rng.getbyte();
         }
-    let mut rng2 = RAND_impl::new();
+    let mut rng2 = RAND::new();
 
     // create 4 unique shares of TOKEN
         rng2.clean();
@@ -184,7 +184,7 @@ fn mpin_bn254(rng: &mut impl RAND) {
                 }
 }
 
-fn mpin_bls12383(rng: &mut impl RAND) {
+fn mpin_bls12383(rng: &mut RAND) {
     use mcore::bls12383::mpin;
 
     const EFS: usize = mpin::EFS;
@@ -306,7 +306,7 @@ fn mpin_bls12383(rng: &mut impl RAND) {
                 }
 }
 
-fn mpin_bls24479(rng: &mut impl RAND) {
+fn mpin_bls24479(rng: &mut RAND) {
     use mcore::bls24479::mpin192;
 
     const EFS: usize = mpin192::EFS;
@@ -427,7 +427,7 @@ fn mpin_bls24479(rng: &mut impl RAND) {
                 }
 }
 
-fn mpin_bls48556(rng: &mut impl RAND) {
+fn mpin_bls48556(rng: &mut RAND) {
     use mcore::bls48556::mpin256;
 
     const EFS: usize = mpin256::EFS;
@@ -551,7 +551,7 @@ fn mpin_bls48556(rng: &mut impl RAND) {
 fn main() {
     let mut raw: [u8; 100] = [0; 100];
 
-    let mut rng = RAND_impl::new();
+    let mut rng = RAND::new();
     rng.clean();
     for i in 0..100 {
         raw[i] = i as u8

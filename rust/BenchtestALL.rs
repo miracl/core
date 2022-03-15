@@ -23,14 +23,14 @@ extern crate mcore;
 //use std::io;
 
 use mcore::arch;
-use mcore::rand::{RAND, RAND_impl};
+use mcore::rand::RAND;
 
 use std::time::Instant;
 
 const MIN_ITERS: isize = 10;
 const MIN_TIME: isize = 10;
 
-fn ed25519(rng: &mut impl RAND) {
+fn ed25519(rng: &mut RAND) {
     //use mcore::ed25519;
     use mcore::ed25519::big;
     use mcore::ed25519::ecp;
@@ -103,7 +103,7 @@ fn ed25519(rng: &mut impl RAND) {
     }
 }
 
-fn nist256(rng: &mut impl RAND) {
+fn nist256(rng: &mut RAND) {
     //use mcore::nist256;
     use mcore::nist256::big;
     use mcore::nist256::ecp;
@@ -175,7 +175,7 @@ fn nist256(rng: &mut impl RAND) {
     }
 }
 
-fn goldilocks(rng: &mut impl RAND) {
+fn goldilocks(rng: &mut RAND) {
     //use mcore::goldilocks;
     use mcore::goldilocks::big;
     use mcore::goldilocks::ecp;
@@ -247,7 +247,7 @@ fn goldilocks(rng: &mut impl RAND) {
     }
 }
 
-fn bn254(rng: &mut impl RAND) {
+fn bn254(rng: &mut RAND) {
     //use mcore::bn254;
     use mcore::bn254::big;
     use mcore::bn254::ecp;
@@ -443,7 +443,7 @@ fn bn254(rng: &mut impl RAND) {
     }
 }
 
-fn bls12383(rng: &mut impl RAND) {
+fn bls12383(rng: &mut RAND) {
     //use mcore::bls12383;
     use mcore::bls12383::big;
     use mcore::bls12383::ecp;
@@ -658,7 +658,7 @@ fn bls12383(rng: &mut impl RAND) {
     }
 }
 
-fn bls24479(rng: &mut impl RAND) {
+fn bls24479(rng: &mut RAND) {
     //use mcore::bls24479;
     use mcore::bls24479::big;
     use mcore::bls24479::ecp;
@@ -840,7 +840,7 @@ fn bls24479(rng: &mut impl RAND) {
     }
 }
 
-fn bls48556(rng: &mut impl RAND) {
+fn bls48556(rng: &mut RAND) {
     //use mcore::bls48556;
     use mcore::bls48556::big;
     use mcore::bls48556::ecp;
@@ -1022,7 +1022,7 @@ fn bls48556(rng: &mut impl RAND) {
     }
 }
 
-fn rsa2048(rng: &mut impl RAND) {
+fn rsa2048(rng: &mut RAND) {
     use mcore::rsa2048::rsa;
     let mut pbc = rsa::new_public_key();
     let mut prv = rsa::new_private_key();
@@ -1098,7 +1098,7 @@ fn rsa2048(rng: &mut impl RAND) {
 fn main() {
     let mut raw: [u8; 100] = [0; 100];
 
-    let mut rng = RAND_impl::new();
+    let mut rng = RAND::new();
     rng.clean();
     for i in 0..100 {
         raw[i] = i as u8
