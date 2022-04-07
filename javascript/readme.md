@@ -53,7 +53,7 @@ It is also possible to use it as a npm package. Install it locally into your pro
 As an example in React it is possible to install the library with npm and import it with
 
 ```javascript
-const ctx = require('amcl-js').CTX;
+const ctx = require('miracl-js').CTX;
 ```
 After the import the library is used as described above.
 
@@ -61,6 +61,8 @@ After the import the library is used as described above.
 
 
 To see some running examples, load TestECC.html or TestMPIN.html or TestHPKE.html or TestHTP.html or TestBLS.html or TestNHS.html or BenchtestALL.html into your favourite browser.
+Note that the optimizer does not like context changes, so the individual benchmarks run faster.
+
 You might have to wait a few seconds for the benchmarking scripts to complete.
 
 For TestMPIN.html the correct PIN number is 1234.
