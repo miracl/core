@@ -1,4 +1,8 @@
 
+Note that this code does NOT use the Javascript BigInt type, which is not constant time, and hence deprecated for use in cryptography. 
+
+-------------------------------------------
+
 # Installation and Testing
 
 Suppose you want to implement ECDH with NIST256 elliptic curve. First you need to initialize the context:
@@ -34,11 +38,13 @@ The following is the list of all the RSA security level supported by *MIRACL Cor
     ['RSA2048','RSA3072','RSA4096'];
 
 
-MIRACL Core JS supports also SHA256, SHA384, SHA512, SHA3, AES-GCM encryption and a secure random number generator. Those functions are contained in every context initialized with RSA or with an elliptic curve. 
-If you want to create a context supporting only those general functions then initialize it with no parameter as follows:
+MIRACL Core JS supports also SHA256, SHA384, SHA512, SHA3, AES-GCM encryption and a secure random number generator. Those functions are contained in every context initialized with RSA 
+or with an elliptic curve. If you want to create a context supporting only those general functions then initialize it with no parameter as follows:
 
 
     var ctx = new CTX();
+
+-------------------------------------------
 
 To use this library in Node.js import it as follows:
 
@@ -53,17 +59,22 @@ It is also possible to use it as a npm package. Install it locally into your pro
 As an example in React it is possible to install the library with npm and import it with
 
 ```javascript
-const ctx = require('miracl-js').CTX;
+const ctx = require('miracl-core-js').CTX;
 ```
 After the import the library is used as described above.
 
 --------------------------------------
 
 
-To see some running examples, load TestECC.html or TestMPIN.html or TestHPKE.html or TestHTP.html or TestBLS.html or TestNHS.html or BenchtestALL.html into your favourite browser.
+To see some running examples using your favourite browser, navigate to the examples/browser folder, and load for example TestECC.html
+
+Alternatively if using node.js navigate to the examples/node folder, and execute for example
+
+	node BenchBN254.js
+
 Note that the optimizer does not like context changes, so the individual benchmarks run faster.
 
 You might have to wait a few seconds for the benchmarking scripts to complete.
 
-For TestMPIN.html the correct PIN number is 1234.
+For TestMPIN the correct PIN number is 1234.
 
