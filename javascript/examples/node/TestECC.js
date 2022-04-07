@@ -3,10 +3,7 @@ const CTX = require('../../index').CTX;
 // ED25519 context
 function ED25519() {
 	var ctx = new CTX('ED25519');
-
-	
-
-	console.log(" ED25519 Curve "+  "");
+	console.log("ED25519 Curve "+  "");
 
 	var i,res;
 	var pp="M0ng00se";
@@ -125,7 +122,7 @@ function NIST256() {
 	var ctx = new CTX('NIST256');
 	
 
-	console.log(" NIST256 Curve "+  "");
+	console.log("NIST256 Curve "+  "");
 	var i,res;
 	var pp="M0ng00se";
 
@@ -240,13 +237,12 @@ function NIST256() {
 
 }
 
-
 // GOLDILOCKS context
 function GOLDILOCKS() {
 	var ctx = new CTX('GOLDILOCKS');
 	
 
-	console.log(" GOLDILOCKS Curve "+  "");
+	console.log("GOLDILOCKS Curve "+  "");
 
 	var i,res;
 	var pp="M0ng00se";
@@ -396,7 +392,7 @@ function RSA2048() {
 
 	var start,end,time;
 	start=new Date().getTime();
-	console.log(" Generating RSA public/private key pair (slow!)  ");
+	console.log("Generating RSA public/private key pair (slow!)  ");
 	ctx.RSA.KEY_PAIR(rng,65537,priv,pub);
 	end=new Date().getTime();
 	time=end-start;

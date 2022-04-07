@@ -5,7 +5,7 @@ function BN254() {
 	var ctx = new CTX('BN254');
 	
 
-	console.log(" BN254 Pairing-Friendly Curve "+  "");
+	console.log("BN254 Pairing-Friendly Curve "+  "");
 
 	var i,res;
 
@@ -61,7 +61,7 @@ function BLS12383() {
 	var ctx = new CTX('BLS12383');
 	
 
-	console.log(" BLS12 Pairing-Friendly Curve "+  "");
+	console.log("BLS12 Pairing-Friendly Curve "+  "");
 
 	var i,res;
 
@@ -118,7 +118,7 @@ function BLS24479() {
 	var ctx = new CTX('BLS24479');
 	
 
-	console.log(" BLS24 Pairing-Friendly Curve "+  "");
+	console.log("BLS24 Pairing-Friendly Curve "+  "");
 
 	var i,res;
 
@@ -175,7 +175,7 @@ function BLS48556() {
 	var ctx = new CTX('BLS48556');
 	
 
-	console.log(" BLS48 Pairing-Friendly Curve "+  "");
+	console.log("BLS48 Pairing-Friendly Curve "+  "");
 
 	var i,res;
 

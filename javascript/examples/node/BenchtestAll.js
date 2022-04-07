@@ -3,10 +3,6 @@ const {performance} = require('perf_hooks');
 
 function ED25519() {
 		var ctx = new CTX('ED25519');
-		
-		//
-		
-
 		var i;
 		var MIN_ITERS=5;
 		var MIN_TIME=3;
@@ -20,47 +16,38 @@ function ED25519() {
 
 		rng.seed(100,RAW);
 
-		//console.log(" Curve ED25519");
 		console.log("Curve ED25519");
 		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
 		{
-			//console.log("Weierstrass parameterization ");
 			console.log("Weierstrass parameterization");
 		}
 		if (ctx.ECP.CURVETYPE==ctx.ECP.EDWARDS)
 		{
-			//console.log("Edwards parameterization");
 			console.log("Edwards parameterization");
 		}
 		if (ctx.ECP.CURVETYPE==ctx.ECP.MONTGOMERY)
 		{
-			//console.log("Montgomery parameterization");
 			console.log("Motngomery parameterization");
 		}
 
 		if (ctx.FP.MODTYPE==ctx.FP.PSEUDO_MERSENNE)
 		{
-			//console.log("Pseudo-Mersenne Modulus");
 			console.log("Pseudo-Mersenne Modulus");
 		}
 		if (ctx.FP.MODTYPE==ctx.FP.MONTGOMERY_FRIENDLY)
 		{
-			//console.log("Montgomery friendly Modulus");
 			console.log("Montgomery firendly Modulus");
 		}
 		if (ctx.FP.MODTYPE==ctx.FP.GENERALISED_MERSENNE)
 		{
-			//console.log("Generalised-Mersenne Modulus");
 			console.log("Generalised-Mersenne Modulus");
 		}
 		if (ctx.FP.MODTYPE==ctx.FP.NOT_SPECIAL)
 		{
-			//console.log("Not special Modulus");
 			console.log("Not special Modulus");
 		}
 
-		//console.log("Modulus size "+ctx.FP.MODBITS+ " bits");
-		console.log("Modulus size" + ctx.FP.MODBITS + " bits");
+		console.log("Modulus size " + ctx.FP.MODBITS + " bits");
 
 		var r,s;
 		var G,WP;
@@ -93,12 +80,8 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		var dur=elapsed/iterations;
-		//console.log("EC  mul - " + iterations + " iterations  ");
-		console.log("EC mul - " + iterations + " iterations ");
-		//console.log(dur.toFixed(2) + " ms per iteration");
-		console.log(dur.toFixed(2) + " ms per iteration");
-		//if (!fail) console.log("All tests pass");
-		if (!fail) console.log("ALl tests pass");
+		console.log("EC mul - " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
+		if (!fail) console.log("All tests pass");
 	}
 
 // BLS12383 context
@@ -120,9 +103,7 @@ function ED25519() {
 
 		rng.seed(100,RAW);
 
-		
-
-		console.log(" Curve BLS12383");
+		console.log("Curve BLS12383");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
 		{
 			console.log("BN Pairing-Friendly Curve");
@@ -165,8 +146,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		var dur=elapsed/iterations;
-		console.log("G1 mul -                " + iterations + " iterations  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("G1 mul -                " + iterations + " iterations  "+ dur.toFixed(2) + " ms per iteration");
 
 		Q=ctx.ECP2.generator();
 
@@ -199,8 +179,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("G2 mul -                " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("G2 mul -                " + iterations + " iterations "+ dur.toFixed(2) + " ms per iteration");
 
 		var w=ctx.PAIR.ate(Q,P);
 		w=ctx.PAIR.fexp(w);
@@ -221,8 +200,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("GT pow -                " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("GT pow -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		var cr;
 		start = performance.now();
@@ -233,8 +211,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("GT pow (compressed) -   " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("GT pow (compressed) -   " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		start = performance.now();
 		iterations=0;
@@ -244,8 +221,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("PAIRing ATE   -         " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("PAIRing ATE   -         " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		start = performance.now();
 		iterations=0;
@@ -255,8 +231,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("PAIRing FEXP -          " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("PAIRing FEXP -          " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		P.copy(G);
 		Q.copy(W);
@@ -309,7 +284,6 @@ function ED25519() {
 
 // NIST256 context
 	function NIST256() {
-
 		var ctx = new CTX('NIST256');
 		var i;
 		var MIN_ITERS=5;
@@ -324,9 +298,7 @@ function ED25519() {
 
 		rng.seed(100,RAW);
 
-		
-
-		console.log(" Curve NIST256");
+		console.log("Curve NIST256");
 		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
 		{
 			console.log("Weierstrass parameterization ");
@@ -390,8 +362,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		var dur=elapsed/iterations;
-		console.log("EC  mul - " + iterations + " iterations  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("EC  mul - " + iterations + " iterations  "+dur.toFixed(2) + " ms per iteration");
 		if (!fail) console.log("All tests pass");
 	}
 
@@ -413,9 +384,7 @@ function ED25519() {
 
 		rng.seed(100,RAW);
 
-		
-
-		console.log(" Curve GOLDILOCKS");
+		console.log("Curve GOLDILOCKS");
 		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
 		{
 			console.log("Weierstrass parameterization ");
@@ -479,8 +448,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		var dur=elapsed/iterations;
-		console.log("EC  mul - " + iterations + " iterations  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("EC  mul - " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 		if (!fail) console.log("All tests pass");
 	}
 
@@ -504,9 +472,7 @@ function ED25519() {
 
 		rng.seed(100,RAW);
 
-		
-
-		console.log(" Curve BN254");
+		console.log("Curve BN254");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
 		{
 			console.log("BN Pairing-Friendly Curve");
@@ -548,8 +514,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		var dur=elapsed/iterations;
-		console.log("G1 mul -                " + iterations + " iterations  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("G1 mul -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		Q=ctx.ECP2.generator();
 
@@ -582,8 +547,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("G2 mul -                " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("G2 mul -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		var w=ctx.PAIR.ate(Q,P);
 		w=ctx.PAIR.fexp(w);
@@ -604,8 +568,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("GT pow -                " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("GT pow -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 
 		var cr;
@@ -617,8 +580,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("GT pow (compressed) -   " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("GT pow (compressed) -   " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		start = performance.now();
 		iterations=0;
@@ -628,8 +590,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("PAIRing ATE   -         " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("PAIRing ATE   -         " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		start = performance.now();
 		iterations=0;
@@ -639,8 +600,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("PAIRing FEXP -          " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("PAIRing FEXP -          " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		P.copy(G);
 		Q.copy(W);
@@ -710,9 +670,7 @@ function ED25519() {
 
 		rng.seed(100,RAW);
 
-		
-
-		console.log(" Curve BLS24479");
+		console.log("Curve BLS24479");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
 		{
 			console.log("BN Pairing-Friendly Curve");
@@ -754,8 +712,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		var dur=elapsed/iterations;
-		console.log("G1 mul -                " + iterations + " iterations  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("G1 mul -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		Q=ctx.ECP4.generator();
 
@@ -788,8 +745,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("G2 mul -                " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("G2 mul -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		var w=ctx.PAIR4.ate(Q,P);
 		w=ctx.PAIR4.fexp(w);
@@ -810,8 +766,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("GT pow -                " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("GT pow -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		start = performance.now();
 		iterations=0;
@@ -821,8 +776,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("PAIRing ATE   -         " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("PAIRing ATE   -         " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		start = performance.now();
 		iterations=0;
@@ -832,8 +786,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("PAIRing FEXP -          " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("PAIRing FEXP -          " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		P.copy(G);
 		Q.copy(W);
@@ -887,7 +840,6 @@ function ED25519() {
 
 // BLS48556 context
 	function BLS48556() {
-
 		var ctx = new CTX('BLS48556');
 		var i;
 		var MIN_ITERS=1;
@@ -904,9 +856,7 @@ function ED25519() {
 
 		rng.seed(100,RAW);
 
-		
-
-		console.log(" Curve BLS48556");
+		console.log("Curve BLS48556");
 		if (ctx.ECP.CURVE_PAIRING_TYPE==ctx.ECP.BN)
 		{
 			console.log("BN Pairing-Friendly Curve");
@@ -948,8 +898,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		var dur=elapsed/iterations;
-		console.log("G1 mul -                " + iterations + " iterations  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("G1 mul -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		Q=ctx.ECP8.generator();
 
@@ -965,7 +914,6 @@ function ED25519() {
             alert("FAILURE - rQ!=O");
 			fail=true;
         }
-
 
 		W=ctx.PAIR8.G2mul(Q,r);
 
@@ -983,8 +931,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("G2 mul -                " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("G2 mul -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		var w=ctx.PAIR8.ate(Q,P);
 		w=ctx.PAIR8.fexp(w);
@@ -1005,8 +952,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("GT pow -                " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("GT pow -                " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		start = performance.now();
 		iterations=0;
@@ -1016,8 +962,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("PAIRing ATE   -         " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("PAIRing ATE   -         " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		start = performance.now();
 		iterations=0;
@@ -1027,8 +972,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("PAIRing FEXP -          " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("PAIRing FEXP -          " + iterations + " iterations "+dur.toFixed(2) + " ms per iteration");
 
 		P.copy(G);
 		Q.copy(W);
@@ -1081,12 +1025,8 @@ function ED25519() {
 
 // RSA2048 context
 	function rsa2048() {
-
 		var ctx = new CTX('RSA2048');
-
-		
-
-		console.log(" Generating 2048 bit RSA public/private key pair");
+		console.log("Generating 2048 bit RSA public/private key pair");
 		var fail=false;
 		var RAW=[];
 
@@ -1115,8 +1055,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		var dur=elapsed/iterations;
-		console.log("RSA gen - " + iterations + " iteration  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("RSA gen - " + iterations + " iteration  "+dur.toFixed(2) + " ms per iteration");
 
 		MIN_ITERS=5;
 
@@ -1130,8 +1069,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("RSA enc - " + iterations + " iterations  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("RSA enc - " + iterations + " iterations  "+dur.toFixed(2) + " ms per iteration");
 
 		start = performance.now();
 		iterations=0;
@@ -1141,8 +1079,7 @@ function ED25519() {
 			elapsed=(performance.now()-start);
 		} while (elapsed<MIN_TIME*1000 || iterations<MIN_ITERS);
 		dur=elapsed/iterations;
-		console.log("RSA dec - " + iterations + " iterations  ");
-		console.log(dur.toFixed(2) + " ms per iteration");
+		console.log("RSA dec - " + iterations + " iterations  "+dur.toFixed(2) + " ms per iteration");
 
 		var cmp=true;
 		for (i=0;i<ctx.RSA.RFS;i++)

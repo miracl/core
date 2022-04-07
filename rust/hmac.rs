@@ -602,11 +602,7 @@ pub fn pss_encode(sha: usize, m: &[u8], rng: &mut RAND, f: &mut [u8], rfs: usize
     for i in 0..hlen {
         md[8+hlen+i]=salt[i];
     }
-
-//    print!("MD= 0x"); printbinary(&md[0..8+hlen+hlen]);
-
     SPhashit(MC_SHA2,sha,&mut h,Some(&md[0..8+hlen+hlen]));
-
     for i in 0..emlen-hlen-hlen-2 {
         f[i]=0;
     }
@@ -614,7 +610,6 @@ pub fn pss_encode(sha: usize, m: &[u8], rng: &mut RAND, f: &mut [u8], rfs: usize
     for i in 0..hlen {
         f[emlen+i-hlen-hlen-1]=salt[i];
     }
-//    print!("f= 0x"); printbinary(&f[0..emlen-hlen-1]);
     mgf1xor(sha,&h[0..hlen],emlen-hlen-1,f);
     f[0]&=mask;
     for i in 0..hlen {
