@@ -42,13 +42,13 @@ const sign32 iroots[] = {0x3ffe00,0x7f7b0a,0x7eafd,0x27cefe,0x78c1dd,0xd5ed8,0xb
 
 static sign32 redc(unsign64 T)
 {
-    unsign32 m = (unsign32)T * (unsign32)ND;
-    return ((unsign64)m * PRIME + T) >> 32;
+    unsign32 m = (unsign32)T * (unsign32)DL_ND;
+    return ((unsign64)m * DL_PRIME + T) >> 32;
 }
 
 static sign32 nres(unsign32 x)
 {
-    return redc((unsign64)x * R2MODP);
+    return redc((unsign64)x * DL_R2MODP);
 }
 
 static sign32 modmul(unsign32 a, unsign32 b)
@@ -60,8 +60,8 @@ static sign32 modmul(unsign32 a, unsign32 b)
 static void poly_pos(sign32 *p)
 {
     int i;
-    for (i=0;i<DEGREE;i++)
-        p[i]+=(p[i]>>31)&PRIME; 
+    for (i=0;i<DL_DEGREE;i++)
+        p[i]+=(p[i]>>31)&DL_PRIME; 
 }
 
 // NTT code
@@ -100,13 +100,13 @@ static void poly_pos(sign32 *p)
 
 static void ntt(sign32 *x)
 {
-    int m, i, j, start, len = DEGREE / 2;
-    sign32 S, V, q = PRIME;
+    int m, i, j, start, len = DL_DEGREE / 2;
+    sign32 S, V, q = DL_PRIME;
 
     /* Make positive */
     poly_pos(x);
     m = 1;
-    while (m < DEGREE)
+    while (m < DL_DEGREE)
     {
         start = 0;
         for (i = 0; i < m; i++)
@@ -133,10 +133,10 @@ static void ntt(sign32 *x)
 static void intt(sign32 *x)
 {
     int m, i, j, k, n,lim,t = 1;
-    sign32 S, U, V, W, q = PRIME;
+    sign32 S, U, V, W, q = DL_PRIME;
 
-    m = DEGREE/2;
-    n=LGN;
+    m = DL_DEGREE/2;
+    n=DL_LGN;
     while (m >= 1)
     {
 		lim=NTTL>>n;
@@ -149,14 +149,14 @@ static void intt(sign32 *x)
             {
 				if (m<NTTL && j<k+lim)   // This should be unwound for timings
 				{ // need to knock back excesses. Never used if NTTL=1.
-					U=modmul(x[j],ONE);  
-					V=modmul(x[j+t],ONE); 
+					U=modmul(x[j],DL_ONE);  
+					V=modmul(x[j+t],DL_ONE); 
 				} else {
                     U = x[j];
                     V = x[j + t];
                 }
                 x[j] = U + V;
-                W = U + (DEGREE/NTTL) * q - V; 
+                W = U + (DL_DEGREE/NTTL) * q - V; 
                 x[j + t] = modmul(W, S); 
             }
             k += 2 * t;
@@ -165,9 +165,9 @@ static void intt(sign32 *x)
         m /= 2;
     }
 
-    for (j = 0; j < DEGREE; j++)
+    for (j = 0; j < DL_DEGREE; j++)
     { // fully reduce, nres combined with 1/DEGREE
-        x[j]=  modmul(x[j],COMBO);
+        x[j]=  modmul(x[j],DL_COMBO);
         x[j] -= q;
         x[j] += (x[j] >> 31)&q;
     } 
@@ -176,14 +176,14 @@ static void intt(sign32 *x)
 static void nres_it(sign32 *p)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
         p[i] = nres(p[i]);
 }
 
 static void redc_it(sign32 *p)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
         p[i] = redc(p[i]);
 }
 
@@ -191,7 +191,7 @@ static void redc_it(sign32 *p)
 static void poly_copy(sign32 *p1, sign32 *p2)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
         p1[i] = p2[i];
 }
 
@@ -199,7 +199,7 @@ static void poly_copy(sign32 *p1, sign32 *p2)
 static void poly_scopy(sign32 *p1, sign8 *p2)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
         p1[i] = (sign32)p2[i];
 }
 
@@ -207,43 +207,43 @@ static void poly_scopy(sign32 *p1, sign8 *p2)
 static void poly_mcopy(sign32 *p1, sign16 *p2)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
         p1[i] = (sign32)p2[i];
 }
 
 static void poly_zero(sign32 *p1)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
         p1[i] = 0;
 }
 
 static void poly_negate(sign32 *p1,sign32 *p2)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
-        p1[i] = PRIME-p2[i];
+    for (i = 0; i < DL_DEGREE; i++)
+        p1[i] = DL_PRIME-p2[i];
 }
 
 static void poly_mul(sign32 *p1, sign32 *p2, sign32 *p3)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
         p1[i] = modmul(p2[i], p3[i]);
 }
 
 static void poly_add(sign32 *p1, sign32 *p2, sign32 *p3)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
         p1[i] = (p2[i] + p3[i]);
 }
 
 static void poly_sub(sign32 *p1, sign32 *p2, sign32 *p3)
 {
     int i;
-    for (i = 0; i < DEGREE; i++)
-        p1[i] = (p2[i] + PRIME - p3[i]);
+    for (i = 0; i < DL_DEGREE; i++)
+        p1[i] = (p2[i] + DL_PRIME - p3[i]);
 }
 
 /* reduces inputs that are already < 2q */
@@ -251,10 +251,10 @@ static void poly_soft_reduce(sign32 *poly)
 {
     int i;
     sign32 e;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
     {
-        e = poly[i] - PRIME;
-        poly[i] = e + ((e >> 31)&PRIME);
+        e = poly[i] - DL_PRIME;
+        poly[i] = e + ((e >> 31)&DL_PRIME);
     }
 }
 
@@ -263,11 +263,11 @@ static void poly_hard_reduce(sign32 *poly)
 {
     int i;
     sign32 e;
-    for (i = 0; i < DEGREE; i++)
+    for (i = 0; i < DL_DEGREE; i++)
     {
-        e = modmul(poly[i], ONE); // reduces to < 2q
-        e = e - PRIME;
-        poly[i] = e + ((e >> 31)&PRIME); // finishes it off
+        e = modmul(poly[i], DL_ONE); // reduces to < 2q
+        e = e - DL_PRIME;
+        poly[i] = e + ((e >> 31)&DL_PRIME); // finishes it off
     }
 }
 
@@ -279,18 +279,18 @@ static void ExpandAij(byte rho[32],sign32 Aij[],int i,int j)
     unsign32 b0,b1,b2;
     sign32 cf;
     SHA3_init(&sh, SHAKE128);
-    byte buff[4*DEGREE];  // should be plenty
+    byte buff[4*DL_DEGREE];  // should be plenty
     for (m=0;m<32;m++)
         SHA3_process(&sh,rho[m]);
     SHA3_process(&sh,j&0xff);
     SHA3_process(&sh,i&0xff);
-    SHA3_shake(&sh,(char *)buff,4*DEGREE);
+    SHA3_shake(&sh,(char *)buff,4*DL_DEGREE);
     m=n=0;
-    while (m<DEGREE)
+    while (m<DL_DEGREE)
     {
         b0=(unsign32)buff[n++]; b1=(unsign32)buff[n++]; b2=(unsign32)buff[n++]; 
         cf=((b2&0x7F)<<16)+(b1<<8)+b0;
-        if (cf>=PRIME) continue;
+        if (cf>=DL_PRIME) continue;
         Aij[m++]=cf;
     }
 }
@@ -422,8 +422,8 @@ static void pack_pk(byte pk[],byte rho[32],sign16 t1[])
     for (i=0;i<32;i++)
         pk[i]=rho[i];
     n=32; ptr=bts=0;
-    for (i=0;i<(K*DEGREE*TD)/8;i++ )
-        pk[n++]=nextbyte16(TD,0,t1,&ptr,&bts);
+    for (i=0;i<(DL_K*DL_DEGREE*DL_TD)/8;i++ )
+        pk[n++]=nextbyte16(DL_TD,0,t1,&ptr,&bts);
 }
 
 // unpack public key
@@ -433,8 +433,8 @@ static void unpack_pk(byte rho[32],sign16 t1[],byte pk[])
     for (i=0;i<32;i++)
         rho[i]=pk[i];
     ptr=bts=0;
-    for (i=0;i<K*DEGREE;i++ )
-        t1[i]=(sign16)nextword(TD,0,&pk[32],&ptr,&bts);
+    for (i=0;i<DL_K*DL_DEGREE;i++ )
+        t1[i]=(sign16)nextword(DL_TD,0,&pk[32],&ptr,&bts);
 }
 
 // secret key of size 32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8
@@ -448,14 +448,14 @@ static void pack_sk(byte sk[],byte rho[32],byte bK[32],byte tr[32],sign8 s1[],si
     for (i=0;i<32;i++)
         sk[n++]=tr[i];
     ptr=bts=0;
-    for (i=0;i<(L*DEGREE*LG2ETA1)/8;i++)
-        sk[n++]=nextbyte8(LG2ETA1,ETA,s1,&ptr,&bts);
+    for (i=0;i<(DL_L*DL_DEGREE*DL_LG2ETA1)/8;i++)
+        sk[n++]=nextbyte8(DL_LG2ETA1,DL_ETA,s1,&ptr,&bts);
     ptr=bts=0;
-    for (i=0;i<(K*DEGREE*LG2ETA1)/8;i++)
-        sk[n++]=nextbyte8(LG2ETA1,ETA,s2,&ptr,&bts);
+    for (i=0;i<(DL_K*DL_DEGREE*DL_LG2ETA1)/8;i++)
+        sk[n++]=nextbyte8(DL_LG2ETA1,DL_ETA,s2,&ptr,&bts);
     ptr=bts=0;
-    for (i=0;i<(K*DEGREE*D)/8;i++)
-        sk[n++]=nextbyte16(D,(1<<(D-1)),t0,&ptr,&bts);
+    for (i=0;i<(DL_K*DL_DEGREE*DL_D)/8;i++)
+        sk[n++]=nextbyte16(DL_D,(1<<(DL_D-1)),t0,&ptr,&bts);
 }
 
 static void unpack_sk(byte rho[32],byte bK[32],byte tr[32],sign8 s1[],sign8 s2[],sign16 t0[],byte sk[])
@@ -468,22 +468,22 @@ static void unpack_sk(byte rho[32],byte bK[32],byte tr[32],sign8 s1[],sign8 s2[]
     for (i=0;i<32;i++)
         tr[i]=sk[n++];
     ptr=bts=0; 
-    for (i=0;i<L*DEGREE;i++ )
-        s1[i]=(sign8)nextword(LG2ETA1,ETA,&sk[n],&ptr,&bts);
+    for (i=0;i<DL_L*DL_DEGREE;i++ )
+        s1[i]=(sign8)nextword(DL_LG2ETA1,DL_ETA,&sk[n],&ptr,&bts);
     n+=ptr;
     ptr=bts=0; 
-    for (i=0;i<K*DEGREE;i++ )
-        s2[i]=(sign8)nextword(LG2ETA1,ETA,&sk[n],&ptr,&bts);
+    for (i=0;i<DL_K*DL_DEGREE;i++ )
+        s2[i]=(sign8)nextword(DL_LG2ETA1,DL_ETA,&sk[n],&ptr,&bts);
     n+=ptr;
     ptr=bts=0;
-    for (i=0;i<K*DEGREE;i++ )
-        t0[i]=(sign16)nextword(D,(1<<(D-1)),&sk[n],&ptr,&bts);
+    for (i=0;i<DL_K*DL_DEGREE;i++ )
+        t0[i]=(sign16)nextword(DL_D,(1<<(DL_D-1)),&sk[n],&ptr,&bts);
 }
 
 // pack signature - changes z 
 static void pack_sig(byte sig[],sign32 z[],byte ct[],byte h[])
 {
-    int ptr,bts,i,m,n,row,k=(L*DEGREE*(LG+1))/8;
+    int ptr,bts,i,m,n,row,k=(DL_L*DL_DEGREE*(DL_LG+1))/8;
     sign32 t;
 
     for (i=0;i<32;i++)
@@ -491,42 +491,42 @@ static void pack_sig(byte sig[],sign32 z[],byte ct[],byte h[])
     n=32;
     ptr=bts=0;
 //pre-process z
-    for (i=0;i<L;i++)
+    for (i=0;i<DL_L;i++)
     {
-        row=DEGREE*i;
-        for (m=0;m<DEGREE;m++)
+        row=DL_DEGREE*i;
+        for (m=0;m<DL_DEGREE;m++)
         {
             t=z[row+m];
-            if (t>PRIME/2) t-=PRIME;
+            if (t>DL_PRIME/2) t-=DL_PRIME;
             //t+=GAMMA1-1;
-            t=GAMMA1-t;
+            t=DL_GAMMA1-t;
             z[row+m]=t;
         }
     }
     for (i=0;i<k;i++) {
-        sig[n++]=nextbyte32(LG+1,0,z,&ptr,&bts);
+        sig[n++]=nextbyte32(DL_LG+1,0,z,&ptr,&bts);
     }
-    for (i=0;i<OMEGA+K;i++)
+    for (i=0;i<DL_OMEGA+DL_K;i++)
         sig[n++]=h[i];
 }
 
 static void unpack_sig(sign32 z[],byte ct[],byte h[],byte sig[])
 {
-    int ptr,bts,i,n=L*DEGREE;
+    int ptr,bts,i,n=DL_L*DL_DEGREE;
     sign32 t;
-    int m=32+(L*DEGREE*(LG+1))/8;
+    int m=32+(DL_L*DL_DEGREE*(DL_LG+1))/8;
     for (i=0;i<32;i++)
         ct[i]=sig[i];
 
     ptr=bts=0;
     for (i=0;i<n;i++) {
-        t=nextword(LG+1,0,&sig[32],&ptr,&bts);
-        t=GAMMA1-t;
-        if (t<0) t+=PRIME;
+        t=nextword(DL_LG+1,0,&sig[32],&ptr,&bts);
+        t=DL_GAMMA1-t;
+        if (t<0) t+=DL_PRIME;
         z[i]=t;
     }
 
-    for (i=0;i<OMEGA+K;i++)
+    for (i=0;i<DL_OMEGA+DL_K;i++)
         h[i]=sig[m++];    
 }
 
@@ -543,14 +543,14 @@ static void sample_Sn(byte rhod[64],sign8 s[],int n)
     SHA3_process(&sh,(n>>8)&0xff);
     SHA3_shake(&sh,(char *)buff,272);
     ptr=bts=0;
-    for (m=0;m<DEGREE;m++)
+    for (m=0;m<DL_DEGREE;m++)
     {
         do
         {
-            s[m]=nextword(LG2ETA1,0,buff,&ptr,&bts);
+            s[m]=nextword(DL_LG2ETA1,0,buff,&ptr,&bts);
         }
-        while (s[m]>2*ETA);
-        s[m]=ETA-s[m];
+        while (s[m]>2*DL_ETA);
+        s[m]=DL_ETA-s[m];
     }
 }
 
@@ -560,26 +560,26 @@ static void sample_Y(int k,byte rhod[64],sign32 y[])
     int i,j,m,ki,row,ptr,bts;   // 2^n-1
     sha3 sh;
     sign32 w,t;
-    byte buff[YBYTES];
+    byte buff[DL_YBYTES];
 
-    for (i=0;i<L;i++)
+    for (i=0;i<DL_L;i++)
     {
-        row=DEGREE*i;
+        row=DL_DEGREE*i;
         SHA3_init(&sh, SHAKE256);
         for (j=0;j<64;j++)
             SHA3_process(&sh,rhod[j]);
         ki=k+i;
         SHA3_process(&sh,ki&0xff);
         SHA3_process(&sh,ki>>8);
-        SHA3_shake(&sh,(char *)buff,YBYTES);
+        SHA3_shake(&sh,(char *)buff,DL_YBYTES);
 
         ptr=bts=0;
-        for (m=0;m<DEGREE;m++)
+        for (m=0;m<DL_DEGREE;m++)
         {  // take in LG+1 bits at a time
-            w=nextword(LG+1,0,buff,&ptr,&bts);  // 20 bits
-            w=GAMMA1-w;
+            w=nextword(DL_LG+1,0,buff,&ptr,&bts);  // 20 bits
+            w=DL_GAMMA1-w;
             t=w>>31;
-            y[row+m]=w+(PRIME&t);
+            y[row+m]=w+(DL_PRIME&t);
         }
     }
 }
@@ -594,8 +594,8 @@ static void CRH1(byte H[32],byte rho[32],sign16 t1[])
     for (i=0;i<32;i++)
         SHA3_process(&sh,rho[i]);
     ptr=bts=0;
-    for (i=0;i<(K*DEGREE*TD)/8;i++)
-            SHA3_process(&sh,nextbyte16(TD,0,t1,&ptr,&bts));
+    for (i=0;i<(DL_K*DL_DEGREE*DL_TD)/8;i++)
+            SHA3_process(&sh,nextbyte16(DL_TD,0,t1,&ptr,&bts));
     SHA3_shake(&sh,(char *)H,32);
 }
 
@@ -635,12 +635,12 @@ static void H4(byte CT[32],byte mu[64],sign8 w1[])
     for (i=0;i<64;i++)
         SHA3_process(&sh,mu[i]);
     ptr=bts=0;
-    for (i=0;i<(K*DEGREE*W1B)/8;i++)
-        SHA3_process(&sh,nextbyte8(W1B,0,w1,&ptr,&bts));
+    for (i=0;i<(DL_K*DL_DEGREE*DL_W1B)/8;i++)
+        SHA3_process(&sh,nextbyte8(DL_W1B,0,w1,&ptr,&bts));
     SHA3_shake(&sh,(char *)CT,32);
 }
 
-static void SampleInBall(byte ct[32],sign32 c[DEGREE])
+static void SampleInBall(byte ct[32],sign32 c[DL_DEGREE])
 {
     int i,j,k,n,b,sn;
     byte signs[8],buff[136];
@@ -655,7 +655,7 @@ static void SampleInBall(byte ct[32],sign32 c[DEGREE])
     b=0;
     poly_zero(c);
     sn=signs[0]; n=1;
-    for (i=DEGREE-WC;i<DEGREE;i++)
+    for (i=DL_DEGREE-DL_WC;i<DL_DEGREE;i++)
     {
         do
         {
@@ -672,10 +672,10 @@ static void SampleInBall(byte ct[32],sign32 c[DEGREE])
 
 static sign16 p2r(sign32 *r0)
 {
-    sign32 d=(1<<D);
+    sign32 d=(1<<DL_D);
     sign32 r1;
-    r1=(*r0+d/2-1)>>D;
-    *r0-=(r1 << D);
+    r1=(*r0+d/2-1)>>DL_D;
+    *r0-=(r1 << DL_D);
     return (sign16)r1;
 }
 
@@ -683,7 +683,7 @@ static void Power2Round(sign32 t[],sign16 t0[],sign16 t1[])
 {
     int m;
     sign32 w;
-    for (m=0;m<DEGREE;m++)
+    for (m=0;m<DL_DEGREE;m++)
     {   
         w=t[m];
         t1[m]=p2r(&w);
@@ -698,9 +698,9 @@ static sign32 decompose_lo(sign32 a) {
   a1  = (a1*1025 + (1 << 21)) >> 22;
   a1 &= 15;
 
-  a0  = a - a1*(PRIME-1)/16;  // (Q-1)/16=alpha
-  a0 -= (((PRIME-1)/2 - a0) >> 31) & PRIME;
-  a0 += (a0>>31)&PRIME;
+  a0  = a - a1*(DL_PRIME-1)/16;  // (Q-1)/16=alpha
+  a0 -= (((DL_PRIME-1)/2 - a0) >> 31) & DL_PRIME;
+  a0 += (a0>>31)&DL_PRIME;
   return a0;
 }
 
@@ -716,14 +716,14 @@ static sign8 decompose_hi(sign32 a) {
 static void lobits(sign32 r0[],sign32 r[])
 {
     int m;
-    for (m=0;m<DEGREE;m++)
+    for (m=0;m<DL_DEGREE;m++)
             r0[m]=decompose_lo(r[m]);
 }
 
 static void hibits(sign8 r1[],sign32 r[])
 {
     int m;
-    for (m=0;m<DEGREE;m++)
+    for (m=0;m<DL_DEGREE;m++)
         r1[m]=(sign32)decompose_hi(r[m]);
 }    
 
@@ -735,15 +735,15 @@ static int MakePartialHint(byte h[],int hptr,sign32 z[],sign32 r[])
     int m;
     sign8 a0,a1;
     sign32 rz,t;
-    for (m=0;m<DEGREE;m++)
+    for (m=0;m<DL_DEGREE;m++)
     {
         a0=decompose_hi(r[m]);
         rz=r[m]+z[m];
-        t=rz-PRIME;
-        rz=rz+((t>>31)&PRIME);
+        t=rz-DL_PRIME;
+        rz=rz+((t>>31)&DL_PRIME);
         a1=decompose_hi(rz);
         if (a0!=a1) {
-            if (hptr>=OMEGA) return OMEGA+1;
+            if (hptr>=DL_OMEGA) return DL_OMEGA+1;
             h[hptr++]=m&0xff;
         }
     }
@@ -752,17 +752,17 @@ static int MakePartialHint(byte h[],int hptr,sign32 z[],sign32 r[])
 
 static int UsePartialHint(sign8 r[],byte h[],int hptr,int i,sign32 w[])
 {
-    sign8 a1,md=RR/2;
+    sign8 a1,md=DL_RR/2;
     sign32 a0;
     int m;
-    for (m=0;m<DEGREE;m++)
+    for (m=0;m<DL_DEGREE;m++)
     {
         a1=decompose_hi(w[m]);
-        if (m==h[hptr] && hptr<h[OMEGA+i])
+        if (m==h[hptr] && hptr<h[DL_OMEGA+i])
         {
             hptr++;
             a0=decompose_lo(w[m]);
-            if (a0<=PRIME/2) {
+            if (a0<=DL_PRIME/2) {
                 a1++;
                 if (a1>=md) a1-=md;
             } else {
@@ -779,10 +779,10 @@ sign32 infinity_norm(sign32 w[])
 {
     int m;
     sign32 az,n=0;
-    for (m=0;m<DEGREE;m++)
+    for (m=0;m<DL_DEGREE;m++)
     {
         az=w[m];
-        if (az>PRIME/2) az=PRIME-az;
+        if (az>DL_PRIME/2) az=DL_PRIME-az;
         if (az>n) n=az;    
     }
     return n;
@@ -800,13 +800,13 @@ void DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
     byte rhod[64];
     byte bK[32];
     byte tr[32];          // 320 bytes
-    sign32 Aij[DEGREE];     // 1024 bytes
-    sign8 s1[L*DEGREE];     // 1280 bytes
-    sign8 s2[K*DEGREE];     // 1536 bytes
-    sign16 t0[K*DEGREE];    // 3072 bytes
-    sign16 t1[K*DEGREE];    // 3072 bytes
-    sign32 w[DEGREE]; // work space  1024 bytes
-    sign32 r[DEGREE]; // work space  1024 bytes total = 12352
+    sign32 Aij[DL_DEGREE];     // 1024 bytes
+    sign8 s1[DL_L*DL_DEGREE];     // 1280 bytes
+    sign8 s2[DL_K*DL_DEGREE];     // 1536 bytes
+    sign16 t0[DL_K*DL_DEGREE];    // 3072 bytes
+    sign16 t1[DL_K*DL_DEGREE];    // 3072 bytes
+    sign32 w[DL_DEGREE]; // work space  1024 bytes
+    sign32 r[DL_DEGREE]; // work space  1024 bytes total = 12352
 
     SHA3_init(&sh, SHAKE256);
     for (i=0;i<32;i++)
@@ -823,22 +823,22 @@ void DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
     for (i=0;i<64;i++)
         rhod[i]=buff[32+i];
 
-    for (i=0;i<L;i++)
+    for (i=0;i<DL_L;i++)
     {
 
-        row=DEGREE*i;
+        row=DL_DEGREE*i;
         sample_Sn(rhod,&s1[row],i);
     }
 
-    for (i=0;i<K;i++)
+    for (i=0;i<DL_K;i++)
     {
-        row=DEGREE*i;
-        sample_Sn(rhod,&s2[row],L+i);
+        row=DL_DEGREE*i;
+        sample_Sn(rhod,&s2[row],DL_L+i);
 
         poly_zero(r);
-        for (j=0;j<L;j++)
+        for (j=0;j<DL_L;j++)
         {
-            poly_scopy(w,&s1[j*DEGREE]);
+            poly_scopy(w,&s1[j*DL_DEGREE]);
             ntt(w);  
             ExpandAij(rho,Aij,i,j);
             poly_mul(w,w,Aij);
@@ -857,8 +857,8 @@ void DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
     CRH1(tr,rho,t1);
 
     pack_pk((byte *)pk->val,rho,t1);
-    pk->len=(K*DEGREE*TD)/8+32;
-    sk->len=32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8;
+    pk->len=(DL_K*DL_DEGREE*DL_TD)/8+32;
+    sk->len=32*3+DL_DEGREE*(DL_K*DL_D+DL_L*DL_LG2ETA1+DL_K*DL_LG2ETA1)/8;
     pack_sk((byte *)sk->val,rho,bK,tr,s1,s2,t0);
 }
 
@@ -872,20 +872,20 @@ int DLTHM_signature(octet *sk,octet *M,octet *sig)
     byte tr[32];
     byte mu[64];
     byte rhod[64];   // 288 bytes
-    byte hint[OMEGA+K]; // 61 bytes
+    byte hint[DL_OMEGA+DL_K]; // 61 bytes
 
-    //sign32 Aij[DEGREE]; // 1024 bytes
-    sign8 s1[L*DEGREE]; // 1280 bytes
-    sign8 s2[K*DEGREE]; // 1536 bytes
-    sign16 t0[K*DEGREE]; // 3072 bytes
+    //sign32 Aij[DL_DEGREE]; // 1024 bytes
+    sign8 s1[DL_L*DL_DEGREE]; // 1280 bytes
+    sign8 s2[DL_K*DL_DEGREE]; // 1536 bytes
+    sign16 t0[DL_K*DL_DEGREE]; // 3072 bytes
 
-    sign32 y[L*DEGREE];  // 5120 bytes
-    sign32 Ay[K*DEGREE]; // 6144 bytes
+    sign32 y[DL_L*DL_DEGREE];  // 5120 bytes
+    sign32 Ay[DL_K*DL_DEGREE]; // 6144 bytes
 
-    sign8 w1[K*DEGREE]; // 1280 bytes
-    sign32 c[DEGREE];  // 1024 bytes
-    sign32 w[DEGREE];  // work space 1024 bytes
-    sign32 r[DEGREE];  // work space 1024 bytes total= 21673 bytes
+    sign8 w1[DL_K*DL_DEGREE]; // 1280 bytes
+    sign32 c[DL_DEGREE];  // 1024 bytes
+    sign32 w[DL_DEGREE];  // work space 1024 bytes
+    sign32 r[DL_DEGREE];  // work space 1024 bytes total= 21673 bytes
 
     unpack_sk(rho,bK,tr,s1,s2,t0,(byte *)sk->val);
 
@@ -895,24 +895,24 @@ int DLTHM_signature(octet *sk,octet *M,octet *sig)
 
     for (k=0; ;k++ )
     {
-        fk=k*L;
+        fk=k*DL_L;
         sample_Y(fk,rhod,y);
 
 // NTT y
-        for (i=0;i<L;i++)
+        for (i=0;i<DL_L;i++)
         {
-            row=DEGREE*i;
+            row=DL_DEGREE*i;
             ntt(&y[row]);
         }
 
 // Calculate Ay 
-        for (i=0;i<K;i++)
+        for (i=0;i<DL_K;i++)
         {
-            row=DEGREE*i;
+            row=DL_DEGREE*i;
             poly_zero(r);
-            for (j=0;j<L;j++)
+            for (j=0;j<DL_L;j++)
             { // Note: no NTTs in here
-                poly_copy(w,&y[j*DEGREE]);
+                poly_copy(w,&y[j*DL_DEGREE]);
                 ExpandAij(rho,c,i,j);  // re-use c for Aij
                 poly_mul(w,w,c);
                 poly_add(r,r,w);
@@ -931,9 +931,9 @@ int DLTHM_signature(octet *sk,octet *M,octet *sig)
         badone=false;
 // Calculate z=y+c.s1
         ntt(c);
-        for (i=0;i<L;i++)
+        for (i=0;i<DL_L;i++)
         {
-            row=DEGREE*i;
+            row=DL_DEGREE*i;
             poly_scopy(w,&s1[row]);
             ntt(w);
             poly_mul(w,w,c);
@@ -944,7 +944,7 @@ int DLTHM_signature(octet *sk,octet *M,octet *sig)
             intt(&y[row]);
 
             poly_soft_reduce(&y[row]);
-            if (infinity_norm(&y[row])>=GAMMA1-BETA)
+            if (infinity_norm(&y[row])>=DL_GAMMA1-DL_BETA)
             {
                 badone=true;
                 break;
@@ -955,11 +955,11 @@ int DLTHM_signature(octet *sk,octet *M,octet *sig)
  
 // Calculate Ay=w-c.s2 and r0=lobits(w-c.s2)
         nh=0;
-        for (i=0;i<OMEGA+K;i++)
+        for (i=0;i<DL_OMEGA+DL_K;i++)
             hint[i]=0;
-        for (i=0;i<K;i++)
+        for (i=0;i<DL_K;i++)
         {
-            row=DEGREE*i;
+            row=DL_DEGREE*i;
             poly_scopy(w,&s2[row]);
             ntt(w);
             poly_mul(w,w,c);
@@ -968,7 +968,7 @@ int DLTHM_signature(octet *sk,octet *M,octet *sig)
             poly_sub(&Ay[row],&Ay[row],w);
             poly_soft_reduce(&Ay[row]);   //Ay=w-cs2
             lobits(w,&Ay[row]);    // r0
-            if (infinity_norm(w)>=GAMMA2-BETA)
+            if (infinity_norm(w)>=DL_GAMMA2-DL_BETA)
             {
                 badone=true;
                 break;
@@ -979,7 +979,7 @@ int DLTHM_signature(octet *sk,octet *M,octet *sig)
             
             intt(w);
             poly_negate(r,w);  // -ct0
-            if (infinity_norm(r)>=GAMMA2)
+            if (infinity_norm(r)>=DL_GAMMA2)
             {
                 badone=true;
                 break;
@@ -988,18 +988,18 @@ int DLTHM_signature(octet *sk,octet *M,octet *sig)
             poly_soft_reduce(&Ay[row]);
 
             nh=MakePartialHint(hint,nh,r,&Ay[row]);
-            if (nh>OMEGA)
+            if (nh>DL_OMEGA)
             {
                 badone=true;
                 break;
             }
-            hint[OMEGA+i]=nh;
+            hint[DL_OMEGA+i]=nh;
         }
         if (badone) continue;
         break;
     }
     pack_sig((byte *)sig->val,y,ct,hint);
-    sig->len=(DEGREE*L*(LG+1))/8+OMEGA+K+32;
+    sig->len=(DL_DEGREE*DL_L*(DL_LG+1))/8+DL_OMEGA+DL_K+32;
     return k+1;      
 }
 
@@ -1011,25 +1011,25 @@ bool DLTHM_verify(octet *pk,octet *M,octet *sig)
     byte ct[32];
     byte cct[32];
     byte tr[32];         // 192 bytes
-    byte hint[OMEGA+K];  // 61 bytes
+    byte hint[DL_OMEGA+DL_K];  // 61 bytes
 
-    sign32 z[L*DEGREE];  // 5120 bytes
+    sign32 z[DL_L*DL_DEGREE];  // 5120 bytes
 
-    sign16 t1[K*DEGREE]; // 3072 bytes
-    sign8 w1d[K*DEGREE]; // 1536 bytes 
-    sign32 Aij[DEGREE];  // 1024 bytes
-    sign32 c[DEGREE];    // 1024 bytes
-    sign32 w[DEGREE]; // work space // 1024 bytes
-    sign32 r[DEGREE]; // work space // 1024 bytes total=14077 bytes
+    sign16 t1[DL_K*DL_DEGREE]; // 3072 bytes
+    sign8 w1d[DL_K*DL_DEGREE]; // 1536 bytes 
+    sign32 Aij[DL_DEGREE];  // 1024 bytes
+    sign32 c[DL_DEGREE];    // 1024 bytes
+    sign32 w[DL_DEGREE]; // work space // 1024 bytes
+    sign32 r[DL_DEGREE]; // work space // 1024 bytes total=14077 bytes
 
 // unpack public key and signature
     unpack_pk(rho,t1,(byte *)pk->val);
     unpack_sig(z,ct,hint,(byte *)sig->val);
 
-    for (i=0;i<L;i++)
+    for (i=0;i<DL_L;i++)
     {
-        row=DEGREE*i;
-        if (infinity_norm(&z[row])>=GAMMA1-BETA)
+        row=DL_DEGREE*i;
+        if (infinity_norm(&z[row])>=DL_GAMMA1-DL_BETA)
             return false;
         ntt(&z[row]); // convert to ntt form
     }
@@ -1041,13 +1041,13 @@ bool DLTHM_verify(octet *pk,octet *M,octet *sig)
 
 // Calculate Az
     hints=0;
-    for (i=0;i<K;i++)
+    for (i=0;i<DL_K;i++)
     {
-        row=DEGREE*i;
+        row=DL_DEGREE*i;
         poly_zero(r);
-        for (j=0;j<L;j++)
+        for (j=0;j<DL_L;j++)
         { // Note: no NTTs in here
-            poly_copy(w,&z[j*DEGREE]);
+            poly_copy(w,&z[j*DL_DEGREE]);
             ExpandAij(rho,Aij,i,j);
             poly_mul(w,w,Aij);
             poly_add(r,r,w);
@@ -1056,15 +1056,15 @@ bool DLTHM_verify(octet *pk,octet *M,octet *sig)
         poly_hard_reduce(r);
 
 // Calculate Az-ct1.2^d
-        for (m=0;m<DEGREE;m++)
-            w[m]=(sign32)(t1[row+m])<<D;
+        for (m=0;m<DL_DEGREE;m++)
+            w[m]=(sign32)(t1[row+m])<<DL_D;
         ntt(w);
         poly_mul(w,w,c);
         poly_sub(r,r,w);
         intt(r);
 
         hints=UsePartialHint(&w1d[row],hint,hints,i,r);
-        if (hints>OMEGA) return false;
+        if (hints>DL_OMEGA) return false;
     }
 
     H4(cct,mu,w1d);

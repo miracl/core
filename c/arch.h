@@ -58,6 +58,13 @@
 #endif
 
 #ifndef C99  /* You are on your own! These are for Microsoft C */
+#define bool int
+#ifndef true
+  #define true 1
+#endif
+#ifndef false
+  #define false 0
+#endif
 #define byte unsigned char      /**< 8-bit unsigned integer */
 #define sign32 __int32          /**< 32-bit signed integer */
 #define sign8 signed char       /**< 8-bit signed integer */
@@ -67,6 +74,7 @@
 #define unsign64 unsigned long long  /**< 64-bit unsigned integer */
 #else
 #include <stdint.h>
+#include <stdbool.h>
 #define byte uint8_t            /**< 8-bit unsigned integer */
 #define sign8 int8_t            /**< 8-bit signed integer */
 #define sign16 int16_t          /**< 16-bit signed integer */

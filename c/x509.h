@@ -33,7 +33,8 @@
 
 #define X509_ECC 1      /**< Uses Elliptic Curve Cryptography */
 #define X509_RSA 2      /**< Uses RSA Cryptography */
-#define X509_ECD 3
+#define X509_ECD 3      /**< Uses Ed25519 cryptography */
+#define X509_PQ 4       /**< Uses Post Quantum Cryptography */
 
 // Supported Hash functions
 

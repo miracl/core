@@ -36,7 +36,7 @@ int main() {
     bool result;
     char raw[100];
     csprng RNG;
-    char sk[32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8], pk[(K*DEGREE*TD)/8+32], sig[(DEGREE*L*(LG+1))/8+OMEGA+K+32],m[128];
+    char sk[DL_SK_LEN], pk[DL_PK_LEN], sig[DL_SIG_LEN],m[128];
     octet SK = {0, sizeof(sk), sk};
     octet PK = {0, sizeof(pk), pk};
     octet SIG = {0, sizeof(sig), sig};
