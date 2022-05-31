@@ -27,29 +27,32 @@
 /* DILITHIUM 3 parameters */
 
 //q= 8380417
-#define LGN 8
-#define DEGREE (1 << LGN)
-#define PRIME 0x7fe001
-#define D 13
-#define TD (23-D)
-#define WC 49
-#define LG 19
-#define GAMMA1 ((sign32)1<<LG)
-#define RR 32
-#define GAMMA2 (PRIME-1)/RR
-#define K 6
-#define L 5
-#define ETA 4
-#define LG2ETA1 4  // lg(2*ETA+1) rounded up
-#define BETA 196
-#define OMEGA 55
-#define YBYTES ((LG+1)*DEGREE)/8
-#define W1B 4
-#define ONE 0x3FFE00    // R mod Q
-#define COMBO 0xA3FA    // ONE*inv mod Q
-#define R2MODP 0x2419FF // R^2 mod Q
-#define ND 0xFC7FDFFF   // 1/(R-Q) mod R
+#define DL_LGN 8
+#define DL_DEGREE (1 << DL_LGN)
+#define DL_PRIME 0x7fe001
+#define DL_D 13
+#define DL_TD (23-DL_D)
+#define DL_WC 49
+#define DL_LG 19
+#define DL_GAMMA1 ((sign32)1<<DL_LG)
+#define DL_RR 32
+#define DL_GAMMA2 (DL_PRIME-1)/DL_RR
+#define DL_K 6
+#define DL_L 5
+#define DL_ETA 4
+#define DL_LG2ETA1 4  // lg(2*ETA+1) rounded up
+#define DL_BETA 196
+#define DL_OMEGA 55
+#define DL_YBYTES ((DL_LG+1)*DL_DEGREE)/8
+#define DL_W1B 4
+#define DL_ONE 0x3FFE00    // R mod Q
+#define DL_COMBO 0xA3FA    // ONE*inv mod Q
+#define DL_R2MODP 0x2419FF // R^2 mod Q
+#define DL_ND 0xFC7FDFFF   // 1/(R-Q) mod R
 
+#define DL_SK_LEN (32*3+DL_DEGREE*(DL_K*DL_D+DL_L*DL_LG2ETA1+DL_K*DL_LG2ETA1)/8)
+#define DL_PK_LEN ((DL_K*DL_DEGREE*DL_TD)/8+32)
+#define DL_SIG_LEN ((DL_DEGREE*DL_L*(DL_LG+1))/8+DL_OMEGA+DL_K+32)
 
 namespace core {
 
