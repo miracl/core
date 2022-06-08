@@ -665,6 +665,7 @@ miracl_compile.compile_file(3, "aes.cpp")
 miracl_compile.compile_file(3, "gcm.cpp")
 miracl_compile.compile_file(3, "newhope.cpp")
 miracl_compile.compile_file(3, "dilithium.cpp")
+miracl_compile.compile_file(3, "kyber.cpp")
 miracl_compile.compile_file(3, "x509.cpp")
 
 if sys.platform.startswith("win") :
@@ -709,6 +710,7 @@ delete_file("aes.cpp")
 delete_file("oct.cpp");
 delete_file("newhope.cpp")
 delete_file("dilithium.cpp")
+delete_file("kyber.cpp")
 delete_file("Doxyfile")
 delete_file("refman.pdf")
 delete_file("readme.md")
