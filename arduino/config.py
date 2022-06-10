@@ -38,6 +38,7 @@ pfcurve_selected=False
 rsa_selected=False
 nhs_selected=False
 dlthm_selected=False
+kyber_selected=False
 
 def copy_file(file, target):
     shutil.copyfile(file, target)
@@ -740,7 +741,7 @@ class miracl_crypto:
         ("512", "RSA4096", "29", "8")
     )
 
-    total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)+2
+    total_entries = len(np_curves)+len(pf_curves)+len(rsa_params)+3
 
     def valid_query(number):
         return number >= 0 and number <= miracl_crypto.total_entries
@@ -767,6 +768,8 @@ def interactive_prompt_print():
     index += 1
     print(str(index)+". Dilithium")
     index += 1
+    print(str(index)+". Kyber")
+    index += 1
 
 def interactive_prompt_exect(index):
     global curve_selected
@@ -774,6 +777,8 @@ def interactive_prompt_exect(index):
     global rsa_selected
     global nhs_selected
     global dlthm_selected
+    global kyber_selected
+
     index -= 1 # Python internally is zero-indexed
     if index < len(miracl_crypto.np_curves):
         tuple = miracl_crypto.np_curves[index]
@@ -801,8 +806,10 @@ def interactive_prompt_exect(index):
         rsa_selected=True
     elif index < len(miracl_crypto.np_curves) + len(miracl_crypto.pf_curves) + len(miracl_crypto.rsa_params)+1 :
         nhs_selected=True
-    else :
+    elif index < len(miracl_crypto.np_curves) + len(miracl_crypto.pf_curves) + len(miracl_crypto.rsa_params)+2 :
         dlthm_selected=True
+    else :
+        kyber_selected=True
 
 def interactive_prompt_input():
     while True:
@@ -885,7 +892,14 @@ else :
     os.system(copytext+" testdlthm.ino "+"examples"+slashtext+"testdlthm"+slashtext+"testdlthm.ino")
 os.system(deltext+" testdlthm.ino")
 
-
+if not kyber_selected :
+    os.system(deltext+" kyber.cpp")
+    os.system(deltext+" kyber.h")
+else :
+    os.system("mkdir examples")
+    os.system("mkdir examples"+slashtext+"testkyber")
+    os.system(copytext+" testkyber.ino "+"examples"+slashtext+"testkyber"+slashtext+"testkyber.ino")
+os.system(deltext+" testkyber.ino")
 
 os.system(deltext+" share.cpp")
 os.system(deltext+" *.rs")
@@ -1064,6 +1078,7 @@ os.system(deltext+" testhpke.cpp")
 os.system(deltext+" testhtp.cpp")
 os.system(deltext+" testnhs.cpp")
 os.system(deltext+" testdlthm.cpp")
+os.system(deltext+" testkyber.cpp")
 os.system(deltext+" testx509.cpp")
 os.system(deltext+" *.md")
 

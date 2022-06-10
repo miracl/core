@@ -242,13 +242,18 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
             return ret;
         }
         j+=skip(len);
-        for i in 0..len {
+        let mut tlen=len;
+        if tlen>pk.len() {
+            tlen=pk.len();
+        }
+
+        for i in 0..tlen {
             pk[i]=c[j];
             j+=1;
         }
-        ret.len=len;
+        ret.len=tlen;
         ret.kind=PQ;
-        ret.curve=8*len;
+        ret.curve=8*tlen;
     }    
     if ECPK == soid[0..slen] {
         len=getalen(OID,c,j);

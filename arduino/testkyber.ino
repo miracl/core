@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <dilithium.h>
+#include <kyber.h>
 #include <randapi.h>
 
 // requires too much RAM for some boards :(
@@ -129,7 +129,7 @@ void setup()
 //setCpuFrequencyMhz(80);
     xTaskCreatePinnedToCore(
         myloop
-        ,  "testdlthm"   // A name just for humans
+        ,  "testkyber"   // A name just for humans
         ,  32768  // This stack size can be checked & adjusted by reading the Stack Highwater
         ,  NULL
         ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
@@ -148,37 +148,84 @@ void myloop(void *pvParameters) {
 #else
 void loop() {
 #endif
-    int attempts;
-    bool result;
-    char sk[32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8], pk[(K*DEGREE*TD)/8+32], sig[(DEGREE*L*(LG+1))/8+OMEGA+K+32], m[128];
+
+    char sk[KYBER_SECRET_CPA], pk[KYBER_PUBLIC],ct[KYBER_CIPHERTEXT],skc[KYBER_SECRET_CCA];
+    octet SKC = {0, sizeof(skc), skc};
     octet SK = {0, sizeof(sk), sk};
     octet PK = {0, sizeof(pk), pk};
-    octet SIG = {0, sizeof(sig), sig};
-    octet M = {0, sizeof(m), m};
+    octet CT = {0, sizeof(ct), ct};
+    byte tau[32],ss1[32],ss2[32],r64[64],r32[32];
+    byte coins[32];
+    unsigned long start_time;
+    bool success;
 
-    OCT_jstring(&M,(char *)"Hello World");
+    Serial.println("Testing Kyber CPA");
+   
+    for (int i=0;i<32;i++)
+			ss1[i]=42+i;
 
-// Dilithium signature
-    Serial.println("Dilithium Key Pair");
-    unsigned long start_time=start();
-    DLTHM_keypair(&RNG,&SK,&PK);
-    stop(start_time);
+    for (int i=0;i<32;i++)
+        tau[i]=RAND_byte(&RNG);
 
-    Serial.println("Dilithium sign message");
+    for (int i=0;i<32;i++)
+        coins[i]=RAND_byte(&RNG); 
+  
+    Serial.println("Kyber CPA generate key pair");
     start_time=start();
-    attempts=DLTHM_signature(&SK,&M,&SIG);
+    KYBER_CPA_keypair(tau,&SK,&PK);
     stop(start_time);
 
-    Serial.println("Dilithium verify signature");
+    Serial.println("Kyber CPA encrypt");
     start_time=start();
-    result=DLTHM_verify(&PK,&M,&SIG);
+    KYBER_CPA_encrypt(coins,&PK,ss1,&CT); 
     stop(start_time);
-    Serial.print(attempts); Serial.println(" attempts required");
 
+    Serial.println("Kyber CPA decrypt");
+    start_time=start();
+    KYBER_CPA_decrypt(&SK,&CT,ss2);
+    stop(start_time);
+       
+    success=true;
+    for (int i=0;i<32;i++)
+        if (ss1[i]!=ss2[i]) success=false;
+    if (success) Serial.println("CPA Decapsulation succeeded");
+    else Serial.println("CPA Decapsulation failed");
 
-    if (result) Serial.println("Signature is verified");
-    else Serial.println("Signature is NOT verified");
+    Serial.println("Testing Kyber CCA");
+
+    for (int i=0;i<64;i++)
+        r64[i]=RAND_byte(&RNG); 
+  
+    for (int i=0;i<32;i++)
+        r32[i]=RAND_byte(&RNG);
+
+    Serial.println("Kyber CCA generate key pair");
+    start_time=start();
+    KYBER_CCA_keypair(r64,&SKC,&PK);
+    stop(start_time);
+
+    Serial.println("Kyber CCA encrypt");
+    start_time=start();
+    KYBER_CCA_encrypt(r32,&PK,ss1,&CT); 
+    stop(start_time);
+
+    Serial.println("Kyber CCA decrypt");
+    start_time=start();
+    KYBER_CCA_decrypt(&SKC,&CT,ss2);
+    stop(start_time);
+        
+    success=true;
+    for (int i=0;i<32;i++)
+        if (ss1[i]!=ss2[i]) success=false;
+    if (success) Serial.println("CCA Decapsulation succeeded");
+    else Serial.println("CCA Decapsulation failed");
+
+#ifdef ESP32
+    Serial.print("Amount of unused stack memory ");     // useful information!
+    Serial.println(uxTaskGetStackHighWaterMark(NULL));
+#endif
 
     while (1) delay(1000);
+
 }
 

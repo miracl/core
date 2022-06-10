@@ -195,7 +195,7 @@ static int bround(int len)
 // For ECC octet = k
 pktype X509_extract_private_key(octet *c,octet *pk)
 {
-    int i, j, k, fin, len, rlen, flen, sj, ex;
+    int i, j, k, fin, len, rlen, flen, tlen, sj, ex;
     char soid[12];
     octet SOID = {0, sizeof(soid), soid};
     pktype ret;
@@ -254,11 +254,14 @@ pktype X509_extract_private_key(octet *c,octet *pk)
         len = getalen(OCT, c->val, j);
         if (len < 0) return ret;
         j += skip(len);
-        for (i=0;i<len;i++)
+        tlen=len; 
+        if (tlen>pk->max)
+            tlen=pk->max;
+        for (i=0;i<tlen;i++)
             pk->val[i]=c->val[j++];
-        pk->len=len;
+        pk->len=tlen;
         ret.type=X509_PQ;
-        ret.curve=8*len;
+        ret.curve=8*tlen;
     }
     if (OCT_comp(&ECPK, &SOID))
     { // Its an ECC key

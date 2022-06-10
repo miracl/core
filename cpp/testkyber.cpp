@@ -29,7 +29,7 @@ using namespace core;
 #define LOOPS 100
 
 int main() {
-    int i,j,attempts;
+    int i,j;
     unsigned long ran;
     bool result;
     char raw[100];
