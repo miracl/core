@@ -292,7 +292,7 @@ impl DBIG {
     }
 
     /* Convert to Hex String */
-#[cfg(not(feature = "no_std"))]
+    #[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         let mut s = String::new();
         let mut len = self.nbits();

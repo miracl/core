@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-//#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 #![allow(clippy::many_single_char_names)]
 #![allow(clippy::needless_range_loop)]

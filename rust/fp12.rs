@@ -907,7 +907,7 @@ impl FP12 {
     }
 
     /* output to hex string */
-#[cfg(not(feature = "no_std"))]
+    #[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         format!(
             "[{},{},{}]",

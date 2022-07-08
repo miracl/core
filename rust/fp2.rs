@@ -449,7 +449,7 @@ impl FP2 {
     }
 
     /* output to hex string */
-#[cfg(not(feature = "no_std"))]
+    #[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         format!("[{},{}]", self.a.tostring(), self.b.tostring())
     }
