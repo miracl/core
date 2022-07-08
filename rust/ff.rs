@@ -165,7 +165,7 @@ impl SF {
     }
 
     /* Convert to Hex String */
-#[cfg(not(feature = "no_std"))]
+    #[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         let mut cs:[BIG;SL]=[BIG::new();SL];
         return generic_tostring(&self.v,&mut cs,SL);
@@ -666,7 +666,7 @@ impl DF {
     }
 
     /* Convert to Hex String */
-#[cfg(not(feature = "no_std"))]
+    #[cfg(feature = "std")]
     pub fn tostring(&self) -> String {
         let mut cs:[BIG;DL]=[BIG::new();DL];
         return generic_tostring(&self.v,&mut cs,DL);
@@ -942,7 +942,7 @@ impl QF {
     }
 }
 
-#[cfg(not(feature = "no_std"))]
+#[cfg(feature = "std")]
 fn generic_tostring(v: &[BIG],cs: &mut [BIG],len: usize) -> String {
     generic_copy(cs,v);
     generic_norm(cs);
