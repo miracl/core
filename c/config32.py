@@ -884,6 +884,7 @@ miracl_compile.compile_file(3, "aes.c")
 miracl_compile.compile_file(3, "gcm.c")
 miracl_compile.compile_file(3, "newhope.c")
 miracl_compile.compile_file(3, "dilithium.c")
+miracl_compile.compile_file(3, "kyber.c")
 miracl_compile.compile_file(3, "x509.c")
 
 if sys.platform.startswith("win") :
@@ -900,6 +901,7 @@ if testing :
     miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
     miracl_compile.compile_binary(2, "testnhs.c", "core.a", "testnhs")
     miracl_compile.compile_binary(2, "testdlthm.c", "core.a", "testdlthm")
+    miracl_compile.compile_binary(2, "testkyber.c", "core.a", "testkyber")
 
 #clean up
 for file in generated_files:
@@ -930,6 +932,7 @@ delete_file("aes.c")
 delete_file("oct.c");
 delete_file("newhope.c")
 delete_file("dilithium.c")
+delete_file("kyber.c")
 delete_file("Doxyfile")
 delete_file("refman.pdf")
 delete_file("readme.md")

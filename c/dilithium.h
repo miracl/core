@@ -32,6 +32,9 @@
 #define DL_PRIME 0x7fe001
 #define DL_D 13
 #define DL_TD (23-DL_D)
+
+// These values change for alternate security levels
+// Dilithium 3
 #define DL_WC 49
 #define DL_LG 19
 #define DL_GAMMA1 ((sign32)1<<DL_LG)
@@ -43,6 +46,7 @@
 #define DL_LG2ETA1 4  // lg(2*ETA+1) rounded up
 #define DL_BETA 196
 #define DL_OMEGA 55
+
 #define DL_YBYTES ((DL_LG+1)*DL_DEGREE)/8
 #define DL_W1B 4
 #define DL_ONE 0x3FFE00    // R mod Q
@@ -57,12 +61,12 @@
 
 /** @brief Dilithium signature key pair generation
  *
-    @param RNG Random Number Generator handle
+    @param tau Random Numbers
     @param SK secret key
     @param PK public key
 
  */
-extern void DLTHM_keypair(csprng *,octet *SK,octet *PK);
+extern void DLTHM_keypair(byte *tau,octet *SK,octet *PK);
 
 /** @brief Dilithium create signature on a message 
  *

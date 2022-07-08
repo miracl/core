@@ -24,8 +24,6 @@
 
 #include "kyber.h"
 
-using namespace core;
-
 /* Start of public domain reference implementation code - taken from https://github.com/pq-crystals/kyber */
 
 const sign16 zetas[128] = {
@@ -236,55 +234,63 @@ static void CBD(byte bts[],int eta,sign16 f[KY_DEGREE])
 }
 
 // extract ab bits into word from dense byte stream
-static sign16 nextword(int ab,byte t[],int &ptr, int &bts)
+static sign16 nextword(int ab,byte t[],int *ptr, int *bts)
 {
-    sign16 r=t[ptr]>>bts;
+    int mptr=*ptr;
+    int mbts=*bts;
+    sign16 r=t[mptr]>>mbts;
     sign16 mask=(1<<ab)-1;
     sign16 w;
     int i=0;
-    int gotbits=8-bts; // bits left in current byte
+    int gotbits=8-mbts; // bits left in current byte
     while (gotbits<ab)
     {
         i++;
-        w=(sign16)t[ptr+i];
+        w=(sign16)t[mptr+i];
         r|=w<<gotbits;
         gotbits+=8;
     }
-    bts+=ab;
-    while (bts>=8)
+    mbts+=ab;
+    while (mbts>=8)
     {
-        bts-=8;
-        ptr++;
+        mbts-=8;
+        mptr++;
     }
     w=r&mask;
+    *ptr=mptr;
+    *bts=mbts;
     return w;  
 }
 
 // array t has ab active bits per word
 // extract bytes from array of words
 // if max!=0 then -max<=t[i]<=+max
-static byte nextbyte16(int ab,sign16 t[],int &ptr, int &bts)
+static byte nextbyte16(int ab,sign16 t[],int *ptr, int *bts)
 {
+    int mptr=*ptr;
+    int mbts=*bts;
     sign16 r,w;
-    int left=ab-bts; // number of bits left in this word
+    int left=ab-mbts; // number of bits left in this word
     int i=0;
 
-    w=t[ptr]; w+=(w>>15)&KY_PRIME;
-    r=w>>bts;
+    w=t[mptr]; w+=(w>>15)&KY_PRIME;
+    r=w>>mbts;
     while (left<8)
     {
         i++;
-        w=t[ptr+i]; w+=(w>>15)&KY_PRIME;
+        w=t[mptr+i]; w+=(w>>15)&KY_PRIME;
         r|=w<<left;
         left+=ab;
     }
 
-    bts+=8;
-    while (bts>=ab)
+    mbts+=8;
+    while (mbts>=ab)
     {
-        bts-=ab;
-        ptr++;
+        mbts-=ab;
+        mptr++;
     }
+    *ptr=mptr;
+    *bts=mbts;
     return (byte)r&0xff;        
 }
 
@@ -294,7 +300,7 @@ static int encode(sign16 t[],int len,int L,byte pack[])
     int ptr,bts,i,n;
     n=0; ptr=bts=0;
     for (i=0;i<len*(KY_DEGREE*L)/8;i++ ) {
-        pack[n++]=nextbyte16(L,t,ptr,bts);
+        pack[n++]=nextbyte16(L,t,&ptr,&bts);
     }
     return n;
 }
@@ -305,7 +311,7 @@ static void decode(byte pack[],int L,sign16 t[],int len)
     int ptr,bts,i;
     ptr=bts=0;
     for (i=0;i<len*KY_DEGREE;i++ )
-        t[i]=nextword(L,pack,ptr,bts);
+        t[i]=nextword(L,pack,&ptr,&bts);
 }
 
 // compress polynomial coefficents in place, for polynomial vector of length len
@@ -330,7 +336,7 @@ static void decompress(sign16 t[],int len,int d)
 // ********************* Kyber API ******************************
 
 // input entropy, output key pair
-void core::KYBER_CPA_keypair(byte *tau,octet *sk,octet *pk)
+void KYBER_CPA_keypair(byte *tau,octet *sk,octet *pk)
 {
     int i,j,k,row;
     sha3 sh;
@@ -355,8 +361,8 @@ void core::KYBER_CPA_keypair(byte *tau,octet *sk,octet *pk)
 		rho[i]=buff[i];
 		sigma[i]=buff[i+32];
 	}
-	sigma[32]=0;   // N
 
+	sigma[32]=0;   // N
 // create s
 	for (i=0;i<KY_K;i++)
 	{
@@ -411,7 +417,7 @@ void core::KYBER_CPA_keypair(byte *tau,octet *sk,octet *pk)
 }
 
 // provide 64 random bytes, output secret and public keys
-void core::KYBER_CCA_keypair(byte *randbytes64,octet *sk,octet *pk)
+void KYBER_CCA_keypair(byte *randbytes64,octet *sk,octet *pk)
 {
     int i;
     sha3 sh;
@@ -428,7 +434,7 @@ void core::KYBER_CCA_keypair(byte *randbytes64,octet *sk,octet *pk)
 }
 
 // Given input of entropy, public key and shared secret is an input, outputs ciphertext
-void core::KYBER_CPA_encrypt(byte *coins,octet *pk,octet *ss,octet *ct)
+void KYBER_CPA_encrypt(byte *coins,octet *pk,octet *ss,octet *ct)
 {
     int i,row,j,len;
     sha3 sh;
@@ -529,7 +535,7 @@ void core::KYBER_CPA_encrypt(byte *coins,octet *pk,octet *ss,octet *ct)
 }
 
 // Given entropy and public key, outputs 32-byte shared secret and ciphertext
-void core::KYBER_CCA_encrypt(byte *randbytes32,octet *pk,octet *ss,octet *ct)
+void KYBER_CCA_encrypt(byte *randbytes32,octet *pk,octet *ss,octet *ct)
 {
     int i;
     sha3 sh;
@@ -573,7 +579,7 @@ void core::KYBER_CCA_encrypt(byte *randbytes32,octet *pk,octet *ss,octet *ct)
 }
 
 // Input secret key and ciphertext, outputs shared 32-byte secret
-void core::KYBER_CPA_decrypt(octet *sk,octet *ct,octet *ss)
+void KYBER_CPA_decrypt(octet *sk,octet *ct,octet *ss)
 {
 	int i,j,row;
 	sign16 w[KY_DEGREE];
@@ -605,7 +611,7 @@ void core::KYBER_CPA_decrypt(octet *sk,octet *ct,octet *ss)
     
 }
 
-void core::KYBER_CCA_decrypt(octet *sk,octet *ct,octet *ss)
+void KYBER_CCA_decrypt(octet *sk,octet *ct,octet *ss)
 { 
     int i,olen,same;
     sha3 sh;

@@ -24,8 +24,6 @@
 #include <time.h>
 #include "kyber.h"
 
-using namespace core;
-
 #define LOOPS 100
 
 int main() {

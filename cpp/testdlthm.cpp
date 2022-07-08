@@ -32,10 +32,11 @@ using namespace core;
 #define LOOPS 100
 
 int main() {
-    int i,attempts;
+    int i,j,attempts;
     unsigned long ran;
     bool result;
     char raw[100];
+    byte tau[32];
     csprng RNG;
     char sk[DL_SK_LEN], pk[DL_PK_LEN], sig[DL_SIG_LEN],m[128];
     octet SK = {0, sizeof(sk), sk};
@@ -59,7 +60,11 @@ int main() {
 
         OCT_clear(&M);
         OCT_jstring(&M,(char *)"Hello World");
-        DLTHM_keypair(&RNG,&SK,&PK);
+
+        for (j=0;j<32;j++)
+            tau[j]=RAND_byte(&RNG);
+
+        DLTHM_keypair(tau,&SK,&PK);
 
         printf("private key %d bits\n",8*SK.len);
         printf("public key %d bits\n",8*PK.len);

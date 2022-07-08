@@ -47,6 +47,7 @@ fn main() {
 
     let mut tats=0;
     for _ in 0..LOOPS {
+        let mut tau:[u8;32]=[0;32];
         let mut sk: [u8; dilithium::SK_SIZE] = [0; dilithium::SK_SIZE];
         let mut pk: [u8; dilithium::PK_SIZE] = [0; dilithium::PK_SIZE];
         let mut sig: [u8; dilithium::SIG_SIZE] = [0; dilithium::SIG_SIZE];
@@ -54,7 +55,11 @@ fn main() {
         let message = "Hello World";
         let m = message.as_bytes();
 
-        dilithium::keypair(&mut rng, &mut sk, &mut pk);
+        for i in 0..32 {
+            tau[i] = rng.getbyte();
+        }
+
+        dilithium::keypair(&tau, &mut sk, &mut pk);
 
         println!("private key {} bits",8*dilithium::SK_SIZE);
         println!("public key {} bits",8*dilithium::PK_SIZE);

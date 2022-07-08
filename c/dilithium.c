@@ -790,11 +790,10 @@ sign32 infinity_norm(sign32 w[])
 
 // Dilithium API
 
-void DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
+void DLTHM_keypair(byte *tau,octet *sk,octet *pk)
 {
     int i,row,j;
     sha3 sh;
-    byte tau[32];
     byte buff[128];
     byte rho[32];
     byte rhod[64];
@@ -809,9 +808,7 @@ void DLTHM_keypair(csprng *RNG,octet *sk,octet *pk)
     sign32 r[DL_DEGREE]; // work space  1024 bytes total = 12352
 
     SHA3_init(&sh, SHAKE256);
-    for (i=0;i<32;i++)
-        tau[i]=RAND_byte(RNG);
-   
+
     for (i=0;i<32;i++)
         SHA3_process(&sh,tau[i]); 
     SHA3_shake(&sh,(char *)buff,128);

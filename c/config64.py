@@ -830,6 +830,7 @@ class miracl_crypto:
         "gcm.c",
         "newhope.c",
         "dilithium.c",
+        "kyber.c",
         "x509.c"
     )
 
@@ -1005,6 +1006,7 @@ def main(argv):
         miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")
         miracl_compile.compile_binary(2, "testnhs.c", "core.a", "testnhs")
         miracl_compile.compile_binary(2, "testdlthm.c", "core.a", "testdlthm")
+        miracl_compile.compile_binary(2, "testkyber.c", "core.a", "testkyber")
 
     #clean up
     for file in generated_files:

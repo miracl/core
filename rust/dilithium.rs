@@ -31,7 +31,6 @@ Might be simpler to wait for hardware support for SHA3!
    M.Scott 30/09/2021
 */
 
-use crate::rand::RAND;
 use crate::sha3;
 use crate::sha3::SHA3;
 
@@ -43,6 +42,9 @@ const DEGREE: usize = 1<<LGN;
 const PRIME: i32 = 0x7fe001;
 const D: usize = 13;
 const TD: usize = 23-D;
+
+// These values change for alternate security levels
+// Dilithium 3
 const WC: usize = 49;
 const LG: usize = 19;
 const GAMMA1: i32 = 1<<LG;
@@ -54,6 +56,7 @@ const ETA: usize = 4;
 const LG2ETA1: usize = 4;  // lg(2*ETA+1) rounded up
 const BETA: i32 = 196;
 const OMEGA: usize = 55;
+
 const YBYTES: usize = ((LG+1)*DEGREE)/8;
 const W1B: usize = 4;
 const ONE: i32 = 0x3FFE00;    // R mod Q
@@ -822,9 +825,8 @@ fn infinity_norm(w: &[i32]) -> i32 {
     return n;
 }
 
-pub fn keypair(rng: &mut RAND,sk: &mut [u8],pk: &mut [u8]) {
-    let mut sh = SHA3::new(sha3::SHAKE256);
-    let mut tau: [u8; 32] = [0; 32]; 
+pub fn keypair(tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
+    let mut sh = SHA3::new(sha3::SHAKE256); 
     let mut buff: [u8; 128] = [0; 128]; 
     let mut rho: [u8; 32] = [0; 32]; 
     let mut rhod: [u8; 64] = [0; 64];
@@ -838,9 +840,6 @@ pub fn keypair(rng: &mut RAND,sk: &mut [u8],pk: &mut [u8]) {
     let mut w: [i32; DEGREE] = [0; DEGREE];
     let mut r: [i32; DEGREE] = [0; DEGREE];
 
-    for i in 0..32 {
-        tau[i] = rng.getbyte();
-    }
     for i in 0..32 {
         sh.process(tau[i]);
     }
