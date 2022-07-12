@@ -48,9 +48,9 @@ fn main() {
     let mut tats=0;
     for _ in 0..LOOPS {
         let mut tau:[u8;32]=[0;32];
-        let mut sk: [u8; dilithium::SK_SIZE_3] = [0; dilithium::SK_SIZE_3];
-        let mut pk: [u8; dilithium::PK_SIZE_3] = [0; dilithium::PK_SIZE_3];
-        let mut sig: [u8; dilithium::SIG_SIZE_3] = [0; dilithium::SIG_SIZE_3];
+        let mut sk: [u8; dilithium::SK_SIZE] = [0; dilithium::SK_SIZE];
+        let mut pk: [u8; dilithium::PK_SIZE] = [0; dilithium::PK_SIZE];
+        let mut sig: [u8; dilithium::SIG_SIZE] = [0; dilithium::SIG_SIZE];
 
         let message = "Hello World";
         let m = message.as_bytes();
@@ -59,16 +59,16 @@ fn main() {
             tau[i] = rng.getbyte();
         }
 
-        dilithium::keypair_3(&tau, &mut sk, &mut pk);
+        dilithium::keypair(&tau, &mut sk, &mut pk);
 
-        println!("private key {} bits",8*dilithium::SK_SIZE_3);
-        println!("public key {} bits",8*dilithium::PK_SIZE_3);
+        println!("private key {} bits",8*dilithium::SK_SIZE);
+        println!("public key {} bits",8*dilithium::PK_SIZE);
 
-        let attempts=dilithium::signature_3(&sk,&m,&mut sig);
+        let attempts=dilithium::signature(&sk,&m,&mut sig);
         tats+=attempts;
-        println!("signature {} bits created on attempt {}",8*dilithium::SIG_SIZE_3,attempts);
+        println!("signature {} bits created on attempt {}",8*dilithium::SIG_SIZE,attempts);
 
-        let result=dilithium::verify_3(&pk,&m,&sig);
+        let result=dilithium::verify(&pk,&m,&sig);
         if result {
             println!("Signature is verified");
         } else {

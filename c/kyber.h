@@ -27,72 +27,32 @@
 /* Kyber768 parameters */
 
 //q= 3329
-//#define KY_WL 32
 #define KY_LGN 8
 #define KY_DEGREE (1 << KY_LGN)
 #define KY_PRIME 0xD01
 
-// These vary for different security levels
-
-// Kyber 512
-//#define KY_K 2
-//#define KY_ETA1 3
-//#define KY_DU 10
-//#define KY_DV 4
-
-// Kyber 768
-#define KY_K 3
-#define KY_ETA1 2
-#define KY_DU 10
-#define KY_DV 4
-
-// Kyber 1024
-//#define KY_K 4
-//#define KY_ETA1 2
-//#define KY_DU 11
-//#define KY_DV 5
-
-#define KY_ETA2 2
 #define KY_ONE 0x549		// R mod Q
-//#define KY_COMBO 0x450		// ONE*inv mod Q
-//#define KY_R2MODP 0xBAC	// R^2 mod Q
-//#define KY_ND 0x94570CFF   // 1/(R-Q) mod R
-
-//#define KY_MONT 2285 // 2^16 % Q
 #define KY_QINV 62209 // q^(-1) mod 2^16
 
-#define KYBER_SECRET_CPA (KY_K*(KY_DEGREE*3)/2)
-#define KYBER_PUBLIC (32+KY_K*(KY_DEGREE*3)/2)
-#define KYBER_CIPHERTEXT ((KY_DU*KY_K+KY_DV)*KY_DEGREE/8)
-#define KYBER_SECRET_CCA (KYBER_SECRET_CPA+KYBER_PUBLIC+64)
+#define KYBER_SECRET_CPA_SIZE_512 (2*(KY_DEGREE*3)/2)
+#define KYBER_PUBLIC_SIZE_512 (32+2*(KY_DEGREE*3)/2)
+#define KYBER_CIPHTERTEXT_SIZE_512  ((10*2+4)*KY_DEGREE/8)
+#define KYBER_SECRET_CCA_SIZE_512 (KYBER_SECRET_CPA_SIZE_512+KYBER_PUBLIC_SIZE_512+64)
+#define KYBER_SHARED_SECRET_512 32;
 
-/** @brief Kyber KEM CPA key pair generation
- *
-    @param tau random bytes
-    @param SK secret key
-    @param PK public key
+#define KYBER_SECRET_CPA_SIZE_768 (3*(KY_DEGREE*3)/2)
+#define KYBER_PUBLIC_SIZE_768 (32+3*(KY_DEGREE*3)/2)
+#define KYBER_CIPHTERTEXT_SIZE_768  ((10*3+4)*KY_DEGREE/8)
+#define KYBER_SECRET_CCA_SIZE_768 (KYBER_SECRET_CPA_SIZE_768+KYBER_PUBLIC_SIZE_768+64)
+#define KYBER_SHARED_SECRET_768 32
 
- */
-extern void KYBER_CPA_keypair(byte *tau,octet *SK,octet *PK);
+#define KYBER_SECRET_CPA_SIZE_1024 (4*(KY_DEGREE*3)/2)
+#define KYBER_PUBLIC_SIZE_1024 (32+4*(KY_DEGREE*3)/2)
+#define KYBER_CIPHTERTEXT_SIZE_1024  ((11*4+5)*KY_DEGREE/8)
+#define KYBER_SECRET_CCA_SIZE_1024 (KYBER_SECRET_CPA_SIZE_1024+KYBER_PUBLIC_SIZE_1024+64)
+#define KYBER_SHARED_SECRET_1024 32;
 
-/** @brief Kyber KEM CPA encrypt
- *
-    @param coins random bytes
-    @param PK public key
-	@param SS session key to be encrypted
-	@param CT ciphertext
-
- */
-extern void KYBER_CPA_encrypt(byte *coins,octet *PK,octet *SS,octet *CT);
-
-/** @brief Kyber KEM CPA decrypt
- *
-    @param SK secret key
-	@param CT ciphertext
-	@param SS output session key
- */
-extern void KYBER_CPA_decrypt(octet *PK,octet *CT,octet *SS);
-
+#define KY_MAXK 4
 
 /** @brief Kyber KEM CCA key pair generation
  *
@@ -101,7 +61,7 @@ extern void KYBER_CPA_decrypt(octet *PK,octet *CT,octet *SS);
     @param PK public key
 
  */
-extern void KYBER_CCA_keypair(byte *r64,octet *SK,octet *PK);
+extern void KYBER512_keypair(byte *r64,octet *SK,octet *PK);
 
 /** @brief Kyber KEM CCA encrypt
  *
@@ -111,7 +71,7 @@ extern void KYBER_CCA_keypair(byte *r64,octet *SK,octet *PK);
 	@param CT ciphertext
 
  */
-extern void KYBER_CCA_encrypt(byte *r32,octet *PK,octet *SS,octet *CT);
+extern void KYBER512_encrypt(byte *r32,octet *PK,octet *SS,octet *CT);
 
 /** @brief Kyber KEM CCA decrypt
  *
@@ -119,6 +79,60 @@ extern void KYBER_CCA_encrypt(byte *r32,octet *PK,octet *SS,octet *CT);
 	@param CT ciphertext
 	@param SS output session key 
  */
-extern void KYBER_CCA_decrypt(octet *PK,octet *CT,octet *SS);
+extern void KYBER512_decrypt(octet *PK,octet *CT,octet *SS);
+
+/** @brief Kyber KEM CCA key pair generation
+ *
+    @param r64 64 random bytes
+    @param SK secret key
+    @param PK public key
+
+ */
+extern void KYBER768_keypair(byte *r64,octet *SK,octet *PK);
+
+/** @brief Kyber KEM CCA encrypt
+ *
+    @param r32 32 random bytes
+    @param PK public key
+	@param SS random session key generated
+	@param CT ciphertext
+
+ */
+extern void KYBER768_encrypt(byte *r32,octet *PK,octet *SS,octet *CT);
+
+/** @brief Kyber KEM CCA decrypt
+ *
+    @param SK secret key
+	@param CT ciphertext
+	@param SS output session key 
+ */
+extern void KYBER768_decrypt(octet *PK,octet *CT,octet *SS);
+
+/** @brief Kyber KEM CCA key pair generation
+ *
+    @param r64 64 random bytes
+    @param SK secret key
+    @param PK public key
+
+ */
+extern void KYBER1024_keypair(byte *r64,octet *SK,octet *PK);
+
+/** @brief Kyber KEM CCA encrypt
+ *
+    @param r32 32 random bytes
+    @param PK public key
+	@param SS random session key generated
+	@param CT ciphertext
+
+ */
+extern void KYBER1024_encrypt(byte *r32,octet *PK,octet *SS,octet *CT);
+
+/** @brief Kyber KEM CCA decrypt
+ *
+    @param SK secret key
+	@param CT ciphertext
+	@param SS output session key 
+ */
+extern void KYBER1024_decrypt(octet *PK,octet *CT,octet *SS);
 
 #endif

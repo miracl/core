@@ -50,26 +50,53 @@ fn main() {
     }
     rng.seed(100, &raw);
 
-    println!("Testing Kyber Encryption");
+    println!("Testing Kyber CPA Encryption");
     for j in 0..LOOPS {
-        let mut sk: [u8; kyber::SECRET_CCA_SIZE_768] = [0; kyber::SECRET_CCA_SIZE_768];
-        let mut pk: [u8; kyber::PUBLIC_SIZE_768] = [0; kyber::PUBLIC_SIZE_768];
-        let mut ct: [u8; kyber::CIPHTERTEXT_SIZE_768] = [0; kyber::CIPHTERTEXT_SIZE_768];
-        let mut ss: [u8; kyber::SHARED_SECRET_768]=[0;kyber::SHARED_SECRET_768];
+        let mut sk: [u8; kyber::SECRET_CPA] = [0; kyber::SECRET_CPA];
+        let mut pk: [u8; kyber::PUBLIC] = [0; kyber::PUBLIC];
+        let mut ct: [u8; kyber::CIPHERTEXT] = [0; kyber::CIPHERTEXT];
+        let mut tau: [u8;32]=[0;32];
+        let mut coins: [u8;32]=[0;32];
+        let mut ss: [u8;32]=[0;32];
+        for i in 0..32 {
+            tau[i] = rng.getbyte();
+        }
+        kyber::cpa_keypair(&tau, &mut sk, &mut pk);
+        for i in 0..32 {
+            coins[i] = rng.getbyte();
+        }
+        for i in 0..32 {
+            ss[i] = (42+i) as u8;
+        }
+
+        kyber::cpa_encrypt(&coins,&pk,&ss,&mut ct);
+
+        kyber::cpa_decrypt(&sk,&ct,&mut ss);
+        println!("j= {}",j);
+        print!("ss= "); printbinary(&ss);
+        println!("");
+    }
+    println!("Testing Kyber CCA Encryption");
+    for j in 0..LOOPS {
+        let mut sk: [u8; kyber::SECRET_CCA] = [0; kyber::SECRET_CCA];
+        let mut pk: [u8; kyber::PUBLIC] = [0; kyber::PUBLIC];
+        let mut ct: [u8; kyber::CIPHERTEXT] = [0; kyber::CIPHERTEXT];
         let mut r64: [u8;64]=[0;64];
         let mut r32: [u8;32]=[0;32];
- 
+        let mut ss: [u8;32]=[0;32];
+
         for i in 0..64 {
             r64[i]=rng.getbyte();
         }
-        kyber::keypair_768(&r64,&mut sk,&mut pk);
+        kyber::cca_keypair(&r64,&mut sk,&mut pk);
         for i in 0..32 {
             r32[i]=rng.getbyte();
         }
-        kyber::encrypt_768(&r32,&pk,&mut ss,&mut ct);
+        kyber::cca_encrypt(&r32,&pk,&mut ss,&mut ct);
         println!("j= {}",j);
         print!("ss= "); printbinary(&ss);
-        kyber::decrypt_768(&sk,&ct,&mut ss);
+        kyber::cca_decrypt(&sk,&ct,&mut ss);
         print!("ss= "); printbinary(&ss);
+        println!("");
     }
 }

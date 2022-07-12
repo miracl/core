@@ -34,6 +34,8 @@ Might be simpler to wait for hardware support for SHA3!
 use crate::sha3;
 use crate::sha3::SHA3;
 
+//use std::process;
+
 //q= 8380417
 const LGN: usize = 8;
 const DEGREE: usize = 1<<LGN;
@@ -41,19 +43,36 @@ const PRIME: i32 = 0x7fe001;
 const D: usize = 13;
 const TD: usize = 23-D;
 
+// These values change for alternate security levels
+// Dilithium 3
+const WC: usize = 49;
+const LG: usize = 19;
+const GAMMA1: i32 = 1<<LG;
+const RR: i32 = 32;
+const GAMMA2: i32 = (PRIME-1)/RR;
+const K: usize = 6;
+const L: usize = 5;
+const ETA: usize = 4;
+const LG2ETA1: usize = 4;  // lg(2*ETA+1) rounded up
+const BETA: i32 = 196;
+const OMEGA: usize = 55;
+
+const YBYTES: usize = ((LG+1)*DEGREE)/8;
+const W1B: usize = 4;
 const ONE: i32 = 0x3FFE00;    // R mod Q
 const COMBO: i32 = 0xA3FA;    // ONE*inv mod Q
 const ND: u32 = 0xFC7FDFFF; // 1/(R-Q) mod R
 const R2MODP: u64 = 0x2419FF; // R^2 mod Q
 
-const MAXLG: usize=19;
-const MAXK: usize=8;     // could reduce these if not using highest security
-const MAXL: usize=7;
-const YBYTES: usize = ((MAXLG+1)*DEGREE)/8;
+pub const SK_SIZE: usize=32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8;
+pub const PK_SIZE: usize=(K*DEGREE*TD)/8+32;
+pub const SIG_SIZE: usize=(DEGREE*L*(LG+1))/8+OMEGA+K+32;
 
-pub const SK_SIZE_2: usize=32*3+DEGREE*(4*13+4*3+4*3)/8;
-pub const PK_SIZE_2: usize=(4*DEGREE*TD)/8+32;
-pub const SIG_SIZE_2: usize=(DEGREE*4*(17+1))/8+80+4+32;
+
+
+pub const SK_SIZE_1: usize=32*3+DEGREE*(4*13+4*3+4*3)/8;
+pub const PK_SIZE_1: usize=(4*DEGREE*TD)/8+32;
+pub const SIG_SIZE_1: usize=(DEGREE*4*(17+1))/8+80+4+32;
 
 pub const SK_SIZE_3: usize=32*3+DEGREE*(6*13+5*4+6*4)/8;
 pub const PK_SIZE_3: usize=(6*DEGREE*TD)/8+32;
@@ -65,9 +84,11 @@ pub const SIG_SIZE_5: usize=(DEGREE*7*(19+1))/8+75+8+32;
 
 // parameters for each security level
 // tau,gamma1,gamma2,K,L,eta,lg(2*eta+1),omega
-const PARAMS_2: [usize;8] = [39,17,88,4,4,2,3,80];
+const PARAMS_1: [usize;8] = [39,17,88,4,4,2,3,80];
 const PARAMS_3: [usize;8] = [49,19,32,6,5,4,4,55];
 const PARAMS_5: [usize;8] = [60,19,32,8,7,2,3,75];
+
+
 
 const ROOTS: [i32; 256] = [
     0x3ffe00,0x64f7,0x581103,0x77f504,0x39e44,0x740119,0x728129,0x71e24,0x1bde2b,0x23e92b,0x7a64ae,
@@ -455,38 +476,31 @@ fn nextword(ab: usize,mx: usize,t: &[u8],ptr:&mut usize,bts: &mut usize) -> i32 
     return w;
 }
 
-fn pack_pk(params: &[usize],pk: &mut [u8],rho: &[u8],t1: &[i16]) {
-    let ck=params[3];
+fn pack_pk(pk: &mut [u8],rho: &[u8],t1: &[i16]) {
     for i in 0..32 {
         pk[i]=rho[i];
     }
     let mut ptr=0 as usize;
     let mut bts=0 as usize;
     let mut n=32;
-    for _ in 0..(ck*DEGREE*TD)/8 {
+    for _ in 0..(K*DEGREE*TD)/8 {
         pk[n]=nextbyte16(TD,0,t1,&mut ptr,&mut bts);
         n += 1;
     }
 }
 
-fn unpack_pk(params: &[usize],rho: &mut [u8],t1: &mut [i16],pk: &[u8]) {
-    let ck=params[3];
+fn unpack_pk(rho: &mut [u8],t1: &mut [i16],pk: &[u8]) {
     for i in 0..32 {
         rho[i]=pk[i];
     }
     let mut ptr=0 as usize;
     let mut bts=0 as usize;
-    for i in 0..ck*DEGREE {
+    for i in 0..K*DEGREE {
         t1[i]=nextword(TD,0,&pk[32..],&mut ptr,&mut bts) as i16;
     }
 }
 
-fn pack_sk(params: &[usize],sk: &mut [u8],rho: &[u8],bk: &[u8],tr: &[u8],s1: &[i8],s2: &[i8],t0: &[i16]) {
-    let ck=params[3];
-    let el=params[4];
-    let eta=params[5];
-    let lg2eta1=params[6];
-
+fn pack_sk(sk: &mut [u8],rho: &[u8],bk: &[u8],tr: &[u8],s1: &[i8],s2: &[i8],t0: &[i16]) {
     for i in 0..32 {
         sk[i]=rho[i];
     } 
@@ -500,28 +514,23 @@ fn pack_sk(params: &[usize],sk: &mut [u8],rho: &[u8],bk: &[u8],tr: &[u8],s1: &[i
     let mut ptr=0 as usize;
     let mut bts=0 as usize;
 
-    for _ in 0..(el*DEGREE*lg2eta1)/8 {
-        sk[n]=nextbyte8(lg2eta1,eta,s1,&mut ptr,&mut bts);
+    for _ in 0..(L*DEGREE*LG2ETA1)/8 {
+        sk[n]=nextbyte8(LG2ETA1,ETA,s1,&mut ptr,&mut bts);
         n += 1;
     }
     ptr=0; bts=0;
-    for _ in 0..(ck*DEGREE*lg2eta1)/8 {
-        sk[n]=nextbyte8(lg2eta1,eta,s2,&mut ptr,&mut bts);
+    for _ in 0..(K*DEGREE*LG2ETA1)/8 {
+        sk[n]=nextbyte8(LG2ETA1,ETA,s2,&mut ptr,&mut bts);
         n += 1;
     }
     ptr=0; bts=0;
-    for _ in 0..(ck*DEGREE*D)/8 {
+    for _ in 0..(K*DEGREE*D)/8 {
         sk[n]=nextbyte16(D,1<<(D-1),t0,&mut ptr,&mut bts);
         n += 1;
     }
 }
 
-fn unpack_sk(params: &[usize],rho: &mut [u8],bk: &mut [u8],tr: &mut [u8],s1: &mut [i8],s2: &mut [i8],t0: &mut [i16],sk: &[u8]) {
-    let ck=params[3];
-    let el=params[4];
-    let eta=params[5];
-    let lg2eta1=params[6];
-
+fn unpack_sk(rho: &mut [u8],bk: &mut [u8],tr: &mut [u8],s1: &mut [i8],s2: &mut [i8],t0: &mut [i16],sk: &[u8]) {
     for i in 0..32 {
         rho[i]=sk[i];
     }
@@ -535,29 +544,23 @@ fn unpack_sk(params: &[usize],rho: &mut [u8],bk: &mut [u8],tr: &mut [u8],s1: &mu
     let mut ptr=0 as usize;
     let mut bts=0 as usize;
 
-    for i in 0..el*DEGREE {
-        s1[i]=nextword(lg2eta1,eta,&sk[n..],&mut ptr,&mut bts) as i8;
+    for i in 0..L*DEGREE {
+        s1[i]=nextword(LG2ETA1,ETA,&sk[n..],&mut ptr,&mut bts) as i8;
     }  
     n += ptr;
     ptr=0; bts=0;
-    for i in 0..ck*DEGREE {
-        s2[i]=nextword(lg2eta1,eta,&sk[n..],&mut ptr,&mut bts) as i8;
+    for i in 0..K*DEGREE {
+        s2[i]=nextword(LG2ETA1,ETA,&sk[n..],&mut ptr,&mut bts) as i8;
     }  
     n += ptr;
     ptr=0; bts=0;
-    for i in 0..ck*DEGREE {
+    for i in 0..K*DEGREE {
         t0[i]=nextword(D,1<<(D-1),&sk[n..],&mut ptr,&mut bts) as i16;
     } 
 }
 
 // pack signature - changes z
-fn pack_sig(params: &[usize],sig: &mut [u8],z: &mut [i32],ct: &[u8],h: &[u8]) {
-    let lg=params[1];
-    let gamma1=1<<lg;
-    let ck=params[3];
-    let el=params[4];
-    let omega=params[7];
-
+fn pack_sig(sig: &mut [u8],z: &mut [i32],ct: &[u8],h: &[u8]) {
     for i in 0..32 {
         sig[i]=ct[i];
     }
@@ -565,34 +568,28 @@ fn pack_sig(params: &[usize],sig: &mut [u8],z: &mut [i32],ct: &[u8],h: &[u8]) {
     let mut ptr=0 as usize;
     let mut bts=0 as usize;
 
-    for i in 0..el {
+    for i in 0..L {
         let row=DEGREE*i;
         for m in 0..DEGREE {
             let mut t=z[row+m];
             if t>PRIME/2 {
                 t -= PRIME;
             }
-            t=gamma1-t;
+            t=GAMMA1-t;
             z[row+m]=t;
         }
     }
-    for _ in 0..(el*DEGREE*(lg+1))/8 {
-        sig[n]=nextbyte32(lg+1,0,z,&mut ptr,&mut bts);
+    for _ in 0..(L*DEGREE*(LG+1))/8 {
+        sig[n]=nextbyte32(LG+1,0,z,&mut ptr,&mut bts);
         n+=1;
     }
-    for i in 0..omega+ck {
+    for i in 0..OMEGA+K {
         sig[n]=h[i];
         n+=1;
     }
 }
 
-fn unpack_sig(params: &[usize],z: &mut [i32],ct: &mut [u8],h: &mut [u8],sig: &[u8]) {
-    let lg=params[1];
-    let gamma1=1<<lg;
-    let ck=params[3];
-    let el=params[4];
-    let omega=params[7];
-
+fn unpack_sig(z: &mut [i32],ct: &mut [u8],h: &mut [u8],sig: &[u8]) {
     for i in 0..32 {
         ct[i]=sig[i];
     }
@@ -600,22 +597,22 @@ fn unpack_sig(params: &[usize],z: &mut [i32],ct: &mut [u8],h: &mut [u8],sig: &[u
     let mut ptr=0 as usize;
     let mut bts=0 as usize;
 
-    for i in 0..el*DEGREE {
-        let mut t=nextword(lg+1,0,&sig[32..],&mut ptr,&mut bts);
-        t=gamma1-t;
+    for i in 0..L*DEGREE {
+        let mut t=nextword(LG+1,0,&sig[32..],&mut ptr,&mut bts);
+        t=GAMMA1-t;
         if t<0 {
             t += PRIME;
         }
         z[i]=t;
     }
-    let mut m=32+(el*DEGREE*(lg+1))/8;
-    for i in 0..omega+ck {
+    let mut m=32+(L*DEGREE*(LG+1))/8;
+    for i in 0..OMEGA+K {
         h[i]=sig[m];
         m+=1;
     }
 }
 
-fn sample_sn(params: &[usize],rhod: &[u8],s: &mut [i8],n: usize) {
+fn sample_sn(rhod: &[u8],s: &mut [i8],n: usize) {
     let mut buff: [u8; 272] = [0; 272];
     let mut sh = SHA3::new(sha3::SHAKE256);
     for m in 0..64 {
@@ -625,28 +622,22 @@ fn sample_sn(params: &[usize],rhod: &[u8],s: &mut [i8],n: usize) {
     sh.process(((n>>8)&0xff) as u8);
     sh.shake(&mut buff, 272);    
 
-    let eta=params[5];
-    let lg2eta1=params[6];
-
     let mut ptr=0 as usize;
     let mut bts=0 as usize;
     for m in 0..DEGREE {
         loop {
-            s[m]=nextword(lg2eta1,0,&buff,&mut ptr,&mut bts) as i8;
-            if s[m]<=2*(eta as i8) {
+            s[m]=nextword(LG2ETA1,0,&buff,&mut ptr,&mut bts) as i8;
+            if s[m]<=2*(ETA as i8) {
                 break;
             }
         }
-        s[m]=(eta as i8)-s[m];
+        s[m]=(ETA as i8)-s[m];
     }
 }
 
-fn sample_y(params: &[usize],k: usize,rhod: &[u8],y: &mut [i32]) {
-    let lg=params[1];
-    let gamma1=1<<lg;
-    let el=params[4];
+fn sample_y(k: usize,rhod: &[u8],y: &mut [i32]) {
     let mut buff: [u8; YBYTES] = [0; YBYTES];
-    for i in 0..el {
+    for i in 0..L {
         let row=DEGREE*i;
         let mut sh = SHA3::new(sha3::SHAKE256);
         for j in 0..64 {
@@ -655,30 +646,30 @@ fn sample_y(params: &[usize],k: usize,rhod: &[u8],y: &mut [i32]) {
         let ki=k+i;
         sh.process((ki&0xff) as u8);
         sh.process((ki>>8) as u8);
-        sh.shake(&mut buff, ((lg+1)*DEGREE)/8); 
+        sh.shake(&mut buff, YBYTES); 
 
         let mut ptr=0 as usize;
         let mut bts=0 as usize;
 
         for m in 0..DEGREE {
-            let mut w=nextword(lg+1,0,&buff,&mut ptr,&mut bts);
-            w=gamma1-w;
+            let mut w=nextword(LG+1,0,&buff,&mut ptr,&mut bts);
+            w=GAMMA1-w;
             let t=w>>31;
             y[row+m]=w+(PRIME&t);
         }
     }
 }
 
-fn crh1(params: &[usize],h: &mut [u8],rho: &[u8],t1: &[i16]) {
+fn crh1(h: &mut [u8],rho: &[u8],t1: &[i16]) {
     let mut sh = SHA3::new(sha3::SHAKE256);
     for j in 0..32 {
         sh.process(rho[j]);
     }
-    let ck=params[3];
+
     let mut ptr=0 as usize;
     let mut bts=0 as usize;
 
-    for _ in 0..(ck*DEGREE*TD)/8 {
+    for _ in 0..(K*DEGREE*TD)/8 {
         sh.process(nextbyte16(TD,0,t1,&mut ptr,&mut bts));
     }
     sh.shake(h, 32); 
@@ -706,13 +697,7 @@ fn crh3(h: &mut [u8],bk: &[u8],mu: &[u8]) {
     sh.shake(h, 64); 
 }
 
-fn h4(params: &[usize],ct: &mut [u8], mu: &[u8],w1: &[i8]) {
-    let ck=params[3];
-    let dv=params[2];
-    let mut w1b=4;
-    if dv==88 {
-        w1b=6;
-    }
+fn h4(ct: &mut [u8], mu: &[u8],w1: &[i8]) {
     let mut sh = SHA3::new(sha3::SHAKE256);
     for j in 0..64 {
         sh.process(mu[j]);
@@ -721,14 +706,13 @@ fn h4(params: &[usize],ct: &mut [u8], mu: &[u8],w1: &[i8]) {
     let mut ptr=0 as usize;
     let mut bts=0 as usize;
 
-    for _ in 0..(ck*DEGREE*w1b)/8 {
-        sh.process(nextbyte8(w1b,0,w1,&mut ptr,&mut bts));
+    for _ in 0..(K*DEGREE*W1B)/8 {
+        sh.process(nextbyte8(W1B,0,w1,&mut ptr,&mut bts));
     }
     sh.shake(ct, 32); 
 }
 
-fn sampleinball(params: &[usize],ct: &[u8],c: &mut [i32]) {
-    let tau=params[0];
+fn sampleinball(ct: &[u8],c: &mut [i32]) {
     let mut buff: [u8; 136] = [0; 136]; 
     let mut signs: [u8; 8] = [0; 8]; 
     let mut sh = SHA3::new(sha3::SHAKE256);
@@ -745,7 +729,7 @@ fn sampleinball(params: &[usize],ct: &[u8],c: &mut [i32]) {
     let mut j:usize;
     let mut n=1;
     let mut sn=signs[0];
-    for i in DEGREE-tau..DEGREE {
+    for i in DEGREE-WC..DEGREE {
         loop {
             j=buff[k] as usize; k+=1;
             if j<=i {
@@ -776,65 +760,47 @@ fn power2round(t: &[i32],t0: &mut [i16],t1: &mut [i16]) {
     }
 }
 
-fn decompose_lo(params: &[usize],a: i32) -> i32 {
-    let dv=params[2];
+fn decompose_lo(a: i32) -> i32 {
     let mut a1=(a+127) >> 7;
-    let gamma2:i32;
-    if dv==32 {
-        a1 = (a1*1025+(1<<21))>>22;
-        a1 &= 15;
-        gamma2=(PRIME-1)/32;
-        
-    } else { // 88
-        a1  = (a1*11275 + (1 << 23)) >> 24;
-        a1 ^= ((43 - a1) >> 31) & a1;
-        gamma2=(PRIME-1)/88;
-    }
+    a1 = (a1*1025+(1<<21))>>22;
+    a1 &= 15;
 
-    let mut a0=a-a1*2*gamma2;
+    let mut a0=a-a1*(PRIME-1)/16;
     a0 -= (((PRIME-1)/2-a0)>>31)&PRIME;
     a0 += (a0>>31)&PRIME;
     return a0;
 }
 
-fn decompose_hi(params: &[usize],a: i32) -> i8 {
-    let dv=params[2];
-
+fn decompose_hi(a: i32) -> i8 {
     let mut a1=(a+127) >> 7;
-    if dv==32 {
-        a1 = (a1*1025+(1<<21))>>22;
-        a1 &= 15;
-    } else { // 88
-        a1  = (a1*11275 + (1 << 23)) >> 24;
-        a1 ^= ((43 - a1) >> 31) & a1;
-    }
+    a1 = (a1*1025+(1<<21))>>22;
+    a1 &= 15;
     return a1 as i8;
 }
 
-fn lobits(params: &[usize],r0: &mut [i32],r: &[i32]) {
+fn lobits(r0: &mut [i32],r: &[i32]) {
     for m in 0..DEGREE {
-        r0[m]=decompose_lo(params,r[m]);
+        r0[m]=decompose_lo(r[m]);
     }
 }
 
-fn hibits(params: &[usize],r1: &mut [i8],r: &[i32]) {
+fn hibits(r1: &mut [i8],r: &[i32]) {
     for m in 0..DEGREE {
-        r1[m]=decompose_hi(params,r[m]);
+        r1[m]=decompose_hi(r[m]);
     }
 }
 
-fn makepartialhint(params: &[usize],h: &mut [u8],hptr: usize,z: &[i32],r: &[i32]) -> usize {
+fn makepartialhint(h: &mut [u8],hptr: usize,z: &[i32],r: &[i32]) -> usize {
     let mut ptr=hptr;
-    let omega=params[7];
     for m in 0..DEGREE {
-        let a0=decompose_hi(params,r[m]);
+        let a0=decompose_hi(r[m]);
         let mut rz=r[m]+z[m];
-        rz-=PRIME;
-        rz=rz+((rz>>31)&PRIME);
-        let a1=decompose_hi(params,rz);
+        let t=rz-PRIME;
+        rz=rz+((t>>31)&PRIME);
+        let a1=decompose_hi(rz);
         if a0!=a1 {
-            if ptr>=omega {
-                return omega+1;
+            if ptr>=OMEGA {
+                return OMEGA+1;
             }
             h[ptr]=(m&0xff) as u8; ptr += 1;
         }
@@ -842,22 +808,19 @@ fn makepartialhint(params: &[usize],h: &mut [u8],hptr: usize,z: &[i32],r: &[i32]
     return ptr;
 }
 
-fn usepartialhint(params: &[usize],r: &mut [i8],h: &[u8], hptr: usize,i: usize,w: &[i32]) -> usize{
+fn usepartialhint(r: &mut [i8],h: &[u8], hptr: usize,i: usize,w: &[i32]) -> usize{
     let mut ptr=hptr;
-    let dv=params[2] as i32;
-    let omega=params[7];
-    let md=(dv/2) as i8;
-
+    let md=(RR/2) as i8;
     for m in 0..DEGREE {
-        let mut a1=decompose_hi(params,w[m]);
-        if m==h[ptr] as usize && ptr<h[omega+i] as usize {
+        let mut a1=decompose_hi(w[m]);
+        if m==h[ptr] as usize && ptr<h[OMEGA+i] as usize {
             ptr += 1;
-            let a0=decompose_lo(params,w[m]);
+            let a0=decompose_lo(w[m]);
             if a0 <= PRIME/2 {
                 a1 += 1;
                 if a1 >= md {
                     a1 -= md;
-                } 
+                }
             } else {
                 a1 -= 1;
                 if a1<0 {
@@ -884,7 +847,7 @@ fn infinity_norm(w: &[i32]) -> i32 {
     return n;
 }
 
-fn keypair(params: &[usize],tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
+pub fn keypair(tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
     let mut sh = SHA3::new(sha3::SHAKE256); 
     let mut buff: [u8; 128] = [0; 128]; 
     let mut rho: [u8; 32] = [0; 32]; 
@@ -892,15 +855,12 @@ fn keypair(params: &[usize],tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
     let mut bk: [u8; 32] = [0; 32];
     let mut tr: [u8; 32] = [0; 32]; 
     let mut aij: [i32; DEGREE] = [0; DEGREE];
-    let mut s1: [i8; MAXL*DEGREE] = [0; MAXL*DEGREE];
-    let mut s2: [i8; MAXK*DEGREE] = [0; MAXK*DEGREE];
-    let mut t0: [i16; MAXK*DEGREE] = [0; MAXK*DEGREE];
-    let mut t1: [i16; MAXK*DEGREE] = [0; MAXK*DEGREE];
+    let mut s1: [i8; L*DEGREE] = [0; L*DEGREE];
+    let mut s2: [i8; K*DEGREE] = [0; K*DEGREE];
+    let mut t0: [i16; K*DEGREE] = [0; K*DEGREE];
+    let mut t1: [i16; K*DEGREE] = [0; K*DEGREE];
     let mut w: [i32; DEGREE] = [0; DEGREE];
     let mut r: [i32; DEGREE] = [0; DEGREE];
-
-    let ck=params[3];
-    let el=params[4];
 
     for i in 0..32 {
         sh.process(tau[i]);
@@ -914,16 +874,16 @@ fn keypair(params: &[usize],tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
         rhod[i] = buff[i+32];
     }
 
-    for i in 0..el {
+    for i in 0..L {
         let row=DEGREE*i;
-        sample_sn(params,&rhod,&mut s1[row..],i);
+        sample_sn(&rhod,&mut s1[row..],i);
     }
 
-    for i in 0..ck {
+    for i in 0..K {
         let row=DEGREE*i;
-        sample_sn(params,&rhod,&mut s2[row..],el+i);
+        sample_sn(&rhod,&mut s2[row..],L+i);
         poly_zero(&mut r);
-        for j in 0..el {
+        for j in 0..L {
             poly_scopy(&mut w,&s1[j*DEGREE..]);
             ntt(&mut w);
             expandaij(&rho,&mut aij,i,j);
@@ -938,45 +898,34 @@ fn keypair(params: &[usize],tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
         poly_soft_reduce(&mut r);
         power2round(&r,&mut t0[row..],&mut t1[row..]);
     }
-    crh1(params,&mut tr,&rho,&t1);
-    pack_pk(params,pk,&rho,&t1);
-    pack_sk(params,sk,&rho,&bk,&tr,&s1,&s2,&t0);
+    crh1(&mut tr,&rho,&t1);
+    pack_pk(pk,&rho,&t1);
+    pack_sk(sk,&rho,&bk,&tr,&s1,&s2,&t0);
 }
 
-fn signature(params: &[usize],sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
+pub fn signature(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
     let mut rho: [u8; 32] = [0; 32]; 
     let mut bk: [u8; 32] = [0; 32];
     let mut ct: [u8; 32] = [0; 32];
     let mut tr: [u8; 32] = [0; 32]; 
     let mut mu: [u8; 64] = [0; 64];
     let mut rhod: [u8; 64] = [0; 64];
-    let mut hint: [u8; 100] = [0; 100];
+    let mut hint: [u8; OMEGA+K] = [0; OMEGA+K];
 
     //let mut aij: [i32; DEGREE] = [0; DEGREE];
-    let mut s1: [i8; MAXL*DEGREE] = [0; MAXL*DEGREE];
-    let mut s2: [i8; MAXK*DEGREE] = [0; MAXK*DEGREE];
-    let mut t0: [i16; MAXK*DEGREE] = [0; MAXK*DEGREE];
+    let mut s1: [i8; L*DEGREE] = [0; L*DEGREE];
+    let mut s2: [i8; K*DEGREE] = [0; K*DEGREE];
+    let mut t0: [i16; K*DEGREE] = [0; K*DEGREE];
     
-    let mut y: [i32; MAXL*DEGREE] = [0; MAXL*DEGREE];
-    let mut ay: [i32; MAXK*DEGREE] = [0; MAXK*DEGREE];
+    let mut y: [i32; L*DEGREE] = [0; L*DEGREE];
+    let mut ay: [i32; K*DEGREE] = [0; K*DEGREE];
 
-    let mut w1: [i8; MAXK*DEGREE] = [0; MAXK*DEGREE];
+    let mut w1: [i8; K*DEGREE] = [0; K*DEGREE];
     let mut c: [i32; DEGREE] = [0; DEGREE];
     let mut w: [i32; DEGREE] = [0; DEGREE];
     let mut r: [i32; DEGREE] = [0; DEGREE];
 
-    let tau=params[0];
-    let lg=params[1];
-    let gamma1=(1<<lg) as i32;
-    let dv=params[2] as i32;
-    let gamma2=(PRIME-1)/dv;
-    let ck=params[3];
-    let el=params[4];
-    let eta=params[5];
-    let beta=(tau*eta) as i32;
-    let omega=params[7];
-
-    unpack_sk(params,&mut rho,&mut bk,&mut tr,&mut s1,&mut s2,&mut t0,&sk);
+    unpack_sk(&mut rho,&mut bk,&mut tr,&mut s1,&mut s2,&mut t0,&sk);
 
 // signature
     crh2(&mut mu,&tr,m);
@@ -984,18 +933,18 @@ fn signature(params: &[usize],sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
     let mut k=0;
 
     loop {
-        let fk=k*el; k+=1;
-        sample_y(params,fk,&rhod,&mut y);
+        let fk=k*L; k+=1;
+        sample_y(fk,&rhod,&mut y);
 // NTT y
-        for i in 0..el {
+        for i in 0..L {
             let row=DEGREE*i;
             ntt(&mut y[row..]);
         }
 // Calculate ay 
-        for i in 0..ck {
+        for i in 0..K {
             let row=DEGREE*i;
             poly_zero(&mut r);
-            for j in 0..el {
+            for j in 0..L {
                 poly_copy(&mut w,&y[j*DEGREE..]);
                 expandaij(&rho,&mut c,i,j);
                 poly_mul(&mut w,&c);
@@ -1005,15 +954,15 @@ fn signature(params: &[usize],sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
             intt(&mut r);
             poly_copy(&mut ay[row..],&r);
 // Calculate w1
-            hibits(params,&mut w1[row..],&ay[row..]);
+            hibits(&mut w1[row..],&ay[row..]);
         }
 // Calculate c
-        h4(params,&mut ct,&mu,&w1);
-        sampleinball(params,&ct,&mut c);
+        h4(&mut ct,&mu,&w1);
+        sampleinball(&ct,&mut c);
         let mut badone=false;
 // Calculate z=y+c.s1
         ntt(&mut c);
-        for i in 0..el {
+        for i in 0..L {
             let row=DEGREE*i;
             poly_scopy(&mut w,&s1[row..]);
             ntt(&mut w);
@@ -1025,7 +974,7 @@ fn signature(params: &[usize],sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
             intt(&mut y[row..]);
 
             poly_soft_reduce(&mut y[row..]);
-            if infinity_norm(&y[row..])>=gamma1-beta {
+            if infinity_norm(&y[row..])>=GAMMA1-BETA {
                 badone=true;
                 break;
             }
@@ -1035,10 +984,10 @@ fn signature(params: &[usize],sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
         }
 // Calculate ay=w-c.s2 and r0=lobits(w-c.s2)
         let mut nh=0;
-        for i in 0..omega+ck {
+        for i in 0..OMEGA+K {
             hint[i]=0;
         }
-        for i in 0..ck {
+        for i in 0..K {
             let row=DEGREE*i;
             poly_scopy(&mut w,&s2[row..]);
             ntt(&mut w);
@@ -1046,8 +995,8 @@ fn signature(params: &[usize],sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
             intt(&mut w);
             poly_sub(&mut ay[row..],&w);
             poly_soft_reduce(&mut ay[row..]);
-            lobits(params,&mut w,&ay[row..]);
-            if infinity_norm(&w) >= gamma2-beta {
+            lobits(&mut w,&ay[row..]);
+            if infinity_norm(&w) >= GAMMA2-BETA {
                 badone=true;
                 break;
             }
@@ -1056,76 +1005,68 @@ fn signature(params: &[usize],sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
             poly_mul(&mut w,&c);
             intt(&mut w);
             poly_negate(&mut r,&w);
-            if infinity_norm(&r) >= gamma2 {
+            if infinity_norm(&r) >= GAMMA2 {
                 badone=true;
                 break;
             }  
             poly_sub(&mut ay[row..],&r);
             poly_soft_reduce(&mut ay[row..]);
-            nh=makepartialhint(params,&mut hint,nh,&r,&ay[row..]);
-            if nh>omega {
+            nh=makepartialhint(&mut hint,nh,&r,&ay[row..]);
+            if nh>OMEGA {
                 badone=true;
                 break;
             }
-            hint[omega+i]=nh as u8;
+            hint[OMEGA+i]=nh as u8;
         }
         if badone {
             continue;
         }
         break;
     }
-    pack_sig(params,sig,&mut y,&ct,&hint);
+
+    pack_sig(sig,&mut y,&ct,&hint);
     return k;
 }
 
-fn verify(params: &[usize],pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
+pub fn verify(pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
     let mut rho: [u8; 32] = [0; 32]; 
     let mut ct: [u8; 32] = [0; 32];
     let mut cct: [u8; 32] = [0; 32];
     let mut tr: [u8; 32] = [0; 32]; 
     let mut mu: [u8; 64] = [0; 64];
-    let mut hint: [u8; 100] = [0; 100];
+    let mut hint: [u8; OMEGA+K] = [0; OMEGA+K];
 
-    let mut z: [i32; MAXL*DEGREE] = [0; MAXL*DEGREE];
-    let mut t1: [i16; MAXK*DEGREE] = [0; MAXK*DEGREE];
-    let mut w1d: [i8; MAXK*DEGREE] = [0; MAXK*DEGREE];
+    let mut z: [i32; L*DEGREE] = [0; L*DEGREE];
+    let mut t1: [i16; K*DEGREE] = [0; K*DEGREE];
+    let mut w1d: [i8; K*DEGREE] = [0; K*DEGREE];
 
     let mut aij: [i32; DEGREE] = [0; DEGREE];
     let mut c: [i32; DEGREE] = [0; DEGREE];
     let mut w: [i32; DEGREE] = [0; DEGREE];
     let mut r: [i32; DEGREE] = [0; DEGREE];    
 
-    let tau=params[0];
-    let lg=params[1];
-    let gamma1=(1<<lg) as i32;
-    let ck=params[3];
-    let el=params[4];
-    let eta=params[5];
-    let beta=(tau*eta) as i32;
-    let omega=params[7];
+    unpack_pk(&mut rho,&mut t1,pk);
+    unpack_sig(&mut z,&mut ct,&mut hint,sig);
 
-    unpack_pk(params,&mut rho,&mut t1,pk);
-    unpack_sig(params,&mut z,&mut ct,&mut hint,sig);
-
-    for i in 0..el {
+    for i in 0..L {
         let row=DEGREE*i;
-        if infinity_norm(&z[row..]) >= gamma1-beta {
+        if infinity_norm(&z[row..]) >= GAMMA1-BETA {
             return false;
         }
         ntt(&mut z[row..]);
     }
-    crh1(params,&mut tr,&rho,&t1);
+    crh1(&mut tr,&rho,&t1);
     crh2(&mut mu,&tr,m);
 
-    sampleinball(params,&ct,&mut c);
+    sampleinball(&ct,&mut c);
     ntt(&mut c);
 
 // Calculate az
     let mut hints=0;
-    for i in 0..ck {
+    for i in 0..K {
         let row=DEGREE*i;
         poly_zero(&mut r);
-        for j in 0..el {
+        for j in 0..L {
             poly_copy(&mut w,&z[j*DEGREE..]);
             expandaij(&rho,&mut aij,i,j);
             poly_mul(&mut w,&aij);
@@ -1142,13 +1083,13 @@ fn verify(params: &[usize],pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
         poly_sub(&mut r,&w);
         intt(&mut r);
 
-        hints=usepartialhint(params,&mut w1d[row..],&mut hint,hints,i,&r);
-        if hints>omega {
+        hints=usepartialhint(&mut w1d[row..],&mut hint,hints,i,&r);
+        if hints>OMEGA {
             return false;
         }
     }
 
-    h4(params,&mut cct,&mu,&w1d);
+    h4(&mut cct,&mu,&w1d);
 
     for i in 0..32 {
         if ct[i]!=cct[i] {
@@ -1156,44 +1097,4 @@ fn verify(params: &[usize],pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
         }
     }
     return true;
-}
-
-// Dilithium API
-
-pub fn keypair_2(tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
-    keypair(&PARAMS_2,tau,sk,pk);
-}
-
-pub fn signature_2(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
-    return signature(&PARAMS_2,sk,m,sig);
-}
-
-pub fn verify_2(pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
-    return verify(&PARAMS_2,pk,m,sig);
-}
-
-
-pub fn keypair_3(tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
-    keypair(&PARAMS_3,tau,sk,pk);
-}
-
-pub fn signature_3(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
-    return signature(&PARAMS_3,sk,m,sig);
-}
-
-pub fn verify_3(pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
-    return verify(&PARAMS_3,pk,m,sig);
-}
-
-
-pub fn keypair_5(tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
-    keypair(&PARAMS_5,tau,sk,pk);
-}
-
-pub fn signature_5(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
-    return signature(&PARAMS_5,sk,m,sig);
-}
-
-pub fn verify_5(pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
-    return verify(&PARAMS_5,pk,m,sig);
 }

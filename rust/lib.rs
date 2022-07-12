@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+// comment out if debugging with print macros !!!
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #![allow(clippy::many_single_char_names)]

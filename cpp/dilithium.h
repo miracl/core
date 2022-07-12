@@ -24,7 +24,7 @@
 
 #include "core.h"
 
-/* DILITHIUM 3 parameters */
+/* DILITHIUM parameters */
 
 //q= 8380417
 #define DL_LGN 8
@@ -33,30 +33,28 @@
 #define DL_D 13
 #define DL_TD (23-DL_D)
 
-// These values change for alternate security levels
-// Dilithium 3
-#define DL_WC 49
-#define DL_LG 19
-#define DL_GAMMA1 ((sign32)1<<DL_LG)
-#define DL_RR 32
-#define DL_GAMMA2 (DL_PRIME-1)/DL_RR
-#define DL_K 6
-#define DL_L 5
-#define DL_ETA 4
-#define DL_LG2ETA1 4  // lg(2*ETA+1) rounded up
-#define DL_BETA 196
-#define DL_OMEGA 55
-
-#define DL_YBYTES ((DL_LG+1)*DL_DEGREE)/8
-#define DL_W1B 4
 #define DL_ONE 0x3FFE00    // R mod Q
 #define DL_COMBO 0xA3FA    // ONE*inv mod Q
 #define DL_R2MODP 0x2419FF // R^2 mod Q
 #define DL_ND 0xFC7FDFFF   // 1/(R-Q) mod R
 
-#define DL_SK_LEN (32*3+DL_DEGREE*(DL_K*DL_D+DL_L*DL_LG2ETA1+DL_K*DL_LG2ETA1)/8)
-#define DL_PK_LEN ((DL_K*DL_DEGREE*DL_TD)/8+32)
-#define DL_SIG_LEN ((DL_DEGREE*DL_L*(DL_LG+1))/8+DL_OMEGA+DL_K+32)
+#define DL_MAXLG 19
+#define DL_MAXK 8     // could reduce these if not using highest security
+#define DL_MAXL 7
+#define DL_YBYTES (((DL_MAXLG+1)*DL_DEGREE)/8)
+
+#define DL_SK_SIZE_2 (32*3+DL_DEGREE*(4*13+4*3+4*3)/8)
+#define DL_PK_SIZE_2 ((4*DL_DEGREE*DL_TD)/8+32)
+#define DL_SIG_SIZE_2 ((DL_DEGREE*4*(17+1))/8+80+4+32)
+
+#define DL_SK_SIZE_3 (32*3+DL_DEGREE*(6*13+5*4+6*4)/8)
+#define DL_PK_SIZE_3 ((6*DL_DEGREE*DL_TD)/8+32)
+#define DL_SIG_SIZE_3 ((DL_DEGREE*5*(19+1))/8+55+6+32)
+
+#define DL_SK_SIZE_5 (32*3+DL_DEGREE*(8*13+7*3+8*3)/8)
+#define DL_PK_SIZE_5 ((8*DL_DEGREE*DL_TD)/8+32)
+#define DL_SIG_SIZE_5 ((DL_DEGREE*7*(19+1))/8+75+8+32)
+
 
 namespace core {
 
@@ -67,7 +65,7 @@ namespace core {
     @param PK public key
 
  */
-extern void DLTHM_keypair(byte *tau,octet *SK,octet *PK);
+extern void DLTHM_keypair_2(byte *tau,octet *SK,octet *PK);
 
 /** @brief Dilithium create signature on a message 
  *
@@ -77,7 +75,7 @@ extern void DLTHM_keypair(byte *tau,octet *SK,octet *PK);
     @return numbers of attempts needed to create signature
 
  */
-extern int DLTHM_signature(octet *SK,octet *M, octet *SIG);
+extern int DLTHM_signature_2(octet *SK,octet *M, octet *SIG);
 
 /** @brief Dilithium verify signature on a message 
  *
@@ -87,7 +85,67 @@ extern int DLTHM_signature(octet *SK,octet *M, octet *SIG);
     @return true if signature is good, else false
 
  */
-extern bool DLTHM_verify(octet *PK,octet *M,octet *SIG);
+extern bool DLTHM_verify_2(octet *PK,octet *M,octet *SIG);
+
+
+/** @brief Dilithium signature key pair generation
+ *
+    @param tau Random Numbers
+    @param SK secret key
+    @param PK public key
+
+ */
+extern void DLTHM_keypair_3(byte *tau,octet *SK,octet *PK);
+
+/** @brief Dilithium create signature on a message 
+ *
+    @param SK secret key
+    @param M the message to be signed
+    @param SIG the output signature
+    @return numbers of attempts needed to create signature
+
+ */
+extern int DLTHM_signature_3(octet *SK,octet *M, octet *SIG);
+
+/** @brief Dilithium verify signature on a message 
+ *
+    @param PK public key key
+    @param M the signed message
+    @param SIG the signature
+    @return true if signature is good, else false
+
+ */
+extern bool DLTHM_verify_3(octet *PK,octet *M,octet *SIG);
+
+
+/** @brief Dilithium signature key pair generation
+ *
+    @param tau Random Numbers
+    @param SK secret key
+    @param PK public key
+
+ */
+extern void DLTHM_keypair_5(byte *tau,octet *SK,octet *PK);
+
+/** @brief Dilithium create signature on a message 
+ *
+    @param SK secret key
+    @param M the message to be signed
+    @param SIG the output signature
+    @return numbers of attempts needed to create signature
+
+ */
+extern int DLTHM_signature_5(octet *SK,octet *M, octet *SIG);
+
+/** @brief Dilithium verify signature on a message 
+ *
+    @param PK public key key
+    @param M the signed message
+    @param SIG the signature
+    @return true if signature is good, else false
+
+ */
+extern bool DLTHM_verify_5(octet *PK,octet *M,octet *SIG);
 }
 
 #endif

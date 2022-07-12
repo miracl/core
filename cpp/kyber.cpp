@@ -26,6 +26,11 @@
 
 using namespace core;
 
+// parameters for each security level
+const int PARAMS_512[6]={2,3,2,10,4,32};
+const int PARAMS_768[6]={3,2,2,10,4,32};
+const int PARAMS_1024[6]={4,2,2,11,5,32};
+
 /* Start of public domain reference implementation code - taken from https://github.com/pq-crystals/kyber */
 
 const sign16 zetas[128] = {
@@ -289,14 +294,25 @@ static byte nextbyte16(int ab,sign16 t[],int &ptr, int &bts)
 }
 
 // encode polynomial vector of length len with coefficients of length 2^L, into packed bytes
-static int encode(sign16 t[],int len,int L,byte pack[])
+static void encode(sign16 t[],int len,int L,byte pack[])
 {
-    int ptr,bts,i,n;
-    n=0; ptr=bts=0;
-    for (i=0;i<len*(KY_DEGREE*L)/8;i++ ) {
-        pack[n++]=nextbyte16(L,t,ptr,bts);
+    int ptr,bts,n;
+    ptr=bts=0;
+    for (n=0;n<len*(KY_DEGREE*L)/8;n++ ) {
+        pack[n]=nextbyte16(L,t,ptr,bts);
     }
-    return n;
+}
+
+static byte chk_encode(sign16 t[],int len,int L,byte pack[])
+{
+    int ptr,bts,n;
+    byte m,diff=0;
+    ptr=bts=0;
+    for (n=0;n<len*(KY_DEGREE*L)/8;n++ ) {
+        m=nextbyte16(L,t,ptr,bts);
+        diff|=(m^pack[n]);
+    }    
+    return diff;
 }
 
 // decode packed bytes into polynomial vector of length len, with coefficients of length 2^L
@@ -327,10 +343,8 @@ static void decompress(sign16 t[],int len,int d)
 		t[i]=(KY_PRIME*t[i]+twod1)>>d;
 }
 
-// ********************* Kyber API ******************************
-
 // input entropy, output key pair
-void core::KYBER_CPA_keypair(byte *tau,octet *sk,octet *pk)
+static void KYBER_CPA_keypair(const int *params,byte *tau,octet *sk,octet *pk)
 {
     int i,j,k,row;
     sha3 sh;
@@ -341,9 +355,14 @@ void core::KYBER_CPA_keypair(byte *tau,octet *sk,octet *pk)
     sign16 r[KY_DEGREE];
     sign16 w[KY_DEGREE];
     sign16 Aij[KY_DEGREE]; 
-    sign16 s[KY_K*KY_DEGREE];
-    sign16 e[KY_K*KY_DEGREE];
-    sign16 p[KY_K*KY_DEGREE];
+    sign16 s[KY_MAXK*KY_DEGREE];
+    sign16 e[KY_MAXK*KY_DEGREE];
+    sign16 p[KY_MAXK*KY_DEGREE];
+
+    int ck=params[0];
+    int eta1=params[1];
+    int public_key_size=32+ck*(KY_DEGREE*3)/2;
+    int secret_cpa_key_size=ck*(KY_DEGREE*3)/2;
 
     SHA3_init(&sh,SHA3_HASH512);
    
@@ -358,40 +377,40 @@ void core::KYBER_CPA_keypair(byte *tau,octet *sk,octet *pk)
 	sigma[32]=0;   // N
 
 // create s
-	for (i=0;i<KY_K;i++)
+	for (i=0;i<ck;i++)
 	{
 		SHA3_init(&sh,SHAKE256);
 		for (j=0;j<33;j++)
 			SHA3_process(&sh,sigma[j]); 
-		SHA3_shake(&sh,(char *)buff,64*KY_ETA1);
-		CBD(buff,KY_ETA1,&s[i*KY_DEGREE]);
+		SHA3_shake(&sh,(char *)buff,64*eta1);
+		CBD(buff,eta1,&s[i*KY_DEGREE]);
 		sigma[32]+=1;
 	}
 
 // create e
-	for (i=0;i<KY_K;i++)
+	for (i=0;i<ck;i++)
 	{
 		SHA3_init(&sh,SHAKE256);
 		for (j=0;j<33;j++)
 			SHA3_process(&sh,sigma[j]); 
-		SHA3_shake(&sh,(char *)buff,64*KY_ETA1);
-		CBD(buff,KY_ETA1,&e[i*KY_DEGREE]);
+		SHA3_shake(&sh,(char *)buff,64*eta1);
+		CBD(buff,eta1,&e[i*KY_DEGREE]);
 		sigma[32]+=1;
 	}
 
-    for (k=0;k<KY_K;k++)
+    for (k=0;k<ck;k++)
     {
         row=KY_DEGREE*k;
         poly_ntt(&s[row]);
         poly_ntt(&e[row]);
     }
 
-    for (i=0;i<KY_K;i++)
+    for (i=0;i<ck;i++)
     {
         row=KY_DEGREE*i;
         ExpandAij(rho,Aij,i,0);
         poly_mul(r,Aij,s);
-        for (j=1;j<KY_K;j++)
+        for (j=1;j<ck;j++)
         {
             ExpandAij(rho,Aij,i,j);
             poly_mul(w,&s[j*KY_DEGREE],Aij);
@@ -403,20 +422,22 @@ void core::KYBER_CPA_keypair(byte *tau,octet *sk,octet *pk)
         poly_reduce(&p[row]);
     }
 
-    sk->len=encode(s,KY_K,12,(byte *)sk->val);
-
-    pk->len=encode(p,KY_K,12,(byte *)pk->val);
+    encode(s,ck,12,(byte *)sk->val);
+    sk->len=secret_cpa_key_size;
+    encode(p,ck,12,(byte *)pk->val);
+    pk->len=public_key_size;
     for (i=0;i<32;i++)
-        pk->val[pk->len++]=rho[i];
+        pk->val[public_key_size-32+i]=rho[i];
 }
 
 // provide 64 random bytes, output secret and public keys
-void core::KYBER_CCA_keypair(byte *randbytes64,octet *sk,octet *pk)
+static void KYBER_CCA_keypair(const int *params,byte *randbytes64,octet *sk,octet *pk)
 {
     int i;
     sha3 sh;
     byte h[32];
-    KYBER_CPA_keypair(randbytes64,sk,pk);
+
+    KYBER_CPA_keypair(params,randbytes64,sk,pk);
     OCT_joctet(sk,pk);
 
     SHA3_init(&sh,SHA3_HASH256);
@@ -427,8 +448,7 @@ void core::KYBER_CCA_keypair(byte *randbytes64,octet *sk,octet *pk)
     OCT_jbytes(sk,(char *)&randbytes64[32],32);
 }
 
-// Given input of entropy, public key and shared secret is an input, outputs ciphertext
-void core::KYBER_CPA_encrypt(byte *coins,octet *pk,octet *ss,octet *ct)
+static void KYBER_CPA_base_encrypt(const int *params,byte *coins,octet *pk,octet *ss,sign16 *u, sign16* v)
 {
     int i,row,j,len;
     sha3 sh;
@@ -438,11 +458,16 @@ void core::KYBER_CPA_encrypt(byte *coins,octet *pk,octet *ss,octet *ct)
 
     sign16 r[KY_DEGREE];
     sign16 w[KY_DEGREE];
-    sign16 v[KY_DEGREE];
     sign16 Aij[KY_DEGREE]; 
-    sign16 u[KY_K*KY_DEGREE];
-    sign16 q[KY_K*KY_DEGREE];
-    sign16 p[KY_K*KY_DEGREE];
+    sign16 q[KY_MAXK*KY_DEGREE];
+    sign16 p[KY_MAXK*KY_DEGREE];
+
+    int ck=params[0];
+    int eta1=params[1];
+    int eta2=params[2];
+    int du=params[3];
+    int dv=params[4];
+    int public_key_size=32+ck*(KY_DEGREE*3)/2;
 
     for (i=0;i<32;i++)
         sigma[i]=coins[i];//i+6; //RAND_byte(RNG);
@@ -452,39 +477,39 @@ void core::KYBER_CPA_encrypt(byte *coins,octet *pk,octet *ss,octet *ct)
         rho[i]=pk->val[pk->len-32+i];
 
 // create q
-	for (i=0;i<KY_K;i++)
+	for (i=0;i<ck;i++)
 	{
 		SHA3_init(&sh,SHAKE256);
 		for (j=0;j<33;j++)
 			SHA3_process(&sh,sigma[j]); 
-		SHA3_shake(&sh,(char *)buff,64*KY_ETA1);
-		CBD(buff,KY_ETA1,&q[i*KY_DEGREE]);
+		SHA3_shake(&sh,(char *)buff,64*eta1);
+		CBD(buff,eta1,&q[i*KY_DEGREE]);
 		sigma[32]+=1;
 	}
 
 // create e1
-	for (i=0;i<KY_K;i++)
+	for (i=0;i<ck;i++)
 	{
 		SHA3_init(&sh,SHAKE256);
 		for (j=0;j<33;j++)
 			SHA3_process(&sh,sigma[j]); 
-		SHA3_shake(&sh,(char *)buff,64*KY_ETA2);
-		CBD(buff,KY_ETA1,&u[i*KY_DEGREE]);          // e1
+		SHA3_shake(&sh,(char *)buff,64*eta2);
+		CBD(buff,eta1,&u[i*KY_DEGREE]);          // e1
 		sigma[32]+=1;
 	}
 
-    for (i=0;i<KY_K;i++)
+    for (i=0;i<ck;i++)
     {
         row=KY_DEGREE*i;
         poly_ntt(&q[row]);
     }
 
-    for (i=0;i<KY_K;i++)
+    for (i=0;i<ck;i++)
     {
         row=KY_DEGREE*i;
         ExpandAij(rho,Aij,0,i);
         poly_mul(r,Aij,q);
-        for (j=1;j<KY_K;j++)
+        for (j=1;j<ck;j++)
         {
             ExpandAij(rho,Aij,j,i);
             poly_mul(w,&q[j*KY_DEGREE],Aij);
@@ -496,10 +521,10 @@ void core::KYBER_CPA_encrypt(byte *coins,octet *pk,octet *ss,octet *ct)
         poly_reduce(&u[row]);
     }
 
-    decode((byte *)pk->val,12,p,KY_K);
+    decode((byte *)pk->val,12,p,ck);
 
     poly_mul(v,p,q);
-    for (i=1;i<KY_K;i++)
+    for (i=1;i<ck;i++)
     {
         row=KY_DEGREE*i;
         poly_mul(r,&p[row],&q[row]);
@@ -511,8 +536,8 @@ void core::KYBER_CPA_encrypt(byte *coins,octet *pk,octet *ss,octet *ct)
     SHA3_init(&sh,SHAKE256);
 	for (j=0;j<33;j++)
 		SHA3_process(&sh,sigma[j]); 
-	SHA3_shake(&sh,(char *)buff,64*KY_ETA2);
-	CBD(buff,KY_ETA1,w);  // e2
+	SHA3_shake(&sh,(char *)buff,64*eta2);
+	CBD(buff,eta1,w);  // e2
 
     poly_add(v,v,w);
     
@@ -522,19 +547,55 @@ void core::KYBER_CPA_encrypt(byte *coins,octet *pk,octet *ss,octet *ct)
     poly_add(v,v,r);
     poly_reduce(v);
 
-    compress(u,KY_K,KY_DU);
-    compress(v,1,KY_DV);
-    ct->len=encode(u,KY_K,KY_DU,(byte *)ct->val);
-    ct->len+=encode(v,1,KY_DV,(byte *)&ct->val[ct->len]);
+    compress(u,ck,du);
+    compress(v,1,dv);
+}
+
+// Given input of entropy, public key and shared secret is an input, outputs ciphertext
+static void KYBER_CPA_encrypt(const int *params,byte *coins,octet *pk,octet *ss,octet *ct)
+{
+    sign16 v[KY_DEGREE]; 
+    sign16 u[KY_MAXK*KY_DEGREE];
+    int ck=params[0];
+    int du=params[3];
+    int dv=params[4];
+    int ciphertext_size=(du*ck+dv)*KY_DEGREE/8;
+    KYBER_CPA_base_encrypt(params,coins,pk,ss,u,v);
+    encode(u,ck,du,(byte *)ct->val);
+    encode(v,1,dv,(byte *)&ct->val[ciphertext_size-(dv*KY_DEGREE/8)]);
+    ct->len=ciphertext_size;
+}
+
+// Re-encrypt and check that ct is OK (if so return is zero)
+static byte KYBER_CPA_check_encrypt(const int *params,byte *coins,octet *pk,octet *ss,octet *ct)
+{
+    sign16 v[KY_DEGREE]; 
+    sign16 u[KY_MAXK*KY_DEGREE];
+    int ck=params[0];
+    int du=params[3];
+    int dv=params[4];
+    int ciphertext_size=(du*ck+dv)*KY_DEGREE/8;
+    byte d1,d2;
+    KYBER_CPA_base_encrypt(params,coins,pk,ss,u,v);
+    d1=chk_encode(u,ck,du,(byte *)ct->val);
+    d2=chk_encode(v,1,dv,(byte *)&ct->val[ciphertext_size-(dv*KY_DEGREE/8)]);
+    if ((d1|d2)==0)
+        return 0;
+    else
+        return 0xff;
 }
 
 // Given entropy and public key, outputs 32-byte shared secret and ciphertext
-void core::KYBER_CCA_encrypt(byte *randbytes32,octet *pk,octet *ss,octet *ct)
+static void KYBER_CCA_encrypt(const int *params,byte *randbytes32,octet *pk,octet *ss,octet *ct)
 {
     int i;
     sha3 sh;
     byte h[32],hm[32],g[64],coins[32];
     octet HM={32,sizeof(hm),(char *)hm};
+    int ck=params[0];
+    int du=params[3];
+    int dv=params[4];
+    int shared_secret_size=params[5];
 
     SHA3_init(&sh,SHA3_HASH256);               // H(m)
     for (i=0;i<32;i++)
@@ -555,7 +616,7 @@ void core::KYBER_CCA_encrypt(byte *randbytes32,octet *pk,octet *ss,octet *ct)
 
     for (i=0;i<32;i++)
         coins[i]=g[i+32];
-    KYBER_CPA_encrypt(coins,pk,&HM,ct);
+    KYBER_CPA_encrypt(params,coins,pk,&HM,ct);
     
     SHA3_init(&sh,SHA3_HASH256);              // H(ct)
     for (i=0;i<ct->len;i++)
@@ -568,29 +629,34 @@ void core::KYBER_CCA_encrypt(byte *randbytes32,octet *pk,octet *ss,octet *ct)
     for (i=0;i<32;i++)
         SHA3_process(&sh,h[i]);
 
-    SHA3_shake(&sh,ss->val,32); // could be any length?
-    ss->len=32;
+    SHA3_shake(&sh,ss->val,shared_secret_size); // could be any length?
+    ss->len=shared_secret_size;
 }
 
 // Input secret key and ciphertext, outputs shared 32-byte secret
-void core::KYBER_CPA_decrypt(octet *sk,octet *ct,octet *ss)
+static void KYBER_CPA_decrypt(const int *params,octet *sk,octet *ct,octet *ss)
 {
 	int i,j,row;
 	sign16 w[KY_DEGREE];
     sign16 v[KY_DEGREE];
     sign16 r[KY_DEGREE];
-    sign16 u[KY_K*KY_DEGREE];
-    sign16 s[KY_K*KY_DEGREE];
+    sign16 u[KY_MAXK*KY_DEGREE];
+    sign16 s[KY_MAXK*KY_DEGREE];
 
-    decode((byte *)ct->val,KY_DU,u,KY_K);
-    decode((byte *)&ct->val[KY_DU*KY_K*KY_DEGREE/8],KY_DV,v,1);
-    decompress(u,KY_K,KY_DU);
-    decompress(v,1,KY_DV);
-    decode((byte *)sk->val,12,s,KY_K);
+    int ck=params[0];
+    int du=params[3];
+    int dv=params[4];
+    int shared_secret_size=params[5];
+
+    decode((byte *)ct->val,du,u,ck);
+    decode((byte *)&ct->val[du*ck*KY_DEGREE/8],dv,v,1);
+    decompress(u,ck,du);
+    decompress(v,1,dv);
+    decode((byte *)sk->val,12,s,ck);
 
     poly_ntt(u);
     poly_mul(w,u,s);
-    for (i=1;i<KY_K;i++)
+    for (i=1;i<ck;i++)
     {
         row=KY_DEGREE*i;
         poly_ntt(&u[row]);
@@ -601,29 +667,32 @@ void core::KYBER_CPA_decrypt(octet *sk,octet *ct,octet *ss)
     poly_invntt(w);
     poly_sub(v,v,w);
     compress(v,1,1);
-    ss->len=encode(v,1,1,(byte *)ss->val);
-    
+    encode(v,1,1,(byte *)ss->val); 
+    ss->len=shared_secret_size;
 }
 
-void core::KYBER_CCA_decrypt(octet *sk,octet *ct,octet *ss)
+static void KYBER_CCA_decrypt(const int *params,octet *sk,octet *ct,octet *ss)
 { 
     int i,olen,same;
     sha3 sh;
-    byte h[32],z[32],m[32],coins[32],g[64];
+    byte h[32],z[32],m[32],coins[32],g[64],mask;
     octet M={32,sizeof(m),(char *)m};
-    char pk[KYBER_PUBLIC],mct[KYBER_CIPHERTEXT];
-    octet PK = {KYBER_PUBLIC, sizeof(pk), pk};
-    octet CT = {0,sizeof(mct),mct};
-    olen=sk->len;
-    sk->len=KYBER_SECRET_CPA;
-    for (i=0;i<KYBER_PUBLIC;i++)
-        PK.val[i]=sk->val[KYBER_SECRET_CPA+i];
-    for (i=0;i<32;i++)
-        h[i]=sk->val[KYBER_SECRET_CPA+KYBER_PUBLIC+i];
-    for (i=0;i<32;i++)
-        z[i]=sk->val[KYBER_SECRET_CPA+KYBER_PUBLIC+32+i];
+    int ck=params[0];
+    int du=params[3];
+    int dv=params[4];
+    int secret_cpa_key_size=ck*(KY_DEGREE*3)/2;
+    int public_key_size=32+ck*(KY_DEGREE*3)/2;
+    int shared_secret_size=params[5];
+    octet PK={public_key_size,public_key_size,&sk->val[secret_cpa_key_size]}; // public key is here
 
-    KYBER_CPA_decrypt(sk,ct,&M);
+    olen=sk->len;
+    sk->len=secret_cpa_key_size;  // chop off CPA secret
+    for (i=0;i<32;i++)
+        h[i]=sk->val[secret_cpa_key_size+public_key_size+i];
+    for (i=0;i<32;i++)
+        z[i]=sk->val[secret_cpa_key_size+public_key_size+32+i];
+
+    KYBER_CPA_decrypt(params,sk,ct,&M);
 
     SHA3_init(&sh,SHA3_HASH512);               // Kb,r = G(H(m)|H(pk)
     for (i=0;i<32;i++)
@@ -634,11 +703,10 @@ void core::KYBER_CCA_decrypt(octet *sk,octet *ct,octet *ss)
 
     for (i=0;i<32;i++)
         coins[i]=g[i+32];
-    KYBER_CPA_encrypt(coins,&PK,&M,&CT);       // encrypt again with public key - FO transform CPA->CCA 
-    same=OCT_ncomp(ct,&CT,KYBER_CIPHERTEXT); same-=1;
+    mask=KYBER_CPA_check_encrypt(params,coins,&PK,&M,ct);       // encrypt again with public key - FO transform CPA->CCA 
 
     for (i=0;i<32;i++)
-        g[i]^=(g[i]^z[i])&same;               // substitute z for Kb on failure
+        g[i]^=(g[i]^z[i])&mask;               // substitute z for Kb on failure
 
     SHA3_init(&sh,SHA3_HASH256);              // H(ct)
     for (i=0;i<ct->len;i++)
@@ -651,7 +719,54 @@ void core::KYBER_CCA_decrypt(octet *sk,octet *ct,octet *ss)
     for (i=0;i<32;i++)
         SHA3_process(&sh,h[i]);
     
-    SHA3_shake(&sh,ss->val,32); // could be any length?
-    ss->len=32;
-    sk->len=olen;
+    SHA3_shake(&sh,ss->val,shared_secret_size); // could be any length?
+    ss->len=shared_secret_size;
+    sk->len=olen; // restore length
+}
+
+// ********************* Kyber API ******************************
+
+void core::KYBER512_keypair(byte *r64,octet *SK,octet *PK)
+{
+    KYBER_CCA_keypair(PARAMS_512,r64,SK,PK);
+}
+
+void core::KYBER768_keypair(byte *r64,octet *SK,octet *PK)
+{
+    KYBER_CCA_keypair(PARAMS_768,r64,SK,PK);
+}
+
+void core::KYBER1024_keypair(byte *r64,octet *SK,octet *PK)
+{
+    KYBER_CCA_keypair(PARAMS_1024,r64,SK,PK);
+}
+
+void core::KYBER512_encrypt(byte *r32,octet *PK,octet *SS,octet *CT)
+{
+    KYBER_CCA_encrypt(PARAMS_512,r32,PK,SS,CT);
+}
+
+void core::KYBER768_encrypt(byte *r32,octet *PK,octet *SS,octet *CT)
+{
+    KYBER_CCA_encrypt(PARAMS_768,r32,PK,SS,CT);
+}
+
+void core::KYBER1024_encrypt(byte *r32,octet *PK,octet *SS,octet *CT)
+{
+    KYBER_CCA_encrypt(PARAMS_1024,r32,PK,SS,CT);
+}
+
+void core::KYBER512_decrypt(octet *PK,octet *CT,octet *SS)
+{
+    KYBER_CCA_decrypt(PARAMS_512,PK,CT,SS);
+}
+
+void core::KYBER768_decrypt(octet *PK,octet *CT,octet *SS)
+{
+    KYBER_CCA_decrypt(PARAMS_768,PK,CT,SS);
+}
+
+void core::KYBER1024_decrypt(octet *PK,octet *CT,octet *SS)
+{
+    KYBER_CCA_decrypt(PARAMS_1024,PK,CT,SS);
 }

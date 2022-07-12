@@ -34,7 +34,7 @@ int main() {
     bool result;
     char raw[100];
     csprng RNG;
-    char sk[KYBER_SECRET_CPA], pk[KYBER_PUBLIC],ct[KYBER_CIPHERTEXT],skc[KYBER_SECRET_CCA],ss[32];
+    char sk[KYBER_SECRET_CPA_SIZE_768], pk[KYBER_PUBLIC_SIZE_768],ct[KYBER_CIPHTERTEXT_SIZE_768],skc[KYBER_SECRET_CCA_SIZE_768],ss[KYBER_SHARED_SECRET_768];
     octet SKC = {0, sizeof(skc), skc};
     octet SK = {0, sizeof(sk), sk};
     octet PK = {0, sizeof(pk), pk};
@@ -51,42 +51,17 @@ int main() {
     raw[2] = ran >> 16;
     raw[3] = ran >> 24;
 
-    for (i = 4; i < 100; i++) raw[i] = i + 1; 
+    for (i = 0; i < 100; i++) raw[i] = i + 1; 
     RAND_seed(&RNG, 100, raw);
-
-    printf("Testing Kyber CPA Encryption\n");
-   
-    for (j=0;j<LOOPS;j++) {
-
-		for (i=0;i<32;i++)
-			ss[i]=42+i;
-
-        for (i=0;i<32;i++)
-            tau[i]=RAND_byte(&RNG);
-
-        for (i=0;i<32;i++)
-            coins[i]=RAND_byte(&RNG); 
-  
-        KYBER_CPA_keypair(tau,&SK,&PK);
-
-		KYBER_CPA_encrypt(coins,&PK,&SS,&CT); 
-
-		KYBER_CPA_decrypt(&SK,&CT,&SS);
-        
-        printf("j= %d\n",j);
-        for (i=0;i<32;i++)
-            printf("%02x",(byte)SS.val[i]);
-        printf("\n");
-    }
        
-    printf("Testing Kyber CCA Encryption\n");
+    printf("Testing Kyber Encryption\n");
 
     for (j=0;j<LOOPS;j++) {
 
         for (i=0;i<64;i++)
             r64[i]=RAND_byte(&RNG); 
   
-        KYBER_CCA_keypair(r64,&SKC,&PK);
+        KYBER768_keypair(r64,&SKC,&PK);
 
 //printf("Public key= ");
 //for (i=0;i<PK.len;i++)
@@ -102,7 +77,7 @@ int main() {
         for (i=0;i<32;i++)
             r32[i]=RAND_byte(&RNG); 
 
-		KYBER_CCA_encrypt(r32,&PK,&SS,&CT); 
+		KYBER768_encrypt(r32,&PK,&SS,&CT); 
 
 //printf("Ciphertext= ");
 //for (i=0;i<CT.len;i++)
@@ -114,7 +89,7 @@ int main() {
             printf("%02x",(byte)SS.val[i]);
         printf("\n");
 
-		KYBER_CCA_decrypt(&SKC,&CT,&SS);
+		KYBER768_decrypt(&SKC,&CT,&SS);
         
         for (i=0;i<32;i++)
             printf("%02x",(byte)SS.val[i]);

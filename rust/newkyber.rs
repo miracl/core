@@ -25,39 +25,74 @@
 use crate::sha3;
 use crate::sha3::SHA3;
 
+//const WL: usize = 32;
 const LGN: usize = 8;
 const DEGREE: usize = 1<<LGN;
 const PRIME: i16 = 0xD01;
 
-const ONE: i16 = 0x549;     // r mod q
-const QINV: i32 = 62209;    // 1/q mod 2^16
-const TWO26: i32 = 1<<26;   // 2^26
-const TWO25: i32 = 1<<25;   // 2^25
+// These vary for different security levels
+
+// Kyber - 512
+
+//const K: usize = 2;keypair
+//const ETA1: usize = 3;
+//const DU: usize = 10;
+//const DV: usize = 4;
+
+// Kyber - 768
+//const K: usize = 3;
+//const ETA1: usize = 2;
+//const DU: usize = 10;
+//const DV: usize = 4;
+
+// Kyber - 1024
+//const K: usize = 4;
+//const ETA1: usize = 2;
+//const DU: usize = 11;
+//const DV: usize = 5;
+
+//const ETA2: usize = 2;
+const ONE: i16 = 0x549;    // r mod q
+
+const QINV: i32 = 62209; // 1/q mod 2^16
+const TWO26: i32 = 1<<26; // 2^26
+const TWO25: i32 = 1<<25; // 2^25
+
+//pub const SECRET_CPA: usize=K*(DEGREE*3)/2;
+//pub const PUBLIC: usize=32+K*(DEGREE*3)/2;
+//pub const CIPHERTEXT: usize=(DU*K+DV)*DEGREE/8;
+//pub const SECRET_CCA: usize=SECRET_CPA+PUBLIC+64;
+//pub const SHARED_SECRET: usize=32;
 
 pub const SECRET_CPA_SIZE_512: usize=2*(DEGREE*3)/2;
 pub const PUBLIC_SIZE_512: usize=32+2*(DEGREE*3)/2;
 pub const CIPHTERTEXT_SIZE_512: usize= (10*2+4)*DEGREE/8;
-pub const SECRET_CCA_SIZE_512: usize=SECRET_CPA_SIZE_512+PUBLIC_SIZE_512+64;
+pub const SECRET_CCA_SIZE_512: usize=SECRET_SIZE_CPA_512+PUBLIC_SIZE_512+64;
 pub const SHARED_SECRET_512: usize=32;
 
 pub const SECRET_CPA_SIZE_768: usize=3*(DEGREE*3)/2;
 pub const PUBLIC_SIZE_768: usize=32+3*(DEGREE*3)/2;
 pub const CIPHTERTEXT_SIZE_768: usize= (10*3+4)*DEGREE/8;
-pub const SECRET_CCA_SIZE_768: usize=SECRET_CPA_SIZE_768+PUBLIC_SIZE_768+64;
+pub const SECRET_CCA_SIZE_768: usize=SECRET_SIZE_CPA_768+PUBLIC_SIZE_768+64;
 pub const SHARED_SECRET_768: usize=32;
 
 pub const SECRET_CPA_SIZE_1024: usize=4*(DEGREE*3)/2;
 pub const PUBLIC_SIZE_1024: usize=32+4*(DEGREE*3)/2;
 pub const CIPHTERTEXT_SIZE_1024: usize= (11*4+5)*DEGREE/8;
-pub const SECRET_CCA_SIZE_1024: usize=SECRET_CPA_SIZE_1024+PUBLIC_SIZE_1024+64;
+pub const SECRET_CCA_SIZE_1024: usize=SECRET_SIZE_CPA_1024+PUBLIC_SIZE_1024+64;
 pub const SHARED_SECRET_1024: usize=32;
+
+pub const SECRET_CPA_SIZE_MAX: usize=4*(DEGREE*3)/2;
+pub const PUBLIC_SIZE_MAX: usize=32+4*(DEGREE*3)/2;
+pub const CIPHTERTEXT_SIZE_MAX: usize= (11*4+5)*DEGREE/8;
+pub const SECRET_CCA_SIZE_MAX: usize=SECRET_SIZE_CPA_MAX+PUBLIC_SIZE_MAX+64;
+pub const SHARED_SECRET_MAX: usize=32;
 
 pub const MAXK:usize = 4;
 
-// parameters for each security level
-const PARAMS_512:  [usize;6] = [2,3,2,10,4,32];
-const PARAMS_768:  [usize;6] = [3,2,2,10,4,32];
-const PARAMS_1024: [usize;6] = [4,2,2,11,5,32];
+const PARAMS_512:  [usize;5] = [2,3,2,10,4];
+const PARAMS_768:  [usize;5] = [3,2,2,10,4];
+const PARAMS_1024: [usize;5] = [4,2,2,11,5];
 
 /* Start of public domain reference implementation code - translated from https://github.com/pq-crystals/kyber */
 
@@ -297,24 +332,14 @@ fn nextbyte16(ab: usize,t: &[i16],ptr: &mut usize,bts: &mut usize) -> u8 {
     return (r&0xff) as u8;
 }
 
-fn encode(t: &[i16],len: usize,l: usize,pack: &mut [u8]) {
+fn encode(t: &[i16],len: usize,l: usize,pack: &mut [u8]) -> usize {
+    let mut n=0;
     let mut ptr=0;
     let mut bts=0;
-    for n in 0..len*(DEGREE*l)/8 {
-        pack[n]=nextbyte16(l,t,&mut ptr, &mut bts); 
+    for _ in 0..len*(DEGREE*l)/8 {
+        pack[n]=nextbyte16(l,t,&mut ptr, &mut bts); n+=1;
     }
-}
-
-// return 0 if encoding is unchanged
-fn chk_encode(t: &[i16],len: usize,l: usize,pack: &[u8]) -> u8 {
-    let mut ptr=0;
-    let mut bts=0;
-    let mut diff=0 as u8;
-    for n in 0..len*(DEGREE*l)/8 {
-        let m=nextbyte16(l,t,&mut ptr, &mut bts); 
-        diff|=m^pack[n];
-    }
-    return diff;
+    return n;
 }
 
 fn decode(pack: &[u8],l: usize,t: &mut [i16],len: usize) {
@@ -357,7 +382,6 @@ fn cpa_keypair(params: &[usize],tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
 
     let ck=params[0];
     let eta1=params[1];
-    let public_key_size=32+ck*(DEGREE*3)/2;
 
     for i in 0..32 {
         sh.process(tau[i]);
@@ -413,20 +437,22 @@ fn cpa_keypair(params: &[usize],tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
     }
 
     encode(&s,ck,12,sk);
-    encode(&p,ck,12,pk);
+    let len = encode(&p,ck,12,pk);
     for i in 0..32 {
-        pk[public_key_size-32+i]=rho[i];
+        pk[len+i]=rho[i];
     }
 }
 
-fn cpa_base_encrypt(params: &[usize],coins: &[u8],pk: &[u8],ss: &[u8],u: &mut [i16],v: &mut [i16]) {
+fn cpa_encrypt(params: &[usize],coins: &[u8],pk: &[u8],ss: &[u8],ct: &mut [u8]) {
     let mut rho:[u8;32]=[0;32];
     let mut sigma:[u8;33]=[0;33];
     let mut buff:[u8;256]=[0;256];
 
     let mut r:[i16;DEGREE]=[0;DEGREE];
     let mut w:[i16;DEGREE]=[0;DEGREE];
+    let mut v:[i16;DEGREE]=[0;DEGREE];
     let mut aij:[i16;DEGREE]=[0;DEGREE];
+    let mut u:[i16;MAXK*DEGREE]=[0;MAXK*DEGREE];
     let mut q:[i16;MAXK*DEGREE]=[0;MAXK*DEGREE];
     let mut p:[i16;MAXK*DEGREE]=[0;MAXK*DEGREE];
 
@@ -486,13 +512,13 @@ fn cpa_base_encrypt(params: &[usize],coins: &[u8],pk: &[u8],ss: &[u8],u: &mut [i
 
     decode(&pk,12,&mut p,ck);
 
-    poly_mul(v,&p,&q);
+    poly_mul(&mut v,&p,&q);
     for i in 1..ck {
         let row=DEGREE*i;
         poly_mul(&mut r,&p[row..],&q[row..]);
-        poly_acc(v,&r);
+        poly_acc(&mut v,&r);
     }
-    poly_invntt(v);
+    poly_invntt(&mut v);
 
     let mut sh = SHA3::new(sha3::SHAKE256);
     for j in 0..33 {
@@ -501,44 +527,16 @@ fn cpa_base_encrypt(params: &[usize],coins: &[u8],pk: &[u8],ss: &[u8],u: &mut [i
     sh.shake(&mut buff,64*eta2);
     cbd(&buff,eta1,&mut w); // e2
 
-    poly_acc(v,&w);
+    poly_acc(&mut v,&w);
 
     decode(&ss,1,&mut r,1);
     decompress(&mut r,1,1);
-    poly_acc(v,&r);
-    poly_reduce(v);
-    compress(u,ck,du);
-    compress(v,1,dv);
-}
-
-fn cpa_encrypt(params: &[usize],coins: &[u8],pk: &[u8],ss: &[u8],ct: &mut [u8]) {
-    let mut v:[i16;DEGREE]=[0;DEGREE];
-    let mut u:[i16;MAXK*DEGREE]=[0;MAXK*DEGREE];
-    let ck=params[0];
-    let du=params[3];
-    let dv=params[4];
-    let ciphertext_size=(du*ck+dv)*DEGREE/8;
-    cpa_base_encrypt(params,coins,pk,ss,&mut u,&mut v);  
-    encode(&u,ck,du,ct);
-    encode(&v,1,dv,&mut ct[ciphertext_size-(dv*DEGREE/8)..]);
-}
-
-// Re-encrypt and check that ct is OK (if so return is zero)
-fn cpa_check_encrypt(params: &[usize],coins: &[u8],pk: &[u8],ss: &[u8],ct: &[u8]) -> u8 {
-    let mut v:[i16;DEGREE]=[0;DEGREE];
-    let mut u:[i16;MAXK*DEGREE]=[0;MAXK*DEGREE];
-    let ck=params[0];
-    let du=params[3];
-    let dv=params[4];
-    let ciphertext_size=(du*ck+dv)*DEGREE/8;
-    cpa_base_encrypt(params,coins,pk,ss,&mut u,&mut v);  
-    let d1=chk_encode(&u,ck,du,ct);
-    let d2=chk_encode(&v,1,dv,&ct[ciphertext_size-(dv*DEGREE/8)..]);
-    if (d1|d2)==0 {
-        return 0;
-    } else {
-        return 0xff;
-    }
+    poly_acc(&mut v,&r);
+    poly_reduce(&mut v);
+    compress(&mut u,K,du);
+    compress(&mut v,1,dv);
+    let len=encode(&u,K,du,ct);
+    encode(&v,1,dv,&mut ct[len..]);
 }
 
 fn cpa_decrypt(params: &[usize],sk: &[u8],ct: &[u8],ss: &mut [u8]) {
@@ -549,6 +547,8 @@ fn cpa_decrypt(params: &[usize],sk: &[u8],ct: &[u8],ss: &mut [u8]) {
     let mut s:[i16;MAXK*DEGREE]=[0;MAXK*DEGREE];
     
     let ck=params[0];
+    let eta1=params[1];
+    let eta2=params[2];
     let du=params[3];
     let dv=params[4];
 
@@ -575,10 +575,12 @@ fn cpa_decrypt(params: &[usize],sk: &[u8],ct: &[u8],ss: &mut [u8]) {
 
 fn cca_keypair(params: &[usize],randbytes64: &[u8],sk: &mut [u8],pk: &mut [u8]) {
     let ck=params[0];
-    let secret_cpa_key_size=ck*(DEGREE*3)/2;
+    let du=params[3];
+    let dv=params[4];
+    let secret_cpa_key_size=ck*(DEGREE*3)/2;;
     let public_key_size=32+ck*(DEGREE*3)/2;
 
-    cpa_keypair(params,randbytes64,sk,pk);
+    cpa_keypair(randbytes64,sk,pk);
     for i in 0..public_key_size {
         sk[i+secret_cpa_key_size]=pk[i];
     }
@@ -599,9 +601,10 @@ fn cca_encrypt(params: &[usize],randbytes32: &[u8],pk: &[u8],ss: &mut [u8],ct: &
     let ck=params[0];
     let du=params[3];
     let dv=params[4];
+    let secret_cpa_key_size=ck*(DEGREE*3)/2;;
     let public_key_size=32+ck*(DEGREE*3)/2;
-    let ciphertext_size=(du*ck+dv)*DEGREE/8;
-    let shared_secret_size=params[5];
+    let ciphertext_size=(du*2+dv)*DEGREE/8;
+    let shared_secret_size=32;
 
     let mut sh = SHA3::new(sha3::HASH256);
     for i in 0..32 {
@@ -619,7 +622,7 @@ fn cca_encrypt(params: &[usize],randbytes32: &[u8],pk: &[u8],ss: &mut [u8],ct: &
     sh.process_array(&hm);
     sh.process_array(&h);
     sh.hash(&mut g);
-    cpa_encrypt(params,&g[32..],&pk,&hm,ct);
+    cpa_encrypt(&g[32..],&pk,&hm,ct);
 
     sh = SHA3::new(sha3::HASH256);
     for i in 0..ciphertext_size {
@@ -635,23 +638,37 @@ fn cca_encrypt(params: &[usize],randbytes32: &[u8],pk: &[u8],ss: &mut [u8],ct: &
 fn cca_decrypt(params: &[usize],sk: &[u8],ct: &[u8],ss: &mut [u8]) {
     let mut m:[u8;32]=[0;32];
     let mut g:[u8;64]=[0;64];
+    let mut mct:[u8;CIPHTERTEXT_SIZE_MAX]=[0;CIPHTERTEXT_SIZE_MAX];
+
     let ck=params[0];
-    let secret_cpa_key_size=ck*(DEGREE*3)/2;
+    let du=params[3];
+    let dv=params[4];
+    let secret_cpa_key_size=ck*(DEGREE*3)/2;;
     let public_key_size=32+ck*(DEGREE*3)/2;
-    let shared_secret_size=params[5];    
+    let ciphertext_size=(du*2+dv)*DEGREE/8;
+    let shared_secret_size=32;    
 
     let pk=&sk[secret_cpa_key_size..secret_cpa_key_size+public_key_size];
     let h=&sk[secret_cpa_key_size+public_key_size..secret_cpa_key_size+public_key_size+32];
     let z=&sk[secret_cpa_key_size+public_key_size+32..secret_cpa_key_size+public_key_size+64];
 
-    cpa_decrypt(params,sk,ct,&mut m);
+    cpa_decrypt(sk,ct,&mut m);
 
     let mut sh = SHA3::new(sha3::HASH512);
     sh.process_array(&m);
     sh.process_array(h);
     sh.hash(&mut g);
 
-    let mask=cpa_check_encrypt(params,&g[32..],pk,&m,ct); // FO check ct is correct
+    cpa_encrypt(&g[32..],pk,&m,&mut mct);
+    
+    let mut mask:u8=0;
+    for i in 0..ciphertext_size {
+        mask |= mct[i]^ct[i];
+    }
+
+    if mask!=0 {
+        mask=0xff;
+    }
 
     for i in 0..32 {
         g[i]^=(g[i]^z[i])&mask;
@@ -682,25 +699,25 @@ pub fn keypair_1024(randbytes64: &[u8],sk: &mut [u8],pk: &mut [u8]) {
 }
 
 pub fn encrypt_512(randbytes32: &[u8],pk: &[u8],ss: &mut [u8],ct: &mut [u8]) {
-    cca_encrypt(&PARAMS_512,randbytes32,pk,ss,ct);
+    cca_encrypt(&PARAMS_512,pk,ss,ct);
 }
 
 pub fn encrypt_768(randbytes32: &[u8],pk: &[u8],ss: &mut [u8],ct: &mut [u8]) {
-    cca_encrypt(&PARAMS_768,randbytes32,pk,ss,ct);
+    cca_encrypt(&PARAMS_768,pk,ss,ct);
 }
 
 pub fn encrypt_1024(randbytes32: &[u8],pk: &[u8],ss: &mut [u8],ct: &mut [u8]) {
-    cca_encrypt(&PARAMS_1024,randbytes32,pk,ss,ct);
+    cca_encrypt(&PARAMS_1024,pk,ss,ct);
 }
 
 pub fn decrypt_512(sk: &[u8],ct: &[u8],ss: &mut [u8]) {
-    cca_decrypt(&PARAMS_512,sk,ct,ss);
+    cca_decrypt(&PARAMS_512,ct,ss) {
 }
 
 pub fn decrypt_768(sk: &[u8],ct: &[u8],ss: &mut [u8]) {
-    cca_decrypt(&PARAMS_768,sk,ct,ss);
+    cca_decrypt(&PARAMS_768,ct,ss) {
 }
 
 pub fn decrypt_1024(sk: &[u8],ct: &[u8],ss: &mut [u8]) {
-    cca_decrypt(&PARAMS_1024,sk,ct,ss);
+    cca_decrypt(&PARAMS_1024,ct,ss) {
 }
