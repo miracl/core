@@ -30,7 +30,7 @@ const DEGREE: usize = 1<<LGN;
 const PRIME: i16 = 0xD01;
 
 const ONE: i16 = 0x549;     // r mod q
-const QINV: i32 = 62209;    // 1/q mod 2^16
+const QINV: i32 = 3327;    // -1/q mod 2^16
 const TWO26: i32 = 1<<26;   // 2^26
 const TWO25: i32 = 1<<25;   // 2^25
 
@@ -55,6 +55,7 @@ pub const SHARED_SECRET_1024: usize=32;
 pub const MAXK:usize = 4;
 
 // parameters for each security level
+// K,eta1,eta2,du,dv,shared secret
 const PARAMS_512:  [usize;6] = [2,3,2,10,4,32];
 const PARAMS_768:  [usize;6] = [3,2,2,10,4,32];
 const PARAMS_1024: [usize;6] = [4,2,2,11,5,32];
@@ -91,9 +92,8 @@ fn printbinary(array: &[u8]) {
 
 fn montgomery_reduce(a: i32) -> i16 {
     let dp=PRIME as i32;
-    let mut t=(a*QINV) as i16;
-    let dt=t as i32;
-    t=((a-(dt*dp))>>16) as i16;
+    let dt=((a&0xffff)*QINV)&0xffff;
+    let t=((a+(dt*dp))>>16) as i16;
     return t;
 }
 
@@ -240,21 +240,21 @@ fn expandaij(rho: &[u8],aij: &mut [i16],i:usize,j:usize) {
     }
 }
 
-fn getbit(b: &[u8],n: usize) -> usize {
+fn getbit(b: &[u8],n: usize) -> i16 {
     let wd=n/8;
     let bt=n%8;
-    return ((b[wd]>>bt)&1) as usize;
+    return ((b[wd]>>bt)&1) as i16;
 }
 
 fn cbd(bts: &[u8],eta: usize,f: &mut [i16]) {
     for i in 0..DEGREE {
-        let mut a=0;
-        let mut b=0;
+        let mut a=0 as i16;
+        let mut b=0 as i16;
         for j in 0..eta {
             a+=getbit(bts,2*i*eta+j);
             b+=getbit(bts,2*i*eta+eta+j);
         }
-        f[i] = (a-b) as i16;
+        f[i] = a-b;
     }
 }
 
@@ -376,7 +376,7 @@ fn cpa_keypair(params: &[usize],tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
             sh.process(sigma[j]);
         }
         sh.shake(&mut buff,64*eta1);
-        cbd(&buff,params[1],&mut s[i*DEGREE..]);
+        cbd(&buff,eta1,&mut s[i*DEGREE..]);
         sigma[32] += 1;
     }
 

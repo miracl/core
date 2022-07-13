@@ -27,6 +27,7 @@
 using namespace core;
 
 // parameters for each security level
+// K,eta1,eta2,du,dv,shared secret
 const int PARAMS_512[6]={2,3,2,10,4,32};
 const int PARAMS_768[6]={3,2,2,10,4,32};
 const int PARAMS_1024[6]={4,2,2,11,5,32};
