@@ -427,7 +427,7 @@ static void WWW::FF_karmul_upper(BIG z[], BIG x[], BIG y[], BIG t[], int n)
 /* z=x*y */
 void WWW::FF_mul(BIG z[], BIG x[], BIG y[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG t[2 * FFLEN_WWW];
 #else
     BIG t[2 * n];
@@ -438,7 +438,7 @@ void WWW::FF_mul(BIG z[], BIG x[], BIG y[], int n)
 /* return low part of product */
 static void WWW::FF_lmul(BIG z[], BIG x[], BIG y[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG t[2 * FFLEN_WWW];
 #else
     BIG t[2 * n];
@@ -476,7 +476,7 @@ void WWW::FF_mod(BIG b[], BIG c[], int n)
 /* z=x^2 */
 void WWW::FF_sqr(BIG z[], BIG x[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG t[2 * FFLEN_WWW];
 #else
     BIG t[2 * n];
@@ -488,7 +488,7 @@ void WWW::FF_sqr(BIG z[], BIG x[], int n)
 static void WWW::FF_reduce(BIG r[], BIG T[], BIG N[], BIG ND[], int n)
 {
     /* fast karatsuba Montgomery reduction */
-#ifndef C99
+#ifndef USE_VLAS
     BIG t[2 * FFLEN_WWW];
     BIG m[FFLEN_WWW];
 #else
@@ -513,7 +513,7 @@ static void WWW::FF_reduce(BIG r[], BIG T[], BIG N[], BIG ND[], int n)
 void WWW::FF_dmod(BIG r[], BIG a[], BIG b[], int n)
 {
     int k;
-#ifndef C99
+#ifndef USE_VLAS
     BIG m[2 * FFLEN_WWW];
     BIG x[2 * FFLEN_WWW];
 #else
@@ -551,7 +551,7 @@ void WWW::FF_dmod(BIG r[], BIG a[], BIG b[], int n)
 
 void WWW::FF_invmodp(BIG r[], BIG a[], BIG p[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG u[FFLEN_WWW], v[FFLEN_WWW], x1[FFLEN_WWW], x2[FFLEN_WWW], t[FFLEN_WWW], one[FFLEN_WWW];
 #else
     BIG u[n], v[n], x1[n], x2[n], t[n], one[n];
@@ -620,7 +620,7 @@ void WWW::FF_invmodp(BIG r[], BIG a[], BIG p[], int n)
 /* nesidue mod m */
 static void WWW::FF_nres(BIG a[], BIG m[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG d[2 * FFLEN_WWW];
 #else
     BIG d[2 * n];
@@ -640,7 +640,7 @@ static void WWW::FF_nres(BIG a[], BIG m[], int n)
 
 static void WWW::FF_redc(BIG a[], BIG m[], BIG ND[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG d[2 * FFLEN_WWW];
 #else
     BIG d[2 * n];
@@ -664,7 +664,7 @@ static void WWW::FF_redc(BIG a[], BIG m[], BIG ND[], int n)
 static void WWW::FF_invmod2m(BIG U[], BIG a[], int n)
 {
     int i;
-#ifndef C99
+#ifndef USE_VLAS
     BIG t1[2*FFLEN_WWW], b[FFLEN_WWW], c[FFLEN_WWW];
 #else
     BIG t1[2 * n], b[n], c[n];
@@ -716,7 +716,7 @@ void WWW::FF_random(BIG x[], csprng *rng, int n)
 void WWW::FF_randomnum(BIG x[], BIG p[], csprng *rng, int n)
 {
     int i;
-#ifndef C99
+#ifndef USE_VLAS
     BIG d[2 * FFLEN_WWW];
 #else
     BIG d[2 * n];
@@ -730,7 +730,7 @@ void WWW::FF_randomnum(BIG x[], BIG p[], csprng *rng, int n)
 
 static void WWW::FF_modmul(BIG z[], BIG x[], BIG y[], BIG p[], BIG ND[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG d[2 * FFLEN_WWW];
 #else
     BIG d[2 * n];
@@ -763,7 +763,7 @@ static void WWW::FF_modmul(BIG z[], BIG x[], BIG y[], BIG p[], BIG ND[], int n)
 
 static void WWW::FF_modsqr(BIG z[], BIG x[], BIG p[], BIG ND[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG d[2 * FFLEN_WWW];
 #else
     BIG d[2 * n];
@@ -796,7 +796,7 @@ static void WWW::FF_modsqr(BIG z[], BIG x[], BIG p[], BIG ND[], int n)
 void WWW::FF_skpow(BIG r[], BIG x[], BIG e[], BIG p[], int n)
 {
     int i, b;
-#ifndef C99
+#ifndef USE_VLAS
     BIG R0[FFLEN_WWW], R1[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG R0[n], R1[n], ND[n];
@@ -827,7 +827,7 @@ void WWW::FF_skpow(BIG r[], BIG x[], BIG e[], BIG p[], int n)
 void WWW::FF_skspow(BIG r[], BIG x[], BIG e, BIG p[], int n)
 {
     int i, b;
-#ifndef C99
+#ifndef USE_VLAS
     BIG R0[FFLEN_WWW], R1[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG R0[n], R1[n], ND[n];
@@ -854,7 +854,7 @@ void WWW::FF_skspow(BIG r[], BIG x[], BIG e, BIG p[], int n)
 void WWW::FF_power(BIG r[], BIG x[], int e, BIG p[], int n)
 {
     int f = 1;
-#ifndef C99
+#ifndef USE_VLAS
     BIG w[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG w[n], ND[n];
@@ -888,7 +888,7 @@ void WWW::FF_power(BIG r[], BIG x[], int e, BIG p[], int n)
 void WWW::FF_pow(BIG r[], BIG x[], BIG e[], BIG p[], int n)
 {
     int i, b;
-#ifndef C99
+#ifndef USE_VLAS
     BIG w[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG w[n], ND[n];
@@ -913,7 +913,7 @@ void WWW::FF_pow(BIG r[], BIG x[], BIG e[], BIG p[], int n)
 void WWW::FF_pow2(BIG r[], BIG x[], BIG e, BIG y[], BIG f, BIG p[], int n)
 {
     int i, eb, fb;
-#ifndef C99
+#ifndef USE_VLAS
     BIG xn[FFLEN_WWW], yn[FFLEN_WWW], xy[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG xn[n], yn[n], xy[n], ND[n];
@@ -962,7 +962,7 @@ int WWW::FF_cfactor(BIG w[], sign32 s, int n)
 {
     int r;
     sign32 g;
-#ifndef C99
+#ifndef USE_VLAS
     BIG x[FFLEN_WWW], y[FFLEN_WWW];
 #else
     BIG x[n], y[n];
@@ -992,7 +992,7 @@ int WWW::FF_cfactor(BIG w[], sign32 s, int n)
 int WWW::FF_prime(BIG p[], csprng *rng, int n)
 {
     int i, j, loop, s = 0;
-#ifndef C99
+#ifndef USE_VLAS
     BIG d[FFLEN_WWW], x[FFLEN_WWW], unity[FFLEN_WWW], nm1[FFLEN_WWW];
 #else
     BIG d[n], x[n], unity[n], nm1[n];

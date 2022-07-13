@@ -361,14 +361,20 @@ void KYBER_CPA_keypair(const int *params,byte *tau,octet *sk,octet *pk)
 	byte sigma[33];
 	byte buff[256];
 
+    int ck=params[0];
     sign16 r[KY_DEGREE];
     sign16 w[KY_DEGREE];
     sign16 Aij[KY_DEGREE]; 
+#ifdef USE_VLAS
+    sign16 s[ck*KY_DEGREE];
+    sign16 e[ck*KY_DEGREE];
+    sign16 p[ck*KY_DEGREE];
+#else
     sign16 s[KY_MAXK*KY_DEGREE];
     sign16 e[KY_MAXK*KY_DEGREE];
     sign16 p[KY_MAXK*KY_DEGREE];
+#endif
 
-    int ck=params[0];
     int eta1=params[1];
     int public_key_size=32+ck*(KY_DEGREE*3)/2;
     int secret_cpa_key_size=ck*(KY_DEGREE*3)/2;
@@ -465,14 +471,19 @@ void KYBER_CPA_base_encrypt(const int *params,byte *coins,octet *pk,octet *ss,si
     byte sigma[33];
 	byte buff[256];
     byte rho[32];
+    int ck=params[0];
 
     sign16 r[KY_DEGREE];
     sign16 w[KY_DEGREE];
     sign16 Aij[KY_DEGREE]; 
+#ifdef USE_VLAS
+    sign16 q[ck*KY_DEGREE];
+    sign16 p[ck*KY_DEGREE];
+#else
     sign16 q[KY_MAXK*KY_DEGREE];
     sign16 p[KY_MAXK*KY_DEGREE];
+#endif
 
-    int ck=params[0];
     int eta1=params[1];
     int eta2=params[2];
     int du=params[3];
@@ -564,9 +575,14 @@ void KYBER_CPA_base_encrypt(const int *params,byte *coins,octet *pk,octet *ss,si
 // Given input of entropy, public key and shared secret is an input, outputs ciphertext
 static void KYBER_CPA_encrypt(const int *params,byte *coins,octet *pk,octet *ss,octet *ct)
 {
-    sign16 v[KY_DEGREE]; 
-    sign16 u[KY_MAXK*KY_DEGREE];
     int ck=params[0];
+    sign16 v[KY_DEGREE]; 
+#ifdef USE_VLAS
+    sign16 u[ck*KY_DEGREE];
+#else
+    sign16 u[KY_MAXK*KY_DEGREE];
+#endif
+
     int du=params[3];
     int dv=params[4];
     int ciphertext_size=(du*ck+dv)*KY_DEGREE/8;
@@ -579,9 +595,14 @@ static void KYBER_CPA_encrypt(const int *params,byte *coins,octet *pk,octet *ss,
 // Re-encrypt and check that ct is OK (if so return is zero)
 static byte KYBER_CPA_check_encrypt(const int *params,byte *coins,octet *pk,octet *ss,octet *ct)
 {
-    sign16 v[KY_DEGREE]; 
-    sign16 u[KY_MAXK*KY_DEGREE];
     int ck=params[0];
+    sign16 v[KY_DEGREE]; 
+#ifdef USE_VLAS
+    sign16 u[ck*KY_DEGREE];
+#else
+    sign16 u[KY_MAXK*KY_DEGREE];
+#endif
+
     int du=params[3];
     int dv=params[4];
     int ciphertext_size=(du*ck+dv)*KY_DEGREE/8;
@@ -648,13 +669,17 @@ void KYBER_CCA_encrypt(const int *params,byte *randbytes32,octet *pk,octet *ss,o
 void KYBER_CPA_decrypt(const int *params,octet *sk,octet *ct,octet *ss)
 {
 	int i,j,row;
+    int ck=params[0];
 	sign16 w[KY_DEGREE];
     sign16 v[KY_DEGREE];
     sign16 r[KY_DEGREE];
+#ifdef USE_VLAS
+    sign16 u[ck*KY_DEGREE];
+    sign16 s[ck*KY_DEGREE];
+#else
     sign16 u[KY_MAXK*KY_DEGREE];
     sign16 s[KY_MAXK*KY_DEGREE];
-
-    int ck=params[0];
+#endif
     int du=params[3];
     int dv=params[4];
     int shared_secret_size=params[5];

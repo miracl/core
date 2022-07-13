@@ -35,6 +35,14 @@
 #define ARCH_H
 #include <stdint.h>
 
+#define WOULD_USE_VLAS   /* Would like to use variable length arrays? */
+
+#ifdef WOULD_USE_VLAS
+#if __cplusplus >= 201402L
+#define USE_VLAS
+#endif
+#endif
+
 namespace core {
 
 /*** START OF USER CONFIGURABLE SECTION - set architecture ***/

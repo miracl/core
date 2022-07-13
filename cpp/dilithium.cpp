@@ -867,15 +867,23 @@ static void keypair(const int *params,byte *tau,octet *sk,octet *pk)
     byte bK[32];
     byte tr[32];          // 320 bytes
     sign32 Aij[DL_DEGREE];     // 1024 bytes
+    sign32 w[DL_DEGREE]; // work space  1024 bytes
+    sign32 r[DL_DEGREE]; // work space  1024 bytes total = 12352
+
+    int ck=params[3];
+    int el=params[4];
+
+#ifdef USE_VLAS
+    sign8 s1[el*DL_DEGREE];     // 1280 bytes
+    sign8 s2[ck*DL_DEGREE];     // 1536 bytes
+    sign16 t0[ck*DL_DEGREE];    // 3072 bytes
+    sign16 t1[ck*DL_DEGREE];    // 3072 bytes
+#else    
     sign8 s1[DL_MAXL*DL_DEGREE];     // 1280 bytes
     sign8 s2[DL_MAXK*DL_DEGREE];     // 1536 bytes
     sign16 t0[DL_MAXK*DL_DEGREE];    // 3072 bytes
     sign16 t1[DL_MAXK*DL_DEGREE];    // 3072 bytes
-    sign32 w[DL_DEGREE]; // work space  1024 bytes
-    sign32 r[DL_DEGREE]; // work space  1024 bytes total = 12352
-    int ck=params[3];
-    int el=params[4];
-
+#endif
     SHA3_init(&sh, SHAKE256);
   
     for (i=0;i<32;i++)
@@ -936,26 +944,34 @@ static int signature(const int *params,octet *sk,octet *M,octet *sig)
     byte rhod[64];   // 288 bytes
     byte hint[100]; // 61 bytes
 
-    //sign32 Aij[DL_DEGREE]; // 1024 bytes
-    sign8 s1[DL_MAXL*DL_DEGREE]; // 1280 bytes
-    sign8 s2[DL_MAXK*DL_DEGREE]; // 1536 bytes
-    sign16 t0[DL_MAXK*DL_DEGREE]; // 3072 bytes
-
-    sign32 y[DL_MAXL*DL_DEGREE];  // 5120 bytes
-    sign32 Ay[DL_MAXK*DL_DEGREE]; // 6144 bytes
-
-    sign8 w1[DL_MAXK*DL_DEGREE]; // 1280 bytes
     sign32 c[DL_DEGREE];  // 1024 bytes
     sign32 w[DL_DEGREE];  // work space 1024 bytes
     sign32 r[DL_DEGREE];  // work space 1024 bytes total= 21673 bytes
+    //sign32 Aij[DL_DEGREE]; // 1024 bytes
 
+    int ck=params[3];
+    int el=params[4];
+
+#ifdef USE_VLAS
+    sign8 s1[el*DL_DEGREE]; // 1280 bytes
+    sign8 s2[ck*DL_DEGREE]; // 1536 bytes
+    sign16 t0[ck*DL_DEGREE]; // 3072 bytes
+    sign32 y[el*DL_DEGREE];  // 5120 bytes
+    sign32 Ay[ck*DL_DEGREE]; // 6144 bytes
+    sign8 w1[ck*DL_DEGREE]; // 1280 bytes
+#else
+    sign8 s1[DL_MAXL*DL_DEGREE]; // 1280 bytes
+    sign8 s2[DL_MAXK*DL_DEGREE]; // 1536 bytes
+    sign16 t0[DL_MAXK*DL_DEGREE]; // 3072 bytes
+    sign32 y[DL_MAXL*DL_DEGREE];  // 5120 bytes
+    sign32 Ay[DL_MAXK*DL_DEGREE]; // 6144 bytes
+    sign8 w1[DL_MAXK*DL_DEGREE]; // 1280 bytes
+#endif
     int tau=params[0];
     int lg=params[1];
     int gamma1=(sign32)(1<<lg);
     int dv=(sign32)params[2];
     int gamma2=(DL_PRIME-1)/dv;
-    int ck=params[3];
-    int el=params[4];
     int eta=params[5];
     int beta=(sign32)(tau*eta);
     int omega=params[7];
@@ -1084,20 +1100,27 @@ static bool verify(const int *params,octet *pk,octet *M,octet *sig)
     byte tr[32];         // 192 bytes
     byte hint[100];  // 61 bytes
 
-    sign32 z[DL_MAXL*DL_DEGREE];  // 5120 bytes
 
-    sign16 t1[DL_MAXK*DL_DEGREE]; // 3072 bytes
-    sign8 w1d[DL_MAXK*DL_DEGREE]; // 1536 bytes 
     sign32 Aij[DL_DEGREE];  // 1024 bytes
     sign32 c[DL_DEGREE];    // 1024 bytes
     sign32 w[DL_DEGREE]; // work space // 1024 bytes
     sign32 r[DL_DEGREE]; // work space // 1024 bytes total=14077 bytes
 
+    int ck=params[3];
+    int el=params[4];
+
+#ifdef USE_VLAS
+    sign32 z[el*DL_DEGREE];  // 5120 bytes
+    sign16 t1[ck*DL_DEGREE]; // 3072 bytes
+    sign8 w1d[ck*DL_DEGREE]; // 1536 bytes 
+#else
+    sign32 z[DL_MAXL*DL_DEGREE];  // 5120 bytes
+    sign16 t1[DL_MAXK*DL_DEGREE]; // 3072 bytes
+    sign8 w1d[DL_MAXK*DL_DEGREE]; // 1536 bytes 
+#endif
     int tau=params[0];
     int lg=params[1];
     int gamma1=(sign32)(1<<lg);
-    int ck=params[3];
-    int el=params[4];
     int eta=params[5];
     int beta=(sign32)(tau*eta);
     int omega=params[7];

@@ -35,8 +35,6 @@
 #define ARCH_H
 
 
-
-
 /*** START OF USER CONFIGURABLE SECTION - set architecture ***/
 
 #ifdef CMAKE
@@ -50,12 +48,21 @@
 /* Create Integer types */
 /* Support for C99?  Note for GCC need to explicitly include -std=c99 in command line */
 
+#define WOULD_USE_VLAS   /* Would like to use variable length arrays? */
+
 #if __STDC_VERSION__ >= 199901L
 /* C99 code */
 #define C99
 #else
 /* Not C99 code */
 #endif
+
+#ifdef WOULD_USE_VLAS
+#ifdef C99
+#define USE_VLAS   /* OK then */
+#endif
+#endif
+
 
 #ifndef C99  /* You are on your own! These are for Microsoft C */
 #define bool int

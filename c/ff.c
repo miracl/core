@@ -401,7 +401,7 @@ static void FF_WWW_karmul_upper(BIG_XXX z[], BIG_XXX x[], BIG_XXX y[], BIG_XXX t
 /* z=x*y */
 void FF_WWW_mul(BIG_XXX z[], BIG_XXX x[], BIG_XXX y[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX t[2 * FFLEN_WWW];
 #else
     BIG_XXX t[2 * n];
@@ -412,7 +412,7 @@ void FF_WWW_mul(BIG_XXX z[], BIG_XXX x[], BIG_XXX y[], int n)
 /* return low part of product */
 static void FF_WWW_lmul(BIG_XXX z[], BIG_XXX x[], BIG_XXX y[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX t[2 * FFLEN_WWW];
 #else
     BIG_XXX t[2 * n];
@@ -450,7 +450,7 @@ void FF_WWW_mod(BIG_XXX b[], BIG_XXX c[], int n)
 /* z=x^2 */
 void FF_WWW_sqr(BIG_XXX z[], BIG_XXX x[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX t[2 * FFLEN_WWW];
 #else
     BIG_XXX t[2 * n];
@@ -462,7 +462,7 @@ void FF_WWW_sqr(BIG_XXX z[], BIG_XXX x[], int n)
 static void FF_WWW_reduce(BIG_XXX r[], BIG_XXX T[], BIG_XXX N[], BIG_XXX ND[], int n)
 {
     /* fast karatsuba Montgomery reduction */
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX t[2 * FFLEN_WWW];
     BIG_XXX m[FFLEN_WWW];
 #else
@@ -487,7 +487,7 @@ static void FF_WWW_reduce(BIG_XXX r[], BIG_XXX T[], BIG_XXX N[], BIG_XXX ND[], i
 void FF_WWW_dmod(BIG_XXX r[], BIG_XXX a[], BIG_XXX b[], int n)
 {
     int k;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX m[2 * FFLEN_WWW];
     BIG_XXX x[2 * FFLEN_WWW];
 #else
@@ -525,7 +525,7 @@ void FF_WWW_dmod(BIG_XXX r[], BIG_XXX a[], BIG_XXX b[], int n)
 
 void FF_WWW_invmodp(BIG_XXX r[], BIG_XXX a[], BIG_XXX p[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX u[FFLEN_WWW], v[FFLEN_WWW], x1[FFLEN_WWW], x2[FFLEN_WWW], t[FFLEN_WWW], one[FFLEN_WWW];
 #else
     BIG_XXX u[n], v[n], x1[n], x2[n], t[n], one[n];
@@ -594,7 +594,7 @@ void FF_WWW_invmodp(BIG_XXX r[], BIG_XXX a[], BIG_XXX p[], int n)
 /* nesidue mod m */
 static void FF_WWW_nres(BIG_XXX a[], BIG_XXX m[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX d[2 * FFLEN_WWW];
 #else
     BIG_XXX d[2 * n];
@@ -614,7 +614,7 @@ static void FF_WWW_nres(BIG_XXX a[], BIG_XXX m[], int n)
 
 static void FF_WWW_redc(BIG_XXX a[], BIG_XXX m[], BIG_XXX ND[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX d[2 * FFLEN_WWW];
 #else
     BIG_XXX d[2 * n];
@@ -638,7 +638,7 @@ static void FF_WWW_redc(BIG_XXX a[], BIG_XXX m[], BIG_XXX ND[], int n)
 static void FF_WWW_invmod2m(BIG_XXX U[], BIG_XXX a[], int n)
 {
     int i;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX t1[2*FFLEN_WWW], b[FFLEN_WWW], c[FFLEN_WWW];
 #else
     BIG_XXX t1[2 * n], b[n], c[n];
@@ -690,7 +690,7 @@ void FF_WWW_random(BIG_XXX x[], csprng *rng, int n)
 void FF_WWW_randomnum(BIG_XXX x[], BIG_XXX p[], csprng *rng, int n)
 {
     int i;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX d[2 * FFLEN_WWW];
 #else
     BIG_XXX d[2 * n];
@@ -704,7 +704,7 @@ void FF_WWW_randomnum(BIG_XXX x[], BIG_XXX p[], csprng *rng, int n)
 
 static void FF_WWW_modmul(BIG_XXX z[], BIG_XXX x[], BIG_XXX y[], BIG_XXX p[], BIG_XXX ND[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX d[2 * FFLEN_WWW];
 #else
     BIG_XXX d[2 * n];
@@ -737,7 +737,7 @@ static void FF_WWW_modmul(BIG_XXX z[], BIG_XXX x[], BIG_XXX y[], BIG_XXX p[], BI
 
 static void FF_WWW_modsqr(BIG_XXX z[], BIG_XXX x[], BIG_XXX p[], BIG_XXX ND[], int n)
 {
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX d[2 * FFLEN_WWW];
 #else
     BIG_XXX d[2 * n];
@@ -770,7 +770,7 @@ static void FF_WWW_modsqr(BIG_XXX z[], BIG_XXX x[], BIG_XXX p[], BIG_XXX ND[], i
 void FF_WWW_skpow(BIG_XXX r[], BIG_XXX x[], BIG_XXX e[], BIG_XXX p[], int n)
 {
     int i, b;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX R0[FFLEN_WWW], R1[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG_XXX R0[n], R1[n], ND[n];
@@ -801,7 +801,7 @@ void FF_WWW_skpow(BIG_XXX r[], BIG_XXX x[], BIG_XXX e[], BIG_XXX p[], int n)
 void FF_WWW_skspow(BIG_XXX r[], BIG_XXX x[], BIG_XXX e, BIG_XXX p[], int n)
 {
     int i, b;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX R0[FFLEN_WWW], R1[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG_XXX R0[n], R1[n], ND[n];
@@ -828,7 +828,7 @@ void FF_WWW_skspow(BIG_XXX r[], BIG_XXX x[], BIG_XXX e, BIG_XXX p[], int n)
 void FF_WWW_power(BIG_XXX r[], BIG_XXX x[], int e, BIG_XXX p[], int n)
 {
     int f = 1;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX w[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG_XXX w[n], ND[n];
@@ -862,7 +862,7 @@ void FF_WWW_power(BIG_XXX r[], BIG_XXX x[], int e, BIG_XXX p[], int n)
 void FF_WWW_pow(BIG_XXX r[], BIG_XXX x[], BIG_XXX e[], BIG_XXX p[], int n)
 {
     int i, b;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX w[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG_XXX w[n], ND[n];
@@ -887,7 +887,7 @@ void FF_WWW_pow(BIG_XXX r[], BIG_XXX x[], BIG_XXX e[], BIG_XXX p[], int n)
 void FF_WWW_pow2(BIG_XXX r[], BIG_XXX x[], BIG_XXX e, BIG_XXX y[], BIG_XXX f, BIG_XXX p[], int n)
 {
     int i, eb, fb;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX xn[FFLEN_WWW], yn[FFLEN_WWW], xy[FFLEN_WWW], ND[FFLEN_WWW];
 #else
     BIG_XXX xn[n], yn[n], xy[n], ND[n];
@@ -936,7 +936,7 @@ int FF_WWW_cfactor(BIG_XXX w[], sign32 s, int n)
 {
     int r;
     sign32 g;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX x[FFLEN_WWW], y[FFLEN_WWW];
 #else
     BIG_XXX x[n], y[n];
@@ -966,7 +966,7 @@ int FF_WWW_cfactor(BIG_XXX w[], sign32 s, int n)
 int FF_WWW_prime(BIG_XXX p[], csprng *rng, int n)
 {
     int i, j, loop, s = 0;
-#ifndef C99
+#ifndef USE_VLAS
     BIG_XXX d[FFLEN_WWW], x[FFLEN_WWW], unity[FFLEN_WWW], nm1[FFLEN_WWW];
 #else
     BIG_XXX d[n], x[n], unity[n], nm1[n];
