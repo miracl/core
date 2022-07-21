@@ -30,9 +30,10 @@ const DEGREE: usize = 1<<LGN;
 const PRIME: i16 = 0xD01;
 
 const ONE: i16 = 0x549;     // r mod q
-const QINV: i32 = 3327;    // -1/q mod 2^16
-const TWO26: i32 = 1<<26;   // 2^26
+const QINV: i32 = -3327;    // -1/q mod 2^16
+//const TWO26: i32 = 1<<26;   // 2^26
 const TWO25: i32 = 1<<25;   // 2^25
+const BARC: i32 = 20159;    // ((TWO26 + PRIME/2)/PRIME)
 
 pub const SECRET_CPA_SIZE_512: usize=2*(DEGREE*3)/2;
 pub const PUBLIC_SIZE_512: usize=32+2*(DEGREE*3)/2;
@@ -92,17 +93,14 @@ fn printbinary(array: &[u8]) {
 
 fn montgomery_reduce(a: i32) -> i16 {
     let dp=PRIME as i32;
-    let dt=((a&0xffff)*QINV)&0xffff;
-    let t=((a+(dt*dp))>>16) as i16;
+    let dt=(((a&0xffff)*QINV)&0xffff) as i16;
+    let t=((a-((dt as i32)*dp))>>16) as i16;
     return t;
 }
 
 fn barrett_reduce(a: i16) -> i16 {
-    let dp=PRIME as i32;
-    let v=((TWO26 + dp/2)/dp) as i16;
-    let dv=v as i32;
     let da=a as i32;
-    let mut t=((dv*da + TWO25) >> 26) as i16;
+    let mut t=((BARC*da + TWO25) >> 26) as i16;
     t*=PRIME;
     return a-t;
 }
@@ -142,7 +140,7 @@ fn invntt(r: &mut [i16]) {
             let mut j=start;
             while j<start+len {
                 let t=r[j];
-                r[j]=barrett_reduce(t+r[j+len]);
+                r[j]=barrett_reduce(t+r[j+len]);  // problem here
                 r[j+len] -= t;
                 r[j+len]=fqmul(zeta,r[j+len]);
                 j+=1;
