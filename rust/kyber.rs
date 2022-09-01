@@ -37,19 +37,19 @@ const BARC: i32 = 20159;    // ((TWO26 + PRIME/2)/PRIME)
 
 pub const SECRET_CPA_SIZE_512: usize=2*(DEGREE*3)/2;
 pub const PUBLIC_SIZE_512: usize=32+2*(DEGREE*3)/2;
-pub const CIPHTERTEXT_SIZE_512: usize= (10*2+4)*DEGREE/8;
+pub const CIPHERTEXT_SIZE_512: usize= (10*2+4)*DEGREE/8;
 pub const SECRET_CCA_SIZE_512: usize=SECRET_CPA_SIZE_512+PUBLIC_SIZE_512+64;
 pub const SHARED_SECRET_512: usize=32;
 
 pub const SECRET_CPA_SIZE_768: usize=3*(DEGREE*3)/2;
 pub const PUBLIC_SIZE_768: usize=32+3*(DEGREE*3)/2;
-pub const CIPHTERTEXT_SIZE_768: usize= (10*3+4)*DEGREE/8;
+pub const CIPHERTEXT_SIZE_768: usize= (10*3+4)*DEGREE/8;
 pub const SECRET_CCA_SIZE_768: usize=SECRET_CPA_SIZE_768+PUBLIC_SIZE_768+64;
 pub const SHARED_SECRET_768: usize=32;
 
 pub const SECRET_CPA_SIZE_1024: usize=4*(DEGREE*3)/2;
 pub const PUBLIC_SIZE_1024: usize=32+4*(DEGREE*3)/2;
-pub const CIPHTERTEXT_SIZE_1024: usize= (11*4+5)*DEGREE/8;
+pub const CIPHERTEXT_SIZE_1024: usize= (11*4+5)*DEGREE/8;
 pub const SECRET_CCA_SIZE_1024: usize=SECRET_CPA_SIZE_1024+PUBLIC_SIZE_1024+64;
 pub const SHARED_SECRET_1024: usize=32;
 

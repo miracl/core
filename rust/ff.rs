@@ -672,7 +672,7 @@ impl DF {
         return generic_tostring(&self.v,&mut cs,DL);
     }
 
-    /* Convert SFs to/from byte arrays */
+    /* Convert DFs to/from byte arrays */
     pub fn tobytes(&mut self, b: &mut [u8]) {
         for i in 0..DL {
             self.v[i].tobytearray(b, (DL - i - 1) * (big::MODBYTES as usize))

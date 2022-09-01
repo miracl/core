@@ -32,7 +32,7 @@ int main() {
     bool result;
     char raw[100];
     csprng RNG;
-    char sk[KYBER_SECRET_CPA_SIZE_768], pk[KYBER_PUBLIC_SIZE_768],ct[KYBER_CIPHTERTEXT_SIZE_768],skc[KYBER_SECRET_CCA_SIZE_768],ss[KYBER_SHARED_SECRET_768];
+    char sk[KYBER_SECRET_CPA_SIZE_768], pk[KYBER_PUBLIC_SIZE_768],ct[KYBER_CIPHERTEXT_SIZE_768],skc[KYBER_SECRET_CCA_SIZE_768],ss[KYBER_SHARED_SECRET_768];
     octet SKC = {0, sizeof(skc), skc};
     octet SK = {0, sizeof(sk), sk};
     octet PK = {0, sizeof(pk), pk};

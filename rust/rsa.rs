@@ -82,6 +82,15 @@ pub fn rsa_private_key_from_openssl(p: &[u8],q: &[u8],dp: &[u8],dq: &[u8],c: &[u
     prv.c.frombytes(c);    
 }
 
+pub fn rsa_private_key_to_openssl(prv: &RsaPrivateKey,p: &mut [u8],q: &mut [u8],dp: &mut [u8],dq: &mut [u8],c: &mut [u8]) {
+    let mut t = SF::new();
+    t.copy(&prv.p); t.tobytes(q);
+    t.copy(&prv.q); t.tobytes(p);
+    t.copy(&prv.dp); t.tobytes(dq);
+    t.copy(&prv.dq); t.tobytes(dp);
+    t.copy(&prv.c); t.tobytes(c);
+}
+
 pub fn key_pair_from_openssl(e: isize, p: &[u8],q: &[u8],dp: &[u8],dq: &[u8],c: &[u8], prv: &mut RsaPrivateKey, pbc: &mut RsaPublicKey) {
     rsa_private_key_from_openssl(p,q,dp,dq,c,prv);
     pbc.n = prv.p.mul(&prv.q);

@@ -54,7 +54,7 @@ fn main() {
     for j in 0..LOOPS {
         let mut sk: [u8; kyber::SECRET_CCA_SIZE_768] = [0; kyber::SECRET_CCA_SIZE_768];
         let mut pk: [u8; kyber::PUBLIC_SIZE_768] = [0; kyber::PUBLIC_SIZE_768];
-        let mut ct: [u8; kyber::CIPHTERTEXT_SIZE_768] = [0; kyber::CIPHTERTEXT_SIZE_768];
+        let mut ct: [u8; kyber::CIPHERTEXT_SIZE_768] = [0; kyber::CIPHERTEXT_SIZE_768];
         let mut ss: [u8; kyber::SHARED_SECRET_768]=[0;kyber::SHARED_SECRET_768];
         let mut r64: [u8;64]=[0;64];
         let mut r32: [u8;32]=[0;32];
