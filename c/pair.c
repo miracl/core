@@ -1119,6 +1119,7 @@ int PAIR_ZZZ_G2member(ECP2_ZZZ *P)
     FP2_YYY X;
     FP_YYY fx, fy;
 
+    if (ECP2_ZZZ_isinf(P)) return 0;
     FP_YYY_rcopy(&fx, Fra_YYY);
     FP_YYY_rcopy(&fy, Frb_YYY);
     FP2_YYY_from_FPs(&X, &fx, &fy);
@@ -1128,42 +1129,32 @@ int PAIR_ZZZ_G2member(ECP2_ZZZ *P)
 #endif
     BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
 
-    ECP2_ZZZ_copy(&W,P);
-    ECP2_ZZZ_frob(&W, &X);
-
     ECP2_ZZZ_copy(&T,P);
     ECP2_ZZZ_mul(&T,x);
 
-#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
-    ECP2_ZZZ_mul(&T,x);
-    BIG_XXX_zero(x); BIG_XXX_inc(x,6);
-    ECP2_ZZZ_mul(&T,x);
-#else
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     ECP2_ZZZ_neg(&T);
 #endif
+
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
+//https://eprint.iacr.org/2022/348.pdf
+    ECP2_ZZZ_copy(&W,&T);
+    ECP2_ZZZ_frob(&W,&X); // W=\psi(xP)
+    ECP2_ZZZ_add(&T,P); // T=xP+P
+    ECP2_ZZZ_add(&T,&W); // T=xP+P+\psi(xP)
+    ECP2_ZZZ_frob(&W,&X); // W=\psi^2(xP)
+    ECP2_ZZZ_add(&T,&W); // T=xp+P+\psi(xP)+\psi^2(xP)
+    ECP2_ZZZ_frob(&W,&X); // W=\psi^3(xP)
+    ECP2_ZZZ_dbl(&W); // W=\psi^3(2xP)
+#else
+//https://eprint.iacr.org/2021/1130
+    ECP2_ZZZ_copy(&W,P);
+    ECP2_ZZZ_frob(&W, &X);    // W=\psi(P)    
 #endif
-/* Not needed
-    ECP2_ZZZ_copy(&R,&W);
-    ECP2_ZZZ_frob(&R,&X);    // R=\psi^2(P)
-    ECP2_ZZZ_sub(&W,&R);
-    ECP2_ZZZ_copy(&R,&T);    // R=xP
-    ECP2_ZZZ_frob(&R,&X);
-    ECP2_ZZZ_add(&W,&R);     // W=\psi(P)-\psi^2(P)+\psi(xP)
-*/
+
     if (ECP2_ZZZ_equals(&W,&T)) return 1;
     return 0;
-/*
-	BIG_XXX q;
-	ECP2_ZZZ W;
-    if (ECP2_ZZZ_isinf(P)) return 0;
-    BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
-	ECP2_ZZZ_copy(&W,P);
-	ECP2_ZZZ_mul(&W,q);
-	if (!ECP2_ZZZ_isinf(&W)) return 0;
-	return 1; */
 }
-
 
 /* Check that m is in cyclotomic sub-group */
 /* Check that m!=1, conj(m)*m==1, and m.m^{p^4}=m^{p^2} */

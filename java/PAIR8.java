@@ -855,6 +855,7 @@ public final class PAIR8 {
 /* test G2 group membership */
     public static boolean G2member(ECP8 P)
     {
+        if (P.is_infinity()) return false;
         FP2[] F = ECP8.frob_constants();
         BIG x = new BIG(ROM.CURVE_Bnx);
 

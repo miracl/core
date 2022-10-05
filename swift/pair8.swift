@@ -882,6 +882,7 @@ public struct PAIR8 {
     // test G2 group membership */
     static public func G2member(_ P:ECP8) -> Bool
     {
+        if P.is_infinity() {return false}
         let F=ECP8.frob_constants()
         let x=BIG(ROM.CURVE_Bnx)
         var W=ECP8(); W.copy(P); W.frob(F,1)

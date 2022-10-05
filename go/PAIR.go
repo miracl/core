@@ -1013,39 +1013,36 @@ func G1member(P *ECP) bool {
 
 /* test G2 group membership */
 func G2member(P *ECP2) bool {
+	if P.Is_infinity() {return false}
 	f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
 	if SEXTIC_TWIST == M_TYPE {
 		f.inverse(nil)
 		f.norm()
 	}
 	x := NewBIGints(CURVE_Bnx)
-	W := NewECP2(); W.Copy(P); W.frob(f)
-	T := P.mul(x)
+
+	W := NewECP2(); 
+	T := P.mul(x)	
+	if SIGN_OF_X == NEGATIVEX {
+		T.neg()
+	}	
 	if CURVE_PAIRING_TYPE == BN {
-		T=T.mul(x)
-		six:=NewBIGint(6)
-		T=T.mul(six)
+//https://eprint.iacr.org/2022/348.pdf
+		W.Copy(T)
+		W.frob(f)
+		T.Add(P)
+		T.Add(W)
+		W.frob(f)
+		T.Add(W)
+		W.frob(f)
+		W.dbl()
 	} else {
-		if SIGN_OF_X == NEGATIVEX {
-			T.neg()
-		}
+//https://eprint.iacr.org/2021/1130
+		W.Copy(P); W.frob(f)
 	}
-/*
-	R:=NewECP2(); R.Copy(W)
-    R.frob(f)
-    W.Sub(R)
-    R.Copy(T)
-    R.frob(f)
-    W.Add(R)
-*/
+
 	if !W.Equals(T) {return false}
 	return true
-/*
-	q := NewBIGints(CURVE_Order)
-	if P.Is_infinity() {return false}
-	W:=P.mul(q)
-	if !W.Is_infinity() {return false}
-	return true */
 }
 
 /* Check that m is in cyclotomic sub-group */
@@ -1085,25 +1082,25 @@ func GTmember(m *FP12) bool {
 	f := NewFP2bigs(NewBIGints(Fra), NewBIGints(Frb))
 	x := NewBIGints(CURVE_Bnx)
 
-	r := NewFP12copy(m); r.frob(f)
+	r := NewFP12()
 	t := m.Pow(x)
-
+	if SIGN_OF_X == NEGATIVEX {
+		t.conj()
+	}
 	if CURVE_PAIRING_TYPE == BN {
-		t=t.Pow(x)
-		six:=NewBIGint(6)
-		t=t.Pow(six)
+//https://eprint.iacr.org/2022/348.pdf
+		r.Copy(t);
+		r.frob(f);
+		t.Mul(m);
+		t.Mul(r);
+		r.frob(f);
+		t.Mul(r);
+		r.frob(f);
+		r.usqr();
 	} else {
-		if SIGN_OF_X == NEGATIVEX {
-			t.conj()
-		}
+//https://eprint.iacr.org/2021/1130
+		r.Copy(m); r.frob(f)
 	}
 	if !r.Equals(t) {return false}
 	return true
-/*
-	q := NewBIGints(CURVE_Order)
-	r := m.Pow(q)
-	if !r.Isunity() {
-		return false
-	} 
-	return true */
 }

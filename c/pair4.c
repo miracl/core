@@ -875,6 +875,8 @@ int PAIR_ZZZ_G2member(ECP4_ZZZ *P)
     ECP4_ZZZ W,T;
     BIG_XXX x;
     FP2_YYY X[3];
+
+    if (ECP4_ZZZ_isinf(P)) return 0;
     ECP4_ZZZ_frob_constants(X);
     BIG_XXX_rcopy(x, CURVE_Bnx_ZZZ);
 

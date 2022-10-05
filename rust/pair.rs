@@ -944,43 +944,39 @@ pub fn g1member(P: &ECP) -> bool {
 /* test G2 group membership */
 #[allow(non_snake_case)]
 pub fn g2member(P: &ECP2) -> bool {
+    if P.is_infinity() {
+        return false;
+    }
     let mut f = FP2::new_bigs(&BIG::new_ints(&rom::FRA), &BIG::new_ints(&rom::FRB));    
     if ecp::SEXTIC_TWIST == ecp::M_TYPE {
         f.inverse(None);
         f.norm();
     }
     let x = BIG::new_ints(&rom::CURVE_BNX);
-    let mut W=ECP2::new(); W.copy(P); W.frob(&f);
+
+    let mut W=ECP2::new();
     let mut T=P.mul(&x);
-    if ecp::CURVE_PAIRING_TYPE == ecp::BN {
-        T=T.mul(&x);
-        let six=BIG::new_int(6);
-        T=T.mul(&six);
-    } else {
-        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-            T.neg();
-        }
+    if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+        T.neg();
     }
-/*
-    let mut R=ECP2::new(); R.copy(&W);
-    R.frob(&f);
-    W.sub(&R);
-    R.copy(&T);
-    R.frob(&f);
-    W.add(&R);
-*/
+    if ecp::CURVE_PAIRING_TYPE == ecp::BN {
+//https://eprint.iacr.org/2022/348.pdf
+        W.copy(&T);
+        W.frob(&f);
+        T.add(P);
+        T.add(&W);
+        W.frob(&f);
+        T.add(&W);
+        W.frob(&f);
+        W.dbl();
+    } else {
+//https://eprint.iacr.org/2021/1130
+        W.copy(P); W.frob(&f);
+    }
+
     if !W.equals(&T) {
         return false;
     }
-
-/*    let q = BIG::new_ints(&rom::CURVE_ORDER);
-    if P.is_infinity() {
-        return false;
-    }
-    let W=P.mul(&q); 
-    if !W.is_infinity() {
-        return false;
-    } */
     true
 }
 
@@ -1013,26 +1009,30 @@ pub fn gtmember(m: &FP12) -> bool {
     }
     let f = FP2::new_bigs(&BIG::new_ints(&rom::FRA), &BIG::new_ints(&rom::FRB));    
     let x = BIG::new_ints(&rom::CURVE_BNX);
-    let mut r=FP12::new_copy(m); r.frob(&f);
+
+    let mut r=FP12::new(); 
     let mut t=m.pow(&x);
-    if ecp::CURVE_PAIRING_TYPE == ecp::BN {
-        t=t.pow(&x);
-        let six=BIG::new_int(6);
-        t=t.pow(&six);
-    } else {
-        if ecp::SIGN_OF_X == ecp::NEGATIVEX {
-            t.conj();
-        }
+    if ecp::SIGN_OF_X == ecp::NEGATIVEX {
+        t.conj();
     }
+    if ecp::CURVE_PAIRING_TYPE == ecp::BN {
+//https://eprint.iacr.org/2022/348.pdf
+        r.copy(&t);
+        r.frob(&f);
+        t.mul(m);
+        t.mul(&r);
+        r.frob(&f);
+        t.mul(&r);
+        r.frob(&f);
+        r.usqr();
+    } else {
+//https://eprint.iacr.org/2021/1130
+        r.copy(m); r.frob(&f);
+    }
+
     if !r.equals(&t) {
         return false;
     }
 
-/*
-    let q = BIG::new_ints(&rom::CURVE_ORDER);
-    let r = m.pow(&q);
-    if !r.isunity() {
-        return false;
-    } */
     true
 }

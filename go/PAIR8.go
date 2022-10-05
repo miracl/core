@@ -873,6 +873,7 @@ func G1member(P *ECP) bool {
 
 /* test G2 group membership */
 func G2member(P *ECP8) bool {
+	if P.Is_infinity() {return false}
 	F := ECP8_frob_constants()	
 	x := NewBIGints(CURVE_Bnx)
 	W := NewECP8(); W.Copy(P); W.frob(F,1)

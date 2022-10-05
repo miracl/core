@@ -1072,6 +1072,7 @@ int ZZZ::PAIR_G2member(ECP2 *P)
     FP2 X;
     FP fx, fy;
 
+    if (ECP2_isinf(P)) return 0;
     FP_rcopy(&fx, Fra);
     FP_rcopy(&fy, Frb);
     FP2_from_FPs(&X, &fx, &fy);
@@ -1081,43 +1082,31 @@ int ZZZ::PAIR_G2member(ECP2 *P)
 #endif
     BIG_rcopy(x, CURVE_Bnx);
 
-    ECP2_copy(&W,P);
-    ECP2_frob(&W, &X);    // W=\psi(P)
-
     ECP2_copy(&T,P);
     ECP2_mul(&T,x);
 
-#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
-    ECP2_mul(&T,x);
-    BIG_zero(x); BIG_inc(x,6);
-    ECP2_mul(&T,x);
-#else
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     ECP2_neg(&T);
 #endif
+
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
+//https://eprint.iacr.org/2022/348.pdf
+    ECP2_copy(&W,&T);
+    ECP2_frob(&W,&X); // W=\psi(xP)
+    ECP2_add(&T,P); // T=xP+P
+    ECP2_add(&T,&W); // T=xP+P+\psi(xP)
+    ECP2_frob(&W,&X); // W=\psi^2(xP)
+    ECP2_add(&T,&W); // T=xp+P+\psi(xP)+\psi^2(xP)
+    ECP2_frob(&W,&X); // W=\psi^3(xP)
+    ECP2_dbl(&W); // W=\psi^3(2xP)
+#else
+//https://eprint.iacr.org/2021/1130
+    ECP2_copy(&W,P);
+    ECP2_frob(&W, &X);    // W=\psi(P)    
 #endif
 
-// T=xP
-/* Not needed
-    ECP2_copy(&R,&W);
-    ECP2_frob(&R,&X);    // R=\psi^2(P)
-    ECP2_sub(&W,&R);
-    ECP2_copy(&R,&T);    // R=xP
-    ECP2_frob(&R,&X);
-    ECP2_add(&W,&R);     // W=\psi(P)-\psi^2(P)+\psi(xP)
-*/
     if (ECP2_equals(&W,&T)) return 1;
     return 0;
-
-/*
-	BIG q;
-	ECP2 W;
-    if (ECP2_isinf(P)) return 0;
-    BIG_rcopy(q, CURVE_Order);
-	ECP2_copy(&W,P);
-	ECP2_mul(&W,q);
-	if (!ECP2_isinf(&W)) return 0;
-	return 1; */
 }
 
 /* Check that m is in cyclotomic sub-group */
@@ -1158,30 +1147,30 @@ int ZZZ::PAIR_GTmember(FP12 *m)
     FP2_from_FPs(&X, &fx, &fy);
     BIG_rcopy(x, CURVE_Bnx);
 
-    FP12_copy(&r,m);
-    FP12_frob(&r, &X);
-
     FP12_pow(&t,m,x);
 
-#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
-    FP12_pow(&t,&t,x);
-    BIG_zero(x); BIG_inc(x,6);
-    FP12_pow(&t,&t,x);
-#else
 #if SIGN_OF_X_ZZZ==NEGATIVEX
     FP12_conj(&t,&t);
 #endif
+
+#if PAIRING_FRIENDLY_ZZZ==BN_CURVE
+//https://eprint.iacr.org/2022/348.pdf
+    FP12_copy(&r,&t);
+    FP12_frob(&r,&X); // r=(m^x)^p
+    FP12_mul(&t,m); // t=(m^x).m
+    FP12_mul(&t,&r); // t=(m^x).m.(m^x)^p
+    FP12_frob(&r,&X); // r=(m^x)^p^2
+    FP12_mul(&t,&r); // t=(m^x).m.(m^x)^p.(m^x)^p^2
+    FP12_frob(&r,&X); // r=(m^x)^p^3
+    FP12_usqr(&r,&r); // r=(m^2x)^p^3
+#else
+//https://eprint.iacr.org/2021/1130
+    FP12_copy(&r,m);
+    FP12_frob(&r, &X);  
 #endif
 
     if (FP12_equals(&r,&t)) return 1;
     return 0;
-
-/*
-
-    BIG_rcopy(q, CURVE_Order);
-    FP12_pow(&r, m, q);
-	if (!FP12_isunity(&r)) return 0;
-	return 1; */
 }
 
 #ifdef HAS_MAIN

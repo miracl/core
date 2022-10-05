@@ -1015,6 +1015,7 @@ PFBNF */
     // test G2 group membership */
     static public func G2member(_ P:ECP2) -> Bool
     {
+        if P.is_infinity() {return false}
         var f=FP2(BIG(ROM.Fra),BIG(ROM.Frb));
         if CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE {  
             let pNIL:FP?=nil   
@@ -1022,31 +1023,27 @@ PFBNF */
             f.norm()
         }
         let x=BIG(ROM.CURVE_Bnx)
-        var W=ECP2(); W.copy(P); W.frob(f)
+        var W=ECP2()
         var T=P.mul(x)
-        if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
-            T=T.mul(x);
-            let six=BIG(6)
-            T=T.mul(six)
-        } else {
-            if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
-                T.neg()
-            }
+        if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
+            T.neg()
         }
-/*
-        var R=ECP2(); R.copy(W)
-        R.frob(f)
-        W.sub(R)
-        R.copy(T)
-        R.frob(f)
-        W.add(R)
-*/
+        if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
+//https://eprint.iacr.org/2022/348.pdf
+            W.copy(T)
+            W.frob(f)
+            T.add(P)
+            T.add(W)
+            W.frob(f)
+            T.add(W)
+            W.frob(f)
+            W.dbl()
+        } else {
+//https://eprint.iacr.org/2021/1130
+            W.copy(P); W.frob(f)
+        }
+
         if !W.equals(T) {return false}
-/*
-        let q=BIG(ROM.CURVE_Order)
-        if P.is_infinity() {return false}
-        let W=P.mul(q)
-        if !W.is_infinity() {return false} */
         return true
     }
 
@@ -1077,22 +1074,27 @@ PFBNF */
         let f=FP2(BIG(ROM.Fra),BIG(ROM.Frb));
         let x=BIG(ROM.CURVE_Bnx)
 
-        var r=FP12(m); r.frob(f)
+        var r=FP12(); r.frob(f)
         var t=m.pow(x)
-        if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
-            t=t.pow(x);
-            let six=BIG(6)
-            t=t.pow(six)
-        } else {
-            if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
-                t.conj()
-            }
+        if CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX {
+            t.conj()
         }
+        if CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN {
+//https://eprint.iacr.org/2022/348.pdf
+            r.copy(t)
+            r.frob(f)
+            t.mul(m)
+            t.mul(r)
+            r.frob(f)
+            t.mul(r)
+            r.frob(f)
+            r.usqr()
+        } else {
+//https://eprint.iacr.org/2021/1130
+            r.copy(m); r.frob(f)
+        }
+
         if !r.equals(t) { return false}
-/*
-        let q=BIG(ROM.CURVE_Order)
-        let r=m.pow(q)
-        if !r.isunity() {return false} */
         return true
     }
 

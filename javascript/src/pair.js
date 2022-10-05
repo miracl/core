@@ -1037,7 +1037,7 @@ var PAIR = function(ctx) {
 /* test G2 group membership */
     PAIR.G2member=function(P)
     {
-
+        if (P.is_infinity()) return false;
         var fa=new ctx.BIG(0); fa.rcopy(ctx.ROM_FIELD.Fra);
         var fb=new ctx.BIG(0); fb.rcopy(ctx.ROM_FIELD.Frb);
         var f=new ctx.FP2(fa,fb); 
@@ -1048,36 +1048,29 @@ var PAIR = function(ctx) {
 		    f.inverse(null);
 		    f.norm();
 		}
-        var W=new ctx.ECP2(); W.copy(P); W.frob(f);
+        var W=new ctx.ECP2();
         var T=P.mul(x);
-        if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BN) {
-            T=T.mul(x);
-            var six=new ctx.BIG(6);
-            T=T.mul(six);
-        } else {
-            if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
-                T.neg();
-            }
+        if (ctx.ECP.SIGN_OF_X==ctx.ECP.NEGATIVEX) {
+            T.neg();
         }
-/*
-        var R=new ctx.ECP2(); R.copy(W);
-        R.frob(f);
-        W.sub(R);
-        R.copy(T);
-        R.frob(f);
-        W.add(R);
-*/
+        if (ctx.ECP.CURVE_PAIRING_TYPE == ctx.ECP.BN) {
+//https://eprint.iacr.org/2022/348.pdf
+            W.copy(T);
+            W.frob(f);
+            T.add(P);
+            T.add(W);
+            W.frob(f);
+            T.add(W);
+            W.frob(f);
+            W.dbl();
+        } else {
+//https://eprint.iacr.org/2021/1130
+            W.copy(P); W.frob(f);
+        }
+
         if (W.equals(T))
             return true;
         return false;
-
-/*
-        var q = new ctx.BIG(0);
-        q.rcopy(ctx.ROM_CURVE.CURVE_Order);
-        if (P.is_infinity()) return false;
-        var W=P.mul(q);
-        if (!W.is_infinity()) return false;
-        return true; */
     };
 
 /* Check that m is in cyclotomic sub-group */

@@ -759,6 +759,7 @@ public final class PAIR4 {
 /* test G2 group membership */
     public static boolean G2member(ECP4 P)
     {
+        if (P.is_infinity()) return false;
         FP2[] F = ECP4.frob_constants();
         BIG x = new BIG(ROM.CURVE_Bnx);
 

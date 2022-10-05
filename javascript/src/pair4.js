@@ -761,6 +761,7 @@ var PAIR4 = function(ctx) {
 /* test G1 group membership */
     PAIR4.G1member=function(P)
     {
+        if (P.is_infinity()) return false;
         var x = new ctx.BIG(0);
         x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);
         var bcru = new ctx.BIG(0);
@@ -789,6 +790,7 @@ var PAIR4 = function(ctx) {
 /* test G2 group membership */
     PAIR4.G2member=function(P)
     {
+        if (P.is_infinity()) return false;
         var F = ctx.ECP4.frob_constants();
         var x = new ctx.BIG(0);
         x.rcopy(ctx.ROM_CURVE.CURVE_Bnx);

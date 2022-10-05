@@ -978,6 +978,8 @@ int ZZZ::PAIR_G2member(ECP8 *P)
     ECP8 W,T;
     BIG x;
     FP2 X[3];
+
+    if (ECP8_isinf(P)) return 0;
     ECP8_frob_constants(X);
     BIG_rcopy(x, CURVE_Bnx);
 

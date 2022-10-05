@@ -784,6 +784,7 @@ public struct PAIR4 {
     // test G2 group membership */
     static public func G2member(_ P:ECP4) -> Bool
     {
+        if P.is_infinity() {return false}
         let F=ECP4.frob_constants()
         let x=BIG(ROM.CURVE_Bnx)
         var W=ECP4(); W.copy(P); W.frob(F,1)

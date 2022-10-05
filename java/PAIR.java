@@ -945,14 +945,6 @@ PFBNF */
             T=T.mul(x); T.neg();
             W.getx().mul(cru);
             if (!W.equals(T)) return false;
-// Not needed
-//            W.add(P);
-//            T.getx().mul(cru);
-//            W.add(T);
-//            if (!W.is_infinity()) return false;
-/*
-            ECP W=P.mul(q);
-            if (!W.is_infinity()) return false; */
         }
         return true;
     }
@@ -960,41 +952,38 @@ PFBNF */
 /* test G2 group membership */
     public static boolean G2member(ECP2 P)
     {
+        if (P.is_infinity()) return false;
         FP2 f = new FP2(new BIG(ROM.Fra), new BIG(ROM.Frb));
         if (CONFIG_CURVE.SEXTIC_TWIST == CONFIG_CURVE.M_TYPE) {
             f.inverse(null);
             f.norm();
         }
         BIG x = new BIG(ROM.CURVE_Bnx);
-        ECP2 W=new ECP2(P); W.frob(f);
+        ECP2 W=new ECP2();
+
         ECP2 T=P.mul(x);
 
-        if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
-            T=T.mul(x);
-            BIG six=new BIG(6);
-            T=T.mul(six);
-        } else {
-            if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
-                T.neg();
-            }
+        if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+            T.neg();
         }
-/*
-        ECP2 R=new ECP2(W);
-        R.frob(f);
-        W.sub(R);
-        R.copy(T);
-        R.frob(f);
-        W.add(R);
-*/
+        if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
+//https://eprint.iacr.org/2022/348.pdf
+            W.copy(T);
+            W.frob(f);
+            T.add(P);
+            T.add(W);
+            W.frob(f);
+            T.add(W);
+            W.frob(f);
+            W.dbl();
+        } else {
+//https://eprint.iacr.org/2021/1130
+            W.copy(P); W.frob(f);
+        }
+
         if (W.equals(T))
             return true;
         return false;
-/*
-		BIG q=new BIG(ROM.CURVE_Order);  
-        if (P.is_infinity()) return false;
-        ECP2 W=P.mul(q);
-        if (!W.is_infinity()) return false;
-        return true;  */
     }
 
 /* Check that m is in cyclotomic sub-group */
@@ -1024,27 +1013,32 @@ PFBNF */
 
         FP2 f=new FP2(new BIG(ROM.Fra),new BIG(ROM.Frb));
         BIG x = new BIG(ROM.CURVE_Bnx);
-
-        FP12 r=new FP12(m); r.frob(f);
+        
+        FP12 r=new FP12();
         FP12 t=m.pow(x);
+        if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
+            t.conj();
+        }
+
         if (CONFIG_CURVE.CURVE_PAIRING_TYPE == CONFIG_CURVE.BN) {
-            t=t.pow(x);
-            BIG six=new BIG(6);
-            t=t.pow(six);
+//https://eprint.iacr.org/2022/348.pdf
+            r.copy(t);
+            r.frob(f);
+            t.mul(m);
+            t.mul(r);
+            r.frob(f);
+            t.mul(r);
+            r.frob(f);
+            r.usqr();
         } else {
-            if (CONFIG_CURVE.SIGN_OF_X == CONFIG_CURVE.NEGATIVEX) {
-                t.conj();
-            }
-        }      
+//https://eprint.iacr.org/2021/1130
+            r.copy(m); r.frob(f);
+        }  
+
         if (r.equals(t))
             return true;
         return false;
 
-/*
-        BIG q=new BIG(ROM.CURVE_Order);
-        FP12 r=m.pow(q); 
-        if (!r.isunity()) return false;
-        return true; */
     }
 
 }

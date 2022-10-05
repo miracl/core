@@ -887,6 +887,8 @@ int ZZZ::PAIR_G2member(ECP4 *P)
     ECP4 W,T;
     BIG x;
     FP2 X[3];
+
+    if (ECP4_isinf(P)) return 0;
     ECP4_frob_constants(X);
     BIG_rcopy(x, CURVE_Bnx);
 
