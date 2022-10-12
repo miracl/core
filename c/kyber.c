@@ -792,18 +792,18 @@ void KYBER1024_encrypt(byte *r32,octet *PK,octet *SS,octet *CT)
     KYBER_CCA_encrypt(PARAMS_1024,r32,PK,SS,CT);
 }
 
-void KYBER512_decrypt(octet *PK,octet *CT,octet *SS)
+void KYBER512_decrypt(octet *SK,octet *CT,octet *SS)
 {
-    KYBER_CCA_decrypt(PARAMS_512,PK,CT,SS);
+    KYBER_CCA_decrypt(PARAMS_512,SK,CT,SS);
 }
 
-void KYBER768_decrypt(octet *PK,octet *CT,octet *SS)
+void KYBER768_decrypt(octet *SK,octet *CT,octet *SS)
 {
-    KYBER_CCA_decrypt(PARAMS_768,PK,CT,SS);
+    KYBER_CCA_decrypt(PARAMS_768,SK,CT,SS);
 }
 
-void KYBER1024_decrypt(octet *PK,octet *CT,octet *SS)
+void KYBER1024_decrypt(octet *SK,octet *CT,octet *SS)
 {
-    KYBER_CCA_decrypt(PARAMS_1024,PK,CT,SS);
+    KYBER_CCA_decrypt(PARAMS_1024,SK,CT,SS);
 }
 
