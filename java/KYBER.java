@@ -271,20 +271,25 @@ public final class KYBER {
 		}
 	}
 
+    static short caste(byte x) {
+        return (short)((int)x&0xff);
+    }
+
 // extract ab bits into word from dense byte stream
 	static short nextword(int ab,byte[] t,int[] position)
 	{
 		int ptr=position[0]; // index in array
 		int bts=position[1]; // bit index in byte
-		short r=(short)(t[ptr]>>bts);
+		short r=(short)(     ((int)t[ptr]&0xff)    >>bts);
 		short mask=(short)((1<<ab)-1);
 		short w;
 		int i=0;
+
 		int gotbits=8-bts; // bits left in current byte
 		while (gotbits<ab)
 		{
 			i++;
-			w=(short)t[ptr+i];
+			w=(short)(((int)t[ptr+i])&0xff);
 			r|=w<<gotbits;
 			gotbits+=8;
 		}
@@ -560,19 +565,21 @@ public final class KYBER {
 			poly_add(u[i],u[i],r);
 			poly_reduce(u[i]);
 		}
+
 		int[] pos=new int[2];
 		pos[0]=pos[1]=0;
 		for (i=0;i<ck;i++)
 			decode(pk,12,p[i],pos);	
-		
+	
 		poly_mul(v,p[0],q[0]);
+
 		for (i=1;i<ck;i++)
 		{
 			poly_mul(r,p[i],q[i]);
 			poly_add(v,v,r);
-		}
-		poly_invntt(v);
-		
+		}    
+		poly_invntt(v);        
+
 // create e2
 		SHA3 sh = new SHA3(SHA3.SHAKE256);
 		for (j=0;j<33;j++)
@@ -608,7 +615,13 @@ public final class KYBER {
 		pos[0]=pos[1]=0;
 		for (i=0;i<ck;i++)
 			encode(u[i],pos,du,ct,i);
-		encode(v,pos,dv,ct,ck);
+
+        int len=(dv*KY_DEGREE/8); // last part of CT
+        byte[] last=new byte[len];
+
+		encode(v,pos,dv,last,0);
+        for (i=0;i<len;i++)
+            ct[ciphertext_size-len+i]=last[i];
 	}
 
 // Re-encrypt and check that ct is OK (if so return is zero)
@@ -628,7 +641,13 @@ public final class KYBER {
 		d1=0;
 		for (i=0;i<ck;i++)
 			d1|=chk_encode(u[i],pos,du,ct,i);
-		d2=chk_encode(v,pos,dv,ct,ck);
+
+        int len=(dv*KY_DEGREE/8); // last part of CT
+        byte[] last=new byte[len];
+        for (i=0;i<len;i++)
+            last[i]=ct[ciphertext_size-len+i];
+
+		d2=chk_encode(v,pos,dv,last,0);
 
 		if ((d1|d2)==0)
 			return 0;
@@ -668,13 +687,8 @@ public final class KYBER {
 		for (i=0;i<32;i++)
 			coins[i]=g[i+32];
 
-System.out.printf("coins[0]= %d\n",((int)coins[0])&0xff);
-System.out.printf("hm[0]= %d\n",((int)hm[0])&0xff);
-
 		CPA_encrypt(params,coins,pk,hm,ct);
 
-System.out.printf("ct[0]= %d\n",((int)ct[0])&0xff);
-System.out.printf("ciphertext_size= %d\n",ciphertext_size);
 		sh = new SHA3(SHA3.HASH256);
 		for (i=0;i<ciphertext_size;i++)
 			sh.process(ct[i]);
@@ -687,7 +701,6 @@ System.out.printf("ciphertext_size= %d\n",ciphertext_size);
 			sh.process(h[i]);
 
 		sh.shake(ss,shared_secret_size);
-System.out.printf("ss[0]= %d\n",((int)ss[0])&0xff);
 	}
 
 	static void CPA_decrypt(int[] params,byte[] SK,byte[] CT,byte[] SS)

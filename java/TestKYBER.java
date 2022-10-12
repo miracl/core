@@ -23,54 +23,63 @@ package org.miracl.core;
 
 import java.util.Scanner;
 import junit.framework.TestCase;       //
+import org.miracl.core.RAND;
 import org.miracl.core.KYBER;
 
 public class TestKYBER extends TestCase {
     public static void testKYBER() {
-        int i;
+        int i,LOOPS=100;
+        byte[] RAW = new byte[100];
         byte[] R64 = new byte[64];
         byte[] R32 = new byte[32];
 		byte[] SK= new byte[KYBER.SECRET_CCA_SIZE_768];
 		byte[] PK= new byte[KYBER.PUBLIC_SIZE_768];
 		byte[] SS=new byte[KYBER.SHARED_SECRET_768];
 		byte[] CT=new byte[KYBER.CIPHERTEXT_SIZE_768];
-        for (i = 0; i < 64; i++) R64[i] = (byte)(i + 2);
-        for (i = 0; i < 32; i++) R32[i] = (byte)(i + 3);
 
-		KYBER.keypair768(R64,SK,PK);
+        RAND RNG = new RAND();
+      
+        for (i = 0; i < 100; i++) RAW[i] = (byte)(i + 1);
+        RNG.seed(100, RAW);
 
-		System.out.printf("Secret Key length= %d\n",SK.length);
+        System.out.println("\nTesting KYBER Key Exchange");
 
-        System.out.printf("Secret key= 0x");
-        for (i = 0; i < SK.length; i++)
-            System.out.printf("%02x", SK[i]);
-        System.out.println();
+        for (int j=0;j<LOOPS;j++) {
+        
+            for (i = 0; i < 64; i++) R64[i] = (byte)RNG.getByte(); //(byte)(i + 2);
 
+		    KYBER.keypair768(R64,SK,PK);
+/*
+            System.out.printf("Public key= 0x");
+            for (i = 0; i < PK.length; i++)
+                System.out.printf("%02x", PK[i]);
+            System.out.println();
 
-        System.out.printf("Public key= 0x");
-        for (i = 0; i < PK.length; i++)
-            System.out.printf("%02x", PK[i]);
-        System.out.println();
+            System.out.printf("Secret key= 0x");
+            for (i = 0; i < SK.length; i++)
+                System.out.printf("%02x", SK[i]);
+            System.out.println();
+*/
+            for (i = 0; i < 32; i++) R32[i] = (byte)RNG.getByte(); //(byte)(i + 3);
 
-		KYBER.encrypt768(R32,PK,SS,CT);
+		    KYBER.encrypt768(R32,PK,SS,CT);
+/*
+		    System.out.printf("Ciphertext= 0x");
+		    for (i=0;i<CT.length;i++ )
+			    System.out.printf("%02x",CT[i]);
+            System.out.println();
+*/
 
-		System.out.printf("Ciphertext= 0x");
-		for (i=0;i<CT.length;i++ )
-			System.out.printf("%02x",CT[i]);
-        System.out.println();
+            System.out.printf("j= %d\n",j);
+            for (i = 0; i < SS.length; i++)
+                System.out.printf("%02x", SS[i]);	
+            System.out.println();
 
+		    KYBER.decrypt768(SK,CT,SS);
 
-        System.out.printf("Shared secret= 0x");
-        for (i = 0; i < SS.length; i++)
-            System.out.printf("%02x", SS[i]);	
-        System.out.println();
-
-		KYBER.decrypt768(SK,CT,SS);
-
-        System.out.printf("Shared secret= 0x");
-        for (i = 0; i < SS.length; i++)
-            System.out.printf("%02x", SS[i]);	
-        System.out.println();
-
+            for (i = 0; i < SS.length; i++)
+                System.out.printf("%02x", SS[i]);	
+            System.out.println();
+        }
     }
 }
