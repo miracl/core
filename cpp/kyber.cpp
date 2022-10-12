@@ -294,7 +294,7 @@ static byte nextbyte16(int ab,sign16 t[],int &ptr, int &bts)
     return (byte)r&0xff;        
 }
 
-// encode polynomial vector of length len with coefficients of length 2^L, into packed bytes
+// encode polynomial vector of length len with coefficients of length L, into packed bytes
 static void encode(sign16 t[],int len,int L,byte pack[])
 {
     int ptr,bts,n;
@@ -316,7 +316,7 @@ static byte chk_encode(sign16 t[],int len,int L,byte pack[])
     return diff;
 }
 
-// decode packed bytes into polynomial vector of length len, with coefficients of length 2^L
+// decode packed bytes into polynomial vector of length len, with coefficients of length L
 static void decode(byte pack[],int L,sign16 t[],int len)
 {
     int ptr,bts,i;
@@ -437,7 +437,7 @@ static void KYBER_CPA_keypair(const int *params,byte *tau,octet *sk,octet *pk)
         pk->val[public_key_size-32+i]=rho[i];
 }
 
-// provide 64 random bytes, output secret and public keys
+// input 64 random bytes, output secret and public keys
 static void KYBER_CCA_keypair(const int *params,byte *randbytes64,octet *sk,octet *pk)
 {
     int i;
@@ -782,17 +782,17 @@ void core::KYBER1024_encrypt(byte *r32,octet *PK,octet *SS,octet *CT)
     KYBER_CCA_encrypt(PARAMS_1024,r32,PK,SS,CT);
 }
 
-void core::KYBER512_decrypt(octet *PK,octet *CT,octet *SS)
+void core::KYBER512_decrypt(octet *SK,octet *CT,octet *SS)
 {
-    KYBER_CCA_decrypt(PARAMS_512,PK,CT,SS);
+    KYBER_CCA_decrypt(PARAMS_512,SK,CT,SS);
 }
 
-void core::KYBER768_decrypt(octet *PK,octet *CT,octet *SS)
+void core::KYBER768_decrypt(octet *SK,octet *CT,octet *SS)
 {
-    KYBER_CCA_decrypt(PARAMS_768,PK,CT,SS);
+    KYBER_CCA_decrypt(PARAMS_768,SK,CT,SS);
 }
 
-void core::KYBER1024_decrypt(octet *PK,octet *CT,octet *SS)
+void core::KYBER1024_decrypt(octet *SK,octet *CT,octet *SS)
 {
-    KYBER_CCA_decrypt(PARAMS_1024,PK,CT,SS);
+    KYBER_CCA_decrypt(PARAMS_1024,SK,CT,SS);
 }
