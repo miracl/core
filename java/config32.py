@@ -328,7 +328,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 os.system(makedir + corepath)
 
 os.system(copytext + "pom.xml " + "core" + slashtext + ".")
-for file in ['HASH*.java', 'HMAC.java', 'SHA3.java', 'RAND.java', 'AES.java', 'GCM.java', 'NHS.java', 'SHARE.java']:
+for file in ['HASH*.java', 'HMAC.java', 'SHA3.java', 'RAND.java', 'AES.java', 'GCM.java', 'NHS.java', 'KYBER.java', 'DILITHIUM.java', 'SHARE.java']:
     os.system(copytext + file + " " + corepath+slashtext+".")
 
 
@@ -461,6 +461,8 @@ if testing:
         interactive_prompt_exect(i+1)
 
 os.system(copytext+"TestNHS.java "+coreTestPath+slashtext+"TestNHS.java")
+os.system(copytext+"TestKYBER.java "+coreTestPath+slashtext+"TestKYBER.java")
+os.system(copytext+"TestDLTHM.java "+coreTestPath+slashtext+"TestDLTHM.java")
 
 if testing :
     os.chdir("core")

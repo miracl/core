@@ -800,6 +800,22 @@ public final class KYBER {
 		sh.shake(SS,shared_secret_size);
 	}
 
+	public static void keypair512(byte[] r64,byte[] SK,byte[] PK)
+	{
+		CCA_keypair(PARAMS_512,r64,SK,PK);
+	}
+
+	public static void encrypt512(byte r32[],byte[] PK,byte[] SS,byte[] CT)
+	{
+		CCA_encrypt(PARAMS_512,r32,PK,SS,CT);
+	}
+
+	public static void decrypt512(byte[] SK,byte[] CT,byte[] SS)
+	{
+		CCA_decrypt(PARAMS_512,SK,CT,SS);
+	}
+
+
 	public static void keypair768(byte[] r64,byte[] SK,byte[] PK)
 	{
 		CCA_keypair(PARAMS_768,r64,SK,PK);
@@ -813,5 +829,20 @@ public final class KYBER {
 	public static void decrypt768(byte[] SK,byte[] CT,byte[] SS)
 	{
 		CCA_decrypt(PARAMS_768,SK,CT,SS);
+	}
+
+	public static void keypair1024(byte[] r64,byte[] SK,byte[] PK)
+	{
+		CCA_keypair(PARAMS_1024,r64,SK,PK);
+	}
+
+	public static void encrypt1024(byte r32[],byte[] PK,byte[] SS,byte[] CT)
+	{
+		CCA_encrypt(PARAMS_1024,r32,PK,SS,CT);
+	}
+
+	public static void decrypt1024(byte[] SK,byte[] CT,byte[] SS)
+	{
+		CCA_decrypt(PARAMS_1024,SK,CT,SS);
 	}
 }

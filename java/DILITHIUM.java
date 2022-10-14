@@ -85,7 +85,7 @@ public final class DILITHIUM {
 
     static int redc(long T) {
         long m = (T * DL_ND) & 0xffffffffL;
-        return (int)((m * DL_PRIME + T) >>> WL);
+        return (int)((m * DL_PRIME + T) >>> 32);
     }
 
     static int nres(int x) {
@@ -169,10 +169,10 @@ public final class DILITHIUM {
 /* Output fully reduced */
 public static final int NTTL=1; // maybe should be 2?
 
-    static void intt(sign32 *x)
+    static void intt(int[] x)
     {
         int m, i, j, k, n,lim,t = 1;
-        sign32 S, U, V, W, q = DL_PRIME;
+        int S, U, V, W, q = DL_PRIME;
 
         m = DL_DEGREE/2;
         n=DL_LGN;
@@ -279,7 +279,7 @@ public static final int NTTL=1; // maybe should be 2?
     }
 
 /* fully reduces modulo q */
-    static void poly_hard_reduce(sign32 *poly) {
+    static void poly_hard_reduce(int[] poly) {
         int e;
         for (int i = 0; i < DL_DEGREE; i++)
         {
@@ -294,9 +294,8 @@ public static final int NTTL=1; // maybe should be 2?
     {
 		SHA3 sh = new SHA3(SHA3.SHAKE128);
         int m,n;
-        int b0,b1,b2;
         int cf;
-        byte buff[840];  // should be plenty
+        byte[] buff=new byte[840];  // should be plenty
         for (m=0;m<32;m++)
             sh.process(rho[m]);
         sh.process(j&0xff);
@@ -347,7 +346,7 @@ public static final int NTTL=1; // maybe should be 2?
         }
 	    position[0]=ptr;
 	    position[1]=bts;
-        return (byte)r&0xff;        
+        return (byte)(r&0xff);        
     }
 
 // array t has ab active bits per word
@@ -383,7 +382,7 @@ public static final int NTTL=1; // maybe should be 2?
         }
 		position[0]=ptr;
 		position[1]=bts;
-        return (byte)r&0xff;        
+        return (byte)(r&0xff);        
     }
 
 // array t has ab active bits per word
@@ -419,11 +418,11 @@ public static final int NTTL=1; // maybe should be 2?
         }
 		position[0]=ptr;
 		position[1]=bts;
-        return (byte)r&0xff;        
+        return (byte)(r&0xff);        
     }
 
 // extract ab bits into word from dense byte stream
-    static int nextword(const int ab,int max,byte[] t,int[] position)
+    static int nextword(int ab,int max,byte[] t,int[] position)
     {
 		int ptr=position[0]; // index in array
 		int bts=position[1]; // bit index in word
@@ -435,7 +434,7 @@ public static final int NTTL=1; // maybe should be 2?
         while (gotbits<ab)
         {
             i++;
-            w=(int)t[ptr+i])&0xff;
+            w=(int)(t[ptr+i])&0xff;
             r|=w<<gotbits;
             gotbits+=8;
         }
@@ -462,7 +461,7 @@ public static final int NTTL=1; // maybe should be 2?
         int ck=params[3];
         for (i=0;i<32;i++)
             pk[i]=rho[i];
-        n=32; ptr=bts=0;
+        n=32; 
         for (j=0;j<ck;j++)
         {
             for (i=0;i<(DL_DEGREE*DL_TD)/8;i++ )
@@ -472,18 +471,17 @@ public static final int NTTL=1; // maybe should be 2?
     }
 
 // unpack public key
-    static void unpack_pk(int[] params,byte[] rho,short[] t1,byte[] pk)
+    static void unpack_pk(int[] params,byte[] rho,short[][] t1,byte[] pk)
     {
 		int[] pos=new int[2];
-		pos[0]=pos[1]=0;
+		pos[0]=0; pos[1]=32;
         int i,j,ck=params[3];
         for (i=0;i<32;i++)
             rho[i]=pk[i];
-        bts=0; ptr=32;
         for (j=0;j<ck;j++)
         {
             for (i=0;i<DL_DEGREE;i++ )
-                t1[j][i]=(sign16)nextword(DL_TD,0,pk,pos);
+                t1[j][i]=(short)nextword(DL_TD,0,pk,pos);
         }
     }
 // secret key of size 32*3+DEGREE*(K*D+L*LG2ETA1+K*LG2ETA1)/8
@@ -523,7 +521,7 @@ public static final int NTTL=1; // maybe should be 2?
         return n;
     }
 
-    static void unpack_sk(int[] params,byte[] rho,byte[] bK,byte[] tr,byte[] s1,byte[] s2,short[] t0,byte[] sk)
+    static void unpack_sk(int[] params,byte[] rho,byte[] bK,byte[] tr,byte[][] s1,byte[][] s2,short[][] t0,byte[] sk)
     {
         int i,j,n=32;
         int ck=params[3];
@@ -576,18 +574,17 @@ public static final int NTTL=1; // maybe should be 2?
 //pre-process z
         for (i=0;i<el;i++)
         {
-            row=DL_DEGREE*i;
             for (m=0;m<DL_DEGREE;m++)
             {
                 t=z[i][m];
                 if (t>DL_PRIME/2) t-=DL_PRIME;
                 t=gamma1-t;
-                z[row+m]=t;
+                z[i][m]=t;
             }
         }
         for (j=0;j<el;i++)
         {
-            for (i=0;i<(DL_DEGREE*(lg+1))/8;i++) {
+            for (i=0;i<(DL_DEGREE*(lg+1))/8;i++) 
                 sig[n++]=nextbyte32(lg+1,0,z[j],pos);
         }
         for (i=0;i<omega+ck;i++)
@@ -623,5 +620,355 @@ public static final int NTTL=1; // maybe should be 2?
         for (i=0;i<omega+ck;i++)
             h[i]=sig[m++];    
     }
+
+// rejection sampling in range -ETA to +ETA
+	static void sample_Sn(int[] params,byte[] rhod,byte[] s,int n)
+	{
+		byte eta=(byte)params[5];
+
+		int lg2eta1=params[6];
+		SHA3 sh = new SHA3(SHA3.SHAKE256);
+		byte[] buff=new byte[272];
+		for (int m=0;m<64;m++)
+			sh.process(rhod[m]);
+		sh.process(n&0xff);
+		sh.process((n>>8)&0xff);
+		sh.shake(buff,272);
+		int[] pos=new int[2];
+		pos[0]=0; pos[1]=0;
+		for (int m=0;m<DL_DEGREE;m++)
+		{
+			do
+			{
+				s[m]=(byte)nextword(lg2eta1,0,buff,pos);
+			}
+			while (s[m]>2*eta);
+			s[m]=(byte)(eta-s[m]);
+		}
+	}
+
+// uniform random sampling
+	static void sample_Y(int[] params,int k,byte[] rhod,int[][] y)
+	{
+		int i,j,m,ki;   // 2^n-1
+		int lg=params[1];
+		int gamma1=1<<lg;
+		int el=params[4];
+		int w,t;
+		byte[] buff = new byte[DL_YBYTES];
+
+		for (i=0;i<el;i++)
+		{
+			SHA3 sh = new SHA3(SHA3.SHAKE256);
+			for (j=0;j<64;j++)
+				sh.process(rhod[j]);
+			ki=k+i;
+			sh.process(ki&0xff);
+			sh.process(ki>>8);
+			sh.shake(buff,DL_YBYTES);
+
+			int[] pos=new int[2];
+			pos[0]=0; pos[1]=0;
+			for (m=0;m<DL_DEGREE;m++)
+			{  // take in LG+1 bits at a time
+				w=nextword(lg+1,0,buff,pos);  // 20 bits
+				w=gamma1-w;
+				t=w>>31;
+				y[i][m]=w+(DL_PRIME&t);
+			}
+		}
+	}
+
+// CRH(rho,t1)
+	static void CRH1(int[] params,byte[] H,byte[] rho,short[][] t1)
+	{
+		int i,j;
+		int[] pos=new int[2];
+		pos[0]=0; pos[1]=0;
+		int ck=params[3];
+		SHA3 sh = new SHA3(SHA3.SHAKE256);
+		for (i=0;i<32;i++)
+			sh.process(rho[i]);
+		for (j=0;j<ck;j++)
+		{
+			for (i=0;i<(DL_DEGREE*DL_TD)/8;i++)
+					sh.process(nextbyte16(DL_TD,0,t1[j],pos));
+		}
+		sh.shake(H,32);
+	}
+
+// CRH(tr,M)
+	static void CRH2(byte[] H,byte[] tr,byte[] mess,int mlen)
+	{
+		int i;
+		SHA3 sh = new SHA3(SHA3.SHAKE256);
+		for (i=0;i<32;i++)
+			sh.process(tr[i]);
+		for (i=0;i<mlen;i++)
+			sh.process(mess[i]);
+		sh.shake(H,64);
+	}
+
+// CRH(K,mu)
+	static void CRH3(byte[] H,byte[] bK,byte[] mu)
+	{
+		int i;
+		SHA3 sh = new SHA3(SHA3.SHAKE256);
+		for (i=0;i<32;i++)
+			sh.process(bK[i]);
+		for (i=0;i<64;i++)
+			sh.process(mu[i]);
+		sh.shake(H,64);
+	}
+
+// H(mu,w1)
+	static void H4(int[] params,byte[] CT,byte[] mu,byte[][] w1)
+	{
+		int i,j;
+		int[] pos=new int[2];
+		pos[0]=0; pos[1]=0;
+		int ck=params[3];
+		int dv=params[2];
+		int w1b=4;
+		if (dv==88) w1b=6;
+		SHA3 sh = new SHA3(SHA3.SHAKE256);
+		for (i=0;i<64;i++)
+			sh.process(mu[i]);
+		for (j=0;j<ck;j++)
+		{
+			for (i=0;i<(DL_DEGREE*w1b)/8;i++)
+				sh.process(nextbyte8(w1b,0,w1[j],pos));
+		}
+		sh.shake(CT,32);
+	}
+
+	static void SampleInBall(int[] params,byte[] ct,int[] c)
+	{
+		int i,j,k,n,b,sn;
+		int tau=params[0];
+		byte[] signs=new byte[8];
+		byte[] buff=new byte[136];
+ 		SHA3 sh = new SHA3(SHA3.SHAKE256);
+		for (i=0;i<32;i++)
+			sh.process(ct[i]);
+		sh.shake(buff,136);
+		for (i=0;i<8;i++)
+			signs[i]=buff[i];
+		k=8; 
+		b=0;
+		poly_zero(c);
+		sn=signs[0]; n=1;
+		for (i=DL_DEGREE-tau;i<DL_DEGREE;i++)
+		{
+			do
+			{
+				j=buff[k++];
+			} while (j>i);
+			c[i]=c[j];
+			c[j]=1-2*((int)sn&1);
+			sn>>=1; b++;
+			if (b==8) {
+				sn=signs[n++]; b=0;
+			}
+		}	
+	}
+
+	static void Power2Round(int[] t,short[] t0,short[] t1)
+	{
+		for (int m=0;m<DL_DEGREE;m++)
+		{   
+			int w=t[m];
+
+			//t1[m]=p2r(&w);
+			int d=(1<<DL_D);
+			int r=(w+d/2-1)>>DL_D;
+			w-=(r<<DL_D);
+			t1[m]=(short)r;
+			t0[m]=(short)w;
+		}
+	}
+
+// ALPHA = (Q-1)/16 - borrowed from dilithium ref implementation
+	static int decompose_lo(int[] params,int a) {
+		int gamma2,dv=params[2];
+		int a0,a1;
+		a1  = (a + 127) >> 7;
+
+		if (dv==32)
+		{
+			a1  = (a1*1025 + (1 << 21)) >> 22;
+			a1 &= 15;
+			gamma2=(DL_PRIME-1)/32;
+		} else { // 88
+			a1  = (a1*11275 + (1 << 23)) >> 24;
+			a1 ^= ((43 - a1) >> 31) & a1;
+			gamma2=(DL_PRIME-1)/88;
+		}
+
+		a0  = a - a1*2*gamma2;  // (Q-1)/2R=alpha
+		a0 -= (((DL_PRIME-1)/2 - a0) >> 31) & DL_PRIME;
+		a0 += (a0>>31)&DL_PRIME;
+		return a0;
+	}
+
+// ALPHA = (Q-1)/16
+	static byte decompose_hi(int[] params,int a) {
+		int dv=params[2];
+		int a1;
+		a1  = (a + 127) >> 7;
+		if (dv==32) {
+			a1  = (a1*1025 + (1 << 21)) >> 22;
+		 a1 &= 15;
+		} else {
+			a1  = (a1*11275 + (1 << 23)) >> 24;
+			a1 ^= ((43 - a1) >> 31) & a1;
+		}
+		return (byte)a1;
+	}
+
+	static void lobits(int[] params,int[] r0,int[] r)
+	{
+		for (int m=0;m<DL_DEGREE;m++)
+			r0[m]=decompose_lo(params,r[m]);
+	}
+
+	static void hibits(int[] params,byte[] r1,int[] r)
+	{
+		for (int m=0;m<DL_DEGREE;m++)
+			r1[m]=decompose_hi(params,r[m]);
+	}    
+
+// before h initialised to zeros, hptr=0
+// after new hptr returned and h[OMEGA+i]= hptr
+	static int MakePartialHint(int[] params,byte[] h,int hptr,int[] z,int[] r)
+	{
+		byte a0,a1;
+		int rz;
+		int omega=params[7];
+		for (int m=0;m<DL_DEGREE;m++)
+		{
+			a0=decompose_hi(params,r[m]);
+			rz=r[m]+z[m];
+			rz-=DL_PRIME;
+			rz=rz+((rz>>31)&DL_PRIME);
+			a1=decompose_hi(params,rz);
+			if (a0!=a1) {
+				if (hptr>=omega) return omega+1;
+				h[hptr++]=(byte)(m&0xff);
+			}
+		}
+		return hptr;
+	}
+
+	static int UsePartialHint(int[] params,byte[] r,byte[] h,int hptr,int i,int[] w)
+	{
+		byte dv=(byte)params[2];
+		int omega=params[7];
+		byte a1,md=(byte)(dv/2);
+		int a0;
+		for (int m=0;m<DL_DEGREE;m++)
+		{
+			a1=decompose_hi(params,w[m]);
+			if (m==h[hptr] && hptr<h[omega+i])
+			{
+				hptr++;
+				a0=decompose_lo(params,w[m]);
+				if (a0<=DL_PRIME/2) {
+					a1++;
+					if (a1>=md) a1-=md;
+				} else {
+					a1--;
+					if (a1<0) a1+=md;
+				}
+			}
+			r[m]=a1;
+		}
+		return hptr;
+	}
+
+	static int infinity_norm(int[] w)
+	{
+		int az,n=0;
+		for (int m=0;m<DL_DEGREE;m++)
+		{
+			az=w[m];
+			if (az>DL_PRIME/2) az=DL_PRIME-az;
+			if (az>n) n=az;    
+		}
+		return n;
+	}
+
+// Dilithium API
+
+	static void keypair(int[] params,byte[] tau,byte[] sk,byte[] pk)
+	{
+		int i,j;
+		byte[] buff=new byte[128];
+		byte[] rho=new byte[32];
+		byte[] rhod=new byte[64];
+		byte[] bK=new byte[32];
+		byte[] tr=new byte[32];          // 320 bytes
+		int[] Aij=new int[DL_DEGREE];     // 1024 bytes
+		int[] w=new int[DL_DEGREE]; // work space  1024 bytes
+		int[] r=new int[DL_DEGREE]; // work space  1024 bytes total = 12352
+
+		int ck=params[3];
+		int el=params[4];
+
+		byte[][] s1=new byte[el][DL_DEGREE];     // 1280 bytes
+		byte[][] s2=new byte[ck][DL_DEGREE];     // 1536 bytes
+		short[][] t0=new short[ck][DL_DEGREE];    // 3072 bytes
+		short[][] t1=new short[ck][DL_DEGREE];    // 3072 bytes
+
+		SHA3 sh = new SHA3(SHA3.SHAKE256);
+  
+		for (i=0;i<32;i++)
+			sh.process(tau[i]); 
+		sh.shake(buff,128);
+		for (i=0;i<32;i++)
+		{
+			rho[i]=buff[i];
+			bK[i]=buff[i+96];
+		}
+		for (i=0;i<64;i++)
+			rhod[i]=buff[32+i];
+
+		for (i=0;i<el;i++)
+		{
+			sample_Sn(params,rhod,s1[i],i);
+		}
+
+		for (i=0;i<ck;i++)
+		{
+			sample_Sn(params,rhod,s2[i],el+i);
+			poly_zero(r);
+			for (j=0;j<el;j++)
+			{
+				poly_scopy(w,s1[j]);
+				ntt(w);  
+				ExpandAij(rho,Aij,i,j);  // This is bottleneck
+				poly_mul(w,w,Aij);
+				poly_add(r,r,w);
+            //poly_soft_reduce(r);  // be lazy
+			}
+			poly_hard_reduce(r);  
+			intt(r);
+			poly_scopy(w,s2[i]);
+			poly_pos(w);
+			poly_add(r,r,w);
+			poly_soft_reduce(r);
+			Power2Round(r,t0[i],t1[i]);
+		}
+
+		CRH1(params,tr,rho,t1);
+
+		int pklen=pack_pk(params,pk,rho,t1);
+		int sklen=pack_sk(params,sk,rho,bK,tr,s1,s2,t0);
+	}
+
+	public static void keypair_3(byte[] tau,byte[] sk,byte[] pk)
+	{
+		keypair(PARAMS_3,tau,sk,pk);
+	}
 
 }

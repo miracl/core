@@ -788,7 +788,7 @@ static void hibits(const int *params,sign8 r1[],sign32 r[])
 {
     int m;
     for (m=0;m<DL_DEGREE;m++)
-        r1[m]=(sign32)decompose_hi(params,r[m]);
+        r1[m]=decompose_hi(params,r[m]);
 }    
 
 
