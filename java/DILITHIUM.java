@@ -43,7 +43,7 @@ public final class DILITHIUM {
     public static final int DL_ONE = 0x3FFE00;    // R mod Q
     public static final int DL_COMBO = 0xA3FA;    // ONE*inv mod Q
     public static final int DL_R2MODP = 0x2419FF; // R^2 mod Q
-    public static final int DL_ND = 0xFC7FDFFF;   // 1/(R-Q) mod R
+    public static final long DL_ND = 0xFC7FDFFFL;   // 1/(R-Q) mod R
 
     public static final int DL_MAXLG = 19;
     public static final int DL_MAXK = 8;     // could reduce these if not using highest security
@@ -93,7 +93,7 @@ public final class DILITHIUM {
     }
 
     static int modmul(int a, int b) {
-        return redc((long)a * b);
+        return redc( ((long)(a) & 0xffffffffL) * ((long)(b) & 0xffffffffL)  );
     }
 
 // make all elements +ve
@@ -167,7 +167,7 @@ public final class DILITHIUM {
 /* Gentleman-Sande INTT */
 /* Excess of 2 allowed on input - coefficients must be < 2*PRIME */
 /* Output fully reduced */
-public static final int NTTL=1; // maybe should be 2?
+    public static final int NTTL=1; // maybe should be 2?
 
     static void intt(int[] x)
     {
@@ -202,12 +202,20 @@ public static final int NTTL=1; // maybe should be 2?
                     x[j] = U + V;
                     W = U + (DL_DEGREE/NTTL) * q - V; 
                     x[j + t] = modmul(W, S); 
+ //                   long T=(long)W*(long)S;
+ //                   long M=(T*DL_ND)&0xffffffffL;
+//                    int R=(int)((M * (long)DL_PRIME+T) >>> 32);
+//System.out.printf("x,W,S= %d %d %d %x %x %d\n",x[j+t],W,S,T,M,R); 
                 }
                 k += 2 * t;
             }
             t *= 2;
             m /= 2;
         }
+
+//System.out.printf("\nx[0]= %d\n",x[0]);
+//System.out.printf("x[1]= %d\n",x[1]);
+
 
         for (j = 0; j < DL_DEGREE; j++)
         { // fully reduce, nres combined with 1/DEGREE
@@ -327,7 +335,7 @@ public static final int NTTL=1; // maybe should be 2?
         w=t[k];
         if (max!=0)
             w=max-w;
-        r=w>>bts;
+        r=w>>>bts;
         while (left<8)
         {
             i++;
@@ -474,7 +482,7 @@ public static final int NTTL=1; // maybe should be 2?
     static void unpack_pk(int[] params,byte[] rho,short[][] t1,byte[] pk)
     {
 		int[] pos=new int[2];
-		pos[0]=0; pos[1]=32;
+		pos[0]=32; pos[1]=0;
         int i,j,ck=params[3];
         for (i=0;i<32;i++)
             rho[i]=pk[i];
@@ -536,12 +544,16 @@ public static final int NTTL=1; // maybe should be 2?
         for (i=0;i<32;i++)
             tr[i]=sk[n++];
 		int[] pos=new int[2];
-		pos[0]=0; pos[1]=n;
+		pos[0]=n; pos[1]=0;
         for (j=0;j<el;j++)
         {
             for (i=0;i<DL_DEGREE;i++ )
                 s1[j][i]=(byte)nextword(lg2eta1,eta,sk,pos);
         }
+
+//System.out.printf("lg2eta1 = %d eta= %d\n",lg2eta1,eta);
+//System.out.printf("s1[0][0]= %d sk[0] = %d\n",s1[0][0],sk[n]);
+
         for (j=0;j<ck;j++)
         {
             for (i=0;i<DL_DEGREE;i++ )
@@ -582,7 +594,7 @@ public static final int NTTL=1; // maybe should be 2?
                 z[i][m]=t;
             }
         }
-        for (j=0;j<el;i++)
+        for (j=0;j<el;j++)
         {
             for (i=0;i<(DL_DEGREE*(lg+1))/8;i++) 
                 sig[n++]=nextbyte32(lg+1,0,z[j],pos);
@@ -607,7 +619,7 @@ public static final int NTTL=1; // maybe should be 2?
             ct[i]=sig[i];
 
 		int[] pos=new int[2];
-		pos[0]=0; pos[1]=32;
+		pos[0]=32; pos[1]=0;
         for (j=0;j<el;j++)
         {
             for (i=0;i<DL_DEGREE;i++) {
@@ -687,14 +699,24 @@ public static final int NTTL=1; // maybe should be 2?
 		pos[0]=0; pos[1]=0;
 		int ck=params[3];
 		SHA3 sh = new SHA3(SHA3.SHAKE256);
+//System.out.printf("rho[1]= %d\n",rho[1]);
 		for (i=0;i<32;i++)
 			sh.process(rho[i]);
 		for (j=0;j<ck;j++)
 		{
+//System.out.printf("X t1[j][0]= %d\n",t1[j][0]);
+//System.out.printf("Y t1[j][1]= %d\n",t1[j][1]);
+//System.out.printf("Z t1[j][2]= %d\n",t1[j][2]);
 			for (i=0;i<(DL_DEGREE*DL_TD)/8;i++)
-					sh.process(nextbyte16(DL_TD,0,t1[j],pos));
+            {
+                byte nxt=nextbyte16(DL_TD,0,t1[j],pos);
+                //if (i==0 && j==0)
+                    //System.out.printf(" nxt= %d",nxt);
+			    sh.process(nxt);
+            }
 		}
 		sh.shake(H,32);
+//System.out.printf("H[0]= %d\n",H[0]);
 	}
 
 // CRH(tr,M)
@@ -757,18 +779,18 @@ public static final int NTTL=1; // maybe should be 2?
 		k=8; 
 		b=0;
 		poly_zero(c);
-		sn=signs[0]; n=1;
+		sn=(int)(signs[0])&0xff; n=1;
 		for (i=DL_DEGREE-tau;i<DL_DEGREE;i++)
 		{
 			do
 			{
-				j=buff[k++];
+				j=(int)(buff[k++])&0xff;
 			} while (j>i);
 			c[i]=c[j];
 			c[j]=1-2*((int)sn&1);
 			sn>>=1; b++;
 			if (b==8) {
-				sn=signs[n++]; b=0;
+				sn=(int)(signs[n++])&0xff; b=0;
 			}
 		}	
 	}
@@ -869,7 +891,7 @@ public static final int NTTL=1; // maybe should be 2?
 		for (int m=0;m<DL_DEGREE;m++)
 		{
 			a1=decompose_hi(params,w[m]);
-			if (m==h[hptr] && hptr<h[omega+i])
+			if (m==((int)h[hptr]&0xff) && hptr<((int)h[omega+i]&0xff))
 			{
 				hptr++;
 				a0=decompose_lo(params,w[m]);
@@ -933,14 +955,17 @@ public static final int NTTL=1; // maybe should be 2?
 		for (i=0;i<64;i++)
 			rhod[i]=buff[32+i];
 
+//System.out.printf("rhod[0]= %d\n",rhod[0]);
+
 		for (i=0;i<el;i++)
 		{
 			sample_Sn(params,rhod,s1[i],i);
 		}
-
+//System.out.printf("s1[0][0]= %d\n",s1[0][0]);
 		for (i=0;i<ck;i++)
 		{
 			sample_Sn(params,rhod,s2[i],el+i);
+//System.out.printf("s2[0][0]= %d\n",s2[0][0]);
 			poly_zero(r);
 			for (j=0;j<el;j++)
 			{
@@ -951,24 +976,303 @@ public static final int NTTL=1; // maybe should be 2?
 				poly_add(r,r,w);
             //poly_soft_reduce(r);  // be lazy
 			}
-			poly_hard_reduce(r);  
+			poly_hard_reduce(r); 
+
+//            for (int k=0;k<DL_DEGREE;k++)
+//                System.out.printf(" %d",r[k]);
+                    
 			intt(r);
+//System.out.printf("\n1. r[0]= %d\n",r[0]);
+//System.out.printf("1. r[1]= %d\n",r[1]);
+//System.exit(0);
 			poly_scopy(w,s2[i]);
 			poly_pos(w);
 			poly_add(r,r,w);
 			poly_soft_reduce(r);
+//System.out.printf("2. r[0]= %d\n",r[0]);
+//System.out.printf("2. r[1]= %d\n",r[1]);
 			Power2Round(r,t0[i],t1[i]);
+//System.out.printf("t0[0][0]= %d\n",t0[0][0]);
+//System.out.printf("t0[0][1]= %d\n",t0[0][1]);
+//System.out.printf("t1[0][0]= %d\n",t1[0][0]);
+//System.out.printf("t1[0][1]= %d\n",t1[0][1]);
 		}
 
 		CRH1(params,tr,rho,t1);
-
+//System.out.printf("tr[0]= %d\n",tr[0]);
+//System.out.printf("rho[0]= %d\n",rho[0]);
 		int pklen=pack_pk(params,pk,rho,t1);
 		int sklen=pack_sk(params,sk,rho,bK,tr,s1,s2,t0);
 	}
+
+    static int signature(int[] params,byte[] sk,byte[] M,byte[] sig)
+    {
+        int i,k,nh,fk,j;
+        boolean badone;
+        byte[] rho = new byte[32];
+        byte[] bK = new byte[32];
+        byte[] ct = new byte[32];
+        byte[] tr = new byte[32];
+        byte[] mu = new byte[64];
+        byte[] rhod = new byte [64];   // 288 bytes
+        byte[] hint = new byte[100]; // 61 bytes
+
+        int[] c = new int[DL_DEGREE];  // 1024 bytes
+        int[] w = new int[DL_DEGREE];  // work space 1024 bytes
+        int[] r = new int[DL_DEGREE];  // work space 1024 bytes total= 21673 bytes
+    //sign32 Aij[DL_DEGREE]; // 1024 bytes
+
+        int ck=params[3];
+        int el=params[4];
+
+        byte[][] s1=new byte[el][DL_DEGREE]; // 1280 bytes
+        byte[][] s2=new byte[ck][DL_DEGREE]; // 1536 bytes
+        short[][] t0 = new short[ck][DL_DEGREE]; // 3072 bytes
+        int[][] y=new int[el][DL_DEGREE];  // 5120 bytes
+        int[][] Ay=new int[ck][DL_DEGREE]; // 6144 bytes
+        byte[][] w1=new byte[ck][DL_DEGREE]; // 1280 bytes
+
+        int tau=params[0];
+        int lg=params[1];
+        int gamma1=(int)(1<<lg);
+        int dv=(int)params[2];
+        int gamma2=(DL_PRIME-1)/dv;
+        int eta=params[5];
+        int beta=(int)(tau*eta);
+        int omega=params[7];
+
+        unpack_sk(params,rho,bK,tr,s1,s2,t0,sk);
+
+// signature
+        CRH2(mu,tr,M,M.length);
+        CRH3(rhod,bK,mu);
+
+        for (k=0; ;k++ )
+        {
+            fk=k*el;
+            sample_Y(params,fk,rhod,y);
+//System.out.printf("X y[0][0] = %d y[0][1] = %d\n",y[0][0],y[0][1]); 
+// NTT y
+            for (i=0;i<el;i++)
+                ntt(y[i]);
+//System.out.printf("Y y[0][0] = %d y[0][1] = %d\n",y[0][0],y[0][1]); 
+// Calculate Ay 
+            for (i=0;i<ck;i++)
+            {
+                poly_zero(r);
+                for (j=0;j<el;j++)
+                { // Note: no NTTs in here
+                    poly_copy(w,y[j]);
+                    ExpandAij(rho,c,i,j);  // This is bottleneck // re-use c for Aij 
+                    poly_mul(w,w,c);
+                    poly_add(r,r,w);
+                //poly_soft_reduce(r);  // be lazy
+                }
+                poly_hard_reduce(r);
+                intt(r);
+                poly_copy(Ay[i],r);
+// Calculate w1
+                hibits(params,w1[i],Ay[i]);
+            }
+
+// Calculate c
+            H4(params,ct,mu,w1);
+            SampleInBall(params,ct,c);
+
+            badone=false;
+// Calculate z=y+c.s1
+            ntt(c);
+            for (i=0;i<el;i++)
+            {
+                poly_scopy(w,s1[i]);
+                ntt(w);
+                poly_mul(w,w,c);
+                nres_it(w);
+
+                poly_add(y[i],y[i],w);  // re-use y for z 
+                redc_it(y[i]);  // unNTT y
+                intt(y[i]);
+                poly_soft_reduce(y[i]);
+
+                if (infinity_norm(y[i])>=gamma1-beta)
+                {
+                    badone=true;
+                    break;
+                }
+            } 
+            if (badone) continue;
+ 
+// Calculate Ay=w-c.s2 and r0=lobits(w-c.s2)
+            nh=0;
+            for (i=0;i<omega+ck;i++)
+                hint[i]=0;
+            for (i=0;i<ck;i++)
+            {
+                poly_scopy(w,s2[i]);
+                ntt(w);
+                poly_mul(w,w,c);
+            
+                intt(w);
+                poly_sub(Ay[i],Ay[i],w);
+                poly_soft_reduce(Ay[i]);   //Ay=w-cs2
+                lobits(params,w,Ay[i]);    // r0
+                if (infinity_norm(w)>=gamma2-beta)
+                {
+                    badone=true;
+                    break;
+                }
+                poly_mcopy(w,t0[i]);
+                ntt(w);
+                poly_mul(w,w,c);
+            
+                intt(w);
+                poly_negate(r,w);  // -ct0
+                if (infinity_norm(r)>=gamma2)
+                {
+                    badone=true;
+                    break;
+                }
+                poly_sub(Ay[i],Ay[i],r);
+                poly_soft_reduce(Ay[i]);
+
+                nh=MakePartialHint(params,hint,nh,r,Ay[i]);
+                if (nh>omega)
+                {
+                    badone=true;
+                    break;
+                }
+                hint[omega+i]=(byte)nh;
+            }
+            if (badone) continue;
+            break;
+        }
+//System.out.printf("y[0][0] = %d y[0][1] = %d\n",y[0][0],y[0][1]); 
+        int siglen=pack_sig(params,sig,y,ct,hint);
+        return k+1;      
+    }
+
+    static boolean verify(int[] params,byte[] pk,byte[] M,byte[] sig)
+    {
+        int i,j,m,hints;
+        byte[] rho = new byte[32];
+        byte[] mu = new byte[64];
+        byte[] ct = new byte[32];
+        byte[] cct = new byte[32];
+        byte[] tr = new byte[32];         // 192 bytes
+        byte[] hint = new byte[100];  
+
+        int[] Aij = new int[DL_DEGREE];  // 1024 bytes
+        int[] c = new int[DL_DEGREE];    // 1024 bytes
+        int[] w = new int[DL_DEGREE]; // work space // 1024 bytes
+        int[] r = new int[DL_DEGREE]; // work space // 1024 bytes total=14077 bytes
+
+        int ck=params[3];
+        int el=params[4];
+
+        int[][] z = new int[el][DL_DEGREE];  // 5120 bytes
+        short[][] t1 = new short[ck][DL_DEGREE]; // 3072 bytes
+        byte[][] w1d = new byte[ck][DL_DEGREE]; // 1536 bytes 
+
+        int tau=params[0];
+        int lg=params[1];
+        int gamma1=(int)(1<<lg);
+        int eta=params[5];
+        int beta=(int)(tau*eta);
+        int omega=params[7];
+
+// unpack public key and signature
+        unpack_pk(params,rho,t1,pk);
+        unpack_sig(params,z,ct,hint,sig);
+
+        for (i=0;i<el;i++)
+        {
+            if (infinity_norm(z[i])>=gamma1-beta)
+                return false;
+            ntt(z[i]); // convert to ntt form
+        }
+
+        CRH1(params,tr,rho,t1);
+        CRH2(mu,tr,M,M.length);
+        SampleInBall(params,ct,c);
+        ntt(c);
+
+// Calculate Az
+        hints=0;
+        for (i=0;i<ck;i++)
+        {
+            poly_zero(r);
+            for (j=0;j<el;j++)
+            { // Note: no NTTs in here
+                poly_copy(w,z[j]);
+                ExpandAij(rho,Aij,i,j);    // This is bottleneck
+                poly_mul(w,w,Aij);
+                poly_add(r,r,w);
+            //poly_soft_reduce(r);  // be lazy
+            }
+            poly_hard_reduce(r);
+
+// Calculate Az-ct1.2^d
+            for (m=0;m<DL_DEGREE;m++)
+                w[m]=(int)(t1[i][m])<<DL_D;
+            ntt(w);
+            poly_mul(w,w,c);
+            poly_sub(r,r,w);
+            intt(r);
+
+            hints=UsePartialHint(params,w1d[i],hint,hints,i,r);
+            if (hints>omega) return false;
+        }
+
+        H4(params,cct,mu,w1d);
+
+        for (i=0;i<32;i++)
+            if (ct[i]!=cct[i])
+                return false;
+        return true;
+    }
+
+	public static void keypair_2(byte[] tau,byte[] sk,byte[] pk)
+	{
+		keypair(PARAMS_2,tau,sk,pk);
+	}
+
+    public static int signature_2(byte[] sk,byte[] M,byte[] sig)
+    {
+        return signature(PARAMS_2,sk,M,sig);
+    }
+
+    public static boolean verify_2(byte[] pk,byte[] M,byte[] sig)
+    {
+        return verify(PARAMS_2,pk,M,sig);
+    }
 
 	public static void keypair_3(byte[] tau,byte[] sk,byte[] pk)
 	{
 		keypair(PARAMS_3,tau,sk,pk);
 	}
 
+    public static int signature_3(byte[] sk,byte[] M,byte[] sig)
+    {
+        return signature(PARAMS_3,sk,M,sig);
+    }
+
+    public static boolean verify_3(byte[] pk,byte[] M,byte[] sig)
+    {
+        return verify(PARAMS_3,pk,M,sig);
+    }
+
+	public static void keypair_5(byte[] tau,byte[] sk,byte[] pk)
+	{
+		keypair(PARAMS_5,tau,sk,pk);
+	}
+
+    public static int signature_5(byte[] sk,byte[] M,byte[] sig)
+    {
+        return signature(PARAMS_5,sk,M,sig);
+    }
+
+    public static boolean verify_5(byte[] pk,byte[] M,byte[] sig)
+    {
+        return verify(PARAMS_5,pk,M,sig);
+    }
 }

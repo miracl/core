@@ -30,7 +30,8 @@ import org.miracl.core.DILITHIUM;
 
 public class TestDLTHM extends TestCase {
     public static void testDLTHM() {
-        int i,LOOPS=1;
+        int i,attempts,LOOPS=100;
+        boolean result;
         byte[] RAW = new byte[100];
         byte[] TAU = new byte[32];
 		byte[] SK= new byte[DILITHIUM.SK_SIZE_3];
@@ -49,19 +50,39 @@ public class TestDLTHM extends TestCase {
 		int tats=0;
         for (int j=0;j<LOOPS;j++) {
 			String mess=new String("Hello World");
-			for (i = 0; i < 32; i++) TAU[i] = (byte)RNG.getByte(); //(byte)(i + 3);
-			DILITHIUM.keypair_3(TAU,SK,PK);
-
+			for (i = 0; i < 32; i++) TAU[i] = (byte)RNG.getByte(); //(byte)(i + 1);
+			
+            DILITHIUM.keypair_3(TAU,SK,PK);
+/*
             System.out.printf("Public key= 0x");
             for (i = 0; i < PK.length; i++)
                 System.out.printf("%02x", PK[i]);
             System.out.println();
 
-            System.out.printf("Secret key= 0x");
+            System.out.printf("Secret key = 0x");
             for (i = 0; i < SK.length; i++)
                 System.out.printf("%02x", SK[i]);
             System.out.println();
+*/
+            attempts=DILITHIUM.signature_3(SK,mess.getBytes(),SIG);
+            tats+=attempts;
+/*
+            System.out.printf("Signature = 0x");
+            for (i = 0; i < SIG.length; i++)
+                System.out.printf("%02x", SIG[i]);
+            System.out.println();
+*/
+            System.out.printf("Signature %d bits created on attempt %d\n",8*SIG.length,attempts);
 
+            result=DILITHIUM.verify_3(PK,mess.getBytes(),SIG);
+            if (result) {
+                System.out.printf("Signature is verified\n");
+            } else {
+                System.out.printf("Signature is NOT verified\n"); 
+                break;
+            }
 		}
+        if (LOOPS>1)
+            System.out.printf("Average= %d\n",tats/LOOPS);
 	}
 }
