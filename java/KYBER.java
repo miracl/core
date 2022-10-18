@@ -170,8 +170,7 @@ public final class KYBER {
 // Note r must be distinct from a and b
 	static void poly_mul(short[] r, short[] a, short[] b)
 	{
-		int i,index;
-		for(i = 0; i < KY_DEGREE/4; i++) {
+		for(int i = 0; i < KY_DEGREE/4; i++) {
 			basemul(4*i,r,a,b,zetas[64+i]);
 			basemul(4*i+2,r,a,b,(short)-zetas[64+i]);
 		}
@@ -394,7 +393,7 @@ public final class KYBER {
 // input entropy, output key pair
 	static void CPA_keypair(int[] params,byte[] tau,byte[] sk,byte[] pk)
 	{
-		int i,j,k,row;
+		int i,j,k;
 		SHA3 sh = new SHA3(SHA3.HASH512);
 		byte[] rho = new byte[32]; 
 		byte[] sigma = new byte[33]; 

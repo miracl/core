@@ -288,7 +288,8 @@ os.system(copytext+ "RAND.go core"+slashtext+".")
 os.system(copytext+ "SHARE.go core"+slashtext+".")
 os.system(copytext+ "AES.go core"+slashtext+".")
 os.system(copytext+ "GCM.go core"+slashtext+".")
-os.system(copytext+ "NHS.go core"+slashtext+".")
+#os.system(copytext+ "NHS.go core"+slashtext+".")
+os.system(copytext+ "KYBER.go core"+slashtext+".")
 
 class miracl_crypto:
     np_curves = (
