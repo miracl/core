@@ -615,27 +615,21 @@ int X509_extract_cert(octet *sc, octet *cert)
     return 1;
 }
 
-// Extract Public Key from inside Certificate
-pktype X509_extract_public_key(octet *c, octet *key)
+// find index to start of ASN.1 raw public key, and return its length
+int X509_find_public_key(octet *c,int *ptr)
 {
-    int i, j, fin, len, sj;
-    char koid[12];     /*****/
-    octet KOID = {0, sizeof(koid), koid};
-    pktype ret;
-
-    ret.type = ret.hash = 0;
-    ret.curve = -1;
+    int i, j, k, fin, len, sj;
 
     j = 0;
 
     len = getalen(SEQ, c->val, j);
-    if (len < 0) return ret;
+    if (len < 0) 0;
     j += skip(len);
 
-    if (len + j != c->len) return ret;
+    if (len + j != c->len) return 0;
 
     len = getalen(ANY, c->val, j);
-    if (len < 0) return ret;
+    if (len < 0) return 0;
     j += skip(len) + len; //jump over version clause
 
     len = getalen(INT, c->val, j);
@@ -643,20 +637,43 @@ pktype X509_extract_public_key(octet *c, octet *key)
     if (len > 0) j += skip(len) + len; // jump over serial number clause (if there is one)
 
     len = getalen(SEQ, c->val, j);
-    if (len < 0) return ret;
+    if (len < 0) return 0;
     j += skip(len) + len; // jump over signature algorithm
 
     len = getalen(SEQ, c->val, j);
-    if (len < 0) return ret;
+    if (len < 0) return 0;
     j += skip(len) + len; // skip issuer
 
     len = getalen(SEQ, c->val, j);
-    if (len < 0) return ret;
+    if (len < 0) return 0;
     j += skip(len) + len; // skip validity
 
     len = getalen(SEQ, c->val, j);
-    if (len < 0) return ret;
+    if (len < 0) return 0;
     j += skip(len) + len; // skip subject
+
+    k=j;
+    len = getalen(SEQ, c->val, j); // look ahead to determine length
+    if (len < 0) return 0;
+    j += skip(len); //
+
+    fin=j+len;
+    *ptr=k;
+    return fin-k;
+}
+
+// get Public Key details from ASN.1 description
+pktype X509_get_public_key(octet *c,octet *key) 
+{
+    int i, j, fin, len, sj, ptr;
+    char koid[12];     /*****/
+    octet KOID = {0, sizeof(koid), koid};
+    pktype ret;
+
+    ret.type = ret.hash = 0;
+    ret.curve = -1;
+
+    j=0;
 
     len = getalen(SEQ, c->val, j);
     if (len < 0) return ret;
@@ -766,6 +783,15 @@ pktype X509_extract_public_key(octet *c, octet *key)
         ret.curve = 8 * len;
     }
     return ret;
+}
+
+// Extract Public Key from inside Certificate
+pktype X509_extract_public_key(octet *c, octet *key)
+{
+    int ptr=0;
+    int pklen=X509_find_public_key(c,&ptr);
+    octet CC={pklen,pklen,&c->val[ptr]};
+    return X509_get_public_key(&CC,key);
 }
 
 // Find pointer to main sections of cert, before extracting individual field

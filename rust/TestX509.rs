@@ -200,6 +200,13 @@ fn main() {
 
     let mut c=x509::extract_cert(&io[0..len],&mut cert);
 
+/*
+    let mut cptr=0;
+    let myctlen=x509::find_cert(&io[0..len],&mut cptr);   // find cert slice 
+    //let pklen=x509::find_public_key(&io[cptr..cptr+myctlen],&mut pkptr);    // finds raw public key slice, starts at offset pkptr, of length pklen
+    let ccc=x509::extract_public_key(&io[cptr..cptr+myctlen],&mut cakey); // find and extract public key
+    printoct("EXTRACTED XXX PUBLIC KEY= \n",&cakey[0..ccc.len]);
+*/
     printoct("\nCert= \n",&cert[0..c]);
 
     let mut certificate=&cert[0..c];  

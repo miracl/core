@@ -80,7 +80,7 @@ typedef struct
  *
 	@param c an X.509 private key 
 	@param pk the extracted private key - for RSA octet = p|q|dp|dq|c, for ECC octet = k
-	@return 0 on failure, or indicator of private key type (ECC or RSA)
+	@return indicator of private key type (ECC or RSA)
 */
 extern pktype X509_extract_private_key(octet *c,octet *pk);
 
@@ -88,7 +88,7 @@ extern pktype X509_extract_private_key(octet *c,octet *pk);
  *
 	@param c an X.509 certificate
 	@param s the extracted signature
-	@return 0 on failure, or indicator of signature type (ECC or RSA)
+	@return indicator of signature type (ECC or RSA)
 
 */
 extern pktype X509_extract_cert_sig(octet *c, octet *s);
@@ -99,11 +99,29 @@ extern pktype X509_extract_cert_sig(octet *c, octet *s);
 	@return 0 on failure
 */
 extern int X509_extract_cert(octet *sc, octet *c);
+
+
+/** @brief
+ *
+	@param c an X.509 certificate
+	@param ptr pointer to ASN.1 raw public key
+	@return length of raw public key
+*/
+extern int X509_find_public_key(octet *c,int *ptr);
+
+/** @brief
+ *
+	@param c an ASN.1 encoded public key
+	@param key the extracted public key
+	@return indicator of public key type (ECC or RSA)
+*/
+extern pktype X509_get_public_key(octet *c,octet *key);
+
 /** @brief
  *
 	@param c an X.509 certificate
 	@param k the extracted key
-	@return 0 on failure, or indicator of public key type (ECC or RSA)
+	@return indicator of public key type (ECC or RSA)
 */
 extern pktype X509_extract_public_key(octet *c, octet *k);
 /** @brief
