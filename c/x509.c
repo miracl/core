@@ -623,7 +623,7 @@ int X509_find_public_key(octet *c,int *ptr)
     j = 0;
 
     len = getalen(SEQ, c->val, j);
-    if (len < 0) 0;
+    if (len < 0) return 0;
     j += skip(len);
 
     if (len + j != c->len) return 0;
