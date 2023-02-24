@@ -173,6 +173,7 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
     let mut soid:[u8;12]=[0;12];
     let mut ret=PKTYPE::new();
     let mut j=0 as usize;
+    let pklen=pk.len();
 
     let mut len=getalen(SEQ,c,j);  // Check for expected SEQ clause, and get length
     if len == 0  {                  // if not a SEQ clause, there is a problem, exit
@@ -219,6 +220,9 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
         }
         j+=skip(len);
         let rlen=32;
+        if rlen>pklen {
+            return ret;
+        }
         ret.len=rlen;
         for i in 0..rlen-len {
             pk[i]=0;
@@ -305,6 +309,11 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
             ret.curve=USE_NIST521;
             rlen=66;
         }
+        if rlen>pklen {
+            ret.curve=0;
+            ret.len=0;
+            return ret;
+        }
         ret.len=rlen;
         for i in 0..rlen-len {
             pk[i]=0;
@@ -369,6 +378,12 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
         }
         let mut rlen=bround(len);
 
+        if 5*rlen>pklen {
+            ret.curve=0;
+            ret.len=0;
+            return ret;
+        }
+
         for i in 0..rlen-len {
             pk[i]=0;
         }
@@ -416,6 +431,8 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
     let mut ret=PKTYPE::new();
     let mut j=0 as usize;
     let mut len=getalen(SEQ,sc,j);  // Check for expected SEQ clause, and get length
+    let siglen=sig.len();
+
     if len == 0  {                  // if not a SEQ clause, there is a problem, exit
         return ret;
     }
@@ -499,6 +516,10 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
     if ret.kind==ECD {
         let rlen=bround(len);
         let ex=rlen-len;
+        if rlen>siglen {
+            ret.kind=0;
+            return ret;
+        }
         ret.len=rlen;
         slen=0;
         for _ in 0..ex {
@@ -534,6 +555,11 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
         }
         let mut rlen=bround(len);
         let mut ex=rlen-len;
+
+        if 2*rlen>siglen {
+            ret.kind=0;
+            return ret;
+        }
         ret.len=2*rlen;
 
         slen=0;
@@ -583,6 +609,11 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
     if ret.kind==RSA {
         let rlen=bround(len);
         let ex=rlen-len;
+        if rlen>siglen {
+            ret.kind=0;
+            ret.curve=0;
+            return ret;
+        }
         ret.len=rlen;
         slen=0;
         for _ in 0..ex {
@@ -598,6 +629,11 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
         ret.curve=8*rlen;
     }
     if ret.kind==PQ {
+        if len>siglen {
+            ret.kind=0;
+            ret.curve=0;
+            return ret;
+        }
         ret.len=len;
         slen=0;
         fin=j+len;
@@ -639,6 +675,9 @@ pub fn extract_cert(sc: &[u8],cert: &mut [u8]) -> usize {
     let n=find_cert(sc,&mut ptr);
     let k=ptr;
     let fin=n+k;
+    if fin-k>cert.len() {
+        return 0;
+    }
     for i in k..fin {
         cert[i-k]=sc[i];
     }
@@ -711,6 +750,7 @@ pub fn get_public_key(c: &[u8],key: &mut [u8]) -> PKTYPE {
     let mut koid:[u8;12]=[0;12];
     let mut ret=PKTYPE::new();
     let mut j=0;
+    let keylen=key.len();
 
     let mut len=getalen(SEQ,c,j);
     if len==0 {
@@ -800,6 +840,10 @@ pub fn get_public_key(c: &[u8],key: &mut [u8]) -> PKTYPE {
     len-=1; // skip bit shift (hopefully 0!)
 
     if ret.kind==ECC || ret.kind==ECD || ret.kind==PQ {
+        if len>keylen {
+            ret.kind=0;
+            return ret;
+        }
         ret.len=len;
         fin=j+len;
         slen=0;
@@ -830,7 +874,10 @@ pub fn get_public_key(c: &[u8],key: &mut [u8]) -> PKTYPE {
             j+=1;
             len-=1;
         }
-
+        if len>keylen {
+            ret.kind=0;
+            return ret;
+        }
         ret.len=len;
         fin=j+len;
         slen=0;

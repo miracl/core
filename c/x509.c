@@ -238,6 +238,7 @@ pktype X509_extract_private_key(octet *c,octet *pk)
         if (len < 0) return ret;
         j += skip(len);
         rlen=32;
+        if (rlen>pk->max) return ret;
         pk->len=rlen;
         for (i=0;i<rlen-len;i++)
             pk->val[i]=0;
@@ -304,7 +305,11 @@ pktype X509_extract_private_key(octet *c,octet *pk)
             rlen=66;
             ret.curve = USE_NIST521;
         }
-
+        if (rlen>pk->max)
+        {
+            ret.curve=0;
+            return ret;
+        }
         pk->len=rlen;
         for (i=0;i<rlen-len;i++)
             pk->val[i]=0;
@@ -353,6 +358,10 @@ pktype X509_extract_private_key(octet *c,octet *pk)
             len--;
         }
         rlen=bround(len);
+        if (5*rlen>pk->max)
+            return ret;
+ 
+
         for (i=0;i<rlen-len;i++)
             pk->val[i]=0;
 
@@ -486,7 +495,11 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
     {
         rlen = bround(len);
         ex = rlen - len;
-
+        if (rlen>sig->max)
+        {
+            ret.type=0;
+            return ret;
+        }
         sig->len = rlen;
         i = 0;
         for (k = 0; k < ex; k++)
@@ -526,6 +539,11 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
         rlen = bround(len);
 
         ex = rlen - len;
+        if (2*rlen>sig->max)
+        {
+            ret.type=0;
+            return ret;
+        }
         sig->len = 2 * rlen;
 
         i = 0;
@@ -569,6 +587,11 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
         rlen = bround(len);
         ex = rlen - len;
 
+        if (rlen>sig->max)
+        {
+            ret.type=0;
+            return ret;
+        }
         sig->len = rlen;
         i = 0;
         for (k = 0; k < ex; k++)
@@ -582,6 +605,11 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
     }
     if (ret.type == X509_PQ)
     {
+        if (len>sig->max)
+        {
+            ret.type=0;
+            return ret;
+        }
         sig->len = len;
         fin = j + len;
         for (i=0; j < fin; j++)
@@ -609,6 +637,7 @@ int X509_extract_cert(octet *sc, octet *cert)
     j += skip(len);
 
     fin = j + len;
+    if (fin-k>cert->max) return 0;
     cert->len = fin - k;
     for (i = k; i < fin; i++) cert->val[i - k] = sc->val[i];
 
@@ -743,6 +772,11 @@ pktype X509_get_public_key(octet *c,octet *key)
 // extract key
     if (ret.type == X509_ECC || ret.type == X509_ECD || ret.type == X509_PQ)
     {
+        if (len>key->max)
+        {
+            ret.type=0;
+            return ret;
+        }
         key->len = len;
         fin = j + len;
         for (i = 0; j < fin; j++)
@@ -774,7 +808,11 @@ pktype X509_get_public_key(octet *c,octet *key)
             j++;
             len--; // remove leading zero
         }
-
+        if (len>key->max)
+        {
+            ret.type=0;
+            return ret;
+        }
         key->len = len;
         fin = j + len;
         for (i = 0; j < fin; j++)
