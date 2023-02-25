@@ -224,6 +224,7 @@ pktype X509_extract_private_key(octet *c,octet *pk)
     j += skip(len);
 
     fin = j + len;
+    if (len>SOID.max) return ret;
     SOID.len = len;
     for (i = 0; j < fin; j++)
         SOID.val[i++] = c->val[j];
@@ -271,6 +272,7 @@ pktype X509_extract_private_key(octet *c,octet *pk)
         j += skip(len);
 
         fin = j + len;
+        if (len>SOID.max) return ret;
         SOID.len = len;
         for (i = 0; j < fin; j++)
             SOID.val[i++] = c->val[j];
@@ -432,6 +434,7 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
     j += skip(len);
 
     fin = j + len;
+    if (len>SOID.max) return ret;
     SOID.len = len;
     for (i = 0; j < fin; j++)
         SOID.val[i++] = sc->val[j];
@@ -723,6 +726,7 @@ pktype X509_get_public_key(octet *c,octet *key)
     j += skip(len);
 
     fin = j + len;
+    if (len>KOID.max) return ret;
     KOID.len = len;
     for (i = 0; j < fin; j++)
         KOID.val[i++] = c->val[j];
@@ -747,6 +751,11 @@ pktype X509_get_public_key(octet *c,octet *key)
         j += skip(len);
 
         fin = j + len;
+        if (len>KOID.max)
+        {
+            ret.type=0;
+            return ret;
+        }
         KOID.len = len;
         for (i = 0; j < fin; j++)
             KOID.val[i++] = c->val[j];
@@ -933,6 +942,7 @@ int X509_find_entity_property(octet *c, octet *SOID, int start, int *flen)
         if (len < 0) return 0;
         j += skip(len);
         fin = j + len; // extract OID
+        if (len>FOID.max) return 0;
         FOID.len = len;
         for (i = 0; j < fin; j++)
             FOID.val[i++] = c->val[j];
@@ -1048,6 +1058,7 @@ int X509_find_extension(octet *c, octet *SOID, int start, int *flen)
         if (len < 0) return 0;
         j += skip(len);
         fin = j + len; // extract OID
+        if (len>FOID.max) return 0;
         FOID.len = len;
         for (i = 0; j < fin; j++)
             FOID.val[i++] = c->val[j];

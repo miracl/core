@@ -201,6 +201,9 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
     j+=skip(len);
 
     let mut fin=j+len;
+    if len>soid.len() {
+        return ret;
+    }
     let mut slen=0;
     while j<fin {
         soid[slen]=c[j];
@@ -267,6 +270,9 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
         j+=skip(len);
         
         fin=j+len;
+        if len>soid.len() {
+            return ret;
+        }
         slen=0;
         while j<fin {
             soid[slen]=c[j];
@@ -459,6 +465,10 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
     }
     j+=skip(len);
     let mut fin=j+len;
+    if len>soid.len() {
+        return ret;
+    }
+
     let mut slen=0;
     while j<fin {
         soid[slen]=sc[j];
@@ -777,6 +787,9 @@ pub fn get_public_key(c: &[u8],key: &mut [u8]) -> PKTYPE {
     j += skip(len); 
 
     let mut fin=j+len;
+    if len>koid.len() {
+        return ret;
+    }
     let mut slen=0;
     while j<fin {
         koid[slen]=c[j];
@@ -809,6 +822,10 @@ pub fn get_public_key(c: &[u8],key: &mut [u8]) -> PKTYPE {
         j+=skip(len);
 
         fin=j+len;
+        if len>koid.len() {
+            ret.kind=0;
+            return ret;
+        }
         slen=0;
         while j<fin {
             koid[slen]=c[j];
@@ -1005,6 +1022,9 @@ pub fn find_entity_property(c: &[u8],soid: &[u8],start: usize) -> FDTYPE {
         }
         j+=skip(len);
         let fin=j+len;
+        if len>foid.len() {
+            return ret;
+        }
         let mut flen:usize=0;
         while j<fin {
             foid[flen]=c[j];
@@ -1128,6 +1148,9 @@ pub fn find_extension(c: &[u8],soid: &[u8],start:usize) -> FDTYPE {
         len=getalen(OID,c,j);
         j+=skip(len);
         let fin=j+len;
+        if len>foid.len() {
+            return ret;
+        }
         let mut flen:usize=0;
         while j<fin {
             foid[flen]=c[j];
