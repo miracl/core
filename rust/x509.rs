@@ -385,8 +385,6 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
         let mut rlen=bround(len);
 
         if 5*rlen>pklen {
-            ret.curve=0;
-            ret.len=0;
             return ret;
         }
 
