@@ -197,7 +197,7 @@ int main()
 
 // show some details
     printf("Issuer Details\n");
-    ic = X509_find_issuer(&H);
+    ic = X509_find_issuer(&H,&len);
     c = X509_find_entity_property(&H, &X509_ON, ic, &len);
     print_out("owner=", &H, c, len);
     c = X509_find_entity_property(&H, &X509_CN, ic, &len);
@@ -342,7 +342,7 @@ int main()
     printf("\n");
 
     printf("Subject Details\n");
-    ic = X509_find_subject(&H);
+    ic = X509_find_subject(&H,&len);
     c = X509_find_entity_property(&H, &X509_ON, ic, &len);
     print_out("owner=", &H, c, len);
     c = X509_find_entity_property(&H, &X509_CN, ic, &len);

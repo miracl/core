@@ -845,10 +845,12 @@ pktype X509_extract_public_key(octet *c, octet *key)
 }
 
 // Find pointer to main sections of cert, before extracting individual field
-// Find index to issuer in cert
-int X509_find_issuer(octet *c)
+// Find index to issuer in cert, and its length
+// This is the certificate DER encoded distinguished issuer name 
+int X509_find_issuer(octet *c,int *flen)
 {
     int j, len;
+    *flen=0;
     j = 0;
     len = getalen(SEQ, c->val, j);
     if (len < 0) return 0;
@@ -868,6 +870,9 @@ int X509_find_issuer(octet *c)
     if (len < 0) return 0;
     j += skip(len) + len; // jump over signature algorithm
 
+    len=getalen(SEQ,c->val,j);
+    *flen=len+skip(len);      // length of issuer
+
     return j;
 }
 
@@ -875,40 +880,48 @@ int X509_find_issuer(octet *c)
 int X509_find_validity(octet *c)
 {
     int j, len;
-    j = X509_find_issuer(c);
+    j = X509_find_issuer(c,&len);
+    j+=len; // skip issuer
 
-    len = getalen(SEQ, c->val, j);
-    if (len < 0) return 0;
-    j += skip(len) + len; // skip issuer
+    //len = getalen(SEQ, c->val, j);
+    //if (len < 0) return 0;
+    //j += skip(len) + len; // skip issuer
 
     return j;
 }
 
-// Find index to subject in cert
-int X509_find_subject(octet *c)
+// Find index to subject in cert, and its length
+// This is the certificate DER encoded distinguished subject name 
+int X509_find_subject(octet *c,int *flen)
 {
     int j, len;
+    *flen=0;
     j = X509_find_validity(c);
 
     len = getalen(SEQ, c->val, j);
     if (len < 0) return 0;
     j += skip(len) + len; // skip validity
 
+    len=getalen(SEQ,c->val,j);
+    *flen=len+skip(len);
+
     return j;
 }
 
 int X509_self_signed(octet *c)
 {
-    int i,m;
-    int ksub=X509_find_subject(c);
-    int kiss=X509_find_issuer(c);
+    int i,m,slen,ilen;
+    int ksub=X509_find_subject(c,&slen);
+    int kiss=X509_find_issuer(c,&ilen);
 
-    int sublen=getalen(SEQ,c->val,ksub);
-    int isslen=getalen(SEQ,c->val,kiss);
-    if (isslen!=sublen) return 0;
-    ksub+=skip(sublen);
-    kiss+=skip(isslen);
-    for (i=m=0;i<sublen;i++)
+    if (slen!=ilen) return 0;
+
+    //int sublen=getalen(SEQ,c->val,ksub);
+    //int isslen=getalen(SEQ,c->val,kiss);
+    //if (isslen!=sublen) return 0;
+    //ksub+=skip(sublen);
+    //kiss+=skip(isslen);
+    for (i=m=0;i<slen;i++)
         m|=c->val[i+ksub] - c->val[i+kiss];
     if (m!=0) return 0;
     return 1;
@@ -1021,11 +1034,12 @@ int X509_find_expiry_date(octet *c, int start)
 int X509_find_extensions(octet *c)
 {
     int j, len;
-    j=X509_find_subject(c);
+    j=X509_find_subject(c,&len);
+    j+=len; // skip subject
 
-    len = getalen(SEQ, c->val, j);
-    if (len<0) return 0;
-    j += skip(len)+len; // skip subject
+    //len = getalen(SEQ, c->val, j);
+    //if (len<0) return 0;
+    //j += skip(len)+len; // skip subject
 
     len = getalen(SEQ, c->val, j);
     if (len<0) return 0;

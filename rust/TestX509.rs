@@ -212,12 +212,12 @@ fn main() {
     let mut certificate=&cert[0..c];  
 // show some details
     println!("Issuer Details");
-    c=x509::find_issuer(&certificate);
-    let mut ep=x509::find_entity_property(&certificate,&x509::ON,c);
+    let mut cs=x509::find_issuer(&certificate);
+    let mut ep=x509::find_entity_property(&certificate,&x509::ON,cs.index);
     printout("owner= ",&certificate[ep.index..ep.index+ep.length]);
-    ep=x509::find_entity_property(&certificate,&x509::CN,c);
+    ep=x509::find_entity_property(&certificate,&x509::CN,cs.index);
     printout("country= ",&certificate[ep.index..ep.index+ep.length]);
-    ep=x509::find_entity_property(&certificate,&x509::EN,c);
+    ep=x509::find_entity_property(&certificate,&x509::EN,cs.index);
     printout("email= ",&certificate[ep.index..ep.index+ep.length]);
     println!("");
 
@@ -330,12 +330,12 @@ fn main() {
 
 // show some details
     println!("Subject Details");
-    c=x509::find_subject(&certificate);
-    ep=x509::find_entity_property(&certificate,&x509::ON,c);
+    cs=x509::find_subject(&certificate);
+    ep=x509::find_entity_property(&certificate,&x509::ON,cs.index);
     printout("owner= ",&certificate[ep.index..ep.index+ep.length]);
-    ep=x509::find_entity_property(&certificate,&x509::CN,c);
+    ep=x509::find_entity_property(&certificate,&x509::CN,cs.index);
     printout("country= ",&certificate[ep.index..ep.index+ep.length]);
-    ep=x509::find_entity_property(&certificate,&x509::EN,c);
+    ep=x509::find_entity_property(&certificate,&x509::EN,cs.index);
     printout("email= ",&certificate[ep.index..ep.index+ep.length]);
     println!("");
     
