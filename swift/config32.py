@@ -259,6 +259,7 @@ os.system(copytext+ "share.swift core"+slashtext+".")
 os.system(copytext+ "aes.swift core"+slashtext+".")
 os.system(copytext+ "gcm.swift core"+slashtext+".")
 os.system(copytext+ "nhs.swift core"+slashtext+".")
+os.system(copytext+ "kyber.swift core"+slashtext+".")
 
 #
 os.system("swiftc core"+slashtext+"*.swift -O -Ounchecked -whole-module-optimization -emit-library -emit-module -module-name core")
@@ -396,6 +397,7 @@ os.system(deltext+" rand.swift")
 os.system(deltext+" share.swift")
 os.system(deltext+" gcm.swift")
 os.system(deltext+" nhs.swift")
+os.system(deltext+" kyber.swift")
 
 os.system(deltext+" big.swift")
 os.system(deltext+" dbig.swift")
@@ -420,7 +422,8 @@ if testing :
     os.system("swiftc -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestMPIN.swift ")
     os.system("swiftc -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestBLS.swift")
     os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 BenchtestALL.swift ")
-    os.system("swiftc -I. -L. -lcore TestNHS.swift")
-    os.system("sudo cp lib*.so /usr/lib/.")
+    #os.system("swiftc -I. -L. -lcore TestNHS.swift")
+    os.system("swiftc -I. -L. -lcore TestKYBER.swift")
+os.system("sudo cp lib*.so /usr/lib/.")
 
 
