@@ -44,7 +44,7 @@ func main() {
 	}
 	RNG.Seed(100,RAW[:])
 
-	fmt.Printf("\nTesting Dilithium Signature")
+	fmt.Printf("\nTesting Dilithium Signature\n")
 
 	tats := 0
 	for j := 0; j < LOOPS; j++ {

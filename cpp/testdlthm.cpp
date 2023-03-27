@@ -69,6 +69,9 @@ int main() {
         printf("private key %d bits\n",8*SK.len);
         printf("public key %d bits\n",8*PK.len);
 
+        //OCT_output(&SK); printf("\n");
+        //OCT_output(&PK); printf("\n");
+
         attempts=DLTHM_signature_3(&SK,&M,&SIG);
 
         tats+=attempts;

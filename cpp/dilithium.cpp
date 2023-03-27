@@ -975,7 +975,6 @@ static int signature(const int *params,octet *sk,octet *M,octet *sig)
     int eta=params[5];
     int beta=(sign32)(tau*eta);
     int omega=params[7];
-
     unpack_sk(params,rho,bK,tr,s1,s2,t0,(byte *)sk->val);
 
 // signature
