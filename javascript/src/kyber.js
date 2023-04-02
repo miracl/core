@@ -167,7 +167,7 @@ var KYBER = function(ctx) {
                 var t2=(buff[i+1])&0xff;
                 var t3=(buff[i+2])&0xff;
                 var d1=(t1+256*(t2&0x0f));
-                var d2=(t2/16+16*t3);
+                var d2=(Math.floor(t2/16)+16*t3);
                 if (d1<KYBER.PRIME)
                     Aij[j++]=d1;
                 if (d2<KYBER.PRIME && j<KYBER.DEGREE)
