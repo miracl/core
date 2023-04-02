@@ -204,41 +204,41 @@ static void ExpandAij(byte rho[32],sign16 Aij[],int i,int j)
     SHA3_process(&sh,j&0xff);
     SHA3_process(&sh,i&0xff);
     SHA3_shake(&sh,(char *)buff,640);
-	i=j=0;
-	while (j<KY_DEGREE)
-	{
-		int d1=buff[i]+256*(buff[i+1]&0x0F);
-		int d2=buff[i+1]/16+16*buff[i+2];
-		if (d1<KY_PRIME)
-			Aij[j++]=d1;
-		if (d2<KY_PRIME && j<KY_DEGREE)
-			Aij[j++]=d2;
-		i+=3;
-	}
+    i=j=0;
+    while (j<KY_DEGREE)
+    {
+        int d1=buff[i]+256*(buff[i+1]&0x0F);
+        int d2=buff[i+1]/16+16*buff[i+2];
+        if (d1<KY_PRIME)
+            Aij[j++]=d1;
+        if (d2<KY_PRIME && j<KY_DEGREE)
+            Aij[j++]=d2;
+        i+=3;
+    }
 }
 
 // get n-th bit from byte array
 static int getbit(byte b[],int n)
 {
-	int wd=n/8;
-	int bt=n%8;
-	return (b[wd]>>bt)&1;
+    int wd=n/8;
+    int bt=n%8;
+    return (b[wd]>>bt)&1;
 }
 
 // centered binomial distribution
 static void CBD(byte bts[],int eta,sign16 f[KY_DEGREE])
 {
-	int a,b;
-	for (int i=0;i<KY_DEGREE;i++)
-	{
-		a=b=0;
-		for (int j=0;j<eta;j++)
-		{
-			a+=getbit(bts,2*i*eta+j);
-			b+=getbit(bts,2*i*eta+eta+j);
-		}
-		f[i]=a-b; 
-	}
+    int a,b;
+    for (int i=0;i<KY_DEGREE;i++)
+    {
+        a=b=0;
+        for (int j=0;j<eta;j++)
+        {
+            a+=getbit(bts,2*i*eta+j);
+            b+=getbit(bts,2*i*eta+eta+j);
+        }
+        f[i]=a-b; 
+    }
 }
 
 // extract ab bits into word from dense byte stream
@@ -328,20 +328,20 @@ static void decode(byte pack[],int L,sign16 t[],int len)
 // compress polynomial coefficents in place, for polynomial vector of length len
 static void compress(sign16 t[],int len,int d)
 {
-	int twod=(1<<d);
-	for (int i=0;i<len*KY_DEGREE;i++)
+    int twod=(1<<d);
+    for (int i=0;i<len*KY_DEGREE;i++)
     {
         t[i]+=(t[i]>>15)&KY_PRIME;
-		t[i]= ((twod*t[i]+KY_PRIME/2)/KY_PRIME)&(twod-1);
+        t[i]= ((twod*t[i]+KY_PRIME/2)/KY_PRIME)&(twod-1);
     }
 }
 
 // decompress polynomial coefficents in place, for polynomial vector of length len
 static void decompress(sign16 t[],int len,int d)
 {
-	int twod1=(1<<(d-1));
-	for (int i=0;i<len*KY_DEGREE;i++)
-		t[i]=(KY_PRIME*t[i]+twod1)>>d;
+    int twod1=(1<<(d-1));
+    for (int i=0;i<len*KY_DEGREE;i++)
+        t[i]=(KY_PRIME*t[i]+twod1)>>d;
 }
 
 // input entropy, output key pair
@@ -350,8 +350,8 @@ static void KYBER_CPA_keypair(const int *params,byte *tau,octet *sk,octet *pk)
     int i,j,k,row;
     sha3 sh;
     byte rho[32];
-	byte sigma[33];
-	byte buff[256];
+    byte sigma[33];
+    byte buff[256];
 
     int ck=params[0];
     sign16 r[KY_DEGREE];
@@ -375,35 +375,35 @@ static void KYBER_CPA_keypair(const int *params,byte *tau,octet *sk,octet *pk)
    
     for (i=0;i<32;i++)
         SHA3_process(&sh,tau[i]); 
-	SHA3_hash(&sh,(char *)buff);
-	for (i=0;i<32;i++)
-	{
-		rho[i]=buff[i];
-		sigma[i]=buff[i+32];
-	}
-	sigma[32]=0;   // N
+    SHA3_hash(&sh,(char *)buff);
+    for (i=0;i<32;i++)
+    {
+        rho[i]=buff[i];
+        sigma[i]=buff[i+32];
+    }
+    sigma[32]=0;   // N
 
 // create s
-	for (i=0;i<ck;i++)
-	{
-		SHA3_init(&sh,SHAKE256);
-		for (j=0;j<33;j++)
-			SHA3_process(&sh,sigma[j]); 
-		SHA3_shake(&sh,(char *)buff,64*eta1);
-		CBD(buff,eta1,&s[i*KY_DEGREE]);
-		sigma[32]+=1;
-	}
+    for (i=0;i<ck;i++)
+    {
+        SHA3_init(&sh,SHAKE256);
+        for (j=0;j<33;j++)
+            SHA3_process(&sh,sigma[j]); 
+        SHA3_shake(&sh,(char *)buff,64*eta1);
+        CBD(buff,eta1,&s[i*KY_DEGREE]);
+        sigma[32]+=1;
+    }
 
 // create e
-	for (i=0;i<ck;i++)
-	{
-		SHA3_init(&sh,SHAKE256);
-		for (j=0;j<33;j++)
-			SHA3_process(&sh,sigma[j]); 
-		SHA3_shake(&sh,(char *)buff,64*eta1);
-		CBD(buff,eta1,&e[i*KY_DEGREE]);
-		sigma[32]+=1;
-	}
+    for (i=0;i<ck;i++)
+    {
+        SHA3_init(&sh,SHAKE256);
+        for (j=0;j<33;j++)
+            SHA3_process(&sh,sigma[j]); 
+        SHA3_shake(&sh,(char *)buff,64*eta1);
+        CBD(buff,eta1,&e[i*KY_DEGREE]);
+        sigma[32]+=1;
+    }
 
     for (k=0;k<ck;k++)
     {
@@ -460,7 +460,7 @@ static void KYBER_CPA_base_encrypt(const int *params,byte *coins,octet *pk,octet
     int i,row,j,len;
     sha3 sh;
     byte sigma[33];
-	byte buff[256];
+    byte buff[256];
     byte rho[32];
 
     int ck=params[0];
@@ -483,32 +483,32 @@ static void KYBER_CPA_base_encrypt(const int *params,byte *coins,octet *pk,octet
 
     for (i=0;i<32;i++)
         sigma[i]=coins[i];//i+6; //RAND_byte(RNG);
-	sigma[32]=0;
+    sigma[32]=0;
 
     for (i=0;i<32;i++)
         rho[i]=pk->val[pk->len-32+i];
 
 // create q
-	for (i=0;i<ck;i++)
-	{
-		SHA3_init(&sh,SHAKE256);
-		for (j=0;j<33;j++)
-			SHA3_process(&sh,sigma[j]); 
-		SHA3_shake(&sh,(char *)buff,64*eta1);
-		CBD(buff,eta1,&q[i*KY_DEGREE]);
-		sigma[32]+=1;
-	}
+    for (i=0;i<ck;i++)
+    {
+        SHA3_init(&sh,SHAKE256);
+        for (j=0;j<33;j++)
+            SHA3_process(&sh,sigma[j]); 
+        SHA3_shake(&sh,(char *)buff,64*eta1);
+        CBD(buff,eta1,&q[i*KY_DEGREE]);
+        sigma[32]+=1;
+    }
 
 // create e1
-	for (i=0;i<ck;i++)
-	{
-		SHA3_init(&sh,SHAKE256);
-		for (j=0;j<33;j++)
-			SHA3_process(&sh,sigma[j]); 
-		SHA3_shake(&sh,(char *)buff,64*eta2);
-		CBD(buff,eta1,&u[i*KY_DEGREE]);          // e1
-		sigma[32]+=1;
-	}
+    for (i=0;i<ck;i++)
+    {
+        SHA3_init(&sh,SHAKE256);
+        for (j=0;j<33;j++)
+            SHA3_process(&sh,sigma[j]); 
+        SHA3_shake(&sh,(char *)buff,64*eta2);
+        CBD(buff,eta1,&u[i*KY_DEGREE]);          // e1
+        sigma[32]+=1;
+    }
 
     for (i=0;i<ck;i++)
     {
@@ -546,10 +546,10 @@ static void KYBER_CPA_base_encrypt(const int *params,byte *coins,octet *pk,octet
 
 // create e2
     SHA3_init(&sh,SHAKE256);
-	for (j=0;j<33;j++)
-		SHA3_process(&sh,sigma[j]); 
-	SHA3_shake(&sh,(char *)buff,64*eta2);
-	CBD(buff,eta1,w);  // e2
+    for (j=0;j<33;j++)
+        SHA3_process(&sh,sigma[j]); 
+    SHA3_shake(&sh,(char *)buff,64*eta2);
+    CBD(buff,eta1,w);  // e2
 
     poly_add(v,v,w);
     
@@ -657,9 +657,9 @@ static void KYBER_CCA_encrypt(const int *params,byte *randbytes32,octet *pk,octe
 // Input secret key and ciphertext, outputs shared 32-byte secret
 static void KYBER_CPA_decrypt(const int *params,octet *sk,octet *ct,octet *ss)
 {
-	int i,j,row;
+    int i,j,row;
     int ck=params[0];
-	sign16 w[KY_DEGREE];
+    sign16 w[KY_DEGREE];
     sign16 v[KY_DEGREE];
     sign16 r[KY_DEGREE];
 #ifdef USE_VLAS

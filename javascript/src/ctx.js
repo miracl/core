@@ -1161,6 +1161,8 @@ var CTX = function(input_parameter) {
     prepareModule("RAND");
     prepareModule("SHARE");
     prepareModule("NHS");
+    prepareModule("KYBER");
+
 
     if (typeof input_parameter === "undefined") {
         return;

@@ -1,7 +1,7 @@
 {
-	"name": "amcl-js",
+	"name": "miracl-js",
 	"version": "3.0.0",
-	"description": "AMCL Library",
+	"description": "MIRACL Core Library",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"

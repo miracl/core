@@ -17,14 +17,13 @@
 -- limitations under the License.
 -->
 
-
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>JavaScript Test NHS</title>
+<title>JavaScript Test KYBER</title>
 </head>
 <body>
-<h1>JavaScript Test NHS</h1>
+<h1>JavaScript Test KYBER</h1>
 <script type="text/javascript"src=./../../src/rand.js></script>
 <script type="text/javascript"src=./../../src/share.js></script>
 <script type="text/javascript"src=./../../src/uint64.js></script>
@@ -42,34 +41,42 @@
 
 <script>
 
-// Test NewHope Simple 
-// See https://eprint.iacr.org/2016/1157 (Alkim, Ducas, Popplemann and Schwabe)
+// Test Kyber 
+    var ctx = new CTX();
+    var LOOPS = 100;
 
-	var ctx = new CTX();
+    var RAW=[];
+    var rng=new ctx.RAND(); rng.clean();
+                                
+    for (i=0;i<100;i++) RAW[i]=i+1;
+    rng.seed(100,RAW);
 
-	var RAW=[];
-	var srng=new ctx.RAND(); srng.clean();
-								var crng=new ctx.RAND(); crng.clean(); 
+        
+    var R64 = [];
+    var R32 = [];
+    var SK = [];
+    var PK = [];
+    var SS = [];
+    var CT = [];
 
-	for (i=0;i<100;i++) RAW[i]=i+1;
-	srng.seed(100,RAW);
+    window.document.write("\nTesting KYBER Key Exchange" + "<br>");
 
-								for (i=0;i<100;i++) RAW[i]=i+2;
-								crng.seed(100,RAW);
-	var S=[];
-								var SB=[];
-								var UC=[];
-	var KEYA=[];
-								var KEYB=[];
+    for (var j=0;j<LOOPS;j++) {
+        for (var i=0;i<64;i++) R64[i]=rng.getByte();
+        ctx.KYBER.keypair768(R64,SK,PK);
 
-	ctx.NHS.SERVER_1(srng,SB,S);
+        //window.document.write("Public Key= "+ctx.KYBER.bytestostring(PK)+ "<br>");
+        //window.document.write("Secret key= "+ctx.KYBER.bytestostring(SK)+ "<br>");
 
-								ctx.NHS.CLIENT(crng,SB,UC,KEYB);
+        for (var i=0;i<32;i++) R32[i]=rng.getByte();
+        ctx.KYBER.encrypt768(R32,PK,SS,CT);
 
-	ctx.NHS.SERVER_2(S,UC,KEYA);
+        window.document.write("Alice key= 0x"+ctx.KYBER.bytestostring(SS)+ "<br>");
 
-	window.document.write("Alice Key= 0x"+ctx.NHS.bytestostring(KEYA)+ "<br>");
-	window.document.write("Bob's Key= 0x"+ctx.NHS.bytestostring(KEYB)+ "<br>");
+        ctx.KYBER.decrypt768(SK,CT,SS);
+
+        window.document.write("Bob's key= 0x"+ctx.KYBER.bytestostring(SS)+ "<br>");
+    }
 
 </script>
 </body>
