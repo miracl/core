@@ -68,11 +68,11 @@ Copy the MIRACL Core Rust code into a new directory.
 
 Edit config32.py and replace the line
 
-    os.system("cargo rustc --manifest-path core"+slashtext+"Cargo.toml --release --lib")
+    os.system("cargo rustc --manifest-path mcore"+slashtext+"Cargo.toml --release --lib")
 
 with 
 
-    os.system("cargo rustc --target wasm32-unknown-emscripten --manifest-path core"+slashtext+"Cargo.toml --release --lib")
+    os.system("cargo rustc --target wasm32-unknown-emscripten --manifest-path mcore"+slashtext+"Cargo.toml --release --lib")
 
 Build the Rust library by executing
 
@@ -83,11 +83,11 @@ the example programs.
 
 Copy the MIRACL Core library to the current directory
 
-    cp core/target/wasm32-unknown-emscripten/release/libcore.rlib .
+    cp mcore/target/wasm32-unknown-emscripten/release/libmcore.rlib .
 
 Finally build one of the test programs by, for example
 
-    rustc -O --target=wasm32-unknown-emscripten TestBLS.rs --extern core=libcore.rlib -o TestBLS.html
+    rustc -O --target=wasm32-unknown-emscripten TestBLS.rs --extern mcore=libmcore.rlib -o TestBLS.html
 
 This will create a .html file which can be loaded into a browser as described above, and a .js file which can be run via Node.js
 
