@@ -1162,6 +1162,7 @@ var CTX = function(input_parameter) {
     prepareModule("SHARE");
     prepareModule("NHS");
     prepareModule("KYBER");
+    prepareModule("DILITHIUM");
 
 
     if (typeof input_parameter === "undefined") {
