@@ -5,7 +5,7 @@ A bit rough-and-ready - the output might need minor syntactical corrections
 
 (MINGW build)
 
-g++ -O3 romgen.cpp big.cpp zzn.cpp ecn.cpp zzn2.cpp ecn2.cpp zzn4.cpp ecn4.cpp zzn8.cpp ecn8.cpp miracl.a -o romgen.exe
+g++ -O3 romgen.cpp big.cpp zzn.cpp ecn.cpp zzn2.cpp ecn2.cpp zzn4.cpp ecn4.cpp zzn8.cpp ecn8.cpp miracl.a -o romgen
 
 */
 
@@ -23,7 +23,7 @@ g++ -O3 romgen.cpp big.cpp zzn.cpp ecn.cpp zzn2.cpp ecn2.cpp zzn4.cpp ecn4.cpp z
 
 using namespace std;
 
-Miracl precision(100, 0);
+Miracl precision(200, 0);
 
 char open, close, term, el = 0;
 int PS=28;  // start of pairing friendly curves
@@ -919,8 +919,11 @@ int main(int argc, char **argv)
         curve_b = p - 39081;
         mip->IOBASE = 16;
 
-        gx = (char *)"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa955555555555555555555555555555555555555555555555555555555";
-        gy = (char *)"ae05e9634ad7048db359d6205086c2b0036ed7a035884dd7b7e36d728ad8c4b80d6565833a2a3098bbbcb2bed1cda06bdaeafbcdea9386ed";
+        //gx = (char *)"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa955555555555555555555555555555555555555555555555555555555";
+        //gy = (char *)"ae05e9634ad7048db359d6205086c2b0036ed7a035884dd7b7e36d728ad8c4b80d6565833a2a3098bbbcb2bed1cda06bdaeafbcdea9386ed";
+
+        gx = (char *)"4f1970c66bed0ded221d15a622bf36da9e146570470f1767ea6de324a3d3a46412ae1af72ab66511433b80e18b00938e2626a82bc70cc05e";
+        gy = (char *)"693f46716eb6bc248876203756c9c7624bea73736ca3984087789c1e05a0c2d73ad3ff1ce67c39c4fdbd132c4ed7c8ad9808795bf230fa14";
         htpc=pow(p-1,finde(p),p);
     }
 
@@ -1205,7 +1208,7 @@ int main(int argc, char **argv)
         if (chunk==32)
             bb=29;
         if (chunk==64)
-            bb=56;
+            bb=58;
         if (strcmp(lg, "javascript") == 0)
             bb=23;
         printf("Curve is NUMS384E\n");
@@ -1578,6 +1581,13 @@ int main(int argc, char **argv)
 
         Q = (np / r) * Q;
 
+//cout << "GCD(Phi(p)/r,x-1)= " << gcd((pow(p,4)-p*p+1)/r,x-1) << endl;
+//cout << "GCD(np/r,x-1)= " << gcd(np/r,x-1) << endl;
+
+//cout << "x-1 = " << x-1 << endl;
+//cout << "np/r= " << np/r << endl;
+//cout << "Phi(p)/r= " << (pow(p,4)-p*p+1)/r << endl;
+
         zcru = pow((ZZn)2, (p - 1) / 3);
         //	zcru*=zcru;   // right cube root of unity
         cru = (Big)zcru;
@@ -1647,6 +1657,9 @@ int main(int argc, char **argv)
         np = PP + 1 - (-3 * FF + TT) / 2; // 2 possibilities...
 
         Q = (np / r) * Q;
+
+//cout << "GCD(Phi(p)/r,x-1)= " << gcd((pow(p,4)-p*p+1)/r,x-1) << endl;
+//cout << "GCD(np/r,x-1)= " << gcd(np/r,x-1) << endl;
 
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity ?? if x>0 do this??
@@ -1839,6 +1852,9 @@ cout << "Q= " << Q << endl;
 
         Q = (np / r) * Q;
 
+//cout << "GCD(Phi(p)/r,x-1)= " << gcd((pow(p,4)-p*p+1)/r,x-1) << endl;
+//cout << "GCD(np/r,x-1)= " << gcd(np/r,x-1) << endl;
+
         zcru = pow((ZZn)2, (p - 1) / 3);
         //	zcru*=zcru;   // right cube root of unity
         cru = (Big)zcru;
@@ -2020,6 +2036,9 @@ mip->IOBASE=10;
         np = PP + 1 - (-3 * FF + TT) / 2; // 2 possibilities...
 
         Q = (np / r) * Q;
+
+//cout << "GCD(Phi(p)/r,x-1)= " << gcd((pow(p,4)-p*p+1)/r,x-1) << endl;
+//cout << "GCD(np/r,x-1)= " << gcd(np/r,x-1) << endl;
 
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity
@@ -2271,6 +2290,9 @@ mip->IOBASE=10;
 
         QQ = (np / r) * QQ;
 
+//cout << "GCD(Phi(p)/r,x-1)= " << gcd((pow(p,8)-pow(p,4)+1)/r,x-1) << endl;
+//cout << "GCD(np/r,x-1)= " << gcd(np/r,x-1) << endl;
+
 //cout << "QQ= " << QQ << endl;
 //cout << "2*QQ= " << QQ+QQ << endl;
 //cout << "3*QQ= " << (QQ+QQ)+QQ << endl;
@@ -2373,6 +2395,9 @@ mip->IOBASE=10;
         np = PP + 1 - (3 * FF + TT) / 2; //?
 
         Q8 = (np / r) * Q8;
+
+//cout << "GCD(Phi(p)/r,x-1)= " << gcd((pow(p,16)-pow(p,8)+1)/r,x-1) << endl;
+//cout << "GCD(np/r,x-1)= " << gcd(np/r,x-1) << endl;
 
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity -  not for M-TYPE
@@ -2573,6 +2598,9 @@ mip->IOBASE=10;
         np = PP + 1 - (3 * FF + TT) / 2; //?
 
         Q8 = (np / r) * Q8;
+
+//cout << "GCD(Phi(p)/r,x-1)= " << gcd((pow(p,16)-pow(p,8)+1)/r,x-1) << endl;
+//cout << "GCD(np/r,x-1)= " << gcd(np/r,x-1) << endl;
 
         zcru = pow((ZZn)2, (p - 1) / 3);
         //zcru*=zcru;   // right cube root of unity -  not for M-TYPE
