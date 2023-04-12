@@ -434,6 +434,22 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"XXX",bd)
     miracl_compile.compile_file(3, fnamec)
 
+
+    fnamec="eddsa_"+tc+".cpp"
+    fnameh="eddsa_"+tc+".h"
+
+    copy_temp_file("eddsa.cpp", fnamec)
+    copy_keep_file("eddsa.h", fnameh)
+
+    replace(fnamec,"ZZZ",tc)
+    replace(fnamec,"YYY",tf)
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"ZZZ",tc)
+    replace(fnameh,"YYY",tf)
+    replace(fnameh,"XXX",bd)
+    miracl_compile.compile_file(3, fnamec)
+
+
     fnamec="hpke_"+tc+".cpp"
     fnameh="hpke_"+tc+".h"
 
@@ -896,6 +912,7 @@ else :
 
 if testing :
     miracl_compile.compile_binary(2, "testecc.cpp", "core.a", "testecc")
+    miracl_compile.compile_binary(2, "testeddsa.cpp", "core.a", "testeddsa")
     miracl_compile.compile_binary(2, "testmpin.cpp", "core.a", "testmpin")
     miracl_compile.compile_binary(2, "testbls.cpp", "core.a", "testbls")
     miracl_compile.compile_binary(2, "benchtest_all.cpp", "core.a", "benchtest_all")

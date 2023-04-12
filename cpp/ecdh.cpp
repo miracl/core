@@ -31,11 +31,11 @@ using namespace YYY;
 
 #if CURVETYPE_ZZZ!=WEIERSTRASS
 // Process a random BIG r by RFC7748 (for Montgomery & Edwards curves only)
-void ZZZ::RFC7748(BIG r)
+static void RFC7748(BIG r)
 {
     int c,lg=0;
     BIG t;
-    c=CURVE_Cof_I;
+    c=ZZZ::CURVE_Cof_I;
     while (c!=1)
     {
         lg++;

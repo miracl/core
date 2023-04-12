@@ -59,12 +59,6 @@ using namespace core;
 
 namespace ZZZ {
 
-/**	@brief Transform a point multiplier to RFC7748 form
- *
-	@param r is a random number, to be transformed into RFC7748 form
-*/
-extern void RFC7748(XXX::BIG r);
-
 /**	@brief Test if group element in correct range
  *
 	@param s is a random number

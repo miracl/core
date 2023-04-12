@@ -495,7 +495,7 @@ void core::SHA3_process(sha3 *sh, int byt)
     int cnt = (int)(sh->length);
     int b = cnt % 8;
     cnt /= 8;
-    sh->S[cnt] ^= ((unsign64)byt << (8 * b));
+    sh->S[cnt] ^= ((unsign64)(byt & 0xff) << (8 * b));
     sh->length++;
     if (sh->length == sh->rate)
     {
