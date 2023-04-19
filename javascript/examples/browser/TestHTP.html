@@ -56,7 +56,7 @@
 <p><a id="myLink4" href="#" onclick="ED25519();">ED25519 Hash to Point</a></p>
 <p><a id="myLink4" href="#" onclick="C25519();">C25519 Hash to Point</a></p>
 <p><a id="myLink5" href="#" onclick="NIST256();">NIST256 Hash to Point</a></p>
-<p><a id="myLink6" href="#" onclick="GOLDILOCKS();">GOLDILOCKS Hash to Point</a></p>
+<p><a id="myLink6" href="#" onclick="ED448();">ED448 Hash to Point</a></p>
 <p><a id="myLink7" href="#" onclick="SECP256K1();">SECP256K1 Hash to Point</a></p>
 <p><a id="myLink8" href="#" onclick="BLS12381();">BLS12381_G1 Hash to Point</a></p>
 <p><a id="myLink9" href="#" onclick="BLS12381_G2();">BLS12381_G2 Hash to Point</a></p>
@@ -233,9 +233,9 @@ function NIST256() {
     htp(mywindow,ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
 }
 
-// GOLDILOCKS context
-function GOLDILOCKS() {
-	var ctx = new CTX('GOLDILOCKS');
+// ED448 context
+function ED448() {
+	var ctx = new CTX('ED448');
 	var ro="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_";
 	var nu="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;

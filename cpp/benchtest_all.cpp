@@ -19,8 +19,8 @@
  */
 
 /* Test and benchmark elliptic curve and RSA functions
-    First build core.a from build_ec batch file
-    gcc -O3 benchtest_ec.c core.a -o benchtest_ec.exe
+    First build core.a from config*.py file
+    g++ -O3 benchtest_all.c core.a -o benchtest_all
 */
 
 #include <stdio.h>
@@ -28,12 +28,12 @@
 #include <time.h>
 
 #include "rsa_RSA2048.h"
-#include "ecp_ED25519.h"
+#include "ecp_Ed25519.h"
 #include "pair_BN254.h"
 
 #if CHUNK==32 || CHUNK==64
 #include "ecp_NIST256.h"
-#include "ecp_GOLDILOCKS.h"
+#include "ecp_Ed448.h"
 #include "pair_BLS12383.h"
 #include "pair4_BLS24479.h"
 #include "pair8_BLS48556.h"
@@ -46,9 +46,9 @@ using namespace core;
 
 int ed25519(csprng *RNG)
 {
-    using namespace ED25519;
-    using namespace ED25519_BIG;
-    using namespace ED25519_FP;
+    using namespace Ed25519;
+    using namespace Ed25519_BIG;
+    using namespace Ed25519_FP;
 
     int i, iterations;
     clock_t start;
@@ -56,15 +56,15 @@ int ed25519(csprng *RNG)
     ECP EP, EG;
     BIG s, r, x, y;
     FP rw;
-    printf("\nTesting/Timing ED25519 ECC\n");
+    printf("\nTesting/Timing Ed25519 ECC\n");
 
-#if CURVETYPE_ED25519==WEIERSTRASS
+#if CURVETYPE_Ed25519==WEIERSTRASS
     printf("Weierstrass parameterization\n");
 #endif
-#if CURVETYPE_ED25519==EDWARDS
+#if CURVETYPE_Ed25519==EDWARDS
     printf("Edwards parameterization\n");
 #endif
-#if CURVETYPE_ED25519==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
     printf("Montgomery parameterization\n");
 #endif
 
@@ -118,7 +118,7 @@ int ed25519(csprng *RNG)
         return 0;
     }
 
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_ED25519, RNG);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_Ed25519, RNG);
 
     ECP_copy(&EP, &EG);
     ECP_mul(&EP, r);
@@ -244,11 +244,11 @@ int nist256(csprng *RNG)
     return 0;
 }
 
-int goldilocks(csprng *RNG)
+int ed448(csprng *RNG)
 {
-    using namespace GOLDILOCKS;
-    using namespace GOLDILOCKS_BIG;
-    using namespace GOLDILOCKS_FP;
+    using namespace Ed448;
+    using namespace Ed448_BIG;
+    using namespace Ed448_FP;
 
     int i, iterations;
     clock_t start;
@@ -256,31 +256,31 @@ int goldilocks(csprng *RNG)
     ECP EP, EG;
     BIG s, r, x, y;
     FP rw;
-    printf("\nTesting/Timing GOLDILOCKS ECC\n");
+    printf("\nTesting/Timing Ed448 ECC\n");
 
-#if CURVETYPE_GOLDILOCKS==WEIERSTRASS
+#if CURVETYPE_Ed448==WEIERSTRASS
     printf("Weierstrass parameterization\n");
 #endif
-#if CURVETYPE_GOLDILOCKS==EDWARDS
+#if CURVETYPE_Ed448==EDWARDS
     printf("Edwards parameterization\n");
 #endif
-#if CURVETYPE_GOLDILOCKS==MONTGOMERY
+#if CURVETYPE_Ed448==MONTGOMERY
     printf("Montgomery parameterization\n");
 #endif
 
-#if MODTYPE_GOLDILOCKS == PSEUDO_MERSENNE
+#if MODTYPE_F448 == PSEUDO_MERSENNE
     printf("Pseudo-Mersenne Modulus\n");
 #endif
 
-#if MODTYPE_GOLDILOCKS == GENERALISED_MERSENNE
+#if MODTYPE_F448 == GENERALISED_MERSENNE
     printf("Generalised-Mersenne Modulus\n");
 #endif
 
-#if MODTYPE_GOLDILOCKS == MONTGOMERY_FRIENDLY
+#if MODTYPE_F448 == MONTGOMERY_FRIENDLY
     printf("Montgomery Friendly Modulus\n");
 #endif
 
-#if MODTYPE_GOLDILOCKS == NOT_SPECIAL
+#if MODTYPE_F448 == NOT_SPECIAL
     printf("Not special Modulus\n");
 #endif
 
@@ -312,7 +312,7 @@ int goldilocks(csprng *RNG)
         return 0;
     }
 
-    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_GOLDILOCKS, RNG);
+    BIG_randtrunc(s, r, 2 * CURVE_SECURITY_Ed448, RNG);
 
     ECP_copy(&EP, &EG);
     ECP_mul(&EP, r);
@@ -1449,7 +1449,7 @@ int main()
     ed25519(&RNG);
 #if CHUNK==32 || CHUNK==64
     nist256(&RNG);
-    goldilocks(&RNG);
+    ed448(&RNG);
 #endif
     bn254(&RNG);
 #if CHUNK==32 || CHUNK==64

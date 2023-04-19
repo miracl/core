@@ -237,12 +237,12 @@ function NIST256() {
 
 }
 
-// GOLDILOCKS context
-function GOLDILOCKS() {
-	var ctx = new CTX('GOLDILOCKS');
+// ED448 context
+function ED448() {
+	var ctx = new CTX('ED448');
 	
 
-	console.log("GOLDILOCKS Curve "+  "");
+	console.log("ED448 Curve "+  "");
 
 	var i,res;
 	var pp="M0ng00se";
@@ -468,7 +468,7 @@ ED25519();
 console.log("\n");
 NIST256();
 console.log("\n");
-GOLDILOCKS();
+ED448();
 console.log("\n");
 RSA2048();
 console.log("\n");

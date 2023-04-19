@@ -84,7 +84,7 @@ def rsaset(tb,nb,base,ml) :
 # modulus_bits is the actual bit length of the modulus.
 # modulus_mod_8 is the remainder when the modulus is divided by 8
 # rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
-# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
+# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for Ed448 only)
 # i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
 # Curve A parameter
@@ -100,8 +100,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
     inb=int(itb/8)
     nb=str(inb)
 
-    fpath="core"+slashtext+tc+slashtext
-    os.system("mkdir core"+slashtext+tc)
+    tcl=tc.lower();
+
+    fpath="core"+slashtext+tcl+slashtext
+    os.system("mkdir core"+slashtext+tcl)
 
     os.system(copytext+"big.swift "+fpath+"big.swift")
     os.system(copytext+"config_big.swift "+fpath+"config_big.swift")
@@ -110,7 +112,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
     os.system(copytext+"dbig.swift "+fpath+"dbig.swift")
     os.system(copytext+"fp.swift "+fpath+"fp.swift")
     os.system(copytext+"ecp.swift "+fpath+"ecp.swift")
-    os.system(copytext+"rom_"+tc+".swift "+fpath+"rom.swift")
+    os.system(copytext+"rom_"+tcl+".swift "+fpath+"rom.swift")
 
     replace(fpath+"config_big.swift","@NB@",nb)
     replace(fpath+"config_big.swift","@BASE32@",base)
@@ -199,7 +201,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
             os.system(copytext+"pair.swift "+fpath+"pair.swift")
             os.system(copytext+"mpin.swift "+fpath+"mpin.swift")
             os.system(copytext+"bls.swift "+fpath+"bls.swift")
-            replace(fpath+"bls.swift","XXX",tc.upper())
+            replace(fpath+"bls.swift","XXX",tcl.upper())
 
             if hc2!="0" :
                 replace(fpath+"ecp2.swift","CAHCZS","*/")
@@ -219,7 +221,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
             os.system(copytext+"pair4.swift "+fpath+"pair4.swift")
             os.system(copytext+"mpin192.swift "+fpath+"mpin192.swift")
             os.system(copytext+"bls192.swift "+fpath+"bls192.swift")
-            replace(fpath+"bls192.swift","XXX",tc.upper())
+            replace(fpath+"bls192.swift","XXX",tcl.upper())
 
             replace(fpath+"fp4.swift","PFGE24S","*/")
             replace(fpath+"fp4.swift","PFGE24F","/*")
@@ -231,7 +233,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
             os.system(copytext+"pair8.swift "+fpath+"pair8.swift")
             os.system(copytext+"mpin256.swift "+fpath+"mpin256.swift")
             os.system(copytext+"bls256.swift "+fpath+"bls256.swift")
-            replace(fpath+"bls256.swift","XXX",tc.upper())
+            replace(fpath+"bls256.swift","XXX",tcl.upper())
 
             replace(fpath+"fp4.swift","PFGE24S","*/")
             replace(fpath+"fp4.swift","PFGE24F","/*")
@@ -242,10 +244,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
         os.system(copytext+"ecdh.swift "+fpath+"ecdh.swift")
         os.system(copytext+"hpke.swift "+fpath+"hpke.swift")
 
-    print("Processing "+tc+ "..",end = "",flush=True)
-    os.system("swiftc -DD64 "+fpath+"*.swift -L. -lcore -I. -O -Ounchecked -whole-module-optimization -emit-library -emit-module -module-name "+tc)
+    print("Processing "+tcl+ "..",end = "",flush=True)
+    os.system("swiftc -DD64 "+fpath+"*.swift -L. -lcore -I. -O -Ounchecked -whole-module-optimization -emit-library -emit-module -module-name "+tcl)
     os.system(deltext+fpath+"*.*")
-    os.system("rmdir core"+slashtext+tc)
+    os.system("rmdir core"+slashtext+tcl)
     print(". [DONE]")
 
 os.system("mkdir core")
@@ -265,13 +267,13 @@ os.system("swiftc core"+slashtext+"*.swift -O -Ounchecked -whole-module-optimiza
 
 class miracl_crypto:
     np_curves = (
-        ("ed25519","56","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","128"),
+        ("Ed25519","56","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","128"),
         ("c25519","56","255","2","1","PSEUDO_MERSENNE","0","MONTGOMERY","486662","NOT","NOT","NOT","NOT","128"),
         ("nist256","56","256","1","-10","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","128"),
         ("brainpool","56","256","1","-3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","128"),
         ("anssi","56","256","1","-5","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","128"),
         ("hifive","60","336","2","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","192"),
-        ("goldilocks","58","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","256"),
+        ("Ed448","58","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","256"),
         ("nist384","56","384","1","-12","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","192"),
         ("c41417","60","414","1","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","256"),
         ("nist521","60","521","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","256"),
@@ -296,7 +298,7 @@ class miracl_crypto:
 
     pf_curves = (
         ("bn254","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","66","128"),
-        ("bn254CX","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","66","128"),
+        ("bn254cx","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","66","128"),
         ("bls12383","58","383","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","65","128"),
         ("bls12381","58","381","1",["11","-2","-1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","65","128"),
         ("fp256bn","56","256","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","NEGATIVEX","66","128"),
@@ -418,10 +420,10 @@ os.system(deltext+"core"+slashtext+"*.*")
 os.system("rmdir core")
 
 if testing :
-    os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lrsa2048 TestECC.swift ")
+    os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -led448 -lrsa2048 TestECC.swift ")
     os.system("swiftc -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestMPIN.swift ")
     os.system("swiftc -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestBLS.swift")
-    os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 BenchtestALL.swift ")
+    os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -led448 -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 BenchtestALL.swift ")
     #os.system("swiftc -I. -L. -lcore TestNHS.swift")
     os.system("swiftc -I. -L. -lcore TestKYBER.swift")
     os.system("swiftc -I. -L. -lcore TestDLTHM.swift")

@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 #include "arch.h"
-#include "ecp_ED25519.h"
+#include "ecp_Ed25519.h"
 
-namespace ED25519 {
+namespace Ed25519 {
 
-/* ED25519 */
+/* Ed25519 */
 
 #if CHUNK==16
 /* Ed25519 Curve */

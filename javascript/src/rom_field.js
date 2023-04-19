@@ -42,7 +42,7 @@ var ROM_FIELD_25519,
     ROM_FIELD_C1174,
     ROM_FIELD_C1665,
     ROM_FIELD_MDC,
-    ROM_FIELD_GOLDILOCKS,
+    ROM_FIELD_448,
     ROM_FIELD_HIFIVE,
     ROM_FIELD_NIST256,
     ROM_FIELD_NIST384,
@@ -513,20 +513,20 @@ ROM_FIELD_MDC = function() {
 };
 
 
-ROM_FIELD_GOLDILOCKS = function() {
+ROM_FIELD_448 = function() {
     "use strict";
     /* Fixed Data in ROM - Field and Curve parameters */
 
-    var ROM_FIELD_GOLDILOCKS = {
+    var ROM_FIELD_448 = {
 
-        // GOLDILOCKS modulus
+        // ED448 modulus
         // Base Bits= 23
         Modulus: [0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7DFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FF],
         ROI: [0x7FFFFE, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7DFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FFFFF, 0x7FF],
         R2modp: [0x0, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xC0000, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
         MConst: 0x1,
     };
-    return ROM_FIELD_GOLDILOCKS;
+    return ROM_FIELD_448;
 };
 
 ROM_FIELD_HIFIVE = function() {
@@ -706,7 +706,7 @@ if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
         ROM_FIELD_BN254CX: ROM_FIELD_BN254CX,
         ROM_FIELD_BRAINPOOL: ROM_FIELD_BRAINPOOL,
         ROM_FIELD_C41417: ROM_FIELD_C41417,
-        ROM_FIELD_GOLDILOCKS: ROM_FIELD_GOLDILOCKS,
+        ROM_FIELD_448: ROM_FIELD_448,
         ROM_FIELD_HIFIVE: ROM_FIELD_HIFIVE,
         ROM_FIELD_NIST256: ROM_FIELD_NIST256,
         ROM_FIELD_NIST384: ROM_FIELD_NIST384,

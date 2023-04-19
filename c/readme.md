@@ -8,8 +8,8 @@ is renamed FP_YYY, where YYY reflects the modulus used. Also the ECP type
 is renamed ECP_ZZZ, where ZZZ describes the actual curve. Function names 
 are also decorated in the same way.
 
-So for example to support both ED25519 and the NIST P256 curve on a 64-bit 
-processor, we would need to create BIG_256_56, FP_25519, ECP_ED25519 and 
+So for example to support both Ed25519 and the NIST P256 curve on a 64-bit 
+processor, we would need to create BIG_256_56, FP_25519, ECP_Ed25519 and 
 BIG_256_56, FP_NIST256, ECP_NIST256. Note that both curves could be built 
 on top of BIG_256_56, as both require support for 256-bit numbers using 
 an internal number base of 2^56.
@@ -59,6 +59,13 @@ one binary
 
 Next compile
 
+    gcc -O2  testeddsa.c core.a -o testeddsa
+
+This test program exercises the EDDSA signature algorithm using the Edwards curves Ed25519 and Ed448
+
+
+Next compile
+
     gcc -O2  -std=c99 testmpin.c core.a -o testmpin
 
 This test program exercises 4 different pairing friendly curves using 
@@ -100,7 +107,7 @@ NEW: support for emerging Hash To Curve standard.
 See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
 
 
-Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (ED25519, C25519, NIST256, GOLDILOCKS, SECP256K1 and BLS12381)
+Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (Ed25519, C25519, NIST256, Ed448, SECP256K1 and BLS12381)
 
     gcc -O2 -std=c99 testhtp.c core.a -o testhtp
 

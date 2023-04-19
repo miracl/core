@@ -28,7 +28,7 @@ var CTX = function(input_parameter) {
         "ED25519": {
             "BITS": "256",
             "FIELD": "25519",
-            "CURVE": "ED25519",
+            "CURVE": "Ed25519",
             "@NB": 32,      /* Number of bytes in Modulus */
             "@BASE": 24,    /* Number base as power of 2 */
             "@NBT": 255,    /* Number of bits in modulus */
@@ -81,7 +81,7 @@ var CTX = function(input_parameter) {
 
         "X448": {
             "BITS": "448",
-            "FIELD": "GOLDILOCKS",
+            "FIELD": "448",
             "CURVE": "X448",
             "@NB": 56,
             "@BASE": 23,
@@ -404,10 +404,10 @@ var CTX = function(input_parameter) {
             "@AK": 24
         },
 
-        "GOLDILOCKS": {
+        "ED448": {
             "BITS": "448",
-            "FIELD": "GOLDILOCKS",
-            "CURVE": "GOLDILOCKS",
+            "FIELD": "448",
+            "CURVE": "Ed448",
             "@NB": 56,
             "@BASE": 23,
             "@NBT": 448,

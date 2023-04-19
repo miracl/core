@@ -301,7 +301,7 @@ def rsaset(tb,tff,base,ml) :
 # Next give the number base used for 32 bit architecture, as n where the base is 2^n (note that these must be fixed for the same "big" name, if is ever re-used for another curve)
 # m8 max m such that 2^m | modulus-1
 # rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
-# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
+# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for Ed448 only)
 # i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
 # Curve A parameter
@@ -447,6 +447,21 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
     copy_temp_file("ecdh.c", fnamec)
     copy_keep_file("ecdh.h", fnameh)
+
+    replace(fnamec,"ZZZ",tc)
+    replace(fnamec,"YYY",tf)
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"ZZZ",tc)
+    replace(fnameh,"YYY",tf)
+    replace(fnameh,"XXX",bd)
+    miracl_compile.compile_file(3, fnamec)
+
+
+    fnamec="eddsa_"+tc+".c"
+    fnameh="eddsa_"+tc+".h"
+
+    copy_temp_file("eddsa.c", fnamec)
+    copy_keep_file("eddsa.h", fnameh)
 
     replace(fnamec,"ZZZ",tc)
     replace(fnamec,"YYY",tf)
@@ -757,13 +772,13 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
 class miracl_crypto:
     np_curves = (
-        ( "255", "F25519", "ED25519", "56", "2", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "-1", "NOT_PF", "", "", "", "", "128" ),
+        ( "255", "F25519", "Ed25519", "56", "2", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "-1", "NOT_PF", "", "", "", "", "128" ),
         ( "255", "F25519", "C25519", "56", "2", "1", "PSEUDO_MERSENNE", "0", "MONTGOMERY", "486662", "NOT_PF", "", "", "", "", "128" ),
         ( "256", "NIST256", "NIST256", "56", "1", "-10", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
         ( "256", "BRAINPOOL", "BRAINPOOL", "56", "1", "-3", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
         ( "256", "ANSSI", "ANSSI", "56", "1", "-5", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
         ( "336", "HIFIVE", "HIFIVE", "60", "2", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "192" ),
-        ( "448", "GOLDILOCKS", "GOLDILOCKS", "58", "1", "0", "GENERALISED_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256" ),
+        ( "448", "F448", "Ed448", "58", "1", "0", "GENERALISED_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256" ),
         ( "384", "NIST384", "NIST384", "56", "1", "-12", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "192" ),
         ( "414", "C41417", "C41417", "60", "1", "1", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "256" ),
         ( "521", "NIST521", "NIST521", "60", "1", "-4", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "256" ),
@@ -779,7 +794,7 @@ class miracl_crypto:
         ( "256", "SM2", "SM2", "56", "1", "-9", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
         ( "255", "F25519", "C13318", "56", "2", "2", "PSEUDO_MERSENNE", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
         ( "255", "JUBJUB", "JUBJUB", "56", "32", "1", "NOT_SPECIAL", "5", "EDWARDS", "-1", "NOT_PF", "", "", "", "", "128" ),
-        ( "448", "GOLDILOCKS", "X448", "58", "1", "0", "GENERALISED_MERSENNE", "0", "MONTGOMERY", "156326", "NOT_PF", "", "", "", "", "256" ),
+        ( "448", "F448", "X448", "58", "1", "0", "GENERALISED_MERSENNE", "0", "MONTGOMERY", "156326", "NOT_PF", "", "", "", "", "256" ),
         ( "160", "SECP160R1", "SECP160R1", "56", "1", "3", "NOT_SPECIAL", "0", "WEIERSTRASS", "-3", "NOT_PF", "", "", "", "", "128" ),
         ( "251", "C1174", "C1174", "56", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
         ( "166", "C1665", "C1665", "60", "1", "0", "PSEUDO_MERSENNE", "0", "EDWARDS", "1", "NOT_PF", "", "", "", "", "128" ),
@@ -1001,6 +1016,7 @@ def main(argv):
 
     if testing :
         miracl_compile.compile_binary(2, "testecc.c", "core.a", "testecc")
+        miracl_compile.compile_binary(2, "testeddsa.c", "core.a", "testeddsa")
         miracl_compile.compile_binary(2, "testmpin.c", "core.a", "testmpin")
         miracl_compile.compile_binary(2, "testbls.c", "core.a", "testbls")
         miracl_compile.compile_binary(2, "benchtest_all.c", "core.a", "benchtest_all")

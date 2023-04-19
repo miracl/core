@@ -18,7 +18,7 @@
  */
 
 use crate::arch::Chunk;
-use crate::goldilocks::big::NLEN;
+use crate::ed448::big::NLEN;
 
 // Base Bits= 58
 // Goldilocks modulus

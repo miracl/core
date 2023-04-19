@@ -116,10 +116,10 @@ public class TestHTP extends TestCase {
             System.out.println("\nTesting HTP for curve NIST256");
             oneofmine=true;
         }
-        if (packageName == "org.miracl.core.GOLDILOCKS") {
+        if (packageName == "org.miracl.core.ED448") {
             ro="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_";
             nu="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_";
-            System.out.println("\nTesting HTP for curve GOLDILOCKS");
+            System.out.println("\nTesting HTP for curve ED448");
             oneofmine=true;
         }
         if (packageName == "org.miracl.core.SECP256K1") {

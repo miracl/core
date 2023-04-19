@@ -34,7 +34,7 @@ example program provided). Select 0 to exit.
 
 Then execute
 
-    swift -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lrsa2048 TestECC.swift 
+    swift -I. -L. -lcore -led25519 -lnist256 -led448 -lrsa2048 TestECC.swift 
 
 and
 
@@ -46,7 +46,7 @@ and
 
 and 
 
-    swift -I. -L. -lcore -led25519 -lnist256 -lgoldilocks -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 BenchtestALL.swift 
+    swift -I. -L. -lcore -led25519 -lnist256 -led448 -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 BenchtestALL.swift 
 
 Also
 
@@ -80,9 +80,9 @@ NEW: support for emerging Hash To Curve standard.
 See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
 
 
-Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (ed25519, c25519, nist256, goldilocks, secp256k1 and bls12381)
+Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (ed25519, c25519, nist256, ed448, secp256k1 and bls12381)
 
-    swift -I. -L. -lcore -led25519 -lc25519 -lnist256 -lgoldilocks -lsecp256k1 -lbls12381 TestHTP.swift
+    swift -I. -L. -lcore -led25519 -lc25519 -lnist256 -led448 -lsecp256k1 -lbls12381 TestHTP.swift
 
 Test program runs through test vectors from the draft standard.
 

@@ -120,10 +120,12 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
     global deltext,slashtext,copytext
 
-    fpath=corepath+slashtext+tc+slashtext
-    fpathTest=coreTestPath+slashtext+tc+slashtext  #ms
-    os.system(makedir+corepath+slashtext+tc)
-    os.system(makedir+coreTestPath+slashtext+tc)  #ms
+    tcu=tc.upper()
+
+    fpath=corepath+slashtext+tcu+slashtext
+    fpathTest=coreTestPath+slashtext+tcu+slashtext  #ms
+    os.system(makedir+corepath+slashtext+tcu)
+    os.system(makedir+coreTestPath+slashtext+tcu)  #ms
 
     os.system(copytext+"CONFIG_BIG.java "+fpath+"CONFIG_BIG.java")
     os.system(copytext+"CONFIG_FIELD.java "+fpath+"CONFIG_FIELD.java")
@@ -134,25 +136,25 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     os.system(copytext+"ECP.java "+fpath+"ECP.java")
     os.system(copytext+"ECDH.java "+fpath+"ECDH.java")
     os.system(copytext+"HPKE.java "+fpath+"HPKE.java")
-    os.system(copytext+"ROM_"+tc+"_32.java "+fpath+"ROM.java")
+    os.system(copytext+"ROM_"+tcu+"_32.java "+fpath+"ROM.java")
     os.system(copytext+"TestECDH.java "+fpathTest+"TestECDH.java")    #ms
     os.system(copytext+"TestHPKE.java "+fpathTest+"TestHPKE.java")    #ms
     os.system(copytext+"TestHTP.java "+fpathTest+"TestHTP.java")    #ms
     os.system(copytext+"TesttimeECDH.java "+fpathTest+"TesttimeECDH.java")    #ms
 
-    replace(fpath+"CONFIG_BIG.java","XXX",tc)
-    replace(fpath+"CONFIG_FIELD.java","XXX",tc)
-    replace(fpath+"CONFIG_CURVE.java","XXX",tc)
-    replace(fpath+"BIG.java","XXX",tc)
-    replace(fpath+"DBIG.java","XXX",tc)
-    replace(fpath+"FP.java","XXX",tc)
-    replace(fpath+"ECP.java","XXX",tc)
-    replace(fpath+"ECDH.java","XXX",tc)
-    replace(fpath+"HPKE.java","XXX",tc)
-    replace(fpathTest+"TestECDH.java","XXX",tc)  #ms
-    replace(fpathTest+"TestHPKE.java","XXX",tc)  #ms
-    replace(fpathTest+"TestHTP.java","XXX",tc)  #ms
-    replace(fpathTest+"TesttimeECDH.java","XXX",tc)  #ms
+    replace(fpath+"CONFIG_BIG.java","XXX",tcu)
+    replace(fpath+"CONFIG_FIELD.java","XXX",tcu)
+    replace(fpath+"CONFIG_CURVE.java","XXX",tcu)
+    replace(fpath+"BIG.java","XXX",tcu)
+    replace(fpath+"DBIG.java","XXX",tcu)
+    replace(fpath+"FP.java","XXX",tcu)
+    replace(fpath+"ECP.java","XXX",tcu)
+    replace(fpath+"ECDH.java","XXX",tcu)
+    replace(fpath+"HPKE.java","XXX",tcu)
+    replace(fpathTest+"TestECDH.java","XXX",tcu)  #ms
+    replace(fpathTest+"TestHPKE.java","XXX",tcu)  #ms
+    replace(fpathTest+"TestHTP.java","XXX",tcu)  #ms
+    replace(fpathTest+"TesttimeECDH.java","XXX",tcu)  #ms
 
     replace(fpath+"CONFIG_BIG.java","@NB@",nb)
     replace(fpath+"CONFIG_BIG.java","@BASE@",base)
@@ -237,8 +239,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         os.system(copytext+"FP2.java "+fpath+"FP2.java")
         os.system(copytext+"FP4.java "+fpath+"FP4.java")
 
-        replace(fpath+"FP2.java","XXX",tc)
-        replace(fpath+"FP4.java","XXX",tc)
+        replace(fpath+"FP2.java","XXX",tcu)
+        replace(fpath+"FP4.java","XXX",tcu)
 
         if pf == "BN" or pf == "BLS12" :
 
@@ -259,15 +261,15 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
                 replace(fpath+"ECP2.java","CAHCNZS","*/")
                 replace(fpath+"ECP2.java","CAHCNZF","/*")
 
-            replace(fpath+"FP12.java","XXX",tc)
-            replace(fpath+"ECP2.java","XXX",tc)
-            replace(fpath+"PAIR.java","XXX",tc)
-            replace(fpath+"MPIN.java","XXX",tc)
-            replace(fpath+"BLS.java","XXX",tc)
-            replace(fpathTest+"TestMPIN.java","XXX",tc)  #ms
-            replace(fpathTest+"TestHTP2.java","XXX",tc)  #ms
-            replace(fpathTest+"TestBLS.java","XXX",tc)  #ms
-            replace(fpathTest+"TesttimeMPIN.java","XXX",tc)  #ms
+            replace(fpath+"FP12.java","XXX",tcu)
+            replace(fpath+"ECP2.java","XXX",tcu)
+            replace(fpath+"PAIR.java","XXX",tcu)
+            replace(fpath+"MPIN.java","XXX",tcu)
+            replace(fpath+"BLS.java","XXX",tcu)
+            replace(fpathTest+"TestMPIN.java","XXX",tcu)  #ms
+            replace(fpathTest+"TestHTP2.java","XXX",tcu)  #ms
+            replace(fpathTest+"TestBLS.java","XXX",tcu)  #ms
+            replace(fpathTest+"TesttimeMPIN.java","XXX",tcu)  #ms
 
             if pf == "BN" :
                 replace(fpath+"PAIR.java","PFBNS","*/")
@@ -286,15 +288,15 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             replace(fpath+"FP4.java","PFGE24S","*/")
             replace(fpath+"FP4.java","PFGE24F","/*")
-            replace(fpath+"FP8.java","XXX",tc)
-            replace(fpath+"FP24.java","XXX",tc)
-            replace(fpath+"ECP4.java","XXX",tc)
-            replace(fpath+"PAIR4.java","XXX",tc)
-            replace(fpath+"MPIN192.java","XXX",tc)
-            replace(fpath+"BLS192.java","XXX",tc)
-            replace(fpathTest+"TestMPIN192.java","XXX",tc)  #ms
-            replace(fpathTest+"TestBLS192.java","XXX",tc)  #ms
-            replace(fpathTest+"TesttimeMPIN192.java","XXX",tc)  #ms
+            replace(fpath+"FP8.java","XXX",tcu)
+            replace(fpath+"FP24.java","XXX",tcu)
+            replace(fpath+"ECP4.java","XXX",tcu)
+            replace(fpath+"PAIR4.java","XXX",tcu)
+            replace(fpath+"MPIN192.java","XXX",tcu)
+            replace(fpath+"BLS192.java","XXX",tcu)
+            replace(fpathTest+"TestMPIN192.java","XXX",tcu)  #ms
+            replace(fpathTest+"TestBLS192.java","XXX",tcu)  #ms
+            replace(fpathTest+"TesttimeMPIN192.java","XXX",tcu)  #ms
 
         if pf == "BLS48" :
 
@@ -313,16 +315,16 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"FP4.java","PFGE24F","/*")
             replace(fpath+"FP8.java","PFGE48S","*/")
             replace(fpath+"FP8.java","PFGE48F","/*")
-            replace(fpath+"FP8.java","XXX",tc)
-            replace(fpath+"FP16.java","XXX",tc)
-            replace(fpath+"FP48.java","XXX",tc)
-            replace(fpath+"ECP8.java","XXX",tc)
-            replace(fpath+"PAIR8.java","XXX",tc)
-            replace(fpath+"MPIN256.java","XXX",tc)
-            replace(fpath+"BLS256.java","XXX",tc)
-            replace(fpathTest+"TestMPIN256.java","XXX",tc)  #ms
-            replace(fpathTest+"TestBLS256.java","XXX",tc)  #ms
-            replace(fpathTest+"TesttimeMPIN256.java","XXX",tc)  #ms
+            replace(fpath+"FP8.java","XXX",tcu)
+            replace(fpath+"FP16.java","XXX",tcu)
+            replace(fpath+"FP48.java","XXX",tcu)
+            replace(fpath+"ECP8.java","XXX",tcu)
+            replace(fpath+"PAIR8.java","XXX",tcu)
+            replace(fpath+"MPIN256.java","XXX",tcu)
+            replace(fpath+"BLS256.java","XXX",tcu)
+            replace(fpathTest+"TestMPIN256.java","XXX",tcu)  #ms
+            replace(fpathTest+"TestBLS256.java","XXX",tcu)  #ms
+            replace(fpathTest+"TesttimeMPIN256.java","XXX",tcu)  #ms
 
 
 os.system(makedir + corepath)
@@ -334,13 +336,13 @@ for file in ['HASH*.java', 'HMAC.java', 'SHA3.java', 'RAND.java', 'AES.java', 'G
 
 class miracl_crypto:
     np_curves = (
-        ("ED25519","29","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128"),
+        ("Ed25519","29","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128"),
         ("C25519","29","255","2","1","PSEUDO_MERSENNE","0","MONTGOMERY","486662","NOT","NOT","NOT","NOT","NOT","128"),
         ("NIST256","28","256","1","-10","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),   # Change to 28
         ("BRAINPOOL","28","256","1","-3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"), # Change to 28
         ("ANSSI","28","256","1","-5","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"), # Change to 28
         ("HIFIVE","29","336","2","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","192"),
-        ("GOLDILOCKS","29","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
+        ("Ed448","29","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
         ("NIST384","29","384","1","-12","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","192"),  # change to 29
         ("C41417","29","414","1","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
         ("NIST521","28","521","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","256"),

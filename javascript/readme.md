@@ -21,7 +21,7 @@ If you need to use more than one elliptic curve in the same program you only nee
 
 The following is the list of all elliptic curves supported by MIRACL Core JS
 
-    ['ED25519', 'C25519', 'C41417', 'GOLDILOCKS', 'X448', 'NIST256', 'SECP160R1', 'C1174', 'C1665', 'MDC', 'NIST384','NIST521', 'BRAINPOOL', 'ANSSI', 'HIFIVE', 'JUBJUB', 'NUMS256W', 'SECP256K1','NUMS256E', 'NUMS384W', 'NUMS384E', 'NUMS512W', 'NUMS512E', 'TWEEDLEDUM', 'TWEEDLEDEE', 'BN254', 'BN254CX', 'BLS12383', 'BLS12381', 'FP256BN', 'FP512BN', 'BLS12461', 'BN462', 'BLS24479', 'BLS48556', 'BLS48581', 'BLS48286'];
+    ['ED25519', 'C25519', 'C41417', 'ED448', 'X448', 'NIST256', 'SECP160R1', 'C1174', 'C1665', 'MDC', 'NIST384','NIST521', 'BRAINPOOL', 'ANSSI', 'HIFIVE', 'JUBJUB', 'NUMS256W', 'SECP256K1','NUMS256E', 'NUMS384W', 'NUMS384E', 'NUMS512W', 'NUMS512E', 'TWEEDLEDUM', 'TWEEDLEDEE', 'BN254', 'BN254CX', 'BLS12383', 'BLS12381', 'FP256BN', 'FP512BN', 'BLS12461', 'BN462', 'BLS24479', 'BLS48556', 'BLS48581', 'BLS48286'];
 
 
 This library supports also RSA encryption/decryption and RSA signature. The following is a quick example on how to use RSA. First initialize the context

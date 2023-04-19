@@ -1,10 +1,10 @@
 const CTX = require('../../index').CTX;
 const {performance} = require('perf_hooks');
 
-// GOLDILOCKS context
-	function GOLDILOCKS() {
+// ED448 context
+	function ED448() {
 
-		var ctx = new CTX('GOLDILOCKS');
+		var ctx = new CTX('ED448');
 		var i;
 		var MIN_ITERS=5;
 		var MIN_TIME=3;
@@ -18,7 +18,7 @@ const {performance} = require('perf_hooks');
 
 		rng.seed(100,RAW);
 
-		console.log("Curve GOLDILOCKS");
+		console.log("Curve ED448");
 		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
 		{
 			console.log("Weierstrass parameterization ");
@@ -86,5 +86,5 @@ const {performance} = require('perf_hooks');
 		if (!fail) console.log("All tests pass");
 	}
 
-GOLDILOCKS();
+ED448();
 console.log("\n");

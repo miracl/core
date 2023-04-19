@@ -662,7 +662,6 @@ void ZZZ::ECP_dbl(ECP *P)
     /* Not using square for multiplication swap, as (1) it needs more adds, and (2) it triggers more reductions */
 
     FP C, D, H, J;
-
     FP_sqr(&C, &(P->x));                    //C.sqr();
     FP_mul(&(P->x), &(P->x), &(P->y));      //x.mul(y);
     FP_add(&(P->x), &(P->x), &(P->x));      //x.add(x);
@@ -1057,10 +1056,8 @@ void ZZZ::ECP_clmul(ECP *P, BIG e, BIG maxe)
     }
 
     /* precompute table */
-
     ECP_copy(&Q, P);
     ECP_dbl(&Q);
-
     ECP_copy(&W[0], P);
 
     for (i = 1; i < 8; i++)
@@ -1330,7 +1327,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_one(&one);
 
 #if MODTYPE_YYY != GENERALISED_MERSENNE
-// its NOT goldilocks!
+// its NOT ed448!
 // Figure out the Montgomery curve parameters
 
     FP_rcopy(&B,CURVE_B);
@@ -1440,7 +1437,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     }
 
 #if MODTYPE_YYY == GENERALISED_MERSENNE
-// GOLDILOCKS isogeny
+// Ed448 isogeny
     FP_sqr(&t,&X1);  // t=u^2
     FP_add(&w,&t,&one); // w=u^2+1
     FP_norm(&w);

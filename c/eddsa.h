@@ -32,16 +32,12 @@
 
 #include "ecp_ZZZ.h"
 
-using namespace core;
-
 #define EGS_ZZZ MODBYTES_XXX  /**< ECC Group Size in bytes */
 #define EFS_ZZZ MODBYTES_XXX  /**< ECC Field Size in bytes */
 
 #define EDDSA_OK                     0     /**< Function completed without error */
 #define EDDSA_INVALID_PUBLIC_KEY    -2	/**< Public Key is Invalid */
 #define EDDSA_ERROR                 -3	/**< ECDH Internal Error */
-
-namespace ZZZ {
 
 /* EDDSA primitives */
 /**	@brief Generate an ECC public/private key pair
@@ -51,7 +47,7 @@ namespace ZZZ {
 	@param Q the output public key, which is D.G, where G is a fixed generator
 	@return 0 or an error code
  */
-extern int EDDSA_KEY_PAIR_GENERATE(csprng *R, octet *D, octet *Q);
+extern int EDDSA_ZZZ_KEY_PAIR_GENERATE(csprng *R, octet *D, octet *Q);
 
 /**	@brief Generate signature on a message
  *
@@ -63,7 +59,7 @@ extern int EDDSA_KEY_PAIR_GENERATE(csprng *R, octet *D, octet *Q);
     @param SIG is the output signature
 	@return 0 or an error code
  */
-extern int EDDSA_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,octet *SIG);
+extern int EDDSA_ZZZ_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,octet *SIG);
 
 /**	@brief Verify signature on a message
  *
@@ -74,9 +70,5 @@ extern int EDDSA_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,o
     @param SIG is the intput signature
 	@return true only if signature is good, else false
  */
-extern bool EDDSA_VERIFY(bool ph,octet *Q,octet *context,octet *M,octet *SIG);
-
-}
-
+extern bool EDDSA_ZZZ_VERIFY(bool ph,octet *Q,octet *context,octet *M,octet *SIG);
 #endif
-

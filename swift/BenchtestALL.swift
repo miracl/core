@@ -28,7 +28,7 @@ import Foundation
 import core // comment out for Xcode
 import ed25519
 import nist256
-import goldilocks
+import ed448
 import bn254
 import bls12383
 import bls24479
@@ -244,46 +244,46 @@ public func TimeECDH_nist256(_ rng: inout RAND)
     }
 }
 
-public func TimeECDH_goldilocks(_ rng: inout RAND)
+public func TimeECDH_ed448(_ rng: inout RAND)
 {
     let MIN_TIME=10.0
     let MIN_ITERS=10
 
     var fail=false;
 
-    print("\nTiming/Testing goldilocks ECC")
-    if goldilocks.CONFIG_CURVE.CURVETYPE==goldilocks.CONFIG_CURVE.WEIERSTRASS {
+    print("\nTiming/Testing ed448 ECC")
+    if ed448.CONFIG_CURVE.CURVETYPE==ed448.CONFIG_CURVE.WEIERSTRASS {
         print("Weierstrass parameterisation")
     }
-    if goldilocks.CONFIG_CURVE.CURVETYPE==goldilocks.CONFIG_CURVE.EDWARDS {
+    if ed448.CONFIG_CURVE.CURVETYPE==ed448.CONFIG_CURVE.EDWARDS {
         print("Edwards parameterisation")
     }
-    if goldilocks.CONFIG_CURVE.CURVETYPE==goldilocks.CONFIG_CURVE.MONTGOMERY {
+    if ed448.CONFIG_CURVE.CURVETYPE==ed448.CONFIG_CURVE.MONTGOMERY {
         print("Montgomery representation")
     }
-    if goldilocks.CONFIG_FIELD.MODTYPE==goldilocks.CONFIG_FIELD.PSEUDO_MERSENNE {
+    if ed448.CONFIG_FIELD.MODTYPE==ed448.CONFIG_FIELD.PSEUDO_MERSENNE {
         print("Pseudo-Mersenne Modulus")
     }
-    if goldilocks.CONFIG_FIELD.MODTYPE==goldilocks.CONFIG_FIELD.MONTGOMERY_FRIENDLY {
+    if ed448.CONFIG_FIELD.MODTYPE==ed448.CONFIG_FIELD.MONTGOMERY_FRIENDLY {
         print("Montgomery Friendly Modulus")
     }
-    if goldilocks.CONFIG_FIELD.MODTYPE==goldilocks.CONFIG_FIELD.GENERALISED_MERSENNE {
+    if ed448.CONFIG_FIELD.MODTYPE==ed448.CONFIG_FIELD.GENERALISED_MERSENNE {
         print("Generalised-Mersenne Modulus")
     }
-    if goldilocks.CONFIG_FIELD.MODTYPE==goldilocks.CONFIG_FIELD.NOT_SPECIAL {
+    if ed448.CONFIG_FIELD.MODTYPE==ed448.CONFIG_FIELD.NOT_SPECIAL {
         print("Not special Modulus")
     }
-    print("Modulus size \(goldilocks.CONFIG_FIELD.MODBITS) bits")
-    print("\(goldilocks.CONFIG_BIG.CHUNK) bit build")
+    print("Modulus size \(ed448.CONFIG_FIELD.MODBITS) bits")
+    print("\(ed448.CONFIG_BIG.CHUNK) bit build")
 
 
-    var s:goldilocks.BIG
-    let G=goldilocks.ECP.generator();
+    var s:ed448.BIG
+    let G=ed448.ECP.generator();
 
-    let r=goldilocks.BIG(goldilocks.ROM.CURVE_Order)
-    s=goldilocks.BIG.randtrunc(r,16*goldilocks.CONFIG_CURVE.AESKEY,&rng)
+    let r=ed448.BIG(ed448.ROM.CURVE_Order)
+    s=ed448.BIG.randtrunc(r,16*ed448.CONFIG_CURVE.AESKEY,&rng)
 
-    var W=goldilocks.ECP.map2point(goldilocks.FP(&rng));
+    var W=ed448.ECP.map2point(ed448.FP(&rng));
     if W.is_infinity() {
         print("HASHING FAILURE - P=O")
         fail=true;
@@ -1001,7 +1001,7 @@ rng.seed(100,RAW)
 
 TimeECDH_ed25519(&rng)
 TimeECDH_nist256(&rng)
-TimeECDH_goldilocks(&rng)
+TimeECDH_ed448(&rng)
 TimeRSA_2048(&rng)
 TimeMPIN_bn254(&rng)
 TimeMPIN_bls12383(&rng)

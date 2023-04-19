@@ -175,14 +175,14 @@ fn nist256(rng: &mut RAND) {
     }
 }
 
-fn goldilocks(rng: &mut RAND) {
-    //use mcore::goldilocks;
-    use mcore::goldilocks::big;
-    use mcore::goldilocks::ecp;
-    use mcore::goldilocks::fp;
-    use mcore::goldilocks::rom;
+fn ed448(rng: &mut RAND) {
+    //use mcore::ed448;
+    use mcore::ed448::big;
+    use mcore::ed448::ecp;
+    use mcore::ed448::fp;
+    use mcore::ed448::rom;
     let mut fail = false;
-    println!("\nTesting/Timing goldilocks ECC");
+    println!("\nTesting/Timing ed448 ECC");
 
     if ecp::CURVETYPE == ecp::WEIERSTRASS {
         println!("Weierstrass parameterization");
@@ -1108,7 +1108,7 @@ fn main() {
 
     ed25519(&mut rng);
     nist256(&mut rng);
-    goldilocks(&mut rng);
+    ed448(&mut rng);
     bn254(&mut rng);
     bls12383(&mut rng);
     bls24479(&mut rng);

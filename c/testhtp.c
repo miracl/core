@@ -26,9 +26,9 @@
 #include "core.h"
 #include "randapi.h"
 #include "ecp_NIST256.h"
-#include "ecp_ED25519.h"
+#include "ecp_Ed25519.h"
 #include "ecp_C25519.h"
-#include "ecp_GOLDILOCKS.h"
+#include "ecp_Ed448.h"
 #include "ecp_SECP256K1.h"
 #include "ecp_BLS12381.h"
 #include "ecp2_BLS12381.h"
@@ -133,7 +133,7 @@
 
 
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
-static void hash_to_field_ED25519(int hash,int hlen,FP_F25519 *u,octet *DST,octet *M, int ctr)
+static void hash_to_field_Ed25519(int hash,int hlen,FP_F25519 *u,octet *DST,octet *M, int ctr)
 {
     int i,j,L,k,m;
     BIG_ED q,w,r;
@@ -143,7 +143,7 @@ static void hash_to_field_ED25519(int hash,int hlen,FP_F25519 *u,octet *DST,octe
 
     BIG_ED_rcopy(q, Modulus_F25519);
     k=BIG_ED_nbits(q);
-    BIG_ED_rcopy(r, CURVE_Order_ED25519);
+    BIG_ED_rcopy(r, CURVE_Order_Ed25519);
     m=BIG_ED_nbits(r);
     L=CEIL(k+CEIL(m,2),8);
 
@@ -159,49 +159,49 @@ static void hash_to_field_ED25519(int hash,int hlen,FP_F25519 *u,octet *DST,octe
     }
 }
 
-int htp_ED25519(char *mess)
+int htp_Ed25519(char *mess)
 {
     int res=0;
     BIG_ED r;
     FP_F25519 u[2];
-    ECP_ED25519 P,P1;
+    ECP_Ed25519 P,P1;
     char dst[100];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
 
-    BIG_ED_rcopy(r, CURVE_Order_ED25519);
+    BIG_ED_rcopy(r, CURVE_Order_Ed25519);
     printf("Random oracle - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_RO_");
-    hash_to_field_ED25519(MC_SHA2,/*HASH_TYPE_ED25519*/ SHA512,u,&DST,&MSG,2);
+    hash_to_field_Ed25519(MC_SHA2,/*HASH_TYPE_Ed25519*/ SHA512,u,&DST,&MSG,2);
     printf("u[0]= "); FP_F25519_output(&u[0]); printf("\n");
     printf("u[1]= "); FP_F25519_output(&u[1]); printf("\n");
-    ECP_ED25519_map2point(&P,&u[0]);
-    printf("Q[0]= "); ECP_ED25519_output(&P);
-    ECP_ED25519_map2point(&P1,&u[1]);
-    printf("Q[1]= "); ECP_ED25519_output(&P1);
-    ECP_ED25519_add(&P,&P1);
-    ECP_ED25519_cfp(&P);
-    ECP_ED25519_affine(&P);
-    printf("P= "); ECP_ED25519_output(&P); printf("\n");
-    ECP_ED25519_mul(&P,r);
-    if (!ECP_ED25519_isinf(&P))
+    ECP_Ed25519_map2point(&P,&u[0]);
+    printf("Q[0]= "); ECP_Ed25519_output(&P);
+    ECP_Ed25519_map2point(&P1,&u[1]);
+    printf("Q[1]= "); ECP_Ed25519_output(&P1);
+    ECP_Ed25519_add(&P,&P1);
+    ECP_Ed25519_cfp(&P);
+    ECP_Ed25519_affine(&P);
+    printf("P= "); ECP_Ed25519_output(&P); printf("\n");
+    ECP_Ed25519_mul(&P,r);
+    if (!ECP_Ed25519_isinf(&P))
         printf("Hashing failure\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards25519_XMD:SHA-512_ELL2_NU_");
-    hash_to_field_ED25519(MC_SHA2,/*HASH_TYPE_ED25519*/ SHA512,u,&DST,&MSG,1);
+    hash_to_field_Ed25519(MC_SHA2,/*HASH_TYPE_Ed25519*/ SHA512,u,&DST,&MSG,1);
     printf("u[0]= "); FP_F25519_output(&u[0]); printf("\n");
-    ECP_ED25519_map2point(&P,&u[0]);
-    printf("Q= "); ECP_ED25519_output(&P);
-    ECP_ED25519_cfp(&P);
-    ECP_ED25519_affine(&P);
-    printf("P= "); ECP_ED25519_output(&P); printf("\n");
-    ECP_ED25519_mul(&P,r);
-    if (!ECP_ED25519_isinf(&P))
+    ECP_Ed25519_map2point(&P,&u[0]);
+    printf("Q= "); ECP_Ed25519_output(&P);
+    ECP_Ed25519_cfp(&P);
+    ECP_Ed25519_affine(&P);
+    printf("P= "); ECP_Ed25519_output(&P); printf("\n");
+    ECP_Ed25519_mul(&P,r);
+    if (!ECP_Ed25519_isinf(&P))
         printf("Hashing failure\n");
 
     return res;
@@ -346,7 +346,7 @@ int htp_NIST256(char *mess)
 
 
 /* https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/ */
-static void hash_to_field_GOLDILOCKS(int hash,int hlen,FP_GOLDILOCKS *u,octet *DST,octet *M, int ctr)
+static void hash_to_field_Ed448(int hash,int hlen,FP_Ed448 *u,octet *DST,octet *M, int ctr)
 {
 
     int i,j,L,k,m;
@@ -355,9 +355,9 @@ static void hash_to_field_GOLDILOCKS(int hash,int hlen,FP_GOLDILOCKS *u,octet *D
     char okm[512],fd[256];
     octet OKM = {0,sizeof(okm),okm};
 
-    BIG_GL_rcopy(q, Modulus_GOLDILOCKS);
+    BIG_GL_rcopy(q, Modulus_Ed448);
     k=BIG_GL_nbits(q);
-    BIG_GL_rcopy(r, CURVE_Order_GOLDILOCKS);
+    BIG_GL_rcopy(r, CURVE_Order_Ed448);
     m=BIG_GL_nbits(r);
     L=CEIL(k+CEIL(m,2),8);
     XMD_Expand(hash,hlen,&OKM,L*ctr,DST,M);
@@ -368,54 +368,54 @@ static void hash_to_field_GOLDILOCKS(int hash,int hlen,FP_GOLDILOCKS *u,octet *D
         
         BIG_GL_dfromBytesLen(dx,fd,L);
         BIG_GL_dmod(w,dx,q);
-        FP_GOLDILOCKS_nres(&u[i],w);
+        FP_Ed448_nres(&u[i],w);
     }
 }
 
-int htp_GOLDILOCKS(char *mess)
+int htp_Ed448(char *mess)
 {
  
     int res=0;
     BIG_GL r;
-    FP_GOLDILOCKS u[2];
-    ECP_GOLDILOCKS P,P1;
+    FP_Ed448 u[2];
+    ECP_Ed448 P,P1;
     char dst[100];
     char msg[2000];
     octet MSG = {0,sizeof(msg),msg};
     octet DST = {0,sizeof(dst),dst};
 
-    BIG_GL_rcopy(r, CURVE_Order_GOLDILOCKS);
+    BIG_GL_rcopy(r, CURVE_Order_Ed448);
     printf("Random oracle - message= %s\n",mess);
     OCT_jstring(&MSG,mess);
 
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_");
-    hash_to_field_GOLDILOCKS(MC_SHA2,HASH_TYPE_GOLDILOCKS,u,&DST,&MSG,2);
-    printf("u[0]= "); FP_GOLDILOCKS_output(&u[0]); printf("\n");
-    printf("u[1]= "); FP_GOLDILOCKS_output(&u[1]); printf("\n");
-    ECP_GOLDILOCKS_map2point(&P,&u[0]);
-    printf("Q[0]= "); ECP_GOLDILOCKS_output(&P);
-    ECP_GOLDILOCKS_map2point(&P1,&u[1]);
-    printf("Q[1]= "); ECP_GOLDILOCKS_output(&P1);
-    ECP_GOLDILOCKS_add(&P,&P1);
-    ECP_GOLDILOCKS_cfp(&P);
-    ECP_GOLDILOCKS_affine(&P);
-    printf("+P= "); ECP_GOLDILOCKS_output(&P); printf("\n");
-    ECP_GOLDILOCKS_mul(&P,r);
-    if (!ECP_GOLDILOCKS_isinf(&P))
+    hash_to_field_Ed448(MC_SHA2,HASH_TYPE_Ed448,u,&DST,&MSG,2);
+    printf("u[0]= "); FP_Ed448_output(&u[0]); printf("\n");
+    printf("u[1]= "); FP_Ed448_output(&u[1]); printf("\n");
+    ECP_Ed448_map2point(&P,&u[0]);
+    printf("Q[0]= "); ECP_Ed448_output(&P);
+    ECP_Ed448_map2point(&P1,&u[1]);
+    printf("Q[1]= "); ECP_Ed448_output(&P1);
+    ECP_Ed448_add(&P,&P1);
+    ECP_Ed448_cfp(&P);
+    ECP_Ed448_affine(&P);
+    printf("+P= "); ECP_Ed448_output(&P); printf("\n");
+    ECP_Ed448_mul(&P,r);
+    if (!ECP_Ed448_isinf(&P))
         printf("Hashing failure\n");
 
     printf("Non-Uniform\n");
     OCT_clear(&DST);
     OCT_jstring(&DST,(char *)"QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_");
-    hash_to_field_GOLDILOCKS(MC_SHA2,HASH_TYPE_GOLDILOCKS,u,&DST,&MSG,1);
-    printf("u[0]= "); FP_GOLDILOCKS_output(&u[0]); printf("\n");
-    ECP_GOLDILOCKS_map2point(&P,&u[0]);
-    printf("Q= "); ECP_GOLDILOCKS_output(&P);
-    ECP_GOLDILOCKS_cfp(&P);
-    ECP_GOLDILOCKS_affine(&P);
-    printf("+P= "); ECP_GOLDILOCKS_output(&P); printf("\n");
-    ECP_GOLDILOCKS_mul(&P,r);
-    if (!ECP_GOLDILOCKS_isinf(&P))
+    hash_to_field_Ed448(MC_SHA2,HASH_TYPE_Ed448,u,&DST,&MSG,1);
+    printf("u[0]= "); FP_Ed448_output(&u[0]); printf("\n");
+    ECP_Ed448_map2point(&P,&u[0]);
+    printf("Q= "); ECP_Ed448_output(&P);
+    ECP_Ed448_cfp(&P);
+    ECP_Ed448_affine(&P);
+    printf("+P= "); ECP_Ed448_output(&P); printf("\n");
+    ECP_Ed448_mul(&P,r);
+    if (!ECP_Ed448_isinf(&P))
         printf("Hashing failure\n");
 
 
@@ -684,12 +684,12 @@ int main()
 
     printf("%d bit build", CHUNK);
 
-    printf("\nTesting HTP for curve ED25519\n");
-    htp_ED25519((char *)"");
-    htp_ED25519((char *)"abc");
-    htp_ED25519((char *)"abcdef0123456789");
-    htp_ED25519((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
-    htp_ED25519((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    printf("\nTesting HTP for curve Ed25519\n");
+    htp_Ed25519((char *)"");
+    htp_Ed25519((char *)"abc");
+    htp_Ed25519((char *)"abcdef0123456789");
+    htp_Ed25519((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+    htp_Ed25519((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     printf("\nTesting HTP for curve C25519\n");
     htp_C25519((char *)"");
@@ -706,12 +706,12 @@ int main()
     htp_NIST256((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_NIST256((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-    printf("\nTesting HTP for curve GOLDILOCKS\n");
-    htp_GOLDILOCKS((char *)"");
-    htp_GOLDILOCKS((char *)"abc");
-    htp_GOLDILOCKS((char *)"abcdef0123456789");
-    htp_GOLDILOCKS((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
-    htp_GOLDILOCKS((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    printf("\nTesting HTP for curve Ed448\n");
+    htp_Ed448((char *)"");
+    htp_Ed448((char *)"abc");
+    htp_Ed448((char *)"abcdef0123456789");
+    htp_Ed448((char *)"q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+    htp_Ed448((char *)"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     printf("\nTesting HTP for curve SECP256K1\n");
     htp_SECP256K1((char *)"");

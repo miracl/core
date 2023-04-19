@@ -26,7 +26,7 @@ import "fmt"
 import "miracl/core"
 import "miracl/core/ED25519"
 import "miracl/core/NIST256"
-import "miracl/core/GOLDILOCKS"
+import "miracl/core/ED448"
 import "miracl/core/RSA2048"
 
 func printBinary(array []byte) {
@@ -324,57 +324,57 @@ func ecdh_NIST256(rng *core.RAND) {
 	}
 }
 
-func ecdh_GOLDILOCKS(rng *core.RAND) {
+func ecdh_ED448(rng *core.RAND) {
 	//	j:=0
 	pp := "M0ng00se"
 	res := 0
 
-	var sha = GOLDILOCKS.HASH_TYPE
+	var sha = ED448.HASH_TYPE
 
-	var S1 [GOLDILOCKS.EGS]byte
-	var W0 [2*GOLDILOCKS.EFS + 1]byte
-	var W1 [2*GOLDILOCKS.EFS + 1]byte
-	var Z0 [GOLDILOCKS.EFS]byte
-	var Z1 [GOLDILOCKS.EFS]byte
+	var S1 [ED448.EGS]byte
+	var W0 [2*ED448.EFS + 1]byte
+	var W1 [2*ED448.EFS + 1]byte
+	var Z0 [ED448.EFS]byte
+	var Z1 [ED448.EFS]byte
 	var SALT [8]byte
 	var P1 [3]byte
 	var P2 [4]byte
-	var V [2*GOLDILOCKS.EFS + 1]byte
+	var V [2*ED448.EFS + 1]byte
 	var M [17]byte
 	var T [12]byte
-	var CS [GOLDILOCKS.EGS]byte
-	var DS [GOLDILOCKS.EGS]byte
+	var CS [ED448.EGS]byte
+	var DS [ED448.EGS]byte
 
 	for i := 0; i < 8; i++ {
 		SALT[i] = byte(i + 1)
 	} // set Salt
 
-	fmt.Printf("\nTesting ECDH/ECDSA/ECIES for curve GOLDILOCKS\n")
+	fmt.Printf("\nTesting ECDH/ECDSA/ECIES for curve ED448\n")
 	fmt.Printf("Alice's Passphrase= " + pp)
 	fmt.Printf("\n")
 	PW := []byte(pp)
 
 	/* private key S0 of size MGS bytes derived from Password and Salt */
 
-	S0 := core.PBKDF2(core.MC_SHA2, sha, PW, SALT[:], 1000, GOLDILOCKS.EGS)
+	S0 := core.PBKDF2(core.MC_SHA2, sha, PW, SALT[:], 1000, ED448.EGS)
 
 	fmt.Printf("Alice's private key= 0x")
 	printBinary(S0)
 
 	/* Generate Key pair S/W */
-	GOLDILOCKS.ECDH_KEY_PAIR_GENERATE(nil, S0, W0[:])
+	ED448.ECDH_KEY_PAIR_GENERATE(nil, S0, W0[:])
 
 	fmt.Printf("Alice's public key= 0x")
 	printBinary(W0[:])
 
-	res = GOLDILOCKS.ECDH_PUBLIC_KEY_VALIDATE(W0[:])
+	res = ED448.ECDH_PUBLIC_KEY_VALIDATE(W0[:])
 	if res != 0 {
 		fmt.Printf("ECP Public Key is invalid!\n")
 		return
 	}
 
 	/* Random private key for other party */
-	GOLDILOCKS.ECDH_KEY_PAIR_GENERATE(rng, S1[:], W1[:])
+	ED448.ECDH_KEY_PAIR_GENERATE(rng, S1[:], W1[:])
 
 	fmt.Printf("Servers private key= 0x")
 	printBinary(S1[:])
@@ -382,18 +382,18 @@ func ecdh_GOLDILOCKS(rng *core.RAND) {
 	fmt.Printf("Servers public key= 0x")
 	printBinary(W1[:])
 
-	res = GOLDILOCKS.ECDH_PUBLIC_KEY_VALIDATE(W1[:])
+	res = ED448.ECDH_PUBLIC_KEY_VALIDATE(W1[:])
 	if res != 0 {
 		fmt.Printf("ECP Public Key is invalid!\n")
 		return
 	}
 	/* Calculate common key using DH - IEEE 1363 method */
 
-	GOLDILOCKS.ECDH_ECPSVDP_DH(S0, W1[:], Z0[:], 0)
-	GOLDILOCKS.ECDH_ECPSVDP_DH(S1[:], W0[:], Z1[:], 0)
+	ED448.ECDH_ECPSVDP_DH(S0, W1[:], Z0[:], 0)
+	ED448.ECDH_ECPSVDP_DH(S1[:], W0[:], Z1[:], 0)
 
 	same := true
-	for i := 0; i < GOLDILOCKS.EFS; i++ {
+	for i := 0; i < ED448.EFS; i++ {
 		if Z0[i] != Z1[i] {
 			same = false
 		}
@@ -404,14 +404,14 @@ func ecdh_GOLDILOCKS(rng *core.RAND) {
 		return
 	}
 
-	KEY := core.KDF2(core.MC_SHA2, sha, Z0[:], nil, GOLDILOCKS.AESKEY)
+	KEY := core.KDF2(core.MC_SHA2, sha, Z0[:], nil, ED448.AESKEY)
 
 	fmt.Printf("Alice's DH Key=  0x")
 	printBinary(KEY)
 	fmt.Printf("Servers DH Key=  0x")
 	printBinary(KEY)
 
-	if GOLDILOCKS.CURVETYPE != GOLDILOCKS.MONTGOMERY {
+	if ED448.CURVETYPE != ED448.MONTGOMERY {
 		fmt.Printf("Testing ECIES\n")
 
 		P1[0] = 0x0
@@ -426,7 +426,7 @@ func ecdh_GOLDILOCKS(rng *core.RAND) {
 			M[i] = byte(i)
 		}
 
-		C := GOLDILOCKS.ECDH_ECIES_ENCRYPT(sha, P1[:], P2[:], rng, W1[:], M[:], V[:], T[:])
+		C := ED448.ECDH_ECIES_ENCRYPT(sha, P1[:], P2[:], rng, W1[:], M[:], V[:], T[:])
 
 		fmt.Printf("Ciphertext= \n")
 		fmt.Printf("V= 0x")
@@ -436,7 +436,7 @@ func ecdh_GOLDILOCKS(rng *core.RAND) {
 		fmt.Printf("T= 0x")
 		printBinary(T[:])
 
-		RM := GOLDILOCKS.ECDH_ECIES_DECRYPT(sha, P1[:], P2[:], V[:], C, T[:], S1[:])
+		RM := ED448.ECDH_ECIES_DECRYPT(sha, P1[:], P2[:], V[:], C, T[:], S1[:])
 		if RM == nil {
 			fmt.Printf("*** ECIES Decryption Failed\n")
 			return
@@ -449,7 +449,7 @@ func ecdh_GOLDILOCKS(rng *core.RAND) {
 
 		fmt.Printf("Testing ECDSA\n")
 
-		if GOLDILOCKS.ECDH_ECPSP_DSA(sha, rng, S0, M[:], CS[:], DS[:]) != 0 {
+		if ED448.ECDH_ECPSP_DSA(sha, rng, S0, M[:], CS[:], DS[:]) != 0 {
 			fmt.Printf("***ECDSA Signature Failed\n")
 			return
 		}
@@ -459,7 +459,7 @@ func ecdh_GOLDILOCKS(rng *core.RAND) {
 		fmt.Printf("D= 0x")
 		printBinary(DS[:])
 
-		if GOLDILOCKS.ECDH_ECPVP_DSA(sha, W0[:], M[:], CS[:], DS[:]) != 0 {
+		if ED448.ECDH_ECPVP_DSA(sha, W0[:], M[:], CS[:], DS[:]) != 0 {
 			fmt.Printf("***ECDSA Verification Failed\n")
 			return
 		} else {
@@ -561,6 +561,6 @@ func main() {
 	rng.Seed(100, raw[:])
 	ecdh_ED25519(rng)
 	ecdh_NIST256(rng)
-	ecdh_GOLDILOCKS(rng)
+	ecdh_ED448(rng)
 	rsa_2048(rng)
 }

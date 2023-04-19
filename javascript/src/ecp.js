@@ -1609,7 +1609,7 @@ var ECP = function(ctx) {
             }
 
             if (ctx.FP.MODTYPE==ctx.FP.GENERALISED_MERSENNE)
-            { // GOLDILOCKS isogeny
+            { // ED448 isogeny
                 t.copy(X1); t.sqr();
                 w.copy(t); w.add(one); w.norm();
                 t.sub(one); t.norm();

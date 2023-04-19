@@ -20,7 +20,7 @@
 /* Fixed Data in ROM - Field and Curve parameters */
 
 
-package org.miracl.core.GOLDILOCKS;
+package org.miracl.core.ED448;
 
 public class ROM
 {

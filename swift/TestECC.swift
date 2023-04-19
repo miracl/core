@@ -30,7 +30,7 @@ import Foundation
 import core // comment out for Xcode
 import ed25519
 import nist256
-import goldilocks
+import ed448
 import rsa2048
 
 public func printBinary(_ array: [UInt8])
@@ -401,14 +401,14 @@ public func TestECDH_nist256(_ rng: inout RAND)
     rng=REALRNG!
 }
 
-public func TestECDH_goldilocks(_ rng: inout RAND)
+public func TestECDH_ed448(_ rng: inout RAND)
 {
     let pp=String("M0ng00se");
 
-    let EGS=goldilocks.ECDH.EGS
-    let EFS=goldilocks.ECDH.EFS
-    let EAS=goldilocks.CONFIG_CURVE.AESKEY
-    let sha=goldilocks.CONFIG_CURVE.HASH_TYPE
+    let EGS=ed448.ECDH.EGS
+    let EFS=ed448.ECDH.EFS
+    let EAS=ed448.CONFIG_CURVE.AESKEY
+    let sha=ed448.CONFIG_CURVE.HASH_TYPE
 
     var S1=[UInt8](repeating: 0,count: EGS)
     var W0=[UInt8](repeating: 0,count: 2*EFS+1)
@@ -430,7 +430,7 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
 
     for i in 0 ..< 8 {SALT[i]=UInt8(i+1)}  // set Salt
 
-    print("\nTest Curve goldilocks");
+    print("\nTest Curve ed448");
     print("Alice's Passphrase= " + pp)
     let PW=[UInt8]( (pp).utf8 )
 
@@ -443,11 +443,11 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
     print("Alice's private key= 0x",terminator: ""); printBinary(S0)
 
     // Generate Key pair S/W 
-    goldilocks.ECDH.KEY_PAIR_GENERATE(&NULLRNG,&S0,&W0);
+    ed448.ECDH.KEY_PAIR_GENERATE(&NULLRNG,&S0,&W0);
 
     print("Alice's public key= 0x",terminator: ""); printBinary(W0)
 
-    var res=goldilocks.ECDH.PUBLIC_KEY_VALIDATE(W0);
+    var res=ed448.ECDH.PUBLIC_KEY_VALIDATE(W0);
 
     if res != 0
     {
@@ -456,13 +456,13 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
     }
 
     // Random private key for other party 
-    goldilocks.ECDH.KEY_PAIR_GENERATE(&REALRNG,&S1,&W1)
+    ed448.ECDH.KEY_PAIR_GENERATE(&REALRNG,&S1,&W1)
 
     print("Servers private key= 0x",terminator: ""); printBinary(S1)
 
     print("Servers public key= 0x",terminator: ""); printBinary(W1);
 
-    res=goldilocks.ECDH.PUBLIC_KEY_VALIDATE(W1)
+    res=ed448.ECDH.PUBLIC_KEY_VALIDATE(W1)
     if res != 0
     {
         print("ECP Public Key is invalid!")
@@ -471,8 +471,8 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
 
     // Calculate common key using DH - IEEE 1363 method 
 
-    goldilocks.ECDH.ECPSVDP_DH(S0,W1,&Z0,0)
-    goldilocks.ECDH.ECPSVDP_DH(S1,W0,&Z1,0)
+    ed448.ECDH.ECPSVDP_DH(S0,W1,&Z0,0)
+    ed448.ECDH.ECPSVDP_DH(S1,W0,&Z1,0)
 
     var same=true
     for i in 0 ..< EFS
@@ -491,7 +491,7 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
     print("Alice's DH Key=  0x",terminator: ""); printBinary(KEY)
     print("Servers DH Key=  0x",terminator: ""); printBinary(KEY)
 
-    if goldilocks.CONFIG_CURVE.CURVETYPE != goldilocks.CONFIG_CURVE.MONTGOMERY
+    if ed448.CONFIG_CURVE.CURVETYPE != ed448.CONFIG_CURVE.MONTGOMERY
     {
         print("Testing ECIES")
 
@@ -500,14 +500,14 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
 
         for i in 0...16 {M[i]=UInt8(i&0xff)}
 
-        let C=goldilocks.ECDH.ECIES_ENCRYPT(sha,P1,P2,&REALRNG,W1,M,&V,&T)
+        let C=ed448.ECDH.ECIES_ENCRYPT(sha,P1,P2,&REALRNG,W1,M,&V,&T)
 
         print("Ciphertext= ")
         print("V= 0x",terminator: ""); printBinary(V)
         print("C= 0x",terminator: ""); printBinary(C)
         print("T= 0x",terminator: ""); printBinary(T)
 
-        M=goldilocks.ECDH.ECIES_DECRYPT(sha,P1,P2,V,C,T,S1)
+        M=ed448.ECDH.ECIES_DECRYPT(sha,P1,P2,V,C,T,S1)
         if M.count==0
         {
             print("*** ECIES Decryption Failed\n")
@@ -519,7 +519,7 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
 
         print("Testing ECDSA")
 
-        if goldilocks.ECDH.ECPSP_DSA(sha,&rng,S0,M,&CS,&DS) != 0
+        if ed448.ECDH.ECPSP_DSA(sha,&rng,S0,M,&CS,&DS) != 0
         {
             print("***ECDSA Signature Failed")
             return
@@ -528,7 +528,7 @@ public func TestECDH_goldilocks(_ rng: inout RAND)
         print("C= 0x",terminator: ""); printBinary(CS)
         print("D= 0x",terminator: ""); printBinary(DS)
 
-        if goldilocks.ECDH.ECPVP_DSA(sha,W0,M,CS,DS) != 0
+        if ed448.ECDH.ECPVP_DSA(sha,W0,M,CS,DS) != 0
         {
             print("***ECDSA Verification Failed")
             return
@@ -547,6 +547,6 @@ rng.seed(100,RAW)
 
 TestECDH_ed25519(&rng)
 TestECDH_nist256(&rng)
-TestECDH_goldilocks(&rng)
+TestECDH_ed448(&rng)
 TestRSA_2048(&rng)
 

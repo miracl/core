@@ -104,10 +104,10 @@ def curveset(tc, pf):
 
 
 print("Elliptic Curves")
-print("1. ED25519")
+print("1. Ed25519")
 print("2. C25519")
 print("3. NIST256")
-print("4. GOLDILOCKS")
+print("4. Ed448")
 print("5. NIST384")
 print("6. NIST521")
 print("7. SEC256K1")
@@ -158,7 +158,7 @@ while ptr < max:
         curveset("nist256", "NOT")
         curve_selected = True
     if x == 4:
-        curveset("goldilocks", "NOT")
+        curveset("ed448", "NOT")
         curve_selected = True
     if x == 5:
         curveset("nist384", "NOT")
@@ -205,7 +205,7 @@ os.system(deltext + " ed25519.py")
 os.system(deltext + " nist256.py")
 os.system(deltext + " nist384.py")
 os.system(deltext + " nist521.py")
-os.system(deltext + " goldilocks.py")
+os.system(deltext + " ed448.py")
 os.system(deltext + " sec256k1.py")
 os.system(deltext + " bn254.py")
 os.system(deltext + " bn254cx.py")

@@ -29,7 +29,7 @@
 
 #if CURVETYPE_ZZZ!=WEIERSTRASS
 // Process a random BIG r by RFC7748 (for Montgomery & Edwards curves only)
-void RFC7748_ZZZ(BIG_XXX r)
+static void RFC7748(BIG_XXX r)
 {
     int c,lg=0;
     BIG_XXX t;
@@ -90,7 +90,7 @@ int ECP_ZZZ_KEY_PAIR_GENERATE(csprng *RNG, octet* S, octet *W)
     }
 
 #if CURVETYPE_ZZZ!=WEIERSTRASS
-    RFC7748_ZZZ(s);                     // For Montgomery or Edwards, apply RFC7748 transformation
+    RFC7748(s);                     // For Montgomery or Edwards, apply RFC7748 transformation
 #endif
     S->len = EGS_ZZZ;
     BIG_XXX_toBytes(S->val, s);

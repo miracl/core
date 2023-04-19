@@ -41,6 +41,12 @@ The test program exercises 3 different ordinary elliptic curves (for ECDH
 Key exchange, ECDSA signature and ECIES encryption), plus RSA, all in the 
 one binary
 
+Next compile
+
+    g++ -O2  testeddsa.cpp core.a -o testeddsa
+
+This test program exercises the EDDSA signature algorithm using the Edwards curves Ed25519 and Ed448
+
 
 Next compile
 
@@ -86,7 +92,7 @@ NEW: support for emerging Hash To Curve standard.
 See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
 
 
-Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (ED25519, C25519, NIST256, GOLDILOCKS, SECP256K1 and BLS12381)
+Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (Ed25519, C25519, NIST256, Ed448, SECP256K1 and BLS12381)
 
     g++ -O2 testhtp.cpp core.a -o testhtp
 

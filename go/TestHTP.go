@@ -27,7 +27,7 @@ import "miracl/core"
 import "miracl/core/ED25519"
 import "miracl/core/C25519"
 import "miracl/core/NIST256"
-import "miracl/core/GOLDILOCKS"
+import "miracl/core/ED448"
 import "miracl/core/SECP256K1"
 import "miracl/core/BLS12381"
 
@@ -165,11 +165,11 @@ func htp_NIST256(mess []byte) {
 
 }
 
-func hash_to_field_GOLDILOCKS(hash int, hlen int, DST []byte, M []byte, ctr int) []*GOLDILOCKS.FP {
-	var u []*GOLDILOCKS.FP
-	q := GOLDILOCKS.NewBIGints(GOLDILOCKS.Modulus)
+func hash_to_field_ED448(hash int, hlen int, DST []byte, M []byte, ctr int) []*ED448.FP {
+	var u []*ED448.FP
+	q := ED448.NewBIGints(ED448.Modulus)
 	k := q.Nbits()
-	r := GOLDILOCKS.NewBIGints(GOLDILOCKS.CURVE_Order)
+	r := ED448.NewBIGints(ED448.CURVE_Order)
 	m := r.Nbits()
 	L := ceil(k+ceil(m, 2), 8)
 	var fd = make([]byte, L)
@@ -178,23 +178,23 @@ func hash_to_field_GOLDILOCKS(hash int, hlen int, DST []byte, M []byte, ctr int)
 		for j := 0; j < L; j++ {
 			fd[j] = OKM[i*L+j]
 		}
-		dx := GOLDILOCKS.DBIG_fromBytes(fd)
-		w := GOLDILOCKS.NewFPbig(dx.Mod(q))
+		dx := ED448.DBIG_fromBytes(fd)
+		w := ED448.NewFPbig(dx.Mod(q))
 		u = append(u, w)
 	}
 	return u
 }
 
-func htp_GOLDILOCKS(mess []byte) {
+func htp_ED448(mess []byte) {
 
 	fmt.Println("Random oracle - message= " + string(mess))
 	DST := []byte("QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_")
-	u := hash_to_field_GOLDILOCKS(core.MC_SHA2, GOLDILOCKS.HASH_TYPE, DST, mess, 2)
+	u := hash_to_field_ED448(core.MC_SHA2, ED448.HASH_TYPE, DST, mess, 2)
 	fmt.Printf("u[0]= %s\n", u[0].ToString())
 	fmt.Printf("u[1]= %s\n", u[1].ToString())
-	P := GOLDILOCKS.ECP_map2point(u[0])
+	P := ED448.ECP_map2point(u[0])
 	fmt.Printf("Q[0]= %s\n", P.ToString())
-	P1 := GOLDILOCKS.ECP_map2point(u[1])
+	P1 := ED448.ECP_map2point(u[1])
 	fmt.Printf("Q[0]= %s\n", P1.ToString())
 	P.Add(P1)
 	P.Cfp()
@@ -203,9 +203,9 @@ func htp_GOLDILOCKS(mess []byte) {
 
 	fmt.Printf("Non-Uniform\n")
 	DST = []byte("QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_")
-	u = hash_to_field_GOLDILOCKS(core.MC_SHA2, GOLDILOCKS.HASH_TYPE, DST, mess, 1)
+	u = hash_to_field_ED448(core.MC_SHA2, ED448.HASH_TYPE, DST, mess, 1)
 	fmt.Printf("u= %s\n", u[0].ToString())
-	P = GOLDILOCKS.ECP_map2point(u[0])
+	P = ED448.ECP_map2point(u[0])
 	fmt.Printf("Q= %s\n", P.ToString())
 	P.Cfp()
 	P.Affine()
@@ -385,12 +385,12 @@ func main() {
 	htp_NIST256([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
 	htp_NIST256([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
-	fmt.Printf("\nTesting HTP for curve GOLDILOCKS\n")
-	htp_GOLDILOCKS([]byte(""))
-	htp_GOLDILOCKS([]byte("abc"))
-	htp_GOLDILOCKS([]byte("abcdef0123456789"))
-	htp_GOLDILOCKS([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
-	htp_GOLDILOCKS([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
+	fmt.Printf("\nTesting HTP for curve ED448\n")
+	htp_ED448([]byte(""))
+	htp_ED448([]byte("abc"))
+	htp_ED448([]byte("abcdef0123456789"))
+	htp_ED448([]byte("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"))
+	htp_ED448([]byte("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
 	fmt.Printf("\nTesting HTP for curve SECP256K1\n")
 	htp_SECP256K1([]byte(""))

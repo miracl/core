@@ -367,10 +367,10 @@ function ED25519() {
 	}
 
 
-// GOLDILOCKS context
-	function GOLDILOCKS() {
+// ED448 context
+	function ED448() {
 
-		var ctx = new CTX('GOLDILOCKS');
+		var ctx = new CTX('ED448');
 		var i;
 		var MIN_ITERS=5;
 		var MIN_TIME=3;
@@ -384,7 +384,7 @@ function ED25519() {
 
 		rng.seed(100,RAW);
 
-		console.log("Curve GOLDILOCKS");
+		console.log("Curve ED448");
 		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
 		{
 			console.log("Weierstrass parameterization ");
@@ -1099,7 +1099,7 @@ ED25519();
 console.log("\n");
 NIST256();
 console.log("\n");
-GOLDILOCKS();
+ED448();
 console.log("\n");
 BN254();
 console.log("\n");

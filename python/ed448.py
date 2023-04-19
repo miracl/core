@@ -18,7 +18,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# GOLDILOCKS curve constants
+# Ed448 curve constants
 
 from constants import *
 

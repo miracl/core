@@ -86,7 +86,7 @@ def rsaset(tb,nb,base,ml) :
 # modulus_bits is the actual bit length of the modulus.
 # modulus_mod_8 is the remainder when the modulus is divided by 8
 # rz Z value for hash_to_point, If list G1 Z value is in [0], G2 Z value (=a+bz) is in [1], [2]
-# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for GOLDILOCKS only)
+# modulus_type is NOT_SPECIAL, or PSEUDO_MERSENNE, or MONTGOMERY_Friendly, or GENERALISED_MERSENNE (supported for ED448 only)
 # i for Fp2 QNR 2^i+sqrt(-1) (relevant for PFCs only, else =0). Or QNR over Fp if p=1 mod 8
 # curve_type is WEIERSTRASS, EDWARDS or MONTGOMERY
 # Curve A parameter
@@ -103,8 +103,10 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     inb=int(itb/8)
     nb=str(inb)
 
-    fpath="core"+slashtext+tc+slashtext
-    os.system("mkdir core"+slashtext+tc)
+    tcu=tc.upper()
+
+    fpath="core"+slashtext+tcu+slashtext
+    os.system("mkdir core"+slashtext+tcu)
 
     os.system(copytext+"ARCH64.go "+fpath+"ARCH.go")
     os.system(copytext+"BIG64.go "+fpath+"BIG.go")
@@ -116,18 +118,18 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     os.system(copytext+"CONFIG_BIG.go "+fpath+"CONFIG_BIG.go")
     os.system(copytext+"CONFIG_FIELD.go "+fpath+"CONFIG_FIELD.go")
     os.system(copytext+"CONFIG_CURVE.go "+fpath+"CONFIG_CURVE.go")
-    os.system(copytext+"ROM_"+tc+"_64.go "+fpath+"ROM.go")
+    os.system(copytext+"ROM_"+tcu+"_64.go "+fpath+"ROM.go")
 
-    replace(fpath+"ARCH.go","XXX",tc)
-    replace(fpath+"BIG.go","XXX",tc)
-    replace(fpath+"DBIG.go","XXX",tc)
-    replace(fpath+"FP.go","XXX",tc)
-    replace(fpath+"ECP.go","XXX",tc)
-    replace(fpath+"ECDH.go","XXX",tc)
-    replace(fpath+"HPKE.go","XXX",tc)
-    replace(fpath+"CONFIG_BIG.go","XXX",tc)
-    replace(fpath+"CONFIG_FIELD.go","XXX",tc)
-    replace(fpath+"CONFIG_CURVE.go","XXX",tc)
+    replace(fpath+"ARCH.go","XXX",tcu)
+    replace(fpath+"BIG.go","XXX",tcu)
+    replace(fpath+"DBIG.go","XXX",tcu)
+    replace(fpath+"FP.go","XXX",tcu)
+    replace(fpath+"ECP.go","XXX",tcu)
+    replace(fpath+"ECDH.go","XXX",tcu)
+    replace(fpath+"HPKE.go","XXX",tcu)
+    replace(fpath+"CONFIG_BIG.go","XXX",tcu)
+    replace(fpath+"CONFIG_FIELD.go","XXX",tcu)
+    replace(fpath+"CONFIG_CURVE.go","XXX",tcu)
 
 
     replace(fpath+"CONFIG_BIG.go","@NB@",nb)
@@ -214,8 +216,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
         os.system(copytext+"FP2.go "+fpath+"FP2.go")
         os.system(copytext+"FP4.go "+fpath+"FP4.go")
 
-        replace(fpath+"FP2.go","XXX",tc)
-        replace(fpath+"FP4.go","XXX",tc)
+        replace(fpath+"FP2.go","XXX",tcu)
+        replace(fpath+"FP4.go","XXX",tcu)
 
         if pf == "BN" or pf == "BLS12" :
 
@@ -232,11 +234,11 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
                 replace(fpath+"ECP2.go","CAHCNZS","*/")
                 replace(fpath+"ECP2.go","CAHCNZF","/*")
 
-            replace(fpath+"FP12.go","XXX",tc)
-            replace(fpath+"ECP2.go","XXX",tc)
-            replace(fpath+"PAIR.go","XXX",tc)
-            replace(fpath+"MPIN.go","XXX",tc)
-            replace(fpath+"BLS.go","XXX",tc)
+            replace(fpath+"FP12.go","XXX",tcu)
+            replace(fpath+"ECP2.go","XXX",tcu)
+            replace(fpath+"PAIR.go","XXX",tcu)
+            replace(fpath+"MPIN.go","XXX",tcu)
+            replace(fpath+"BLS.go","XXX",tcu)
 
             if pf == "BN" :
                 replace(fpath+"PAIR.go","PFBNS","*/")
@@ -252,12 +254,12 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             replace(fpath+"FP4.go","PFGE24S","*/")
             replace(fpath+"FP4.go","PFGE24F","/*")
-            replace(fpath+"FP24.go","XXX",tc)
-            replace(fpath+"FP8.go","XXX",tc)
-            replace(fpath+"ECP4.go","XXX",tc)
-            replace(fpath+"PAIR4.go","XXX",tc)
-            replace(fpath+"MPIN192.go","XXX",tc)
-            replace(fpath+"BLS192.go","XXX",tc)
+            replace(fpath+"FP24.go","XXX",tcu)
+            replace(fpath+"FP8.go","XXX",tcu)
+            replace(fpath+"ECP4.go","XXX",tcu)
+            replace(fpath+"PAIR4.go","XXX",tcu)
+            replace(fpath+"MPIN192.go","XXX",tcu)
+            replace(fpath+"BLS192.go","XXX",tcu)
 
         if pf == "BLS48" :
             os.system(copytext+"FP48.go "+fpath+"FP48.go")
@@ -272,13 +274,13 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"FP4.go","PFGE24F","/*")
             replace(fpath+"FP8.go","PFGE48S","*/")
             replace(fpath+"FP8.go","PFGE48F","/*")
-            replace(fpath+"FP48.go","XXX",tc)
-            replace(fpath+"FP16.go","XXX",tc)
-            replace(fpath+"FP8.go","XXX",tc)
-            replace(fpath+"ECP8.go","XXX",tc)
-            replace(fpath+"PAIR8.go","XXX",tc)
-            replace(fpath+"MPIN256.go","XXX",tc)
-            replace(fpath+"BLS256.go","XXX",tc)
+            replace(fpath+"FP48.go","XXX",tcu)
+            replace(fpath+"FP16.go","XXX",tcu)
+            replace(fpath+"FP8.go","XXX",tcu)
+            replace(fpath+"ECP8.go","XXX",tcu)
+            replace(fpath+"PAIR8.go","XXX",tcu)
+            replace(fpath+"MPIN256.go","XXX",tcu)
+            replace(fpath+"BLS256.go","XXX",tcu)
 
 os.system("mkdir core")
 os.system(copytext+ "HASH*.go core"+slashtext+".")
@@ -294,13 +296,13 @@ os.system(copytext+ "DILITHIUM.go core"+slashtext+".")
 
 class miracl_crypto:
     np_curves = (
-        ("ED25519","56","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128"),
+        ("Ed25519","56","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128"),
         ("C25519","56","255","2","1","PSEUDO_MERSENNE","0","MONTGOMERY","486662","NOT","NOT","NOT","NOT","NOT","128"),
         ("NIST256","56","256","1","-10","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
         ("BRAINPOOL","56","256","1","-3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
         ("ANSSI","56","256","1","-5","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
         ("HIFIVE","60","336","2","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","192"),
-        ("GOLDILOCKS","58","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
+        ("Ed448","58","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
         ("NIST384","56","384","1","-12","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","192"),
         ("C41417","60","414","1","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
         ("NIST521","60","521","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","256"),

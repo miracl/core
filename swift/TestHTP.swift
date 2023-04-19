@@ -31,7 +31,7 @@ import core // comment out for Xcode
 import ed25519
 import c25519
 import nist256
-import goldilocks
+import ed448
 import secp256k1
 import bls12381
 
@@ -177,11 +177,11 @@ public func htp_nist256(_ mess: String)
     print("P= "+P.toString())
 }
 
-public func hash_to_field_goldilocks(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UInt8],_ ctr: Int) -> [goldilocks.FP] {
-    var u=[goldilocks.FP]()
-    let q=goldilocks.BIG(goldilocks.ROM.Modulus)
+public func hash_to_field_ed448(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[UInt8],_ ctr: Int) -> [ed448.FP] {
+    var u=[ed448.FP]()
+    let q=ed448.BIG(ed448.ROM.Modulus)
     let k=q.nbits()
-    let r=goldilocks.BIG(goldilocks.ROM.CURVE_Order)
+    let r=ed448.BIG(ed448.ROM.CURVE_Order)
     let m=r.nbits()
     let L=ceil(k+ceil(m,2),8)
     let OKM=HMAC.XMD_Expand(hf,hlen,L*ctr,DST,M)
@@ -190,27 +190,27 @@ public func hash_to_field_goldilocks(_ hf: Int,_ hlen:Int,_ DST: [UInt8], _ M:[U
         for j in 0..<L {
             fd[j]=OKM[i*L+j]
         }
-		var dx=goldilocks.DBIG.fromBytes(fd)
-		let w=goldilocks.FP(dx.mod(q))
+		var dx=ed448.DBIG.fromBytes(fd)
+		let w=ed448.FP(dx.mod(q))
 		u.append(w)
     }
 
     return u
 }
 
-public func htp_goldilocks(_ mess: String)
+public func htp_ed448(_ mess: String)
 {
     print("\nRandom oracle - message= "+mess)
     let M=[UInt8](mess.utf8)
 	var DST = [UInt8]("QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_".utf8)
-	var u=hash_to_field_goldilocks(HMAC.MC_SHA2,goldilocks.CONFIG_CURVE.HASH_TYPE,DST,M,2)
+	var u=hash_to_field_ed448(HMAC.MC_SHA2,ed448.CONFIG_CURVE.HASH_TYPE,DST,M,2)
 
     print("u[0]= "+u[0].toString())
     print("u[1]= "+u[1].toString())
 
-    var P=goldilocks.ECP.map2point(u[0])
+    var P=ed448.ECP.map2point(u[0])
     print("Q[0]= "+P.toString())
-    let P1=goldilocks.ECP.map2point(u[1])
+    let P1=ed448.ECP.map2point(u[1])
     print("Q[1]= "+P1.toString())
     P.add(P1)
     P.cfp()
@@ -219,9 +219,9 @@ public func htp_goldilocks(_ mess: String)
 
     print("\nNon-Uniform");
     DST = [UInt8]("QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_".utf8)
-    u=hash_to_field_goldilocks(HMAC.MC_SHA2,goldilocks.CONFIG_CURVE.HASH_TYPE,DST,M,1);
+    u=hash_to_field_ed448(HMAC.MC_SHA2,ed448.CONFIG_CURVE.HASH_TYPE,DST,M,1);
     print("u[0]= "+u[0].toString())
-    P=goldilocks.ECP.map2point(u[0])
+    P=ed448.ECP.map2point(u[0])
     print("Q= "+P.toString())
     P.cfp()
     P.affine()
@@ -410,12 +410,12 @@ htp_nist256("abcdef0123456789")
 htp_nist256("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq")
 htp_nist256("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
-print("\nTesting HTP for curve goldilocks\n")
-htp_goldilocks("")
-htp_goldilocks("abc")
-htp_goldilocks("abcdef0123456789")
-htp_goldilocks("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq")
-htp_goldilocks("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+print("\nTesting HTP for curve ed448\n")
+htp_ed448("")
+htp_ed448("abc")
+htp_ed448("abcdef0123456789")
+htp_ed448("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq")
+htp_ed448("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
 print("\nTesting HTP for curve secp256k1\n")
 htp_secp256k1("")

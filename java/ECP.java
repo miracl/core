@@ -1282,7 +1282,7 @@ public final class ECP {
             }
 
             if (CONFIG_FIELD.MODTYPE == CONFIG_FIELD.GENERALISED_MERSENNE )
-            { // GOLDILOCKS isogeny
+            { // ED448 isogeny
                 t.copy(X1); t.sqr();
                 w.copy(t); w.add(one); w.norm();
                 t.sub(one); t.norm();

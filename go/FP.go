@@ -137,7 +137,7 @@ func mod(d *DBIG) *BIG {
 		return b
 	}
 
-	if MODTYPE == GENERALISED_MERSENNE { // GoldiLocks only
+	if MODTYPE == GENERALISED_MERSENNE { // Ed448 only
 		t := d.split(MODBITS)
 		b := NewBIGdcopy(d)
 		b.add(t)
@@ -489,7 +489,7 @@ func (F *FP) fpow() *FP {
 	e := int(PM1D2)
 
 	n = int(MODBITS)
-	if MODTYPE == GENERALISED_MERSENNE { // Goldilocks ONLY
+	if MODTYPE == GENERALISED_MERSENNE { // Ed448 ONLY
 		n /= 2
 	}
 
@@ -574,7 +574,7 @@ func (F *FP) fpow() *FP {
 		r.mul(key)
 	}
 
-	if MODTYPE == GENERALISED_MERSENNE { // Goldilocks ONLY
+	if MODTYPE == GENERALISED_MERSENNE { // Ed448 ONLY
 		key.copy(r)
 		r.sqr()
 		r.mul(F)

@@ -18,8 +18,8 @@
  */
 
 /* Test and benchmark elliptic curve and RSA functions
-    First build core.a from build_ec batch file
-    gcc -O3 benchtest_ec.c core.a -o benchtest_ec.exe
+    First build core.a from config*.py file
+    gcc -O3 benchtest_all.c core.a -o benchtest_all
 */
 
 #include <stdio.h>
@@ -27,13 +27,13 @@
 #include <time.h>
 
 #include "rsa_2048.h"
-#include "ecp_ED25519.h"
+#include "ecp_Ed25519.h"
 #include "pair_BN254.h"
 
 
 #if CHUNK==32 || CHUNK==64
 #include "ecp_NIST256.h"
-#include "ecp_GOLDILOCKS.h"
+#include "ecp_Ed448.h"
 #include "pair_BLS12383.h"
 #include "pair4_BLS24479.h"
 #include "pair8_BLS48556.h"
@@ -141,18 +141,18 @@ int ed25519(csprng *RNG)
     int i, iterations;
     clock_t start;
     double elapsed;
-    ECP_ED25519 EP, EG;
+    ECP_Ed25519 EP, EG;
     BIG_ED s, r, x, y;
     FP_F25519 rw;
-    printf("\nTesting/Timing ED25519 ECC\n");
+    printf("\nTesting/Timing Ed25519 ECC\n");
 
-#if CURVETYPE_ED25519==WEIERSTRASS
+#if CURVETYPE_Ed25519==WEIERSTRASS
     printf("Weierstrass parameterization\n");
 #endif
-#if CURVETYPE_ED25519==EDWARDS
+#if CURVETYPE_Ed25519==EDWARDS
     printf("Edwards parameterization\n");
 #endif
-#if CURVETYPE_ED25519==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
     printf("Montgomery parameterization\n");
 #endif
 
@@ -183,24 +183,24 @@ int ed25519(csprng *RNG)
     printf("64-bit Build\n");
 #endif
 
-    ECP_ED25519_generator(&EG);
+    ECP_Ed25519_generator(&EG);
 
     FP_F25519_rand(&rw,RNG);
-    ECP_ED25519_map2point(&EP,&rw);
-    ECP_ED25519_cfp(&EP);
+    ECP_Ed25519_map2point(&EP,&rw);
+    ECP_Ed25519_cfp(&EP);
 
-    if (ECP_ED25519_isinf(&EP))
+    if (ECP_Ed25519_isinf(&EP))
     {
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }    
 
-    BIG_ED_rcopy(r, CURVE_Order_ED25519);
-    BIG_ED_randtrunc(s, r, 2 * CURVE_SECURITY_ED25519, RNG);
-    ECP_ED25519_copy(&EP, &EG);
-    ECP_ED25519_mul(&EP, r);
+    BIG_ED_rcopy(r, CURVE_Order_Ed25519);
+    BIG_ED_randtrunc(s, r, 2 * CURVE_SECURITY_Ed25519, RNG);
+    ECP_Ed25519_copy(&EP, &EG);
+    ECP_Ed25519_mul(&EP, r);
 
-    if (!ECP_ED25519_isinf(&EP))
+    if (!ECP_Ed25519_isinf(&EP))
     {
         printf("FAILURE - rG!=O\n");
         return 0;
@@ -209,8 +209,8 @@ int ed25519(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        ECP_ED25519_copy(&EP, &EG);
-        ECP_ED25519_mul(&EP, s);
+        ECP_Ed25519_copy(&EP, &EG);
+        ECP_Ed25519_mul(&EP, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -309,35 +309,35 @@ int nist256(csprng *RNG)
     return 0;
 }
 
-int goldilocks(csprng *RNG)
+int ed448(csprng *RNG)
 {
     int i, iterations;
     clock_t start;
     double elapsed;
-    ECP_GOLDILOCKS EP, EG;
+    ECP_Ed448 EP, EG;
     BIG_GL s, r, x, y;
-    FP_GOLDILOCKS rw;
-    printf("\nTesting/Timing GOLDILOCKS ECC\n");
+    FP_F448 rw;
+    printf("\nTesting/Timing Ed448 ECC\n");
 
-#if CURVETYPE_GOLDILOCKS==WEIERSTRASS
+#if CURVETYPE_Ed448==WEIERSTRASS
     printf("Weierstrass parameterization\n");
 #endif
-#if CURVETYPE_GOLDILOCKS==EDWARDS
+#if CURVETYPE_Ed448==EDWARDS
     printf("Edwards parameterization\n");
 #endif
-#if CURVETYPE_GOLDILOCKS==MONTGOMERY
+#if CURVETYPE_Ed448==MONTGOMERY
     printf("Montgomery parameterization\n");
 #endif
 
-#if MODTYPE_GOLDILOCKS == PSEUDO_MERSENNE
+#if MODTYPE_F448 == PSEUDO_MERSENNE
     printf("Pseudo-Mersenne Modulus\n");
 #endif
 
-#if MODTYPE_GOLDILOCKS == GENERALISED_MERSENNE
+#if MODTYPE_F448 == GENERALISED_MERSENNE
     printf("Generalised-Mersenne Modulus\n");
 #endif
 
-#if MODTYPE_GOLDILOCKS == MONTGOMERY_FRIENDLY
+#if MODTYPE_F448 == MONTGOMERY_FRIENDLY
     printf("Montgomery Friendly Modulus\n");
 #endif
 
@@ -351,24 +351,24 @@ int goldilocks(csprng *RNG)
     printf("64-bit Build\n");
 #endif
 
-    ECP_GOLDILOCKS_generator(&EG);
+    ECP_Ed448_generator(&EG);
 
-    FP_GOLDILOCKS_rand(&rw,RNG);
-    ECP_GOLDILOCKS_map2point(&EP,&rw);
-    ECP_GOLDILOCKS_cfp(&EP);
+    FP_F448_rand(&rw,RNG);
+    ECP_Ed448_map2point(&EP,&rw);
+    ECP_Ed448_cfp(&EP);
 
-    if (ECP_GOLDILOCKS_isinf(&EP))
+    if (ECP_Ed448_isinf(&EP))
     {
         printf("HASHING FAILURE - P=O\n");
         return 0;
     }   
 
-    BIG_GL_rcopy(r, CURVE_Order_GOLDILOCKS);
-    BIG_GL_randtrunc(s, r, 2 * CURVE_SECURITY_GOLDILOCKS, RNG);
-    ECP_GOLDILOCKS_copy(&EP, &EG);
-    ECP_GOLDILOCKS_mul(&EP, r);
+    BIG_GL_rcopy(r, CURVE_Order_Ed448);
+    BIG_GL_randtrunc(s, r, 2 * CURVE_SECURITY_Ed448, RNG);
+    ECP_Ed448_copy(&EP, &EG);
+    ECP_Ed448_mul(&EP, r);
 
-    if (!ECP_GOLDILOCKS_isinf(&EP))
+    if (!ECP_Ed448_isinf(&EP))
     {
         printf("FAILURE - rG!=O\n");
         return 0;
@@ -377,8 +377,8 @@ int goldilocks(csprng *RNG)
     iterations = 0;
     start = clock();
     do {
-        ECP_GOLDILOCKS_copy(&EP, &EG);
-        ECP_GOLDILOCKS_mul(&EP, s);
+        ECP_Ed448_copy(&EP, &EG);
+        ECP_Ed448_mul(&EP, s);
 
         iterations++;
         elapsed = (clock() - start) / (double)CLOCKS_PER_SEC;
@@ -1278,7 +1278,7 @@ int main()
     ed25519(&RNG);
 #if CHUNK==32 || CHUNK==64
     nist256(&RNG);
-    goldilocks(&RNG);
+    ed448(&RNG);
 #endif
     bn254(&RNG);
 #if CHUNK==32 || CHUNK==64

@@ -467,7 +467,7 @@ var FP = function(ctx) {
 			
 
 			n=FP.MODBITS;
-			if (FP.MODTYPE == FP.GENERALISED_MERSENNE)   // Goldilocks ONLY
+			if (FP.MODTYPE == FP.GENERALISED_MERSENNE)   // ED448 ONLY
 				n/=2;
 
             e=FP.PM1D2;
@@ -541,7 +541,7 @@ var FP = function(ctx) {
 				r.mul(key); 
 			}
 
-			if (FP.MODTYPE == FP.GENERALISED_MERSENNE)   // Goldilocks ONLY
+			if (FP.MODTYPE == FP.GENERALISED_MERSENNE)   // ED448 ONLY
 			{
 				key.copy(r);
 				r.sqr();
@@ -762,7 +762,7 @@ var FP = function(ctx) {
             b.norm();
         }
 
-        if (FP.MODTYPE == FP.GENERALISED_MERSENNE) { // GoldiLocks Only
+        if (FP.MODTYPE == FP.GENERALISED_MERSENNE) { // ED448 Only
             t = d.split(FP.MODBITS);
             b.hcopy(d);
             b.add(t);

@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 #include "arch.h"
-#include "ecp_GOLDILOCKS.h"
+#include "ecp_Ed448.h"
 
-namespace GOLDILOCKS {
+namespace Ed448 {
 
-/* Curve GOLDILOCKS */
+/* Curve Ed448 */
 
 #if CHUNK==16
 

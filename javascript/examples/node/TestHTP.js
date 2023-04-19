@@ -168,9 +168,9 @@ function NIST256() {
     htp(ctx,"a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",ro,nu,hlen);
 }
 
-// GOLDILOCKS context
-function GOLDILOCKS() {
-	var ctx = new CTX('GOLDILOCKS');
+// ED448 context
+function ED448() {
+	var ctx = new CTX('ED448');
 	var ro="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_";
 	var nu="QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_";
 	var hlen=ctx.ECP.HASH_TYPE;
@@ -230,7 +230,7 @@ C25519();
 console.log("\n");
 NIST256();
 console.log("\n");
-GOLDILOCKS();
+ED448();
 console.log("\n");
 SECP256K1();
 console.log("\n");

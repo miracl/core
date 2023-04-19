@@ -420,7 +420,7 @@ void help()
     printf("4. BRAINPOOL\n");
     printf("5. ANSSI\n");
     printf("6. HIFIVE\n");
-    printf("7. GOLDILOCKS\n");
+    printf("7. ED448\n");
     printf("8. NIST384\n");
     printf("9. C41417\n");
     printf("10. NIST521\n");
@@ -577,6 +577,7 @@ int main(int argc, char **argv)
             bb=24;
         
         printf("Curve is ED25519\n");
+        strcpy(curvename, "Ed25519");
         strcpy(fieldname, "F25519");
         mbits = 255;               // bits in modulus
         words = (1 + ((mbits - 1) / bb)); // words per Big
@@ -634,7 +635,7 @@ int main(int argc, char **argv)
         if (strcmp(lg, "javascript") == 0)
             bb=23;
         printf("Curve is X448\n");
-        strcpy(fieldname, "GOLDILOCKS");
+        strcpy(fieldname, "F448");
         mbits = 448;
         words = (1 + ((mbits - 1) / bb));
         curvetype = MONTGOMERY;
@@ -894,7 +895,7 @@ int main(int argc, char **argv)
         htpc=pow((Big)2,finde(p),p);
     }
 
-    if (strcmp(curvename, "GOLDILOCKS") == 0)
+    if (strcmp(curvename, "ED448") == 0)
     {
         curve = 7;
         if (chunk==16)
@@ -905,8 +906,9 @@ int main(int argc, char **argv)
             bb=58;
         if (strcmp(lg, "javascript") == 0)
             bb=23;
-        printf("Curve is GOLDILOCKS\n");
-        strcpy(fieldname, curvename);
+        printf("Curve is Ed448\n");
+        strcpy(curvename,"Ed448");
+        strcpy(fieldname, "F448");
         mbits = 448;
         words = (1 + ((mbits - 1) / bb));
         curvetype = EDWARDS;

@@ -85,7 +85,7 @@ NEW: support for emerging Hash To Curve standard.
 See https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/
 
 
-Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (ed25519, c25519, nist256, goldilocks, secp256k1 and bls12381)
+Create 32 or 64-bit library selecting curves 1, 2, 3, 7, 17 and 31 (ed25519, c25519, nist256, ed448, secp256k1 and bls12381)
 
     rustc TestHTP.rs --extern mcore=libmcore.rlib
 

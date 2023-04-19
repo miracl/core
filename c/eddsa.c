@@ -29,26 +29,23 @@
 
 #if CURVETYPE_ZZZ == EDWARDS
 
-using namespace XXX;
-using namespace YYY;
-
 // Process a random BIG r by RFC7748 (for Montgomery & Edwards curves only)
-static void RFC7748(BIG r)
+static void RFC7748(BIG_XXX r)
 {
     int c,lg=0;
-    BIG t;
-    c=ZZZ::CURVE_Cof_I;
+    BIG_XXX t;
+    c=CURVE_Cof_I_ZZZ;
     while (c!=1)
     {
         lg++;
         c/=2;
     }
     int n=8*EGS_ZZZ-lg+1;
-    BIG_mod2m(r,n);
-    BIG_zero(t); BIG_inc(t,1); BIG_shl(t,n);
-    BIG_add(r,r,t);
-    c=BIG_lastbits(r,lg);
-    BIG_dec(r,c);
+    BIG_XXX_mod2m(r,n);
+    BIG_XXX_zero(t); BIG_XXX_inc(t,1); BIG_XXX_shl(t,n);
+    BIG_XXX_add(r,r,t);
+    c=BIG_XXX_lastbits(r,lg);
+    BIG_XXX_dec(r,c);
 //    printf("lg= %d n=%d\n",lg,n);
 }
 
@@ -92,7 +89,7 @@ static void H(octet *S,char *digest)
 #endif
 }
 
-static int H2(bool ph,octet *context,octet *R,octet *Q,octet *M,DBIG dr)
+static int H2(bool ph,octet *context,octet *R,octet *Q,octet *M,DBIG_XXX dr)
 {
     char h[128];
     int b=Q->len;
@@ -143,11 +140,11 @@ static int H2(bool ph,octet *context,octet *R,octet *Q,octet *M,DBIG dr)
 
 #endif
     reverse(2*b,h);
-    BIG_dfromBytesLen(dr,h,2*b);
+    BIG_XXX_dfromBytesLen(dr,h,2*b);
     return 2*b;
 }
 
-static void getR(bool ph,int b,char *digest,octet *context,octet *M,DBIG dr) {
+static void getR(bool ph,int b,char *digest,octet *context,octet *M,DBIG_XXX dr) {
     char h[128];
     char dom[64];
     octet DOM={0,sizeof(dom),dom};
@@ -194,37 +191,37 @@ static void getR(bool ph,int b,char *digest,octet *context,octet *M,DBIG dr) {
 #endif
 
     reverse(2*b,h);
-    BIG_dfromBytesLen(dr,h,2*b);
+    BIG_XXX_dfromBytesLen(dr,h,2*b);
 }
 // encode integer (little endian)
-static int encode_int(XXX::BIG x,char *ei) {
+static int encode_int(BIG_XXX x,char *ei) {
     int b,index=0;
 
     if (8*MODBYTES_XXX==MBITS_YYY) index=1; // extra byte needed for compression        
     b=MODBYTES_XXX+index;
 
     ei[0]=0;
-    BIG_toBytes(&ei[index],x);
+    BIG_XXX_toBytes(&ei[index],x);
     reverse(b,ei);
     return b;
 }
 
 // encode point
-static void encode(ZZZ::ECP *P,octet *W) {
-    BIG x,y;
+static void encode(ECP_ZZZ *P,octet *W) {
+    BIG_XXX x,y;
     int b,index=0;
 
     if (8*MODBYTES_XXX==MBITS_YYY) index=1; // extra byte needed for compression        
     b=MODBYTES_XXX+index;
 
-    ECP_get(x, y, P);
+    ECP_ZZZ_get(x, y, P);
     b=encode_int(y,W->val);
-    W->val[b-1]|=BIG_parity(x)<<7;
+    W->val[b-1]|=BIG_XXX_parity(x)<<7;
     W->len=b;
 }
 
 // decode integer (little endian)
-static int decode_int(bool strip_sign,char *ei,XXX::BIG x) {
+static int decode_int(bool strip_sign,char *ei,BIG_XXX x) {
     int b,index=0;
     int sign=0;
     char r[MODBYTES_XXX+1];
@@ -242,52 +239,52 @@ static int decode_int(bool strip_sign,char *ei,XXX::BIG x) {
         r[0]&=0x7f;
 
     if (r[0]==0) // remove leading zero
-        BIG_fromBytesLen(x,&r[1],b-1);
+        BIG_XXX_fromBytesLen(x,&r[1],b-1);
     else
-        BIG_fromBytesLen(x,&r[0],b);
+        BIG_XXX_fromBytesLen(x,&r[0],b);
     return sign;
 }
 
 // decode compressed point
-static bool decode(octet *W,ZZZ::ECP *P) {
-    BIG y;
-    FP x,d,t,one,hint;
+static bool decode(octet *W,ECP_ZZZ *P) {
+    BIG_XXX y;
+    FP_YYY x,d,t,one,hint;
     int sign=0;  // LSB of x
 
     sign=decode_int(true,W->val,y);
-    FP_nres(&x,y); FP_copy(&(P->y),&x); FP_sqr(&x,&x);
-    FP_copy(&d,&x); FP_one(&one);
-    FP_sub(&x,&x,&one);
-    FP_norm(&x);
-    FP_rcopy(&t, ZZZ::CURVE_B);
-    FP_mul(&d,&d,&t);
+    FP_YYY_nres(&x,y); FP_YYY_copy(&(P->y),&x); FP_YYY_sqr(&x,&x);
+    FP_YYY_copy(&d,&x); FP_YYY_one(&one);
+    FP_YYY_sub(&x,&x,&one);
+    FP_YYY_norm(&x);
+    FP_YYY_rcopy(&t, CURVE_B_ZZZ);
+    FP_YYY_mul(&d,&d,&t);
 #if CURVE_A_ZZZ == 1
-    FP_sub(&d,&d,&one);
+    FP_YYY_sub(&d,&d,&one);
 #else
-    FP_add(&d,&d,&one);
-#endif  
-    FP_norm(&d);
+    FP_YYY_add(&d,&d,&one);
+#endif    
+    FP_YYY_norm(&d);
 // inverse square root trick for sqrt(x/d)
-    FP_sqr(&t,&x);
-    FP_mul(&x,&x,&t);
-    FP_mul(&x,&x,&d);
-    if (!FP_qr(&x,&hint))
+    FP_YYY_sqr(&t,&x);
+    FP_YYY_mul(&x,&x,&t);
+    FP_YYY_mul(&x,&x,&d);
+    if (!FP_YYY_qr(&x,&hint))
     {
-        ECP_inf(P);
+        ECP_ZZZ_inf(P);
         return false;
     }
-    FP_sqrt(&d,&x,&hint);
-    FP_inv(&x,&x,&hint);
-    FP_mul(&x,&x,&d);
-    FP_mul(&x,&x,&t);
+    FP_YYY_sqrt(&d,&x,&hint);
+    FP_YYY_inv(&x,&x,&hint);
+    FP_YYY_mul(&x,&x,&d);
+    FP_YYY_mul(&x,&x,&t);
 
-    FP_reduce(&x);
-    FP_redc(y,&x);
-    if (BIG_parity(y)!=sign)
-        FP_neg(&x,&x);
-    FP_norm(&x);
-    FP_copy(&(P->x),&x);
-    FP_copy(&(P->z),&one);
+    FP_YYY_reduce(&x);
+    FP_YYY_redc(y,&x);
+    if (BIG_XXX_parity(y)!=sign)
+        FP_YYY_neg(&x,&x);
+    FP_YYY_norm(&x);
+    FP_YYY_copy(&(P->x),&x);
+    FP_YYY_copy(&(P->z),&one);
     return true;
 }
 
@@ -297,10 +294,10 @@ static bool decode(octet *W,ZZZ::ECP *P) {
  * RNG is a cryptographically strong RNG 
  * If RNG==NULL, D is generated externally 
  */
-int ZZZ::EDDSA_KEY_PAIR_GENERATE(csprng *RNG,octet* D,octet *Q)
+int EDDSA_ZZZ_KEY_PAIR_GENERATE(csprng *RNG,octet* D,octet *Q)
 {
-    BIG r, x, y, s;
-    ECP G;
+    BIG_XXX r, x, y, s;
+    ECP_ZZZ G;
     char digest[128];
     int res = EDDSA_OK;
     int b,index=0;
@@ -308,7 +305,7 @@ int ZZZ::EDDSA_KEY_PAIR_GENERATE(csprng *RNG,octet* D,octet *Q)
     if (8*MODBYTES_XXX==MBITS_YYY) index=1; // extra byte needed for compression        
     b=MODBYTES_XXX+index;
 
-    ECP_generator(&G);
+    ECP_ZZZ_generator(&G);
 
     if (RNG != NULL)
         OCT_rand(D, RNG, b); // create random private key
@@ -317,9 +314,9 @@ int ZZZ::EDDSA_KEY_PAIR_GENERATE(csprng *RNG,octet* D,octet *Q)
 
 // reverse bytes for little endian
     reverse(b,digest);
-    BIG_fromBytes(s,&digest[index]);
+    BIG_XXX_fromBytes(s,&digest[index]);
     RFC7748(s);
-    ECP_mul(&G, s);
+    ECP_ZZZ_mul(&G, s);
 
     encode(&G,Q);
     return res;
@@ -328,11 +325,11 @@ int ZZZ::EDDSA_KEY_PAIR_GENERATE(csprng *RNG,octet* D,octet *Q)
 // Generate a signature using key pair (D,Q) on message M
 // Set ph=true if message has already been pre-hashed
 // if ph=false, then context should be NULL for ed25519. However RFC8032 mode ed25519ctx is supported by supplying a non-NULL or non-empty context
-int ZZZ::EDDSA_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,octet *SIG)
+int EDDSA_ZZZ_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,octet *SIG)
 {
-    DBIG dr;
-    BIG s,sr,sd,q;
-    ECP R;
+    DBIG_XXX dr;
+    BIG_XXX s,sr,sd,q;
+    ECP_ZZZ R;
     char digest[128];
     H(D,digest);   // hash of private key
     int res = EDDSA_OK;
@@ -340,25 +337,25 @@ int ZZZ::EDDSA_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,oct
     if (8*MODBYTES_XXX==MBITS_YYY) index=1; // extra byte needed for compression        
     b=MODBYTES_XXX+index;
 
-    BIG_rcopy(q, CURVE_Order);
-    ECP_generator(&R);
+    BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
+    ECP_ZZZ_generator(&R);
 
     if (D->len!=Q->len || D->len!=b)
         res=EDDSA_INVALID_PUBLIC_KEY;
     if (res==EDDSA_OK)
     {
         getR(ph,b,digest,context,M,dr);
-        BIG_dmod(sr,dr,q);
-        ECP_mul(&R,sr);
+        BIG_XXX_dmod(sr,dr,q);
+        ECP_ZZZ_mul(&R,sr);
         encode(&R,SIG);
 // reverse bytes for little endian        
         reverse(b,digest);
-        BIG_fromBytes(s,&digest[index]);
+        BIG_XXX_fromBytes(s,&digest[index]);
         RFC7748(s);
         H2(ph,context,SIG,Q,M,dr);
-        BIG_dmod(sd,dr,q);
-        BIG_modmul(s,s,sd,q);
-        BIG_modadd(s,s,sr,q);
+        BIG_XXX_dmod(sd,dr,q);
+        BIG_XXX_modmul(s,s,sd,q);
+        BIG_XXX_modadd(s,s,sr,q);
         encode_int(s,&SIG->val[b]);
         SIG->len=2*b;
     }
@@ -367,11 +364,11 @@ int ZZZ::EDDSA_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,oct
 
 // verify a signature using public key Q
 // same context (if any) as used for signature
-bool ZZZ::EDDSA_VERIFY(bool ph,octet *Q,octet *context,octet *M,octet *SIG) 
+bool EDDSA_ZZZ_VERIFY(bool ph,octet *Q,octet *context,octet *M,octet *SIG) 
 {
-    DBIG du;
-    BIG q,t,su;
-    ECP R,QD,G;
+    DBIG_XXX du;
+    BIG_XXX q,t,su;
+    ECP_ZZZ R,QD,G;
     int res = EDDSA_OK;
     bool dr,dq;
     int lg=0;
@@ -379,27 +376,30 @@ bool ZZZ::EDDSA_VERIFY(bool ph,octet *Q,octet *context,octet *M,octet *SIG)
     if (8*MODBYTES_XXX==MBITS_YYY) index=1; // extra byte needed for compression        
     b=MODBYTES_XXX+index;
 
-    c=ZZZ::CURVE_Cof_I;
+    c=CURVE_Cof_I_ZZZ;
     while (c!=1)
     {
         lg++;
         c/=2;
     }
-    BIG_rcopy(q, CURVE_Order);
+    BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
+
     if (!decode(SIG,&R)) return false;
     decode_int(false,&SIG->val[b],t);
     if (!decode(Q,&QD)) return false;
+
     H2(ph,context,SIG,Q,M,du);
-    BIG_dmod(su,du,q);
-    ECP_generator(&G);
-    ECP_mul(&G,t);
-    ECP_mul(&QD,su);
+    BIG_XXX_dmod(su,du,q);
+    ECP_ZZZ_generator(&G);
+    ECP_ZZZ_mul(&G,t);
+    ECP_ZZZ_mul(&QD,su);
+
     for (int i=0;i<lg;i++)
     { // use cofactor 2^c
-        ECP_dbl(&G); ECP_dbl(&QD); ECP_dbl(&R);
+        ECP_ZZZ_dbl(&G); ECP_ZZZ_dbl(&QD); ECP_ZZZ_dbl(&R);
     }
-    ECP_add(&R,&QD);
-    if (!ECP_equals(&G,&R)) return false;
+    ECP_ZZZ_add(&R,&QD);
+    if (!ECP_ZZZ_equals(&G,&R)) return false;
 
     return true;
 }

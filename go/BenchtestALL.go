@@ -26,7 +26,7 @@ import "fmt"
 import "miracl/core"
 import "miracl/core/ED25519"
 import "miracl/core/NIST256"
-import "miracl/core/GOLDILOCKS"
+import "miracl/core/ED448"
 import "miracl/core/BN254"
 import "miracl/core/BLS12383"
 import "miracl/core/RSA2048"
@@ -175,43 +175,43 @@ func NIST_256(rng *core.RAND) {
 }
 
 func GOLDI_LOCKS(rng *core.RAND) {
-	fmt.Printf("\nTesting/Timing GOLDILOCKS ECC\n")
+	fmt.Printf("\nTesting/Timing ED448 ECC\n")
 
-	if GOLDILOCKS.CURVETYPE == GOLDILOCKS.WEIERSTRASS {
+	if ED448.CURVETYPE == ED448.WEIERSTRASS {
 		fmt.Printf("Weierstrass parameterization\n")
 	}
-	if GOLDILOCKS.CURVETYPE == GOLDILOCKS.EDWARDS {
+	if ED448.CURVETYPE == ED448.EDWARDS {
 		fmt.Printf("Edwards parameterization\n")
 	}
-	if GOLDILOCKS.CURVETYPE == GOLDILOCKS.MONTGOMERY {
+	if ED448.CURVETYPE == ED448.MONTGOMERY {
 		fmt.Printf("Montgomery parameterization\n")
 	}
 
-	if GOLDILOCKS.MODTYPE == GOLDILOCKS.PSEUDO_MERSENNE {
+	if ED448.MODTYPE == ED448.PSEUDO_MERSENNE {
 		fmt.Printf("Pseudo-Mersenne Modulus\n")
 	}
-	if GOLDILOCKS.MODTYPE == GOLDILOCKS.MONTGOMERY_FRIENDLY {
+	if ED448.MODTYPE == ED448.MONTGOMERY_FRIENDLY {
 		fmt.Printf("Montgomery friendly Modulus\n")
 	}
-	if GOLDILOCKS.MODTYPE == GOLDILOCKS.GENERALISED_MERSENNE {
+	if ED448.MODTYPE == ED448.GENERALISED_MERSENNE {
 		fmt.Printf("Generalised-Mersenne Modulus\n")
 	}
-	if GOLDILOCKS.MODTYPE == GOLDILOCKS.NOT_SPECIAL {
+	if ED448.MODTYPE == ED448.NOT_SPECIAL {
 		fmt.Printf("Not special Modulus\n")
 	}
 
-	fmt.Printf("Modulus size %d bits\n", GOLDILOCKS.MODBITS)
-	fmt.Printf("%d bit build\n", GOLDILOCKS.CHUNK)
+	fmt.Printf("Modulus size %d bits\n", ED448.MODBITS)
+	fmt.Printf("%d bit build\n", ED448.CHUNK)
 
-	var rw *GOLDILOCKS.FP
-	var WP *GOLDILOCKS.ECP
+	var rw *ED448.FP
+	var WP *ED448.ECP
 
-	EG := GOLDILOCKS.ECP_generator()
-	er := GOLDILOCKS.NewBIGints(GOLDILOCKS.CURVE_Order)
-	es := GOLDILOCKS.Randtrunc(er, 16*GOLDILOCKS.AESKEY, rng)
+	EG := ED448.ECP_generator()
+	er := ED448.NewBIGints(ED448.CURVE_Order)
+	es := ED448.Randtrunc(er, 16*ED448.AESKEY, rng)
 	for i := 0; i < 10; i++ {
-		rw = GOLDILOCKS.NewFPrand(rng)
-		WP = GOLDILOCKS.ECP_map2point(rw)
+		rw = ED448.NewFPrand(rng)
+		WP = ED448.ECP_map2point(rw)
 		WP.Cfp()
 
 		if WP.Is_infinity() {

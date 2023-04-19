@@ -86,11 +86,13 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
     global deltext,slashtext,copytext
 
-    fpath="mcore"+slashtext+"src"+slashtext+tc+slashtext
-    os.system("mkdir mcore"+slashtext+"src"+slashtext+tc)
+    tcl=tc.lower()
+
+    fpath="mcore"+slashtext+"src"+slashtext+tcl+slashtext
+    os.system("mkdir mcore"+slashtext+"src"+slashtext+tcl)
 
     with open("mcore"+slashtext+"src"+slashtext+"lib.rs","a") as libfile:
-        libfile.write("pub mod "+tc+";\n")
+        libfile.write("pub mod "+tcl+";\n")
 
 
     os.system(copytext+"big.rs "+fpath+"big.rs")
@@ -99,14 +101,14 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     os.system(copytext+"ecp.rs "+fpath+"ecp.rs")
     os.system(copytext+"ecdh.rs "+fpath+"ecdh.rs")
     os.system(copytext+"hpke.rs "+fpath+"hpke.rs")
-    os.system(copytext+"rom_"+tc+"_32.rs "+fpath+"rom.rs")
+    os.system(copytext+"rom_"+tcl+"_32.rs "+fpath+"rom.rs")
 
-    replace(fpath+"big.rs","xxx",tc)
-    replace(fpath+"dbig.rs","xxx",tc)
-    replace(fpath+"fp.rs","xxx",tc)
-    replace(fpath+"ecp.rs","xxx",tc)
-    replace(fpath+"ecdh.rs","xxx",tc)
-    replace(fpath+"hpke.rs","xxx",tc)
+    replace(fpath+"big.rs","xxx",tcl)
+    replace(fpath+"dbig.rs","xxx",tcl)
+    replace(fpath+"fp.rs","xxx",tcl)
+    replace(fpath+"ecp.rs","xxx",tcl)
+    replace(fpath+"ecdh.rs","xxx",tcl)
+    replace(fpath+"hpke.rs","xxx",tcl)
 
     replace(fpath+"big.rs","@NB@",nb)
     replace(fpath+"big.rs","@BASE@",base)
@@ -190,8 +192,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
         os.system(copytext+"fp2.rs "+fpath+"fp2.rs")
         os.system(copytext+"fp4.rs "+fpath+"fp4.rs")
-        replace(fpath+"fp2.rs","xxx",tc)
-        replace(fpath+"fp4.rs","xxx",tc)
+        replace(fpath+"fp2.rs","xxx",tcl)
+        replace(fpath+"fp4.rs","xxx",tcl)
 
         if pf == "BN" or pf == "BLS12" :
 
@@ -208,12 +210,12 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
                 replace(fpath+"ecp2.rs","CAHCNZS","*/")
                 replace(fpath+"ecp2.rs","CAHCNZF","/*")
 
-            replace(fpath+"fp12.rs","xxx",tc)
-            replace(fpath+"ecp2.rs","xxx",tc)
-            replace(fpath+"pair.rs","xxx",tc)
-            replace(fpath+"mpin.rs","xxx",tc)
-            replace(fpath+"bls.rs","xxx",tc)
-            replace(fpath+"bls.rs","XXX",tc.upper())
+            replace(fpath+"fp12.rs","xxx",tcl)
+            replace(fpath+"ecp2.rs","xxx",tcl)
+            replace(fpath+"pair.rs","xxx",tcl)
+            replace(fpath+"mpin.rs","xxx",tcl)
+            replace(fpath+"bls.rs","xxx",tcl)
+            replace(fpath+"bls.rs","XXX",tcl.upper())
 
             if pf == "BN" :
                 replace(fpath+"pair.rs","PFBNS","*/")
@@ -232,13 +234,13 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             replace(fpath+"fp4.rs","PFGE24S","*/")
             replace(fpath+"fp4.rs","PFGE24F","/*")
-            replace(fpath+"fp8.rs","xxx",tc)
-            replace(fpath+"fp24.rs","xxx",tc)
-            replace(fpath+"ecp4.rs","xxx",tc)
-            replace(fpath+"pair4.rs","xxx",tc)
-            replace(fpath+"mpin192.rs","xxx",tc)
-            replace(fpath+"bls192.rs","xxx",tc)
-            replace(fpath+"bls192.rs","XXX",tc.upper())
+            replace(fpath+"fp8.rs","xxx",tcl)
+            replace(fpath+"fp24.rs","xxx",tcl)
+            replace(fpath+"ecp4.rs","xxx",tcl)
+            replace(fpath+"pair4.rs","xxx",tcl)
+            replace(fpath+"mpin192.rs","xxx",tcl)
+            replace(fpath+"bls192.rs","xxx",tcl)
+            replace(fpath+"bls192.rs","XXX",tcl.upper())
 
             os.system(copytext+"modpf192.rs "+fpath+"mod.rs")
 
@@ -255,14 +257,14 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
             replace(fpath+"fp4.rs","PFGE24F","/*")
             replace(fpath+"fp8.rs","PFGE48S","*/")
             replace(fpath+"fp8.rs","PFGE48F","/*")
-            replace(fpath+"fp8.rs","xxx",tc)
-            replace(fpath+"fp16.rs","xxx",tc)
-            replace(fpath+"fp48.rs","xxx",tc)
-            replace(fpath+"ecp8.rs","xxx",tc)
-            replace(fpath+"pair8.rs","xxx",tc)
-            replace(fpath+"mpin256.rs","xxx",tc)
-            replace(fpath+"bls256.rs","xxx",tc)
-            replace(fpath+"bls256.rs","XXX",tc.upper())
+            replace(fpath+"fp8.rs","xxx",tcl)
+            replace(fpath+"fp16.rs","xxx",tcl)
+            replace(fpath+"fp48.rs","xxx",tcl)
+            replace(fpath+"ecp8.rs","xxx",tcl)
+            replace(fpath+"pair8.rs","xxx",tcl)
+            replace(fpath+"mpin256.rs","xxx",tcl)
+            replace(fpath+"bls256.rs","xxx",tcl)
+            replace(fpath+"bls256.rs","XXX",tcl.upper())
 
             os.system(copytext+"modpf256.rs "+fpath+"mod.rs")
 
@@ -271,13 +273,13 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
 class miracl_crypto:
     np_curves = (
-        ("ed25519","29","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128"),
+        ("Ed25519","29","255","2","1","PSEUDO_MERSENNE","0","EDWARDS","-1","NOT","NOT","NOT","NOT","NOT","128"),
         ("c25519","29","255","2","1","PSEUDO_MERSENNE","0","MONTGOMERY","486662","NOT","NOT","NOT","NOT","NOT","128"),
         ("nist256","28","256","1","-10","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
         ("brainpool","28","256","1","-3","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
         ("anssi","28","256","1","-5","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","128"),
         ("hifive","29","336","2","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","192"),
-        ("goldilocks","29","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
+        ("Ed448","29","448","1","0","GENERALISED_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
         ("nist384","29","384","1","-12","NOT_SPECIAL","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","192"),
         ("c41417","29","414","1","1","PSEUDO_MERSENNE","0","EDWARDS","1","NOT","NOT","NOT","NOT","NOT","256"),
         ("nist521","28","521","1","-4","PSEUDO_MERSENNE","0","WEIERSTRASS","-3","NOT","NOT","NOT","NOT","NOT","256"),

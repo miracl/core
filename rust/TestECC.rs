@@ -339,10 +339,10 @@ fn ecdh_nist256(rng: &mut RAND) {
     }
 }
 
-fn ecdh_goldilocks(rng: &mut RAND) {
-    //use mcore::goldilocks;
-    use mcore::goldilocks::ecdh;
-    use mcore::goldilocks::ecp;
+fn ecdh_ed448(rng: &mut RAND) {
+    //use mcore::ed448;
+    use mcore::ed448::ecdh;
+    use mcore::ed448::ecp;
 
 
     let pw = "M0ng00se";
@@ -373,7 +373,7 @@ fn ecdh_goldilocks(rng: &mut RAND) {
     } // set Salt
 
     println!("\nTesting ECDH/ECDSA/ECIES");
-    println!("Curve goldilocks");
+    println!("Curve ed448");
     println!("Alice's Passphrase= {}", pw);
 
     let mut s0: [u8; EGS] = [0; EGS];
@@ -592,6 +592,6 @@ fn main() {
 
     ecdh_ed25519(&mut rng);
     ecdh_nist256(&mut rng);
-    ecdh_goldilocks(&mut rng);
+    ecdh_ed448(&mut rng);
     rsa_2048(&mut rng);
 }

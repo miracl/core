@@ -187,12 +187,12 @@ fn htp_nist256(mess: &str) {
     println!("P= {}",P.tostring());
 }
 
-fn hash_to_field_goldilocks(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [mcore::goldilocks::fp::FP;2] {
+fn hash_to_field_ed448(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: usize) -> [mcore::ed448::fp::FP;2] {
 
-    use mcore::goldilocks::big::BIG;
-    use mcore::goldilocks::dbig::DBIG;
-    use mcore::goldilocks::fp::FP;
-    use mcore::goldilocks::rom;
+    use mcore::ed448::big::BIG;
+    use mcore::ed448::dbig::DBIG;
+    use mcore::ed448::fp::FP;
+    use mcore::ed448::rom;
 
     let mut u: [FP; 2] = [FP::new(),FP::new()];
 
@@ -216,13 +216,13 @@ fn hash_to_field_goldilocks(hash: usize,hlen: usize,dst: &[u8],msg: &[u8],ctr: u
     u
 }
 
-fn htp_goldilocks(mess: &str) {
-    use mcore::goldilocks::ecp;
-    use mcore::goldilocks::ecp::ECP;
+fn htp_ed448(mess: &str) {
+    use mcore::ed448::ecp;
+    use mcore::ed448::ecp::ECP;
     println!("\nRandom oracle - message= {}",mess);
     let m = mess.as_bytes();
     let mut dst = "QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_RO_".as_bytes();
-    let mut u=hash_to_field_goldilocks(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
+    let mut u=hash_to_field_ed448(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,2);
     println!("u[0]= {}",u[0].tostring());
     println!("u[1]= {}",u[1].tostring());
     let mut P=ECP::map2point(&u[0]);
@@ -236,7 +236,7 @@ fn htp_goldilocks(mess: &str) {
 
     println!("\nNon-Uniform");
     dst = "QUUX-V01-CS02-with-edwards448_XMD:SHA-512_ELL2_NU_".as_bytes();
-    u=hash_to_field_goldilocks(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
+    u=hash_to_field_ed448(hmac::MC_SHA2,ecp::HASH_TYPE,dst,m,1);
     println!("u[0]= {}",u[0].tostring());
     P=ECP::map2point(&u[0]);
     println!("Q= {}",P.tostring());
@@ -448,12 +448,12 @@ fn main() {
     htp_nist256("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
     htp_nist256("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-    println!("\nTesting HTP for curve goldilocks");
-    htp_goldilocks("");
-    htp_goldilocks("abc");
-    htp_goldilocks("abcdef0123456789");
-    htp_goldilocks("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
-    htp_goldilocks("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    println!("\nTesting HTP for curve ed448");
+    htp_ed448("");
+    htp_ed448("abc");
+    htp_ed448("abcdef0123456789");
+    htp_ed448("q128_qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+    htp_ed448("a512_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     println!("\nTesting HTP for curve secp256k1");
     htp_secp256k1("");

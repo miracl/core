@@ -101,7 +101,7 @@ public struct FP {
             return b;
         }
         if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE
-        { // GoldiLocks Only
+        { // ed448 Only
             let t=d.split(CONFIG_FIELD.MODBITS)
             let RM2=CONFIG_FIELD.MODBITS/2
             var b=BIG(d)
@@ -528,7 +528,7 @@ public struct FP {
 
         var n=Int(CONFIG_FIELD.MODBITS)
         var c: Int
-        if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {   // Goldilocks ONLY
+        if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {   // ed448 ONLY
             n=n/2
         }
 
@@ -594,7 +594,7 @@ public struct FP {
             for _ in 0..<bw {r.sqr()}
             r.mul(key)
         }
-        if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {   // Goldilocks ONLY
+        if CONFIG_FIELD.MODTYPE==CONFIG_FIELD.GENERALISED_MERSENNE {   // ed448 ONLY
             key.copy(r)
             r.sqr()
             r.mul(self)

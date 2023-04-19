@@ -31,9 +31,6 @@
 #include "eddsa_Ed25519.h"
 #include "eddsa_Ed448.h"
 
-
-using namespace core;
-
 // prehash message
 static void PH_Ed25519(octet *M,octet *HM) {
     hash512 sh512;
@@ -55,8 +52,6 @@ static void PH_Ed448(octet *M,octet *HM) {
 
 int eddsa_Ed25519(csprng *RNG)
 {
-    using namespace Ed25519;
-
     char d[EGS_Ed25519], q[EFS_Ed25519], m[256], sig[2*EFS_Ed25519], hm[64];
     octet D = {0, sizeof(d), d};
     octet Q = {0, sizeof(q), q};
@@ -71,7 +66,7 @@ int eddsa_Ed25519(csprng *RNG)
     OCT_fromHex(&D,(char *)"c5aa8df43f9f837bedb7442f31dcb7b166d38535076f094b85ce3a2e0b4458f7");
 //    OCT_fromHex(&D,(char *)"833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42");
 
-    EDDSA_KEY_PAIR_GENERATE(NULL, &D, &Q);
+    EDDSA_Ed25519_KEY_PAIR_GENERATE(NULL, &D, &Q);
     printf("Secret key= 0x");
     OCT_output(&D);
     printf("Public key= 0x");
@@ -83,9 +78,9 @@ int eddsa_Ed25519(csprng *RNG)
 
     if (prehash) {
         PH_Ed25519(&M,&HM);
-        EDDSA_SIGNATURE(true,&D, &Q, NULL,&HM, &SIG);
+        EDDSA_Ed25519_SIGNATURE(true,&D, &Q, NULL,&HM, &SIG);
     } else {
-        EDDSA_SIGNATURE(false,&D, &Q, NULL,&M, &SIG);
+        EDDSA_Ed25519_SIGNATURE(false,&D, &Q, NULL,&M, &SIG);
     }
     printf("Signature= 0x");
     OCT_output(&SIG);
@@ -93,9 +88,9 @@ int eddsa_Ed25519(csprng *RNG)
 
     if (prehash) {
         PH_Ed25519(&M,&HM);
-        verify=EDDSA_VERIFY(true,&Q, NULL ,&HM, &SIG);
+        verify=EDDSA_Ed25519_VERIFY(true,&Q, NULL ,&HM, &SIG);
     } else {
-        verify=EDDSA_VERIFY(false,&Q, NULL ,&M, &SIG);
+        verify=EDDSA_Ed25519_VERIFY(false,&Q, NULL ,&M, &SIG);
     }
     if (verify)
         printf("Signature is verified\n");
@@ -107,8 +102,6 @@ int eddsa_Ed25519(csprng *RNG)
 
 int eddsa_Ed448(csprng *RNG)
 {
-    using namespace Ed448;
-
     char d[EGS_Ed448+1],  q[EFS_Ed448 + 1], m[256], sig[2*EFS_Ed448+2], ctx[256], hm[64];
     octet D = {0, sizeof(d), d};
     octet Q = {0, sizeof(q), q};
@@ -125,7 +118,7 @@ int eddsa_Ed448(csprng *RNG)
 //    OCT_fromHex(&D,(char *)"833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42ef7822e0d5104127dc05d6dbefde69e3ab2cec7c867c6e2c49");
 
 
-    EDDSA_KEY_PAIR_GENERATE(NULL, &D, &Q);
+    EDDSA_Ed448_KEY_PAIR_GENERATE(NULL, &D, &Q);
     printf("Secret key= 0x");
     OCT_output(&D);
     printf("Public key= 0x");
@@ -139,9 +132,9 @@ int eddsa_Ed448(csprng *RNG)
 
     if (prehash) {
         PH_Ed448(&M,&HM);
-        EDDSA_SIGNATURE(true,&D, &Q, NULL,&HM, &SIG);
+        EDDSA_Ed448_SIGNATURE(true,&D, &Q, NULL,&HM, &SIG);
     } else {
-        EDDSA_SIGNATURE(false,&D, &Q, NULL,&M, &SIG);
+        EDDSA_Ed448_SIGNATURE(false,&D, &Q, NULL,&M, &SIG);
     }
 
     printf("Signature= 0x");
@@ -149,9 +142,9 @@ int eddsa_Ed448(csprng *RNG)
 
     if (prehash) {
         PH_Ed448(&M,&HM);
-        verify=EDDSA_VERIFY(true,&Q, NULL ,&HM, &SIG);
+        verify=EDDSA_Ed448_VERIFY(true,&Q, NULL ,&HM, &SIG);
     } else {
-        verify=EDDSA_VERIFY(false,&Q, NULL ,&M, &SIG);
+        verify=EDDSA_Ed448_VERIFY(false,&Q, NULL ,&M, &SIG);
     }
     if (verify)
         printf("Signature is verified\n");

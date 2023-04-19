@@ -70,7 +70,7 @@
 
 <p><a id="myLink1" href="#" onclick="ED25519();">ED25519 Edwards Elliptic Curve</a></p>
 <p><a id="myLink2" href="#" onclick="NIST256();">NIST256 Weierstrass Elliptic Curve</a></p>
-<p><a id="myLink3" href="#" onclick="GOLDILOCKS();">GOLDILOCKS Edwards Elliptic Curve</a></p>
+<p><a id="myLink3" href="#" onclick="ED448();">ED448 Edwards Elliptic Curve</a></p>
 <p><a id="myLink4" href="#" onclick="BN254();">BN254 k=12 Pairing-Friendly BN Curve</a></p>
 <p><a id="myLink5" href="#" onclick="BLS12383();">BLS12383 k=12 Pairing-Friendly BLS Curve</a></p>
 <p><a id="myLink6" href="#" onclick="BLS24479();">BLS24479 k=24 Pairing-Friendly BLS Curve</a></p>
@@ -467,10 +467,10 @@
 	}
 
 
-// GOLDILOCKS context
-	function GOLDILOCKS() {
+// ED448 context
+	function ED448() {
 
-		var ctx = new CTX('GOLDILOCKS');
+		var ctx = new CTX('ED448');
 		var i;
 		var MIN_ITERS=5;
 		var MIN_TIME=3;
@@ -486,7 +486,7 @@
 
 		var mywindow=window.open();
 
-		mywindow.document.write("<br> Curve GOLDILOCKS"+ "<br>");
+		mywindow.document.write("<br> Curve ED448"+ "<br>");
 		if (ctx.ECP.CURVETYPE==ctx.ECP.WEIERSTRASS)
 		{
 			mywindow.document.write("Weierstrass parameterization "+ "<br>");

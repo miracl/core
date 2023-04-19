@@ -688,7 +688,7 @@ void YYY::FP_fpow(FP *r, FP *x)
 #if MODTYPE_YYY==PSEUDO_MERSENNE
     n = MODBITS_YYY;
 #endif
-#if MODTYPE_YYY==GENERALISED_MERSENNE  // Goldilocks ONLY
+#if MODTYPE_YYY==GENERALISED_MERSENNE  // Ed448 ONLY
     n = MODBITS_YYY / 2;
 #endif
 
@@ -759,7 +759,7 @@ void YYY::FP_fpow(FP *r, FP *x)
         FP_mul(r, r, &key);
     }
 
-#if MODTYPE_YYY==GENERALISED_MERSENNE  // Goldilocks ONLY
+#if MODTYPE_YYY==GENERALISED_MERSENNE  // Ed448 ONLY
     FP_copy(&key, r);
     FP_sqr(&t, &key);
     FP_mul(r, &t, &xp[0]);
