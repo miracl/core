@@ -40,7 +40,7 @@ static void RFC7748(BIG_XXX r)
         lg++;
         c/=2;
     }
-    int n=8*EGS_ZZZ-lg+1;
+    int n=8*MODBYTES_XXX-lg+1;
     BIG_XXX_mod2m(r,n);
     BIG_XXX_zero(t); BIG_XXX_inc(t,1); BIG_XXX_shl(t,n);
     BIG_XXX_add(r,r,t);
@@ -59,16 +59,22 @@ static void reverse(int n,char *buff) {
 }
 
 // dom2 - context still needs to be appended
-static void dom2(int f,int cl,octet *DOM) {
+static void dom2(bool ph,int cl,octet *DOM) {
     OCT_jstring(DOM,(char *)"SigZZZ no ZZZ collisions");
-    OCT_jbyte(DOM,f,1);
+    if (ph)
+        OCT_jbyte(DOM,1,1);
+    else
+        OCT_jbyte(DOM,0,1);
     OCT_jbyte(DOM,cl,1); // context length
 }
 
 // dom4 - context still needs to be appended
-static void dom4(int f,int cl,octet *DOM) {
+static void dom4(bool ph,int cl,octet *DOM) {
     OCT_jstring(DOM,(char *)"SigZZZ");
-    OCT_jbyte(DOM,f,1);
+    if (ph)
+        OCT_jbyte(DOM,1,1);
+    else
+        OCT_jbyte(DOM,0,1);
     OCT_jbyte(DOM,cl,1); // context length
 }
 
@@ -103,10 +109,7 @@ static int H2(bool ph,octet *context,octet *R,octet *Q,octet *M,DBIG_XXX dr)
     HASH512_init(&sh512);
     if (ph || cl>0)
     {                   // if not prehash and no context, omit dom2()
-        if (ph)
-            dom2(1,cl,&DOM);
-        else
-            dom2(0,cl,&DOM);
+        dom2(ph,cl,&DOM);
         for (int i=0;i<DOM.len;i++)
             HASH512_process(&sh512,DOM.val[i]);
         for (int i=0;i<cl;i++)
@@ -120,10 +123,7 @@ static int H2(bool ph,octet *context,octet *R,octet *Q,octet *M,DBIG_XXX dr)
         HASH512_process(&sh512,M->val[i]);
     HASH512_hash(&sh512,h);
 #else                          // for ed448?
-    if (ph)
-        dom4(1,cl,&DOM);
-    else
-        dom4(0,cl,&DOM);
+    dom4(ph,cl,&DOM);
     sha3 SHA3;
     SHA3_init(&SHA3,SHAKE256);
     for (int i=0;i<DOM.len;i++)
@@ -157,10 +157,7 @@ static void getR(bool ph,int b,char *digest,octet *context,octet *M,DBIG_XXX dr)
     HASH512_init(&sh512);
     if (ph || cl>0)
     {                   // if not prehash and no context, omit dom2()
-        if (ph)
-            dom2(1,cl,&DOM);
-        else
-            dom2(0,cl,&DOM);
+        dom2(ph,cl,&DOM);
         for (int i=0;i<DOM.len;i++)
             HASH512_process(&sh512,DOM.val[i]);
         for (int i=0;i<cl;i++)
@@ -173,10 +170,7 @@ static void getR(bool ph,int b,char *digest,octet *context,octet *M,DBIG_XXX dr)
     HASH512_hash(&sh512,h);
 
 #else                       // for ed448?
-    if (ph)
-        dom4(1,cl,&DOM);
-    else
-        dom4(0,cl,&DOM);
+    dom4(ph,cl,&DOM);
     sha3 SHA3;
     SHA3_init(&SHA3,SHAKE256);
     for (int i=0;i<DOM.len;i++)
@@ -246,13 +240,13 @@ static int decode_int(bool strip_sign,char *ei,BIG_XXX x) {
 }
 
 // decode compressed point
-static bool decode(octet *W,ECP_ZZZ *P) {
-    BIG_XXX y;
+static void decode(octet *W,ECP_ZZZ *P) {
+    BIG_XXX X,Y;
     FP_YYY x,d,t,one,hint;
     int sign=0;  // LSB of x
 
-    sign=decode_int(true,W->val,y);
-    FP_YYY_nres(&x,y); FP_YYY_copy(&(P->y),&x); FP_YYY_sqr(&x,&x);
+    sign=decode_int(true,W->val,Y);
+    FP_YYY_nres(&x,Y); FP_YYY_sqr(&x,&x);
     FP_YYY_copy(&d,&x); FP_YYY_one(&one);
     FP_YYY_sub(&x,&x,&one);
     FP_YYY_norm(&x);
@@ -271,7 +265,7 @@ static bool decode(octet *W,ECP_ZZZ *P) {
     if (!FP_YYY_qr(&x,&hint))
     {
         ECP_ZZZ_inf(P);
-        return false;
+        return;
     }
     FP_YYY_sqrt(&d,&x,&hint);
     FP_YYY_inv(&x,&x,&hint);
@@ -279,13 +273,12 @@ static bool decode(octet *W,ECP_ZZZ *P) {
     FP_YYY_mul(&x,&x,&t);
 
     FP_YYY_reduce(&x);
-    FP_YYY_redc(y,&x);
-    if (BIG_XXX_parity(y)!=sign)
+    FP_YYY_redc(X,&x);
+    if (BIG_XXX_parity(X)!=sign)
         FP_YYY_neg(&x,&x);
     FP_YYY_norm(&x);
-    FP_YYY_copy(&(P->x),&x);
-    FP_YYY_copy(&(P->z),&one);
-    return true;
+    FP_YYY_redc(X,&x);
+    ECP_ZZZ_set(P,X,Y);
 }
 
 /* Calculate a public/private EC GF(p) key pair. Q=D.G mod EC(p),
@@ -359,7 +352,7 @@ int EDDSA_ZZZ_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,octe
         encode_int(s,&SIG->val[b]);
         SIG->len=2*b;
     }
-    return 0;
+    return res;
 }
 
 // verify a signature using public key Q
@@ -384,21 +377,23 @@ bool EDDSA_ZZZ_VERIFY(bool ph,octet *Q,octet *context,octet *M,octet *SIG)
     }
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
 
-    if (!decode(SIG,&R)) return false;
+    decode(SIG,&R);
+    if (ECP_ZZZ_isinf(&R)) return false;
     decode_int(false,&SIG->val[b],t);
-    if (!decode(Q,&QD)) return false;
+    decode(Q,&QD);
+    if (ECP_ZZZ_isinf(&QD)) return false;
 
     H2(ph,context,SIG,Q,M,du);
     BIG_XXX_dmod(su,du,q);
     ECP_ZZZ_generator(&G);
-    ECP_ZZZ_mul(&G,t);
-    ECP_ZZZ_mul(&QD,su);
-
     for (int i=0;i<lg;i++)
     { // use cofactor 2^c
         ECP_ZZZ_dbl(&G); ECP_ZZZ_dbl(&QD); ECP_ZZZ_dbl(&R);
     }
-    ECP_ZZZ_add(&R,&QD);
+
+    ECP_ZZZ_neg(&QD);
+    ECP_ZZZ_mul2(&G,&QD,t,su);
+
     if (!ECP_ZZZ_equals(&G,&R)) return false;
 
     return true;

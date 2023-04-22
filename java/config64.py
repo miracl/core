@@ -135,9 +135,11 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     os.system(copytext+"FP64.java "+fpath+"FP.java")
     os.system(copytext+"ECP.java "+fpath+"ECP.java")
     os.system(copytext+"ECDH.java "+fpath+"ECDH.java")
+    os.system(copytext+"EDDSA.java "+fpath+"EDDSA.java")
     os.system(copytext+"HPKE.java "+fpath+"HPKE.java")
     os.system(copytext+"ROM_"+tcu+"_64.java "+fpath+"ROM.java")
     os.system(copytext+"TestECDH.java "+fpathTest+"TestECDH.java")    #ms
+    os.system(copytext+"TestEDDSA.java "+fpathTest+"TestEDDSA.java")    #ms
     os.system(copytext+"TestHPKE.java "+fpathTest+"TestHPKE.java")    #ms
     os.system(copytext+"TestHTP.java "+fpathTest+"TestHTP.java")    #ms
     os.system(copytext+"TesttimeECDH.java "+fpathTest+"TesttimeECDH.java")    #ms
@@ -150,8 +152,11 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fpath+"FP.java","XXX",tcu)
     replace(fpath+"ECP.java","XXX",tcu)
     replace(fpath+"ECDH.java","XXX",tcu)
+    replace(fpath+"EDDSA.java","XXX",tcu)
+    replace(fpath+"EDDSA.java","Xxx",tc)
     replace(fpath+"HPKE.java","XXX",tcu)
     replace(fpathTest+"TestECDH.java","XXX",tcu)  #ms
+    replace(fpathTest+"TestEDDSA.java","XXX",tcu)  #ms
     replace(fpathTest+"TestHPKE.java","XXX",tcu)  #ms
     replace(fpathTest+"TestHTP.java","XXX",tcu)  #ms
     replace(fpathTest+"TesttimeECDH.java","XXX",tcu)  #ms

@@ -171,18 +171,4 @@ public class TestECDH extends TestCase { //
         }
     }
 
-    /*
-    	public static void main(String[] args)
-    	{
-
-    		byte[] RAW=new byte[100];
-    		RAND rng=new RAND();
-
-    		rng.clean();
-    		for (int i=0;i<100;i++) RAW[i]=(byte)(i);
-
-    		rng.seed(100,RAW);
-    		ecdh(rng);
-
-    	} */
 }
