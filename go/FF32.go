@@ -300,7 +300,7 @@ func (F *FF) toBytes(b []byte) {
 
 func ff_fromBytes(x *FF, b []byte) {
 	for i := 0; i < x.length; i++ {
-		x.v[i] = frombytearray(b, (x.length-i-1)*int(MODBYTES))
+		x.v[i] = BIG_frombytearray(b, (x.length-i-1)*int(MODBYTES))
 	}
 }
 

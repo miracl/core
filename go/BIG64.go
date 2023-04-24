@@ -481,7 +481,7 @@ func (r *BIG) tobytearray(b []byte, n int) {
 }
 
 /* convert from byte array to BIG */
-func frombytearray(b []byte, n int) *BIG {
+func BIG_frombytearray(b []byte, n int) *BIG {
 	m := NewBIG()
 	l := len(b)
 	for i := 0; i < int(MODBYTES); i++ {
@@ -500,7 +500,7 @@ func (r *BIG) ToBytes(b []byte) {
 }
 
 func FromBytes(b []byte) *BIG {
-	return frombytearray(b, 0)
+	return BIG_frombytearray(b, 0)
 }
 
 /* divide by 3 */

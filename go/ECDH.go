@@ -24,8 +24,8 @@ package XXX
 //import "fmt"
 import "miracl/core"
 
-const INVALID_PUBLIC_KEY int = -2
-const ERROR int = -3
+const ECDH_INVALID_PUBLIC_KEY int = -2
+const ECDH_ERROR int = -3
 
 //const INVALID int = -4
 const EFS int = int(MODBYTES)
@@ -103,7 +103,7 @@ func ECDH_PUBLIC_KEY_VALIDATE(W []byte) int {
 	r := NewBIGints(CURVE_Order)
 
 	if WP.Is_infinity() {
-		res = INVALID_PUBLIC_KEY
+		res = ECDH_INVALID_PUBLIC_KEY
 	}
 	if res == 0 {
 
@@ -123,7 +123,7 @@ func ECDH_PUBLIC_KEY_VALIDATE(W []byte) int {
 			WP = WP.mul(k)
 		}
 		if WP.Is_infinity() {
-			res = INVALID_PUBLIC_KEY
+			res = ECDH_INVALID_PUBLIC_KEY
 		}
 
 	}
@@ -141,14 +141,14 @@ func ECDH_ECPSVDP_DH(S []byte, WD []byte, Z []byte, typ int) int {
 
 	W := ECP_fromBytes(WD)
 	if W.Is_infinity() {
-		res = ERROR
+		res = ECDH_ERROR
 	}
 
 	if res == 0 {
 		r := NewBIGints(CURVE_Order)
 		W = W.clmul(s, r)
 		if W.Is_infinity() {
-			res = ERROR
+			res = ECDH_ERROR
 		} else {
 			if CURVETYPE != MONTGOMERY {
 				if typ > 0 {
@@ -229,7 +229,7 @@ func ECDH_ECPVP_DSA(sha int, W []byte, F []byte, C []byte, D []byte) int {
 	f := FromBytes(B[:])
 
 	if c.iszilch() || Comp(c, r) >= 0 || d.iszilch() || Comp(d, r) >= 0 {
-		res = ERROR
+		res = ECDH_ERROR
 	}
 
 	if res == 0 {
@@ -239,7 +239,7 @@ func ECDH_ECPVP_DSA(sha int, W []byte, F []byte, C []byte, D []byte) int {
 
 		WP := ECP_fromBytes(W)
 		if WP.Is_infinity() {
-			res = ERROR
+			res = ECDH_ERROR
 		} else {
 			P := NewECP()
 			P.Copy(WP)
@@ -247,13 +247,13 @@ func ECDH_ECPVP_DSA(sha int, W []byte, F []byte, C []byte, D []byte) int {
 			P = P.Mul2(h2, G, f)
 
 			if P.Is_infinity() {
-				res = ERROR
+				res = ECDH_ERROR
 			} else {
 				d = P.GetX()
 				d.Mod(r)
 
 				if Comp(d, c) != 0 {
-					res = ERROR
+					res = ECDH_ERROR
 				}
 			}
 		}

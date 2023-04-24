@@ -42,6 +42,10 @@ Run the ECC test program by executing
 
     go run TestECC.go
 
+Run the EDDSA test program by executing
+
+    go run TestEDDSA.go
+
 Run the MPIN test program by executing
 
     go run TestMPIN.go
