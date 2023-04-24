@@ -246,14 +246,14 @@ static int decode_int(bool strip_sign,char *ei,XXX::BIG x) {
 static void decode(octet *W,ZZZ::ECP *P) {
     BIG X,Y;
     FP x,d,t,one,hint;
-    int sign=0;  // LSB of x
-
-    sign=decode_int(true,W->val,Y);
-    FP_nres(&x,Y); FP_sqr(&x,&x);
+    int sign=decode_int(true,W->val,Y); // LSB of x
+    FP_nres(&x,Y); 
+    FP_sqr(&x,&x);
     FP_copy(&d,&x); FP_one(&one);
     FP_sub(&x,&x,&one);
     FP_norm(&x);
     FP_rcopy(&t, ZZZ::CURVE_B);
+
     FP_mul(&d,&d,&t);
 #if CURVE_A_ZZZ == 1
     FP_sub(&d,&d,&one);

@@ -1185,14 +1185,15 @@ var CTX = function(input_parameter) {
     }
 
     // Set Elliptic Curve parameters
-    if (typeof ctx.config["CURVE"] !== "undefined") {
-        prepareModule("ROM_CURVE_" + ctx.config["CURVE"], "rom_curve", "ROM_CURVE");
+    if (typeof ctx.config["CURVE"].toUpperCase() !== "undefined") {
+        prepareModule("ROM_CURVE_" + ctx.config["CURVE"].toUpperCase(), "rom_curve", "ROM_CURVE");
 
         prepareModule("ROM_FIELD_" + ctx.config["FIELD"], "rom_field", "ROM_FIELD");
 
         prepareModule("FP");
         prepareModule("ECP");
         prepareModule("ECDH");
+        prepareModule("EDDSA");
         prepareModule("HPKE");
 
         if (ctx.config["@PF"] == 1   || ctx.config["@PF"] == 2) {

@@ -39,8 +39,8 @@ var ROM_CURVE_ANSSI,
     ROM_CURVE_C1174,
     ROM_CURVE_C1665,
     ROM_CURVE_MDC,
-    ROM_CURVE_Ed25519,
-    ROM_CURVE_Ed448,
+    ROM_CURVE_ED25519,
+    ROM_CURVE_ED448,
     ROM_CURVE_X448,
     ROM_CURVE_HIFIVE,
     ROM_CURVE_NIST256,
@@ -924,10 +924,10 @@ ROM_CURVE_MDC = function() {
 };
 
 
-ROM_CURVE_Ed25519 = function() {
+ROM_CURVE_ED25519 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */
 
-    var ROM_CURVE_Ed25519 = {
+    var ROM_CURVE_ED25519 = {
 
         // ED25519 Curve
 
@@ -940,13 +940,13 @@ ROM_CURVE_Ed25519 = function() {
         CURVE_HTPC: [0x7504F,0xD93A5,0x3C6277,0x5697F2,0xA18C03,0xEBD397,0x4C9EFD,0x95A680,0xE0EF85,0x924027,0x55C1],
 
     };
-    return ROM_CURVE_Ed25519;
+    return ROM_CURVE_ED25519;
 };
 
-ROM_CURVE_Ed448 = function() {
+ROM_CURVE_ED448 = function() {
     /* Fixed Data in ROM - Field and Curve parameters */
 
-    var ROM_CURVE_Ed448 = {
+    var ROM_CURVE_ED448 = {
 
         // ED448 curve
         CURVE_Cof_I : 4,
@@ -960,7 +960,7 @@ ROM_CURVE_Ed448 = function() {
         CURVE_HTPC: [0x7FFFFE,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7DFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FFFFF,0x7FF],
 
         };
-    return ROM_CURVE_Ed448;
+    return ROM_CURVE_ED448;
 };
 
 ROM_CURVE_X448 = function() {

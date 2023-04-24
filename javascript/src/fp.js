@@ -165,6 +165,7 @@ var FP = function(ctx) {
 
         /* convert this to string */
         toString: function() {
+            this.reduce();
             var s = this.redc().toString();
             return s;
         },
@@ -357,8 +358,8 @@ var FP = function(ctx) {
             var n = new FP(0);
 
             n.copy(b);
-            n.neg();
-            this.add(n);
+            n.neg(); 
+            this.add(n); 
 
             return this;
         },
