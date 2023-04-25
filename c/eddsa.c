@@ -380,6 +380,7 @@ bool EDDSA_ZZZ_VERIFY(bool ph,octet *Q,octet *context,octet *M,octet *SIG)
     decode(SIG,&R);
     if (ECP_ZZZ_isinf(&R)) return false;
     decode_int(false,&SIG->val[b],t);
+    if (BIG_XXX_comp(t,q)>=0) return false;
     decode(Q,&QD);
     if (ECP_ZZZ_isinf(&QD)) return false;
 

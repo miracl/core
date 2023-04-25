@@ -35,6 +35,10 @@ root directory, and execute
 
 Run this test program by executing the program TestECC
 
+    rustc TestEDDSA.rs --extern mcore=libmcore.rlib
+
+Run this test program by executing the program TestEDDSA
+
     rustc TestMPIN.rs --extern mcore=libmcore.rlib
 
 Run this test program by executing the program TestMPIN

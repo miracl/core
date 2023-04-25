@@ -383,7 +383,9 @@ func VERIFY(ph bool,Q []byte,ctx []byte,M []byte,SIG []byte) bool {
         S[i]=SIG[b+i]
 	}
     t:=decode_int(false,S)
-
+	if Comp(t,q)>=0 {
+		return false;
+	}
     du:=h2(ph,ctx,SIG,Q,M)
     su:=du.Mod(q)
 

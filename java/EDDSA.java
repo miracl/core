@@ -207,7 +207,6 @@ public final class EDDSA {
 // decode integer (little endian)
     private static BIG decode_int(boolean strip_sign,byte[] ei) {
         int b,index=0;
-        int sign=0;
 
         if (8*CONFIG_BIG.MODBYTES==CONFIG_FIELD.MODBITS) index=1; // extra byte needed for compression        
         b=CONFIG_BIG.MODBYTES+index;
@@ -346,7 +345,7 @@ public final class EDDSA {
         for (int i=0;i<b;i++)
             S[i]=SIG[b+i];
         BIG t=decode_int(false,S);
-
+        if (BIG.comp(t,q)>=0) return false;
         DBIG du=H2(ph,ctx,SIG,Q,M);
         BIG su=du.mod(q);
 

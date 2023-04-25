@@ -389,7 +389,7 @@ var EDDSA = function(ctx) {
             for (var i=0;i<b;i++)
                 S[i]=SIG[b+i];
             var t=this.decode_int(false,S);
-
+            if (ctx.BIG.comp(t,q)>=0) return false;
             var du=this.H2(ph,context,SIG,Q,M);
             var su=du.mod(q);
 

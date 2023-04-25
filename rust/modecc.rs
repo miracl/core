@@ -19,6 +19,7 @@
 pub mod big;
 pub mod dbig;
 pub mod ecdh;
+pub mod eddsa;
 pub mod hpke;
 pub mod ecp;
 pub mod fp;

@@ -102,6 +102,7 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     os.system(copytext+"fp.rs "+fpath+"fp.rs")
     os.system(copytext+"ecp.rs "+fpath+"ecp.rs")
     os.system(copytext+"ecdh.rs "+fpath+"ecdh.rs")
+    os.system(copytext+"eddsa.rs "+fpath+"eddsa.rs")
     os.system(copytext+"hpke.rs "+fpath+"hpke.rs")
     os.system(copytext+"rom_"+tcl+"_64.rs "+fpath+"rom.rs")
 
@@ -110,6 +111,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fpath+"fp.rs","xxx",tcl)
     replace(fpath+"ecp.rs","xxx",tcl)
     replace(fpath+"ecdh.rs","xxx",tcl)
+    replace(fpath+"eddsa.rs","xxx",tcl)
+    replace(fpath+"eddsa.rs","Xxx",tc)
     replace(fpath+"hpke.rs","xxx",tcl)
 
     replace(fpath+"big.rs","@NB@",nb)
@@ -461,6 +464,7 @@ if __name__ == '__main__':
     os.system(deltext+" lib.rs")
 
     os.system(deltext+" ecdh.rs")
+    os.system(deltext+" eddsa.rs")
     os.system(deltext+" hpke.rs")
     os.system(deltext+" ff.rs")
     os.system(deltext+" rsa.rs")
@@ -473,6 +477,7 @@ if __name__ == '__main__':
     if testing :
         os.system(copytext+" mcore"+slashtext+"target"+slashtext+"release"+slashtext+"libmcore.rlib .")
         os.system("rustc TestECC.rs --extern mcore=libmcore.rlib")
+        os.system("rustc TestEDDSA.rs --extern mcore=libmcore.rlib")
         os.system("rustc TestMPIN.rs --extern mcore=libmcore.rlib")
         os.system("rustc TestBLS.rs --extern mcore=libmcore.rlib")
         os.system("rustc BenchtestALL.rs --extern mcore=libmcore.rlib")
