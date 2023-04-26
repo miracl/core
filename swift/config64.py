@@ -242,7 +242,9 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
 
     else :
         os.system(copytext+"ecdh.swift "+fpath+"ecdh.swift")
+        os.system(copytext+"eddsa.swift "+fpath+"eddsa.swift")
         os.system(copytext+"hpke.swift "+fpath+"hpke.swift")
+        replace(fpath+"eddsa.swift","Xxx",tc)
 
     print("Processing "+tcl+ "..",end = "",flush=True)
     os.system("swiftc -DD64 "+fpath+"*.swift -L. -lcore -I. -O -Ounchecked -whole-module-optimization -emit-library -emit-module -module-name "+tcl)
@@ -408,6 +410,7 @@ os.system(deltext+" config*.swift")
 
 os.system(deltext+" ecp*.swift")
 os.system(deltext+" ecdh.swift")
+os.system(deltext+" eddsa.swift")
 os.system(deltext+" hpke.swift")
 os.system(deltext+" ff.swift")
 os.system(deltext+" rsa.swift")
@@ -421,6 +424,7 @@ os.system("rmdir core")
 
 if testing :
     os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -led448 -lrsa2048 TestECC.swift ")
+    os.system("swiftc -I. -L. -lcore -led25519 -led448 TestEDDSA.swift ")
     os.system("swiftc -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestMPIN.swift ")
     os.system("swiftc -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestBLS.swift")
     os.system("swiftc -I. -L. -lcore -led25519 -lnist256 -led448 -lbn254 -lbls12383 -lbls24479 -lbls48556 -lrsa2048 BenchtestALL.swift ")

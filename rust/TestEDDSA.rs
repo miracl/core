@@ -111,10 +111,10 @@ fn eddsa_ed25519(_rng: &mut RAND) {  // remove _ if using rng
 
     if prehash {
         let mut hm:[u8;64]=[0;64];
-         prehash_sha2(&m,&mut hm);
-         eddsa::signature(true,&d, &q, None,&hm, &mut sig);
+        prehash_sha2(&m,&mut hm);
+        eddsa::signature(true,&d, &q, None,&hm, &mut sig);
     } else {
-         eddsa::signature(false,&d, &q, None,&m, &mut sig);
+        eddsa::signature(false,&d, &q, None,&m, &mut sig);
     }
     print!("Signature= 0x"); 
     printbinary(&sig);

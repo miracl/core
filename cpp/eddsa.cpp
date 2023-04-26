@@ -140,7 +140,6 @@ static int H2(bool ph,octet *context,octet *R,octet *Q,octet *M,DBIG dr)
     for (int i=0;i<M->len;i++) 
         SHA3_process(&SHA3,M->val[i]);
     SHA3_shake(&SHA3,h,2*b);
-
 #endif
     reverse(2*b,h);
     BIG_dfromBytesLen(dr,h,2*b);

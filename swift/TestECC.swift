@@ -18,7 +18,7 @@
  */
 
 //
-//  TestALL.swift
+//  TestECC.swift
 //
 //  Created by Michael Scott on 02/07/2015.
 //  Copyright (c) 2015 Michael Scott. All rights reserved.

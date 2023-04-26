@@ -38,6 +38,10 @@ Then execute
 
 and
 
+    swift -I. -L. -lcore -led25519 -led448 TestEDDSA.swift 
+
+and
+
     swift -I. -L. -lcore -lbn254 -lbls12383 -lbls24479 -lbls48556 TestMPIN.swift 
 
 and
