@@ -53,13 +53,12 @@ extern int EDDSA_ZZZ_KEY_PAIR_GENERATE(csprng *R, octet *D, octet *Q);
  *
     @param ph true for pre-hash version, default to false
 	@param D the private key
-	@param Q the public key
 	@param context is an octet string (or NULL)
 	@param M is the message to be signed
     @param SIG is the output signature
 	@return 0 or an error code
  */
-extern int EDDSA_ZZZ_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,octet *SIG);
+extern int EDDSA_ZZZ_SIGNATURE(bool ph,octet *D, octet *context,octet *M,octet *SIG);
 
 /**	@brief Verify signature on a message
  *

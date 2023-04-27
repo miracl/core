@@ -114,9 +114,9 @@ public class TestEDDSA extends TestCase { //
 
             if (prehash) {
                 byte[] HM = prehashEDDSA(M);
-                EDDSA.SIGNATURE(true,D, Q, null,HM, SIG);
+                EDDSA.SIGNATURE(true,D, null,HM, SIG);
             } else {
-                EDDSA.SIGNATURE(false,D, Q, null,M, SIG);
+                EDDSA.SIGNATURE(false,D, null,M, SIG);
             }
             System.out.print("Signature= 0x"); printBinary(SIG);
  

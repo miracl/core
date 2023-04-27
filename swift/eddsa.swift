@@ -323,6 +323,25 @@ public struct EDDSA
         return ECP(x.redc(),y)
     }
 
+    static func key_pair_regenerate(_ d: [UInt8],_ q:inout [UInt8])
+    {
+        var index=0
+        if 8*EFS==CONFIG_FIELD.MODBITS {
+            index=1 // extra byte needed for compression
+        }
+        let b=EFS+index;
+        var G=ECP.generator();
+        
+        var digest = [UInt8](repeating: 0,count: 128)
+        h(d,&digest)
+// reverse bytes for little endian
+        reverse(b,&digest);
+        var s=BIG.frombytearray(digest,index);
+        rfc7748(&s);
+        G.copy(G.mul(s));
+        encode(G,&q);
+    }
+
 /* Calculate a public/private EC GF(p) key pair w,s where W=s.G mod EC(p),
  * where s is the secret key and W is the public key
  * and G is fixed generator.
@@ -359,7 +378,7 @@ public struct EDDSA
 // Set ph=true if message has already been pre-hashed
 // if ph=false, then context should be NULL for ed25519. However RFC8032 mode ed25519ctx is supported by supplying a non-NULL or non-empty context
 
-    @discardableResult static public func SIGNATURE(_ ph: Bool,_ d: [UInt8],_ q: [UInt8],_ ctx: [UInt8]?,_ m: [UInt8],_ sig:inout [UInt8]) ->Int {
+    @discardableResult static public func SIGNATURE(_ ph: Bool,_ d: [UInt8],_ ctx: [UInt8]?,_ m: [UInt8],_ sig:inout [UInt8]) ->Int {
         var digest = [UInt8](repeating: 0,count: 128)
         h(d,&digest) // hash of private key
         var res = 0
@@ -369,9 +388,13 @@ public struct EDDSA
         }
         let b=EFS+index
 
+        var q = [UInt8](repeating: 0,count: EFS+1)
+        key_pair_regenerate(d,&q)
+        let qs=Array(q[0 ..< b])
+
         let r=BIG(ROM.CURVE_Order)
 
-        if d.count != q.count || d.count != b {
+        if d.count != qs.count || d.count != b {
             res=INVALID_PUBLIC_KEY
         }
         if res==0 {
@@ -386,7 +409,7 @@ public struct EDDSA
             reverse(b,&digest)
             var s=BIG.frombytearray(digest,index)
             rfc7748(&s)
-            dr=h2(ph,ctx!,sig,q,m)
+            dr=h2(ph,ctx!,sig,qs,m)
             let sd=dr.mod(r)
             encode_int(BIG.modadd(sr,BIG.modmul(s,sd,r),r),&t);
             for i in 0..<b {

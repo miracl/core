@@ -102,9 +102,9 @@ function ED25519() {
 
     if (prehash) {
         var HM = prehashSHA2(M);
-        ctx.EDDSA.SIGNATURE(true,D, Q, null,HM, SIG);
+        ctx.EDDSA.SIGNATURE(true,D, null,HM, SIG);
     } else {
-        ctx.EDDSA.SIGNATURE(false,D, Q, null,M, SIG);
+        ctx.EDDSA.SIGNATURE(false,D, null,M, SIG);
     }
     mywindow.document.write("Signature= 0x"+ctx.EDDSA.bytestostring(SIG)+"<br>");
 
@@ -152,9 +152,9 @@ function ED448() {
 
     if (prehash) {
         var HM = prehashSHA3(M);
-        ctx.EDDSA.SIGNATURE(true,D, Q, CONTEXT,HM, SIG);
+        ctx.EDDSA.SIGNATURE(true,D, CONTEXT,HM, SIG);
     } else {
-        ctx.EDDSA.SIGNATURE(false,D, Q, CONTEXT,M, SIG);
+        ctx.EDDSA.SIGNATURE(false,D, CONTEXT,M, SIG);
     }
     mywindow.document.write("Signature= 0x"+ctx.EDDSA.bytestostring(SIG)+"<br>");
 

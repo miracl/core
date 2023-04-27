@@ -101,9 +101,9 @@ public func TestEDDSA_ed25519(_ rng: inout RAND,_ prehash:Bool)
     if prehash {
         var hm=[UInt8](repeating: 0,count: 64)
         prehash_sha2(m,&hm)
-        ed25519.EDDSA.SIGNATURE(true,d, q, nil,hm, &sig)
+        ed25519.EDDSA.SIGNATURE(true,d, nil,hm, &sig)
     } else {
-        ed25519.EDDSA.SIGNATURE(false,d, q, nil,m, &sig)
+        ed25519.EDDSA.SIGNATURE(false,d, nil,m, &sig)
     }
     print("Signature= 0x",terminator: ""); printBinary(sig)
 
@@ -144,9 +144,9 @@ public func TestEDDSA_ed448(_ rng: inout RAND,_ prehash:Bool)
     if prehash {
         var hm=[UInt8](repeating: 0,count: 64)
         prehash_sha3(m,&hm)
-        ed448.EDDSA.SIGNATURE(true,d, q, nil,hm, &sig)
+        ed448.EDDSA.SIGNATURE(true,d, nil,hm, &sig)
     } else {
-        ed448.EDDSA.SIGNATURE(false,d, q, nil,m, &sig)
+        ed448.EDDSA.SIGNATURE(false,d, nil,m, &sig)
     }
     print("Signature= 0x",terminator: ""); printBinary(sig)
 

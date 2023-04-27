@@ -326,7 +326,7 @@ func KEY_PAIR_GENERATE(RNG *core.RAND,D []byte,Q  []byte) int {
 // Generate a signature using key pair (D,Q) on message M
 // Set ph=true if message has already been pre-hashed
 // if ph=false, then context should be NULL for ed25519. However RFC8032 mode ed25519ctx is supported by supplying a non-NULL or non-empty context
-func SIGNATURE(ph bool,D []byte,Q []byte,ctx []byte,M []byte,SIG []byte) int {
+func SIGNATURE(ph bool,D []byte,ctx []byte,M []byte,SIG []byte) int {
 	digest:=h(D)   // hash of private key
 	res := 0
 	index:=0
@@ -335,6 +335,9 @@ func SIGNATURE(ph bool,D []byte,Q []byte,ctx []byte,M []byte,SIG []byte) int {
 	}	
 	b:=int(MODBYTES)+index
 	S:=make([]byte,b);
+	Q:=make([]byte,b);
+	KEY_PAIR_GENERATE(nil,D,Q[:]);
+
 	q := NewBIGints(CURVE_Order)
 	if len(D)!=len(Q) || len(D)!=b {
 		res=EDDSA_INVALID_PUBLIC_KEY;

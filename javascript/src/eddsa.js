@@ -334,7 +334,7 @@ var EDDSA = function(ctx) {
 // Generate a signature using key pair (D,Q) on message M
 // Set ph=true if message has already been pre-hashed
 // if ph=false, then context should be NULL for ed25519. However RFC8032 mode ed25519ctx is supported by supplying a non-NULL or non-empty context
-        SIGNATURE: function(ph,D,Q,context,M,SIG) {
+        SIGNATURE: function(ph,D,context,M,SIG) {
             var digest=this.H(D);   // hash of private key
             var res = 0;
             var b,index=0;
@@ -342,6 +342,10 @@ var EDDSA = function(ctx) {
             b=ctx.BIG.MODBYTES+index;
 
             var S=[];
+            var Q=[];
+
+            this.KEY_PAIR_GENERATE(null,D,Q);
+
             var q = new ctx.BIG();
             q.rcopy(ctx.ROM_CURVE.CURVE_Order);
        

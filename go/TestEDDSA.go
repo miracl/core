@@ -72,9 +72,9 @@ func eddsa_ED25519(rng *core.RAND) {
 
     if prehash {
         HM := prehashSHA2(M[:]);
-        ED25519.SIGNATURE(true,D, Q[:], nil,HM[:], SIG[:])
+        ED25519.SIGNATURE(true,D, nil,HM[:], SIG[:])
     } else {
-        ED25519.SIGNATURE(false,D, Q[:], nil,M[:], SIG[:])
+        ED25519.SIGNATURE(false,D, nil,M[:], SIG[:])
     }
     fmt.Printf("Signature= 0x"); printBinary(SIG[:])
  
@@ -114,9 +114,9 @@ func eddsa_ED448(rng *core.RAND) {
 
     if prehash {
         HM := prehashSHA3(M[:]);
-        ED448.SIGNATURE(true,D, Q[:], CTX[:],HM[:], SIG[:])
+        ED448.SIGNATURE(true,D, CTX[:],HM[:], SIG[:])
     } else {
-        ED448.SIGNATURE(false,D, Q[:], CTX[:],M[:], SIG[:])
+        ED448.SIGNATURE(false,D, CTX[:],M[:], SIG[:])
     }
     fmt.Printf("Signature= 0x"); printBinary(SIG[:])
 

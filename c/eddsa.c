@@ -318,22 +318,26 @@ int EDDSA_ZZZ_KEY_PAIR_GENERATE(csprng *RNG,octet* D,octet *Q)
 // Generate a signature using key pair (D,Q) on message M
 // Set ph=true if message has already been pre-hashed
 // if ph=false, then context should be NULL for ed25519. However RFC8032 mode ed25519ctx is supported by supplying a non-NULL or non-empty context
-int EDDSA_ZZZ_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,octet *SIG)
+int EDDSA_ZZZ_SIGNATURE(bool ph,octet *D, octet *context,octet *M,octet *SIG)
 {
     DBIG_XXX dr;
     BIG_XXX s,sr,sd,q;
     ECP_ZZZ R;
     char digest[128];
+    char pq[MODBYTES_XXX+1];
+    octet Q={0,sizeof(pq),pq};
     H(D,digest);   // hash of private key
     int res = EDDSA_OK;
     int b,index=0;
     if (8*MODBYTES_XXX==MBITS_YYY) index=1; // extra byte needed for compression        
     b=MODBYTES_XXX+index;
 
+    EDDSA_ZZZ_KEY_PAIR_GENERATE(NULL,D,&Q);
+
     BIG_XXX_rcopy(q, CURVE_Order_ZZZ);
     ECP_ZZZ_generator(&R);
 
-    if (D->len!=Q->len || D->len!=b)
+    if (D->len!=Q.len || D->len!=b)
         res=EDDSA_INVALID_PUBLIC_KEY;
     if (res==EDDSA_OK)
     {
@@ -345,7 +349,7 @@ int EDDSA_ZZZ_SIGNATURE(bool ph,octet *D, octet *Q, octet *context,octet *M,octe
         reverse(b,digest);
         BIG_XXX_fromBytes(s,&digest[index]);
         RFC7748(s);
-        H2(ph,context,SIG,Q,M,dr);
+        H2(ph,context,SIG,&Q,M,dr);
         BIG_XXX_dmod(sd,dr,q);
         BIG_XXX_modmul(s,s,sd,q);
         BIG_XXX_modadd(s,s,sr,q);

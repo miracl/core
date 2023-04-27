@@ -83,9 +83,9 @@ int eddsa_Ed25519(csprng *RNG)
 
     if (prehash) {
         PH_Ed25519(&M,&HM);
-        EDDSA_SIGNATURE(true,&D, &Q, NULL,&HM, &SIG);
+        EDDSA_SIGNATURE(true,&D, NULL,&HM, &SIG);
     } else {
-        EDDSA_SIGNATURE(false,&D, &Q, NULL,&M, &SIG);
+        EDDSA_SIGNATURE(false,&D, NULL,&M, &SIG);
     }
     printf("Signature= 0x");
     OCT_output(&SIG);
@@ -139,9 +139,9 @@ int eddsa_Ed448(csprng *RNG)
 
     if (prehash) {
         PH_Ed448(&M,&HM);
-        EDDSA_SIGNATURE(true,&D, &Q, NULL,&HM, &SIG);
+        EDDSA_SIGNATURE(true,&D, NULL,&HM, &SIG);
     } else {
-        EDDSA_SIGNATURE(false,&D, &Q, NULL,&M, &SIG);
+        EDDSA_SIGNATURE(false,&D, NULL,&M, &SIG);
     }
 
     printf("Signature= 0x");

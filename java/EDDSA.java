@@ -294,13 +294,17 @@ public final class EDDSA {
 // Generate a signature using key pair (D,Q) on message M
 // Set ph=true if message has already been pre-hashed
 // if ph=false, then context should be NULL for ed25519. However RFC8032 mode ed25519ctx is supported by supplying a non-NULL or non-empty context
-    public static int SIGNATURE(boolean ph,byte[] D, byte[] Q, byte[] ctx, byte[] M, byte[] SIG) {
+    public static int SIGNATURE(boolean ph,byte[] D, byte[] ctx, byte[] M, byte[] SIG) {
         byte [] digest=H(D);   // hash of private key
         int res = 0;
         int b,index=0;
         if (8*CONFIG_BIG.MODBYTES==CONFIG_FIELD.MODBITS) index=1; // extra byte needed for compression        
         b=CONFIG_BIG.MODBYTES+index;
         byte [] S=new byte[b];
+
+        byte[] Q=new byte[b];
+        KEY_PAIR_GENERATE(null,D,Q);
+
         BIG q = new BIG(ROM.CURVE_Order);
         if (D.length!=Q.length || D.length!=b)
             res=INVALID_PUBLIC_KEY;

@@ -317,6 +317,26 @@ fn decode(w: &[u8]) -> ECP {
     return ECP::new_bigs(&x.redc(),&y);
 }
 
+#[allow(non_snake_case)]
+fn key_pair_regenerate(d: &[u8], q: &mut [u8]) {
+    let mut index=0;
+    if 8*EFS==fp::MODBITS {
+        index=1; // extra byte needed for compression
+    }
+    let b=EFS+index;
+    let mut G=ECP::generator();
+
+    let mut digest: [u8; 128] = [0; 128];
+    h(d,&mut digest);
+
+// reverse bytes for little endian
+    reverse(b,&mut digest);
+    let mut s=BIG::frombytearray(&digest,index);
+    rfc7748(&mut s);
+    G.copy(&G.mul(&s));
+    encode(&G,q);
+}
+
 /* Calculate a public/private EC GF(p) key pair w,s where W=s.G mod EC(p),
  * where s is the secret key and W is the public key
  * and G is fixed generator.
@@ -353,8 +373,9 @@ pub fn key_pair_generate(rng: Option<&mut RAND>, d: &mut [u8], q: &mut [u8]) -> 
 // Set ph=true if message has already been pre-hashed
 // if ph=false, then context should be NULL for ed25519. However RFC8032 mode ed25519ctx is supported by supplying a non-NULL or non-empty context
 #[allow(non_snake_case)]
-pub fn signature(ph: bool,d: &[u8], q: &[u8], ctx: Option<&[u8]>,m: &[u8], sig: &mut [u8]) ->isize {
+pub fn signature(ph: bool,d: &[u8], ctx: Option<&[u8]>,m: &[u8], sig: &mut [u8]) ->isize {
     let mut digest: [u8; 128] = [0; 128];
+    let mut q: [u8; EFS+1] = [0; EFS+1];  // public key
     h(d,&mut digest); // hash of private key
     let mut res = 0;
     let mut index=0;
@@ -364,7 +385,10 @@ pub fn signature(ph: bool,d: &[u8], q: &[u8], ctx: Option<&[u8]>,m: &[u8], sig: 
     let b=EFS+index;
     let r = BIG::new_ints(&rom::CURVE_ORDER);
 
-    if d.len()!=q.len() || d.len()!=b {
+    key_pair_regenerate(d,&mut q);
+    let qs=&q[0..b];
+
+    if d.len()!=qs.len() || d.len()!=b {
         res=INVALID_PUBLIC_KEY;
     }
     if res==0 {
@@ -375,7 +399,7 @@ pub fn signature(ph: bool,d: &[u8], q: &[u8], ctx: Option<&[u8]>,m: &[u8], sig: 
         reverse(b,&mut digest);
         let mut s=BIG::frombytearray(&digest,index);
         rfc7748(&mut s);
-        dr=h2(ph,ctx,sig,q,m);
+        dr=h2(ph,ctx,sig,&qs,m);
         let sd=dr.dmod(&r);
         encode_int(&BIG::modadd(&sr,&BIG::modmul(&s,&sd,&r),&r),&mut sig[b..2*b]);
     }
