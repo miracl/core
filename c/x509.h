@@ -41,11 +41,13 @@
 #define X509_H256 2     /**< Using SHA256 hashing */
 #define X509_H384 3     /**< Using SHA384 hashing */
 #define X509_H512 4     /**< Using SHA512 hashing */
+#define X509_SHAKE256 5 /**< Using SHA3-SHAKE256 hashing */
 
 // Supported Curves
 
 #define USE_NIST256 0    /**< For the NIST 256-bit standard curve - WEIERSTRASS only */
-#define USE_C25519 1     /**< Bernstein's Modulus 2^255-19 - EDWARDS or MONTGOMERY only */
+#define USE_ED25519 1       /**< Bernstein's Modulus 2^255-19 - EDWARDS */
+#define USE_ED448 4         /**< Goldilocks Modulus Ed448 - EDWARDS */
 #define USE_BRAINPOOL 2  /**< For Brainpool 256-bit curve - WEIERSTRASS only */
 #define USE_ANSSI 3      /**< For French 256-bit standard curve - WEIERSTRASS only */
 #define USE_NIST384 10   /**< For the NIST 384-bit standard curve - WEIERSTRASS only */

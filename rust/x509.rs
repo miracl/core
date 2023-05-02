@@ -35,7 +35,7 @@ pub struct FDTYPE {
 
 pub const ECC:usize = 1;
 pub const RSA:usize = 2;
-pub const ECD:usize = 3;  // for Ed25519
+pub const ECD:usize = 3;  // for Ed25519 and Ed448
 pub const PQ:usize = 4;
 
 // Supported Hash functions
@@ -43,11 +43,13 @@ pub const PQ:usize = 4;
 pub const H256:usize = 2;
 pub const H384:usize = 3;
 pub const H512:usize = 4;
+pub const SHAKE256:usize = 5;
 
 // Supported Curves
 
 pub const USE_NIST256:usize = 4;    /**< For the NIST 256-bit standard curve - WEIERSTRASS only */
-pub const USE_C25519:usize = 1;     /**< Bernstein's Modulus 2^255-19 - EDWARDS or MONTGOMERY only */
+pub const USE_ED25519:usize = 1;     /**< Bernstein's Modulus 2^255-19 - EDWARDS only */
+pub const USE_ED448:usize = 5;
 //const USE_BRAINPOOL:usize = 2;  /**< For Brainpool 256-bit curve - WEIERSTRASS only */
 //const USE_ANSSI:usize = 3;      /**< For French 256-bit standard curve - WEIERSTRASS only */
 pub const USE_NIST384:usize = 10;   /**< For the NIST 384-bit standard curve - WEIERSTRASS only */
@@ -78,7 +80,8 @@ const ECCSHA256:[u8;8]=[0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x02];
 const ECCSHA384:[u8;8]=[0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x03];
 const ECCSHA512:[u8;8]=[0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x04];
 const ECPK:[u8;7]=[0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01];
-const EDPK:[u8;3]=[0x2b, 0x65, 0x70];
+const EDPK25519:[u8;3]=[0x2b, 0x65, 0x70];
+const EDPK448:[u8;3]=[0x2b, 0x65, 0x71];
 const PRIME25519:[u8;9]=[0x2B, 0x06, 0x01, 0x04, 0x01, 0xDA, 0x47, 0x0F, 0x01];
 const PRIME256V1:[u8;8]=[0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07];
 const SECP384R1:[u8;5]=[0x2B, 0x81, 0x04, 0x00, 0x22];
@@ -211,7 +214,7 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
         j+=1;
     }
     j=fin;
-    if EDPK == soid[0..slen] {
+    if EDPK25519 == soid[0..slen] {
         len=getalen(OCT,c,j);
         if len==0 {
             return ret;
@@ -235,9 +238,34 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
             j+=1;
         }
         ret.kind = ECD;
-        ret.curve = USE_C25519;
+        ret.curve = USE_ED25519;
     }
-
+    if EDPK448 == soid[0..slen] {
+        len=getalen(OCT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len);
+        len=getalen(OCT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len);
+        let rlen=57;
+        if rlen>pklen {
+            return ret;
+        }
+        ret.len=rlen;
+        for i in 0..rlen-len {
+            pk[i]=0;
+        }
+        for i in rlen-len..rlen {
+            pk[i]=c[j];
+            j+=1;
+        }
+        ret.kind = ECD;
+        ret.curve = USE_ED448;
+    }
     if DILITHIUM3 == soid[0..slen] {
         len=getalen(OCT,c,j);
         if len==0 {
@@ -474,11 +502,14 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
         j+=1;
 
     }
-    if EDPK == soid[0..slen] {
+    if EDPK25519 == soid[0..slen] {
         ret.kind=ECD;
         ret.hash=H512;
     }
-
+    if EDPK448 == soid[0..slen] {
+        ret.kind=ECD;
+        ret.hash=SHAKE256;
+    }
     if ECCSHA256 == soid[0..slen] {
         ret.kind=ECC;
         ret.hash=H256;
@@ -522,23 +553,23 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
     len-=1; // skip bit shift (hopefully 0!)
 
     if ret.kind==ECD {
-        let rlen=bround(len);
-        let ex=rlen-len;
-        if rlen>siglen {
+        if len>siglen {
             ret.kind=0;
             return ret;
         }
-        ret.len=rlen;
+        ret.len=len;
         slen=0;
-        for _ in 0..ex {
-            sig[slen]=0;
-            slen+=1;
-        }
         fin=j+len;
         while j<fin {
             sig[slen]=sc[j];
             j+=1;
             slen+=1;
+        }
+        if ret.hash==H512 {
+            ret.curve=USE_ED25519;
+        }
+        if ret.hash==SHAKE256 {
+            ret.curve=USE_ED448;
         }
     }
 
@@ -798,8 +829,11 @@ pub fn get_public_key(c: &[u8],key: &mut [u8]) -> PKTYPE {
     if ECPK == koid[0..slen] {
         ret.kind=ECC;
     }
-    if EDPK == koid[0..slen] {
-        ret.kind=ECD;
+    if EDPK25519 == koid[0..slen] {
+        ret.kind=ECD; ret.curve=USE_ED25519
+    }
+    if EDPK448 == koid[0..slen] {
+        ret.kind=ECD; ret.curve=USE_ED448
     }
     if RSAPK == koid[0..slen] {
         ret.kind=RSA;
@@ -831,7 +865,7 @@ pub fn get_public_key(c: &[u8],key: &mut [u8]) -> PKTYPE {
             j+=1;
         }
         if PRIME25519==koid[0..slen] {
-            ret.curve=USE_C25519;
+            ret.curve=USE_ED25519;
         }
         if PRIME256V1==koid[0..slen] {
             ret.curve=USE_NIST256;

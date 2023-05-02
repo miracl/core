@@ -61,9 +61,13 @@ static octet ECCSHA512 = {8, sizeof(eccsha512), (char *)eccsha512};
 static unsigned char ecpk[7] = {0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01};
 static octet ECPK = {7, sizeof(ecpk), (char *)ecpk};
 
-// ED Public Key - Elliptic curve EdDSA (Ed25519) Signature
-static unsigned char edpk[3] = {0x2B, 0x65, 0x70};  
-static octet EDPK = {3, sizeof(edpk),(char *)edpk};
+// ED25519 Public Key - Elliptic curve EdDSA (Ed25519) Signature
+static unsigned char edpk25519[3] = {0x2B, 0x65, 0x70};  
+static octet EDPK25519 = {3, sizeof(edpk25519),(char *)edpk25519};
+
+// ED448 Public Key - Elliptic curve EdDSA (Ed448) Signature
+static unsigned char edpk448[3] = {0x2B, 0x65, 0x71};  
+static octet EDPK448 = {3, sizeof(edpk448),(char *)edpk448};
 
 // C25519 curve
 static unsigned char prime25519[9] = {0x2B, 0x06, 0x01, 0x04, 0x01, 0xDA, 0x47, 0x0F, 0x01}; /*****/
@@ -230,7 +234,7 @@ pktype X509_extract_private_key(octet *c,octet *pk)
         SOID.val[i++] = c->val[j];
     j=fin;
 
-    if (OCT_comp(&EDPK, &SOID))
+    if (OCT_comp(&EDPK25519, &SOID))
     { // Its an Ed25519 key
         len = getalen(OCT, c->val, j);
         if (len < 0) return ret;
@@ -246,7 +250,25 @@ pktype X509_extract_private_key(octet *c,octet *pk)
         for (i=rlen-len;i<rlen;i++)
             pk->val[i]=c->val[j++];
         ret.type = X509_ECD;
-        ret.curve = USE_C25519;
+        ret.curve = USE_ED25519;
+    }
+    if (OCT_comp(&EDPK448, &SOID))
+    { // Its an Ed448 key
+        len = getalen(OCT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+        len = getalen(OCT, c->val, j);
+        if (len < 0) return ret;
+        j += skip(len);
+        rlen=57;
+        if (rlen>pk->max) return ret;
+        pk->len=rlen;
+        for (i=0;i<rlen-len;i++)
+            pk->val[i]=0;
+        for (i=rlen-len;i<rlen;i++)
+            pk->val[i]=c->val[j++];
+        ret.type = X509_ECD;
+        ret.curve = USE_ED448;
     }
     if (OCT_comp(&DILITHIUM3, &SOID))
     { // Its a DILITHIUM3 key
@@ -440,10 +462,15 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
         SOID.val[i++] = sc->val[j];
 
     // check OID here..
-    if (OCT_comp(&EDPK, &SOID))
+    if (OCT_comp(&EDPK25519, &SOID))
     {
         ret.type = X509_ECD;
         ret.hash = X509_H512;
+    }
+    if (OCT_comp(&EDPK448, &SOID))
+    {
+        ret.type = X509_ECD;
+        ret.hash = X509_SHAKE256;
     }
     if (OCT_comp(&ECCSHA256, &SOID))
     {
@@ -496,23 +523,19 @@ pktype X509_extract_cert_sig(octet *sc, octet *sig)
 
     if (ret.type==X509_ECD) 
     {
-        rlen = bround(len);
-        ex = rlen - len;
-
-        if (rlen>sig->max)
+        if (len>sig->max)
         {
             ret.type=0;
             return ret;
         }
-
-        sig->len = rlen;
+        sig->len = len;
         i = 0;
-        for (k = 0; k < ex; k++)
-            sig->val[i++] = 0;
-
         fin = j + len;
         for (; j < fin; j++)
             sig->val[i++] = sc->val[j];
+
+        if (ret.hash == X509_H512) ret.curve = USE_ED25519;
+        if (ret.hash == X509_SHAKE256) ret.curve = USE_ED448;
     }
     if (ret.type == X509_ECC)
     {
@@ -737,7 +760,8 @@ pktype X509_get_public_key(octet *c,octet *key)
 
     ret.type = 0;
     if (OCT_comp(&ECPK, &KOID)) ret.type = X509_ECC;
-    if (OCT_comp(&EDPK, &KOID)) ret.type = X509_ECD;
+    if (OCT_comp(&EDPK25519, &KOID)) {ret.type = X509_ECD; ret.curve=USE_ED25519;}
+    if (OCT_comp(&EDPK448, &KOID)) {ret.type = X509_ECD;  ret.curve=USE_ED448;}
     if (OCT_comp(&RSAPK, &KOID)) ret.type = X509_RSA;
     if (OCT_comp(&DILITHIUM3, &KOID)) ret.type = X509_PQ;
 
@@ -764,7 +788,7 @@ pktype X509_get_public_key(octet *c,octet *key)
         for (i = 0; j < fin; j++)
             KOID.val[i++] = c->val[j];
 
-        if (OCT_comp(&PRIME25519, &KOID)) ret.curve = USE_C25519; /*****/
+        if (OCT_comp(&PRIME25519, &KOID)) ret.curve = USE_ED25519; /*****/
         if (OCT_comp(&PRIME256V1, &KOID)) ret.curve = USE_NIST256;
         if (OCT_comp(&SECP384R1, &KOID)) ret.curve = USE_NIST384;
         if (OCT_comp(&SECP521R1, &KOID)) ret.curve = USE_NIST521;
