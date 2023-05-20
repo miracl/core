@@ -428,6 +428,21 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fnameh,"XXX",bd)
     miracl_compile.compile_file(3, fnamec, fnamebc)
 
+    fnamec="eddsa_"+tc+".c"
+    fnamebc="eddsa_"+tc+".bc"
+    fnameh="eddsa_"+tc+".h"
+
+    copy_temp_file("eddsa.c", fnamec)
+    copy_keep_file("eddsa.h", fnameh)
+
+    replace(fnamec,"ZZZ",tc)
+    replace(fnamec,"YYY",tf)
+    replace(fnamec,"XXX",bd)
+    replace(fnameh,"ZZZ",tc)
+    replace(fnameh,"YYY",tf)
+    replace(fnameh,"XXX",bd)
+    miracl_compile.compile_file(3, fnamec, fnamebc)
+
     fnamec="hpke_"+tc+".c"
     fnamebc="hpke_"+tc+".bc"
     fnameh="hpke_"+tc+".h"
