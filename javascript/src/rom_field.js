@@ -37,6 +37,7 @@ var ROM_FIELD_25519,
     ROM_FIELD_FP512BN,
     ROM_FIELD_BN254,
     ROM_FIELD_BN254CX,
+    ROM_FIELD_BN158,
     ROM_FIELD_BRAINPOOL,
     ROM_FIELD_C41417,
     ROM_FIELD_C1174,
@@ -430,6 +431,31 @@ ROM_FIELD_BN254CX = function() {
     return ROM_FIELD_BN254CX;
 };
 
+
+
+
+ROM_FIELD_BN158 = function() {
+    "use strict";
+    /* Fixed Data in ROM - Field and Curve parameters */
+
+    var ROM_FIELD_BN158 = {
+
+        // BN158 Modulus
+        // Base Bits= 24
+        Modulus: [0x4E013,0x2280AB,0xFB9507,0xCF6FD3,0x8C9953,0x202762,0x2401],
+        R2modp: [0x45973D,0x739B5,0xB288A6,0x16565D,0x6C0526,0x500B22,0x1731],
+        ROI: [0x4E012,0x2280AB,0xFB9507,0xCF6FD3,0x8C9953,0x202762,0x2401],
+        SQRTm3: [0x18004,0xE4048,0x4CE27F,0x5CA99F,0xFC95F3,0x202761,0x2401],
+        CRu: [0x81B007,0xA2031,0x575944,0x39631A,0x4801B0,0x0,0x0],
+        MConst: 0xF615E5,
+        Fra: [0xECE2A9,0x674296,0x96F2A1,0x21C992,0x2E1BF,0xECF82A,0xA85],
+        Frb: [0x17FD6A,0xBB3E14,0x64A265,0xADA641,0x89B794,0x332F38,0x197B],
+    };
+
+    return ROM_FIELD_BN158;
+};
+
+
 ROM_FIELD_BRAINPOOL = function() {
     "use strict";
     /* Fixed Data in ROM - Field and Curve parameters */
@@ -704,6 +730,7 @@ if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
         ROM_FIELD_FP512BN: ROM_FIELD_FP512BN,
         ROM_FIELD_BN254: ROM_FIELD_BN254,
         ROM_FIELD_BN254CX: ROM_FIELD_BN254CX,
+        ROM_FIELD_BN158: ROM_FIELD_BN158,
         ROM_FIELD_BRAINPOOL: ROM_FIELD_BRAINPOOL,
         ROM_FIELD_C41417: ROM_FIELD_C41417,
         ROM_FIELD_448: ROM_FIELD_448,

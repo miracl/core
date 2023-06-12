@@ -457,6 +457,7 @@ void help()
     printf("38. BLS48556\n");
     printf("39. BLS48581\n");
     printf("40. BLS48286\n");
+    printf("41. BN158\n");
 
     printf("\nromgen curve wordlength language\n");
     printf("where wordlength is 16, 32 or 64 (always 32 for javascript)\n");
@@ -1518,6 +1519,48 @@ int main(int argc, char **argv)
         Q = (p - 1 + t) * Q;
         //cofactor(Q,X,x);
         cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2);
+        sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
+
+        htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
+
+        cout << "Hash to Curve Z for G2= " << findZ2(curve_b) << endl;
+    }
+
+    if (strcmp(curvename,"BN158")==0)
+    {
+        curve = PS+13;
+        if (chunk==32)
+        bb=28;
+        if (chunk==64)
+        bb=56;
+        if (strcmp(lg, "javascript") == 0)
+            bb=24;
+        printf("Curve is BN158\n");
+        strcpy(fieldname, curvename);
+        mbits = 158;
+        words = (1 + ((mbits - 1) / bb));
+        curvetype = WEIERSTRASS;
+        modtype = NOT_SPECIAL;
+        curve_a = 0;
+        mip->IOBASE = 16;
+        x = (char *)"4000801001";  // SIGN_OF_X is negative
+        atebits = bits(3 * (6 * x - 2)) - 1;
+        hw = hamming(6 * x - 2) + 2;
+
+        p = 36 * pow(x, 4) - 36 * pow(x, 3) + 24 * x * x - 6 * x + 1; // Modulus
+        t = 6 * x * x + 1;
+        r = p + 1 - t;                 // Group order
+        curve_b = 5;
+        gx=p-1;
+        gy=2;
+        cof=1;
+        ecurve((Big)0, curve_b, p, MR_AFFINE);
+        mip->TWIST = MR_SEXTIC_M;      // twist type
+
+        Q.set((ZZn2)1);
+        Q = (p - 1 + t) * Q;           // generator point in G2
+        cru = (18 * pow(x, 3) - 18 * x * x + 9 * x - 2); // cube root of unity for GLV method
+
         sqrtm3=p-(36*pow(x,3) - 36*x*x + 18*x - 3);
 
         htpc=pow((Big)findZ(curve_a,curve_b,p),finde(p),p);
@@ -2916,7 +2959,7 @@ mip->IOBASE=10;
 
     if (curve >= PS)
     {   // Frobenius constants -  depend on embedding degree
-        if (curve < PS+9)
+        if (curve < PS+9 || curve==PS+13)
             set_frobenius_constant(X, 12);
         else
         {
@@ -2988,7 +3031,7 @@ mip->IOBASE=10;
     }
 
 // BN curves, negative x
-    if (curve == PS || curve == PS+1 || curve == PS+4)
+    if (curve == PS || curve == PS+1 || curve == PS+4 || curve == PS+13)
     {
         cout << endl;
 
@@ -3112,49 +3155,49 @@ mip->IOBASE=10;
             cout << "**** Failed ****" << endl;
             cout << "\nQ= " << Q << endl << endl;
         }
-    }
+    //}
 
-    if (curve == PS+3 || curve == PS+6)   // bls12381 or bls12443
-    {
-        cout << pre1 << toupperit((char *)"CURVE_Ad", lang) << post1; output(chunk, words, ad, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Bd", lang) << post1; output(chunk, words, bd, m); cout << term << endl;
-        cout << pre8 << "PC" << post8 << open;
-        for (i=0;i<ncs-1;i++)
+        if (curve == PS+3 || curve == PS+6)   // bls12381 or bls12443
         {
-            output(chunk, words, pc[i], m); cout << ",";
+            cout << pre1 << toupperit((char *)"CURVE_Ad", lang) << post1; output(chunk, words, ad, m); cout << term << endl;
+            cout << pre1 << toupperit((char *)"CURVE_Bd", lang) << post1; output(chunk, words, bd, m); cout << term << endl;
+            cout << pre8 << "PC" << post8 << open;
+            for (i=0;i<ncs-1;i++)
+            {
+                output(chunk, words, pc[i], m); cout << ",";
+            }
+            output(chunk, words, pc[ncs-1], m);  
+            cout << close << term << endl;
+        } else {
+            cout << close;
+            cout << close << term << endl;
         }
-        output(chunk, words, pc[ncs-1], m);  
-        cout << close << term << endl;
-    } else {
-        cout << close;
-        cout << close << term << endl;
-    }
 
 
-    if (curve == PS+3 || curve == PS+6)   // bls12381 or bls12443
-    {
-        cout << pre1 << toupperit((char *)"CURVE_HTPC2", lang) << post1; output(chunk, words, htpc2, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Adr", lang) << post1; output(chunk, words, adr, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Adi", lang) << post1; output(chunk, words, adi, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Bdr", lang) << post1; output(chunk, words, bdr, m); cout << term << endl;
-        cout << pre1 << toupperit((char *)"CURVE_Bdi", lang) << post1; output(chunk, words, bdi, m); cout << term << endl;
-        cout << pre8 << "PCR" << post9 << open;
-        for (i=0;i<ncs2-1;i++)
+        if (curve == PS+3 || curve == PS+6)   // bls12381 or bls12443
         {
-            output(chunk, words, pcr[i], m); cout << ",";
-        }
-        output(chunk, words, pcr[ncs2-1], m);  
-        cout << close << term << endl;
-        cout << pre8 << "PCI" << post9 << open;
-        for (i=0;i<ncs2-1;i++)
-        {
-            output(chunk, words, pci[i], m); cout << ",";
-        }
-        output(chunk, words, pci[ncs2-1], m);  
-        cout << close << term << endl;
+            cout << pre1 << toupperit((char *)"CURVE_HTPC2", lang) << post1; output(chunk, words, htpc2, m); cout << term << endl;
+            cout << pre1 << toupperit((char *)"CURVE_Adr", lang) << post1; output(chunk, words, adr, m); cout << term << endl;
+            cout << pre1 << toupperit((char *)"CURVE_Adi", lang) << post1; output(chunk, words, adi, m); cout << term << endl;
+            cout << pre1 << toupperit((char *)"CURVE_Bdr", lang) << post1; output(chunk, words, bdr, m); cout << term << endl;
+            cout << pre1 << toupperit((char *)"CURVE_Bdi", lang) << post1; output(chunk, words, bdi, m); cout << term << endl;
+            cout << pre8 << "PCR" << post9 << open;
+            for (i=0;i<ncs2-1;i++)
+            {
+                output(chunk, words, pcr[i], m); cout << ",";
+            }
+            output(chunk, words, pcr[ncs2-1], m);  
+            cout << close << term << endl;
+            cout << pre8 << "PCI" << post9 << open;
+            for (i=0;i<ncs2-1;i++)
+            {
+                output(chunk, words, pci[i], m); cout << ",";
+            }
+            output(chunk, words, pci[ncs2-1], m);  
+            cout << close << term << endl;
 
+        }
     }
-
     if (curve == PS+9)
     {
         cout << endl;

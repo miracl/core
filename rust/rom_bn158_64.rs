@@ -1,0 +1,55 @@
+/*
+ * Copyright (c) 2012-2020 MIRACL UK Ltd.
+ *
+ * This file is part of MIRACL Core
+ * (see https://github.com/miracl/core).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+use crate::arch::Chunk;
+use crate::bn158::big::NLEN;
+
+// BN158 Modulus
+// Base Bits= 56
+pub const MODULUS:[Chunk;NLEN]=[0x72280AB04E013,0x9953CF6FD3FB95,0x24012027628C];
+pub const R2MODP:[Chunk;NLEN]=[0xA60739B545973D,0x52616565DB288,0x1731500B226C];
+pub const ROI:[Chunk;NLEN]=[0x72280AB04E012,0x9953CF6FD3FB95,0x24012027628C];
+pub const SQRTM3:[Chunk;NLEN]=[0x7F0E4048018004,0x95F35CA99F4CE2,0x2401202761FC];
+pub const CRU:[Chunk;NLEN]=[0x440A203181B007,0x1B039631A5759,0x48];
+pub const MCONST:Chunk=0xFC609004F615E5;
+pub const FRA:[Chunk;NLEN]=[0xA1674296ECE2A9,0xE1BF21C99296F2,0xA85ECF82A02];
+pub const FRB:[Chunk;NLEN]=[0x65BB3E1417FD6A,0xB794ADA64164A2,0x197B332F3889];
+
+pub const CURVE_COF_I:isize = 1;
+pub const CURVE_COF:[Chunk;NLEN]=[0x1,0x0,0x0];
+pub const CURVE_B_I:isize = 5;
+pub const CURVE_B:[Chunk;NLEN]=[0x5,0x0,0x0];
+pub const CURVE_ORDER:[Chunk;NLEN]=[0xD59F209F04200D,0x9953CF6F73FA14,0x24012027628C];
+pub const CURVE_GX:[Chunk;NLEN]=[0x72280AB04E012,0x9953CF6FD3FB95,0x24012027628C];
+pub const CURVE_GY:[Chunk;NLEN]=[0x2,0x0,0x0];
+pub const CURVE_HTPC:[Chunk;NLEN]=[0x1,0x0,0x0];
+
+pub const CURVE_BNX:[Chunk;NLEN]=[0x4000801001,0x0,0x0];
+pub const CURVE_PXA:[Chunk;NLEN]=[0x3B2765033A5768,0x1EECE2B3022922,0x1EA35F882728];
+pub const CURVE_PXB:[Chunk;NLEN]=[0x7B04ACE776A2F5,0x5D05BA314F9D68,0x23485611EB92];
+pub const CURVE_PYA:[Chunk;NLEN]=[0x69AB26E30CFE24,0x1FB7A85F92C435,0x1C952F906B6E];
+pub const CURVE_PYB:[Chunk;NLEN]=[0x91017738E8609D,0x8445B3BA0F3EE2,0x23E289544ED8];
+pub const CURVE_W:[[Chunk;NLEN];2]=[[0x3182600A008003,0x600180,0x0],[0x8001002001,0x0,0x0]];
+pub const CURVE_SB:[[[Chunk;NLEN];2];2]=[[[0x3182E00B00A004,0x600180,0x0],[0x8001002001,0x0,0x0]],[[0x8001002001,0x0,0x0],[0xA41CC09503A00A,0x9953CF6F13F894,0x24012027628C]]];
+pub const CURVE_WB:[[Chunk;NLEN];4]=[[0x10806002801000,0x200080,0x0],[0xF907C026815005,0x1202642519090,0x30],[0x7C84001380B003,0x90132128C848,0x18],[0x1080E003803001,0x200080,0x0]];
+pub const CURVE_BB:[[[Chunk;NLEN];4];4]=[[[0xD59EE09E84100D,0x9953CF6F73FA14,0x24012027628C],[0xD59EE09E84100C,0x9953CF6F73FA14,0x24012027628C],[0xD59EE09E84100C,0x9953CF6F73FA14,0x24012027628C],[0x8001002002,0x0,0x0]],[[0x8001002001,0x0,0x0],[0xD59EE09E84100C,0x9953CF6F73FA14,0x24012027628C],[0xD59EE09E84100D,0x9953CF6F73FA14,0x24012027628C],[0xD59EE09E84100C,0x9953CF6F73FA14,0x24012027628C]],[[0x8001002002,0x0,0x0],[0x8001002001,0x0,0x0],[0x8001002001,0x0,0x0],[0x8001002001,0x0,0x0]],[[0x4000801002,0x0,0x0],[0x10002004002,0x0,0x0],[0xD59EA09E04000A,0x9953CF6F73FA14,0x24012027628C],[0x4000801002,0x0,0x0]]];
+
+pub const USE_GLV: bool = true;
+pub const USE_GS_G2: bool = true;
+pub const USE_GS_GT: bool = true;
+pub const GT_STRONG: bool = false;

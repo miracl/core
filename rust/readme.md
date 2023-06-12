@@ -25,7 +25,7 @@ As a quick example execute from your root directory
 
     python3 config64.py
 
-Then select options 1, 3, 7, 28, 30, 37, 38 and 41 (these are fixed for 
+Then select options 1, 3, 7, 28, 30, 37, 38 and 42 (these are fixed for 
 the example program provided). Select 0 to exit.
 
 Then copy the library from mcore/target/release/libmcore.rlib to the

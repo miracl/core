@@ -808,7 +808,8 @@ class miracl_crypto:
         ( "479", "BLS24479", "BLS24479", "29", "1",["1", "4", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS24_CURVE", "M_TYPE", "POSITIVEX", "52", "49", "192"),
         ( "556", "BLS48556", "BLS48556", "29", "1",["-1", "2", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS48_CURVE", "M_TYPE", "POSITIVEX", "35", "32", "256"),
         ( "581", "BLS48581", "BLS48581", "29", "1",["2", "2", "0"],"NOT_SPECIAL", "10", "WEIERSTRASS", "0", "BLS48_CURVE", "D_TYPE", "NEGATIVEX", "36", "33", "256"),
-        ( "286", "BLS48286", "BLS48286", "29", "1",["1", "1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS48_CURVE", "M_TYPE", "POSITIVEX", "20", "17", "128")
+        ( "286", "BLS48286", "BLS48286", "29", "1",["1", "1", "0"],"NOT_SPECIAL", "0", "WEIERSTRASS", "0", "BLS48_CURVE", "M_TYPE", "POSITIVEX", "20", "17", "128"),
+        ( "158", "BN158", "BN158", "28","1",["1", "1", "0"], "NOT_SPECIAL", "0", "WEIERSTRASS", "0","BN_CURVE","M_TYPE","NEGATIVEX","49","42","128")
     )
 
     # There are choices here, different ways of getting the same result, but some faster than others

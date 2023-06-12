@@ -863,6 +863,33 @@ var CTX = function(input_parameter) {
             "@AK": 16
         },
 
+        "BN158": {
+            "BITS": "160",
+            "FIELD": "BN158",
+            "CURVE": "BN158",
+            "@NB": 20,
+            "@BASE": 24,
+            "@NBT": 158,
+            "@M8": 1,
+            "@RZ": 1,
+            "@RZ2A": 1,    
+            "@RZ2B": 0,  
+            "@HC": 0,     
+            "@HC2": 0,  
+            "@MT": 0,
+			"@QI": 0,
+			"@TW": 0,
+            "@CT": 0,
+            "@CA": 0, 
+            "@PF": 1,
+            "@ST": 1,
+            "@SX": 1,
+            "@AB": 42,
+            "@HT": 32,
+			"@SH": 10, 
+            "@AK": 16
+        },
+
         "BN462": {
             "BITS": "464",
             "FIELD": "BN462",
@@ -1204,7 +1231,6 @@ var CTX = function(input_parameter) {
             prepareModule("PAIR");
             prepareModule("MPIN");
 			prepareModule("BLS");
-
         }
 
         if (ctx.config["@PF"] == 3) {
