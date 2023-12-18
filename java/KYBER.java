@@ -374,10 +374,22 @@ public final class KYBER {
 	static void compress(short[] t,int d)
 	{
 		int twod=(1<<d);
+		int ti;
 		for (int i=0;i<KY_DEGREE;i++)
 		{
-			t[i]+=(t[i]>>15)&KY_PRIME;
-			t[i]= (short)(((twod*t[i]+KY_PRIME/2)/KY_PRIME)&(twod-1));
+			if (d==1)
+			{
+				ti=t[i];
+				ti<<=1;
+				ti+=1665;
+				ti*=80635;
+				ti>>=28;
+				ti&=1;
+				t[i]=(short)ti;
+			} else {
+				t[i]+=(t[i]>>15)&KY_PRIME;
+				t[i]= (short)(((twod*t[i]+KY_PRIME/2)/KY_PRIME)&(twod-1));
+			}
 		}
 	}
 

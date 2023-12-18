@@ -329,10 +329,22 @@ static void decode(byte pack[],int L,sign16 t[],int len)
 static void compress(sign16 t[],int len,int d)
 {
     int twod=(1<<d);
+    sign32 ti;
     for (int i=0;i<len*KY_DEGREE;i++)
     {
-        t[i]+=(t[i]>>15)&KY_PRIME;
-        t[i]= ((twod*t[i]+KY_PRIME/2)/KY_PRIME)&(twod-1);
+        if (d==1)
+        {
+            ti=t[i];
+            ti<<=1;
+            ti+=1665;
+            ti*=80635;
+            ti>>=28;
+            ti&=1;
+            t[i]=(sign16)ti;
+        } else {
+            t[i]+=(t[i]>>15)&KY_PRIME;
+            t[i]= ((twod*t[i]+KY_PRIME/2)/KY_PRIME)&(twod-1);
+        }
     }
 }
 

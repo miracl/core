@@ -292,8 +292,18 @@ var KYBER = function(ctx) {
             var twod=(1<<d);
             for (var i=0;i<KYBER.DEGREE;i++)
             {
-                t[i]+=(t[i]>>15)&KYBER.PRIME;
-                t[i]= (    Math.floor((twod*t[i]+(KYBER.PRIME>>1))/KYBER.PRIME)    &(twod-1));
+				if (d==1) {
+					var ti=t[i];
+					ti<<=1;
+					ti+=1665;
+					ti*=80635;
+					ti>>=28;
+					ti&=1;
+					t[i]=ti;
+				} else {
+					t[i]+=(t[i]>>15)&KYBER.PRIME;
+					t[i]= (    Math.floor((twod*t[i]+(KYBER.PRIME>>1))/KYBER.PRIME)    &(twod-1));
+				}
             }
         },
 

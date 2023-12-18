@@ -327,8 +327,18 @@ fn compress(t: &mut [i16],len:usize,d:usize) {
     let twod=(1<<d) as i32;
     let dp=PRIME as i32;
     for i in 0..len*DEGREE {
-        t[i]+=(t[i]>>15)&PRIME;
-        t[i]=(((twod*(t[i] as i32) + dp/2)/dp)&(twod-1)) as i16;
+        if d==1 {
+            let mut ti=t[i] as i32;
+            ti<<=1;
+            ti+=1665;
+            ti*=80635;
+            ti>>=28;
+            ti&=1;
+            t[i]=ti as i16;
+        } else {
+            t[i]+=(t[i]>>15)&PRIME;
+            t[i]=(((twod*(t[i] as i32) + dp/2)/dp)&(twod-1)) as i16;
+        }
     }
 }
 fn decompress(t: &mut [i16],len:usize,d:usize) {

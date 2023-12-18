@@ -331,8 +331,18 @@ func decode(pack []byte,L int,t []int16,pos []int) {
 func compress(t []int16,d int) {
 	twod:=int32(1<<d)
 	for i:=0;i<KY_DEGREE;i++ {
-		t[i]+=(t[i]>>15)&int16(KY_PRIME)
-		t[i]= int16(((twod*int32(t[i])+KY_PRIME/2)/KY_PRIME)&(twod-1))
+		if d==1 {
+			ti:=int32(t[i])
+			ti<<=1
+			ti+=1665
+			ti*=80635
+			ti>>=28
+			ti&=1
+			t[i]=int16(ti)
+		} else {
+			t[i]+=(t[i]>>15)&int16(KY_PRIME)
+			t[i]= int16(((twod*int32(t[i])+KY_PRIME/2)/KY_PRIME)&(twod-1))
+		}
 	}
 }
 
