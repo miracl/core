@@ -370,6 +370,20 @@ public final class KYBER {
 			t[i]=nextword(L,pack,pos);
 	}
 
+// Bernsteins safe division by 0xD01
+	static int safediv(int x)
+    {
+        int qpart,q=0;    
+ 
+        qpart=(int)(((long)x*645083)>>31);
+        x-=qpart*0xD01; q += qpart;
+
+        qpart=(int)(((long)x*645083)>>31)+1;
+        x-=qpart*0xD01; q += qpart+(x>>31);
+
+        return q;
+    }
+
 // compress polynomial coefficents in place, for polynomial vector of length len
 	static void compress(short[] t,int d)
 	{
@@ -377,19 +391,8 @@ public final class KYBER {
 		int ti;
 		for (int i=0;i<KY_DEGREE;i++)
 		{
-			if (d==1)
-			{
-				ti=t[i];
-				ti<<=1;
-				ti+=1665;
-				ti*=80635;
-				ti>>=28;
-				ti&=1;
-				t[i]=(short)ti;
-			} else {
-				t[i]+=(t[i]>>15)&KY_PRIME;
-				t[i]= (short)(((twod*t[i]+KY_PRIME/2)/KY_PRIME)&(twod-1));
-			}
+			t[i]+=(t[i]>>15)&KY_PRIME;
+			t[i]= (short)(safediv((twod*t[i]+KY_PRIME/2))&(twod-1));
 		}
 	}
 

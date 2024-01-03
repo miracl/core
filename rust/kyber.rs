@@ -323,22 +323,26 @@ fn decode(pack: &[u8],l: usize,t: &mut [i16],len: usize) {
     }
 }
 
+// Bernsteins safe division by 0xD01
+fn safediv(xx: i32) -> i32 {
+  let mut x=xx;
+  let mut q = 0 as i32;
+
+  let mut qpart = (((x as i64)*645083)>>31) as i32;
+  x -= qpart*0xD01; q += qpart;
+
+  qpart = ((((x as i64)*645083)>>31) as i32)+1;
+  x -= qpart*0xD01; q += qpart+(x>>31);
+
+  return q;
+}
+
 fn compress(t: &mut [i16],len:usize,d:usize) {
     let twod=(1<<d) as i32;
     let dp=PRIME as i32;
     for i in 0..len*DEGREE {
-        if d==1 {
-            let mut ti=t[i] as i32;
-            ti<<=1;
-            ti+=1665;
-            ti*=80635;
-            ti>>=28;
-            ti&=1;
-            t[i]=ti as i16;
-        } else {
-            t[i]+=(t[i]>>15)&PRIME;
-            t[i]=(((twod*(t[i] as i32) + dp/2)/dp)&(twod-1)) as i16;
-        }
+        t[i]+=(t[i]>>15)&PRIME;
+        t[i]= (safediv(twod*(t[i] as i32)+dp/2)&(twod-1)) as i16;
     }
 }
 fn decompress(t: &mut [i16],len:usize,d:usize) {

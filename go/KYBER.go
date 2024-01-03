@@ -327,22 +327,25 @@ func decode(pack []byte,L int,t []int16,pos []int) {
 	}
 }
 
+// Bernsteins safe division by 0xD01
+func safediv(xx int32) int32 {
+	x:=xx
+	q:=int32(0)
+	qpart:=int32((int64(x)*645083)>>31)
+	x-=qpart*0xD01; q += qpart
+
+	qpart=int32((int64(x)*645083)>>31)+1
+	x-=qpart*0xD01; q += qpart+(x>>31)
+
+	return q;
+}
+
 // compress polynomial coefficents in place, for polynomial vector of length len
 func compress(t []int16,d int) {
 	twod:=int32(1<<d)
 	for i:=0;i<KY_DEGREE;i++ {
-		if d==1 {
-			ti:=int32(t[i])
-			ti<<=1
-			ti+=1665
-			ti*=80635
-			ti>>=28
-			ti&=1
-			t[i]=int16(ti)
-		} else {
-			t[i]+=(t[i]>>15)&int16(KY_PRIME)
-			t[i]= int16(((twod*int32(t[i])+KY_PRIME/2)/KY_PRIME)&(twod-1))
-		}
+		t[i]+=(t[i]>>15)&int16(KY_PRIME)
+		t[i] = int16(safediv(twod*int32(t[i])+KY_PRIME/2)&(twod-1))
 	}
 }
 

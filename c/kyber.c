@@ -331,26 +331,28 @@ static void decode(byte pack[],int L,sign16 t[],int len)
         t[i]=nextword(L,pack,&ptr,&bts);
 }
 
+// Bernsteins safe division by 0xD01
+static int32_t safediv(int32_t x)
+{
+    int32_t qpart,q=0;    
+
+    qpart=(int32_t)(((int64_t)x*645083)>>31);
+    x-=qpart*0xD01; q += qpart;
+
+    qpart=(int32_t)(((int64_t)x*645083)>>31)+1;
+    x-=qpart*0xD01; q += qpart+(x>>31);
+
+    return q;
+}
+
 // compress polynomial coefficents in place, for polynomial vector of length len
 static void compress(sign16 t[],int len,int d)
 {
-	int twod=(1<<d);
-    sign32 ti;
+	sign32 twod=(1<<d);
 	for (int i=0;i<len*KY_DEGREE;i++)
     {
-        if (d==1)
-        {
-            ti=t[i];
-            ti<<=1;
-            ti+=1665;
-            ti*=80635;
-            ti>>=28;
-            ti&=1;
-            t[i]=(sign16)ti;
-        } else {
-            t[i]+=(t[i]>>15)&KY_PRIME;
-		    t[i]= ((twod*t[i]+KY_PRIME/2)/KY_PRIME)&(twod-1);
-        }
+        t[i]+=(t[i]>>15)&KY_PRIME;
+        t[i]= (sign16)(safediv(twod*t[i]+KY_PRIME/2)&(twod-1));
     }
 }
 

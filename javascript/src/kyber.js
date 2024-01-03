@@ -287,23 +287,25 @@ var KYBER = function(ctx) {
                 t[i]=KYBER.nextword(L,pack,pos);
         },
 
+		safediv: function(xx) {
+			var qpart,q=0; var x=xx;   
+ 
+			qpart=Math.floor((x*645083)*Math.pow(2,-31));
+			x-=qpart*0xD01; q += qpart;
+
+			qpart=Math.floor((x*645083)*Math.pow(2,-31))+1;
+			x-=qpart*0xD01; q += qpart+(x>>31);
+
+			return q;
+		},
+
 // compress polynomial coefficents in place, for polynomial vector of length len
         compress: function(t,d) {
             var twod=(1<<d);
             for (var i=0;i<KYBER.DEGREE;i++)
             {
-				if (d==1) {
-					var ti=t[i];
-					ti<<=1;
-					ti+=1665;
-					ti*=80635;
-					ti>>=28;
-					ti&=1;
-					t[i]=ti;
-				} else {
-					t[i]+=(t[i]>>15)&KYBER.PRIME;
-					t[i]= (    Math.floor((twod*t[i]+(KYBER.PRIME>>1))/KYBER.PRIME)    &(twod-1));
-				}
+				t[i]+=(t[i]>>15)&KYBER.PRIME;
+				t[i]= KYBER.safediv(twod*t[i]+(KYBER.PRIME>>1))&(twod-1)
             }
         },
 

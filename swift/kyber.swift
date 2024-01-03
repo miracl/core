@@ -350,22 +350,25 @@ public struct KYBER
         }
     }
 
+// Bernsteins safe division by 0xD01
+    static func safediv(_ xx:Int32) -> Int32 {
+    	var x=xx
+	var q:Int32=0
+	var qpart=Int32((Int64(x)*645083)>>31)
+	x-=qpart*0xD01; q += qpart
+
+	qpart=Int32((Int64(x)*645083)>>31)+1
+	x-=qpart*0xD01; q += qpart+(x>>31)
+
+	return q
+    }
+
 // compress polynomial coefficents in place, for polynomial vector of length len
     static func compress(_ t:inout [Int16],_ d:Int) {
         let twod=Int32(1<<d)
         for i in 0..<KY_DEGREE {
-	    if d==1 {
-	        var ti=Int32(t[i])
-                ti<<=1
-                ti+=1665
-                ti*=80635
-                ti>>=28
-                ti&=1
-                t[i]=Int16(ti)
-	    } else {
                 t[i]+=(t[i]>>15)&Int16(KY_PRIME)
-                t[i] = Int16(((twod*Int32(t[i])+KY_PRIME/2)/KY_PRIME)&(twod-1))
-            }
+		t[i] = Int16(safediv(twod*Int32(t[i])+KY_PRIME/2)&(twod-1))
         }
     }
 
