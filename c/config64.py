@@ -32,7 +32,7 @@ fast_fail=True
 keep_querying=True
 ignore_variables=False
 
-my_compiler = "gcc"
+my_compiler = "gcc -Wno-stringop-overflow"
 generated_files = []
 
 def copy_keep_file(file, target):

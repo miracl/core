@@ -31,7 +31,7 @@ if len(sys.argv)==2 :
     if sys.argv[1]=="test":
         testing=True
 
-my_compiler = "gcc"
+my_compiler = "gcc -Wno-stringop-overflow"
 generated_files = []
 
 def copy_keep_file(file, target):
