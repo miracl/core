@@ -43,7 +43,7 @@ pub const BLS_FAIL: isize = -1;
 // But it is just written to once at start-up, so actually safe.
 
 // Best not to use precomp if stack memory limited - i.e. embedded use
-// Uncomment to use precomp
+// Uncomment to use precomp - Note this example code may no longer work when Rust 2024 appears in version 1.82, and may need restructuring
 // static mut G2_TAB: [FP4; ecp::G2_TABLE] = [FP4::new(); ecp::G2_TABLE];
 
 fn ceil(a: usize,b: usize) -> usize {

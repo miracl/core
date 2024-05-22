@@ -20,7 +20,7 @@ use crate::xxx::ecp;
 use crate::xxx::ecp::ECP;
 use crate::xxx::dbig::DBIG;
 use crate::xxx::ecp4::ECP4;
-use crate::xxx::fp8::FP8;
+//use crate::xxx::fp8::FP8;
 
 use crate::xxx::big;
 use crate::xxx::big::BIG;
@@ -38,7 +38,10 @@ pub const BLS_FAIL: isize = -1;
 
 // NOTE this must be accessed in unsafe mode.
 // But it is just written to once at start-up, so actually quite safe.
-static mut G2_TAB: [FP8; ecp::G2_TABLE] = [FP8::new(); ecp::G2_TABLE];
+
+// Best not to use precomp if stack memory limited - i.e. embedded use
+// Uncomment to use precomp - Note this example code may no longer work when Rust 2024 appears in version 1.82, and may need restructuring
+//static mut G2_TAB: [FP8; ecp::G2_TABLE] = [FP8::new(); ecp::G2_TABLE];
 
 fn ceil(a: usize,b: usize) -> usize {
     (a-1)/b+1
@@ -82,13 +85,14 @@ pub fn bls_hash_to_point(m: &[u8]) -> ECP {
 }
 
 pub fn init() -> isize {
-    let g = ECP4::generator();
-    if g.is_infinity() {
-        return BLS_FAIL;
-    }
-    unsafe {
-        pair4::precomp(&mut G2_TAB, &g);
-    }
+// Uncomment to use precomp
+//    let g = ECP4::generator();
+//    if g.is_infinity() {
+//        return BLS_FAIL;
+//    }
+//    unsafe {
+//        pair4::precomp(&mut G2_TAB, &g);
+//    }
     BLS_OK
 }
 
@@ -150,18 +154,19 @@ pub fn core_verify(sig: &[u8], m: &[u8], w: &[u8]) -> isize {
         return BLS_FAIL;
     }
 
+// Uncomment to use precomp
     // Use new multi-pairing mechanism
-    let mut r = pair4::initmp();
+    //let mut r = pair4::initmp();
     //    pair4::another(&mut r,&g,&d);
-    unsafe {
-        pair4::another_pc(&mut r, &G2_TAB, &d);
-    }
-    pair4::another(&mut r, &pk, &hm);
-    let mut v = pair4::miller(&mut r);
+    //unsafe {
+    //    pair4::another_pc(&mut r, &G2_TAB, &d);
+    //}
+    //pair4::another(&mut r, &pk, &hm);
+    //let mut v = pair4::miller(&mut r);
 
     //.. or alternatively
-    //    let g = ECP4::generator();
-    //    let mut v = pair4::ate2(&g, &d, &pk, &hm);
+        let g = ECP4::generator();
+        let mut v = pair4::ate2(&g, &d, &pk, &hm);
 
     v = pair4::fexp(&v);
     if v.isunity() {
