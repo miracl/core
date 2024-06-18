@@ -6,6 +6,10 @@ crucified by its lack of support for short fixed length arrays allocated
 from the stack. Instead they are allocated as variable length from the heap, 
 so the code spends more time doing garbage collection than doing crypto.
 
+NEW: 18/06/2024 Int128 type now supported in Swift Version 6.0! So can be used
+in this implementation. Minor changes required to config_big.swift and big.swift
+Unfortunately as of now, its much slower.
+
 Each supported primitive is implemented inside of its own swift namespace. 
 
 So for example to support both ed25519 and the NIST P256 curves, one
@@ -18,7 +22,7 @@ that must be set for the particular curve.
 # Installation and Testing
 
 To build the library and see it in action, copy all of the files in this 
-directory to a fresh root directory. Then execute the python3 script 
+directory to a fresh directory. Then execute the python3 script 
 config32.py or config64.py (depending om whether you want a 32 or 
 64-bit build), and select the curves that you wish to support. Libraries 
 will be built automatically including all of the modules that you will need.
