@@ -95,18 +95,18 @@ fn montgomery_reduce(a: i32) -> i16 {
     let dp=PRIME as i32;
     let dt=(((a&0xffff)*QINV)&0xffff) as i16;
     let t=((a-((dt as i32)*dp))>>16) as i16;
-    return t;
+    t
 }
 
 fn barrett_reduce(a: i16) -> i16 {
     let da=a as i32;
     let mut t=((BARC*da + TWO25) >> 26) as i16;
     t*=PRIME;
-    return a-t;
+    a-t
 }
 
 fn fqmul(a: i16, b: i16) -> i16 {
-    return montgomery_reduce((a as i32)*(b as i32));
+    montgomery_reduce((a as i32)*(b as i32))
 }
 
 fn ntt(r: &mut [i16]) {
@@ -241,7 +241,7 @@ fn expandaij(rho: &[u8],aij: &mut [i16],i:usize,j:usize) {
 fn getbit(b: &[u8],n: usize) -> i16 {
     let wd=n/8;
     let bt=n%8;
-    return ((b[wd]>>bt)&1) as i16;
+    ((b[wd]>>bt)&1) as i16
 }
 
 fn cbd(bts: &[u8],eta: usize,f: &mut [i16]) {
@@ -273,7 +273,7 @@ fn nextword(ab: usize,t: &[u8],ptr: &mut usize,bts: &mut usize) -> i16 {
         *bts -= 8;
         *ptr += 1;
     }
-    return r&mask;
+    r&mask
 }
 
 fn nextbyte16(ab: usize,t: &[i16],ptr: &mut usize,bts: &mut usize) -> u8 {
@@ -292,7 +292,7 @@ fn nextbyte16(ab: usize,t: &[i16],ptr: &mut usize,bts: &mut usize) -> u8 {
         *bts -= ab;
         *ptr += 1;
     }
-    return (r&0xff) as u8;
+    (r&0xff) as u8
 }
 
 fn encode(t: &[i16],len: usize,l: usize,pack: &mut [u8]) {
@@ -309,10 +309,10 @@ fn chk_encode(t: &[i16],len: usize,l: usize,pack: &[u8]) -> u8 {
     let mut bts=0;
     let mut diff=0 as u8;
     for n in 0..len*(DEGREE*l)/8 {
-        let m=nextbyte16(l,t,&mut ptr, &mut bts); 
+        let m=nextbyte16(l,t,&mut ptr, &mut bts);
         diff|=m^pack[n];
     }
-    return diff;
+    diff
 }
 
 fn decode(pack: &[u8],l: usize,t: &mut [i16],len: usize) {
@@ -334,7 +334,7 @@ fn safediv(xx: i32) -> i32 {
   qpart = ((((x as i64)*645083)>>31) as i32)+1;
   x -= qpart*0xD01; q += qpart+(x>>31);
 
-  return q;
+  q
 }
 
 fn compress(t: &mut [i16],len:usize,d:usize) {
@@ -544,13 +544,13 @@ fn cpa_check_encrypt(params: &[usize],coins: &[u8],pk: &[u8],ss: &[u8],ct: &[u8]
     let du=params[3];
     let dv=params[4];
     let ciphertext_size=(du*ck+dv)*DEGREE/8;
-    cpa_base_encrypt(params,coins,pk,ss,&mut u,&mut v);  
+    cpa_base_encrypt(params,coins,pk,ss,&mut u,&mut v);
     let d1=chk_encode(&u,ck,du,ct);
     let d2=chk_encode(&v,1,dv,&ct[ciphertext_size-(dv*DEGREE/8)..]);
     if (d1|d2)==0 {
-        return 0;
+        0
     } else {
-        return 0xff;
+        0xff
     }
 }
 

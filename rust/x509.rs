@@ -126,7 +126,7 @@ fn getalen(tag: u8,b:&[u8],j:usize) -> usize {
             return 0;
         }
     }
-    return len;
+    len
 }
 
 fn skip(len: usize) -> usize {
@@ -136,14 +136,14 @@ fn skip(len: usize) -> usize {
     if len<256 {
         return 3;
     }
-    return 4;
+    4
 }
 
 fn bround(len:usize) -> usize {
     if len%8 == 0 {
         return len;
     }
-    return len+(8-len%8);
+    len+(8-len%8)
 }
 
 impl PKTYPE {
@@ -451,7 +451,7 @@ pub fn extract_private_key(c: &[u8],pk: &mut [u8]) -> PKTYPE {
         ret.kind=RSA;
         ret.curve=16*flen;
     }
-    return ret;
+    ret
 }
 
 //  Input signed cert as octet, and extract signature
@@ -683,7 +683,7 @@ pub fn extract_cert_sig(sc: &[u8],sig: &mut [u8]) -> PKTYPE {
         }
         ret.curve=8*len;
     }
-    return ret;
+    ret
 }
 
 // Extract pointer to cert inside signed cert, and return its length;
@@ -705,7 +705,7 @@ pub fn find_cert(sc: &[u8],ptr: &mut usize) -> usize {
     j+=skip(len);
     let fin=j+len;
     *ptr=k;
-    return fin-k;
+    fin-k
 }
 
 // Extract certificate from signed cert
@@ -720,7 +720,7 @@ pub fn extract_cert(sc: &[u8],cert: &mut [u8]) -> usize {
     for i in k..fin {
         cert[i-k]=sc[i];
     }
-    return n;
+    n
 }
 
 // extract pointer to ASN.1 raw public Key inside certificate, and return its length;
@@ -777,11 +777,11 @@ pub fn find_public_key(c: &[u8],ptr: &mut usize) -> usize {
     if len==0 {
         return 0;
     }
-    j += skip(len); // 
+    j += skip(len); //
 
     let fin=j+len;
     *ptr=k;
-    return fin-k;
+    fin-k
 }
 
 // get Public details from ASN.1 description
@@ -937,7 +937,7 @@ pub fn get_public_key(c: &[u8],key: &mut [u8]) -> PKTYPE {
         }
         ret.curve=8*len;
     }
-    return ret; 
+    ret
 }
 
 // Extract Public Key from inside Certificate
@@ -945,7 +945,7 @@ pub fn extract_public_key(c: &[u8],key: &mut [u8]) -> PKTYPE {
     let mut ptr=0;
     let pklen = find_public_key(c,&mut ptr); // ptr is pointer into certificate, at start of ASN.1 raw public key
     let cc=&c[ptr..ptr+pklen];
-    return get_public_key(&cc,key);
+    get_public_key(&cc,key)
 }
 
 pub fn find_issuer(c: &[u8]) -> FDTYPE {
@@ -982,7 +982,7 @@ pub fn find_issuer(c: &[u8]) -> FDTYPE {
     ret.index=j;
     ret.length=len+skip(len);
 
-    return ret;
+    ret
 }
 
 pub fn find_validity(c: &[u8]) -> usize {
@@ -995,7 +995,7 @@ pub fn find_validity(c: &[u8]) -> usize {
     //    return 0;
     //}
     //j+=skip(len)+len; // skip issuer
-    return j;
+    j
 }
 
 pub fn find_subject(c: &[u8]) -> FDTYPE {
@@ -1011,7 +1011,7 @@ pub fn find_subject(c: &[u8]) -> FDTYPE {
     ret.index=j;
     ret.length=len+skip(len);
 
-    return ret;
+    ret
 }
 
 pub fn self_signed(c: &[u8]) -> bool {
@@ -1036,7 +1036,7 @@ pub fn self_signed(c: &[u8]) -> bool {
     if m!=0 {
         return false;
     }
-    return true;
+    true
 }
 
 // NOTE: When extracting cert information, we actually return just an index to the data inside the cert, and maybe its length
@@ -1093,7 +1093,7 @@ pub fn find_entity_property(c: &[u8],soid: &[u8],start: usize) -> FDTYPE {
         }
         j+=len; // skip over it
     }
-    return ret;
+    ret
 }
 
 pub fn find_start_date(c: &[u8],start: usize) -> usize {
@@ -1115,7 +1115,8 @@ pub fn find_start_date(c: &[u8],start: usize) -> usize {
     } else {
         j+=skip(len);
     }
-    return j;
+
+    j
 }
 
 pub fn find_expiry_date(c: &[u8],start: usize) -> usize {
@@ -1146,7 +1147,8 @@ pub fn find_expiry_date(c: &[u8],start: usize) -> usize {
     } else {
         j+=skip(len);
     }
-    return j;
+
+    j
 }
 
 pub fn find_extensions(c: &[u8]) -> usize {
@@ -1215,7 +1217,8 @@ pub fn find_extension(c: &[u8],soid: &[u8],start:usize) -> FDTYPE {
         }
         j=nj;  // skip over this extension
     }
-    return ret;
+
+    ret
 }
 
 // return 1 if name found, else 0, where name is URL
@@ -1280,6 +1283,6 @@ pub fn find_alt_name(c: &[u8],start: usize,name: &[u8]) -> bool {
             return true;
         }
     }
-    return false;
-}
 
+    false
+}

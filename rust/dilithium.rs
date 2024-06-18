@@ -375,7 +375,7 @@ fn nextbyte32(ab: usize,mx: usize,t: &[i32],ptr:&mut usize,bts: &mut usize) -> u
         *bts -= ab;
         *ptr+=1;
     }
-    return r as u8;
+    r as u8
 }
 
 fn nextbyte16(ab: usize,mx: usize,t: &[i16],ptr:&mut usize,bts: &mut usize) -> u8 {
@@ -401,7 +401,7 @@ fn nextbyte16(ab: usize,mx: usize,t: &[i16],ptr:&mut usize,bts: &mut usize) -> u
         *bts -= ab;
         *ptr += 1;
     }
-    return r as u8;
+    r as u8
 }
 
 fn nextbyte8(ab: usize,mx: usize,t: &[i8],ptr:&mut usize,bts: &mut usize) -> u8 {
@@ -427,7 +427,7 @@ fn nextbyte8(ab: usize,mx: usize,t: &[i8],ptr:&mut usize,bts: &mut usize) -> u8 
         *bts -= ab;
         *ptr+=1;
     }
-    return r as u8;
+    r as u8
 }
 
 fn nextword(ab: usize,mx: usize,t: &[u8],ptr:&mut usize,bts: &mut usize) -> i32 {
@@ -452,7 +452,7 @@ fn nextword(ab: usize,mx: usize,t: &[u8],ptr:&mut usize,bts: &mut usize) -> i32 
     if mxm!=0 {
         w=mxm-w;
     }
-    return w;
+    w
 }
 
 fn pack_pk(params: &[usize],pk: &mut [u8],rho: &[u8],t1: &[i16]) {
@@ -765,7 +765,7 @@ fn p2r(r0: &mut i32) -> i16 {
     let d=(1<<D) as i32;
     let r1=(*r0+d/2-1)>>D;
     *r0-=r1 << D;
-    return r1 as i16;
+    r1 as i16
 }
 
 fn power2round(t: &[i32],t0: &mut [i16],t1: &mut [i16]) {
@@ -794,7 +794,7 @@ fn decompose_lo(params: &[usize],a: i32) -> i32 {
     let mut a0=a-a1*2*gamma2;
     a0 -= (((PRIME-1)/2-a0)>>31)&PRIME;
     a0 += (a0>>31)&PRIME;
-    return a0;
+    a0
 }
 
 fn decompose_hi(params: &[usize],a: i32) -> i8 {
@@ -808,7 +808,7 @@ fn decompose_hi(params: &[usize],a: i32) -> i8 {
         a1  = (a1*11275 + (1 << 23)) >> 24;
         a1 ^= ((43 - a1) >> 31) & a1;
     }
-    return a1 as i8;
+    a1 as i8
 }
 
 fn lobits(params: &[usize],r0: &mut [i32],r: &[i32]) {
@@ -839,7 +839,7 @@ fn makepartialhint(params: &[usize],h: &mut [u8],hptr: usize,z: &[i32],r: &[i32]
             h[ptr]=(m&0xff) as u8; ptr += 1;
         }
     }
-    return ptr;
+    ptr
 }
 
 fn usepartialhint(params: &[usize],r: &mut [i8],h: &[u8], hptr: usize,i: usize,w: &[i32]) -> usize{
@@ -867,7 +867,7 @@ fn usepartialhint(params: &[usize],r: &mut [i8],h: &[u8], hptr: usize,i: usize,w
         }
         r[m]=a1;
     }
-    return ptr;
+    ptr
 }
 
 fn infinity_norm(w: &[i32]) -> i32 {
@@ -1155,7 +1155,7 @@ fn verify(params: &[usize],pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
             return false;
         }
     }
-    return true;
+    true
 }
 
 // Dilithium API
@@ -1165,11 +1165,11 @@ pub fn keypair_2(tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
 }
 
 pub fn signature_2(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
-    return signature(&PARAMS_2,sk,m,sig);
+    signature(&PARAMS_2,sk,m,sig)
 }
 
 pub fn verify_2(pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
-    return verify(&PARAMS_2,pk,m,sig);
+    verify(&PARAMS_2,pk,m,sig)
 }
 
 
@@ -1178,11 +1178,11 @@ pub fn keypair_3(tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
 }
 
 pub fn signature_3(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
-    return signature(&PARAMS_3,sk,m,sig);
+    signature(&PARAMS_3,sk,m,sig)
 }
 
 pub fn verify_3(pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
-    return verify(&PARAMS_3,pk,m,sig);
+    verify(&PARAMS_3,pk,m,sig)
 }
 
 
@@ -1191,9 +1191,9 @@ pub fn keypair_5(tau: &[u8],sk: &mut [u8],pk: &mut [u8]) {
 }
 
 pub fn signature_5(sk: &[u8],m: &[u8],sig: &mut[u8]) -> usize {
-    return signature(&PARAMS_5,sk,m,sig);
+    signature(&PARAMS_5,sk,m,sig)
 }
 
 pub fn verify_5(pk: &[u8],m: &[u8],sig: &[u8]) -> bool {
-    return verify(&PARAMS_5,pk,m,sig);
+    verify(&PARAMS_5,pk,m,sig)
 }
