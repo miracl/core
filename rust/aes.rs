@@ -433,9 +433,7 @@ impl AES {
 
             k += 4;
             for j in 0..4 {
-                let t = p[j];
-                p[j] = q[j];
-                q[j] = t;
+                core::mem::swap(&mut p[j], &mut q[j]);
             }
         }
 
@@ -521,9 +519,7 @@ impl AES {
 
             k += 4;
             for j in 0..4 {
-                let t = p[j];
-                p[j] = q[j];
-                q[j] = t;
+                core::mem::swap(&mut p[j], &mut q[j]);
             }
         }
 
