@@ -1253,10 +1253,10 @@ pub fn find_alt_name(c: &[u8],start: usize,name: &[u8]) -> bool {
         let mut cmp=true;
         let mut m=0;
         let nlen=name.len();
-        if c[j]=='*' as u8 {
+        if c[j] == b'*' {
             j+=1; len-=1; // skip over *
             while m<nlen { // advance to first .
-                if name[m]=='.' as u8 {
+                if name[m] == b'.' {
                     break;
                 }
                 m+=1;
