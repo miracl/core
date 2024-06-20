@@ -164,9 +164,7 @@ impl RAND {
     }
 }
 
-
-
-/* test main program 
+/* test main program
 
 fn main() {
     let mut raw : [u8;100]=[0;100];

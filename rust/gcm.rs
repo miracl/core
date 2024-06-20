@@ -42,10 +42,7 @@ pub struct GCM {
 impl GCM {
     fn pack(b: [u8; 4]) -> u32 {
         /* pack bytes into a 32-bit Word */
-        ((b[0] as u32) << 24)
-            | ((b[1] as u32) << 16)
-            | ((b[2] as u32) << 8)
-            | (b[3] as u32)
+        ((b[0] as u32) << 24) | ((b[1] as u32) << 16) | ((b[2] as u32) << 8) | (b[3] as u32)
     }
 
     fn unpack(a: u32) -> [u8; 4] {
@@ -299,7 +296,7 @@ impl GCM {
                 if let Some(sp) = plain {
                     cipher[j] = sp[j] ^ cb[i];
                 } else {
-                    cipher[j] ^=cb[i];
+                    cipher[j] ^= cb[i];
                 }
 
                 self.statex[i] ^= cipher[j];
@@ -353,7 +350,7 @@ impl GCM {
                 if j >= len {
                     break;
                 }
-                let oc:u8;
+                let oc: u8;
                 if let Some(sc) = cipher {
                     oc = sc[j];
                 } else {
@@ -377,7 +374,7 @@ impl GCM {
     }
 
     /* Finish and extract Tag */
-    pub fn finish(&mut self,tag: &mut [u8], extract: bool) {
+    pub fn finish(&mut self, tag: &mut [u8], extract: bool) {
         /* Finish off GHASH and extract tag (MAC) */
         self.wrap();
         /* extract tag */
@@ -427,20 +424,20 @@ impl GCM {
     }
 }
 
-pub fn encrypt(c: &mut [u8],t: &mut [u8],k: &[u8],iv: &[u8],h: &[u8],p: &[u8]) {
-	let mut g=GCM::new();
-	g.init(k.len(),k,iv.len(),iv);
-	g.add_header(h,h.len());
-	g.add_plain(c,Some(p),p.len());
-	g.finish(t,true)
+pub fn encrypt(c: &mut [u8], t: &mut [u8], k: &[u8], iv: &[u8], h: &[u8], p: &[u8]) {
+    let mut g = GCM::new();
+    g.init(k.len(), k, iv.len(), iv);
+    g.add_header(h, h.len());
+    g.add_plain(c, Some(p), p.len());
+    g.finish(t, true)
 }
 
-pub fn decrypt(p: &mut [u8],t: &mut [u8],k: &[u8],iv: &[u8],h: &[u8],c: &[u8]) {
-	let mut g=GCM::new();
-	g.init(k.len(),k,iv.len(),iv);
-	g.add_header(h,h.len());
-	g.add_cipher(p,Some(c),c.len());
-	g.finish(t,true);
+pub fn decrypt(p: &mut [u8], t: &mut [u8], k: &[u8], iv: &[u8], h: &[u8], c: &[u8]) {
+    let mut g = GCM::new();
+    g.init(k.len(), k, iv.len(), iv);
+    g.add_header(h, h.len());
+    g.add_cipher(p, Some(c), c.len());
+    g.finish(t, true);
 }
 
 /*
