@@ -147,77 +147,125 @@ impl HASH384 {
         HASH384::s(19, x) ^ HASH384::s(61, x) ^ HASH384::r(6, x)
     }
 
-    pub fn as_bytes(&self,array: &mut [u8]) {
-        let mut ptr=0;
+    pub fn as_bytes(&self, array: &mut [u8]) {
+        let mut ptr = 0;
         for i in 0..2 {
-            let mut t=self.length[i];
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=t as u8; ptr+=1;
+            let mut t = self.length[i];
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = t as u8;
+            ptr += 1;
         }
         for i in 0..8 {
-            let mut t=self.h[i];
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=t as u8; ptr+=1;
+            let mut t = self.h[i];
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = t as u8;
+            ptr += 1;
         }
         for i in 0..80 {
-            let mut t=self.w[i];
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=(t%256) as u8; t/=256; ptr+=1;
-            array[ptr]=t as u8; ptr+=1;
+            let mut t = self.w[i];
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = (t % 256) as u8;
+            t /= 256;
+            ptr += 1;
+            array[ptr] = t as u8;
+            ptr += 1;
         }
     }
 
-    pub fn from_bytes(&mut self,array: &[u8]) {
-        let mut ptr=0;
+    pub fn from_bytes(&mut self, array: &[u8]) {
+        let mut ptr = 0;
         for i in 0..2 {
-            let mut t=array[ptr+7] as u64; 
-            t=256*t+(array[ptr+6] as u64); 
-            t=256*t+(array[ptr+5] as u64); 
-            t=256*t+(array[ptr+4] as u64); 
-            t=256*t+(array[ptr+3] as u64); 
-            t=256*t+(array[ptr+2] as u64); 
-            t=256*t+(array[ptr+1] as u64); 
-            t=256*t+(array[ptr] as u64); 
-            self.length[i]=t; ptr+=8;
+            let mut t = array[ptr + 7] as u64;
+            t = 256 * t + (array[ptr + 6] as u64);
+            t = 256 * t + (array[ptr + 5] as u64);
+            t = 256 * t + (array[ptr + 4] as u64);
+            t = 256 * t + (array[ptr + 3] as u64);
+            t = 256 * t + (array[ptr + 2] as u64);
+            t = 256 * t + (array[ptr + 1] as u64);
+            t = 256 * t + (array[ptr] as u64);
+            self.length[i] = t;
+            ptr += 8;
         }
         for i in 0..8 {
-            let mut t=array[ptr+7] as u64; 
-            t=256*t+(array[ptr+6] as u64); 
-            t=256*t+(array[ptr+5] as u64); 
-            t=256*t+(array[ptr+4] as u64); 
-            t=256*t+(array[ptr+3] as u64); 
-            t=256*t+(array[ptr+2] as u64); 
-            t=256*t+(array[ptr+1] as u64); 
-            t=256*t+(array[ptr] as u64); 
-            self.h[i]=t; ptr+=8;
+            let mut t = array[ptr + 7] as u64;
+            t = 256 * t + (array[ptr + 6] as u64);
+            t = 256 * t + (array[ptr + 5] as u64);
+            t = 256 * t + (array[ptr + 4] as u64);
+            t = 256 * t + (array[ptr + 3] as u64);
+            t = 256 * t + (array[ptr + 2] as u64);
+            t = 256 * t + (array[ptr + 1] as u64);
+            t = 256 * t + (array[ptr] as u64);
+            self.h[i] = t;
+            ptr += 8;
         }
         for i in 0..80 {
-            let mut t=array[ptr+7] as u64;
-            t=256*t+(array[ptr+6] as u64); 
-            t=256*t+(array[ptr+5] as u64); 
-            t=256*t+(array[ptr+4] as u64); 
-            t=256*t+(array[ptr+3] as u64); 
-            t=256*t+(array[ptr+2] as u64); 
-            t=256*t+(array[ptr+1] as u64); 
-            t=256*t+(array[ptr] as u64); 
-            self.w[i]=t; ptr+=8;
+            let mut t = array[ptr + 7] as u64;
+            t = 256 * t + (array[ptr + 6] as u64);
+            t = 256 * t + (array[ptr + 5] as u64);
+            t = 256 * t + (array[ptr + 4] as u64);
+            t = 256 * t + (array[ptr + 3] as u64);
+            t = 256 * t + (array[ptr + 2] as u64);
+            t = 256 * t + (array[ptr + 1] as u64);
+            t = 256 * t + (array[ptr] as u64);
+            self.w[i] = t;
+            ptr += 8;
         }
     }
 
@@ -298,15 +346,15 @@ impl HASH384 {
             h: [0; 8],
             w: [0; 80],
         };
-        nh.length[0]=hh.length[0];
-        nh.length[1]=hh.length[1];
+        nh.length[0] = hh.length[0];
+        nh.length[1] = hh.length[1];
         for i in 0..80 {
             nh.w[i] = hh.w[i];
         }
         for i in 0..8 {
             nh.h[i] = hh.h[i];
         }
-        nh        
+        nh
     }
 
     /* process a single byte */
@@ -362,7 +410,7 @@ impl HASH384 {
         digest
     }
     pub fn continuing_hash(&self) -> [u8; 48] {
-        let mut sh=HASH384::new_copy(self);
+        let mut sh = HASH384::new_copy(self);
         sh.hash()
     }
 }

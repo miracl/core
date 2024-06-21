@@ -4,7 +4,7 @@
 
 The original contribution to the Apache Milagro Cryptographic Library (AMCL) has now been extended and is being re-released as MIRACL Core.
 
-MIRACL Core is a multi-lingual and architecturally agnostic cryptographic library that supports elliptic curve cryptography, pairing-friendly curve cryptography, RSA, AES symmetric encryption and hash functions. It is designed from the ground up with side-channel attack resistance in mind. Multiple curves can be supported in a single application..
+MIRACL Core is a multi-lingual and architecturally agnostic cryptographic library that supports elliptic curve cryptography, pairing-friendly curve cryptography, RSA, AES symmetric encryption and hash functions. It is designed from the ground up with side-channel attack resistance in mind. Multiple curves can be supported in a single application.
 
 All code is entirely in the supported high-level languages. No assembly language and no third party code is required - these libraries are completely self-contained. MIRACL Core is currently available in the C, C++, Go, Rust, Python, Java, Javascript and Swift programming languages. Via code translators it can be easily translated to other languages (like WebAssembly and C#). It is particularly suitable for smaller devices such as those supported by Arduino infrastructure.
 

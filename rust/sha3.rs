@@ -58,7 +58,7 @@ pub struct SHA3 {
     rate: usize,
     len: usize,
     //s: [[u64; 5]; 5],
-    s: [u64;25],
+    s: [u64; 25],
 }
 
 impl SHA3 {
@@ -68,77 +68,77 @@ impl SHA3 {
 
     fn transform(&mut self) {
         for k in 0..ROUNDS {
-            let c0=self.s[0]^self.s[5]^self.s[10]^self.s[15]^self.s[20];
-            let c1=self.s[1]^self.s[6]^self.s[11]^self.s[16]^self.s[21];
-            let c2=self.s[2]^self.s[7]^self.s[12]^self.s[17]^self.s[22];
-            let c3=self.s[3]^self.s[8]^self.s[13]^self.s[18]^self.s[23];
-            let c4=self.s[4]^self.s[9]^self.s[14]^self.s[19]^self.s[24];
+            let c0 = self.s[0] ^ self.s[5] ^ self.s[10] ^ self.s[15] ^ self.s[20];
+            let c1 = self.s[1] ^ self.s[6] ^ self.s[11] ^ self.s[16] ^ self.s[21];
+            let c2 = self.s[2] ^ self.s[7] ^ self.s[12] ^ self.s[17] ^ self.s[22];
+            let c3 = self.s[3] ^ self.s[8] ^ self.s[13] ^ self.s[18] ^ self.s[23];
+            let c4 = self.s[4] ^ self.s[9] ^ self.s[14] ^ self.s[19] ^ self.s[24];
 
-            let d0=c4^SHA3::rotl(c1,1);
-            let d1=c0^SHA3::rotl(c2,1);
-            let d2=c1^SHA3::rotl(c3,1);
-            let d3=c2^SHA3::rotl(c4,1);
-            let d4=c3^SHA3::rotl(c0,1);
+            let d0 = c4 ^ SHA3::rotl(c1, 1);
+            let d1 = c0 ^ SHA3::rotl(c2, 1);
+            let d2 = c1 ^ SHA3::rotl(c3, 1);
+            let d3 = c2 ^ SHA3::rotl(c4, 1);
+            let d4 = c3 ^ SHA3::rotl(c0, 1);
 
-            let b00 = self.s[0]^d0;
-            let b02 = SHA3::rotl(self.s[1]^d1, 1);
-            let b04 = SHA3::rotl(self.s[2]^d2, 62);
-            let b01 = SHA3::rotl(self.s[3]^d3, 28);
-            let b03 = SHA3::rotl(self.s[4]^d4, 27);
+            let b00 = self.s[0] ^ d0;
+            let b02 = SHA3::rotl(self.s[1] ^ d1, 1);
+            let b04 = SHA3::rotl(self.s[2] ^ d2, 62);
+            let b01 = SHA3::rotl(self.s[3] ^ d3, 28);
+            let b03 = SHA3::rotl(self.s[4] ^ d4, 27);
 
-            let b13 = SHA3::rotl(self.s[5]^d0, 36);
-            let b10 = SHA3::rotl(self.s[6]^d1, 44);
-            let b12 = SHA3::rotl(self.s[7]^d2, 6);
-            let b14 = SHA3::rotl(self.s[8]^d3, 55);
-            let b11 = SHA3::rotl(self.s[9]^d4, 20);
+            let b13 = SHA3::rotl(self.s[5] ^ d0, 36);
+            let b10 = SHA3::rotl(self.s[6] ^ d1, 44);
+            let b12 = SHA3::rotl(self.s[7] ^ d2, 6);
+            let b14 = SHA3::rotl(self.s[8] ^ d3, 55);
+            let b11 = SHA3::rotl(self.s[9] ^ d4, 20);
 
-            let b21 = SHA3::rotl(self.s[10]^d0, 3);
-            let b23 = SHA3::rotl(self.s[11]^d1, 10);
-            let b20 = SHA3::rotl(self.s[12]^d2, 43);
-            let b22 = SHA3::rotl(self.s[13]^d3, 25);
-            let b24 = SHA3::rotl(self.s[14]^d4, 39);
+            let b21 = SHA3::rotl(self.s[10] ^ d0, 3);
+            let b23 = SHA3::rotl(self.s[11] ^ d1, 10);
+            let b20 = SHA3::rotl(self.s[12] ^ d2, 43);
+            let b22 = SHA3::rotl(self.s[13] ^ d3, 25);
+            let b24 = SHA3::rotl(self.s[14] ^ d4, 39);
 
-            let b34 = SHA3::rotl(self.s[15]^d0, 41);
-            let b31 = SHA3::rotl(self.s[16]^d1, 45);
-            let b33 = SHA3::rotl(self.s[17]^d2, 15);
-            let b30 = SHA3::rotl(self.s[18]^d3, 21);
-            let b32 = SHA3::rotl(self.s[19]^d4, 8);
+            let b34 = SHA3::rotl(self.s[15] ^ d0, 41);
+            let b31 = SHA3::rotl(self.s[16] ^ d1, 45);
+            let b33 = SHA3::rotl(self.s[17] ^ d2, 15);
+            let b30 = SHA3::rotl(self.s[18] ^ d3, 21);
+            let b32 = SHA3::rotl(self.s[19] ^ d4, 8);
 
-            let b42 = SHA3::rotl(self.s[20]^d0, 18);
-            let b44 = SHA3::rotl(self.s[21]^d1, 2);
-            let b41 = SHA3::rotl(self.s[22]^d2, 61);
-            let b43 = SHA3::rotl(self.s[23]^d3, 56);
-            let b40 = SHA3::rotl(self.s[24]^d4, 14);   
+            let b42 = SHA3::rotl(self.s[20] ^ d0, 18);
+            let b44 = SHA3::rotl(self.s[21] ^ d1, 2);
+            let b41 = SHA3::rotl(self.s[22] ^ d2, 61);
+            let b43 = SHA3::rotl(self.s[23] ^ d3, 56);
+            let b40 = SHA3::rotl(self.s[24] ^ d4, 14);
 
-            self.s[0]=b00^(!b10&b20);
-            self.s[1]=b10^(!b20&b30);
-            self.s[2]=b20^(!b30&b40);
-            self.s[3]=b30^(!b40&b00);
-            self.s[4]=b40^(!b00&b10);
+            self.s[0] = b00 ^ (!b10 & b20);
+            self.s[1] = b10 ^ (!b20 & b30);
+            self.s[2] = b20 ^ (!b30 & b40);
+            self.s[3] = b30 ^ (!b40 & b00);
+            self.s[4] = b40 ^ (!b00 & b10);
 
-            self.s[5]=b01^(!b11&b21);
-            self.s[6]=b11^(!b21&b31);
-            self.s[7]=b21^(!b31&b41);
-            self.s[8]=b31^(!b41&b01);
-            self.s[9]=b41^(!b01&b11);
+            self.s[5] = b01 ^ (!b11 & b21);
+            self.s[6] = b11 ^ (!b21 & b31);
+            self.s[7] = b21 ^ (!b31 & b41);
+            self.s[8] = b31 ^ (!b41 & b01);
+            self.s[9] = b41 ^ (!b01 & b11);
 
-            self.s[10]=b02^(!b12&b22);
-            self.s[11]=b12^(!b22&b32);
-            self.s[12]=b22^(!b32&b42);
-            self.s[13]=b32^(!b42&b02);
-            self.s[14]=b42^(!b02&b12);
+            self.s[10] = b02 ^ (!b12 & b22);
+            self.s[11] = b12 ^ (!b22 & b32);
+            self.s[12] = b22 ^ (!b32 & b42);
+            self.s[13] = b32 ^ (!b42 & b02);
+            self.s[14] = b42 ^ (!b02 & b12);
 
-            self.s[15]=b03^(!b13&b23);
-            self.s[16]=b13^(!b23&b33);
-            self.s[17]=b23^(!b33&b43);
-            self.s[18]=b33^(!b43&b03);
-            self.s[19]=b43^(!b03&b13);
+            self.s[15] = b03 ^ (!b13 & b23);
+            self.s[16] = b13 ^ (!b23 & b33);
+            self.s[17] = b23 ^ (!b33 & b43);
+            self.s[18] = b33 ^ (!b43 & b03);
+            self.s[19] = b43 ^ (!b03 & b13);
 
-            self.s[20]=b04^(!b14&b24);
-            self.s[21]=b14^(!b24&b34);
-            self.s[22]=b24^(!b34&b44);
-            self.s[23]=b34^(!b44&b04);
-            self.s[24]=b44^(!b04&b14);
+            self.s[20] = b04 ^ (!b14 & b24);
+            self.s[21] = b14 ^ (!b24 & b34);
+            self.s[22] = b24 ^ (!b34 & b44);
+            self.s[23] = b34 ^ (!b44 & b04);
+            self.s[24] = b44 ^ (!b04 & b14);
 
             self.s[0] ^= RC[k];
         }
@@ -173,9 +173,9 @@ impl SHA3 {
             len: 0,
             s: [0; 25],
         };
-        nh.length=hh.length;
-        nh.len=hh.len;
-        nh.rate=hh.rate;
+        nh.length = hh.length;
+        nh.len = hh.len;
+        nh.rate = hh.rate;
         for i in 0..25 {
             nh.s[i] = hh.s[i];
         }
@@ -191,7 +191,7 @@ impl SHA3 {
         self.s[ind] ^= (byt as u64) << (8 * b);
         self.length += 1;
         if self.length == self.rate {
-            self.length=0;
+            self.length = 0;
             self.transform();
         }
     }
@@ -214,13 +214,13 @@ impl SHA3 {
 
     pub fn squeeze(&mut self, buff: &mut [u8], olen: usize) {
         let mut m = 0;
-        let nb=olen/self.rate;
+        let nb = olen / self.rate;
 
         for _ in 0..nb {
-            for i in 0..self.rate/8 {
-                let mut el=self.s[i];
+            for i in 0..self.rate / 8 {
+                let mut el = self.s[i];
                 for _ in 0..8 {
-                    buff[m]=(el & 0xff) as u8;
+                    buff[m] = (el & 0xff) as u8;
                     m += 1;
                     el >>= 8;
                 }
@@ -228,11 +228,12 @@ impl SHA3 {
             self.transform();
         }
 
-        let mut i=0;
-        while m<olen {
-            let mut el=self.s[i]; i += 1;
+        let mut i = 0;
+        while m < olen {
+            let mut el = self.s[i];
+            i += 1;
             for _ in 0..8 {
-                buff[m]=(el & 0xff) as u8;
+                buff[m] = (el & 0xff) as u8;
                 m += 1;
                 if m >= olen {
                     break;
@@ -241,7 +242,7 @@ impl SHA3 {
             }
         }
 
-/*
+        /*
         loop {
             for i in 0..25 {
                 let mut el = self.s[i];
@@ -284,7 +285,7 @@ impl SHA3 {
     }
 
     pub fn continuing_hash(&mut self, digest: &mut [u8]) {
-        let mut sh=SHA3::new_copy(self);    
+        let mut sh = SHA3::new_copy(self);
         sh.hash(digest)
     }
 
@@ -303,8 +304,8 @@ impl SHA3 {
     }
 
     pub fn continuing_shake(&mut self, digest: &mut [u8], olen: usize) {
-        let mut sh=SHA3::new_copy(self); 
-        sh.shake(digest,olen);
+        let mut sh = SHA3::new_copy(self);
+        sh.shake(digest, olen);
     }
 }
 

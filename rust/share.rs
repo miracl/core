@@ -60,11 +60,11 @@ const LTAB: [u8; 256] = [
 pub struct SHARE<'a> {
     id: u8,
     nsr: u8,
-    b: &'a [u8]
+    b: &'a [u8],
 }
 
 fn mul(x: u8, y: u8) -> u8 {
-/* x.y= AntiLog(Log(x) + Log(y)) */
+    /* x.y= AntiLog(Log(x) + Log(y)) */
     let ix = (x as usize) & 0xff;
     let iy = (y as usize) & 0xff;
     let lx = (LTAB[ix] as usize) & 0xff;
@@ -77,64 +77,77 @@ fn mul(x: u8, y: u8) -> u8 {
     }
 }
 
-fn add(x: u8,y: u8) -> u8 {
-    x^y
+fn add(x: u8, y: u8) -> u8 {
+    x ^ y
 }
 
 fn inv(x: u8) -> u8 {
-   let ix = (x as usize) & 0xff;
-   let lx = (LTAB[ix] as usize) & 0xff;
-   PTAB[255-lx]
+    let ix = (x as usize) & 0xff;
+    let lx = (LTAB[ix] as usize) & 0xff;
+    PTAB[255 - lx]
 }
 
 /* Lagrange interpolation */
 fn interpolate(n: usize, x: &[u8], y: &[u8]) -> u8 {
-    let mut yp=0 as u8;
+    let mut yp = 0 as u8;
     for i in 0..n {
-        let mut p=1 as u8;
+        let mut p = 1 as u8;
         for j in 0..n {
-            if i!=j {
-                p=mul(p,mul(x[j],inv(add(x[i],x[j]))));
+            if i != j {
+                p = mul(p, mul(x[j], inv(add(x[i], x[j]))));
             }
         }
-        yp=add(yp,mul(p,y[i]));
+        yp = add(yp, mul(p, y[i]));
     }
     yp
 }
 
 impl<'a> SHARE<'a> {
-
-/* Return a share of M */
-/* input id - Unique share ID */
-/* input nsr - Number of shares required for recovery */
-/* input Message M to be shared */
-/* input Random number generator rng to be used */
-/* return share structure */
-// must bind lifetime of the byte array stored by structure, to lifetime of s
-    pub fn new(ident: usize,numshare: usize,s: &'a mut [u8],m: &[u8], rng: &mut RAND) -> SHARE<'a> {
-        if ident<1 || ident>=256 || numshare<2 || numshare>=256 {
-            return SHARE{id:0,nsr:0,b:s};
+    /* Return a share of M */
+    /* input id - Unique share ID */
+    /* input nsr - Number of shares required for recovery */
+    /* input Message M to be shared */
+    /* input Random number generator rng to be used */
+    /* return share structure */
+    // must bind lifetime of the byte array stored by structure, to lifetime of s
+    pub fn new(
+        ident: usize,
+        numshare: usize,
+        s: &'a mut [u8],
+        m: &[u8],
+        rng: &mut RAND,
+    ) -> SHARE<'a> {
+        if ident < 1 || ident >= 256 || numshare < 2 || numshare >= 256 {
+            return SHARE {
+                id: 0,
+                nsr: 0,
+                b: s,
+            };
         }
-        let len=m.len();
+        let len = m.len();
         for j in 0..len {
-            let mut x=ident as u8;
-            s[j]=m[j];
+            let mut x = ident as u8;
+            s[j] = m[j];
             for _ in 1..numshare {
-                s[j]=add(s[j],mul(rng.getbyte(),x));
-                x=mul(x,ident as u8);
+                s[j] = add(s[j], mul(rng.getbyte(), x));
+                x = mul(x, ident as u8);
             }
         }
-        SHARE{id: ident as u8,nsr: numshare as u8,b:s}
+        SHARE {
+            id: ident as u8,
+            nsr: numshare as u8,
+            b: s,
+        }
     }
-/* recover M from shares */
-    pub fn recover(m: &mut [u8],s: &[SHARE]) {
-        let len=s[0].b.len();
-        let nsr=s[0].nsr as usize;
-        if nsr!=s.len() {
+    /* recover M from shares */
+    pub fn recover(m: &mut [u8], s: &[SHARE]) {
+        let len = s[0].b.len();
+        let nsr = s[0].nsr as usize;
+        if nsr != s.len() {
             return;
         }
         for i in 1..nsr {
-            if s[i].nsr as usize != nsr || s[i].b.len()!=len {
+            if s[i].nsr as usize != nsr || s[i].b.len() != len {
                 return;
             }
         }
@@ -143,12 +156,10 @@ impl<'a> SHARE<'a> {
 
         for j in 0..len {
             for i in 0..nsr {
-                x[i]=s[i].id;
-                y[i]=s[i].b[j];
+                x[i] = s[i].id;
+                y[i] = s[i].b[j];
             }
-            m[j]=interpolate(nsr,&x,&y);
+            m[j] = interpolate(nsr, &x, &y);
         }
     }
 }
-
-

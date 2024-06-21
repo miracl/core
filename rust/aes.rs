@@ -174,14 +174,13 @@ const RTABLE: [u32; 256] = [
 ];
 
 pub struct AES {
-//    nk: usize,
+    //    nk: usize,
     nr: usize,
     mode: usize,
     fkey: [u32; 60],
     rkey: [u32; 60],
     pub f: [u8; 16],
 }
-
 
 fn rotl8(x: u32) -> u32 {
     ((x) << 8) | ((x) >> 24)
@@ -197,10 +196,7 @@ fn rotl24(x: u32) -> u32 {
 
 fn pack(b: [u8; 4]) -> u32 {
     /* pack bytes into a 32-bit Word */
-    ((b[3] as u32) << 24)
-        | ((b[2] as u32) << 16)
-        | ((b[1] as u32) << 8)
-        | (b[0] as u32)
+    ((b[3] as u32) << 24) | ((b[2] as u32) << 16) | ((b[1] as u32) << 8) | (b[0] as u32)
 }
 
 fn unpack(a: u32) -> [u8; 4] {
@@ -241,10 +237,7 @@ fn product(x: u32, y: u32) -> u8 {
     let xb = unpack(x);
     let yb = unpack(y);
 
-    bmul(xb[0], yb[0])
-        ^ bmul(xb[1], yb[1])
-        ^ bmul(xb[2], yb[2])
-        ^ bmul(xb[3], yb[3])
+    bmul(xb[0], yb[0]) ^ bmul(xb[1], yb[1]) ^ bmul(xb[2], yb[2]) ^ bmul(xb[3], yb[3])
 }
 
 fn invmixcol(x: u32) -> u32 {
@@ -271,10 +264,9 @@ fn increment(f: &mut [u8; 16]) {
 }
 
 impl AES {
-
     pub fn new() -> AES {
         AES {
-//            nk: 0,
+            //            nk: 0,
             nr: 0,
             mode: 0,
             fkey: [0; 60],
@@ -329,33 +321,32 @@ impl AES {
         j = nk;
         let mut k = 0;
         while j < n {
-            self.fkey[j] =
-                self.fkey[j - nk] ^ subbyte(rotl24(self.fkey[j - 1])) ^ (RCO[k] as u32);
-            if nk<=6 { 
-		for i in 1..nk {
-			if (i + j) >= n {
-				break;
-			}
-			self.fkey[i + j] = self.fkey[i + j - nk] ^ self.fkey[i + j - 1];
-		}
-	    } else {
-		for i in 1..4  {
-			if (i + j) >= n {
-				break;
-			}
-			self.fkey[i + j] = self.fkey[i + j - nk] ^ self.fkey[i + j - 1];
-		}
-		
-		if (j + 4) < n {
-			self.fkey[j + 4] = self.fkey[j + 4 - nk] ^ subbyte(self.fkey[j + 3]);
-		}
-		for i in 5..nk {
-			if (i + j) >= n {
-				break;
-			}
-			self.fkey[i + j] = self.fkey[i + j - nk] ^ self.fkey[i + j - 1];
-		}	        
-	    }
+            self.fkey[j] = self.fkey[j - nk] ^ subbyte(rotl24(self.fkey[j - 1])) ^ (RCO[k] as u32);
+            if nk <= 6 {
+                for i in 1..nk {
+                    if (i + j) >= n {
+                        break;
+                    }
+                    self.fkey[i + j] = self.fkey[i + j - nk] ^ self.fkey[i + j - 1];
+                }
+            } else {
+                for i in 1..4 {
+                    if (i + j) >= n {
+                        break;
+                    }
+                    self.fkey[i + j] = self.fkey[i + j - nk] ^ self.fkey[i + j - 1];
+                }
+
+                if (j + 4) < n {
+                    self.fkey[j + 4] = self.fkey[j + 4 - nk] ^ subbyte(self.fkey[j + 3]);
+                }
+                for i in 5..nk {
+                    if (i + j) >= n {
+                        break;
+                    }
+                    self.fkey[i + j] = self.fkey[i + j - nk] ^ self.fkey[i + j - 1];
+                }
+            }
             j += nk;
             k += 1;
         }
@@ -433,9 +424,7 @@ impl AES {
 
             k += 4;
             for j in 0..4 {
-                let t = p[j];
-                p[j] = q[j];
-                q[j] = t;
+                core::mem::swap(&mut p[j], &mut q[j]);
             }
         }
 
@@ -521,9 +510,7 @@ impl AES {
 
             k += 4;
             for j in 0..4 {
-                let t = p[j];
-                p[j] = q[j];
-                q[j] = t;
+                core::mem::swap(&mut p[j], &mut q[j]);
             }
         }
 
@@ -637,9 +624,7 @@ impl AES {
                 0
             }
 
-            _ => {
-                0
-            }
+            _ => 0,
         }
     }
 
@@ -716,9 +701,7 @@ impl AES {
                 0
             }
 
-            _ => {
-                0
-            }
+            _ => 0,
         }
     }
 
@@ -736,7 +719,7 @@ impl AES {
 }
 
 /* AES encryption/decryption. Encrypt byte array m using key k and returns ciphertext c */
-pub fn cbc_iv0_encrypt(k: &[u8], m: &[u8],c: &mut [u8]) -> usize {
+pub fn cbc_iv0_encrypt(k: &[u8], m: &[u8], c: &mut [u8]) -> usize {
     /* AES CBC encryption, with Null IV and key K */
     /* Input is from an octet string m, output is to an octet string c */
     /* Input is padded as necessary to make up a full final block */
@@ -768,7 +751,8 @@ pub fn cbc_iv0_encrypt(k: &[u8], m: &[u8],c: &mut [u8]) -> usize {
         a.encrypt(&mut buff);
         for j in 0..16 {
             if opt < c.len() {
-                c[opt]=buff[j]; opt+=1;
+                c[opt] = buff[j];
+                opt += 1;
             }
         }
     }
@@ -783,8 +767,9 @@ pub fn cbc_iv0_encrypt(k: &[u8], m: &[u8],c: &mut [u8]) -> usize {
     a.encrypt(&mut buff);
 
     for j in 0..16 {
-        if opt<c.len() {
-            c[opt]=buff[j]; opt+=1;
+        if opt < c.len() {
+            c[opt] = buff[j];
+            opt += 1;
         }
     }
     a.end();
@@ -829,8 +814,9 @@ pub fn cbc_iv0_decrypt(k: &[u8], c: &[u8], m: &mut [u8]) -> usize {
             break;
         }
         for j in 0..16 {
-            if opt<m.len() {
-                m[opt]=buff[j]; opt+=1;
+            if opt < m.len() {
+                m[opt] = buff[j];
+                opt += 1;
             }
         }
     }
@@ -851,8 +837,9 @@ pub fn cbc_iv0_decrypt(k: &[u8], c: &[u8], m: &mut [u8]) -> usize {
 
     if !bad {
         for i in 0..16 - padlen {
-            if opt<m.len() {
-                m[opt]=buff[i]; opt+=1;
+            if opt < m.len() {
+                m[opt] = buff[i];
+                opt += 1;
             }
         }
     }
