@@ -123,7 +123,7 @@ fn ntt(r: &mut [i16]) {
 }
 
 fn invntt(r: &mut [i16]) {
-    let f = 1441 as i16;
+    let f = 1441i16;
     let mut k = 127;
     let mut len = 2;
     while len <= 128 {
@@ -244,8 +244,8 @@ fn getbit(b: &[u8], n: usize) -> i16 {
 
 fn cbd(bts: &[u8], eta: usize, f: &mut [i16]) {
     for i in 0..DEGREE {
-        let mut a = 0 as i16;
-        let mut b = 0 as i16;
+        let mut a = 0;
+        let mut b = 0;
         for j in 0..eta {
             a += getbit(bts, 2 * i * eta + j);
             b += getbit(bts, 2 * i * eta + eta + j);
@@ -307,7 +307,7 @@ fn encode(t: &[i16], len: usize, l: usize, pack: &mut [u8]) {
 fn chk_encode(t: &[i16], len: usize, l: usize, pack: &[u8]) -> u8 {
     let mut ptr = 0;
     let mut bts = 0;
-    let mut diff = 0 as u8;
+    let mut diff = 0;
     for n in 0..len * (DEGREE * l) / 8 {
         let m = nextbyte16(l, t, &mut ptr, &mut bts);
         diff |= m ^ pack[n];
@@ -326,7 +326,7 @@ fn decode(pack: &[u8], l: usize, t: &mut [i16], len: usize) {
 // Bernsteins safe division by 0xD01
 fn safediv(xx: i32) -> i32 {
     let mut x = xx;
-    let mut q = 0 as i32;
+    let mut q = 0;
 
     let mut qpart = (((x as i64) * 645083) >> 31) as i32;
     x -= qpart * 0xD01;
@@ -340,7 +340,7 @@ fn safediv(xx: i32) -> i32 {
 }
 
 fn compress(t: &mut [i16], len: usize, d: usize) {
-    let twod = (1 << d) as i32;
+    let twod = 1 << d;
     let dp = PRIME as i32;
     for i in 0..len * DEGREE {
         t[i] += (t[i] >> 15) & PRIME;
@@ -348,7 +348,7 @@ fn compress(t: &mut [i16], len: usize, d: usize) {
     }
 }
 fn decompress(t: &mut [i16], len: usize, d: usize) {
-    let twod1 = (1 << (d - 1)) as i32;
+    let twod1 = 1 << (d - 1);
     let dp = PRIME as i32;
     for i in 0..len * DEGREE {
         t[i] = ((dp * (t[i] as i32) + twod1) >> d) as i16;

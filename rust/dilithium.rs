@@ -469,8 +469,8 @@ fn pack_pk(params: &[usize], pk: &mut [u8], rho: &[u8], t1: &[i16]) {
     for i in 0..32 {
         pk[i] = rho[i];
     }
-    let mut ptr = 0 as usize;
-    let mut bts = 0 as usize;
+    let mut ptr = 0;
+    let mut bts = 0;
     let mut n = 32;
     for _ in 0..(ck * DEGREE * TD) / 8 {
         pk[n] = nextbyte16(TD, 0, t1, &mut ptr, &mut bts);
@@ -483,8 +483,8 @@ fn unpack_pk(params: &[usize], rho: &mut [u8], t1: &mut [i16], pk: &[u8]) {
     for i in 0..32 {
         rho[i] = pk[i];
     }
-    let mut ptr = 0 as usize;
-    let mut bts = 0 as usize;
+    let mut ptr = 0;
+    let mut bts = 0;
     for i in 0..ck * DEGREE {
         t1[i] = nextword(TD, 0, &pk[32..], &mut ptr, &mut bts) as i16;
     }
@@ -517,8 +517,8 @@ fn pack_sk(
         sk[n] = tr[i];
         n += 1;
     }
-    let mut ptr = 0 as usize;
-    let mut bts = 0 as usize;
+    let mut ptr = 0;
+    let mut bts = 0;
 
     for _ in 0..(el * DEGREE * lg2eta1) / 8 {
         sk[n] = nextbyte8(lg2eta1, eta, s1, &mut ptr, &mut bts);
@@ -565,8 +565,8 @@ fn unpack_sk(
         tr[i] = sk[n];
         n += 1;
     }
-    let mut ptr = 0 as usize;
-    let mut bts = 0 as usize;
+    let mut ptr = 0;
+    let mut bts = 0;
 
     for i in 0..el * DEGREE {
         s1[i] = nextword(lg2eta1, eta, &sk[n..], &mut ptr, &mut bts) as i8;
@@ -597,8 +597,8 @@ fn pack_sig(params: &[usize], sig: &mut [u8], z: &mut [i32], ct: &[u8], h: &[u8]
         sig[i] = ct[i];
     }
     let mut n = 32;
-    let mut ptr = 0 as usize;
-    let mut bts = 0 as usize;
+    let mut ptr = 0;
+    let mut bts = 0;
 
     for i in 0..el {
         let row = DEGREE * i;
@@ -632,8 +632,8 @@ fn unpack_sig(params: &[usize], z: &mut [i32], ct: &mut [u8], h: &mut [u8], sig:
         ct[i] = sig[i];
     }
 
-    let mut ptr = 0 as usize;
-    let mut bts = 0 as usize;
+    let mut ptr = 0;
+    let mut bts = 0;
 
     for i in 0..el * DEGREE {
         let mut t = nextword(lg + 1, 0, &sig[32..], &mut ptr, &mut bts);
@@ -663,8 +663,8 @@ fn sample_sn(params: &[usize], rhod: &[u8], s: &mut [i8], n: usize) {
     let eta = params[5];
     let lg2eta1 = params[6];
 
-    let mut ptr = 0 as usize;
-    let mut bts = 0 as usize;
+    let mut ptr = 0;
+    let mut bts = 0;
     for m in 0..DEGREE {
         loop {
             s[m] = nextword(lg2eta1, 0, &buff, &mut ptr, &mut bts) as i8;
@@ -692,8 +692,8 @@ fn sample_y(params: &[usize], k: usize, rhod: &[u8], y: &mut [i32]) {
         sh.process((ki >> 8) as u8);
         sh.shake(&mut buff, ((lg + 1) * DEGREE) / 8);
 
-        let mut ptr = 0 as usize;
-        let mut bts = 0 as usize;
+        let mut ptr = 0;
+        let mut bts = 0;
 
         for m in 0..DEGREE {
             let mut w = nextword(lg + 1, 0, &buff, &mut ptr, &mut bts);
@@ -710,8 +710,8 @@ fn crh1(params: &[usize], h: &mut [u8], rho: &[u8], t1: &[i16]) {
         sh.process(rho[j]);
     }
     let ck = params[3];
-    let mut ptr = 0 as usize;
-    let mut bts = 0 as usize;
+    let mut ptr = 0;
+    let mut bts = 0;
 
     for _ in 0..(ck * DEGREE * TD) / 8 {
         sh.process(nextbyte16(TD, 0, t1, &mut ptr, &mut bts));
@@ -753,8 +753,8 @@ fn h4(params: &[usize], ct: &mut [u8], mu: &[u8], w1: &[i8]) {
         sh.process(mu[j]);
     }
 
-    let mut ptr = 0 as usize;
-    let mut bts = 0 as usize;
+    let mut ptr = 0;
+    let mut bts = 0;
 
     for _ in 0..(ck * DEGREE * w1b) / 8 {
         sh.process(nextbyte8(w1b, 0, w1, &mut ptr, &mut bts));
@@ -801,7 +801,7 @@ fn sampleinball(params: &[usize], ct: &[u8], c: &mut [i32]) {
 }
 
 fn p2r(r0: &mut i32) -> i16 {
-    let d = (1 << D) as i32;
+    let d = 1 << D;
     let r1 = (*r0 + d / 2 - 1) >> D;
     *r0 -= r1 << D;
     r1 as i16
@@ -919,7 +919,7 @@ fn usepartialhint(
 }
 
 fn infinity_norm(w: &[i32]) -> i32 {
-    let mut n = 0 as i32;
+    let mut n = 0i32;
     for m in 0..DEGREE {
         let mut az = w[m];
         if az > PRIME / 2 {
@@ -1015,7 +1015,7 @@ fn signature(params: &[usize], sk: &[u8], m: &[u8], sig: &mut [u8]) -> usize {
 
     let tau = params[0];
     let lg = params[1];
-    let gamma1 = (1 << lg) as i32;
+    let gamma1 = 1 << lg;
     let dv = params[2] as i32;
     let gamma2 = (PRIME - 1) / dv;
     let ck = params[3];
@@ -1148,7 +1148,7 @@ fn verify(params: &[usize], pk: &[u8], m: &[u8], sig: &[u8]) -> bool {
 
     let tau = params[0];
     let lg = params[1];
-    let gamma1 = (1 << lg) as i32;
+    let gamma1 = 1 << lg;
     let ck = params[3];
     let el = params[4];
     let eta = params[5];

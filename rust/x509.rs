@@ -182,7 +182,7 @@ impl FDTYPE {
 pub fn extract_private_key(c: &[u8], pk: &mut [u8]) -> PKTYPE {
     let mut soid: [u8; 12] = [0; 12];
     let mut ret = PKTYPE::new();
-    let mut j = 0 as usize;
+    let mut j = 0;
     let pklen = pk.len();
 
     let mut len = getalen(SEQ, c, j); // Check for expected SEQ clause, and get length
@@ -471,7 +471,7 @@ pub fn extract_private_key(c: &[u8], pk: &mut [u8]) -> PKTYPE {
 pub fn extract_cert_sig(sc: &[u8], sig: &mut [u8]) -> PKTYPE {
     let mut soid: [u8; 12] = [0; 12];
     let mut ret = PKTYPE::new();
-    let mut j = 0 as usize;
+    let mut j = 0;
     let mut len = getalen(SEQ, sc, j); // Check for expected SEQ clause, and get length
     let siglen = sig.len();
 
