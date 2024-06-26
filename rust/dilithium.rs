@@ -490,6 +490,7 @@ fn unpack_pk(params: &[usize], rho: &mut [u8], t1: &mut [i16], pk: &[u8]) {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn pack_sk(
     params: &[usize],
     sk: &mut [u8],
@@ -538,6 +539,7 @@ fn pack_sk(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn unpack_sk(
     params: &[usize],
     rho: &mut [u8],
