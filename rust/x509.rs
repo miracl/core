@@ -960,7 +960,7 @@ pub fn extract_public_key(c: &[u8], key: &mut [u8]) -> PKTYPE {
     let mut ptr = 0;
     let pklen = find_public_key(c, &mut ptr); // ptr is pointer into certificate, at start of ASN.1 raw public key
     let cc = &c[ptr..ptr + pklen];
-    get_public_key(&cc, key)
+    get_public_key(cc, key)
 }
 
 pub fn find_issuer(c: &[u8]) -> FDTYPE {

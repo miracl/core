@@ -1025,7 +1025,7 @@ fn signature(params: &[usize], sk: &[u8], m: &[u8], sig: &mut [u8]) -> usize {
     let omega = params[7];
 
     unpack_sk(
-        params, &mut rho, &mut bk, &mut tr, &mut s1, &mut s2, &mut t0, &sk,
+        params, &mut rho, &mut bk, &mut tr, &mut s1, &mut s2, &mut t0, sk,
     );
 
     // signature

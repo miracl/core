@@ -381,7 +381,7 @@ pub fn xmd_expand(hash: usize, hlen: usize, okm: &mut [u8], olen: usize, dst: &[
             0,
             Some(b"H2C-OVERSIZE-DST-"),
             -1,
-            Some(&dst),
+            Some(dst),
         );
         xmd_expand_short_dst(hash, hlen, okm, olen, &w[0..hlen], msg);
     } else {

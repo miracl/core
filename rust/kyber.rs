@@ -505,7 +505,7 @@ fn cpa_base_encrypt(
         poly_reduce(&mut u[row..]);
     }
 
-    decode(&pk, 12, &mut p, ck);
+    decode(pk, 12, &mut p, ck);
 
     poly_mul(v, &p, &q);
     for i in 1..ck {
@@ -524,7 +524,7 @@ fn cpa_base_encrypt(
 
     poly_acc(v, &w);
 
-    decode(&ss, 1, &mut r, 1);
+    decode(ss, 1, &mut r, 1);
     decompress(&mut r, 1, 1);
     poly_acc(v, &r);
     poly_reduce(v);
@@ -640,7 +640,7 @@ fn cca_encrypt(params: &[usize], randbytes32: &[u8], pk: &[u8], ss: &mut [u8], c
     sh.process_array(&hm);
     sh.process_array(&h);
     sh.hash(&mut g);
-    cpa_encrypt(params, &g[32..], &pk, &hm, ct);
+    cpa_encrypt(params, &g[32..], pk, &hm, ct);
 
     sh = SHA3::new(sha3::HASH256);
     for i in 0..ciphertext_size {
@@ -680,7 +680,7 @@ fn cca_decrypt(params: &[usize], sk: &[u8], ct: &[u8], ss: &mut [u8]) {
     }
 
     sh = SHA3::new(sha3::HASH256);
-    sh.process_array(&ct);
+    sh.process_array(ct);
     sh.hash(&mut m);
 
     sh = SHA3::new(sha3::SHAKE256);
