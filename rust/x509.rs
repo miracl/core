@@ -1002,15 +1002,16 @@ pub fn find_issuer(c: &[u8]) -> FDTYPE {
 
 pub fn find_validity(c: &[u8]) -> usize {
     let pos = find_issuer(c);
-    let j = pos.index + pos.length; // skip issuer
+    pos.index + pos.length // skip issuer
 
+    //let j = pos.index + pos.length;
     //let mut j=find_issuer(c);
     //let len=getalen(SEQ,c,j);
     //if len==0 {
     //    return 0;
     //}
     //j+=skip(len)+len; // skip issuer
-    j
+    //j
 }
 
 pub fn find_subject(c: &[u8]) -> FDTYPE {
