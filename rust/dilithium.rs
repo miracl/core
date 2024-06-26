@@ -1193,7 +1193,7 @@ fn verify(params: &[usize], pk: &[u8], m: &[u8], sig: &[u8]) -> bool {
         poly_sub(&mut r, &w);
         intt(&mut r);
 
-        hints = usepartialhint(params, &mut w1d[row..], &mut hint, hints, i, &r);
+        hints = usepartialhint(params, &mut w1d[row..], &hint, hints, i, &r);
         if hints > omega {
             return false;
         }
