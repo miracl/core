@@ -491,7 +491,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp12.c", fnamec)
             copy_keep_file("fp12.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -536,7 +536,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("mpin.c", fnamec)
             copy_keep_file("mpin.h", fnameh)
- 
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -567,7 +567,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp8.c", fnamec)
             copy_keep_file("fp8.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -642,7 +642,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("bls192.c", fnamec)
             copy_keep_file("bls192.h", fnameh)
- 
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -659,7 +659,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp8.c", fnamec)
             copy_keep_file("fp8.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -691,7 +691,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp16.c", fnamec)
             copy_keep_file("fp16.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -706,7 +706,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("fp48.c", fnamec)
             copy_keep_file("fp48.h", fnameh)
- 
+
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
             replace(fnamec,"ZZZ",tc)
@@ -721,7 +721,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("pair8.c", fnamec)
             copy_keep_file("pair8.h", fnameh)
-  
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -751,7 +751,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("bls256.c", fnamec)
             copy_keep_file("bls256.h", fnameh)
- 
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)

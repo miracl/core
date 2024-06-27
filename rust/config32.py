@@ -178,8 +178,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fpath+"ecp.rs","@AB@",ab)
     replace(fpath+"ecp.rs","@G2@",g2)
 
-    replace(fpath+"ecp.rs","@HC@",hc) 
-    replace(fpath+"ecp.rs","@HC2@",hc2) 
+    replace(fpath+"ecp.rs","@HC@",hc)
+    replace(fpath+"ecp.rs","@HC2@",hc2)
 
     if cs == "128" :
         replace(fpath+"ecp.rs","@HT@","32")

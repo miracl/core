@@ -713,7 +713,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("pair8.cpp", fnamec)
             copy_keep_file("pair8.h", fnameh)
-  
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
