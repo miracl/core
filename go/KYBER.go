@@ -19,6 +19,10 @@
 
 /* Kyber API */
 
+// Now conforms to new ML_KEM standard
+// See https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf
+//
+
 package core
 
 //import "fmt"
