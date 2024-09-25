@@ -19,6 +19,10 @@
 
 /* Kyber API high-level functions  */
 
+// Now conforms to new ML_KEM standard
+// See https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf
+//
+
 var KYBER = function(ctx) {
     "use strict";
 
@@ -347,6 +351,9 @@ var KYBER = function(ctx) {
    
             for (var i=0;i<32;i++)
                 sh.process(tau[i]); 
+
+            sh.process(ck&0xff);
+
             var bf = sh.hash();
 
 //console.log("bf = "+bf[6]);
@@ -600,7 +607,7 @@ var KYBER = function(ctx) {
 
         CCA_encrypt: function(params,randbytes32,pk,ss,ct) {
             var coins = new Uint8Array(32);
-
+            var hm = new Uint8Array(32);
             var ck=params[0];
             var du=params[3];
             var dv=params[4];
@@ -608,12 +615,15 @@ var KYBER = function(ctx) {
             var public_key_size=32+ck*(KYBER.DEGREE*3)/2;
             var ciphertext_size=(du*ck+dv)*KYBER.DEGREE/8;
 
-            var sh = new ctx.SHA3(ctx.SHA3.HASH256);
             for (var i=0;i<32;i++)
-                sh.process(randbytes32[i]);
-            var hm= sh.hash();
+                hm[i]=randbytes32[i];
 
-            sh = new ctx.SHA3(ctx.SHA3.HASH256);
+            //var sh = new ctx.SHA3(ctx.SHA3.HASH256);
+            //for (var i=0;i<32;i++)
+            //    sh.process(randbytes32[i]);
+            //var hm= sh.hash();
+
+            var sh = new ctx.SHA3(ctx.SHA3.HASH256);
             for (var i=0;i<public_key_size;i++)
                 sh.process(pk[i]);
             var h= sh.hash();
@@ -630,6 +640,10 @@ var KYBER = function(ctx) {
 
             KYBER.CPA_encrypt(params,coins,pk,hm,ct);
 
+            for (var i=0;i<32;i++)
+                ss[i]=g[i];
+
+/*
             sh = new ctx.SHA3(ctx.SHA3.HASH256);
             for (var i=0;i<ciphertext_size;i++)
                 sh.process(ct[i]);
@@ -642,6 +656,7 @@ var KYBER = function(ctx) {
                 sh.process(h[i]);
 
             sh.shake(ss,shared_secret_size);
+*/
         },
 
         CPA_decrypt: function(params,SK,CT,SS) {
@@ -726,7 +741,18 @@ var KYBER = function(ctx) {
             for (var i=0;i<32;i++)
                 coins[i]=g[i+32];
 
+            sh = new ctx.SHA3(ctx.SHA3.SHAKE256);
+            for (var i=0;i<32;i++)
+                sh.process(z[i]);
+            for (var i=0;i<ciphertext_size;i++)
+                sh.process(CT[i]);
+            sh.shake(SS,shared_secret_size);
+
             var mask=KYBER.CPA_check_encrypt(params,coins,PK,m,CT);
+
+            for (var i=0;i<32;i++)
+                SS[i]^=(SS[i]^g[i])&(~mask);
+/*
             for (var i=0;i<32;i++)
                 g[i]^=(g[i]^z[i])&mask;               // substitute z for Kb on failure
 
@@ -740,7 +766,7 @@ var KYBER = function(ctx) {
                 sh.process(g[i]);
             for (var i=0;i<32;i++)
                 sh.process(h[i]);
-            sh.shake(SS,shared_secret_size);
+            sh.shake(SS,shared_secret_size); */
         },
 
         keypair512: function(r64,SK,PK) {

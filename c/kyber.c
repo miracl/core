@@ -397,6 +397,9 @@ void KYBER_CPA_keypair(const int *params,byte *tau,octet *sk,octet *pk)
    
     for (i=0;i<32;i++)
         SHA3_process(&sh,tau[i]); 
+#ifdef ML_KEM
+    SHA3_process(&sh,(byte)ck);  /*** ML-KEM change ***/
+#endif
 	SHA3_hash(&sh,(char *)buff);
 	for (i=0;i<32;i++)
 	{
@@ -642,11 +645,15 @@ void KYBER_CCA_encrypt(const int *params,byte *randbytes32,octet *pk,octet *ss,o
     int dv=params[4];
     int shared_secret_size=params[5];
 
-
+#ifdef ML_KEM
+    for (i=0;i<32;i++)
+        hm[i]=randbytes32[i];
+#else
     SHA3_init(&sh,SHA3_HASH256);               // H(m)
     for (i=0;i<32;i++)
         SHA3_process(&sh,randbytes32[i]);
     SHA3_hash(&sh,(char *)hm);
+#endif
 
     SHA3_init(&sh,SHA3_HASH256);               // H(pk)
     for (i=0;i<pk->len;i++)
@@ -664,6 +671,10 @@ void KYBER_CCA_encrypt(const int *params,byte *randbytes32,octet *pk,octet *ss,o
         coins[i]=g[i+32];
     KYBER_CPA_encrypt(params,coins,pk,&HM,ct);
     
+#ifdef ML_KEM
+    for (i=0;i<32;i++)
+        ss->val[i]=g[i];
+#else
     SHA3_init(&sh,SHA3_HASH256);              // H(ct)
     for (i=0;i<ct->len;i++)
         SHA3_process(&sh,(byte)ct->val[i]);
@@ -676,6 +687,7 @@ void KYBER_CCA_encrypt(const int *params,byte *randbytes32,octet *pk,octet *ss,o
         SHA3_process(&sh,h[i]);
 
     SHA3_shake(&sh,ss->val,shared_secret_size); // could be any length?
+#endif
     ss->len=shared_secret_size;
 }
 
@@ -753,8 +765,22 @@ void KYBER_CCA_decrypt(const int *params,octet *sk,octet *ct,octet *ss)
 
     for (i=0;i<32;i++)
         coins[i]=g[i+32];
+
+#ifdef ML_KEM
+    SHA3_init(&sh,SHAKE256);                  // K=PRF2(z|ct)
+    for (i=0;i<32;i++)
+        SHA3_process(&sh,z[i]);
+    for (i=0;i<ct->len;i++)
+        SHA3_process(&sh,(byte)ct->val[i]);
+    SHA3_shake(&sh,ss->val,shared_secret_size);
+#endif
+
     mask=KYBER_CPA_check_encrypt(params,coins,&PK,&M,ct);       // encrypt again with public key - FO transform CPA->CCA 
 
+#ifdef ML_KEM
+    for (i=0;i<32;i++)
+        ss->val[i]^=(ss->val[i]^g[i])&(~mask);               // substitute g for K on success
+#else
     for (i=0;i<32;i++)
         g[i]^=(g[i]^z[i])&mask;               // substitute z for Kb on failure
 
@@ -770,6 +796,7 @@ void KYBER_CCA_decrypt(const int *params,octet *sk,octet *ct,octet *ss)
         SHA3_process(&sh,h[i]);
     
     SHA3_shake(&sh,ss->val,shared_secret_size); // could be any length?
+#endif
     ss->len=shared_secret_size;
     sk->len=olen; // restore length
 }

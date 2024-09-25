@@ -22,6 +22,10 @@
    M.Scott 06/07/2022
 */
 
+// Now conforms to new ML_KEM standard
+// See https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf
+//
+
 use crate::sha3;
 use crate::sha3::SHA3;
 
@@ -376,6 +380,8 @@ fn cpa_keypair(params: &[usize], tau: &[u8], sk: &mut [u8], pk: &mut [u8]) {
     for i in 0..32 {
         sh.process(tau[i]);
     }
+    sh.process(ck as u8);   /*** ML-KEM change ***/
+
     sh.hash(&mut buff);
     for i in 0..32 {
         rho[i] = buff[i];
@@ -618,19 +624,22 @@ fn cca_encrypt(params: &[usize], randbytes32: &[u8], pk: &[u8], ss: &mut [u8], c
     let mut h: [u8; 32] = [0; 32];
     let mut g: [u8; 64] = [0; 64];
     let ck = params[0];
-    let du = params[3];
-    let dv = params[4];
+    //let du = params[3];
+    //let dv = params[4];
     let public_key_size = 32 + ck * (DEGREE * 3) / 2;
-    let ciphertext_size = (du * ck + dv) * DEGREE / 8;
-    let shared_secret_size = params[5];
+    //let ciphertext_size = (du * ck + dv) * DEGREE / 8;
+    //let shared_secret_size = params[5];
+
+    for i in 0..32 {
+        hm[i]=randbytes32[i];
+    }
+    //let mut sh = SHA3::new(sha3::HASH256);
+    //for i in 0..32 {
+    //    sh.process(randbytes32[i]);
+    //}
+    //sh.hash(&mut hm);
 
     let mut sh = SHA3::new(sha3::HASH256);
-    for i in 0..32 {
-        sh.process(randbytes32[i]);
-    }
-    sh.hash(&mut hm);
-
-    sh = SHA3::new(sha3::HASH256);
     for i in 0..public_key_size {
         sh.process(pk[i]);
     }
@@ -642,15 +651,18 @@ fn cca_encrypt(params: &[usize], randbytes32: &[u8], pk: &[u8], ss: &mut [u8], c
     sh.hash(&mut g);
     cpa_encrypt(params, &g[32..], pk, &hm, ct);
 
-    sh = SHA3::new(sha3::HASH256);
-    for i in 0..ciphertext_size {
-        sh.process(ct[i]);
+    for i in 0..32 {
+        ss[i]=g[i];
     }
-    sh.hash(&mut h);
-    sh = SHA3::new(sha3::SHAKE256);
-    sh.process_array(&g[0..32]);
-    sh.process_array(&h);
-    sh.shake(ss, shared_secret_size);
+    //sh = SHA3::new(sha3::HASH256);
+    //for i in 0..ciphertext_size {
+    //    sh.process(ct[i]);
+    //}
+    //sh.hash(&mut h);
+    //sh = SHA3::new(sha3::SHAKE256);
+    //sh.process_array(&g[0..32]);
+    //sh.process_array(&h);
+    //sh.shake(ss, shared_secret_size);
 }
 
 fn cca_decrypt(params: &[usize], sk: &[u8], ct: &[u8], ss: &mut [u8]) {
@@ -673,20 +685,29 @@ fn cca_decrypt(params: &[usize], sk: &[u8], ct: &[u8], ss: &mut [u8]) {
     sh.process_array(h);
     sh.hash(&mut g);
 
+    sh=SHA3::new(sha3::SHAKE256); /*** ML_KEM ***/
+    sh.process_array(&z[0..32]);
+    sh.process_array(ct);
+    sh.shake(ss, shared_secret_size);
+
     let mask = cpa_check_encrypt(params, &g[32..], pk, &m, ct); // FO check ct is correct
 
-    for i in 0..32 {
-        g[i] ^= (g[i] ^ z[i]) & mask;
+    for i in 0..32 {  /*** ML_KEM ***/
+        ss[i]^=(ss[i]^g[i])&(!mask);
     }
 
-    sh = SHA3::new(sha3::HASH256);
-    sh.process_array(ct);
-    sh.hash(&mut m);
+    //for i in 0..32 {
+    //    g[i] ^= (g[i] ^ z[i]) & mask;
+    //}
 
-    sh = SHA3::new(sha3::SHAKE256);
-    sh.process_array(&g[0..32]);
-    sh.process_array(&m);
-    sh.shake(ss, shared_secret_size);
+    //sh = SHA3::new(sha3::HASH256);
+    //sh.process_array(ct);
+    //sh.hash(&mut m);
+
+    //sh = SHA3::new(sha3::SHAKE256);
+    //sh.process_array(&g[0..32]);
+    //sh.process_array(&m);
+    //sh.shake(ss, shared_secret_size);
 }
 
 // ********************* Kyber API ******************************

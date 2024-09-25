@@ -405,6 +405,8 @@ if __name__ == '__main__':
             testing=True
 
     os.system("cargo new mcore")
+    with open("mcore"+slashtext+"Cargo.toml","a") as cargofile:
+        cargofile.write("\n[features]\nstd=[]\n")
     #os.system("mkdir mcore"+slashtext+"src")
     os.system(copytext+ "hash*.rs mcore"+slashtext+"src"+slashtext+".")
     os.system(copytext+ "hmac.rs mcore"+slashtext+"src"+slashtext+".")

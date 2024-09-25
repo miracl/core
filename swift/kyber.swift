@@ -402,6 +402,9 @@ public struct KYBER
         for i in 0..<32 { 
             sh.process(tau[i])
         }
+
+        sh.process(UInt8(ck));
+
         let bf = sh.hash()
         for i in 0..<32 {
             rho[i]=bf[i]
@@ -651,25 +654,28 @@ public struct KYBER
 
     static func CCA_encrypt(_ params:[Int],_ randbytes32:[UInt8],_ pk:[UInt8],_ ss:inout [UInt8],_ ct:inout [UInt8]) {
         var coins=[UInt8](repeating: 0,count: 32)
-
+        var hm = [UInt8](repeating: 0,count: 32)
         let ck=params[0]
-        let du=params[3]
-        let dv=params[4]
-        let shared_secret_size=params[5]
+        //let du=params[3]
+        //let dv=params[4]
+        //let shared_secret_size=params[5]
         let public_key_size=32+ck*(KY_DEGREE*3)/2
-        let ciphertext_size=(du*ck+dv)*KY_DEGREE/8
+        //let ciphertext_size=(du*ck+dv)*KY_DEGREE/8
+
+        for i in 0..<32 {
+            hm[i]=randbytes32[i]
+        }
+        //var sh = SHA3(SHA3.HASH256)
+        //for i in 0..<32 {
+        //    sh.process(randbytes32[i])
+        //}
+        //let hm = sh.hash()
 
         var sh = SHA3(SHA3.HASH256)
-        for i in 0..<32 {
-            sh.process(randbytes32[i])
-        }
-        let hm = sh.hash()
-
-        sh = SHA3(SHA3.HASH256)
         for i in 0..<public_key_size {
             sh.process(pk[i])
         }
-        var h = sh.hash()
+        let h = sh.hash()
 
         sh = SHA3(SHA3.HASH512)
         for i in 0..<32 {
@@ -686,6 +692,10 @@ public struct KYBER
 
         CPA_encrypt(params,coins,pk,hm,&ct);
 
+        for i in 0..<32 {
+            ss[i]=g[i]
+        }
+/*
         sh = SHA3(SHA3.HASH256)
         for i in 0..<ciphertext_size {
             sh.process(ct[i])
@@ -701,6 +711,7 @@ public struct KYBER
         }
 
         sh.shake(&ss,shared_secret_size)
+*/
     }
 
 	static func CPA_decrypt(_ params:[Int],_ SK:[UInt8],_ CT:[UInt8],_ SS:inout [UInt8]) {
@@ -782,13 +793,28 @@ public struct KYBER
 		for i in 0..<32 {
 			sh.process(h[i])
         }
-		var g = sh.hash()
+		let g = sh.hash()
 
 		for i in 0..<32 {
 			coins[i]=g[i+32]
         }
 
+        sh = SHA3(SHA3.SHAKE256)
+        for i in 0..<32 {
+			sh.process(z[i])
+        }
+        for i in 0..<ciphertext_size {
+			sh.process(CT[i])
+        }
+        sh.shake(&SS,shared_secret_size)
+
 		let mask=CPA_check_encrypt(params,coins,PK,m,CT)
+
+        for i in 0..<32 {
+            SS[i] ^= (SS[i]^g[i])&(~mask)
+        }
+        
+/*
 		for i in 0..<32 {
 			g[i]^=(g[i]^z[i])&mask               // substitute z for Kb on failure
         }
@@ -806,7 +832,7 @@ public struct KYBER
 		for i in 0..<32 {
 			sh.process(h[i])
         }
-		sh.shake(&SS,shared_secret_size)
+		sh.shake(&SS,shared_secret_size) */
 	}
 
 	public static func keypair512(_ r64:[UInt8],_ SK:inout [UInt8],_ PK:inout [UInt8]) {

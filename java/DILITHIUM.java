@@ -29,9 +29,18 @@ Might be simpler to wait for hardware support for SHA3 before attempting further
    M.Scott 13/10/2022
 */
 
+// See https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf
+// Minor API changes required for ML_DSA, 32 byte random component (rn) required for hedged non-deterministic signature (recommended). Set to NULL for deterministic signature
+// Also domain seperating context string required for signature and verification. Set to Nnull if not required.
+
+// For prehash modes, set ph to True and create message as OID||H(m) where OID identifies the hash function H, else ph to False
+
+
 package org.miracl.core;
 
 public final class DILITHIUM {
+
+    public static final int TRSIZE = 64;
 
 //q= 8380417
     public static final int DL_LGN = 8;
@@ -50,23 +59,23 @@ public final class DILITHIUM {
     public static final int DL_MAXL = 7;
     public static final int DL_YBYTES = (((DL_MAXLG+1)*DL_DEGREE)/8);
 
-    public static final int SK_SIZE_2 = (32*3+DL_DEGREE*(4*13+4*3+4*3)/8);
+    public static final int SK_SIZE_2 = (64+TRSIZE+DL_DEGREE*(4*13+4*3+4*3)/8);
     public static final int PK_SIZE_2 = ((4*DL_DEGREE*DL_TD)/8+32);
     public static final int SIG_SIZE_2 = ((DL_DEGREE*4*(17+1))/8+80+4+32);
 
-    public static final int SK_SIZE_3 = (32*3+DL_DEGREE*(6*13+5*4+6*4)/8);
+    public static final int SK_SIZE_3 = (64+TRSIZE+DL_DEGREE*(6*13+5*4+6*4)/8);
     public static final int PK_SIZE_3 = ((6*DL_DEGREE*DL_TD)/8+32);
-    public static final int SIG_SIZE_3 = ((DL_DEGREE*5*(19+1))/8+55+6+32);
+    public static final int SIG_SIZE_3 = ((DL_DEGREE*5*(19+1))/8+55+6+48);
 
-    public static final int SK_SIZE_5 = (32*3+DL_DEGREE*(8*13+7*3+8*3)/8);
+    public static final int SK_SIZE_5 = (64+TRSIZE+DL_DEGREE*(8*13+7*3+8*3)/8);
     public static final int PK_SIZE_5 = ((8*DL_DEGREE*DL_TD)/8+32);
-    public static final int SIG_SIZE_5 = ((DL_DEGREE*7*(19+1))/8+75+8+32);
+    public static final int SIG_SIZE_5 = ((DL_DEGREE*7*(19+1))/8+75+8+64);
 
 // parameters for each security level
 // tau,gamma1,gamma2,K,L,eta,lg(2*eta+1),omega
-	public static final int[] PARAMS_2 = {39,17,88,4,4,2,3,80};
-	public static final int[] PARAMS_3 = {49,19,32,6,5,4,4,55};
-	public static final int[] PARAMS_5 = {60,19,32,8,7,2,3,75};
+	public static final int[] PARAMS_2 = {39,17,88,4,4,2,3,80,32};
+	public static final int[] PARAMS_3 = {49,19,32,6,5,4,4,55,48};
+	public static final int[] PARAMS_5 = {60,19,32,8,7,2,3,75,64};
 
 	static final int[] roots =  {0x3ffe00,0x64f7,0x581103,0x77f504,0x39e44,0x740119,0x728129,0x71e24,0x1bde2b,0x23e92b,0x7a64ae,0x5ff480,0x2f9a75,0x53db0a,0x2f7a49,0x28e527,0x299658,0xfa070,0x6f65a5,0x36b788,0x777d91,0x6ecaa1,0x27f968,0x5fb37c,0x5f8dd7,0x44fae8,0x6a84f8,0x4ddc99,0x1ad035,0x7f9423,0x3d3201,0x445c5,0x294a67,0x17620,0x2ef4cd,0x35dec5,0x668504,0x49102d,0x5927d5,0x3bbeaf,0x44f586,0x516e7d,0x368a96,0x541e42,0x360400,0x7b4a4e,0x23d69c,0x77a55e,0x65f23e,0x66cad7,0x357e1e,0x458f5a,0x35843f,0x5f3618,0x67745d,0x38738c,0xc63a8,0x81b9a,0xe8f76,0x3b3853,0x3b8534,0x58dc31,0x1f9d54,0x552f2e,0x43e6e6,0x688c82,0x47c1d0,0x51781a,0x69b65e,0x3509ee,0x2135c7,0x67afbc,0x6caf76,0x1d9772,0x419073,0x709cf7,0x4f3281,0x4fb2af,0x4870e1,0x1efca,0x3410f2,0x70de86,0x20c638,0x296e9f,0x5297a4,0x47844c,0x799a6e,0x5a140a,0x75a283,0x6d2114,0x7f863c,0x6be9f8,0x7a0bde,0x1495d4,0x1c4563,0x6a0c63,0x4cdbea,0x40af0,0x7c417,0x2f4588,0xad00,0x6f16bf,0xdcd44,0x3c675a,0x470bcb,0x7fbe7f,0x193948,0x4e49c1,0x24756c,0x7ca7e0,0xb98a1,0x6bc809,0x2e46c,0x49a809,0x3036c2,0x639ff7,0x5b1c94,0x7d2ae1,0x141305,0x147792,0x139e25,0x67b0e1,0x737945,0x69e803,0x51cea3,0x44a79d,0x488058,0x3a97d9,0x1fea93,0x33ff5a,0x2358d4,0x3a41f8,0x4cdf73,0x223dfb,0x5a8ba0,0x498423,0x412f5,0x252587,0x6d04f1,0x359b5d,0x4a28a1,0x4682fd,0x6d9b57,0x4f25df,0xdbe5e,0x1c5e1a,0xde0e6,0xc7f5a,0x78f83,0x67428b,0x7f3705,0x77e6fd,0x75e022,0x503af7,0x1f0084,0x30ef86,0x49997e,0x77dcd7,0x742593,0x4901c3,0x53919,0x4610c,0x5aad42,0x3eb01b,0x3472e7,0x4ce03c,0x1a7cc7,0x31924,0x2b5ee5,0x291199,0x585a3b,0x134d71,0x3de11c,0x130984,0x25f051,0x185a46,0x466519,0x1314be,0x283891,0x49bb91,0x52308a,0x1c853f,0x1d0b4b,0x6fd6a7,0x6b88bf,0x12e11b,0x4d3e3f,0x6a0d30,0x78fde5,0x1406c7,0x327283,0x61ed6f,0x6c5954,0x1d4099,0x590579,0x6ae5ae,0x16e405,0xbdbe7,0x221de8,0x33f8cf,0x779935,0x54aa0d,0x665ff9,0x63b158,0x58711c,0x470c13,0x910d8,0x463e20,0x612659,0x251d8b,0x2573b7,0x7d5c90,0x1ddd98,0x336898,0x2d4bb,0x6d73a8,0x4f4cbf,0x27c1c,0x18aa08,0x2dfd71,0xc5ca5,0x19379a,0x478168,0x646c3e,0x51813d,0x35c539,0x3b0115,0x41dc0,0x21c4f7,0x70fbf5,0x1a35e7,0x7340e,0x795d46,0x1a4cd0,0x645caf,0x1d2668,0x666e99,0x6f0634,0x7be5db,0x455fdc,0x530765,0x5dc1b0,0x7973de,0x5cfd0a,0x2cc93,0x70f806,0x189c2a,0x49c5aa,0x776a51,0x3bcf2c,0x7f234f,0x6b16e0,0x3c15ca,0x155e68,0x72f6b7,0x1e29ce};
 	static final int[] iroots = {0x3ffe00,0x7f7b0a,0x7eafd,0x27cefe,0x78c1dd,0xd5ed8,0xbdee8,0x7c41bd,0x56fada,0x5065b8,0x2c04f7,0x50458c,0x1feb81,0x57b53,0x5bf6d6,0x6401d6,0x7b9a3c,0x42ae00,0x4bde,0x650fcc,0x320368,0x155b09,0x3ae519,0x20522a,0x202c85,0x57e699,0x111560,0x86270,0x492879,0x107a5c,0x703f91,0x5649a9,0x2ab0d3,0x6042ad,0x2703d0,0x445acd,0x44a7ae,0x71508b,0x77c467,0x737c59,0x476c75,0x186ba4,0x20a9e9,0x4a5bc2,0x3a50a7,0x4a61e3,0x19152a,0x19edc3,0x83aa3,0x5c0965,0x495b3,0x49dc01,0x2bc1bf,0x49556b,0x2e7184,0x3aea7b,0x442152,0x26b82c,0x36cfd4,0x195afd,0x4a013c,0x50eb34,0x7e69e1,0x56959a,0x454828,0x375fa9,0x3b3864,0x2e115e,0x15f7fe,0xc66bc,0x182f20,0x6c41dc,0x6b686f,0x6bccfc,0x2b520,0x24c36d,0x1c400a,0x4fa93f,0x3637f8,0x7cfb95,0x1417f8,0x744760,0x33821,0x5b6a95,0x319640,0x66a6b9,0x2182,0x38d436,0x4378a7,0x7212bd,0x10c942,0x7f3301,0x509a79,0x781bea,0x7bd511,0x330417,0x15d39e,0x639a9e,0x6b4a2d,0x5d423,0x13f609,0x59c5,0x12beed,0xa3d7e,0x25cbf7,0x64593,0x385bb5,0x2d485d,0x567162,0x5f19c9,0xf017b,0x4bcf0f,0x7df037,0x376f20,0x302d52,0x30ad80,0xf430a,0x3e4f8e,0x62488f,0x13308b,0x183045,0x5eaa3a,0x4ad613,0x1629a3,0x2e67e7,0x381e31,0x17537f,0x3bf91b,0x61b633,0xce94a,0x6a8199,0x43ca37,0x14c921,0xbcb2,0x4410d5,0x875b0,0x361a57,0x6743d7,0xee7fb,0x7d136e,0x22e2f7,0x66c23,0x221e51,0x2cd89c,0x3a8025,0x3fa26,0x10d9cd,0x197168,0x62b999,0x1b8352,0x659331,0x682bb,0x78abf3,0x65aa1a,0xee40c,0x5e1b0a,0x7bc241,0x44deec,0x4a1ac8,0x2e5ec4,0x1b73c3,0x385e99,0x66a867,0x73835c,0x51e290,0x6735f9,0x7d63e5,0x309342,0x126c59,0x7d0b46,0x4c7769,0x620269,0x28371,0x5a6c4a,0x5ac276,0x1eb9a8,0x39a1e1,0x76cf29,0x38d3ee,0x276ee5,0x1c2ea9,0x198008,0x2b35f4,0x846cc,0x4be732,0x5dc219,0x74041a,0x68fbfc,0x14fa53,0x26da88,0x629f68,0x1386ad,0x1df292,0x4d6d7e,0x6bd93a,0x6e21c,0x15d2d1,0x32a1c2,0x6cfee6,0x145742,0x10095a,0x62d4b6,0x635ac2,0x2daf77,0x362470,0x57a770,0x6ccb43,0x397ae8,0x6785bb,0x59efb0,0x6cd67d,0x41fee5,0x6c9290,0x2785c6,0x56ce68,0x54811c,0x7cc6dd,0x65633a,0x32ffc5,0x4b6d1a,0x412fe6,0x2532bf,0x7b7ef5,0x7aa6e8,0x36de3e,0xbba6e,0x8032a,0x364683,0x4ef07b,0x60df7d,0x2fa50a,0x9ffdf,0x7f904,0xa8fc,0x189d76,0x78507e,0x7360a7,0x71ff1b,0x6381e7,0x7221a3,0x30ba22,0x1244aa,0x395d04,0x35b760,0x4a44a4,0x12db10,0x5aba7a,0x7bcd0c,0x365bde,0x255461,0x5da206,0x33008e,0x459e09,0x5c872d,0x4be0a7,0x5ff56e};
@@ -505,7 +514,7 @@ public final class DILITHIUM {
             sk[i]=rho[i];
         for (i=0;i<32;i++)
             sk[n++]=bK[i];
-        for (i=0;i<32;i++)
+        for (i=0;i<TRSIZE;i++)
             sk[n++]=tr[i];
 		int[] pos=new int[2];
 		pos[0]=pos[1]=0;
@@ -541,7 +550,7 @@ public final class DILITHIUM {
             rho[i]=sk[i];
         for (i=0;i<32;i++)
             bK[i]=sk[n++];
-        for (i=0;i<32;i++)
+        for (i=0;i<TRSIZE;i++)
             tr[i]=sk[n++];
 		int[] pos=new int[2];
 		pos[0]=n; pos[1]=0;
@@ -575,12 +584,13 @@ public final class DILITHIUM {
         int ck=params[3];
         int el=params[4];
         int omega=params[7];
+        int lambda=params[8];
         int i,j,m,n;
         int t;
 
-        for (i=0;i<32;i++)
+        for (i=0;i<lambda;i++)
             sig[i]=ct[i];   
-        n=32;
+        n=lambda;
 		int[] pos=new int[2];
 		pos[0]=pos[1]=0;
 //pre-process z
@@ -611,15 +621,15 @@ public final class DILITHIUM {
         int ck=params[3];
         int el=params[4];
         int omega=params[7];
-
+        int lambda=params[8];
         int i,j;
         int t;
-        int m=32+(el*DL_DEGREE*(lg+1))/8;
-        for (i=0;i<32;i++)
+        int m=lambda+(el*DL_DEGREE*(lg+1))/8;
+        for (i=0;i<lambda;i++)
             ct[i]=sig[i];
 
 		int[] pos=new int[2];
-		pos[0]=32; pos[1]=0;
+		pos[0]=lambda; pos[1]=0;
         for (j=0;j<el;j++)
         {
             for (i=0;i<DL_DEGREE;i++) {
@@ -715,29 +725,49 @@ public final class DILITHIUM {
 			    sh.process(nxt);
             }
 		}
-		sh.shake(H,32);
+		sh.shake(H,TRSIZE);
 //System.out.printf("H[0]= %d\n",H[0]);
 	}
 
 // CRH(tr,M)
-	static void CRH2(byte[] H,byte[] tr,byte[] mess,int mlen)
+	static void CRH2(byte[] H,byte[] tr,boolean ph,byte[] ctx,byte[] mess)
 	{
 		int i;
 		SHA3 sh = new SHA3(SHA3.SHAKE256);
-		for (i=0;i<32;i++)
+		for (i=0;i<TRSIZE;i++)
 			sh.process(tr[i]);
-		for (i=0;i<mlen;i++)
+
+        if (ph) sh.process((byte)1);
+        else    sh.process((byte)0);
+        if (ctx==null) {
+            sh.process((byte)0);
+        } else {
+            sh.process((byte)ctx.length);
+            for (i=0;i<ctx.length;i++)
+                sh.process(ctx[i]);
+        }
+
+		for (i=0;i<mess.length;i++)
 			sh.process(mess[i]);
 		sh.shake(H,64);
 	}
 
 // CRH(K,mu)
-	static void CRH3(byte[] H,byte[] bK,byte[] mu)
+	static void CRH3(byte[] H,byte[] bK,byte[] rn,byte[] mu)
 	{
 		int i;
 		SHA3 sh = new SHA3(SHA3.SHAKE256);
 		for (i=0;i<32;i++)
 			sh.process(bK[i]);
+
+        if (rn==null) {
+            for (i=0;i<32;i++)
+                sh.process((byte)0);        
+        } else {
+            for (i=0;i<32;i++)
+                sh.process(rn[i]);
+        }
+
 		for (i=0;i<64;i++)
 			sh.process(mu[i]);
 		sh.shake(H,64);
@@ -751,6 +781,7 @@ public final class DILITHIUM {
 		pos[0]=0; pos[1]=0;
 		int ck=params[3];
 		int dv=params[2];
+        int lambda=params[8];
 		int w1b=4;
 		if (dv==88) w1b=6;
 		SHA3 sh = new SHA3(SHA3.SHAKE256);
@@ -761,17 +792,18 @@ public final class DILITHIUM {
 			for (i=0;i<(DL_DEGREE*w1b)/8;i++)
 				sh.process(nextbyte8(w1b,0,w1[j],pos));
 		}
-		sh.shake(CT,32);
+		sh.shake(CT,lambda);
 	}
 
 	static void SampleInBall(int[] params,byte[] ct,int[] c)
 	{
 		int i,j,k,n,b,sn;
 		int tau=params[0];
+        int lambda=params[8];
 		byte[] signs=new byte[8];
 		byte[] buff=new byte[136];
  		SHA3 sh = new SHA3(SHA3.SHAKE256);
-		for (i=0;i<32;i++)
+		for (i=0;i<lambda;i++)
 			sh.process(ct[i]);
 		sh.shake(buff,136);
 		for (i=0;i<8;i++)
@@ -929,7 +961,7 @@ public final class DILITHIUM {
 		byte[] rho=new byte[32];
 		byte[] rhod=new byte[64];
 		byte[] bK=new byte[32];
-		byte[] tr=new byte[32];          // 320 bytes
+		byte[] tr=new byte[TRSIZE];          // 320 bytes
 		int[] Aij=new int[DL_DEGREE];     // 1024 bytes
 		int[] w=new int[DL_DEGREE]; // work space  1024 bytes
 		int[] r=new int[DL_DEGREE]; // work space  1024 bytes total = 12352
@@ -946,6 +978,10 @@ public final class DILITHIUM {
   
 		for (i=0;i<32;i++)
 			sh.process(tau[i]); 
+
+        sh.process((byte)ck);
+        sh.process((byte)el);
+
 		sh.shake(buff,128);
 		for (i=0;i<32;i++)
 		{
@@ -1005,14 +1041,14 @@ public final class DILITHIUM {
 		int sklen=pack_sk(params,sk,rho,bK,tr,s1,s2,t0);
 	}
 
-    static int signature(int[] params,byte[] sk,byte[] M,byte[] sig)
+    static int signature(int[] params,boolean ph,byte[] rn,byte[] sk,byte[] CTX,byte[] M,byte[] sig)
     {
         int i,k,nh,fk,j;
         boolean badone;
         byte[] rho = new byte[32];
         byte[] bK = new byte[32];
-        byte[] ct = new byte[32];
-        byte[] tr = new byte[32];
+        byte[] ct = new byte[64];
+        byte[] tr = new byte[TRSIZE];
         byte[] mu = new byte[64];
         byte[] rhod = new byte [64];   // 288 bytes
         byte[] hint = new byte[100]; // 61 bytes
@@ -1044,8 +1080,8 @@ public final class DILITHIUM {
         unpack_sk(params,rho,bK,tr,s1,s2,t0,sk);
 
 // signature
-        CRH2(mu,tr,M,M.length);
-        CRH3(rhod,bK,mu);
+        CRH2(mu,tr,ph,CTX,M);
+        CRH3(rhod,bK,rn,mu);
 
         for (k=0; ;k++ )
         {
@@ -1151,14 +1187,14 @@ public final class DILITHIUM {
         return k+1;      
     }
 
-    static boolean verify(int[] params,byte[] pk,byte[] M,byte[] sig)
+    static boolean verify(int[] params,boolean ph,byte[] pk,byte[] CTX,byte[] M,byte[] sig)
     {
         int i,j,m,hints;
         byte[] rho = new byte[32];
         byte[] mu = new byte[64];
-        byte[] ct = new byte[32];
-        byte[] cct = new byte[32];
-        byte[] tr = new byte[32];         // 192 bytes
+        byte[] ct = new byte[64];
+        byte[] cct = new byte[64];
+        byte[] tr = new byte[TRSIZE];         // 192 bytes
         byte[] hint = new byte[100];  
 
         int[] Aij = new int[DL_DEGREE];  // 1024 bytes
@@ -1179,6 +1215,7 @@ public final class DILITHIUM {
         int eta=params[5];
         int beta=(int)(tau*eta);
         int omega=params[7];
+        int lambda=params[8];
 
 // unpack public key and signature
         unpack_pk(params,rho,t1,pk);
@@ -1192,7 +1229,7 @@ public final class DILITHIUM {
         }
 
         CRH1(params,tr,rho,t1);
-        CRH2(mu,tr,M,M.length);
+        CRH2(mu,tr,ph,CTX,M);
         SampleInBall(params,ct,c);
         ntt(c);
 
@@ -1220,12 +1257,14 @@ public final class DILITHIUM {
             intt(r);
 
             hints=UsePartialHint(params,w1d[i],hint,hints,i,r);
-            if (hints>omega) return false;
+            if (hints>omega || hints!=hint[omega+i]) return false;
         }
 
         H4(params,cct,mu,w1d);
 
-        for (i=0;i<32;i++)
+        for (i=hints;i<omega;i++) /*** ML_DSA ***/
+    	    if (hint[i]!=0) return false; 
+        for (i=0;i<lambda;i++)
             if (ct[i]!=cct[i])
                 return false;
         return true;
@@ -1236,14 +1275,14 @@ public final class DILITHIUM {
 		keypair(PARAMS_2,tau,sk,pk);
 	}
 
-    public static int signature_2(byte[] sk,byte[] M,byte[] sig)
+    public static int signature_2(boolean ph,byte[] rn,byte[] sk,byte[] CTX,byte[] M,byte[] sig)
     {
-        return signature(PARAMS_2,sk,M,sig);
+        return signature(PARAMS_2,ph,rn,sk,CTX,M,sig);
     }
 
-    public static boolean verify_2(byte[] pk,byte[] M,byte[] sig)
+    public static boolean verify_2(boolean ph,byte[] pk,byte[] CTX,byte[] M,byte[] sig)
     {
-        return verify(PARAMS_2,pk,M,sig);
+        return verify(PARAMS_2,ph,pk,CTX,M,sig);
     }
 
 	public static void keypair_3(byte[] tau,byte[] sk,byte[] pk)
@@ -1251,14 +1290,14 @@ public final class DILITHIUM {
 		keypair(PARAMS_3,tau,sk,pk);
 	}
 
-    public static int signature_3(byte[] sk,byte[] M,byte[] sig)
+    public static int signature_3(boolean ph,byte[] rn,byte[] sk,byte[] CTX,byte[] M,byte[] sig)
     {
-        return signature(PARAMS_3,sk,M,sig);
+        return signature(PARAMS_3,ph,rn,sk,CTX,M,sig);
     }
 
-    public static boolean verify_3(byte[] pk,byte[] M,byte[] sig)
+    public static boolean verify_3(boolean ph,byte[] pk,byte[] CTX,byte[] M,byte[] sig)
     {
-        return verify(PARAMS_3,pk,M,sig);
+        return verify(PARAMS_3,ph,pk,CTX,M,sig);
     }
 
 	public static void keypair_5(byte[] tau,byte[] sk,byte[] pk)
@@ -1266,13 +1305,13 @@ public final class DILITHIUM {
 		keypair(PARAMS_5,tau,sk,pk);
 	}
 
-    public static int signature_5(byte[] sk,byte[] M,byte[] sig)
+    public static int signature_5(boolean ph,byte[] rn,byte[] sk,byte[] CTX,byte[] M,byte[] sig)
     {
-        return signature(PARAMS_5,sk,M,sig);
+        return signature(PARAMS_5,ph,rn,sk,CTX,M,sig);
     }
 
-    public static boolean verify_5(byte[] pk,byte[] M,byte[] sig)
+    public static boolean verify_5(boolean ph,byte[] pk,byte[] CTX,byte[] M,byte[] sig)
     {
-        return verify(PARAMS_5,pk,M,sig);
+        return verify(PARAMS_5,ph,pk,CTX,M,sig);
     }
 }

@@ -64,11 +64,11 @@ fn main() {
         println!("private key {} bits",8*dilithium::SK_SIZE_3);
         println!("public key {} bits",8*dilithium::PK_SIZE_3);
 
-        let attempts=dilithium::signature_3(&sk,&m,&mut sig);
+        let attempts=dilithium::signature_3(false,None,&sk,None,&m,&mut sig);
         tats+=attempts;
         println!("signature {} bits created on attempt {}",8*dilithium::SIG_SIZE_3,attempts);
 
-        let result=dilithium::verify_3(&pk,&m,&sig);
+        let result=dilithium::verify_3(false,&pk,None,&m,&sig);
         if result {
             println!("Signature is verified");
         } else {

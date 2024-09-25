@@ -68,11 +68,11 @@ int main() {
         printf("private key %d bits\n",8*SK.len);
         printf("public key %d bits\n",8*PK.len);
 
-        attempts=DLTHM_signature_3(&SK,&M,&SIG);
+        attempts=DLTHM_signature_3(false,NULL,&SK,NULL,&M,&SIG);
         tats+=attempts;
         printf("Signature %d bits created on attempt %d\n",8*SIG.len,attempts);
 
-        result=DLTHM_verify_3(&PK,&M,&SIG);
+        result=DLTHM_verify_3(false,&PK,NULL,&M,&SIG);
         if (result) {
             printf("Signature is verified\n");
         } else {

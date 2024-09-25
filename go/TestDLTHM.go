@@ -63,7 +63,7 @@ func main() {
 			fmt.Printf("%02x", SK[i])
 		}*/
 
-		attempts = core.DL_signature_3(SK[:], []byte(mess), SIG[:])
+		attempts = core.DL_signature_3(false, nil, SK[:], nil, []byte(mess), SIG[:])
 		tats += attempts
 		/* fmt.Println("Signature = 0x")
 		for i:=0;i<len(SIG);i++{
@@ -73,7 +73,7 @@ func main() {
 
 		fmt.Printf("Signature %d bits created on attempt %d\n", 8*len(SIG[:]), attempts)
 
-		result = core.DL_verify_3(PK[:], []byte(mess), SIG[:])
+		result = core.DL_verify_3(false, PK[:], nil, []byte(mess), SIG[:])
 		if result {
 			fmt.Println("Signature is verified")
 		} else {

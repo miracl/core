@@ -31,8 +31,17 @@ Might be simpler to wait for hardware support for SHA3!
    M.Scott 30/09/2021
 */
 
+// See https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf
+// Minor API change required for ML_DSA, 32 byte random component (rn) required for hedged non-deterministic signature (recommended). Set to NULL for deterministic signature
+// Also domain seperating context string required for signature and verification. Set to NULL if not required.
+
+// For prehash modes, set ph to True and create message as OID||H(m) where OID identifies the hash function, else ph to False
+
+
 use crate::sha3;
 use crate::sha3::SHA3;
+
+const TRSIZE: usize = 64;
 
 //q= 8380417
 const LGN: usize = 8;
@@ -51,23 +60,23 @@ const MAXK: usize = 8; // could reduce these if not using highest security
 const MAXL: usize = 7;
 const YBYTES: usize = ((MAXLG + 1) * DEGREE) / 8;
 
-pub const SK_SIZE_2: usize = 32 * 3 + DEGREE * (4 * 13 + 4 * 3 + 4 * 3) / 8;
+pub const SK_SIZE_2: usize = 64+TRSIZE + DEGREE * (4 * 13 + 4 * 3 + 4 * 3) / 8;
 pub const PK_SIZE_2: usize = (4 * DEGREE * TD) / 8 + 32;
 pub const SIG_SIZE_2: usize = (DEGREE * 4 * (17 + 1)) / 8 + 80 + 4 + 32;
 
-pub const SK_SIZE_3: usize = 32 * 3 + DEGREE * (6 * 13 + 5 * 4 + 6 * 4) / 8;
+pub const SK_SIZE_3: usize = 64+TRSIZE + DEGREE * (6 * 13 + 5 * 4 + 6 * 4) / 8;
 pub const PK_SIZE_3: usize = (6 * DEGREE * TD) / 8 + 32;
-pub const SIG_SIZE_3: usize = (DEGREE * 5 * (19 + 1)) / 8 + 55 + 6 + 32;
+pub const SIG_SIZE_3: usize = (DEGREE * 5 * (19 + 1)) / 8 + 55 + 6 + 48;
 
-pub const SK_SIZE_5: usize = 32 * 3 + DEGREE * (8 * 13 + 7 * 3 + 8 * 3) / 8;
+pub const SK_SIZE_5: usize = 64+TRSIZE + DEGREE * (8 * 13 + 7 * 3 + 8 * 3) / 8;
 pub const PK_SIZE_5: usize = (8 * DEGREE * TD) / 8 + 32;
-pub const SIG_SIZE_5: usize = (DEGREE * 7 * (19 + 1)) / 8 + 75 + 8 + 32;
+pub const SIG_SIZE_5: usize = (DEGREE * 7 * (19 + 1)) / 8 + 75 + 8 + 64;
 
 // parameters for each security level
 // tau,gamma1,gamma2,K,L,eta,lg(2*eta+1),omega
-const PARAMS_2: [usize; 8] = [39, 17, 88, 4, 4, 2, 3, 80];
-const PARAMS_3: [usize; 8] = [49, 19, 32, 6, 5, 4, 4, 55];
-const PARAMS_5: [usize; 8] = [60, 19, 32, 8, 7, 2, 3, 75];
+const PARAMS_2: [usize; 9] = [39, 17, 88, 4, 4, 2, 3, 80, 32];
+const PARAMS_3: [usize; 9] = [49, 19, 32, 6, 5, 4, 4, 55, 48];
+const PARAMS_5: [usize; 9] = [60, 19, 32, 8, 7, 2, 3, 75, 64];
 
 const ROOTS: [i32; 256] = [
     0x3ffe00, 0x64f7, 0x581103, 0x77f504, 0x39e44, 0x740119, 0x728129, 0x71e24, 0x1bde2b, 0x23e92b,
@@ -514,7 +523,7 @@ fn pack_sk(
         sk[n] = bk[i];
         n += 1;
     }
-    for i in 0..32 {
+    for i in 0..TRSIZE {
         sk[n] = tr[i];
         n += 1;
     }
@@ -563,7 +572,7 @@ fn unpack_sk(
         bk[i] = sk[n];
         n += 1;
     }
-    for i in 0..32 {
+    for i in 0..TRSIZE {
         tr[i] = sk[n];
         n += 1;
     }
@@ -594,11 +603,12 @@ fn pack_sig(params: &[usize], sig: &mut [u8], z: &mut [i32], ct: &[u8], h: &[u8]
     let ck = params[3];
     let el = params[4];
     let omega = params[7];
+    let lambda = params[8];
 
-    for i in 0..32 {
+    for i in 0..lambda {
         sig[i] = ct[i];
     }
-    let mut n = 32;
+    let mut n = lambda;
     let mut ptr = 0;
     let mut bts = 0;
 
@@ -629,8 +639,9 @@ fn unpack_sig(params: &[usize], z: &mut [i32], ct: &mut [u8], h: &mut [u8], sig:
     let ck = params[3];
     let el = params[4];
     let omega = params[7];
+    let lambda = params[8];
 
-    for i in 0..32 {
+    for i in 0..lambda {
         ct[i] = sig[i];
     }
 
@@ -638,14 +649,14 @@ fn unpack_sig(params: &[usize], z: &mut [i32], ct: &mut [u8], h: &mut [u8], sig:
     let mut bts = 0;
 
     for i in 0..el * DEGREE {
-        let mut t = nextword(lg + 1, 0, &sig[32..], &mut ptr, &mut bts);
+        let mut t = nextword(lg + 1, 0, &sig[lambda..], &mut ptr, &mut bts);
         t = gamma1 - t;
         if t < 0 {
             t += PRIME;
         }
         z[i] = t;
     }
-    let mut m = 32 + (el * DEGREE * (lg + 1)) / 8;
+    let mut m = lambda + (el * DEGREE * (lg + 1)) / 8;
     for i in 0..omega + ck {
         h[i] = sig[m];
         m += 1;
@@ -718,25 +729,51 @@ fn crh1(params: &[usize], h: &mut [u8], rho: &[u8], t1: &[i16]) {
     for _ in 0..(ck * DEGREE * TD) / 8 {
         sh.process(nextbyte16(TD, 0, t1, &mut ptr, &mut bts));
     }
-    sh.shake(h, 32);
+    sh.shake(h, TRSIZE);
 }
 
-fn crh2(h: &mut [u8], tr: &[u8], mess: &[u8]) {
+fn crh2(h: &mut [u8], tr: &[u8], ph: bool, ctx: Option<&[u8]>,  mess: &[u8]) {
     let mut sh = SHA3::new(sha3::SHAKE256);
-    for j in 0..32 {
+    for j in 0..TRSIZE {
         sh.process(tr[j]);
     }
+
+    if ph {
+        sh.process(1 as u8);
+    } else {
+        sh.process(0 as u8);
+    }
+    if let Some(ectx) = ctx {
+        sh.process(ectx.len() as u8);
+        for i in 0..ectx.len() {
+            sh.process(ectx[i]);
+        }
+    } else {
+        sh.process(0 as u8);
+    }
+
     for j in 0..mess.len() {
         sh.process(mess[j]);
     }
     sh.shake(h, 64);
 }
 
-fn crh3(h: &mut [u8], bk: &[u8], mu: &[u8]) {
+fn crh3(h: &mut [u8], bk: &[u8], rn: Option<&[u8]>, mu: &[u8]) {
     let mut sh = SHA3::new(sha3::SHAKE256);
     for j in 0..32 {
         sh.process(bk[j]);
     }
+
+    if let Some(ern) = rn {
+        for i in 0..32 {
+            sh.process(ern[i])
+        }
+    } else {
+        for _ in 0..32 {
+            sh.process(0 as u8);
+        }
+    }
+
     for j in 0..64 {
         sh.process(mu[j]);
     }
@@ -746,6 +783,7 @@ fn crh3(h: &mut [u8], bk: &[u8], mu: &[u8]) {
 fn h4(params: &[usize], ct: &mut [u8], mu: &[u8], w1: &[i8]) {
     let ck = params[3];
     let dv = params[2];
+    let lambda = params[8];
     let mut w1b = 4;
     if dv == 88 {
         w1b = 6;
@@ -761,15 +799,16 @@ fn h4(params: &[usize], ct: &mut [u8], mu: &[u8], w1: &[i8]) {
     for _ in 0..(ck * DEGREE * w1b) / 8 {
         sh.process(nextbyte8(w1b, 0, w1, &mut ptr, &mut bts));
     }
-    sh.shake(ct, 32);
+    sh.shake(ct, lambda);
 }
 
 fn sampleinball(params: &[usize], ct: &[u8], c: &mut [i32]) {
     let tau = params[0];
+    let lambda = params[8];
     let mut buff: [u8; 136] = [0; 136];
     let mut signs: [u8; 8] = [0; 8];
     let mut sh = SHA3::new(sha3::SHAKE256);
-    for j in 0..32 {
+    for j in 0..lambda {
         sh.process(ct[j]);
     }
     sh.shake(&mut buff, 136);
@@ -940,7 +979,7 @@ fn keypair(params: &[usize], tau: &[u8], sk: &mut [u8], pk: &mut [u8]) {
     let mut rho: [u8; 32] = [0; 32];
     let mut rhod: [u8; 64] = [0; 64];
     let mut bk: [u8; 32] = [0; 32];
-    let mut tr: [u8; 32] = [0; 32];
+    let mut tr: [u8; TRSIZE] = [0; TRSIZE];
     let mut aij: [i32; DEGREE] = [0; DEGREE];
     let mut s1: [i8; MAXL * DEGREE] = [0; MAXL * DEGREE];
     let mut s2: [i8; MAXK * DEGREE] = [0; MAXK * DEGREE];
@@ -955,6 +994,10 @@ fn keypair(params: &[usize], tau: &[u8], sk: &mut [u8], pk: &mut [u8]) {
     for i in 0..32 {
         sh.process(tau[i]);
     }
+
+    sh.process(ck as u8);
+    sh.process(el as u8);
+
     sh.shake(&mut buff, 128);
     for i in 0..32 {
         rho[i] = buff[i];
@@ -993,11 +1036,11 @@ fn keypair(params: &[usize], tau: &[u8], sk: &mut [u8], pk: &mut [u8]) {
     pack_sk(params, sk, &rho, &bk, &tr, &s1, &s2, &t0);
 }
 
-fn signature(params: &[usize], sk: &[u8], m: &[u8], sig: &mut [u8]) -> usize {
+fn signature(params: &[usize], ph: bool, rn: Option<&[u8]>, sk: &[u8], ctx: Option<&[u8]>, m: &[u8], sig: &mut [u8]) -> usize {
     let mut rho: [u8; 32] = [0; 32];
     let mut bk: [u8; 32] = [0; 32];
-    let mut ct: [u8; 32] = [0; 32];
-    let mut tr: [u8; 32] = [0; 32];
+    let mut ct: [u8; 64] = [0; 64];
+    let mut tr: [u8; TRSIZE] = [0; TRSIZE];
     let mut mu: [u8; 64] = [0; 64];
     let mut rhod: [u8; 64] = [0; 64];
     let mut hint: [u8; 100] = [0; 100];
@@ -1031,8 +1074,8 @@ fn signature(params: &[usize], sk: &[u8], m: &[u8], sig: &mut [u8]) -> usize {
     );
 
     // signature
-    crh2(&mut mu, &tr, m);
-    crh3(&mut rhod, &bk, &mu);
+    crh2(&mut mu, &tr, ph, ctx, m);
+    crh3(&mut rhod, &bk,rn, &mu);
     let mut k = 0;
 
     loop {
@@ -1131,11 +1174,11 @@ fn signature(params: &[usize], sk: &[u8], m: &[u8], sig: &mut [u8]) -> usize {
     k
 }
 
-fn verify(params: &[usize], pk: &[u8], m: &[u8], sig: &[u8]) -> bool {
+fn verify(params: &[usize], ph: bool, pk: &[u8], ctx: Option<&[u8]>, m: &[u8], sig: &[u8]) -> bool {
     let mut rho: [u8; 32] = [0; 32];
-    let mut ct: [u8; 32] = [0; 32];
-    let mut cct: [u8; 32] = [0; 32];
-    let mut tr: [u8; 32] = [0; 32];
+    let mut ct: [u8; 64] = [0; 64];
+    let mut cct: [u8; 64] = [0; 64];
+    let mut tr: [u8; TRSIZE] = [0; TRSIZE];
     let mut mu: [u8; 64] = [0; 64];
     let mut hint: [u8; 100] = [0; 100];
 
@@ -1156,6 +1199,7 @@ fn verify(params: &[usize], pk: &[u8], m: &[u8], sig: &[u8]) -> bool {
     let eta = params[5];
     let beta = (tau * eta) as i32;
     let omega = params[7];
+    let lambda = params[8];
 
     unpack_pk(params, &mut rho, &mut t1, pk);
     unpack_sig(params, &mut z, &mut ct, &mut hint, sig);
@@ -1168,7 +1212,7 @@ fn verify(params: &[usize], pk: &[u8], m: &[u8], sig: &[u8]) -> bool {
         ntt(&mut z[row..]);
     }
     crh1(params, &mut tr, &rho, &t1);
-    crh2(&mut mu, &tr, m);
+    crh2(&mut mu, &tr, ph, ctx, m);
 
     sampleinball(params, &ct, &mut c);
     ntt(&mut c);
@@ -1196,14 +1240,19 @@ fn verify(params: &[usize], pk: &[u8], m: &[u8], sig: &[u8]) -> bool {
         intt(&mut r);
 
         hints = usepartialhint(params, &mut w1d[row..], &hint, hints, i, &r);
-        if hints > omega {
+        if hints > omega || hints!=hint[omega+i] as usize {
             return false;
         }
     }
 
     h4(params, &mut cct, &mu, &w1d);
 
-    for i in 0..32 {
+    for i in hints..omega {
+        if hint[i]!=0 {
+            return false;
+        }
+    }
+    for i in 0..lambda {
         if ct[i] != cct[i] {
             return false;
         }
@@ -1217,34 +1266,34 @@ pub fn keypair_2(tau: &[u8], sk: &mut [u8], pk: &mut [u8]) {
     keypair(&PARAMS_2, tau, sk, pk);
 }
 
-pub fn signature_2(sk: &[u8], m: &[u8], sig: &mut [u8]) -> usize {
-    signature(&PARAMS_2, sk, m, sig)
+pub fn signature_2(ph: bool, rn: Option<&[u8]>,sk: &[u8], ctx: Option<&[u8]>, m: &[u8], sig: &mut [u8]) -> usize {
+    signature(&PARAMS_2, ph, rn,sk, ctx, m, sig)
 }
 
-pub fn verify_2(pk: &[u8], m: &[u8], sig: &[u8]) -> bool {
-    verify(&PARAMS_2, pk, m, sig)
+pub fn verify_2(ph: bool,pk: &[u8], ctx: Option<&[u8]>, m: &[u8], sig: &[u8]) -> bool {
+    verify(&PARAMS_2, ph, pk, ctx, m, sig)
 }
 
 pub fn keypair_3(tau: &[u8], sk: &mut [u8], pk: &mut [u8]) {
     keypair(&PARAMS_3, tau, sk, pk);
 }
 
-pub fn signature_3(sk: &[u8], m: &[u8], sig: &mut [u8]) -> usize {
-    signature(&PARAMS_3, sk, m, sig)
+pub fn signature_3(ph: bool, rn: Option<&[u8]>,sk: &[u8], ctx: Option<&[u8]>, m: &[u8], sig: &mut [u8]) -> usize {
+    signature(&PARAMS_3, ph, rn,sk, ctx, m, sig)
 }
 
-pub fn verify_3(pk: &[u8], m: &[u8], sig: &[u8]) -> bool {
-    verify(&PARAMS_3, pk, m, sig)
+pub fn verify_3(ph: bool,pk: &[u8], ctx: Option<&[u8]>, m: &[u8], sig: &[u8]) -> bool {
+    verify(&PARAMS_3, ph, pk, ctx, m, sig)
 }
 
 pub fn keypair_5(tau: &[u8], sk: &mut [u8], pk: &mut [u8]) {
     keypair(&PARAMS_5, tau, sk, pk);
 }
 
-pub fn signature_5(sk: &[u8], m: &[u8], sig: &mut [u8]) -> usize {
-    signature(&PARAMS_5, sk, m, sig)
+pub fn signature_5(ph: bool, rn: Option<&[u8]>,sk: &[u8], ctx: Option<&[u8]>, m: &[u8], sig: &mut [u8]) -> usize {
+    signature(&PARAMS_5, ph, rn,sk, ctx, m, sig)
 }
 
-pub fn verify_5(pk: &[u8], m: &[u8], sig: &[u8]) -> bool {
-    verify(&PARAMS_5, pk, m, sig)
+pub fn verify_5(ph: bool,pk: &[u8], ctx: Option<&[u8]>, m: &[u8], sig: &[u8]) -> bool {
+    verify(&PARAMS_5, ph, pk, ctx, m, sig)
 }

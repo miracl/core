@@ -54,17 +54,17 @@ public class TestDLTHM extends TestCase {
 			
             DILITHIUM.keypair_3(TAU,SK,PK);
 /*
-            System.out.printf("Public key= 0x");
-            for (i = 0; i < PK.length; i++)
-                System.out.printf("%02x", PK[i]);
-            System.out.println();
-
-            System.out.printf("Secret key = 0x");
+            System.out.printf("SK= 0x");
             for (i = 0; i < SK.length; i++)
                 System.out.printf("%02x", SK[i]);
             System.out.println();
+
+            System.out.printf("PK= 0x");
+            for (i = 0; i < PK.length; i++)
+                System.out.printf("%02x", PK[i]);
+            System.out.println();
 */
-            attempts=DILITHIUM.signature_3(SK,mess.getBytes(),SIG);
+            attempts=DILITHIUM.signature_3(false,null,SK,null,mess.getBytes(),SIG);
             tats+=attempts;
 /*
             System.out.printf("Signature = 0x");
@@ -74,7 +74,7 @@ public class TestDLTHM extends TestCase {
 */
             System.out.printf("Signature %d bits created on attempt %d\n",8*SIG.length,attempts);
 
-            result=DILITHIUM.verify_3(PK,mess.getBytes(),SIG);
+            result=DILITHIUM.verify_3(false,PK,null,mess.getBytes(),SIG);
             if (result) {
                 System.out.printf("Signature is verified\n");
             } else {

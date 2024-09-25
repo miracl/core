@@ -72,13 +72,13 @@ int main() {
         //OCT_output(&SK); printf("\n");
         //OCT_output(&PK); printf("\n");
 
-        attempts=DLTHM_signature_3(&SK,&M,&SIG);
+        attempts=DLTHM_signature_3(false,NULL,&SK,NULL,&M,&SIG); // no prehash, deterministic sig, no context provided
 
         tats+=attempts;
 
         printf("Signature %d bits created on attempt %d\n",8*SIG.len,attempts);
 
-        result=DLTHM_verify_3(&PK,&M,&SIG);
+        result=DLTHM_verify_3(false,&PK,NULL,&M,&SIG); // no prehash, no context provided
         if (result) {
             printf("Signature is verified\n");
         } else {

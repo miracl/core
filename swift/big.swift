@@ -69,7 +69,7 @@ public struct BIG{
         w[CONFIG_BIG.NLEN-1]|=x
     }
 
-#if D32   // Can be removed for swift version 6
+//#if D32   // Can be removed for swift version 6
 
     static func muladd(_ a: Chunk,_ b: Chunk,_ c: Chunk,_ r: Chunk) -> (Chunk,Chunk)
     {
@@ -80,8 +80,8 @@ public struct BIG{
     }
 
 // This next no longer needed in Swift 6, as Int128 type now available 
-#endif
-#if D64
+//#endif
+/*#if D64
 
     static func muladd(_ a: Chunk,_ b: Chunk,_ c: Chunk,_ r: Chunk) -> (Chunk,Chunk)
     {
@@ -97,7 +97,7 @@ public struct BIG{
     }
 
 #endif
-
+*/
     /* test for zero */
     func iszilch() -> Bool
     {
@@ -827,7 +827,7 @@ public struct BIG{
         cmove(x2,BIG.comp(u,one)&1)
     }
     /* return a*b as DBIG */
-#if D32  // Can be removed for swift version 6
+//#if D32  // Can be removed for swift version 6
     static func mul(_ a: BIG,_ b:BIG) -> DBIG
     {
         var t:DChunk
@@ -955,8 +955,8 @@ public struct BIG{
     }
 
 // This next no longer needed in Swift 6, as Int128 type now available 
-#endif
-#if D64
+//#endif
+/*#if D64
     static func mul(_ a: BIG,_ b:BIG) -> DBIG
     {
         var c=DBIG()
@@ -1028,7 +1028,7 @@ public struct BIG{
         return b
     }
 #endif
-
+*/
 /* Optimized combined shift, subtract and norm */
     static func ssn(_ r: inout BIG,_ a :BIG,_ m: inout BIG) -> Int
     {

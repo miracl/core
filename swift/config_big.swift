@@ -25,7 +25,7 @@ public typealias DChunk = Int64
 
 #if D64
 public typealias Chunk = Int64
-//public typealias DChunk = Int128   // Swift version >= 6.0
+public typealias DChunk = Int128   // Swift version >= 6.0
 #endif
 
 

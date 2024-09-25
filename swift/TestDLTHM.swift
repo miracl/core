@@ -57,12 +57,12 @@ public func TestDLTHM(){
             print("")
 */
 
-            let attempts=DILITHIUM.signature_3(SK,[UInt8](mess.utf8),&SIG)
+            let attempts=DILITHIUM.signature_3(false,nil,SK,nil,[UInt8](mess.utf8),&SIG)
             tats += attempts
             let h=String(format: "Signature %d bits created on attempt %d\n",8*SIG.count,attempts)
             print("\(h)", terminator: "") 
 
-            let result=DILITHIUM.verify_3(PK,[UInt8](mess.utf8),SIG)
+            let result=DILITHIUM.verify_3(false,PK,nil,[UInt8](mess.utf8),SIG)
             if result {
                 print("Signature is verified")
             } else {

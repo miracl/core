@@ -380,6 +380,7 @@ func cpa_keypair(params [6]int,tau []byte,sk []byte,pk []byte) {
 	for i:=0;i<32;i++ {
 		sh.Process(tau[i])
 	}
+	sh.Process(byte(ck))
 	bf := sh.Hash();
 	for i:=0;i<32;i++ {
 		rho[i]=bf[i]
@@ -616,21 +617,25 @@ func cpa_check_encrypt(params [6]int,coins []byte,pk []byte,ss []byte,ct []byte)
 
 func cca_encrypt(params [6]int,randbytes32 []byte,pk []byte,ss []byte,ct []byte) {
 	var coins [32]byte
+	var hm [32]byte
 
 	ck:=params[0]
-	du:=params[3]
-	dv:=params[4]
-	shared_secret_size:=params[5]
+	//du:=params[3]
+	//dv:=params[4]
+	//shared_secret_size:=params[5]
 	public_key_size:=32+ck*(KY_DEGREE*3)/2
-	ciphertext_size:=(du*ck+dv)*KY_DEGREE/8
+	//ciphertext_size:=(du*ck+dv)*KY_DEGREE/8
+
+	for i:=0;i<32;i++ {
+		hm[i]=randbytes32[i]
+	}
+	//sh := NewSHA3(SHA3_HASH256)
+	//for i:=0;i<32;i++{
+	//	sh.Process(randbytes32[i])
+	//}
+	//hm := sh.Hash();
 
 	sh := NewSHA3(SHA3_HASH256)
-	for i:=0;i<32;i++{
-		sh.Process(randbytes32[i])
-	}
-	hm := sh.Hash();
-
-	sh = NewSHA3(SHA3_HASH256)
 	for i:=0;i<public_key_size;i++ {
 		sh.Process(pk[i])
 	}
@@ -649,23 +654,27 @@ func cca_encrypt(params [6]int,randbytes32 []byte,pk []byte,ss []byte,ct []byte)
 		coins[i]=g[i+32]
 	}
 
-	cpa_encrypt(params,coins[:],pk,hm,ct)
+	cpa_encrypt(params,coins[:],pk,hm[:],ct)
 
-	sh = NewSHA3(SHA3_HASH256)
-	for i:=0;i<ciphertext_size;i++ {
-		sh.Process(ct[i])
-	}
-	h= sh.Hash();
-
-	sh = NewSHA3(SHA3_SHAKE256)
 	for i:=0;i<32;i++ {
-		sh.Process(g[i])
-	}
-	for i:=0;i<32;i++ {
-		sh.Process(h[i])
+		ss[i]=g[i]
 	}
 
-	sh.Shake(ss[:],shared_secret_size)
+	//sh = NewSHA3(SHA3_HASH256)
+	//for i:=0;i<ciphertext_size;i++ {
+	//	sh.Process(ct[i])
+	//}
+	//h= sh.Hash();
+
+	//sh = NewSHA3(SHA3_SHAKE256)
+	//for i:=0;i<32;i++ {
+	//	sh.Process(g[i])
+	//}
+	//for i:=0;i<32;i++ {
+	//	sh.Process(h[i])
+	//}
+
+	//sh.Shake(ss[:],shared_secret_size)
 }
 
 func cpa_decrypt(params [6]int,SK []byte,CT []byte,SS []byte) {
@@ -749,25 +758,40 @@ func cca_decrypt(params [6]int,SK []byte,CT []byte,SS []byte) {
 		coins[i]=g[i+32]
 	}
 
-	mask:=cpa_check_encrypt(params,coins[:],PK,m[:],CT)
+	sh = NewSHA3(SHA3_SHAKE256)
 	for i:=0;i<32;i++ {
-		g[i]^=(g[i]^z[i])&mask              // substitute z for Kb on failure
+		sh.Process(z[i])
 	}
-
-	sh = NewSHA3(SHA3_HASH256)
 	for i:=0;i<ciphertext_size;i++ {
 		sh.Process(CT[i])
 	}
-	hh:=sh.Hash()
-
-	sh = NewSHA3(SHA3_SHAKE256);
-	for i:=0;i<32;i++ {
-		sh.Process(g[i])
-	}
-	for i:=0;i<32;i++ {
-		sh.Process(hh[i])
-	}
 	sh.Shake(SS,shared_secret_size)
+
+
+	mask:=cpa_check_encrypt(params,coins[:],PK,m[:],CT)
+
+	for i:=0;i<32;i++ {
+		SS[i]^=(SS[i]^g[i])&(^mask)
+	}
+
+	//for i:=0;i<32;i++ {
+	//	g[i]^=(g[i]^z[i])&mask              // substitute z for Kb on failure
+	//}
+
+	//sh = NewSHA3(SHA3_HASH256)
+	//for i:=0;i<ciphertext_size;i++ {
+	//	sh.Process(CT[i])
+	//}
+	//hh:=sh.Hash()
+
+	//sh = NewSHA3(SHA3_SHAKE256)
+	//for i:=0;i<32;i++ {
+	//	sh.Process(g[i])
+	//}
+	//for i:=0;i<32;i++ {
+	//	sh.Process(hh[i])
+	//}
+	//sh.Shake(SS,shared_secret_size)
 }
 
 func KYBER_keypair512(r64 []byte,SK []byte,PK []byte) {

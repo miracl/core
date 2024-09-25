@@ -19,6 +19,10 @@
 
 /* Kyber API */
 
+// Now conforms to new ML_KEM standard
+// See https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf
+//
+
 package org.miracl.core;
 
 public final class KYBER {
@@ -429,6 +433,9 @@ public final class KYBER {
    
 		for (i=0;i<32;i++)
 			sh.process(tau[i]); 
+
+        sh.process((byte)ck);
+
 		byte[] bf = sh.hash();
 		for (i=0;i<32;i++)
 		{
@@ -681,12 +688,16 @@ public final class KYBER {
 		int public_key_size=32+ck*(KY_DEGREE*3)/2;
 		int ciphertext_size=(du*ck+dv)*KY_DEGREE/8;
 
-		SHA3 sh = new SHA3(SHA3.HASH256);
-		for (i=0;i<32;i++)
-			sh.process(randbytes32[i]);
-		byte[] hm= sh.hash();
+        byte[] hm=new byte[32];
+        for (i=0;i<32;i++)
+            hm[i]=randbytes32[i];
+    
+		//SHA3 sh = new SHA3(SHA3.HASH256);
+		//for (i=0;i<32;i++)
+		//	sh.process(randbytes32[i]);
+		//byte[] hm= sh.hash();
 
-		sh = new SHA3(SHA3.HASH256);
+		SHA3 sh = new SHA3(SHA3.HASH256);
 		for (i=0;i<public_key_size;i++)
 			sh.process(pk[i]);
 		byte[] h= sh.hash();
@@ -703,18 +714,21 @@ public final class KYBER {
 
 		CPA_encrypt(params,coins,pk,hm,ct);
 
-		sh = new SHA3(SHA3.HASH256);
-		for (i=0;i<ciphertext_size;i++)
-			sh.process(ct[i]);
-		h= sh.hash();
+        for (i=0;i<32;i++) 
+            ss[i]=g[i];
 
-		sh = new SHA3(SHA3.SHAKE256);
-		for (i=0;i<32;i++)
-			sh.process(g[i]);
-		for (i=0;i<32;i++)
-			sh.process(h[i]);
+		//sh = new SHA3(SHA3.HASH256);
+		//for (i=0;i<ciphertext_size;i++)
+		//	sh.process(ct[i]);
+		//h= sh.hash();
 
-		sh.shake(ss,shared_secret_size);
+		//sh = new SHA3(SHA3.SHAKE256);
+		//for (i=0;i<32;i++)
+		//	sh.process(g[i]);
+		//for (i=0;i<32;i++)
+		//	sh.process(h[i]);
+
+		//sh.shake(ss,shared_secret_size);
 	}
 
 	static void CPA_decrypt(int[] params,byte[] SK,byte[] CT,byte[] SS)
@@ -797,21 +811,32 @@ public final class KYBER {
 		for (i=0;i<32;i++)
 			coins[i]=g[i+32];
 
+        sh = new SHA3(SHA3.SHAKE256);
+        for (i=0;i<32;i++)
+            sh.process(z[i]);
+        for (i=0;i<ciphertext_size;i++)
+            sh.process(CT[i]);
+        sh.shake(SS,shared_secret_size);
+
 		byte mask=CPA_check_encrypt(params,coins,PK,m,CT);
-		for (i=0;i<32;i++)
-			g[i]^=(g[i]^z[i])&mask;               // substitute z for Kb on failure
 
-		sh = new SHA3(SHA3.HASH256);
-		for (i=0;i<ciphertext_size;i++)
-			sh.process(CT[i]);
-		h=sh.hash();
+        for (i=0;i<32;i++)
+            SS[i]^=(SS[i]^g[i])&(~mask);
 
-		sh = new SHA3(SHA3.SHAKE256);
-		for (i=0;i<32;i++)
-			sh.process(g[i]);
-		for (i=0;i<32;i++)
-			sh.process(h[i]);
-		sh.shake(SS,shared_secret_size);
+		//for (i=0;i<32;i++)
+		//	g[i]^=(g[i]^z[i])&mask;               // substitute z for Kb on failure
+
+		//sh = new SHA3(SHA3.HASH256);
+		//for (i=0;i<ciphertext_size;i++)
+		//	sh.process(CT[i]);
+		//h=sh.hash();
+
+		//sh = new SHA3(SHA3.SHAKE256);
+		//for (i=0;i<32;i++)
+		//	sh.process(g[i]);
+		//for (i=0;i<32;i++)
+		//	sh.process(h[i]);
+		//sh.shake(SS,shared_secret_size);
 	}
 
 	public static void keypair512(byte[] r64,byte[] SK,byte[] PK)

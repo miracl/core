@@ -23,10 +23,18 @@
 // Created by Michael Scott on 26/03/2023
 //
 
+// See https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf
+// Minor API change required for ML_DSA, 32 byte random component (rn) required for hedged non-deterministic signature (recommended). Set to NULL for deterministic signature
+// Also domain seperating context string required for signature and verification. Set to NULL if not required.
+
+// For prehash modes, set ph to True and create message as OID||H(m) where OID identifies the hash function, else ph to False
+
+
 /* Dilithium API */
 
 public struct DILITHIUM {
 
+    static public let TRSIZE:Int = 64
 //q= 8380417
     static public let DL_LGN:Int = 8
     static public let DL_DEGREE:Int = (1 << DL_LGN)
@@ -44,23 +52,23 @@ public struct DILITHIUM {
     static public let DL_MAXL:Int = 7;
     static public let DL_YBYTES:Int = (((DL_MAXLG+1)*DL_DEGREE)/8)
 
-    static public let SK_SIZE_2:Int = (32*3+DL_DEGREE*(4*13+4*3+4*3)/8)
+    static public let SK_SIZE_2:Int = (64+TRSIZE+DL_DEGREE*(4*13+4*3+4*3)/8)
     static public let PK_SIZE_2:Int = ((4*DL_DEGREE*DL_TD)/8+32)
     static public let SIG_SIZE_2:Int = ((DL_DEGREE*4*(17+1))/8+80+4+32)
 
-    static public let SK_SIZE_3:Int = (32*3+DL_DEGREE*(6*13+5*4+6*4)/8)
+    static public let SK_SIZE_3:Int = (64+TRSIZE+DL_DEGREE*(6*13+5*4+6*4)/8)
     static public let PK_SIZE_3:Int = ((6*DL_DEGREE*DL_TD)/8+32)
-    static public let SIG_SIZE_3:Int = ((DL_DEGREE*5*(19+1))/8+55+6+32)
+    static public let SIG_SIZE_3:Int = ((DL_DEGREE*5*(19+1))/8+55+6+48)
 
-    static public let SK_SIZE_5:Int = (32*3+DL_DEGREE*(8*13+7*3+8*3)/8)
+    static public let SK_SIZE_5:Int = (64+TRSIZE+DL_DEGREE*(8*13+7*3+8*3)/8)
     static public let PK_SIZE_5:Int = ((8*DL_DEGREE*DL_TD)/8+32)
-    static public let SIG_SIZE_5:Int = ((DL_DEGREE*7*(19+1))/8+75+8+32)
+    static public let SIG_SIZE_5:Int = ((DL_DEGREE*7*(19+1))/8+75+8+64)
 
 // parameters for each security level
 // tau,gamma1,gamma2,K,L,eta,lg(2*eta+1),omega
-	static public let PARAMS_2:[Int] = [39,17,88,4,4,2,3,80]
-	static public let PARAMS_3:[Int] = [49,19,32,6,5,4,4,55]
-	static public let PARAMS_5:[Int] = [60,19,32,8,7,2,3,75]
+	static public let PARAMS_2:[Int] = [39,17,88,4,4,2,3,80,32]
+	static public let PARAMS_3:[Int] = [49,19,32,6,5,4,4,55,48]
+	static public let PARAMS_5:[Int] = [60,19,32,8,7,2,3,75,64]
 
 	static private let roots:[Int32] =  [0x3ffe00,0x64f7,0x581103,0x77f504,0x39e44,0x740119,0x728129,0x71e24,0x1bde2b,0x23e92b,0x7a64ae,0x5ff480,0x2f9a75,0x53db0a,0x2f7a49,0x28e527,0x299658,0xfa070,0x6f65a5,0x36b788,0x777d91,0x6ecaa1,0x27f968,0x5fb37c,0x5f8dd7,0x44fae8,0x6a84f8,0x4ddc99,0x1ad035,0x7f9423,0x3d3201,0x445c5,0x294a67,0x17620,0x2ef4cd,0x35dec5,0x668504,0x49102d,0x5927d5,0x3bbeaf,0x44f586,0x516e7d,0x368a96,0x541e42,0x360400,0x7b4a4e,0x23d69c,0x77a55e,0x65f23e,0x66cad7,0x357e1e,0x458f5a,0x35843f,0x5f3618,0x67745d,0x38738c,0xc63a8,0x81b9a,0xe8f76,0x3b3853,0x3b8534,0x58dc31,0x1f9d54,0x552f2e,0x43e6e6,0x688c82,0x47c1d0,0x51781a,0x69b65e,0x3509ee,0x2135c7,0x67afbc,0x6caf76,0x1d9772,0x419073,0x709cf7,0x4f3281,0x4fb2af,0x4870e1,0x1efca,0x3410f2,0x70de86,0x20c638,0x296e9f,0x5297a4,0x47844c,0x799a6e,0x5a140a,0x75a283,0x6d2114,0x7f863c,0x6be9f8,0x7a0bde,0x1495d4,0x1c4563,0x6a0c63,0x4cdbea,0x40af0,0x7c417,0x2f4588,0xad00,0x6f16bf,0xdcd44,0x3c675a,0x470bcb,0x7fbe7f,0x193948,0x4e49c1,0x24756c,0x7ca7e0,0xb98a1,0x6bc809,0x2e46c,0x49a809,0x3036c2,0x639ff7,0x5b1c94,0x7d2ae1,0x141305,0x147792,0x139e25,0x67b0e1,0x737945,0x69e803,0x51cea3,0x44a79d,0x488058,0x3a97d9,0x1fea93,0x33ff5a,0x2358d4,0x3a41f8,0x4cdf73,0x223dfb,0x5a8ba0,0x498423,0x412f5,0x252587,0x6d04f1,0x359b5d,0x4a28a1,0x4682fd,0x6d9b57,0x4f25df,0xdbe5e,0x1c5e1a,0xde0e6,0xc7f5a,0x78f83,0x67428b,0x7f3705,0x77e6fd,0x75e022,0x503af7,0x1f0084,0x30ef86,0x49997e,0x77dcd7,0x742593,0x4901c3,0x53919,0x4610c,0x5aad42,0x3eb01b,0x3472e7,0x4ce03c,0x1a7cc7,0x31924,0x2b5ee5,0x291199,0x585a3b,0x134d71,0x3de11c,0x130984,0x25f051,0x185a46,0x466519,0x1314be,0x283891,0x49bb91,0x52308a,0x1c853f,0x1d0b4b,0x6fd6a7,0x6b88bf,0x12e11b,0x4d3e3f,0x6a0d30,0x78fde5,0x1406c7,0x327283,0x61ed6f,0x6c5954,0x1d4099,0x590579,0x6ae5ae,0x16e405,0xbdbe7,0x221de8,0x33f8cf,0x779935,0x54aa0d,0x665ff9,0x63b158,0x58711c,0x470c13,0x910d8,0x463e20,0x612659,0x251d8b,0x2573b7,0x7d5c90,0x1ddd98,0x336898,0x2d4bb,0x6d73a8,0x4f4cbf,0x27c1c,0x18aa08,0x2dfd71,0xc5ca5,0x19379a,0x478168,0x646c3e,0x51813d,0x35c539,0x3b0115,0x41dc0,0x21c4f7,0x70fbf5,0x1a35e7,0x7340e,0x795d46,0x1a4cd0,0x645caf,0x1d2668,0x666e99,0x6f0634,0x7be5db,0x455fdc,0x530765,0x5dc1b0,0x7973de,0x5cfd0a,0x2cc93,0x70f806,0x189c2a,0x49c5aa,0x776a51,0x3bcf2c,0x7f234f,0x6b16e0,0x3c15ca,0x155e68,0x72f6b7,0x1e29ce];
 	static private let iroots:[Int32] = [0x3ffe00,0x7f7b0a,0x7eafd,0x27cefe,0x78c1dd,0xd5ed8,0xbdee8,0x7c41bd,0x56fada,0x5065b8,0x2c04f7,0x50458c,0x1feb81,0x57b53,0x5bf6d6,0x6401d6,0x7b9a3c,0x42ae00,0x4bde,0x650fcc,0x320368,0x155b09,0x3ae519,0x20522a,0x202c85,0x57e699,0x111560,0x86270,0x492879,0x107a5c,0x703f91,0x5649a9,0x2ab0d3,0x6042ad,0x2703d0,0x445acd,0x44a7ae,0x71508b,0x77c467,0x737c59,0x476c75,0x186ba4,0x20a9e9,0x4a5bc2,0x3a50a7,0x4a61e3,0x19152a,0x19edc3,0x83aa3,0x5c0965,0x495b3,0x49dc01,0x2bc1bf,0x49556b,0x2e7184,0x3aea7b,0x442152,0x26b82c,0x36cfd4,0x195afd,0x4a013c,0x50eb34,0x7e69e1,0x56959a,0x454828,0x375fa9,0x3b3864,0x2e115e,0x15f7fe,0xc66bc,0x182f20,0x6c41dc,0x6b686f,0x6bccfc,0x2b520,0x24c36d,0x1c400a,0x4fa93f,0x3637f8,0x7cfb95,0x1417f8,0x744760,0x33821,0x5b6a95,0x319640,0x66a6b9,0x2182,0x38d436,0x4378a7,0x7212bd,0x10c942,0x7f3301,0x509a79,0x781bea,0x7bd511,0x330417,0x15d39e,0x639a9e,0x6b4a2d,0x5d423,0x13f609,0x59c5,0x12beed,0xa3d7e,0x25cbf7,0x64593,0x385bb5,0x2d485d,0x567162,0x5f19c9,0xf017b,0x4bcf0f,0x7df037,0x376f20,0x302d52,0x30ad80,0xf430a,0x3e4f8e,0x62488f,0x13308b,0x183045,0x5eaa3a,0x4ad613,0x1629a3,0x2e67e7,0x381e31,0x17537f,0x3bf91b,0x61b633,0xce94a,0x6a8199,0x43ca37,0x14c921,0xbcb2,0x4410d5,0x875b0,0x361a57,0x6743d7,0xee7fb,0x7d136e,0x22e2f7,0x66c23,0x221e51,0x2cd89c,0x3a8025,0x3fa26,0x10d9cd,0x197168,0x62b999,0x1b8352,0x659331,0x682bb,0x78abf3,0x65aa1a,0xee40c,0x5e1b0a,0x7bc241,0x44deec,0x4a1ac8,0x2e5ec4,0x1b73c3,0x385e99,0x66a867,0x73835c,0x51e290,0x6735f9,0x7d63e5,0x309342,0x126c59,0x7d0b46,0x4c7769,0x620269,0x28371,0x5a6c4a,0x5ac276,0x1eb9a8,0x39a1e1,0x76cf29,0x38d3ee,0x276ee5,0x1c2ea9,0x198008,0x2b35f4,0x846cc,0x4be732,0x5dc219,0x74041a,0x68fbfc,0x14fa53,0x26da88,0x629f68,0x1386ad,0x1df292,0x4d6d7e,0x6bd93a,0x6e21c,0x15d2d1,0x32a1c2,0x6cfee6,0x145742,0x10095a,0x62d4b6,0x635ac2,0x2daf77,0x362470,0x57a770,0x6ccb43,0x397ae8,0x6785bb,0x59efb0,0x6cd67d,0x41fee5,0x6c9290,0x2785c6,0x56ce68,0x54811c,0x7cc6dd,0x65633a,0x32ffc5,0x4b6d1a,0x412fe6,0x2532bf,0x7b7ef5,0x7aa6e8,0x36de3e,0xbba6e,0x8032a,0x364683,0x4ef07b,0x60df7d,0x2fa50a,0x9ffdf,0x7f904,0xa8fc,0x189d76,0x78507e,0x7360a7,0x71ff1b,0x6381e7,0x7221a3,0x30ba22,0x1244aa,0x395d04,0x35b760,0x4a44a4,0x12db10,0x5aba7a,0x7bcd0c,0x365bde,0x255461,0x5da206,0x33008e,0x459e09,0x5c872d,0x4be0a7,0x5ff56e];
@@ -484,7 +492,7 @@ public struct DILITHIUM {
 		    sk[n] = bK[i]
 		    n+=1
 	    }
-	    for i in 0..<32 {
+	    for i in 0..<TRSIZE {
 		    sk[n] = tr[i]
 		    n+=1
 	    }
@@ -528,7 +536,7 @@ public struct DILITHIUM {
 		    bK[i] = sk[n]
 		    n+=1
 	    }
-	    for i in 0..<32 {
+	    for i in 0..<TRSIZE {
 		    tr[i] = sk[n]
 		    n+=1
 	    }
@@ -561,12 +569,13 @@ public struct DILITHIUM {
 	    let ck = params[3]
 	    let el = params[4]
 	    let omega = params[7]
+        let lambda = params[8]
  
-	    for i in 0..<32 {
+	    for i in 0..<lambda {
 		    sig[i] = ct[i]
 	    }
 
-	    var n = 32
+	    var n = lambda
         var pos=[Int](repeating: 0,count: 2)
 	//pre-process z
 	    for i in 0..<el {
@@ -598,15 +607,16 @@ public struct DILITHIUM {
 	    let ck = params[3]
 	    let el = params[4]
 	    let omega = params[7]
+        let lambda = params[8]
 
-	    var m = 32 + (el*DL_DEGREE*(lg+1))/8
+	    var m = lambda + (el*DL_DEGREE*(lg+1))/8
 
-	    for i in 0..<32 {
+	    for i in 0..<lambda {
 		    ct[i] = sig[i]
 	    }
  
         var pos=[Int](repeating: 0,count: 2)
-        pos[0]=32
+        pos[0]=lambda
 	    for j in 0..<el {
 		    for i in 0..<DL_DEGREE {
 			    var t = nextword(lg+1, 0, sig, &pos)
@@ -689,25 +699,51 @@ static func CRH1(_ params: [Int],_ H:inout [UInt8],_ rho: [UInt8],_ t1: [[Int16]
 			    sh.process(nxt)
 		    }
 	    }
-	    sh.shake(&H, 32)
+	    sh.shake(&H, TRSIZE)
     }
 //CRH(tr,M)
-    static func CRH2(_ H:inout [UInt8],_ tr: [UInt8],_ mess: [UInt8],_ mlen: Int) {
+    static func CRH2(_ H:inout [UInt8],_ tr: [UInt8],_ ph: Bool,_ ctx: [UInt8]?,_ mess: [UInt8]) {
 	    var sh = SHA3(SHA3.SHAKE256)
-	    for i in 0..<32 {
+	    for i in 0..<TRSIZE {
 		    sh.process(tr[i])
 	    }
-	    for i in 0..<mlen {
+
+        if ph {
+            sh.process(UInt8(1))
+        } else {
+            sh.process(UInt8(0))
+        }
+        if ctx==nil {
+            sh.process(UInt8(0))
+        } else {
+            sh.process(UInt8(ctx!.count))
+            for i in 0..<ctx!.count {
+                sh.process(ctx![i])
+            }
+        }
+
+	    for i in 0..<mess.count {
 		    sh.process(mess[i])
 	    }
 	    sh.shake(&H, 64)
     }
 //CRH(K,mu)
-static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
+static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ rn: [UInt8]?,_ mu: [UInt8]) {
 	    var sh = SHA3(SHA3.SHAKE256)
 	    for i in 0..<32 {
 		    sh.process(bK[i])
 	    }
+
+        if rn==nil {
+            for _ in 0..<32 {
+                sh.process(UInt8(0))
+            }
+        } else {
+            for i in 0..<32 {
+                sh.process(rn![i])
+            }
+        }
+
 	    for i in 0..<64 {
 		    sh.process(mu[i])
 	    }
@@ -719,6 +755,8 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
        var pos=[Int](repeating: 0,count: 2)
 	    let ck = params[3]
 	    let dv = params[2]
+        let lambda = params[8]
+
 	    var w1b = 4
 	    if dv == 88 {
 		    w1b = 6
@@ -733,16 +771,17 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
 			    sh.process(nextbyte8(w1b, 0, w1[j], &pos))
 		    }
 	    }
-	    sh.shake(&CT, 32)
+	    sh.shake(&CT, lambda)
     }
 
     static func SampleInBall(_ params: [Int],_ ct: [UInt8],_ c:inout [Int32]) {
 	    let tau = params[0]
+        let lambda = params[8]
         var signs=[UInt8](repeating: 0,count: 8) 
         var buff=[UInt8](repeating: 0,count: 136) 
 	    var sh = SHA3(SHA3.SHAKE256)
  
-	    for i in 0..<32 {
+	    for i in 0..<lambda {
 		    sh.process(ct[i])
 	    }
 	    sh.shake(&buff, 136)
@@ -906,7 +945,7 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
         var rho=[UInt8](repeating: 0,count: 32)
         var rhod=[UInt8](repeating: 0,count: 64)
         var bK=[UInt8](repeating: 0,count: 32)
-        var tr=[UInt8](repeating: 0,count: 32)
+        var tr=[UInt8](repeating: 0,count: TRSIZE)
         var Aij=[Int32](repeating: 0,count: DL_DEGREE)         
         var w=[Int32](repeating: 0,count: DL_DEGREE)         
         var r=[Int32](repeating: 0,count: DL_DEGREE)    
@@ -924,6 +963,10 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
         for i in 0..<32 {
             sh.process(tau[i])
         }
+
+        sh.process(UInt8(ck))
+        sh.process(UInt8(el))
+
         sh.shake(&buff,128)
         for i in 0..<32 {
             rho[i]=buff[i]
@@ -958,12 +1001,12 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
         _=pack_sk(params,&sk,rho,bK,tr,s1,s2,t0)
     }
 
-    static func signature(_ params:[Int],_ sk: [UInt8],_ M: [UInt8],_ sig:inout [UInt8]) -> Int {
+    static func signature(_ params:[Int],_ ph: Bool,_ rn: [UInt8]?,_ sk: [UInt8],_ ctx: [UInt8]?,_ M: [UInt8],_ sig:inout [UInt8]) -> Int {
         var rho=[UInt8](repeating: 0,count: 32)
         var rhod=[UInt8](repeating: 0,count: 64)
         var bK=[UInt8](repeating: 0,count: 32)
-        var tr=[UInt8](repeating: 0,count: 32)
-        var ct=[UInt8](repeating: 0,count: 32)
+        var tr=[UInt8](repeating: 0,count: TRSIZE)
+        var ct=[UInt8](repeating: 0,count: 64)
         var mu=[UInt8](repeating: 0,count: 64)
         var hint=[UInt8](repeating: 0,count: 100)
 
@@ -992,8 +1035,8 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
 	    unpack_sk(params, &rho, &bK, &tr, &s1, &s2, &t0, sk)
 
 	//signature
-	    CRH2(&mu, tr, M, M.count)
-	    CRH3(&rhod, bK, mu)
+	    CRH2(&mu, tr, ph, ctx, M)
+	    CRH3(&rhod, bK, rn, mu)
         
         var k=0
         while true {
@@ -1083,12 +1126,12 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
         return k
     }
 
-    static func verify(_ params:[Int],_ pk: [UInt8],_ M: [UInt8],_ sig: [UInt8]) -> Bool {
-        var ct=[UInt8](repeating: 0,count: 32)
+    static func verify(_ params:[Int],_ ph: Bool,_ pk: [UInt8],_ ctx: [UInt8]?,_ M: [UInt8],_ sig: [UInt8]) -> Bool {
+        var ct=[UInt8](repeating: 0,count: 64)
         var mu=[UInt8](repeating: 0,count: 64)
         var rho=[UInt8](repeating: 0,count: 32)
-        var tr=[UInt8](repeating: 0,count: 32)
-        var cct=[UInt8](repeating: 0,count: 32)
+        var tr=[UInt8](repeating: 0,count: TRSIZE)
+        var cct=[UInt8](repeating: 0,count: 64)
         var hint=[UInt8](repeating: 0,count: 100)
 
         var Aij=[Int32](repeating: 0,count: DL_DEGREE)   
@@ -1108,7 +1151,8 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
 	    let gamma1 = Int32(1<<lg)
 	    let eta = params[5]
 	    let beta = Int32(tau*eta)
-	    let omega = params[7]       
+	    let omega = params[7]  
+        let lambda = params[8]
         
         unpack_pk(params,&rho,&t1,pk)
         unpack_sig(params,&z,&ct,&hint,sig)
@@ -1120,7 +1164,7 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
             ntt(&z[i])
         }
         CRH1(params,&tr,rho,t1)
-        CRH2(&mu,tr,M,M.count)
+        CRH2(&mu,tr,ph,ctx,M)
         SampleInBall(params,ct,&c)
         ntt(&c)
         
@@ -1142,12 +1186,17 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
             poly_sub(&r,r,w)
             intt(&r)
             hints=UsePartialHint(params,&w1d[i],hint,hints,i,r)
-            if hints > omega {
+            if (hints > omega) || (UInt8(hints) != hint[omega+i]) {
                 return false
             }
         }
         H4(params,&cct,mu,w1d)
-        for i in 0..<32  {
+        for i in hints..<omega {
+            if hint[i] != 0 {
+                return false
+            }
+        }
+        for i in 0..<lambda  {
             if ct[i] != cct[i] {
                 return false
             }
@@ -1159,36 +1208,36 @@ static func CRH3(_ H:inout [UInt8],_ bK: [UInt8],_ mu: [UInt8]) {
         keypair(PARAMS_2,tau,&sk,&pk)
     }
 
-    public static func signature_2(_ sk: [UInt8],_ M: [UInt8],_ sig:inout  [UInt8]) -> Int {
-	    return signature(PARAMS_2, sk, M, &sig) 
+    public static func signature_2(_ ph: Bool,_ rn: [UInt8]?,_ sk: [UInt8],_ ctx: [UInt8]?,_ M: [UInt8],_ sig:inout  [UInt8]) -> Int {
+	    return signature(PARAMS_2, ph, rn, sk, ctx, M, &sig) 
     }
  
-    public static func verify_2(_ pk: [UInt8],_ M: [UInt8],_ sig: [UInt8]) -> Bool {
-	    return verify(PARAMS_2, pk, M, sig)
+    public static func verify_2(_ ph: Bool,_ pk: [UInt8],_ ctx: [UInt8]?,_ M: [UInt8],_ sig: [UInt8]) -> Bool {
+	    return verify(PARAMS_2, ph, pk, ctx, M, sig)
     }
 
     public static func keypair_3(_ tau: [UInt8],_ sk:inout [UInt8],_ pk:inout [UInt8]) {
         keypair(PARAMS_3,tau,&sk,&pk)
     }
 
-    public static func signature_3(_ sk: [UInt8],_ M: [UInt8],_ sig:inout  [UInt8]) -> Int {
-	    return signature(PARAMS_3, sk, M, &sig) 
+    public static func signature_3(_ ph: Bool,_ rn: [UInt8]?,_ sk: [UInt8],_ ctx: [UInt8]?,_ M: [UInt8],_ sig:inout  [UInt8]) -> Int {
+	    return signature(PARAMS_3, ph, rn, sk, ctx, M, &sig) 
     }
  
-    public static func verify_3(_ pk: [UInt8],_ M: [UInt8],_ sig: [UInt8]) -> Bool {
-	    return verify(PARAMS_3, pk, M, sig)
+    public static func verify_3(_ ph: Bool,_ pk: [UInt8],_ ctx: [UInt8]?,_ M: [UInt8],_ sig: [UInt8]) -> Bool {
+	    return verify(PARAMS_3, ph, pk, ctx, M, sig)
     }
 
     public static func keypair_5(_ tau: [UInt8],_ sk:inout [UInt8],_ pk:inout [UInt8]) {
         keypair(PARAMS_5,tau,&sk,&pk)
     }
 
-    public static func signature_5(_ sk: [UInt8],_ M: [UInt8],_ sig:inout  [UInt8]) -> Int {
-	    return signature(PARAMS_5, sk, M, &sig) 
+    public static func signature_5(_ ph: Bool,_ rn: [UInt8]?,_ sk: [UInt8],_ ctx: [UInt8]?,_ M: [UInt8],_ sig:inout  [UInt8]) -> Int {
+	    return signature(PARAMS_5, ph, rn, sk, ctx, M, &sig) 
     }
  
-    public static func verify_5(_ pk: [UInt8],_ M: [UInt8],_ sig: [UInt8]) -> Bool {
-	    return verify(PARAMS_5, pk, M, sig)
+    public static func verify_5(_ ph: Bool,_ pk: [UInt8],_ ctx: [UInt8]?,_ M: [UInt8],_ sig: [UInt8]) -> Bool {
+	    return verify(PARAMS_5, ph, pk, ctx, M, sig)
     }
 
 }

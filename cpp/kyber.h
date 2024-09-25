@@ -24,6 +24,8 @@
 
 #include "core.h"
 
+#define ML_KEM    // define this for FIPS 203 standard
+
 //q= 3329
 #define KY_LGN 8
 #define KY_DEGREE (1 << KY_LGN)

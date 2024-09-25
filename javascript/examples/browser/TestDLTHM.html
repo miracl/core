@@ -68,13 +68,13 @@
 //        console.log("Public Key= "+ctx.DILITHIUM.bytestostring(PK));
 //        console.log("Secret key= "+ctx.DILITHIUM.bytestostring(SK));
 
-		var attempts=ctx.DILITHIUM.signature_3(SK,ctx.DILITHIUM.asciitobytes(mess),SIG);
+		var attempts=ctx.DILITHIUM.signature_3(false,null,SK,null,ctx.DILITHIUM.asciitobytes(mess),SIG);
 
         window.document.write("Signature created on attempt "+attempts+"<br>");
 
 //        console.log("Signature= "+ctx.DILITHIUM.bytestostring(SIG));
 
-		var result=ctx.DILITHIUM.verify_3(PK,ctx.DILITHIUM.asciitobytes(mess),SIG);
+		var result=ctx.DILITHIUM.verify_3(false,PK,null,ctx.DILITHIUM.asciitobytes(mess),SIG);
         if (result) {
             window.document.write("Signature is verified"+"<br>");
         } else {

@@ -16,8 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// See https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf
+// Minor API change required for ML_DSA, 32 byte random component (rn) required for hedged non-deterministic signature (recommended). Set to NULL for deterministic signature
+// Also domain seperating context string required for signature and verification. Set to NULL if not required.
 
-/* Kyber API high-level functions  */
+// For prehash modes, set ph to True and create message as OID||H(m) where OID identifies the hash function, else ph to False
+
+/* Dilithium API high-level functions  */
 
 var DILITHIUM = function(ctx) {
     "use strict";
@@ -407,7 +412,7 @@ var DILITHIUM = function(ctx) {
                 sk[i]=rho[i];
             for (var i=0;i<32;i++)
                 sk[n++]=bK[i];
-            for (var i=0;i<32;i++)
+            for (var i=0;i<DILITHIUM.TRSIZE;i++)
                 sk[n++]=tr[i];
 		    var pos=[];
 		    pos[0]=pos[1]=0;
@@ -442,7 +447,7 @@ var DILITHIUM = function(ctx) {
                 rho[i]=sk[i];
             for (var i=0;i<32;i++)
                 bK[i]=sk[n++];
-            for (var i=0;i<32;i++)
+            for (var i=0;i<DILITHIUM.TRSIZE;i++)
                 tr[i]=sk[n++];
 		    var pos=[];
 		    pos[0]=n; pos[1]=0;
@@ -474,9 +479,11 @@ var DILITHIUM = function(ctx) {
             var ck=params[3];
             var el=params[4];
             var omega=params[7];
-            for (var i=0;i<32;i++)
+            var lambda=params[8];
+
+            for (var i=0;i<lambda;i++)
                 sig[i]=ct[i];   
-            var n=32;
+            var n=lambda;
 		    var pos=[];
 		    pos[0]=pos[1]=0;
 //pre-process z
@@ -506,13 +513,14 @@ var DILITHIUM = function(ctx) {
             var ck=params[3];
             var el=params[4];
             var omega=params[7];
+            var lambda=params[8];
 
-            var m=32+(el*DILITHIUM.DEGREE*(lg+1))/8;
-            for (var i=0;i<32;i++)
+            var m=lambda+(el*DILITHIUM.DEGREE*(lg+1))/8;
+            for (var i=0;i<lambda;i++)
                 ct[i]=sig[i];
 
 		    var pos=[];
-		    pos[0]=32; pos[1]=0;
+		    pos[0]=lambda; pos[1]=0;
             for (var j=0;j<el;j++)
             {
                 for (var i=0;i<DILITHIUM.DEGREE;i++) {
@@ -595,24 +603,44 @@ var DILITHIUM = function(ctx) {
 			        sh.process(nxt);
                 }
 		    }
-		    sh.shake(H,32);
+		    sh.shake(H,DILITHIUM.TRSIZE);
 	    },
 
 // CRH(tr,M)
-	    CRH2: function(H,tr,mess,mlen) {
+	    CRH2: function(H,tr,ph,context,mess) {
 		    var sh = new ctx.SHA3(ctx.SHA3.SHAKE256);
-		    for (var i=0;i<32;i++)
+		    for (var i=0;i<DILITHIUM.TRSIZE;i++)
 			    sh.process(tr[i]);
-		    for (var i=0;i<mlen;i++)
+
+            if (ph) sh.process(1);
+            else    sh.process(0);
+            if (context==null) {
+                sh.process(0);
+            } else {
+                sh.process(context.length&0xff);
+                for (var i=0;i<context.length;i++)
+                    sh.process(context[i]);
+            }
+
+		    for (var i=0;i<mess.length;i++)
 			    sh.process(mess[i]);
 		    sh.shake(H,64);
 	    },
 
 // CRH(K,mu)
-	    CRH3: function(H,bK,mu) {
+	    CRH3: function(H,bK,rn,mu) {
 		    var  sh = new ctx.SHA3(ctx.SHA3.SHAKE256);
 		    for (var i=0;i<32;i++)
 			    sh.process(bK[i]);
+
+            if (rn==null) {
+                for (var i=0;i<32;i++)
+                    sh.process(0);
+            } else {
+                for (var i=0;i<32;i++)
+                    sh.process(rn[i]);
+            }
+
 		    for (var i=0;i<64;i++)
 			    sh.process(mu[i]);
 		    sh.shake(H,64);
@@ -624,6 +652,8 @@ var DILITHIUM = function(ctx) {
 		    pos[0]=0; pos[1]=0;
 		    var ck=params[3];
 		    var dv=params[2];
+            var lambda=params[8];
+
 		    var w1b=4;
 		    if (dv==88) w1b=6;
 		    var sh = new ctx.SHA3(ctx.SHA3.SHAKE256);
@@ -634,15 +664,16 @@ var DILITHIUM = function(ctx) {
 			    for (var i=0;i<(DILITHIUM.DEGREE*w1b)/8;i++)
 				    sh.process(DILITHIUM.nextbyte(w1b,0,w1[j],pos));
 		    }
-		    sh.shake(CT,32);
+		    sh.shake(CT,lambda);
 	    },
 
 	    SampleInBall: function(params,ct,c) {
 		    var tau=params[0];
+            var lambda=params[8];
 		    var signs=new Uint8Array(8);
 		    var buff=new Uint8Array(136);
  		    var sh = new ctx.SHA3(ctx.SHA3.SHAKE256);
-		    for (var i=0;i<32;i++)
+		    for (var i=0;i<lambda;i++)
 			    sh.process(ct[i]);
 		    sh.shake(buff,136);
 		    for (var i=0;i<8;i++)
@@ -789,7 +820,7 @@ var DILITHIUM = function(ctx) {
             var rho=new Uint8Array(32);
             var rhod=new Uint8Array(64);
             var bK=new Uint8Array(32);
-            var tr=new Uint8Array(32);
+            var tr=new Uint8Array(DILITHIUM.TRSIZE);
             var Aij=new Int32Array(DILITHIUM.DEGREE);
             var w=new Int32Array(DILITHIUM.DEGREE);
             var r=new Int32Array(DILITHIUM.DEGREE);
@@ -818,6 +849,10 @@ var DILITHIUM = function(ctx) {
   
 		    for (var i=0;i<32;i++)
 			    sh.process(tau[i]); 
+
+            sh.process(ck&0xff);
+            sh.process(el&0xff);
+
 		    sh.shake(buff,128);
 		    for (var i=0;i<32;i++)
 		    {
@@ -864,12 +899,12 @@ var DILITHIUM = function(ctx) {
 		    var sklen=DILITHIUM.pack_sk(params,sk,rho,bK,tr,s1,s2,t0);
 	    },
 
-        signature: function(params,sk,M,sig) {
+        signature: function(params,ph,rn,sk,context,M,sig) {
             var badone;
             var rho = new Uint8Array(32);
             var bK = new Uint8Array(32);
-            var ct = new Uint8Array(32);
-            var tr = new Uint8Array(32);
+            var ct = new Uint8Array(64);
+            var tr = new Uint8Array(DILITHIUM.TRSIZE);
             var mu = new Uint8Array(64);
             var rhod = new Uint8Array(64);
             var hint = new Uint8Array(100);
@@ -919,9 +954,9 @@ var DILITHIUM = function(ctx) {
             DILITHIUM.unpack_sk(params,rho,bK,tr,s1,s2,t0,sk);
 //console.log("tr= "+DILITHIUM.bytestostring(tr));
 // signature
-            DILITHIUM.CRH2(mu,tr,M,M.length);
+            DILITHIUM.CRH2(mu,tr,ph,context,M);
 //console.log("mu= "+DILITHIUM.bytestostring(mu));
-            DILITHIUM.CRH3(rhod,bK,mu);
+            DILITHIUM.CRH3(rhod,bK,rn,mu);
 //console.log("rhod= "+DILITHIUM.bytestostring(rhod));
             for (var k=0; ;k++ )
             {
@@ -1025,12 +1060,12 @@ var DILITHIUM = function(ctx) {
             return k+1;      
         },
 
-        verify: function(params,pk,M,sig) {
+        verify: function(params,ph,pk,context,M,sig) {
             var rho = new Uint8Array(32);
             var mu = new Uint8Array(64);
-            var ct = new Uint8Array(32);
-            var cct = new Uint8Array(32);
-            var tr = new Uint8Array(32);
+            var ct = new Uint8Array(64);
+            var cct = new Uint8Array(64);
+            var tr = new Uint8Array(DILITHIUM.TRSIZE);
             var hint = new Uint8Array(100);
 
             var Aij = new Int32Array(DILITHIUM.DEGREE);  // 1024 bytes
@@ -1060,6 +1095,7 @@ var DILITHIUM = function(ctx) {
             var eta=params[5];
             var beta=(tau*eta);
             var omega=params[7];
+            var lambda=params[8];
 
 // unpack public key and signature
             DILITHIUM.unpack_pk(params,rho,t1,pk);
@@ -1073,7 +1109,7 @@ var DILITHIUM = function(ctx) {
             }
 
             DILITHIUM.CRH1(params,tr,rho,t1);
-            DILITHIUM.CRH2(mu,tr,M,M.length);
+            DILITHIUM.CRH2(mu,tr,ph,context,M);
             DILITHIUM.SampleInBall(params,ct,c);
             DILITHIUM.ntt(c);
 
@@ -1101,12 +1137,14 @@ var DILITHIUM = function(ctx) {
                 DILITHIUM.intt(r);
 
                 hints=DILITHIUM.UsePartialHint(params,w1d[i],hint,hints,i,r);
-                if (hints>omega) return false;
+                if (hints>omega || hints!=hint[omega+i]) return false;
             }
 
             DILITHIUM.H4(params,cct,mu,w1d);
 
-            for (var i=0;i<32;i++)
+            for (var i=hints;i<omega;i++) /*** ML_DSA ***/
+    	        if (hint[i]!=0) return false;
+            for (var i=0;i<lambda;i++)
                 if (ct[i]!=cct[i])
                     return false;
             return true;
@@ -1117,14 +1155,14 @@ var DILITHIUM = function(ctx) {
 		    DILITHIUM.keypair(DILITHIUM.PARAMS_2,tau,sk,pk);
 	    },
 
-        signature_2: function(sk,M,sig)
+        signature_2: function(ph,rn,sk,context,M,sig)
         {
-            return DILITHIUM.signature(DILITHIUM.PARAMS_2,sk,M,sig);
+            return DILITHIUM.signature(DILITHIUM.PARAMS_2,ph,rn,sk,context,M,sig);
         },
 
-        verify_2: function(pk,M,sig)
+        verify_2: function(ph,pk,context,M,sig)
         {
-            return DILITHIUM.verify(DILITHIUM.PARAMS_2,pk,M,sig);
+            return DILITHIUM.verify(DILITHIUM.PARAMS_2,ph,pk,context,M,sig);
         },
 
 	    keypair_3: function(tau,sk,pk)
@@ -1132,14 +1170,14 @@ var DILITHIUM = function(ctx) {
 		    DILITHIUM.keypair(DILITHIUM.PARAMS_3,tau,sk,pk);
 	    },
 
-        signature_3: function(sk,M,sig)
+        signature_3: function(ph,rn,sk,context,M,sig)
         {
-            return DILITHIUM.signature(DILITHIUM.PARAMS_3,sk,M,sig);
+            return DILITHIUM.signature(DILITHIUM.PARAMS_3,ph,rn,sk,context,M,sig);
         },
 
-        verify_3: function(pk,M,sig)
+        verify_3: function(ph,pk,context,M,sig)
         {
-            return DILITHIUM.verify(DILITHIUM.PARAMS_3,pk,M,sig);
+            return DILITHIUM.verify(DILITHIUM.PARAMS_3,ph,pk,context,M,sig);
         },
 
 	    keypair_5: function(tau,sk,pk)
@@ -1147,14 +1185,14 @@ var DILITHIUM = function(ctx) {
 		    DILITHIUM.keypair(DILITHIUM.PARAMS_5,tau,sk,pk);
 	    },
 
-        signature_5: function(sk,M,sig)
+        signature_5: function(ph,rn,sk,context,M,sig)
         {
-            return DILITHIUM.signature(DILITHIUM.PARAMS_5,sk,M,sig);
+            return DILITHIUM.signature(DILITHIUM.PARAMS_5,ph,rn,sk,context,M,sig);
         },
 
-        verify_5: function(pk,M,sig)
+        verify_5: function(ph,pk,context,M,sig)
         {
-            return DILITHIUM.verify(DILITHIUM.PARAMS_5,pk,M,sig);
+            return DILITHIUM.verify(DILITHIUM.PARAMS_5,ph,pk,context,M,sig);
         },
 
 
@@ -1211,6 +1249,7 @@ var DILITHIUM = function(ctx) {
         }
     };
     
+    DILITHIUM.TRSIZE = 64;
 //q= 8380417          
     DILITHIUM.PRIME = 0x7fe001; // q in Hex
     DILITHIUM.LGN = 8; // Degree n=2^LGN
@@ -1231,21 +1270,21 @@ var DILITHIUM = function(ctx) {
     DILITHIUM.MAXL = 7;
     DILITHIUM.YBYTES = (((DILITHIUM.MAXLG+1)*DILITHIUM.DEGREE)/8);
 
-    DILITHIUM.SK_SIZE_2 = (32*3+DILITHIUM.DEGREE*(4*13+4*3+4*3)/8);
+    DILITHIUM.SK_SIZE_2 = (64+DILITHIUM.TRSIZE+DILITHIUM.DEGREE*(4*13+4*3+4*3)/8);
     DILITHIUM.PK_SIZE_2 = ((4*DILITHIUM.DEGREE*DILITHIUM.TD)/8+32);
     DILITHIUM.SIG_SIZE_2 = ((DILITHIUM.DEGREE*4*(17+1))/8+80+4+32);
 
-    DILITHIUM.SK_SIZE_3 = (32*3+DILITHIUM.DEGREE*(6*13+5*4+6*4)/8);
+    DILITHIUM.SK_SIZE_3 = (64+DILITHIUM.TRSIZE+DILITHIUM.DEGREE*(6*13+5*4+6*4)/8);
     DILITHIUM.PK_SIZE_3 = ((6*DILITHIUM.DEGREE*DILITHIUM.TD)/8+32);
-    DILITHIUM.SIG_SIZE_3 = ((DILITHIUM.DEGREE*5*(19+1))/8+55+6+32);
+    DILITHIUM.SIG_SIZE_3 = ((DILITHIUM.DEGREE*5*(19+1))/8+55+6+48);
 
-    DILITHIUM.SK_SIZE_5 = (32*3+DILITHIUM.DEGREE*(8*13+7*3+8*3)/8);
+    DILITHIUM.SK_SIZE_5 = (64+DILITHIUM.TRSIZE+DILITHIUM.DEGREE*(8*13+7*3+8*3)/8);
     DILITHIUM.PK_SIZE_5 = ((8*DILITHIUM.DEGREE*DILITHIUM.TD)/8+32);
-    DILITHIUM.SIG_SIZE_5 = ((DILITHIUM.DEGREE*7*(19+1))/8+75+8+32);
+    DILITHIUM.SIG_SIZE_5 = ((DILITHIUM.DEGREE*7*(19+1))/8+75+8+64);
 
-	DILITHIUM.PARAMS_2 = [39,17,88,4,4,2,3,80];
-	DILITHIUM.PARAMS_3 = [49,19,32,6,5,4,4,55];
-	DILITHIUM.PARAMS_5 = [60,19,32,8,7,2,3,75];
+	DILITHIUM.PARAMS_2 = [39,17,88,4,4,2,3,80,32];
+	DILITHIUM.PARAMS_3 = [49,19,32,6,5,4,4,55,48];
+	DILITHIUM.PARAMS_5 = [60,19,32,8,7,2,3,75,64];
 
     DILITHIUM.roots = [0x3ffe00,0x64f7,0x581103,0x77f504,0x39e44,0x740119,0x728129,0x71e24,0x1bde2b,0x23e92b,0x7a64ae,0x5ff480,0x2f9a75,0x53db0a,0x2f7a49,0x28e527,0x299658,0xfa070,0x6f65a5,0x36b788,0x777d91,0x6ecaa1,0x27f968,0x5fb37c,0x5f8dd7,0x44fae8,0x6a84f8,0x4ddc99,0x1ad035,0x7f9423,0x3d3201,0x445c5,0x294a67,0x17620,0x2ef4cd,0x35dec5,0x668504,0x49102d,0x5927d5,0x3bbeaf,0x44f586,0x516e7d,0x368a96,0x541e42,0x360400,0x7b4a4e,0x23d69c,0x77a55e,0x65f23e,0x66cad7,0x357e1e,0x458f5a,0x35843f,0x5f3618,0x67745d,0x38738c,0xc63a8,0x81b9a,0xe8f76,0x3b3853,0x3b8534,0x58dc31,0x1f9d54,0x552f2e,0x43e6e6,0x688c82,0x47c1d0,0x51781a,0x69b65e,0x3509ee,0x2135c7,0x67afbc,0x6caf76,0x1d9772,0x419073,0x709cf7,0x4f3281,0x4fb2af,0x4870e1,0x1efca,0x3410f2,0x70de86,0x20c638,0x296e9f,0x5297a4,0x47844c,0x799a6e,0x5a140a,0x75a283,0x6d2114,0x7f863c,0x6be9f8,0x7a0bde,0x1495d4,0x1c4563,0x6a0c63,0x4cdbea,0x40af0,0x7c417,0x2f4588,0xad00,0x6f16bf,0xdcd44,0x3c675a,0x470bcb,0x7fbe7f,0x193948,0x4e49c1,0x24756c,0x7ca7e0,0xb98a1,0x6bc809,0x2e46c,0x49a809,0x3036c2,0x639ff7,0x5b1c94,0x7d2ae1,0x141305,0x147792,0x139e25,0x67b0e1,0x737945,0x69e803,0x51cea3,0x44a79d,0x488058,0x3a97d9,0x1fea93,0x33ff5a,0x2358d4,0x3a41f8,0x4cdf73,0x223dfb,0x5a8ba0,0x498423,0x412f5,0x252587,0x6d04f1,0x359b5d,0x4a28a1,0x4682fd,0x6d9b57,0x4f25df,0xdbe5e,0x1c5e1a,0xde0e6,0xc7f5a,0x78f83,0x67428b,0x7f3705,0x77e6fd,0x75e022,0x503af7,0x1f0084,0x30ef86,0x49997e,0x77dcd7,0x742593,0x4901c3,0x53919,0x4610c,0x5aad42,0x3eb01b,0x3472e7,0x4ce03c,0x1a7cc7,0x31924,0x2b5ee5,0x291199,0x585a3b,0x134d71,0x3de11c,0x130984,0x25f051,0x185a46,0x466519,0x1314be,0x283891,0x49bb91,0x52308a,0x1c853f,0x1d0b4b,0x6fd6a7,0x6b88bf,0x12e11b,0x4d3e3f,0x6a0d30,0x78fde5,0x1406c7,0x327283,0x61ed6f,0x6c5954,0x1d4099,0x590579,0x6ae5ae,0x16e405,0xbdbe7,0x221de8,0x33f8cf,0x779935,0x54aa0d,0x665ff9,0x63b158,0x58711c,0x470c13,0x910d8,0x463e20,0x612659,0x251d8b,0x2573b7,0x7d5c90,0x1ddd98,0x336898,0x2d4bb,0x6d73a8,0x4f4cbf,0x27c1c,0x18aa08,0x2dfd71,0xc5ca5,0x19379a,0x478168,0x646c3e,0x51813d,0x35c539,0x3b0115,0x41dc0,0x21c4f7,0x70fbf5,0x1a35e7,0x7340e,0x795d46,0x1a4cd0,0x645caf,0x1d2668,0x666e99,0x6f0634,0x7be5db,0x455fdc,0x530765,0x5dc1b0,0x7973de,0x5cfd0a,0x2cc93,0x70f806,0x189c2a,0x49c5aa,0x776a51,0x3bcf2c,0x7f234f,0x6b16e0,0x3c15ca,0x155e68,0x72f6b7,0x1e29ce];
     DILITHIUM.iroots = [0x3ffe00,0x7f7b0a,0x7eafd,0x27cefe,0x78c1dd,0xd5ed8,0xbdee8,0x7c41bd,0x56fada,0x5065b8,0x2c04f7,0x50458c,0x1feb81,0x57b53,0x5bf6d6,0x6401d6,0x7b9a3c,0x42ae00,0x4bde,0x650fcc,0x320368,0x155b09,0x3ae519,0x20522a,0x202c85,0x57e699,0x111560,0x86270,0x492879,0x107a5c,0x703f91,0x5649a9,0x2ab0d3,0x6042ad,0x2703d0,0x445acd,0x44a7ae,0x71508b,0x77c467,0x737c59,0x476c75,0x186ba4,0x20a9e9,0x4a5bc2,0x3a50a7,0x4a61e3,0x19152a,0x19edc3,0x83aa3,0x5c0965,0x495b3,0x49dc01,0x2bc1bf,0x49556b,0x2e7184,0x3aea7b,0x442152,0x26b82c,0x36cfd4,0x195afd,0x4a013c,0x50eb34,0x7e69e1,0x56959a,0x454828,0x375fa9,0x3b3864,0x2e115e,0x15f7fe,0xc66bc,0x182f20,0x6c41dc,0x6b686f,0x6bccfc,0x2b520,0x24c36d,0x1c400a,0x4fa93f,0x3637f8,0x7cfb95,0x1417f8,0x744760,0x33821,0x5b6a95,0x319640,0x66a6b9,0x2182,0x38d436,0x4378a7,0x7212bd,0x10c942,0x7f3301,0x509a79,0x781bea,0x7bd511,0x330417,0x15d39e,0x639a9e,0x6b4a2d,0x5d423,0x13f609,0x59c5,0x12beed,0xa3d7e,0x25cbf7,0x64593,0x385bb5,0x2d485d,0x567162,0x5f19c9,0xf017b,0x4bcf0f,0x7df037,0x376f20,0x302d52,0x30ad80,0xf430a,0x3e4f8e,0x62488f,0x13308b,0x183045,0x5eaa3a,0x4ad613,0x1629a3,0x2e67e7,0x381e31,0x17537f,0x3bf91b,0x61b633,0xce94a,0x6a8199,0x43ca37,0x14c921,0xbcb2,0x4410d5,0x875b0,0x361a57,0x6743d7,0xee7fb,0x7d136e,0x22e2f7,0x66c23,0x221e51,0x2cd89c,0x3a8025,0x3fa26,0x10d9cd,0x197168,0x62b999,0x1b8352,0x659331,0x682bb,0x78abf3,0x65aa1a,0xee40c,0x5e1b0a,0x7bc241,0x44deec,0x4a1ac8,0x2e5ec4,0x1b73c3,0x385e99,0x66a867,0x73835c,0x51e290,0x6735f9,0x7d63e5,0x309342,0x126c59,0x7d0b46,0x4c7769,0x620269,0x28371,0x5a6c4a,0x5ac276,0x1eb9a8,0x39a1e1,0x76cf29,0x38d3ee,0x276ee5,0x1c2ea9,0x198008,0x2b35f4,0x846cc,0x4be732,0x5dc219,0x74041a,0x68fbfc,0x14fa53,0x26da88,0x629f68,0x1386ad,0x1df292,0x4d6d7e,0x6bd93a,0x6e21c,0x15d2d1,0x32a1c2,0x6cfee6,0x145742,0x10095a,0x62d4b6,0x635ac2,0x2daf77,0x362470,0x57a770,0x6ccb43,0x397ae8,0x6785bb,0x59efb0,0x6cd67d,0x41fee5,0x6c9290,0x2785c6,0x56ce68,0x54811c,0x7cc6dd,0x65633a,0x32ffc5,0x4b6d1a,0x412fe6,0x2532bf,0x7b7ef5,0x7aa6e8,0x36de3e,0xbba6e,0x8032a,0x364683,0x4ef07b,0x60df7d,0x2fa50a,0x9ffdf,0x7f904,0xa8fc,0x189d76,0x78507e,0x7360a7,0x71ff1b,0x6381e7,0x7221a3,0x30ba22,0x1244aa,0x395d04,0x35b760,0x4a44a4,0x12db10,0x5aba7a,0x7bcd0c,0x365bde,0x255461,0x5da206,0x33008e,0x459e09,0x5c872d,0x4be0a7,0x5ff56e];
