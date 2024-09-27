@@ -798,7 +798,7 @@ pub fn find_public_key(c: &[u8], ptr: &mut usize) -> usize {
 
 // get Public details from ASN.1 description
 pub fn get_public_key(c: &[u8], key: &mut [u8]) -> PKTYPE {
-    let mut koid: [u8; 12] = [0; 12];
+    let mut koid: [u8; 16] = [0; 16];
     let mut ret = PKTYPE::new();
     let mut j = 0;
     let keylen = key.len();

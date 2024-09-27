@@ -724,7 +724,7 @@ int X509_find_public_key(octet *c,int *ptr)
 pktype X509_get_public_key(octet *c,octet *key) 
 {
     int i, j, fin, len, sj, ptr;
-    char koid[12];     /*****/
+    char koid[16];     /*****/
     octet KOID = {0, sizeof(koid), koid};
     pktype ret;
 
