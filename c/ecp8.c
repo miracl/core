@@ -155,6 +155,7 @@ void ECP8_ZZZ_output(ECP8_ZZZ *P)
 void ECP8_ZZZ_toOctet(octet *W, ECP8_ZZZ *Q,bool compress)
 {
     FP8_YYY qx, qy;
+    FP8_YYY_zero(&qx); FP8_YYY_zero(&qy);
     bool alt=false;
     ECP8_ZZZ_get(&qx, &qy, Q);
   

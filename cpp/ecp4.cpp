@@ -159,6 +159,7 @@ void ZZZ::ECP4_output(ECP4 *P)
 void ZZZ::ECP4_toOctet(octet *W, ECP4 *Q,bool compress)
 {
     FP4 qx, qy;
+    FP4_zero(&qx); FP4_zero(&qy);
     bool alt=false;
     ECP4_get(&qx, &qy, Q);
   

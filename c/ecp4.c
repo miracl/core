@@ -155,6 +155,7 @@ void ECP4_ZZZ_output(ECP4_ZZZ *P)
 void ECP4_ZZZ_toOctet(octet *W, ECP4_ZZZ *Q,bool compress)
 {
     FP4_YYY qx, qy;
+    FP4_YYY_zero(&qx); FP4_YYY_zero(&qy);
     bool alt=false;
     ECP4_ZZZ_get(&qx, &qy, Q);
   

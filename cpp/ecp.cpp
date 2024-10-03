@@ -445,12 +445,13 @@ void ZZZ::ECP_rawoutput(ECP *P)
 void ZZZ::ECP_toOctet(octet *W, ECP *P, bool compress)
 {
 #if CURVETYPE_ZZZ==MONTGOMERY
-    BIG x;
+    BIG x; BIG_zero(x);
     ECP_get(x, P);
     W->len = MODBYTES_XXX; // + 1;
     BIG_toBytes(&(W->val[0]), x);
 #else
     BIG x, y;
+    BIG_zero(x); BIG_zero(y);
     bool alt=false;
     ECP_affine(P);
     ECP_get(x, y, P);

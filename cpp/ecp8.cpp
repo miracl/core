@@ -158,6 +158,7 @@ void ZZZ::ECP8_output(ECP8 *P)
 void ZZZ::ECP8_toOctet(octet *W, ECP8 *Q,bool compress)
 {
     FP8 qx, qy;
+    FP8_zero(&qx); FP8_zero(&qy);
     bool alt=false;
     ECP8_get(&qx, &qy, Q);
   

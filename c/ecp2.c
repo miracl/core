@@ -180,6 +180,7 @@ void ECP2_ZZZ_outputxyz(ECP2_ZZZ *P)
 void ECP2_ZZZ_toOctet(octet *W, ECP2_ZZZ *Q, bool compress)
 {
     FP2_YYY qx, qy;
+    FP2_YYY_zero(&qx); FP2_YYY_zero(&qy);
     bool alt=false;
     ECP2_ZZZ_get(&qx, &qy, Q);
 

@@ -184,6 +184,7 @@ void ZZZ::ECP2_outputxyz(ECP2 *P)
 void ZZZ::ECP2_toOctet(octet *W, ECP2 *Q, bool compress)
 {
     FP2 qx, qy;
+    FP2_zero(&qx); FP2_zero(&qy);
     bool alt=false;
     ECP2_get(&qx, &qy, Q);
 
