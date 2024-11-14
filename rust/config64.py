@@ -399,10 +399,18 @@ if __name__ == '__main__':
         deltext="del "
         slashtext="\\"
 
+    build=True
+    selects=[]
     testing=False
-    if len(sys.argv)==2 :
+    nargs=len(sys.argv)
+    if nargs>=2 :
         if sys.argv[1]=="test":
             testing=True
+        else :
+            for i in range(1,nargs) :
+                selects.append(int(sys.argv[i]))
+            build=False
+
 
     os.system("cargo new mcore")
     with open("mcore"+slashtext+"Cargo.toml","a") as cargofile:
@@ -422,24 +430,29 @@ if __name__ == '__main__':
     os.system(copytext+ "arch64.rs mcore"+slashtext+"src"+slashtext+"arch.rs")
     os.system(copytext+ "lib.rs mcore"+slashtext+"src"+slashtext+"lib.rs")
 
-
-    interactive_prompt_print()
-    while keep_querying and not testing:
-        query_val = -1
-        while not miracl_crypto.valid_query(query_val):
-            query_val = interactive_prompt_input()
-            if not miracl_crypto.valid_query(query_val):
-                print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
-            elif query_val == 0:
-                keep_querying = False
-            else:
-                interactive_prompt_exect(query_val)
-
-    if testing:
+    if not testing :
+        if build :
+            interactive_prompt_print()
+            while keep_querying:
+                query_val = -1
+                while not miracl_crypto.valid_query(query_val):
+                    query_val = interactive_prompt_input()
+                    if not miracl_crypto.valid_query(query_val):
+                        print("Number out of range, select values between 1 and " + str(miracl_crypto.total_entries))
+                    elif query_val == 0:
+                        keep_querying = False
+                    else:
+                        interactive_prompt_exect(query_val)
+            os.system("cargo rustc --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib")
+        else :
+            for i in range(0, nargs-1):
+                interactive_prompt_exect(selects[i])
+    else :
+        interactive_prompt_print()
         for i in range(0, miracl_crypto.total_entries):
             interactive_prompt_exect(i+1)
-
-    os.system("cargo rustc --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib")
+        os.system("cargo rustc --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib")
+        
     #os.system("cargo rustc  --manifest-path mcore"+slashtext+"Cargo.toml --release  --lib -- -C opt-level=s")
 
     #-- --cfg D64

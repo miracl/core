@@ -66,6 +66,15 @@ where XX can be 32 or 64
 Note that this builds the library for ALL of the options. 
 Executables of the above test programs are created, and can be run immediately.
 
+
+-------------------------------------------------
+
+Alternatively 
+
+    python3 configXX.py 31 42 44
+    
+just creates library source for selected options, but does NOT build or test.
+
 -------------------------------------------------
 
 ## Using MIRACL core with Cargo
