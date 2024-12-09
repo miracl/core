@@ -298,6 +298,7 @@ void core::HASH384_hash(hash384 *sh, char *digest)
 {
     /* pad message and finish - supply digest */
     HASH512_hash(sh, digest);
+    HASH384_init(sh);
 }
 
 /* return intermediate hash */

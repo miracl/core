@@ -90,7 +90,62 @@ void BIG_XXX_rawoutput(BIG_XXX a)
 #endif
 }
 
-/* Swap a and b if d=1 */
+// Swap a and b if d=1  -  see Loiseau et al. 2021
+chunk BIG_XXX_cswap(BIG_XXX a, BIG_XXX b, int d)
+{
+    int i;
+    chunk t;
+    chunk r0 = a[0] ^ b[1];
+    chunk r1 = a[1] ^ b[0];
+#ifdef DEBUG_NORM
+    for (i = 0; i < NLEN_XXX + 2; i++)
+#else
+    for (i = 0; i < NLEN_XXX; i++)
+#endif
+    {
+        t = a[i];
+        a[i] = a[i] * (1 - (d - r0)) + b[i] * (d + r1) - r0 * a[i] - r1 * b[i];
+        b[i] = b[i] * (1 - (d - r0)) + t * (d + r1) - r0 * b[i] - r1 * t;
+    }
+    return 0;
+}
+
+/* Move g to f if d=1 */
+chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
+{
+    int i;
+    chunk t;
+    chunk r0 = f[0] ^ g[1];
+    chunk r1 = f[1] ^ g[0];
+#ifdef DEBUG_NORM
+    for (i = 0; i < NLEN_XXX + 2; i++)
+#else
+    for (i = 0; i < NLEN_XXX; i++)
+#endif
+    {
+        f[i] = f[i] * (1 - (d - r0)) + g[i] * (d + r1) - r0 * f[i] - r1 * g[i];       
+    }
+    return 0;
+}
+
+/* Move g to f if d=1 */
+chunk BIG_XXX_dcmove(DBIG_XXX f, DBIG_XXX g, int d)
+{
+    int i;
+    chunk t;
+    chunk r0 = f[0] ^ g[1];
+    chunk r1 = f[1] ^ g[0];
+#ifdef DEBUG_NORM
+    for (i = 0; i < DNLEN_XXX + 2; i++)
+#else
+    for (i = 0; i < DNLEN_XXX; i++)
+#endif
+    {
+        f[i] = f[i] * (1 - (d - r0)) + g[i] * (d + r1) - r0 * f[i] - r1 * g[i];       
+    }
+    return 0;
+}
+/* Swap a and b if d=1 
 chunk BIG_XXX_cswap(BIG_XXX a, BIG_XXX b, int d)
 {
     int i;
@@ -113,8 +168,8 @@ chunk BIG_XXX_cswap(BIG_XXX a, BIG_XXX b, int d)
     }
     return w;
 }
-
-/* Move b to a if d=1 */
+*/
+/* Move g to f if d=1 
 chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
 {
     int i;
@@ -135,8 +190,8 @@ chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
     }
     return w;
 }
-
-/* Move g to f if d=1 */
+*/
+/* Move g to f if d=1 
 chunk BIG_XXX_dcmove(DBIG_XXX f, DBIG_XXX g, int d)
 {
     int i;
@@ -157,7 +212,7 @@ chunk BIG_XXX_dcmove(DBIG_XXX f, DBIG_XXX g, int d)
     }
     return w;
 }
-
+*/
 /* convert BIG to/from bytes */
 /* SU= 64 */
 void BIG_XXX_toBytes(char *b, BIG_XXX a)

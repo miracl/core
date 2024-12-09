@@ -187,7 +187,30 @@ impl BIG {
         (self.w[NLEN - 1] >> ((8 * MODBYTES) % BASEBITS)) as Chunk
     }
 
-    /* Conditional swap of two bigs depending on d using XOR - no branches */
+    /* Conditional swap of two bigs depending on d -  see Loiseau et al. 2021 */
+    pub fn cswap(&mut self, b: &mut BIG, d: isize) -> Chunk {
+        let r0=self.w[0]^b.w[1];
+        let r1=self.w[1]^b.w[0];
+        let dd=d as Chunk;
+        for i in 0..NLEN {
+            let t=self.w[i];
+            self.w[i]=self.w[i]*(1-(dd-r0))+b.w[i]*(dd+r1)-r0*self.w[i]-r1*b.w[i];
+            b.w[i]=b.w[i]*(1-(dd-r0))+t*(dd+r1)-r0*b.w[i]-r1*t;
+        }
+        return 0 as Chunk;
+    }
+
+    pub fn cmove(&mut self, g: &BIG, d: isize)  -> Chunk {
+        let r0=self.w[0]^g.w[1];
+        let r1=self.w[1]^g.w[0];
+        let dd=d as Chunk;
+        for i in 0..NLEN {
+            self.w[i]=self.w[i]*(1-(dd-r0))+g.w[i]*(dd+r1)-r0*self.w[i]-r1*g.w[i];      
+        }
+        return 0 as Chunk;
+    }           
+
+    /* Conditional swap of two bigs depending on d using XOR - no branches 
     pub fn cswap(&mut self, b: &mut BIG, d: isize) -> Chunk {
         let c = -d as Chunk;
         let mut w=0 as Chunk;
@@ -217,7 +240,7 @@ impl BIG {
         }
         return w;
     }
-
+*/
     /* Shift right by less than a word */
     pub fn fshr(&mut self, k: usize) -> isize {
         let n = k;

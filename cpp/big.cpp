@@ -93,78 +93,61 @@ void XXX::BIG_rawoutput(BIG a)
 #endif
 }
 
-// modified to prevent Nonce@Once side channel attack
-// Two tricks to thwart compiler optimization
-// 1. Prevent mask removal by performing transformation that might change the mask, but in fact does not
-// 2. Force the code to calculate an intermediate value, by making it part of (an unused) return value
-// problem is XORing with all zeros or XORing with "random" shows up in side-channel, and reveals d
 
-/* Swap a and b if d=1 */
+// Swap a and b if d=1   -  see Loiseau et al. 2021
 chunk XXX::BIG_cswap(BIG a, BIG b, int d)
 {
     int i;
-    chunk e, r, ra, w, t, c = (chunk) - d;
-    w=0; 
-    r=a[0]^b[1];  // sort of random
-    ra=r+r; ra>>=1; // I know this doesn't change r, but the compiler doesn't!
+    chunk t;
+    chunk r0 = a[0] ^ b[1];
+    chunk r1 = a[1] ^ b[0];
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        t = c & (a[i] ^ b[i]);
-        t^=r; 
-        e=a[i]^t; w^=e;  // to force calculation of e
-        a[i]=e^ra;
-        e=b[i]^t; w^=e;
-        b[i]=e^ra;
+        t = a[i];
+        a[i] = a[i] * (1 - (d - r0)) + b[i] * (d + r1) - r0 * a[i] - r1 * b[i];
+        b[i] = b[i] * (1 - (d - r0)) + t * (d + r1) - r0 * b[i] - r1 * t;
     }
-    return w; // to bewilder optimizer
+    return 0;
 }
 
 /* Move g to f if d=1 */
 chunk XXX::BIG_cmove(BIG f, BIG g, int d)
 {
     int i;
-    chunk e,w,r,ra,t,b = (chunk) - d;
-    w=0;
-    r=f[0]^g[1];
-    ra=r+r; ra>>=1; // I know this doesn't change r, but the compiler doesn't!
+    chunk t;
+    chunk r0 = f[0] ^ g[1];
+    chunk r1 = f[1] ^ g[0];
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        t=(f[i]^g[i])&b;
-        t^=r;
-        e=f[i]^t; w^=e;  // to force calculation of e
-        f[i]=e^ra;
+        f[i] = f[i] * (1 - (d - r0)) + g[i] * (d + r1) - r0 * f[i] - r1 * g[i];       
     }
-    return w; // to bewilder optimizer
+    return 0;
 }
 
 /* Move g to f if d=1 */
 chunk XXX::BIG_dcmove(DBIG f, DBIG g, int d)
 {
     int i;
-    chunk e,w,r,ra,t,b = (chunk) - d;
-    w=0;
-    r=f[0]^g[1];
-    ra=r+r; ra>>=1; // I know this doesn't change r, but the compiler doesn't!
+    chunk t;
+    chunk r0 = f[0] ^ g[1];
+    chunk r1 = f[1] ^ g[0];
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
     for (i = 0; i < DNLEN_XXX; i++)
 #endif
     {
-        t=(f[i]^g[i])&b;
-        t^=r;
-        e=f[i]^t; w^=e;
-        f[i]=e^ra;
+        f[i] = f[i] * (1 - (d - r0)) + g[i] * (d + r1) - r0 * f[i] - r1 * g[i];       
     }
-    return w;
+    return 0;
 }
 
 /* convert BIG to/from bytes */
