@@ -95,21 +95,26 @@ void XXX::BIG_rawoutput(BIG a)
 
 
 // Swap a and b if d=1   -  see Loiseau et al. 2021
-chunk XXX::BIG_cswap(BIG a, BIG b, int d)
+// Observe that ((r0<<1)>>1) clears top bit of r0, but we know that the top bit is zero, so makes no difference
+// But compiler doesn't know that, so must treat as different from r0. Stops optimizing compiler from simplifying
+// and removing the side-channel masking.
+chunk XXX::BIG_cswap(BIG f, BIG g, int d)
 {
     int i;
     chunk t;
-    chunk r0 = a[0] ^ b[1];
-    chunk r1 = a[1] ^ b[0];
+    chunk r0 = f[0] ^ g[1]; // "random" mask
+    chunk r1 = f[1] ^ g[0];
+    chunk c0 = (1 - (d - ((r0<<1)>>1)));  
+    chunk c1 = d+((r1<<1)>>1);
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        t = a[i];
-        a[i] = a[i] * (1 - (d - r0)) + b[i] * (d + r1) - r0 * a[i] - r1 * b[i];
-        b[i] = b[i] * (1 - (d - r0)) + t * (d + r1) - r0 * b[i] - r1 * t;
+        t = f[i];
+        f[i] = t*c0 + g[i]*c1 - r0*((t<<1)>>1) - r1*((g[i]<<1)>>1);
+        g[i] = g[i]*c0 + t*c1 - r0*((g[i]<<1)>>1) - r1*((t<<1)>>1);
     }
     return 0;
 }
@@ -118,16 +123,17 @@ chunk XXX::BIG_cswap(BIG a, BIG b, int d)
 chunk XXX::BIG_cmove(BIG f, BIG g, int d)
 {
     int i;
-    chunk t;
     chunk r0 = f[0] ^ g[1];
     chunk r1 = f[1] ^ g[0];
+    chunk c0 = (1 - (d - ((r0<<1)>>1)));
+    chunk c1 = d+((r1<<1)>>1);
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        f[i] = f[i] * (1 - (d - r0)) + g[i] * (d + r1) - r0 * f[i] - r1 * g[i];       
+        f[i] = f[i]*c0 + g[i]*c1 - r0*((f[i]<<1)>>1) - r1*((g[i]<<1)>>1);      
     }
     return 0;
 }
@@ -136,16 +142,17 @@ chunk XXX::BIG_cmove(BIG f, BIG g, int d)
 chunk XXX::BIG_dcmove(DBIG f, DBIG g, int d)
 {
     int i;
-    chunk t;
     chunk r0 = f[0] ^ g[1];
     chunk r1 = f[1] ^ g[0];
+    chunk c0 = (1 - (d - ((r0<<1)>>1)));
+    chunk c1 = d+((r1<<1)>>1);
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
     for (i = 0; i < DNLEN_XXX; i++)
 #endif
     {
-        f[i] = f[i] * (1 - (d - r0)) + g[i] * (d + r1) - r0 * f[i] - r1 * g[i];       
+        f[i] = f[i]*c0 + g[i]*c1 - r0*((f[i]<<1)>>1) - r1*((g[i]<<1)>>1); 
     }
     return 0;
 }

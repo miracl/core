@@ -188,14 +188,17 @@ impl BIG {
     }
 
     /* Conditional swap of two bigs depending on d -  see Loiseau et al. 2021 */
-    pub fn cswap(&mut self, b: &mut BIG, d: isize) -> Chunk {
-        let r0=self.w[0]^b.w[1];
-        let r1=self.w[1]^b.w[0];
+    pub fn cswap(&mut self, g: &mut BIG, d: isize) -> Chunk {
+        let r0=self.w[0]^g.w[1];
+        let r1=self.w[1]^g.w[0];
         let dd=d as Chunk;
+        let c0=1-(dd-((r0<<1)>>1));
+        let c1=dd+((r1<<1)>>1);
+
         for i in 0..NLEN {
             let t=self.w[i];
-            self.w[i]=self.w[i]*(1-(dd-r0))+b.w[i]*(dd+r1)-r0*self.w[i]-r1*b.w[i];
-            b.w[i]=b.w[i]*(1-(dd-r0))+t*(dd+r1)-r0*b.w[i]-r1*t;
+            self.w[i]=t*c0+g.w[i]*c1-r0*((t<<1)>>1)-r1*((g.w[i]<<1)>>1);
+            g.w[i]=g.w[i]*c0+t*c1-r0*((g.w[i]<<1)>>1)-r1*((t<<1)>>1);
         }
         return 0 as Chunk;
     }
@@ -204,8 +207,11 @@ impl BIG {
         let r0=self.w[0]^g.w[1];
         let r1=self.w[1]^g.w[0];
         let dd=d as Chunk;
+        let c0=1-(dd-((r0<<1)>>1));
+        let c1=dd+((r1<<1)>>1);
         for i in 0..NLEN {
-            self.w[i]=self.w[i]*(1-(dd-r0))+g.w[i]*(dd+r1)-r0*self.w[i]-r1*g.w[i];      
+            let t=self.w[i];
+            self.w[i]=t*c0+g.w[i]*c1-r0*((t<<1)>>1)-r1*((g.w[i]<<1)>>1);     
         }
         return 0 as Chunk;
     }           
