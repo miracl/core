@@ -41,11 +41,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#   You can be released from the requirements of the license by purchasing     
+#   You can be released from the requirements of the license by purchasing
 #   a commercial license. Buying such a license is mandatory as soon as you
 #   develop commercial activities involving the MIRACL Core Crypto SDK
 #   without disclosing the source code of your own applications, or shipping
-#   the MIRACL Core Crypto SDK with a closed source product.     
+#   the MIRACL Core Crypto SDK with a closed source product.
 
 #
 # Fp^2 CLass
@@ -207,13 +207,13 @@ class Fp2:
         while True :
             bt=z&1
             z >>= 1
-            if bt == 1: 
+            if bt == 1:
                 r *= w
             if z == 0 :
                 break
             w.sqr()
         return r.copy()
-    
+
     def qr(self):
         w=self.conj()
         w *= self
@@ -237,7 +237,7 @@ class Fp2:
         self.a = w2.copy()
         w2 += w2
         w2 = w2.inverse()
-        self.b *= w2 
+        self.b *= w2
 
 
 
