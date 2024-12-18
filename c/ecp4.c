@@ -627,7 +627,7 @@ void ECP4_ZZZ_mul8(ECP4_ZZZ *P, ECP4_ZZZ Q[8], BIG_XXX u[8])
     {
         BIG_XXX_copy(t[i], u[i]);
     }
-
+    ECP4_ZZZ_inf(&W);
 // Precomputed table
     ECP4_ZZZ_copy(&T1[0], &Q[0]); // Q[0]
     ECP4_ZZZ_copy(&T1[1], &T1[0]);

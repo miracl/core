@@ -799,7 +799,7 @@ void YYY::FP24_pow8(FP24 *p, FP24 *q, BIG u[8])
     */
     for (i = 0; i < 8; i++)
         BIG_copy(t[i], u[i]);
-
+    FP24_zero(&r);
 // Precomputed table
     FP24_copy(&g1[0], &q[0]); // q[0]
     FP24_copy(&g1[1], &g1[0]);

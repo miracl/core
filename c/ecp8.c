@@ -68,7 +68,7 @@ static void ECP8_ZZZ_select(ECP8_ZZZ *P, ECP8_ZZZ W[], sign32 b)
     sign32 babs = (b ^ m) - m;
 
     babs = (babs - 1) / 2;
-
+  
     ECP8_ZZZ_cmove(P, &W[0], teq(babs, 0)); // conditional move
     ECP8_ZZZ_cmove(P, &W[1], teq(babs, 1));
     ECP8_ZZZ_cmove(P, &W[2], teq(babs, 2));
@@ -658,6 +658,7 @@ void ECP8_ZZZ_mul16(ECP8_ZZZ *P, ECP8_ZZZ Q[16], BIG_XXX u[16])
     sign8 w4[NLEN_XXX * BASEBITS_XXX + 1];
     sign8 s4[NLEN_XXX * BASEBITS_XXX + 1];
 
+    ECP8_ZZZ_inf(&W);
     for (i = 0; i < 16; i++)
     {
         BIG_XXX_copy(t[i], u[i]);

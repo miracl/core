@@ -790,7 +790,7 @@ void YYY::FP12_pow4(FP12 *p, FP12 *q, BIG u[4])
     for (i = 0; i < 4; i++)
         BIG_copy(t[i], u[i]);
 
-
+    FP12_zero(&r);
 // Precomputed table
     FP12_copy(&g[0], &q[0]); // q[0]
     FP12_copy(&g[1], &g[0]);

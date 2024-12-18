@@ -605,7 +605,7 @@ void ZZZ::ECP2_mul4(ECP2 *P, ECP2 Q[4], BIG u[4])
     {
         BIG_copy(t[i], u[i]);
     }
-
+    ECP2_inf(&W);
 // Precomputed table
     ECP2_copy(&T[0], &Q[0]); // Q[0]
     ECP2_copy(&T[1], &T[0]);

@@ -787,7 +787,7 @@ void FP12_YYY_pow4(FP12_YYY *p, FP12_YYY *q, BIG_XXX u[4])
     for (i = 0; i < 4; i++)
         BIG_XXX_copy(t[i], u[i]);
 
-
+    FP12_YYY_zero(&r);
 // Precomputed table
     FP12_YYY_copy(&g[0], &q[0]); // q[0]
     FP12_YYY_copy(&g[1], &g[0]);

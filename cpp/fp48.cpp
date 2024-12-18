@@ -793,7 +793,7 @@ void YYY::FP48_pow16(FP48 *p, FP48 *q, BIG u[16])
 
     for (i = 0; i < 16; i++)
         BIG_copy(t[i], u[i]);
-
+    FP48_zero(&r);
 // Precomputed tables
     FP48_copy(&g1[0], &q[0]); // q[0]
     FP48_copy(&g1[1], &g1[0]);

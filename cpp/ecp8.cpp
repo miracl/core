@@ -668,6 +668,7 @@ void ZZZ::ECP8_mul16(ECP8 *P, ECP8 Q[16], BIG u[16])
     {
         BIG_copy(t[i], u[i]);
     }
+    ECP8_inf(&W);
 // Precomputed tables
     ECP8_copy(&T1[0], &Q[0]); // Q[0]
     ECP8_copy(&T1[1], &T1[0]);
