@@ -196,9 +196,14 @@ impl BIG {
         let c1=dd+((r1<<1)>>1);
 
         for i in 0..NLEN {
-            let t=self.w[i];
-            self.w[i]=t*c0+g.w[i]*c1-r0*((t<<1)>>1)-r1*((g.w[i]<<1)>>1);
-            g.w[i]=g.w[i]*c0+t*c1-r0*((g.w[i]<<1)>>1)-r1*((t<<1)>>1);
+            let t=self.w[i]; let s=g.w[i]; self.w[i]=0; g.w[i]=0;
+            let st=(t<<1)>>1;
+            let ss=(s<<1)>>1;
+            if st!=t {   // never-taken-branch. To ensure compiler clears self.w[i]
+                break;
+            }
+            self.w[i]=t*c0+s*c1-r0*st-r1*ss;
+            g.w[i]=s*c0+t*c1-r0*ss-r1*st;
         }
         return 0 as Chunk;
     }
@@ -210,8 +215,12 @@ impl BIG {
         let c0=1-(dd-((r0<<1)>>1));
         let c1=dd+((r1<<1)>>1);
         for i in 0..NLEN {
-            let t=self.w[i];
-            self.w[i]=t*c0+g.w[i]*c1-r0*((t<<1)>>1)-r1*((g.w[i]<<1)>>1);     
+            let t=self.w[i]; self.w[i]=0;
+            let st=(t<<1)>>1;
+            if st!=t {
+                break;
+            }
+            self.w[i]=t*c0+g.w[i]*c1-r0*st-r1*((g.w[i]<<1)>>1);     
         }
         return 0 as Chunk;
     }           

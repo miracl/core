@@ -98,6 +98,7 @@ void XXX::BIG_rawoutput(BIG a)
 // Observe that ((r0<<1)>>1) clears top bit of r0, but we know that the top bit is zero, so makes no difference
 // But compiler doesn't know that, so must treat as different from r0. Stops optimizing compiler from simplifying
 // and removing the side-channel masking.
+/*
 chunk XXX::BIG_cswap(BIG f, BIG g, int d)
 {
     int i;
@@ -119,7 +120,7 @@ chunk XXX::BIG_cswap(BIG f, BIG g, int d)
     return 0;
 }
 
-/* Move g to f if d=1 */
+// Move g to f if d=1 
 chunk XXX::BIG_cmove(BIG f, BIG g, int d)
 {
     int i;
@@ -138,7 +139,8 @@ chunk XXX::BIG_cmove(BIG f, BIG g, int d)
     return 0;
 }
 
-/* Move g to f if d=1 */
+// Move g to f if d=1 
+
 chunk XXX::BIG_dcmove(DBIG f, DBIG g, int d)
 {
     int i;
@@ -153,6 +155,75 @@ chunk XXX::BIG_dcmove(DBIG f, DBIG g, int d)
 #endif
     {
         f[i] = f[i]*c0 + g[i]*c1 - r0*((f[i]<<1)>>1) - r1*((g[i]<<1)>>1); 
+    }
+    return 0;
+}
+*/
+
+chunk XXX::BIG_cmove(BIG f, BIG g, int d)
+{
+    int i;
+    chunk t,st;
+    chunk r0 = f[0] ^ g[1];
+    chunk r1 = f[1] ^ g[0];
+    chunk c0 = (1 - (d - ((r0<<1)>>1)));
+    chunk c1 = d+((r1<<1)>>1);
+#ifdef DEBUG_NORM
+    for (i = 0; i < NLEN_XXX + 2; i++)
+#else
+    for (i = 0; i < NLEN_XXX; i++)
+#endif
+    {
+        t=f[i]; f[i]=0;
+        st=((t<<1)>>1);
+        if (st!=t) break; // never-taken-branch. To ensure compiler clears f[i]
+        f[i] = t*c0 + g[i]*c1 - r0*st - r1*((g[i]<<1)>>1);      
+    }
+    return 0;
+}
+
+chunk XXX::BIG_cswap(BIG f, BIG g, int d)
+{
+    int i;
+    chunk s,t,st,ss;
+    chunk r0 = f[0] ^ g[1]; // "random" mask
+    chunk r1 = f[1] ^ g[0];
+    chunk c0 = (1 - (d - ((r0<<1)>>1)));  
+    chunk c1 = d+((r1<<1)>>1);
+#ifdef DEBUG_NORM
+    for (i = 0; i < NLEN_XXX + 2; i++)
+#else
+    for (i = 0; i < NLEN_XXX; i++)
+#endif
+    {
+        t = f[i]; s=g[i]; f[i]=0; g[i]=0;
+        st=((t<<1)>>1);
+        ss=((s<<1)>>1);
+        if (st!=t) break;
+        f[i] = t*c0 + s*c1 - r0*st - r1*ss;
+        g[i] = s*c0 + t*c1 - r0*ss - r1*st;
+    }
+    return 0;
+}
+
+chunk XXX::BIG_dcmove(DBIG f, DBIG g, int d)
+{
+    int i;
+    chunk t,st;
+    chunk r0 = f[0] ^ g[1];
+    chunk r1 = f[1] ^ g[0];
+    chunk c0 = (1 - (d - ((r0<<1)>>1)));
+    chunk c1 = d+((r1<<1)>>1);
+#ifdef DEBUG_NORM
+    for (i = 0; i < DNLEN_XXX + 2; i++)
+#else
+    for (i = 0; i < DNLEN_XXX; i++)
+#endif
+    {
+        t=f[i]; f[i]=0;
+        st=((t<<1)>>1);
+        if (st!=t) break;
+        f[i] = t*c0 + g[i]*c1 - r0*st - r1*((g[i]<<1)>>1); 
     }
     return 0;
 }
