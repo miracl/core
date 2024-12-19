@@ -74,7 +74,7 @@ func NewFPrand(rng *core.RAND) *FP {
 }
 
 func (F *FP) ToString() string {
-	F.reduce()
+	//F.reduce()
 	return F.redc().ToString()
 }
 
@@ -94,6 +94,7 @@ func (F *FP) nres() {
 
 /* convert back to regular form */
 func (F *FP) redc() *BIG {
+	F.reduce()
 	if MODTYPE != PSEUDO_MERSENNE && MODTYPE != GENERALISED_MERSENNE {
 		d := NewDBIGscopy(F.x)
 		return mod(d)

@@ -150,7 +150,7 @@ var FP = function(ctx) {
         redc: function() {
             var r = new ctx.BIG(0),
                 d, w;
-
+            this.reduce();
             r.copy(this.f);
 
             if (FP.MODTYPE != FP.PSEUDO_MERSENNE && FP.MODTYPE != FP.GENERALISED_MERSENNE) {
@@ -165,7 +165,7 @@ var FP = function(ctx) {
 
         /* convert this to string */
         toString: function() {
-            this.reduce();
+            //this.reduce();
             var s = this.redc().toString();
             return s;
         },

@@ -50,14 +50,15 @@ public struct FP {
 /* convert back to regular form */
     func redc() -> BIG
     {
+        let z=FP(self)
         if CONFIG_FIELD.MODTYPE != CONFIG_FIELD.PSEUDO_MERSENNE && CONFIG_FIELD.MODTYPE != CONFIG_FIELD.GENERALISED_MERSENNE
         {
-            var d=DBIG(x)
+            var d=DBIG(z.x)
             return FP.mod(&d)
         }
         else
         {
-            let r=BIG(x)
+            let r=BIG(z.x)
             return r;
         }
     }

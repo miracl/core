@@ -209,6 +209,7 @@ public final class FP {
 
     /* convert back to regular form */
     public BIG redc() {
+        reduce();
         if (CONFIG_FIELD.MODTYPE != CONFIG_FIELD.PSEUDO_MERSENNE && CONFIG_FIELD.MODTYPE != CONFIG_FIELD.GENERALISED_MERSENNE) {
             DBIG d = new DBIG(x);
             return mod(d);

@@ -49,6 +49,7 @@ void YYY::FP_nres(FP *y, BIG x)
 /* Converts from residue form back to BIG integer form */
 void YYY::FP_redc(BIG x, FP *y)
 {
+    FP_reduce(y);
     BIG_copy(x, y->g);
 }
 
@@ -104,6 +105,7 @@ void YYY::FP_nres(FP *y, BIG x)
 /* Converts from residue form back to BIG integer form */
 void YYY::FP_redc(BIG x, FP *y)
 {
+    FP_reduce(y);
     BIG_copy(x, y->g);
 }
 
@@ -196,6 +198,7 @@ void YYY::FP_redc(BIG x, FP *y)
 {
     DBIG d;
     BIG_dzero(d);
+    FP_reduce(y);
     BIG_dscopy(d, y->g);
     FP_mod(x, d);
 }
@@ -232,6 +235,7 @@ void YYY::FP_redc(BIG x, FP *y)
 {
     DBIG d;
     BIG_dzero(d);
+    FP_reduce(y);
     BIG_dscopy(d, y->g);
     FP_mod(x, d);
 }
