@@ -192,8 +192,8 @@ impl BIG {
         let r0=self.w[0]^g.w[1];
         let r1=self.w[1]^g.w[0];
         let dd=d as Chunk;
-        let c0=1-(dd-((r0<<1)>>1));
-        let c1=dd+((r1<<1)>>1);
+        let c0=1-(dd-r0);
+        let c1=dd+r1;
 
         for i in 0..NLEN {
             let t=self.w[i]; let s=g.w[i]; 
