@@ -90,85 +90,24 @@ void BIG_XXX_rawoutput(BIG_XXX a)
 #endif
 }
 
-// Swap a and b if d=1  -  see Loiseau et al. 2021
-/*
-chunk BIG_XXX_cswap(BIG_XXX f, BIG_XXX g, int d)
+// See Loiseau et al. 2021
+chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
 {
     int i;
     chunk t;
     chunk r0 = f[0] ^ g[1];
     chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - ((r0<<1)>>1)));
-    chunk c1 = d+((r1<<1)>>1);
+    chunk c0 = (1 - (d - r0));
+    chunk c1 = d + r1;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        t = f[i];
-        f[i] = t*c0 + g[i]*c1 - r0*((t<<1)>>1) - r1*((g[i]<<1)>>1);
-        g[i] = g[i]*c0 + t*c1 - r0*((g[i]<<1)>>1) - r1*((t<<1)>>1);
-    }
-    return 0;
-}
-
-// Move g to f if d=1 
-chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
-{
-    int i;
-    chunk r0 = f[0] ^ g[1];
-    chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - ((r0<<1)>>1)));
-    chunk c1 = d+((r1<<1)>>1);
-#ifdef DEBUG_NORM
-    for (i = 0; i < NLEN_XXX + 2; i++)
-#else
-    for (i = 0; i < NLEN_XXX; i++)
-#endif
-    {
-        f[i] = f[i]*c0 + g[i]*c1 - r0*((f[i]<<1)>>1) - r1*((g[i]<<1)>>1);      
-    }
-    return 0;
-}
-
-// Move g to f if d=1 
-chunk BIG_XXX_dcmove(DBIG_XXX f, DBIG_XXX g, int d)
-{
-    int i;
-    chunk r0 = f[0] ^ g[1];
-    chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - ((r0<<1)>>1)));
-    chunk c1 = d+((r1<<1)>>1);
-#ifdef DEBUG_NORM
-    for (i = 0; i < DNLEN_XXX + 2; i++)
-#else
-    for (i = 0; i < DNLEN_XXX; i++)
-#endif
-    {
-        f[i] = f[i]*c0 + g[i]*c1 - r0*((f[i]<<1)>>1) - r1*((g[i]<<1)>>1); 
-    }
-    return 0;
-}*/
-
-chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
-{
-    int i;
-    chunk t,st;
-    chunk r0 = f[0] ^ g[1];
-    chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - ((r0<<1)>>1)));
-    chunk c1 = d+((r1<<1)>>1);
-#ifdef DEBUG_NORM
-    for (i = 0; i < NLEN_XXX + 2; i++)
-#else
-    for (i = 0; i < NLEN_XXX; i++)
-#endif
-    {
-        t=f[i]; f[i]=0;
-        st=((t<<1)>>1); 
-        if (st!=t) break; // never-taken-branch. To ensure compiler clears f[i]
-        f[i] = t*c0 + g[i]*c1 - r0*st - r1*((g[i]<<1)>>1);      
+        t=f[i];
+        f[i] =c0*t+c1*g[i];
+        f[i]-=r0*t+r1*g[i];   
     }
     return 0;
 }
@@ -176,23 +115,22 @@ chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
 chunk BIG_XXX_cswap(BIG_XXX f, BIG_XXX g, int d)
 {
     int i;
-    chunk s,t,st,ss;
+    chunk s,t;
     chunk r0 = f[0] ^ g[1]; // "random" mask
     chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - ((r0<<1)>>1)));  
-    chunk c1 = d+((r1<<1)>>1);
+    chunk c0 = (1 - (d - r0));
+    chunk c1 = d + r1;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        t = f[i]; s=g[i]; f[i]=0; g[i]=0;
-        st=((t<<1)>>1);
-        ss=((s<<1)>>1);
-        if (st!=t) break;
-        f[i] = t*c0 + s*c1 - r0*st - r1*ss;
-        g[i] = s*c0 + t*c1 - r0*ss - r1*st;
+        t=f[i]; s=g[i];
+        f[i] =c0*t+c1*s;
+        g[i] =c0*s+c1*t;
+        f[i]-=r0*t+r1*s;
+        g[i]-=r0*s+r1*t;
     }
     return 0;
 }
@@ -200,21 +138,20 @@ chunk BIG_XXX_cswap(BIG_XXX f, BIG_XXX g, int d)
 chunk BIG_XXX_dcmove(DBIG_XXX f, DBIG_XXX g, int d)
 {
     int i;
-    chunk t,st;
+    chunk t;
     chunk r0 = f[0] ^ g[1];
     chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - ((r0<<1)>>1)));
-    chunk c1 = d+((r1<<1)>>1);
+    chunk c0 = (1 - (d - r0));
+    chunk c1 = d + r1;
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
     for (i = 0; i < DNLEN_XXX; i++)
 #endif
     {
-        t=f[i]; f[i]=0;
-        st=((t<<1)>>1);
-        if (st!=t) break;
-        f[i] = t*c0 + g[i]*c1 - r0*st - r1*((g[i]<<1)>>1); 
+        t=f[i];
+        f[i] =c0*t+c1*g[i];
+        f[i]-=r0*t+r1*g[i]; 
     }
     return 0;
 }

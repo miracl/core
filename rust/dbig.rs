@@ -135,34 +135,16 @@ impl DBIG {
         let r0=self.w[0]^g.w[1];
         let r1=self.w[1]^g.w[0];
         let dd=d as Chunk;
-        let c0=1-(dd-((r0<<1)>>1));
-        let c1=dd+((r1<<1)>>1);
+        let c0=1-(dd-r0);
+        let c1=dd+r1;
         for i in 0..big::DNLEN {
-            let t=self.w[i]; self.w[i]=0;
-            let st=(t<<1)>>1;
-            if st!=t {
-                break;
-            }
-            self.w[i]=t*c0+g.w[i]*c1-r0*st-r1*((g.w[i]<<1)>>1);   
+            let t=self.w[i];
+            self.w[i]= c0*t+c1*g.w[i];
+            self.w[i]-=r0*t+r1*g.w[i];     
         }
         return 0 as Chunk;
     }
 
-/*
-    pub fn cmove(&mut self, g: &DBIG, d: isize) -> Chunk {
-        let b = -d as Chunk;
-        let mut w=0 as Chunk;
-        let r=self.w[0]^g.w[1];
-        let mut ra=r.wrapping_add(r); ra >>= 1;
-        for i in 0..big::DNLEN {
-            let mut t = b & (self.w[i] ^ g.w[i]);
-            t^=r;
-            let e=self.w[i]^t; w^=e;
-            self.w[i]=e^ra; 
-        }
-        return w;
-    }
-*/
     /* self+=x */
     pub fn add(&mut self, x: &DBIG) {
         for i in 0..big::DNLEN {
