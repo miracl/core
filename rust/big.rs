@@ -197,8 +197,8 @@ impl BIG {
 
         for i in 0..NLEN {
             let t=self.w[i]; let s=g.w[i]; 
-            self.w[i]= c0*t+c1*s;
-            g.w[i]= c0*s+c1*t;
+            unsafe {core::ptr::write_volatile(&mut self.w[i],c0*t + c1*s);}
+            unsafe {core::ptr::write_volatile(&mut g.w[i],c0*s + c1*t);}
             self.w[i]-=r0*t+r1*s;  
             g.w[i]-=r0*s+r1*t;
         }
@@ -213,7 +213,7 @@ impl BIG {
         let c1=dd+r1;
         for i in 0..NLEN {
             let t=self.w[i];
-            self.w[i]= c0*t+c1*g.w[i];
+            unsafe {core::ptr::write_volatile(&mut self.w[i],c0*t + c1*g.w[i]);}
             self.w[i]-=r0*t+r1*g.w[i];     
         }
         return 0 as Chunk;

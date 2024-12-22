@@ -98,7 +98,7 @@ void XXX::BIG_rawoutput(BIG a)
 // Note that this method assumes that an optimizing compiler will not attempt simplification amd remove the masking
 // Tests with godbolt.org suggest that current compilers are not (yet) capable of that
 // Check in godbolt that 4 muls and two memory writes occur in each iteration of the main loop.
-chunk XXX::BIG_cmove(BIG f, BIG g, int d)
+chunk XXX::BIG_cmove(volatile BIG f, BIG g, int d)
 {
     int i;
     chunk t;
@@ -119,7 +119,7 @@ chunk XXX::BIG_cmove(BIG f, BIG g, int d)
     return 0;
 }
 
-chunk XXX::BIG_cswap(BIG f, BIG g, int d)
+chunk XXX::BIG_cswap(volatile BIG f, volatile BIG g, int d)
 {
     int i;
     chunk s,t;
@@ -142,7 +142,7 @@ chunk XXX::BIG_cswap(BIG f, BIG g, int d)
     return 0;
 }
 
-chunk XXX::BIG_dcmove(DBIG f, DBIG g, int d)
+chunk XXX::BIG_dcmove(volatile DBIG f, DBIG g, int d)
 {
     int i;
     chunk t;

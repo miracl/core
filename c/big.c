@@ -91,7 +91,7 @@ void BIG_XXX_rawoutput(BIG_XXX a)
 }
 
 // See Loiseau et al. 2021
-chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
+chunk BIG_XXX_cmove(volatile BIG_XXX f, BIG_XXX g, int d)
 {
     int i;
     chunk t;
@@ -112,7 +112,7 @@ chunk BIG_XXX_cmove(BIG_XXX f, BIG_XXX g, int d)
     return 0;
 }
 
-chunk BIG_XXX_cswap(BIG_XXX f, BIG_XXX g, int d)
+chunk BIG_XXX_cswap(volatile BIG_XXX f, volatile BIG_XXX g, int d)
 {
     int i;
     chunk s,t;
@@ -135,7 +135,7 @@ chunk BIG_XXX_cswap(BIG_XXX f, BIG_XXX g, int d)
     return 0;
 }
 
-chunk BIG_XXX_dcmove(DBIG_XXX f, DBIG_XXX g, int d)
+chunk BIG_XXX_dcmove(volatile DBIG_XXX f, DBIG_XXX g, int d)
 {
     int i;
     chunk t;

@@ -113,7 +113,7 @@ extern void BIG_rawoutput(BIG x);
 	@param s swap takes place if not equal to 0
     @return ignore
  */
-extern chunk BIG_cswap(BIG x, BIG y, int s);
+extern chunk BIG_cswap(volatile BIG x, volatile BIG y, int s);
 /**	@brief Conditional copy of BIG number
  *
 	Conditionally copies second parameter to the first (Constant Time without branching)
@@ -122,7 +122,7 @@ extern chunk BIG_cswap(BIG x, BIG y, int s);
 	@param s copy takes place if not equal to 0
     @return ignore
  */
-extern chunk BIG_cmove(BIG x, BIG y, int s);
+extern chunk BIG_cmove(volatile BIG x, BIG y, int s);
 /**	@brief Conditional copy of DBIG number
  *
 	Conditionally copies second parameter to the first (Constant Time without branching)
@@ -131,7 +131,7 @@ extern chunk BIG_cmove(BIG x, BIG y, int s);
 	@param s copy takes place if not equal to 0
     @return ignore
  */
-extern chunk BIG_dcmove(BIG x, BIG y, int s);
+extern chunk BIG_dcmove(volatile BIG x, BIG y, int s);
 /**	@brief Convert from BIG number to byte array (Constant Time)
  *
 	@param a byte array

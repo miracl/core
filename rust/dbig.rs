@@ -139,7 +139,7 @@ impl DBIG {
         let c1=dd+r1;
         for i in 0..big::DNLEN {
             let t=self.w[i];
-            self.w[i]= c0*t+c1*g.w[i];
+            unsafe {core::ptr::write_volatile(&mut self.w[i],c0*t + c1*g.w[i]);}
             self.w[i]-=r0*t+r1*g.w[i];     
         }
         return 0 as Chunk;
