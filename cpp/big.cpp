@@ -93,9 +93,11 @@ void XXX::BIG_rawoutput(BIG a)
 #endif
 }
 
-
+// Conditional move
 // See Loiseau et al. 2021
-
+// Note that this method assumes that an optimizing compiler will not attempt simplification amd remove the masking
+// Tests with godbolt.org suggest that current compilers are not (yet) capable of that
+// Check in godbolt that 4 muls and two memory writes occur in each iteration of the main loop.
 chunk XXX::BIG_cmove(BIG f, BIG g, int d)
 {
     int i;
@@ -111,8 +113,8 @@ chunk XXX::BIG_cmove(BIG f, BIG g, int d)
 #endif
     {
         t=f[i];
-        f[i] =c0*t+c1*g[i];
-        f[i]-=r0*t+r1*g[i];   
+        f[i] =c0*t+c1*g[i];  // should write this first to memory
+        f[i]-=r0*t+r1*g[i];  // before writing this. Point is to avoid writing back unchanged value in a memory write - indicating that move did not happemn  
     }
     return 0;
 }
