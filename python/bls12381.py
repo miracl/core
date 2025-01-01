@@ -41,11 +41,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#   You can be released from the requirements of the license by purchasing     
+#   You can be released from the requirements of the license by purchasing
 #   a commercial license. Buying such a license is mandatory as soon as you
 #   develop commercial activities involving the MIRACL Core Crypto SDK
 #   without disclosing the source code of your own applications, or shipping
-#   the MIRACL Core Crypto SDK with a closed source product.     
+#   the MIRACL Core Crypto SDK with a closed source product.
 
 # BLS12381 curve constants
 
