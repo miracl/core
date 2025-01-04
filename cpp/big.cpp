@@ -94,27 +94,26 @@ void XXX::BIG_rawoutput(BIG a)
 }
 
 // Conditional move
-// See Loiseau et al. 2021
-// Note that this method assumes that an optimizing compiler will not attempt simplification amd remove the masking
-// Tests with godbolt.org suggest that current compilers are not (yet) capable of that
-// Check in godbolt that 4 muls and two memory writes occur in each iteration of the main loop.
+// Based on Loiseau et al. 2021
+// Check in godbolt that 3 muls and two memory writes occur in each iteration of the main loop.
+
 chunk XXX::BIG_cmove(volatile BIG f, BIG g, int d)
 {
     int i;
-    chunk t;
-    chunk r0 = f[0] ^ g[1];
-    chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - r0));
-    chunk c1 = d + r1;
+    chunk c0,c1,r,s,t;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        t=f[i];
-        f[i] =c0*t+c1*g[i];  // should write this first to memory
-        f[i]-=r0*t+r1*g[i];  // before writing this. Point is to avoid writing back unchanged value in a memory write - indicating that move did not happemn  
+        s=g[i]; t=f[i];
+        r=s^t;
+        c0=1-d+r;
+        c1=d+r;
+        r*=(t+s);
+        f[i] =c0*t+c1*s;
+        f[i]-=r;  
     }
     return 0;
 }
@@ -122,22 +121,22 @@ chunk XXX::BIG_cmove(volatile BIG f, BIG g, int d)
 chunk XXX::BIG_cswap(volatile BIG f, volatile BIG g, int d)
 {
     int i;
-    chunk s,t;
-    chunk r0 = f[0] ^ g[1]; // "random" mask
-    chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - r0));  
-    chunk c1 = d + r1;
+    chunk c0,c1,r,s,t;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        t=f[i]; s=g[i];
+        s=g[i]; t=f[i];
+        r=s^t;
+        c0=1-d+r;
+        c1=d+r;
+        r*=(t+s);
         f[i] =c0*t+c1*s;
+        f[i]-=r;  
         g[i] =c0*s+c1*t;
-        f[i]-=r0*t+r1*s;
-        g[i]-=r0*s+r1*t;
+        g[i]-=r; 
     }
     return 0;
 }
@@ -145,20 +144,20 @@ chunk XXX::BIG_cswap(volatile BIG f, volatile BIG g, int d)
 chunk XXX::BIG_dcmove(volatile DBIG f, DBIG g, int d)
 {
     int i;
-    chunk t;
-    chunk r0 = f[0] ^ g[1];
-    chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - r0));
-    chunk c1 = d + r1;
+    chunk c0,c1,r,s,t;
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
     for (i = 0; i < DNLEN_XXX; i++)
 #endif
     {
-        t=f[i];
-        f[i] =c0*t+c1*g[i];
-        f[i]-=r0*t+r1*g[i];   
+        s=g[i]; t=f[i];
+        r=s^t;
+        c0=1-d+r;
+        c1=d+r;
+        r*=(t+s);
+        f[i] =c0*t+c1*s;
+        f[i]-=r;
     }
     return 0;
 }

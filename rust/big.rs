@@ -188,6 +188,24 @@ impl BIG {
     }
 
     /* Conditional swap of two bigs depending on d -  see Loiseau et al. 2021 */
+
+    pub fn cswap(&mut self, g: &mut BIG, b: isize) -> Chunk {
+        let bb=b as Chunk;
+        for i in 0..NLEN {
+            let s = g.w[i];
+            let t = self.w[i];
+            let mut r=s^t;
+            let c0=1-bb+r;
+            let c1=bb+r;
+            r*=t+s;
+            unsafe{core::ptr::write_volatile(&mut self.w[i],c0*t+c1*s)}  
+            self.w[i]-=r;
+            unsafe{core::ptr::write_volatile(&mut g.w[i],c0*s+c1*t)} 
+            g.w[i]-=r;
+        }
+        return 0 as Chunk;
+    }
+/*
     pub fn cswap(&mut self, g: &mut BIG, d: isize) -> Chunk {
         let r0=self.w[0]^g.w[1];
         let r1=self.w[1]^g.w[0];
@@ -204,7 +222,23 @@ impl BIG {
         }
         return 0 as Chunk;
     }
+*/
+    pub fn cmove(&mut self, g: &BIG, b: isize)  -> Chunk {
+        let bb=b as Chunk;
+        for i in 0..NLEN {
+            let s = g.w[i];
+            let t = self.w[i];
+            let mut r=s^t;
+            let c0=1-bb+r;
+            let c1=bb+r;
+            r*=t+s;
+            unsafe{core::ptr::write_volatile(&mut self.w[i],c0*t+c1*s)}  
+            self.w[i]-=r;
+        }
+        return 0 as Chunk;
+    }  
 
+/*
     pub fn cmove(&mut self, g: &BIG, d: isize)  -> Chunk {
         let r0=self.w[0]^g.w[1];
         let r1=self.w[1]^g.w[0];
@@ -218,7 +252,7 @@ impl BIG {
         }
         return 0 as Chunk;
     }           
-
+*/
     /* Shift right by less than a word */
     pub fn fshr(&mut self, k: usize) -> isize {
         let n = k;

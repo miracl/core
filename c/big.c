@@ -94,20 +94,20 @@ void BIG_XXX_rawoutput(BIG_XXX a)
 chunk BIG_XXX_cmove(volatile BIG_XXX f, BIG_XXX g, int d)
 {
     int i;
-    chunk t;
-    chunk r0 = f[0] ^ g[1];
-    chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - r0));
-    chunk c1 = d + r1;
+    chunk c0,c1,r,s,t;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        t=f[i];
-        f[i] =c0*t+c1*g[i];
-        f[i]-=r0*t+r1*g[i];   
+        s=g[i]; t=f[i];
+        r=s^t;
+        c0=1-d+r;
+        c1=d+r;
+        r*=(t+s);
+        f[i] =c0*t+c1*s;
+        f[i]-=r;  
     }
     return 0;
 }
@@ -115,22 +115,22 @@ chunk BIG_XXX_cmove(volatile BIG_XXX f, BIG_XXX g, int d)
 chunk BIG_XXX_cswap(volatile BIG_XXX f, volatile BIG_XXX g, int d)
 {
     int i;
-    chunk s,t;
-    chunk r0 = f[0] ^ g[1]; // "random" mask
-    chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - r0));
-    chunk c1 = d + r1;
+    chunk c0,c1,r,s,t;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        t=f[i]; s=g[i];
+        s=g[i]; t=f[i];
+        r=s^t;
+        c0=1-d+r;
+        c1=d+r;
+        r*=(t+s);
         f[i] =c0*t+c1*s;
+        f[i]-=r;  
         g[i] =c0*s+c1*t;
-        f[i]-=r0*t+r1*s;
-        g[i]-=r0*s+r1*t;
+        g[i]-=r; 
     }
     return 0;
 }
@@ -138,20 +138,20 @@ chunk BIG_XXX_cswap(volatile BIG_XXX f, volatile BIG_XXX g, int d)
 chunk BIG_XXX_dcmove(volatile DBIG_XXX f, DBIG_XXX g, int d)
 {
     int i;
-    chunk t;
-    chunk r0 = f[0] ^ g[1];
-    chunk r1 = f[1] ^ g[0];
-    chunk c0 = (1 - (d - r0));
-    chunk c1 = d + r1;
+    chunk c0,c1,r,s,t;
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
     for (i = 0; i < DNLEN_XXX; i++)
 #endif
     {
-        t=f[i];
-        f[i] =c0*t+c1*g[i];
-        f[i]-=r0*t+r1*g[i]; 
+        s=g[i]; t=f[i];
+        r=s^t;
+        c0=1-d+r;
+        c1=d+r;
+        r*=(t+s);
+        f[i] =c0*t+c1*s;
+        f[i]-=r;
     }
     return 0;
 }
