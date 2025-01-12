@@ -99,6 +99,7 @@
 /* This next is probably OK, but may need changing for non-C99-standard environments */
 
 #if CHUNK==16
+#define CONDMS 0xa55a
 #ifndef C99
 #define chunk __int16       /**< C type corresponding to word length */
 #define dchunk __int32      /**< Always define double length chunk type if available */
@@ -109,6 +110,7 @@
 #endif
 
 #if CHUNK == 32
+#define CONDMS 0x5aa5a55a
 #ifndef C99
 #define chunk __int32       /**< C type corresponding to word length */
 #define dchunk __int64      /**< Always define double length chunk type if available */
@@ -119,7 +121,7 @@
 #endif
 
 #if CHUNK == 64
-
+#define CONDMS 0x3cc3c33c5aa5a55a
 #ifndef C99
 #define chunk __int64     /**< C type corresponding to word length */
 /**< Note - no 128-bit type available    */

@@ -75,21 +75,21 @@ using uchar = unsigned char;
 /* Don't mess with anything below this line unless you know what you are doing */
 
 #if CHUNK==16
-
+#define CONDMS 0xa55a
 #define chunk int16_t       /**< C type corresponding to word length */
 #define dchunk int32_t      /**< Always define double length chunk type if available */
 
 #endif
 
 #if CHUNK == 32
-
+#define CONDMS 0x5aa5a55a
 #define chunk int32_t       /**< C type corresponding to word length */
 #define dchunk int64_t      /**< Always define double length chunk type if available */
 
 #endif
 
 #if CHUNK == 64
-
+#define CONDMS 0x3cc3c33c5aa5a55a
 #define chunk int64_t       /**< C type corresponding to word length */
 #if defined(__SIZEOF_INT128__) && __SIZEOF_INT128__ == 16
 #define dchunk __int128

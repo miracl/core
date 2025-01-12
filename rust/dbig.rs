@@ -19,6 +19,7 @@
 
 use crate::arch;
 use crate::arch::Chunk;
+use crate::arch::CONDMS;
 use crate::xxx::big;
 use crate::xxx::big::BIG;
 
@@ -132,16 +133,15 @@ impl DBIG {
     }
 
     pub fn cmove(&mut self, g: &DBIG, b: isize) -> Chunk {
+        let r=CONDMS;
         let bb=b as Chunk;
+        let c0=1-bb+r;
+        let c1=bb+r;
         for i in 0..big::DNLEN {
             let s = g.w[i];
             let t = self.w[i];
-            let mut r=s^t;
-            let c0=1-bb+r;
-            let c1=bb+r;
-            r*=t+s;
             unsafe{core::ptr::write_volatile(&mut self.w[i],c0*t+c1*s)}  
-            self.w[i]-=r;
+            self.w[i]-=r*(t+s);
         }
         return 0 as Chunk;
     }

@@ -20,3 +20,4 @@
 pub type Chunk = i32;
 pub type DChunk = i64;
 pub const CHUNK: usize = 32;
+pub const CONDMS: i32 = 0x5aa5a55a;
