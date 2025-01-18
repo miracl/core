@@ -102,8 +102,8 @@ chunk XXX::BIG_cmove(volatile BIG f, BIG g, int d)
     int i;
     chunk c0,c1,s,t;
     chunk r=CONDMS;
-    c0=1-d+r;
-    c1=d+r;
+    c0=(1-d)|r;
+    c1=d|r;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
@@ -122,8 +122,8 @@ chunk XXX::BIG_cswap(volatile BIG f, volatile BIG g, int d)
     int i;
     chunk c0,c1,s,t,w;
     chunk r=CONDMS;
-    c0=1-d+r;
-    c1=d+r;
+    c0=(1-d)|r;
+    c1=d|r;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
@@ -145,8 +145,8 @@ chunk XXX::BIG_dcmove(volatile DBIG f, DBIG g, int d)
     int i;
     chunk c0,c1,s,t;
     chunk r=CONDMS;
-    c0=1-d+r;
-    c1=d+r;
+    c0=(1-d)|r;
+    c1=d|r;
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
