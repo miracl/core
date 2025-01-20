@@ -193,7 +193,7 @@ impl BIG {
     pub fn cswap(&mut self, g: &mut BIG, b: isize) -> Chunk {
         let r=CONDMS;
         let bb=b as Chunk;
-        let c0=(1-bb)|r;
+        let c0=(!bb)&(r+1);
         let c1=bb|r;
         for i in 0..NLEN {
             let s = g.w[i];
@@ -227,7 +227,7 @@ impl BIG {
     pub fn cmove(&mut self, g: &BIG, b: isize)  -> Chunk {
         let r=CONDMS;
         let bb=b as Chunk;
-        let c0=(1-bb)|r;
+        let c0=(!bb)&(r+1);
         let c1=bb|r;
         for i in 0..NLEN {
             let s = g.w[i];

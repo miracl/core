@@ -96,7 +96,7 @@ chunk BIG_XXX_cmove(volatile BIG_XXX f, BIG_XXX g, int d)
     int i;
     chunk c0,c1,s,t;
     chunk r=CONDMS;
-    c0=(1-d)|r;
+    c0=(~d)&(r+1);
     c1=d|r;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
