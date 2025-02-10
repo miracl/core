@@ -179,8 +179,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,ab,cs) :
     replace(fpath+"config_curve.swift","@SX@",sx)
     replace(fpath+"config_curve.swift","@AB@",ab)
 
-    replace(fpath+"config_curve.swift","@HC@",hc) 
-    replace(fpath+"config_curve.swift","@HC2@",hc2) 
+    replace(fpath+"config_curve.swift","@HC@",hc)
+    replace(fpath+"config_curve.swift","@HC2@",hc2)
 
     if cs == "128" :
         replace(fpath+"config_curve.swift","@HT@","32")
@@ -375,7 +375,7 @@ def interactive_prompt_input():
             if (userInput == ''):
                 return 0
             print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
-            interactive_prompt_input()
+
 
 interactive_prompt_print()
 while keep_querying and not testing:
