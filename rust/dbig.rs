@@ -136,7 +136,7 @@ impl DBIG {
         let r=CONDMS;
         let bb=b as Chunk;
         let c0=(!bb)&(r+1);
-        let c1=bb|r;
+        let c1=bb+r;
         for i in 0..big::DNLEN {
             let s = g.w[i];
             let t = self.w[i];

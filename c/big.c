@@ -94,10 +94,10 @@ void BIG_XXX_rawoutput(BIG_XXX a)
 chunk BIG_XXX_cmove(volatile BIG_XXX f, BIG_XXX g, int d)
 {
     int i;
-    chunk c0,c1,s,t;
+    chunk c0,c1,s,t,aux;
     chunk r=CONDMS;
     c0=(~d)&(r+1);
-    c1=d|r;
+    c1=d+r;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
@@ -105,8 +105,8 @@ chunk BIG_XXX_cmove(volatile BIG_XXX f, BIG_XXX g, int d)
 #endif
     {
         s=g[i]; t=f[i];
-        f[i] =c0*t+c1*s;
-        f[i]-=r*(t+s);  
+        f[i] =aux=c0*t+c1*s;
+        f[i] =aux-r*(t+s);  
     }
     return 0;
 }
@@ -114,10 +114,10 @@ chunk BIG_XXX_cmove(volatile BIG_XXX f, BIG_XXX g, int d)
 chunk BIG_XXX_cswap(volatile BIG_XXX f, volatile BIG_XXX g, int d)
 {
     int i;
-    chunk c0,c1,s,t,w;
+    chunk c0,c1,s,t,w,aux;
     chunk r=CONDMS;
-    c0=(1-d)|r;
-    c1=d|r;
+    c0=(~d)&(r+1);
+    c1=d+r;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
@@ -126,10 +126,10 @@ chunk BIG_XXX_cswap(volatile BIG_XXX f, volatile BIG_XXX g, int d)
     {
         s=g[i]; t=f[i];
         w=r*(t+s);
-        f[i] =c0*t+c1*s;
-        f[i]-=w;  
-        g[i] =c0*s+c1*t;
-        g[i]-=w; 
+        f[i] =aux=c0*t+c1*s;
+        f[i] =aux-w;  
+        g[i] =aux=c0*s+c1*t;
+        g[i] =aux-w; 
     }
     return 0;
 }
@@ -137,10 +137,10 @@ chunk BIG_XXX_cswap(volatile BIG_XXX f, volatile BIG_XXX g, int d)
 chunk BIG_XXX_dcmove(volatile DBIG_XXX f, DBIG_XXX g, int d)
 {
     int i;
-    chunk c0,c1,s,t;
+    chunk c0,c1,s,t,aux;
     chunk r=CONDMS;
-    c0=(1-d)|r;
-    c1=d|r;
+    c0=(~d)&(r+1);
+    c1=d+r;
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
@@ -148,8 +148,8 @@ chunk BIG_XXX_dcmove(volatile DBIG_XXX f, DBIG_XXX g, int d)
 #endif
     {
         s=g[i]; t=f[i];
-        f[i] =c0*t+c1*s;
-        f[i]-=r*(t+s);
+        f[i] =aux=c0*t+c1*s;
+        f[i] =aux-r*(t+s);
     }
     return 0;
 }
