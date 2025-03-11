@@ -189,7 +189,7 @@ impl BIG {
     }
 
     /* Conditional swap of two bigs depending on d -  see Loiseau et al. 2021 */
-
+    #[inline(never)]
     pub fn cswap(&mut self, g: &mut BIG, b: isize) -> Chunk {
         let r=CONDMS;
         let bb=b as Chunk;
@@ -224,6 +224,7 @@ impl BIG {
         return 0 as Chunk;
     }
 */
+    #[inline(never)]
     pub fn cmove(&mut self, g: &BIG, b: isize)  -> Chunk {
         let r=CONDMS;
         let bb=b as Chunk;

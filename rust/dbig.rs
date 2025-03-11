@@ -132,6 +132,7 @@ impl DBIG {
         }
     }
 
+    #[inline(never)]
     pub fn cmove(&mut self, g: &DBIG, b: isize) -> Chunk {
         let r=CONDMS;
         let bb=b as Chunk;
