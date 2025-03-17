@@ -191,50 +191,43 @@ impl BIG {
     /* Conditional swap of two bigs depending on d -  see Loiseau et al. 2021 */
     #[inline(never)]
     pub fn cswap(&mut self, g: &mut BIG, b: isize) -> Chunk {
-        let r=CONDMS;
+        static mut R:Chunk=0;
+        let w:Chunk;
+        unsafe {
+            R+=CONDMS;
+            w=R;
+        }
         let bb=b as Chunk;
-        let c0=(!bb)&(r+1);
-        let c1=bb+r;
+        let c0=(!bb)&(w+1);
+        let c1=bb+w;
         for i in 0..NLEN {
             let s = g.w[i];
             let t = self.w[i];
-            let w=r*(t+s);
+            let v=w*(t+s);
             unsafe{core::ptr::write_volatile(&mut self.w[i],c0*t+c1*s)}  
-            self.w[i]-=w;
+            self.w[i]-=v;
             unsafe{core::ptr::write_volatile(&mut g.w[i],c0*s+c1*t)} 
-            g.w[i]-=w;
+            g.w[i]-=v;
         }
         return 0 as Chunk;
     }
-/*
-    pub fn cswap(&mut self, g: &mut BIG, d: isize) -> Chunk {
-        let r0=self.w[0]^g.w[1];
-        let r1=self.w[1]^g.w[0];
-        let dd=d as Chunk;
-        let c0=1-(dd-r0);
-        let c1=dd+r1;
 
-        for i in 0..NLEN {
-            let t=self.w[i]; let s=g.w[i]; 
-            unsafe {core::ptr::write_volatile(&mut self.w[i],c0*t + c1*s);}
-            unsafe {core::ptr::write_volatile(&mut g.w[i],c0*s + c1*t);}
-            self.w[i]-=r0*t+r1*s;  
-            g.w[i]-=r0*s+r1*t;
-        }
-        return 0 as Chunk;
-    }
-*/
     #[inline(never)]
     pub fn cmove(&mut self, g: &BIG, b: isize)  -> Chunk {
-        let r=CONDMS;
+        static mut R:Chunk=0;
+        let w:Chunk;
+        unsafe {
+            R+=CONDMS;
+            w=R;
+        }
         let bb=b as Chunk;
-        let c0=(!bb)&(r+1);
-        let c1=bb+r;
+        let c0=(!bb)&(w+1);
+        let c1=bb+w;
         for i in 0..NLEN {
             let s = g.w[i];
             let t = self.w[i];
             unsafe{core::ptr::write_volatile(&mut self.w[i],c0*t+c1*s)}  
-            self.w[i]-=r*(t+s);
+            self.w[i]-=w*(t+s);
         }
         return 0 as Chunk;
     }  

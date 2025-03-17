@@ -134,33 +134,24 @@ impl DBIG {
 
     #[inline(never)]
     pub fn cmove(&mut self, g: &DBIG, b: isize) -> Chunk {
-        let r=CONDMS;
+        static mut R:Chunk=0;
+        let w:Chunk;
+        unsafe {
+            R+=CONDMS;
+            w=R;
+        }
         let bb=b as Chunk;
-        let c0=(!bb)&(r+1);
-        let c1=bb+r;
+        let c0=(!bb)&(w+1);
+        let c1=bb+w;
         for i in 0..big::DNLEN {
             let s = g.w[i];
             let t = self.w[i];
             unsafe{core::ptr::write_volatile(&mut self.w[i],c0*t+c1*s)}  
-            self.w[i]-=r*(t+s);
+            self.w[i]-=w*(t+s);
         }
         return 0 as Chunk;
     }
-/*
-    pub fn cmove(&mut self, g: &DBIG, d: isize) -> Chunk {
-        let r0=self.w[0]^g.w[1];
-        let r1=self.w[1]^g.w[0];
-        let dd=d as Chunk;
-        let c0=1-(dd-r0);
-        let c1=dd+r1;
-        for i in 0..big::DNLEN {
-            let t=self.w[i];
-            unsafe {core::ptr::write_volatile(&mut self.w[i],c0*t + c1*g.w[i]);}
-            self.w[i]-=r0*t+r1*g.w[i];     
-        }
-        return 0 as Chunk;
-    }
-*/
+
     /* self+=x */
     pub fn add(&mut self, x: &DBIG) {
         for i in 0..big::DNLEN {

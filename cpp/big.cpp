@@ -100,10 +100,12 @@ void XXX::BIG_rawoutput(BIG a)
 chunk XXX::BIG_cmove(volatile BIG f, BIG g, int d)
 {
     int i;
-    chunk c0,c1,s,t,aux;
-    chunk r=CONDMS;
-    c0=(~d)&(r+1); // (1-d)|r;
-    c1=d+r;
+    chunk c0,c1,s,t,w,aux;
+    static chunk R=0;
+    R+=CONDMS;
+    w=R;
+    c0=(~d)&(w+1); // (1-d)|r;
+    c1=d+w;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
@@ -112,7 +114,7 @@ chunk XXX::BIG_cmove(volatile BIG f, BIG g, int d)
     {
         s=g[i]; t=f[i];
         f[i] =aux=c0*t+c1*s;
-        f[i] =aux-r*(t+s);  
+        f[i] =aux-w*(t+s);  
     }
     return 0;
 }
@@ -120,10 +122,12 @@ chunk XXX::BIG_cmove(volatile BIG f, BIG g, int d)
 chunk XXX::BIG_cswap(volatile BIG f, volatile BIG g, int d)
 {
     int i;
-    chunk c0,c1,s,t,w,aux;
-    chunk r=CONDMS;
-    c0=(~d)&(r+1);
-    c1=d+r;
+    chunk c0,c1,s,t,w,v,aux;
+    static chunk R=0;
+    R+=CONDMS;
+    w=R;
+    c0=(~d)&(w+1);
+    c1=d+w;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
@@ -131,11 +135,11 @@ chunk XXX::BIG_cswap(volatile BIG f, volatile BIG g, int d)
 #endif
     {
         s=g[i]; t=f[i];
-        w=r*(t+s);
+        v=w*(t+s);
         f[i] =aux=c0*t+c1*s;
-        f[i] =aux-w;  
+        f[i] =aux-v;  
         g[i] =aux=c0*s+c1*t;
-        g[i] =aux-w; 
+        g[i] =aux-v; 
     }
     return 0;
 }
@@ -143,10 +147,12 @@ chunk XXX::BIG_cswap(volatile BIG f, volatile BIG g, int d)
 chunk XXX::BIG_dcmove(volatile DBIG f, DBIG g, int d)
 {
     int i;
-    chunk c0,c1,s,t,aux;
-    chunk r=CONDMS;
-    c0=(~d)&(r+1);
-    c1=d+r;
+    chunk c0,c1,s,t,w,aux;
+    static chunk R=0;
+    R+=CONDMS;
+    w=R;
+    c0=(~d)&(w+1);
+    c1=d+w;
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
@@ -155,7 +161,7 @@ chunk XXX::BIG_dcmove(volatile DBIG f, DBIG g, int d)
     {
         s=g[i]; t=f[i];
         f[i] =aux=c0*t+c1*s;
-        f[i] =aux-r*(t+s);
+        f[i] =aux-w*(t+s);
     }
     return 0;
 }
