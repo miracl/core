@@ -227,8 +227,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fpath+"CONFIG_CURVE.java","@AB@",ab)
     replace(fpath+"CONFIG_CURVE.java","@G2@",g2)
 
-    replace(fpath+"CONFIG_CURVE.java","@HC@",hc) 
-    replace(fpath+"CONFIG_CURVE.java","@HC2@",hc2) 
+    replace(fpath+"CONFIG_CURVE.java","@HC@",hc)
+    replace(fpath+"CONFIG_CURVE.java","@HC2@",hc2)
 
     if cs == "128" :
         replace(fpath+"CONFIG_CURVE.java","@HT@","32")
@@ -449,7 +449,6 @@ def interactive_prompt_input():
             if (userInput == ''):
                 return 0
             print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
-            interactive_prompt_input()
 
 
 interactive_prompt_print()
