@@ -713,7 +713,7 @@ def curveset(nbt,tf,tc,base,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
 
             copy_temp_file("pair8.cpp", fnamec)
             copy_keep_file("pair8.h", fnameh)
-  
+
             replace(fnamec,"ZZZ",tc)
             replace(fnamec,"YYY",tf)
             replace(fnamec,"XXX",bd)
@@ -872,7 +872,6 @@ def interactive_prompt_input():
             if (userInput == ''):
                 return 0
             print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
-            interactive_prompt_input()
 
 interactive_prompt_print()
 while keep_querying and not testing:

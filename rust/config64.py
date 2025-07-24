@@ -181,8 +181,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fpath+"ecp.rs","@AB@",ab)
     replace(fpath+"ecp.rs","@G2@",g2)
 
-    replace(fpath+"ecp.rs","@HC@",hc) 
-    replace(fpath+"ecp.rs","@HC2@",hc2) 
+    replace(fpath+"ecp.rs","@HC@",hc)
+    replace(fpath+"ecp.rs","@HC2@",hc2)
 
     if cs == "128" :
         replace(fpath+"ecp.rs","@HT@","32")
@@ -323,7 +323,7 @@ class miracl_crypto:
         ("bls48556","58","556","1",["-1","2","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","35","32","256"),
         ("bls48581","60","581","1",["2","2","0"],"NOT_SPECIAL","10","WEIERSTRASS","0","BLS48","D_TYPE","NEGATIVEX","36","33","256"),
         ("bls48286","60","286","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS48","M_TYPE","POSITIVEX","20","17","128"),
-        ("bn158","56","158","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","NEGATIVEX","49","42","128") 
+        ("bn158","56","158","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","NEGATIVEX","49","42","128")
     )
 
     rsa_params = (
@@ -388,7 +388,7 @@ def interactive_prompt_input():
             if (userInput == ''):
                 return 0
             print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
-            interactive_prompt_input()
+
 
 if __name__ == '__main__':
     copytext="cp "

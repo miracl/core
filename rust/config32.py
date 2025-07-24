@@ -178,8 +178,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fpath+"ecp.rs","@AB@",ab)
     replace(fpath+"ecp.rs","@G2@",g2)
 
-    replace(fpath+"ecp.rs","@HC@",hc) 
-    replace(fpath+"ecp.rs","@HC2@",hc2) 
+    replace(fpath+"ecp.rs","@HC@",hc)
+    replace(fpath+"ecp.rs","@HC2@",hc2)
 
     if cs == "128" :
         replace(fpath+"ecp.rs","@HT@","32")
@@ -384,7 +384,7 @@ def interactive_prompt_input():
             if (userInput == ''):
                 return 0
             print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
-            interactive_prompt_input()
+
 
 if __name__ == '__main__':
     copytext="cp "
