@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+use core::num::Wrapping;
+
 use crate::arch;
 use crate::arch::Chunk;
 use crate::arch::CONDMS;
@@ -134,22 +136,19 @@ impl DBIG {
 
     #[inline(never)]
     pub fn cmove(&mut self, g: &DBIG, b: isize) -> Chunk {
-        static mut R:Chunk=0;
-        let w:Chunk;
-        unsafe {
-            R=R.wrapping_add(CONDMS);
-            w=R;
-        }
-        let bb=b as Chunk;
-        let c0=(!bb)&(w+1);
-        let c1=bb+w;
+        let w = Wrapping(CONDMS as Chunk);
+        let bb = Wrapping(b as Chunk);
+        let c0 = !bb & (w + Wrapping(1));
+        let c1 = bb + w;
         for i in 0..big::DNLEN {
-            let s = g.w[i];
-            let t = self.w[i];
-            unsafe{core::ptr::write_volatile(&mut self.w[i],t.wrapping_mul(c0).wrapping_add(s.wrapping_mul(c1)))}  
-            self.w[i]=self.w[i].wrapping_sub(w.wrapping_mul(t.wrapping_add(s)));
+            let s = Wrapping(g.w[i]);
+            let t = Wrapping(self.w[i]);
+            let c0_t = c0 * t;
+            let c1_s = c1 * s;
+            let w_tssum = w * (t + s);
+            unsafe { core::ptr::write_volatile(&mut self.w[i], (c0_t + c1_s - w_tssum).0) }
         }
-        return 0 as Chunk;
+        return 0;
     }
 
     /* self+=x */
