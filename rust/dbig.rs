@@ -137,7 +137,7 @@ impl DBIG {
         static mut R:Chunk=0;
         let w:Chunk;
         unsafe {
-            R+=CONDMS;
+            R=R.wrapping_add(CONDMS);
             w=R;
         }
         let bb=b as Chunk;
@@ -146,8 +146,8 @@ impl DBIG {
         for i in 0..big::DNLEN {
             let s = g.w[i];
             let t = self.w[i];
-            unsafe{core::ptr::write_volatile(&mut self.w[i],c0*t+c1*s)}  
-            self.w[i]-=w*(t+s);
+            unsafe{core::ptr::write_volatile(&mut self.w[i],t.wrapping_mul(c0).wrapping_add(s.wrapping_mul(c1)))}  
+            self.w[i]=self.w[i].wrapping_sub(w.wrapping_mul(t.wrapping_add(s)));
         }
         return 0 as Chunk;
     }
