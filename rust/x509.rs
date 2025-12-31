@@ -282,6 +282,19 @@ pub fn extract_private_key(c: &[u8], pk: &mut [u8]) -> PKTYPE {
             return ret;
         }
         j += skip(len);
+
+        len=getalen(SEQ,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len);
+
+        len=getalen(OCT,c,j);
+        if len==0 {
+            return ret;
+        }
+        j+=skip(len)+len;
+
         len = getalen(OCT, c, j);
         if len == 0 {
             return ret;
