@@ -34,34 +34,38 @@ void RSA_WWW_KEY_PAIR(csprng *RNG, sign32 e, rsa_private_key_WWW *PRIV, rsa_publ
 
     if (RNG != NULL)
     {
-
         for (;;)
         {
+            for (;;)
+            {
 
-            FF_WWW_random(PRIV->p, RNG, HFLEN_WWW);
-            while (FF_WWW_lastbits(PRIV->p, 2) != 3) FF_WWW_inc(PRIV->p, 1, HFLEN_WWW);
-            while (!FF_WWW_prime(PRIV->p, RNG, HFLEN_WWW))
-                FF_WWW_inc(PRIV->p, 4, HFLEN_WWW);
+                FF_WWW_random(PRIV->p, RNG, HFLEN_WWW);
+                while (FF_WWW_lastbits(PRIV->p, 2) != 3) FF_WWW_inc(PRIV->p, 1, HFLEN_WWW);
+                while (!FF_WWW_prime(PRIV->p, RNG, HFLEN_WWW))
+                    FF_WWW_inc(PRIV->p, 4, HFLEN_WWW);
 
-            FF_WWW_copy(p1, PRIV->p, HFLEN_WWW);
-            FF_WWW_dec(p1, 1, HFLEN_WWW);
+                FF_WWW_copy(p1, PRIV->p, HFLEN_WWW);
+                FF_WWW_dec(p1, 1, HFLEN_WWW);
 
-            if (FF_WWW_cfactor(p1, e, HFLEN_WWW)) continue;
-            break;
-        }
+                if (FF_WWW_cfactor(p1, e, HFLEN_WWW)) continue;
+                break;
+            }
 
-        for (;;)
-        {
-            FF_WWW_random(PRIV->q, RNG, HFLEN_WWW);
-            while (FF_WWW_lastbits(PRIV->q, 2) != 3) FF_WWW_inc(PRIV->q, 1, HFLEN_WWW);
-            while (!FF_WWW_prime(PRIV->q, RNG, HFLEN_WWW))
-                FF_WWW_inc(PRIV->q, 4, HFLEN_WWW);
+            for (;;)
+            {
+                FF_WWW_random(PRIV->q, RNG, HFLEN_WWW);
+                while (FF_WWW_lastbits(PRIV->q, 2) != 3) FF_WWW_inc(PRIV->q, 1, HFLEN_WWW);
+                while (!FF_WWW_prime(PRIV->q, RNG, HFLEN_WWW))
+                    FF_WWW_inc(PRIV->q, 4, HFLEN_WWW);
 
-            FF_WWW_copy(q1, PRIV->q, HFLEN_WWW);
-            FF_WWW_dec(q1, 1, HFLEN_WWW);
-            if (FF_WWW_cfactor(q1, e, HFLEN_WWW)) continue;
+                FF_WWW_copy(q1, PRIV->q, HFLEN_WWW);
+                FF_WWW_dec(q1, 1, HFLEN_WWW);
+                if (FF_WWW_cfactor(q1, e, HFLEN_WWW)) continue;
 
-            break;
+                break;
+            }
+            FF_WWW_mul(PUB->n, PRIV->p, PRIV->q, HFLEN_WWW);
+            if (FF_WWW_topbit(PUB->n,FFLEN_WWW)==1) break;
         }
     }
     else
@@ -74,9 +78,9 @@ void RSA_WWW_KEY_PAIR(csprng *RNG, sign32 e, rsa_private_key_WWW *PRIV, rsa_publ
 
         FF_WWW_copy(q1, PRIV->q, HFLEN_WWW);
         FF_WWW_dec(q1, 1, HFLEN_WWW);
+        FF_WWW_mul(PUB->n, PRIV->p, PRIV->q, HFLEN_WWW);
     }
 
-    FF_WWW_mul(PUB->n, PRIV->p, PRIV->q, HFLEN_WWW);
     PUB->e = e;
 
 // Only works for 3 mod 4 primes (as always generated above)

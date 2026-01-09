@@ -78,43 +78,48 @@ func RSA_KEY_PAIR(rng *core.RAND, e int, PRIV *rsa_private_key, PUB *rsa_public_
 	q1 := NewFFint(n)
 
 	for true {
-		PRIV.p.random(rng)
-		for PRIV.p.lastbits(2) != 3 {
-			PRIV.p.inc(1)
-		}
-		for !prime(PRIV.p, rng) {
-			PRIV.p.inc(4)
+		for true {
+			PRIV.p.random(rng)
+			for PRIV.p.lastbits(2) != 3 {
+				PRIV.p.inc(1)
+			}
+			for !prime(PRIV.p, rng) {
+				PRIV.p.inc(4)
+			}
+
+			p1.copy(PRIV.p)
+			p1.dec(1)
+
+			if p1.cfactor(e) {
+				continue
+			}
+			break
 		}
 
-		p1.copy(PRIV.p)
-		p1.dec(1)
+		for true {
+			PRIV.q.random(rng)
+			for PRIV.q.lastbits(2) != 3 {
+				PRIV.q.inc(1)
+			}
+			for !prime(PRIV.q, rng) {
+				PRIV.q.inc(4)
+			}
 
-		if p1.cfactor(e) {
-			continue
+			q1.copy(PRIV.q)
+			q1.dec(1)
+
+			if q1.cfactor(e) {
+				continue
+			}
+
+			break
 		}
-		break
+
+		PUB.n = ff_mul(PRIV.p, PRIV.q)
+		if PUB.n.topbit() == 1 {
+			break
+		}
 	}
-
-	for true {
-		PRIV.q.random(rng)
-		for PRIV.q.lastbits(2) != 3 {
-			PRIV.q.inc(1)
-		}
-		for !prime(PRIV.q, rng) {
-			PRIV.q.inc(4)
-		}
-
-		q1.copy(PRIV.q)
-		q1.dec(1)
-
-		if q1.cfactor(e) {
-			continue
-		}
-
-		break
-	}
-
-	PUB.n = ff_mul(PRIV.p, PRIV.q)
 	PUB.e = e
 
 	t.copy(p1)

@@ -215,6 +215,13 @@ extern void FF_invmodp(XXX::BIG *x, XXX::BIG *y, XXX::BIG *z, int n);
 	@param n size of FF in BIGs
  */
 extern void FF_random(XXX::BIG *x, csprng *R, int n);
+/**	@brief Get top bit
+ *
+	@param x FF instance
+	@param n size of FF in BIGs
+    @return top bit of x
+ */
+extern int FF_topbit(XXX::BIG *x,int n);
 /**	@brief Create a random FF less than a given modulus from a random number generator
  *
 	@param x FF instance, on exit x is a random number < y

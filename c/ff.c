@@ -675,6 +675,13 @@ static void FF_WWW_invmod2m(BIG_XXX U[], BIG_XXX a[], int n)
     FF_WWW_norm(U, n);
 }
 
+int FF_WWW_topbit(BIG x[],int n)
+{
+    FF_WWW_norm(x, n);
+    if (BIG_XXX_nbits(x[n - 1]) < MODBYTES_XXX * 8) return 0;
+    return 1;
+}
+
 void FF_WWW_random(BIG_XXX x[], csprng *rng, int n)
 {
     int i;

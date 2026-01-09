@@ -701,6 +701,14 @@ static void WWW::FF_invmod2m(BIG U[], BIG a[], int n)
     FF_norm(U, n);
 }
 
+int WWW::FF_topbit(BIG x[],int n)
+{
+    FF_norm(x, n);
+    //printf("%d %d\n",BIG_nbits(x[n - 1]),MODBYTES_XXX * 8);
+    if (BIG_nbits(x[n - 1]) < MODBYTES_XXX * 8) return 0;
+    return 1;
+}
+
 void WWW::FF_random(BIG x[], csprng *rng, int n)
 {
     int i;

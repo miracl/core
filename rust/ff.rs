@@ -644,6 +644,15 @@ impl DF {
         rnorm(&mut self.v,false);
     }
 
+    pub fn topbit(&mut self) -> usize {  
+        self.norm();
+        if self.v[DL - 1].nbits() < (big::MODBYTES as usize) * 8 {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
     /* increment/decrement by a small integer */
     pub fn inc(&mut self, m: isize) {
         self.v[0].inc(m);

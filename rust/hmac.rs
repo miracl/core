@@ -656,6 +656,7 @@ pub fn pss_encode(sha: usize, m: &[u8], rng: &mut RAND, f: &mut [u8], rfs: usize
     for i in 0..hlen {
         salt[i] = rng.getbyte()
     }
+
     let mask = (0xffu8) >> (8 * emlen - embits);
     SPhashit(MC_SHA2, sha, &mut h, Some(m));
     if emlen < hlen + hlen + 2 {

@@ -613,6 +613,13 @@ var FF = function(ctx) {
             return U;
         },
 
+        topbit: function() {
+            var n = this.length,i;
+            this.norm();
+            if (this.v[n - 1].nbits() < ctx.BIG.MODBYTES * 8) return 0;
+            return 1;
+        },
+
         random: function(rng) {
             var n = this.length,
                 i;

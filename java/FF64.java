@@ -722,6 +722,14 @@ public final class FF {
 		return U;
 	}
 
+    public int topbit()
+    {
+        int n=length;
+        norm();
+        if (v[n-1].nbits()<CONFIG_BIG.MODBYTES*8) return 0;
+        else return 1;
+    }
+
 	public void random(RAND rng)
 	{
 		int n=length;

@@ -104,43 +104,49 @@ pub fn key_pair(rng: &mut RAND, e: isize, prv: &mut RsaPrivateKey, pbc: &mut Rsa
     let mut q1 = SF::new();
 
     loop {
-        prv.p.random(rng);
-        while prv.p.lastbits(2) != 3 {
-            prv.p.inc(1)
-        }
-        while !prv.p.isprime(rng) {
-            prv.p.inc(4);
+        loop {
+            prv.p.random(rng);
+            while prv.p.lastbits(2) != 3 {
+                prv.p.inc(1)
+            }
+            while !prv.p.isprime(rng) {
+                prv.p.inc(4);
+            }
+
+            p1.copy(&prv.p);
+            p1.dec(1);
+
+            if p1.cfactor(e) {
+                continue;
+            }
+            break;
         }
 
-        p1.copy(&prv.p);
-        p1.dec(1);
+        loop {
+            prv.q.random(rng);
+            while prv.q.lastbits(2) != 3 {
+                prv.q.inc(1)
+            }
+            while !prv.q.isprime(rng) {
+                prv.q.inc(4);
+            }
 
-        if p1.cfactor(e) {
-            continue;
+            q1.copy(&prv.q);
+            q1.dec(1);
+
+            if q1.cfactor(e) {
+                continue;
+            }
+
+            break;
         }
-        break;
+        pbc.n = prv.p.mul(&prv.q);
+        if pbc.n.topbit()==1 {
+            break;
+        }
     }
 
-    loop {
-        prv.q.random(rng);
-        while prv.q.lastbits(2) != 3 {
-            prv.q.inc(1)
-        }
-        while !prv.q.isprime(rng) {
-            prv.q.inc(4);
-        }
-
-        q1.copy(&prv.q);
-        q1.dec(1);
-
-        if q1.cfactor(e) {
-            continue;
-        }
-
-        break;
-    }
-
-    pbc.n = prv.p.mul(&prv.q);
+    //pbc.n = prv.p.mul(&prv.q);
     pbc.e = e;
 
 // Note this only works for the 3 mod 4 primes generated as above.

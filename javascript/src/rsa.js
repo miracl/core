@@ -91,50 +91,53 @@ RSA = function(ctx) {
                 t = new ctx.FF(n),
                 p1 = new ctx.FF(n),
                 q1 = new ctx.FF(n);
+            for (;;)
+            {
+                for (;;) {
+                    PRIV.p.random(rng);
 
-            for (;;) {
-                PRIV.p.random(rng);
+                    while (PRIV.p.lastbits(2) != 3) {
+                        PRIV.p.inc(1);
+                    }
 
-                while (PRIV.p.lastbits(2) != 3) {
-                    PRIV.p.inc(1);
+                    while (!ctx.FF.prime(PRIV.p, rng)) {
+                        PRIV.p.inc(4);
+                    }
+
+                    p1.copy(PRIV.p);
+                    p1.dec(1);
+
+                    if (p1.cfactor(e)) {
+                        continue;
+                    }
+
+                    break;
                 }
 
-                while (!ctx.FF.prime(PRIV.p, rng)) {
-                    PRIV.p.inc(4);
+                for (;;) {
+                    PRIV.q.random(rng);
+
+                    while (PRIV.q.lastbits(2) != 3) {
+                        PRIV.q.inc(1);
+                    }
+
+                    while (!ctx.FF.prime(PRIV.q, rng)) {
+                        PRIV.q.inc(4);
+                    }
+
+                    q1.copy(PRIV.q);
+                    q1.dec(1);
+
+                    if (q1.cfactor(e)) {
+                        continue;
+                    }
+
+                    break;
                 }
 
-                p1.copy(PRIV.p);
-                p1.dec(1);
-
-                if (p1.cfactor(e)) {
-                    continue;
-                }
-
-                break;
+                PUB.n = ctx.FF.mul(PRIV.p, PRIV.q);
+                if (PUB.n.topbit()==1) break;
             }
-
-            for (;;) {
-                PRIV.q.random(rng);
-
-                while (PRIV.q.lastbits(2) != 3) {
-                    PRIV.q.inc(1);
-                }
-
-                while (!ctx.FF.prime(PRIV.q, rng)) {
-                    PRIV.q.inc(4);
-                }
-
-                q1.copy(PRIV.q);
-                q1.dec(1);
-
-                if (q1.cfactor(e)) {
-                    continue;
-                }
-
-                break;
-            }
-
-            PUB.n = ctx.FF.mul(PRIV.p, PRIV.q);
             PUB.e = e;
 
             t.copy(p1);

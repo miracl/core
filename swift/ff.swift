@@ -705,6 +705,16 @@ final public class FF {
     /* make sure top bit is 1 */
         while (v[n-1].nbits()<Int(CONFIG_BIG.MODBYTES)*8) {v[n-1].copy(BIG.random(&rng))}
     }
+
+    func topbit() -> Int {
+        let n=length;
+        norm();
+        if (v[n-1].nbits()<Int(CONFIG_BIG.MODBYTES)*8) {
+            return 0;
+        }
+        return 1;
+    }
+
     /* generate random x */
     func randomnum(_ p: FF,_ rng: inout RAND)
     {
@@ -717,6 +727,7 @@ final public class FF {
         }
         copy(d.dmod(p));
     }
+
     /* this*=y mod p */
     func modmul(_ y: FF,_ p:FF,_ nd: FF)
     {

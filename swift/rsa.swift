@@ -99,33 +99,37 @@ public struct RSA {
 
         while true
         {
+            while true
+            {
 
-            PRIV.p.random(&rng);
-            while PRIV.p.lastbits(2) != 3 {PRIV.p.inc(1)}
-            while !FF.prime(PRIV.p,&rng) {PRIV.p.inc(4)}
+                PRIV.p.random(&rng);
+                while PRIV.p.lastbits(2) != 3 {PRIV.p.inc(1)}
+                while !FF.prime(PRIV.p,&rng) {PRIV.p.inc(4)}
 
-            p1.copy(PRIV.p);
-            p1.dec(1);
+                p1.copy(PRIV.p);
+                p1.dec(1);
 
-            if p1.cfactor(e) {continue}
-            break;
+                if p1.cfactor(e) {continue}
+                break;
+            }
+
+            while true
+            {
+                PRIV.q.random(&rng);
+                while PRIV.q.lastbits(2) != 3 {PRIV.q.inc(1)}
+                while !FF.prime(PRIV.q,&rng) {PRIV.q.inc(4)}
+
+                q1.copy(PRIV.q);
+                q1.dec(1);
+
+                if q1.cfactor(e) {continue}
+
+                break;
+            }
+
+            PUB.n=FF.mul(PRIV.p,PRIV.q);
+            if PUB.n.topbit() == 1 {break}
         }
-
-        while true
-        {
-            PRIV.q.random(&rng);
-            while PRIV.q.lastbits(2) != 3 {PRIV.q.inc(1)}
-            while !FF.prime(PRIV.q,&rng) {PRIV.q.inc(4)}
-
-            q1.copy(PRIV.q);
-            q1.dec(1);
-
-            if q1.cfactor(e) {continue}
-
-            break;
-        }
-
-        PUB.n=FF.mul(PRIV.p,PRIV.q);
         PUB.e=e;
 
         t.copy(p1);

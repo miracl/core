@@ -642,6 +642,16 @@ func (F *FF) invmod2m() *FF {
 	return U
 }
 
+func (F *FF) topbit() int {
+	n := F.length
+	F.norm()
+	if F.v[n-1].nbits() < int(MODBYTES*8) {
+		return 0
+	} else {
+		return 1
+	}
+}
+
 func (F *FF) random(rng *core.RAND) {
 	n := F.length
 	for i := 0; i < n; i++ {
