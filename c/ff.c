@@ -675,7 +675,7 @@ static void FF_WWW_invmod2m(BIG_XXX U[], BIG_XXX a[], int n)
     FF_WWW_norm(U, n);
 }
 
-int FF_WWW_topbit(BIG x[],int n)
+int FF_WWW_topbit(BIG_XXX x[],int n)
 {
     FF_WWW_norm(x, n);
     if (BIG_XXX_nbits(x[n - 1]) < MODBYTES_XXX * 8) return 0;
