@@ -94,21 +94,21 @@ void BIG_XXX_rawoutput(BIG_XXX a)
 chunk BIG_XXX_cmove(volatile BIG_XXX f, BIG_XXX g, int d)
 {
     int i;
-    chunk c0,c1,s,t,w,aux;
-    static chunk R=0;
-    R+=CONDMS;
+    chunku c0,c1,s,t,w,aux;
+    static chunku R=0;
+    R+=(chunku)CONDMS;
     w=R;
-    c0=(~d)&(w+1);
-    c1=d+w;
+    c0=(~(chunku)d)&(w+1);
+    c1=(chunku)d+w;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        s=g[i]; t=f[i];
-        f[i] =aux=c0*t+c1*s;
-        f[i] =aux-w*(t+s);  
+        s=(chunku)g[i]; t=(chunku)f[i];
+        f[i] =(chunk)(aux=c0*t+c1*s);
+        f[i] =(chunk)(aux-w*(t+s));
     }
     return 0;
 }
@@ -116,24 +116,24 @@ chunk BIG_XXX_cmove(volatile BIG_XXX f, BIG_XXX g, int d)
 chunk BIG_XXX_cswap(volatile BIG_XXX f, volatile BIG_XXX g, int d)
 {
     int i;
-    chunk c0,c1,s,t,w,v,aux;
-    static chunk R=0;
-    R+=CONDMS;
+    chunku c0,c1,s,t,w,v,aux;
+    static chunku R=0;
+    R+=(chunku)CONDMS;
     w=R;
-    c0=(~d)&(w+1);
-    c1=d+w;
+    c0=(~(chunku)d)&(w+1);
+    c1=(chunku)d+w;
 #ifdef DEBUG_NORM
     for (i = 0; i < NLEN_XXX + 2; i++)
 #else
     for (i = 0; i < NLEN_XXX; i++)
 #endif
     {
-        s=g[i]; t=f[i];
+        s=(chunku)g[i]; t=(chunku)f[i];
         v=w*(t+s);
-        f[i] =aux=c0*t+c1*s;
-        f[i] =aux-v;  
-        g[i] =aux=c0*s+c1*t;
-        g[i] =aux-v; 
+        f[i] =(chunk)(aux=c0*t+c1*s);
+        f[i] =(chunk)(aux-v);
+        g[i] =(chunk)(aux=c0*s+c1*t);
+        g[i] =(chunk)(aux-v);
     }
     return 0;
 }
@@ -141,21 +141,21 @@ chunk BIG_XXX_cswap(volatile BIG_XXX f, volatile BIG_XXX g, int d)
 chunk BIG_XXX_dcmove(volatile DBIG_XXX f, DBIG_XXX g, int d)
 {
     int i;
-    chunk c0,c1,s,t,w,aux;
-    static chunk R=0;
-    R+=CONDMS;
+    chunku c0,c1,s,t,w,aux;
+    static chunku R=0;
+    R+=(chunku)CONDMS;
     w=R;
-    c0=(~d)&(w+1);
-    c1=d+w;
+    c0=(~(chunku)d)&(w+1);
+    c1=(chunku)d+w;
 #ifdef DEBUG_NORM
     for (i = 0; i < DNLEN_XXX + 2; i++)
 #else
     for (i = 0; i < DNLEN_XXX; i++)
 #endif
     {
-        s=g[i]; t=f[i];
-        f[i] =aux=c0*t+c1*s;
-        f[i] =aux-w*(t+s);
+        s=(chunku)g[i]; t=(chunku)f[i];
+        f[i] =(chunk)(aux=c0*t+c1*s);
+        f[i] =(chunk)(aux-w*(t+s));
     }
     return 0;
 }
@@ -577,9 +577,10 @@ chunk BIG_XXX_pmul(BIG_XXX r, BIG_XXX a, int c)
 int BIG_XXX_div3(BIG_XXX r)
 {
     int i;
-    chunk ak, base, carry = 0;
+    chunk ak, carry = 0;
+    chunku base;
     BIG_XXX_norm(r);
-    base = ((chunk)1 << BASEBITS_XXX);
+    base = ((chunku)1 << BASEBITS_XXX);
     for (i = NLEN_XXX - 1; i >= 0; i--)
     {
         ak = (carry * base + r[i]);
@@ -706,7 +707,7 @@ void BIG_XXX_mul(DBIG_XXX c, BIG_XXX a, BIG_XXX b)
         t = co + s;
         
         /*for (i = k; i >= 1 + k / 2; i--) This causes a huge slow down! gcc/g++ optimizer problem (I think) */
-        for (i=1+k/2;i<=k;i++) t += (dchunk)(a[i] - a[k - i]) * (b[k - i] - b[i]);
+        for (i=1+k/2;i<=k;i++) t += (((dchunk)a[i] - (dchunk)a[k - i]) * ((dchunk)b[k - i] - (dchunk)b[i]));
         c[k] = (chunk)t & BMASK_XXX;
         co = t >> BASEBITS_XXX;
     }
@@ -714,7 +715,7 @@ void BIG_XXX_mul(DBIG_XXX c, BIG_XXX a, BIG_XXX b)
     {
         s -= d[k - NLEN_XXX];
         t = co + s;
-        for (i=1+k/2;i<NLEN_XXX;i++) t += (dchunk)(a[i] - a[k - i]) * (b[k - i] - b[i]);
+        for (i=1+k/2;i<NLEN_XXX;i++) t += (((dchunk)a[i] - (dchunk)a[k - i]) * ((dchunk)b[k - i] - (dchunk)b[i]));
         c[k] = (chunk)t & BMASK_XXX;
         co = t >> BASEBITS_XXX;
     }
@@ -897,7 +898,7 @@ void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d)
 #else
 #ifndef USE_KARATSUBA 
     t = d[0];
-    v[0] = ((chunk)t * MC)&BMASK_XXX;
+    v[0] = (chunk)(((chunku)t * (chunku)MC)&(chunku)BMASK_XXX);
     t += (dchunk)v[0] * md[0];
     t = (t >> BASEBITS_XXX) + d[1];
    
@@ -928,8 +929,8 @@ void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d)
     for (k = 1; k < NLEN_XXX; k++)
     {
         t = c + s + (dchunk)v[0] * md[k];
-        for (i=1+k/2;i<k;i++) t += (dchunk)(v[k - i] - v[i]) * (md[i] - md[k - i]);
-        v[k] = ((chunk)t * MC)&BMASK_XXX;
+        for (i=1+k/2;i<k;i++) t += (((dchunk)v[k - i] - (dchunk)v[i]) * ((dchunk)md[i] - (dchunk)md[k - i]));
+        v[k] = (chunk)(((chunku)t * (chunku)MC)&(chunku)BMASK_XXX);
         t += (dchunk)v[k] * md[0];
         c = (t >> BASEBITS_XXX) + d[k + 1];
         dd[k] = (dchunk)v[k] * md[k];
@@ -938,7 +939,7 @@ void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d)
     for (k = NLEN_XXX; k < 2 * NLEN_XXX - 1; k++)
     {
         t = c + s;
-        for (i=1+k/2;i<NLEN_XXX;i++) t += (dchunk)(v[k - i] - v[i]) * (md[i] - md[k - i]);
+        for (i=1+k/2;i<NLEN_XXX;i++) t += (((dchunk)v[k - i] - (dchunk)v[i]) * ((dchunk)md[i] - (dchunk)md[k - i]));
         a[k - NLEN_XXX] = (chunk)t & BMASK_XXX;
         c = (t >> BASEBITS_XXX) + d[k + 1];
         s -= dd[k - NLEN_XXX + 1];
@@ -954,11 +955,11 @@ void BIG_XXX_monty(BIG_XXX a, BIG_XXX md, chunk MC, DBIG_XXX d)
     chunk m, carry;
     for (i = 0; i < NLEN_XXX; i++)
     {
-        if (MC == -1) m = (-d[i])&BMASK_XXX;
+        if (MC == -1) m = (chunk)(-(chunku)d[i])&BMASK_XXX;
         else
         {
             if (MC == 1) m = d[i];
-            else m = (MC * d[i])&BMASK_XXX;
+            else m = (chunk)(((chunku)MC * (chunku)d[i])&(chunku)BMASK_XXX);
         }
         carry = 0;
         for (j = 0; j < NLEN_XXX; j++)
@@ -985,12 +986,12 @@ void BIG_XXX_shl(BIG_XXX a, int k)
     int n = k % BASEBITS_XXX;
     int m = k / BASEBITS_XXX;
 
-    a[NLEN_XXX - 1] = ((a[NLEN_XXX - 1 - m] << n));
-    if (NLEN_XXX >= m + 2) a[NLEN_XXX - 1] |= (a[NLEN_XXX - m - 2] >> (BASEBITS_XXX - n));
+    a[NLEN_XXX - 1] = (chunk)((chunku)a[NLEN_XXX - 1 - m] << n);
+    if (NLEN_XXX >= m + 2) a[NLEN_XXX - 1] |= (chunk)((chunku)a[NLEN_XXX - m - 2] >> (BASEBITS_XXX - n));
 
     for (i = NLEN_XXX - 2; i > m; i--)
-        a[i] = ((a[i - m] << n)&BMASK_XXX) | (a[i - m - 1] >> (BASEBITS_XXX - n));
-    a[m] = (a[0] << n)&BMASK_XXX;
+        a[i] = (chunk)((((chunku)a[i - m] << n)&(chunku)BMASK_XXX) | ((chunku)a[i - m - 1] >> (BASEBITS_XXX - n)));
+    a[m] = (chunk)(((chunku)a[0] << n)&(chunku)BMASK_XXX);
     for (i = 0; i < m; i++) a[i] = 0;
 
 }
@@ -1002,10 +1003,10 @@ int BIG_XXX_fshl(BIG_XXX a, int n)
 {
     int i;
 
-    a[NLEN_XXX - 1] = ((a[NLEN_XXX - 1] << n)) | (a[NLEN_XXX - 2] >> (BASEBITS_XXX - n)); /* top word not masked */
+    a[NLEN_XXX - 1] = (chunk)(((chunku)a[NLEN_XXX - 1] << n) | ((chunku)a[NLEN_XXX - 2] >> (BASEBITS_XXX - n))); /* top word not masked */
     for (i = NLEN_XXX - 2; i > 0; i--)
-        a[i] = ((a[i] << n)&BMASK_XXX) | (a[i - 1] >> (BASEBITS_XXX - n));
-    a[0] = (a[0] << n)&BMASK_XXX;
+        a[i] = (chunk)((((chunku)a[i] << n)&(chunku)BMASK_XXX) | ((chunku)a[i - 1] >> (BASEBITS_XXX - n)));
+    a[0] = (chunk)(((chunku)a[0] << n)&(chunku)BMASK_XXX);
 
     return (int)(a[NLEN_XXX - 1] >> ((8 * MODBYTES_XXX) % BASEBITS_XXX)); /* return excess - only used in ff.c */
 }
@@ -1018,11 +1019,11 @@ void BIG_XXX_dshl(DBIG_XXX a, int k)
     int n = k % BASEBITS_XXX;
     int m = k / BASEBITS_XXX;
 
-    a[DNLEN_XXX - 1] = ((a[DNLEN_XXX - 1 - m] << n)) | (a[DNLEN_XXX - m - 2] >> (BASEBITS_XXX - n));
+    a[DNLEN_XXX - 1] = (chunk)(((chunku)a[DNLEN_XXX - 1 - m] << n) | ((chunku)a[DNLEN_XXX - m - 2] >> (BASEBITS_XXX - n)));
 
     for (i = DNLEN_XXX - 2; i > m; i--)
-        a[i] = ((a[i - m] << n)&BMASK_XXX) | (a[i - m - 1] >> (BASEBITS_XXX - n));
-    a[m] = (a[0] << n)&BMASK_XXX;
+        a[i] = (chunk)((((chunku)a[i - m] << n)&(chunku)BMASK_XXX) | ((chunku)a[i - m - 1] >> (BASEBITS_XXX - n)));
+    a[m] = (chunk)(((chunku)a[0] << n)&(chunku)BMASK_XXX);
     for (i = 0; i < m; i++) a[i] = 0;
 
 }
@@ -1036,8 +1037,8 @@ void BIG_XXX_shr(BIG_XXX a, int k)
     int n = k % BASEBITS_XXX;
     int m = k / BASEBITS_XXX;
     for (i = 0; i < NLEN_XXX - m - 1; i++)
-        a[i] = (a[m + i] >> n) | ((a[m + i + 1] << (BASEBITS_XXX - n))&BMASK_XXX);
-    if (NLEN_XXX > m)  a[NLEN_XXX - m - 1] = a[NLEN_XXX - 1] >> n;
+        a[i] = (chunk)(((chunku)a[m + i] >> n) | (((chunku)a[m + i + 1] << (BASEBITS_XXX - n))&(chunku)BMASK_XXX));
+    if (NLEN_XXX > m)  a[NLEN_XXX - m - 1] = (chunk)((chunku)a[NLEN_XXX - 1] >> n);
     for (i = NLEN_XXX - m; i < NLEN_XXX; i++) a[i] = 0;
 
 }
@@ -1047,17 +1048,18 @@ int BIG_XXX_ssn(BIG_XXX r, BIG_XXX a, BIG_XXX m)
 {
     int i, n = NLEN_XXX - 1;
     chunk carry;
-    m[0] = (m[0] >> 1) | ((m[1] << (BASEBITS_XXX - 1))&BMASK_XXX);
-    r[0] = a[0] - m[0];
-    carry = r[0] >> BASEBITS_XXX;
-    r[0] &= BMASK_XXX;
+    dchunk delta;
+    m[0] = (chunk)(((chunku)m[0] >> 1) | (((chunku)m[1] << (BASEBITS_XXX - 1))&(chunku)BMASK_XXX));
+    delta = (dchunk)a[0] - (dchunk)m[0];
+    carry = (delta < 0) ? (chunk)-1 : 0;
+    r[0] = (chunk)((chunku)delta & (chunku)BMASK_XXX);
 
     for (i = 1; i < n; i++)
     {
-        m[i] = (m[i] >> 1) | ((m[i + 1] << (BASEBITS_XXX - 1))&BMASK_XXX);
-        r[i] = a[i] - m[i] + carry;
-        carry = r[i] >> BASEBITS_XXX;
-        r[i] &= BMASK_XXX;
+        m[i] = (chunk)(((chunku)m[i] >> 1) | (((chunku)m[i + 1] << (BASEBITS_XXX - 1))&(chunku)BMASK_XXX));
+        delta = (dchunk)a[i] - (dchunk)m[i] + (dchunk)carry;
+        carry = (delta < 0) ? (chunk)-1 : 0;
+        r[i] = (chunk)((chunku)delta & (chunku)BMASK_XXX);
     }
 
     m[n] >>= 1;
@@ -1066,7 +1068,7 @@ int BIG_XXX_ssn(BIG_XXX r, BIG_XXX a, BIG_XXX m)
     r[MPV_XXX] = 1;
     r[MNV_XXX] = 0;
 #endif
-    return ((r[n] >> (CHUNK - 1)) & 1);
+    return (int)(((chunku)r[n] >> (CHUNK - 1)) & 1);
 }
 
 /* Faster shift right of a by k bits. Return shifted out part */
@@ -1075,10 +1077,10 @@ int BIG_XXX_ssn(BIG_XXX r, BIG_XXX a, BIG_XXX m)
 int BIG_XXX_fshr(BIG_XXX a, int k)
 {
     int i;
-    chunk r = a[0] & (((chunk)1 << k) - 1); /* shifted out part */
+    chunk r = (chunk)((chunku)a[0] & (((chunku)1 << k) - 1)); /* shifted out part */
     for (i = 0; i < NLEN_XXX - 1; i++)
-        a[i] = (a[i] >> k) | ((a[i + 1] << (BASEBITS_XXX - k))&BMASK_XXX);
-    a[NLEN_XXX - 1] = a[NLEN_XXX - 1] >> k;
+        a[i] = (chunk)(((chunku)a[i] >> k) | (((chunku)a[i + 1] << (BASEBITS_XXX - k))&(chunku)BMASK_XXX));
+    a[NLEN_XXX - 1] = (chunk)((chunku)a[NLEN_XXX - 1] >> k);
     return (int)r;
 }
 
@@ -1090,8 +1092,8 @@ void BIG_XXX_dshr(DBIG_XXX a, int k)
     int n = k % BASEBITS_XXX;
     int m = k / BASEBITS_XXX;
     for (i = 0; i < DNLEN_XXX - m - 1; i++)
-        a[i] = (a[m + i] >> n) | ((a[m + i + 1] << (BASEBITS_XXX - n))&BMASK_XXX);
-    a[DNLEN_XXX - m - 1] = a[DNLEN_XXX - 1] >> n;
+        a[i] = (chunk)(((chunku)a[m + i] >> n) | (((chunku)a[m + i + 1] << (BASEBITS_XXX - n))&(chunku)BMASK_XXX));
+    a[DNLEN_XXX - m - 1] = (chunk)((chunku)a[DNLEN_XXX - 1] >> n);
     for (i = DNLEN_XXX - m; i < DNLEN_XXX; i++ ) a[i] = 0;
 }
 
@@ -1118,15 +1120,15 @@ chunk BIG_XXX_split(BIG_XXX t, BIG_XXX b, DBIG_XXX d, int n)
 
     for (i = 0; i < NLEN_XXX - 1; i++) b[i] = d[i];
 
-    b[NLEN_XXX - 1] = d[NLEN_XXX - 1] & (((chunk)1 << m) - 1);
+    b[NLEN_XXX - 1] = (chunk)((chunku)d[NLEN_XXX - 1] & (((chunku)1 << m) - 1));
 
     if (t != b)
     {
-        carry = (d[DNLEN_XXX - 1] << (BASEBITS_XXX - m));
+        carry = (chunk)((chunku)d[DNLEN_XXX - 1] << (BASEBITS_XXX - m));
         for (i = DNLEN_XXX - 2; i >= NLEN_XXX - 1; i--)
         {
-            nw = (d[i] >> m) | carry;
-            carry = (d[i] << (BASEBITS_XXX - m))&BMASK_XXX;
+            nw = (chunk)(((chunku)d[i] >> m) | (chunku)carry);
+            carry = (chunk)(((chunku)d[i] << (BASEBITS_XXX - m))&(chunku)BMASK_XXX);
             t[i - NLEN_XXX + 1] = nw;
         }
     }
@@ -1405,7 +1407,7 @@ int BIG_XXX_parity(BIG_XXX a)
 /* SU= 16 */
 int BIG_XXX_bit(BIG_XXX a, int n)
 {
-    return (int)((a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) >> (n%BASEBITS_XXX));
+    return (int)(((chunku)a[n / BASEBITS_XXX] & ((chunku)1 << (n % BASEBITS_XXX))) >> (n%BASEBITS_XXX));
 //    if (a[n / BASEBITS_XXX] & ((chunk)1 << (n % BASEBITS_XXX))) return 1;
 //    else return 0;
 }
@@ -1737,7 +1739,7 @@ void BIG_XXX_mod2m(BIG_XXX x, int m)
 
     wd = m / BASEBITS_XXX;
     bt = m % BASEBITS_XXX;
-    msk = ((chunk)1 << bt) - 1;
+    msk = (chunk)(((chunku)1 << bt) - 1);
     x[wd] &= msk;
     for (i = wd + 1; i < NLEN_XXX; i++) x[i] = 0;
 }
