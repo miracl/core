@@ -434,6 +434,10 @@ public struct EDDSA
         }
         var s = [UInt8](repeating: 0,count: EFS+1)
         let r=BIG(ROM.CURVE_Order)
+
+	if sig.count != 2*b {
+	    return false;
+	}
         var R=decode(sig);
         if R.is_infinity() {
             return false;

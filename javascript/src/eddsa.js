@@ -388,6 +388,7 @@ var EDDSA = function(ctx) {
             }
             var q = new ctx.BIG();
             q.rcopy(ctx.ROM_CURVE.CURVE_Order);
+			if (SIG.length!=2*b) return false;
             var R=this.decode(SIG);
             if (R.is_infinity()) return false;
             for (var i=0;i<b;i++)

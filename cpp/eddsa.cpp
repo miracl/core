@@ -382,6 +382,7 @@ bool ZZZ::EDDSA_VERIFY(bool ph,octet *Q,octet *context,octet *M,octet *SIG)
         c/=2;
     }
     BIG_rcopy(q, CURVE_Order);
+    if (SIG->len!=2*b) return false;
 
     decode(SIG,&R);
     if (ECP_isinf(&R)) return false;

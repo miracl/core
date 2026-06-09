@@ -344,6 +344,7 @@ public final class EDDSA {
             c/=2;
         }
         BIG q = new BIG(ROM.CURVE_Order);
+		if (SIG.length!=2*b) return false;
         ECP R=decode(SIG);
         if (R.is_infinity()) return false;
         for (int i=0;i<b;i++)

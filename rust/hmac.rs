@@ -213,14 +213,14 @@ pub fn pbkdf2(
             s[sl + j] = n[j]
         }
 
-        hmac1(hash, sha, &mut f, sha, &s[0..sl + 4], pass);
+        hmac1(hash, sha, &mut f, sha, pass, &s[0..sl + 4]);
 
         for j in 0..sha {
             u[j] = f[j]
         }
 
         for _ in 1..rep {
-            hmac1(hash, sha, &mut ku, sha, &u, pass);
+            hmac1(hash, sha, &mut ku, sha, pass, &u);
             for m in 0..sha {
                 u[m] = ku[m];
                 f[m] ^= u[m]

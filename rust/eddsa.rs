@@ -424,6 +424,10 @@ pub fn verify(ph: bool, q: &[u8], ctx: Option<&[u8]>,m: &[u8], sig: &[u8]) ->boo
         c/=2;
     }
     let r = BIG::new_ints(&rom::CURVE_ORDER);
+
+    if sig.len()!=2*b {
+        return false;
+    }
     let mut R=decode(&sig[0..b]);
  
     if R.is_infinity() {

@@ -324,13 +324,13 @@ void PBKDF2(int hash, int hlen, octet *key, int olen, octet *p, octet *s, int re
         len = s->len;
         OCT_jint(s, i, 4);
 
-        HMAC(hash, hlen, &F, hlen, s, p);
+        HMAC(hash, hlen, &F, hlen, p, s);
 
         s->len = len;
         OCT_copy(&U, &F);
         for (j = 2; j <= rep; j++)
         {
-            HMAC(hash, hlen, &U, hlen, &U, p);
+            HMAC(hash, hlen, &U, hlen, p, &U);
             OCT_xor(&F, &U);
         }
 
