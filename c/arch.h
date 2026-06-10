@@ -102,9 +102,11 @@
 #define CONDMS 0xa55a
 #ifndef C99
 #define chunk __int16       /**< C type corresponding to word length */
+#define chunku unsigned __int16  /**< Unsigned type corresponding to word length */
 #define dchunk __int32      /**< Always define double length chunk type if available */
 #else
 #define chunk int16_t       /**< C type corresponding to word length */
+#define chunku uint16_t     /**< Unsigned type corresponding to word length */
 #define dchunk int32_t      /**< Always define double length chunk type if available */
 #endif
 #endif
@@ -113,9 +115,11 @@
 #define CONDMS 0x5aa5a55a
 #ifndef C99
 #define chunk __int32       /**< C type corresponding to word length */
+#define chunku unsigned __int32  /**< Unsigned type corresponding to word length */
 #define dchunk __int64      /**< Always define double length chunk type if available */
 #else
 #define chunk int32_t       /**< C type corresponding to word length */
+#define chunku uint32_t     /**< Unsigned type corresponding to word length */
 #define dchunk int64_t      /**< Always define double length chunk type if available */
 #endif
 #endif
@@ -124,9 +128,11 @@
 #define CONDMS 0x3cc3c33c5aa5a55a
 #ifndef C99
 #define chunk __int64     /**< C type corresponding to word length */
+#define chunku unsigned __int64  /**< Unsigned type corresponding to word length */
 /**< Note - no 128-bit type available    */
 #else
 #define chunk int64_t     /**< C type corresponding to word length */
+#define chunku uint64_t   /**< Unsigned type corresponding to word length */
 //#ifdef __GNUC__
 //#define dchunk __int128       /**< Always define double length chunk type if available - GCC supports 128 bit type  ??? */
 //#endif

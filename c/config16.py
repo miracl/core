@@ -102,13 +102,13 @@ def inline_mul2(N,base)  :
     for k in range(1,N) :
         str+="\ts+=d[{}]; t=co+s ".format(k)
         for i in range(k,int(k/2),-1) :
-            str+="+(dchunk)(a[{}]-a[{}])*(b[{}]-b[{}])".format(i,k - i, k - i, i)
+            str+="+(((dchunk)a[{}]-(dchunk)a[{}])*((dchunk)b[{}]-(dchunk)b[{}]))".format(i,k - i, k - i, i)
         str+="; c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n".format(k)
     str+="\n"
     for k in range(N,2 * N - 1) :
         str+="\ts-=d[{}]; t=co+s ".format(k - N)
         for i in range(N-1,int(k/2),-1) :
-            str+="+(dchunk)(a[{}]-a[{}])*(b[{}]-b[{}])".format(i, k - i, k - i, i)
+            str+="+(((dchunk)a[{}]-(dchunk)a[{}])*((dchunk)b[{}]-(dchunk)b[{}]))".format(i, k - i, k - i, i)
         str+="; c[{}]=(chunk)t&BMASK_XXX; co=t>>BASEBITS_XXX; \n".format(k)
 
     str+="\tc[{}]=(chunk)co;\n".format(2 * N - 1)
@@ -144,20 +144,20 @@ def inline_sqr(N,base) :
 
 def inline_redc2(N,base) :
     str=""
-    str+="\tt=d[0]; v[0]=((chunk)t*MC)&BMASK_XXX; t+=(dchunk)v[0]*md[0];  s=0; c=(t>>BASEBITS_XXX);\n\n"
+    str+="\tt=d[0]; v[0]=(chunk)(((chunku)t*(chunku)MC)&(chunku)BMASK_XXX); t+=(dchunk)v[0]*md[0];  s=0; c=(t>>BASEBITS_XXX);\n\n"
 
     for k in range(1,N) :
         str+="\tt=d[{}]+c+s+(dchunk)v[0]*md[{}]".format(k, k)
         for i in range(k-1,int(k/2),-1) :
-            str+="+(dchunk)(v[{}]-v[{}])*(md[{}]-md[{}])".format(k - i, i, i, k - i)
-        str+="; v[{}]=((chunk)t*MC)&BMASK_XXX; t+=(dchunk)v[{}]*md[0]; ".format(k, k)
+            str+="+(((dchunk)v[{}]-(dchunk)v[{}])*((dchunk)md[{}]-(dchunk)md[{}]))".format(k - i, i, i, k - i)
+        str+="; v[{}]=(chunk)(((chunku)t*(chunku)MC)&(chunku)BMASK_XXX); t+=(dchunk)v[{}]*md[0]; ".format(k, k)
         str+=" dd[{}]=(dchunk)v[{}]*md[{}]; s+=dd[{}]; c=(t>>BASEBITS_XXX); \n".format(k, k, k, k)
 
     str+="\n"
     for k in range(N,2*N-1) :
         str+="\tt=d[{}]+c+s".format(k)
         for i in range(N-1,int(k/2),-1) :
-            str+="+(dchunk)(v[{}]-v[{}])*(md[{}]-md[{}])".format(k - i, i, i, k - i)
+            str+="+(((dchunk)v[{}]-(dchunk)v[{}])*((dchunk)md[{}]-(dchunk)md[{}]))".format(k - i, i, i, k - i)
         str+="; a[{}]=(chunk)t&BMASK_XXX;  s-=dd[{}]; c=(t>>BASEBITS_XXX); \n".format(k - N, k - N + 1)
 
     str+="\ta[{}]=d[{}]+((chunk)c&BMASK_XXX);\n".format(N-1,2*N-1)
@@ -167,7 +167,7 @@ def inline_redc1(N,base) :
     str=""
 
     str+="\tt = d[0];\n"
-    str+="\tv[0] = ((chunk)t * MC)&BMASK_XXX;\n"
+    str+="\tv[0] = (chunk)(((chunku)t * (chunku)MC)&(chunku)BMASK_XXX);\n"
     str+="\tt += (dchunk)v[0] * md[0];\n"
     str+="\tt = (t >> BASEBITS_XXX) + d[1];\n"
 
@@ -177,7 +177,7 @@ def inline_redc1(N,base) :
         while k<i :
             str+="+ (dchunk)v[{}]*md[{}]".format(k,i-k)
             k+=1
-        str+="; v[{}] = ((chunk)t * MC)&BMASK_XXX; ".format(i)
+        str+="; v[{}] = (chunk)(((chunku)t * (chunku)MC)&(chunku)BMASK_XXX); ".format(i)
         str+="t += (dchunk)v[{}] * md[0]; ".format(i)
         str+="t = (t >> BASEBITS_XXX) + d[{}];\n".format(i+1)
 
@@ -740,5 +740,4 @@ delete_file("bls256.*")
 
 delete_file("rom_field*.c")
 delete_file("rom_curve*.c")
-
 
