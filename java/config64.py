@@ -227,8 +227,8 @@ def curveset(tc,base,nbt,m8,rz,mt,qi,ct,ca,pf,stw,sx,g2,ab,cs) :
     replace(fpath+"CONFIG_CURVE.java","@AB@",ab)
     replace(fpath+"CONFIG_CURVE.java","@G2@",g2)
 
-    replace(fpath+"CONFIG_CURVE.java","@HC@",hc) 
-    replace(fpath+"CONFIG_CURVE.java","@HC2@",hc2) 
+    replace(fpath+"CONFIG_CURVE.java","@HC@",hc)
+    replace(fpath+"CONFIG_CURVE.java","@HC2@",hc2)
 
     if cs == "128" :
         replace(fpath+"CONFIG_CURVE.java","@HT@","32")
@@ -372,7 +372,7 @@ class miracl_crypto:
         ("BN254","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","71","66","128"),
         ("BN254CX","56","254","1",["-1","-1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","D_TYPE","NEGATIVEX","76","66","128"),
         ("BLS12383","58","383","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","68","65","128"),
-        ("BLS12381","58","381","1",["11","-2","-1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","69","65","128"), 
+        ("BLS12381","58","381","1",["11","-2","-1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","NEGATIVEX","69","65","128"),
         ("FP256BN","56","256","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","NEGATIVEX","83","66","128"),
         ("FP512BN","60","512","1",["1","1","0"],"NOT_SPECIAL","0","WEIERSTRASS","0","BN","M_TYPE","POSITIVEX","172","130","128"),
         ("BLS12443","60","443","1",["-7","1","1","11","3"],"NOT_SPECIAL","0","WEIERSTRASS","0","BLS12","M_TYPE","POSITIVEX","78","75","128"),
@@ -446,7 +446,6 @@ def interactive_prompt_input():
             if (userInput == ''):
                 return 0
             print("Non-integer input, select values between 1 and " + str(miracl_crypto.total_entries))
-            interactive_prompt_input()
 
 
 interactive_prompt_print()

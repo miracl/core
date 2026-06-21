@@ -41,11 +41,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#   You can be released from the requirements of the license by purchasing     
+#   You can be released from the requirements of the license by purchasing
 #   a commercial license. Buying such a license is mandatory as soon as you
 #   develop commercial activities involving the MIRACL Core Crypto SDK
 #   without disclosing the source code of your own applications, or shipping
-#   the MIRACL Core Crypto SDK with a closed source product.     
+#   the MIRACL Core Crypto SDK with a closed source product.
 
 #
 # Fp^12 CLass -  towered over Fp^4
@@ -250,7 +250,7 @@ class Fp12:
             tb=other.a.a+other.a.b
             tc=ta*tb
             tc-=(w1+w2)
-			
+
             ta=self.a.a+self.c.b
             tb=other.a.a+other.c.b
             td=ta*tb

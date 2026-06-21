@@ -41,11 +41,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#   You can be released from the requirements of the license by purchasing     
+#   You can be released from the requirements of the license by purchasing
 #   a commercial license. Buying such a license is mandatory as soon as you
 #   develop commercial activities involving the MIRACL Core Crypto SDK
 #   without disclosing the source code of your own applications, or shipping
-#   the MIRACL Core Crypto SDK with a closed source product.     
+#   the MIRACL Core Crypto SDK with a closed source product.
 
 #
 # Optimal Ate Pairing
@@ -77,7 +77,7 @@ def dbl(A) :
     if curve.SexticTwist == D_TYPE:
         YY = YY.mulQNR()
         CC = CC.mulQNR()
-    if curve.SexticTwist == M_TYPE:    
+    if curve.SexticTwist == M_TYPE:
         BB = BB.mulQNR()
     BB=BB-YY
     A.dbl()
@@ -148,7 +148,7 @@ def miller(r) :
         res.conj()
     res *= r[0]
     return res
-	
+
 def pack(AA,BB,CC) :
     i=CC.inverse()
     return Fp4(AA*i,BB*i)
@@ -157,7 +157,7 @@ def unpack(T,Qx,Qy) :
     aa,bb=T.get()
     aa=aa.muls(Qy)
     a=Fp4(aa,bb)
-  
+
     t=Fp2(Qx)
     if curve.SexticTwist == D_TYPE:
         b=Fp4(t)
@@ -182,7 +182,7 @@ def precomp(GV) :
         if big.bit(n3, i) == 0 and big.bit(n, i) == 1:
             AA,BB,CC=add(A,MP)
             T.append(pack(AA,BB,CC))
-    
+
     if curve.PairingFriendly == BN:
         KA = P.copy()
         KA.frobenius()
@@ -196,14 +196,14 @@ def precomp(GV) :
         T.append(pack(AA,BB,CC))
     return T
 
-# Accumulate another set of line functions for n-pairing, assuming precomputation on G2 
+# Accumulate another set of line functions for n-pairing, assuming precomputation on G2
 def another_pc(r,T,QV) :
     if QV.isinf() :
         return
     nb,n3,n=lbits()
     Q=QV.copy()
     Q.affine()
-    Qx, Qy = Q.getxy()	
+    Qx, Qy = Q.getxy()
     j=0
     for i in range(nb - 2, 0, -1):
         lv=unpack(T[j],Qx,Qy)
@@ -212,7 +212,7 @@ def another_pc(r,T,QV) :
             lv2=unpack(T[j],Qx,Qy)
             j+=1
             lv.smul(lv2)
-        if big.bit(n3, i) == 0 and big.bit(n, i) == 1:        
+        if big.bit(n3, i) == 0 and big.bit(n, i) == 1:
             lv2=unpack(T[j],Qx,Qy)
             j+=1
             lv.smul(lv2)
@@ -225,7 +225,7 @@ def another_pc(r,T,QV) :
         lv.smul(lv2)
         r[0] *= lv
 
-# Accumulate another set of line functions for n-pairing 
+# Accumulate another set of line functions for n-pairing
 def another(r,P1,Q1) :
     if Q1.isinf() :
         return
@@ -236,7 +236,7 @@ def another(r,P1,Q1) :
     P.affine()
     Q.affine()
     A = P.copy()
-    Qx, Qy = Q.getxy()	
+    Qx, Qy = Q.getxy()
     for i in range(nb - 2, 0, -1):
         lv=g(A, A, Qx, Qy)
 
@@ -247,7 +247,7 @@ def another(r,P1,Q1) :
             lv2 = g(A, -P, Qx, Qy)
             lv.smul(lv2)
         r[i] *= lv
-    
+
     if curve.PairingFriendly == BN:
         KA = P.copy()
         KA.frobenius()
@@ -271,7 +271,7 @@ def ate(P1, Q1):
     if Q1.isinf() :
         return one();
     nb,n3,n=lbits()
-    
+
     P = P1.copy()
     Q = Q1.copy()
 
